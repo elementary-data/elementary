@@ -2,12 +2,13 @@ import snowflake.connector
 import networkx as nx
 from pyvis.network import Network
 from sqllineage import runner
+import os
 
 # Connect to Snowflake
 con = snowflake.connector.connect(
-    user='elementary_dbt_user',
-    password='NalaGugu202!',
-    account='vr16180.europe-west4.gcp'
+    user=os.getenv('SNOWFLAKE_USER'),
+    password=os.getenv('SNOWFLAKE_PASSWORD'),
+    account=os.getenv('SNOWFLAKE_ACCOUNT')
 )
 
 # Hardcoded history query
