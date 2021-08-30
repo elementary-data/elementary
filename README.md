@@ -1,5 +1,5 @@
 # Elementary Data Lineage
-A simple commandline to present data lineage based on your data warehourse query history
+Data lineage based on your data warehourse query history
 # Installation
 ## Using Pip
 ```bash
@@ -16,7 +16,6 @@ A simple commandline to present data lineage based on your data warehourse query
 $ lineage --help
 ```
 ## Using a configuration file
-`search <keyword>`
 ```bash
 $ lineage --start-date 2021-08-29 --end-date 2021-08-30 -c ~/lineage_configuration.yml
 ```
