@@ -3,13 +3,37 @@ import networkx as nx
 from pyvis.network import Network
 from sqllineage import runner
 import os
+import dbt.config
+from dbt.context.base import generate_base_context
+import webbrowser
+from pyfiglet import Figlet
+f = Figlet(font='slant')
 
+print(f.renderText('Elementary'))
+
+
+def connect_using_dbt_profiles(profiles_dir, profile_name):
+    profiles_raw = dbt.config.profile.read_profile(profiles_dir)
+    empty_profile_renderer = dbt.config.renderer.ProfileRenderer(generate_base_context({}))
+    dbt_profile = dbt.config.Profile.from_raw_profiles(profiles_raw, profile_name, empty_profile_renderer)
+    profile_type = dbt_profile.credentials.type
+    if profile_type == 'snowflake':
+        return snowflake.connector.connect(
+            user=dbt_profile.credentials.user,
+            password=dbt_profile.credentials.password,
+            account=dbt_profile.credentials.account
+        )
+    else:
+        raise Exception("Unsupported profile type")
+
+
+con = connect_using_dbt_profiles('/Users/oravidov/.dbt', 'elementary_snowflake')
 # Connect to Snowflake
-con = snowflake.connector.connect(
-    user=os.getenv('SNOWFLAKE_USER'),
-    password=os.getenv('SNOWFLAKE_PASSWORD'),
-    account=os.getenv('SNOWFLAKE_ACCOUNT')
-)
+# con = snowflake.connector.connect(
+#     user=os.getenv('SNOWFLAKE_USER'),
+#     password=os.getenv('SNOWFLAKE_PASSWORD'),
+#     account=os.getenv('SNOWFLAKE_ACCOUNT')
+# )
 
 # Hardcoded history query
 history_query = """
@@ -58,45 +82,44 @@ for query in queries:
 net = Network(height="100%", width="100%", directed=True, notebook=True)
 net.from_nx(G)
 net.set_options("""{
-  "nodes": {
-    "shape": "box",
-    "size": 68
-  },
-  "edges": {
-    "color": {
-      "inherit": true
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "dashes": true,
+        "smooth": {
+            "type": "continuous",
+            "forceDirection": "none"
+        }
     },
-    "dashes": true,
-    "smooth": false
-  },
-  "layout": {
-    "hierarchical": {
-      "enabled": true,
-      "levelSeparation": 450,
-      "blockShifting": false,
-      "edgeMinimization": false,
-      "parentCentralization": false,
-      "direction": "LR",
-      "sortMethod": "directed"
+    "layout": {
+        "hierarchical": {
+            "enabled": true,
+            "levelSeparation": 485,
+            "nodeSpacing": 300,
+            "treeSpacing": 300,
+            "blockShifting": false,
+            "edgeMinimization": false,
+            "parentCentralization": false,
+            "direction": "LR",
+            "sortMethod": "directed"
+        }
+    },
+    "interaction": {
+        "navigationButtons": true
+    },
+    "physics": {
+        "enabled": false,
+        "hierarchicalRepulsion": {
+            "centralGravity": 0
+        },
+        "minVelocity": 0.75,
+        "solver": "hierarchicalRepulsion"
     }
-  },
-  "interaction": {
-    "navigationButtons": true
-  },
-  "manipulation": {
-    "enabled": false
-  },
-  "physics": {
-    "enabled": false,
-    "hierarchicalRepulsion": {
-      "centralGravity": 0
-    },
-    "minVelocity": 0.75,
-    "solver": "hierarchicalRepulsion"
-  }
 }""")
 #net.from_nx(nx.bfs_tree(G, 'elementary_db.elementary.customers'))
 #net.barnes_hut()
 #net.show_buttons(filter_=True)
 net.show("elementary_lineage.html")
 net.save_graph("elementary_lineage.html")
+webbrowser.open_new_tab('./elementary_lineage.html')
