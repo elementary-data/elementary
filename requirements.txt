@@ -1,0 +1,9 @@
+click==7.1.2
+pyfiglet
+snowflake-connector-python[secure-local-storage]==2.3.6
+dbt
+networkx
+sqllineage
+pyvis
+setuptools
+Jinja2==2.11.2

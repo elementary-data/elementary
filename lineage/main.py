@@ -1,9 +1,9 @@
 import click
 from pyfiglet import Figlet
 from datetime import timedelta, date
-from dbt_utils import connect_using_dbt_profiles
-from query_history import extract_quries_from_query_history
-from lineage_graph import LineageGraph
+from lineage.dbt_utils import connect_using_dbt_profiles
+from lineage.query_history import extract_quries_from_query_history
+from lineage.lineage_graph import LineageGraph
 
 f = Figlet(font='slant')
 
@@ -62,7 +62,7 @@ class RequiredIf(click.Option):
     help="You can connect to your data warehouse using your dbt profiles file, just specify your dbt profiles dir and "
          "current profile name.",
     cls=RequiredIf,
-    required_if='dbt-profile-name'
+    required_if='dbt_profile_name'
 )
 @click.option(
     '--dbt-profile-name', '-p',
@@ -71,7 +71,7 @@ class RequiredIf(click.Option):
     help="You can connect to your data warehouse using your dbt profiles file, just specify your dbt profiles dir and "
          "current profile name.",
     cls=RequiredIf,
-    required_if='dbt-profiles-dir'
+    required_if='dbt_profiles_dir'
 )
 @click.option(
     '--open-browser/--no-browser',

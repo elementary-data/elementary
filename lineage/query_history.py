@@ -1,11 +1,11 @@
 from datetime import timedelta
 
-# TODO: check timezone (to_timestamp Vs to_timestamp_ltz), validate escaping
+# TODO: check timezone (to_timestamp_ltz), validate escaping
 QUERY_HISTORY = """
 select query_text
   from table(elementary_db.information_schema.query_history(
-    end_time_range_start=>to_timestamp('{query_start_time}'),
-    end_time_range_end=>to_timestamp('{query_end_time}')));
+    end_time_range_start=>to_timestamp_ltz('{query_start_time}'),
+    end_time_range_end=>to_timestamp_ltz('{query_end_time}')));
 """
 
 
