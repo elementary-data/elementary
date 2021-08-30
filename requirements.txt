@@ -7,3 +7,4 @@ sqllineage
 pyvis
 setuptools
 Jinja2==2.11.2
+Flask==1.1.4
