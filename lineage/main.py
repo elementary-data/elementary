@@ -6,7 +6,6 @@ from lineage.query_history import extract_quries_from_query_history
 from lineage.lineage_graph import LineageGraph
 
 f = Figlet(font='slant')
-
 print(f.renderText('Elementary'))
 
 
@@ -34,14 +33,7 @@ class RequiredIf(click.Option):
         return super(RequiredIf, self).handle_parse_result(
             ctx, opts, args)
 
-#TODO: add our own configuration file
-# @click.option(
-#     '--configuration-file', '-c',
-#     type=click.Path(),
-#     default='',
-#     help="You can connect to your data warehouse using our own configuration file, "
-#          "just specify your lineage configuration file path.",
-# )
+
 @click.command()
 @click.option(
     '--start-date', '-s',
