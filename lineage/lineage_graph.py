@@ -44,6 +44,8 @@ class LineageGraph(object):
                 for source in source_tables:
                     for target in target_tables:
                         print("Adding edge", str(source), str(target))
+                        self.lineage_graph.add_node(str(source), shape='box')
+                        self.lineage_graph.add_node(str(target), shape='box')
                         self.lineage_graph.add_edge(str(source), str(target))
 
     def draw_graph(self, should_open_browser=True):
@@ -86,9 +88,7 @@ class LineageGraph(object):
                 "solver": "hierarchicalRepulsion"
             }
         }""")
-        #net.from_nx(nx.bfs_tree(G, 'elementary_db.elementary.customers'))
-        #net.barnes_hut()
-        #net.show_buttons(filter_=True)
+
         net.show("elementary_lineage.html")
         net.save_graph("elementary_lineage.html")
         if should_open_browser:
