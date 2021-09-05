@@ -59,13 +59,11 @@ class LineageGraph(object):
                 self._lineage_graph.add_edge(source, target)
 
     def _rename_node(self, old_node: str, new_node: str) -> None:
-        # TODO: consider making this static
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
 
     def _remove_node(self, node: str) -> None:
-        # TODO: consider making this static
         # First let's check if the node exists in the graph
         if self._lineage_graph.has_node(node):
             node_successors = self._lineage_graph.successors(node)
