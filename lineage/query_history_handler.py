@@ -6,7 +6,6 @@ import os
 
 class QueryHistoryHandler(object):
     # TODO: check timezone (to_timestamp_ltz), validate escaping
-    # TODO: filter only on success queries
     # TODO: choose db
     QUERY_HISTORY_QUERY = """
     select query_text
