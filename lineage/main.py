@@ -73,12 +73,19 @@ class RequiredIf(click.Option):
     '--open-browser/--no-browser',
     type=bool,
     default=True,
-    help="Indicate if the data lineage graph should be opened in your default browser, if this flag is set to "
+    help="Indicates if the data lineage graph should be opened in your default browser, if this flag is set to "
          "no-browser an html file will be saved to your current directory instead of opening it in your browser.",
 )
-def main(start_date, end_date, dbt_profiles_dir, dbt_profile_name, open_browser):
+@click.option(
+    '--serialize-query-history/--no-query-history-serialization',
+    type=bool,
+    default=False,
+    help="Indicates if the query history pulled from your warehouse should be serialized and saved in your current "
+         "directory.",
+)
+def main(start_date, end_date, dbt_profiles_dir, dbt_profile_name, open_browser, serialize_query_history):
     con = connect_using_dbt_profiles(dbt_profiles_dir, dbt_profile_name)
-    query_history_handler = QueryHistoryHandler(con)
+    query_history_handler = QueryHistoryHandler(con, should_serialize_query_history=serialize_query_history)
     queries = query_history_handler.extract_queries_from_query_history(start_date, end_date)
     lineage_graph = LineageGraph(show_islands=False)
     lineage_graph.init_graph_from_query_list(queries)
