@@ -2,7 +2,6 @@ import itertools
 
 import networkx as nx
 import sqlparse
-from sqlparse.sql import Statement
 from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
@@ -10,6 +9,42 @@ import webbrowser
 
 # TODO: add logger and debug logs like a pro
 # TODO: add relevant requirements
+GRAPH_VISUALIZATION_OPTIONS = """{
+            "edges": {
+                "color": {
+                    "inherit": true
+                },
+                "dashes": true,
+                "smooth": {
+                    "type": "continuous",
+                    "forceDirection": "none"
+                }
+            },
+            "layout": {
+                "hierarchical": {
+                    "enabled": true,
+                    "levelSeparation": 485,
+                    "nodeSpacing": 300,
+                    "treeSpacing": 300,
+                    "blockShifting": false,
+                    "edgeMinimization": false,
+                    "parentCentralization": false,
+                    "direction": "LR",
+                    "sortMethod": "directed"
+                }
+            },
+            "interaction": {
+                "navigationButtons": true
+            },
+            "physics": {
+                "enabled": false,
+                "hierarchicalRepulsion": {
+                    "centralGravity": 0
+                },
+                "minVelocity": 0.75,
+                "solver": "hierarchicalRepulsion"
+            }
+}"""
 
 
 class LineageGraph(object):
@@ -94,44 +129,9 @@ class LineageGraph(object):
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
-        net = Network(height="100%", width="100%", directed=True, notebook=True)
+        net = Network(height="100%", width="100%", directed=True)
         net.from_nx(self._lineage_graph)
-        net.set_options("""{
-            "edges": {
-                "color": {
-                    "inherit": true
-                },
-                "dashes": true,
-                "smooth": {
-                    "type": "continuous",
-                    "forceDirection": "none"
-                }
-            },
-            "layout": {
-                "hierarchical": {
-                    "enabled": true,
-                    "levelSeparation": 485,
-                    "nodeSpacing": 300,
-                    "treeSpacing": 300,
-                    "blockShifting": false,
-                    "edgeMinimization": false,
-                    "parentCentralization": false,
-                    "direction": "LR",
-                    "sortMethod": "directed"
-                }
-            },
-            "interaction": {
-                "navigationButtons": true
-            },
-            "physics": {
-                "enabled": false,
-                "hierarchicalRepulsion": {
-                    "centralGravity": 0
-                },
-                "minVelocity": 0.75,
-                "solver": "hierarchicalRepulsion"
-            }
-        }""")
+        net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
         net.show("elementary_lineage.html")
         net.save_graph("elementary_lineage.html")
