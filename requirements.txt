@@ -1,6 +1,6 @@
 click==7.1.2
 pyfiglet~=0.8.post1
-snowflake-connector-python[secure-local-storage]==2.4.1
+snowflake-connector-python==2.3.6
 dbt~=0.19.1
 networkx~=2.5.1
 sqllineage~=1.2.4

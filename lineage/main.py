@@ -4,7 +4,7 @@ import click
 from pyfiglet import Figlet
 from datetime import timedelta, date
 from lineage.dbt_utils import connect_using_dbt_profiles
-from lineage.query_history import extract_queries_from_query_history
+from lineage.query_history_handler import QueryHistoryHandler
 from lineage.lineage_graph import LineageGraph
 from lineage.utils import is_debug_mode_on
 
@@ -78,7 +78,8 @@ class RequiredIf(click.Option):
 )
 def main(start_date, end_date, dbt_profiles_dir, dbt_profile_name, open_browser):
     con = connect_using_dbt_profiles(dbt_profiles_dir, dbt_profile_name)
-    queries = extract_queries_from_query_history(con, start_date, end_date)
+    query_history_handler = QueryHistoryHandler(con)
+    queries = query_history_handler.extract_queries_from_query_history(start_date, end_date)
     lineage_graph = LineageGraph(show_islands=False)
     lineage_graph.init_graph_from_query_list(queries)
     lineage_graph.draw_graph(should_open_browser=open_browser)
