@@ -2,6 +2,8 @@ import dbt.config
 from dbt.context.base import generate_base_context
 import snowflake.connector
 
+snowflake.connector.paramstyle = 'qmark'
+
 
 def connect_using_dbt_profiles(profiles_dir, profile_name):
     profiles_raw = dbt.config.profile.read_profile(profiles_dir)

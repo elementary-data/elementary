@@ -4,7 +4,7 @@ import click
 from pyfiglet import Figlet
 from datetime import timedelta, date
 from lineage.dbt_utils import connect_using_dbt_profiles
-from lineage.query_history_handler import QueryHistoryHandler
+from lineage.query_history_handler import QueryHistory
 from lineage.lineage_graph import LineageGraph
 from lineage.utils import is_debug_mode_on
 
@@ -41,15 +41,17 @@ class RequiredIf(click.Option):
 @click.command()
 @click.option(
     '--start-date', '-s',
-    type=click.DateTime(formats=["%Y-%m-%d"]),
+    type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
     default=str(date.today() - timedelta(days=1)),
-    help="Parse queries in query log since this start date, default start date is yesterday."
+    help="Parse queries in query log since this start date (you could also provide a specific time), "
+         "default start date is yesterday."
 )
 @click.option(
     '--end-date', '-e',
-    type=click.DateTime(formats=["%Y-%m-%d"]),
-    default=str(date.today()),
-    help="Parse queries in query log up to this end date, default end date is today."
+    type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
+    default=None,
+    help="Parse queries in query log up to this end date (end_date is inclusive, "
+         "you could also provide a specific time), default is current time."
 )
 @click.option(
     '--dbt-profiles-dir', '-d',
@@ -85,8 +87,8 @@ class RequiredIf(click.Option):
 )
 def main(start_date, end_date, dbt_profiles_dir, dbt_profile_name, open_browser, serialize_query_history):
     con = connect_using_dbt_profiles(dbt_profiles_dir, dbt_profile_name)
-    query_history_handler = QueryHistoryHandler(con, should_serialize_query_history=serialize_query_history)
-    queries = query_history_handler.extract_queries_from_query_history(start_date, end_date)
+    query_history_handler = QueryHistory(con, should_serialize_query_history=serialize_query_history)
+    queries = query_history_handler.extract_queries(start_date, end_date)
     lineage_graph = LineageGraph(show_islands=False)
     lineage_graph.init_graph_from_query_list(queries)
     lineage_graph.draw_graph(should_open_browser=open_browser)
