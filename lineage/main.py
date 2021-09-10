@@ -1,12 +1,10 @@
-import os
-
 import click
 from pyfiglet import Figlet
 from datetime import timedelta, date
-from lineage.dbt_utils import connect_using_dbt_profiles
-from lineage.query_history_handler import QueryHistory
 from lineage.lineage_graph import LineageGraph
+from lineage.query_history_factory import QueryHistoryFactory
 from lineage.utils import is_debug_mode_on
+from datetime import datetime
 
 if not is_debug_mode_on():
     f = Figlet(font='slant')
@@ -54,22 +52,21 @@ class RequiredIf(click.Option):
          "you could also provide a specific time), default is current time."
 )
 @click.option(
-    '--dbt-profiles-dir', '-d',
+    '--profiles-dir', '-d',
     type=click.Path(),
     default='',
-    help="You can connect to your data warehouse using your dbt profiles file, just specify your dbt profiles dir and "
-         "current profile name.",
+    help="You can connect to your data warehouse using your profiles dir, just specify your profiles dir where a "
+         "profiles.yml is located (could be a dbt profiles dir).",
     cls=RequiredIf,
-    required_if='dbt_profile_name'
+    required_if='profile_name'
 )
 @click.option(
-    '--dbt-profile-name', '-p',
+    '--profile-name', '-p',
     type=str,
     default='',
-    help="You can connect to your data warehouse using your dbt profiles file, just specify your dbt profiles dir and "
-         "current profile name.",
+    help="The profile name of the chosen profile in your profiles file.",
     cls=RequiredIf,
-    required_if='dbt_profiles_dir'
+    required_if='profiles_dir'
 )
 @click.option(
     '--open-browser/--no-browser',
@@ -85,10 +82,10 @@ class RequiredIf(click.Option):
     help="Indicates if the query history pulled from your warehouse should be serialized and saved in your current "
          "directory.",
 )
-def main(start_date, end_date, dbt_profiles_dir, dbt_profile_name, open_browser, serialize_query_history):
-    con = connect_using_dbt_profiles(dbt_profiles_dir, dbt_profile_name)
-    query_history_handler = QueryHistory(con, should_serialize_query_history=serialize_query_history)
-    queries = query_history_handler.extract_queries(start_date, end_date)
+def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
+         serialize_query_history: bool) -> None:
+    query_history = QueryHistoryFactory(profiles_dir, profile_name, serialize_query_history).create_query_history()
+    queries = query_history.extract_queries(start_date, end_date)
     lineage_graph = LineageGraph(show_islands=False)
     lineage_graph.init_graph_from_query_list(queries)
     lineage_graph.draw_graph(should_open_browser=open_browser)
