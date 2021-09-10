@@ -8,7 +8,9 @@ class SnowflakeQueryHistory(QueryHistory):
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(?),
         {end_time_range_end_expr})) 
-        where execution_status = 'SUCCESS'
+        where execution_status = 'SUCCESS' and query_type not in 
+        ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
+        'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE')
         order by end_time;
     """
 
