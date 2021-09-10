@@ -30,8 +30,6 @@ class QueryHistoryFactory(object):
                 **credentials.auth_args()
             )
 
-            query_history = SnowflakeQueryHistory(snowflake_con,
-                                                  should_serialize_query_history=self.serialize_query_history)
-            return query_history
+            return SnowflakeQueryHistory(snowflake_con, self.serialize_query_history)
         else:
             raise Exception("Unsupported profile type")
