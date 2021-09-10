@@ -1,17 +1,16 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from lineage.utils import is_flight_mode_on
 import json
 import os
 
 
-class QueryHistoryHandler(object):
-    # TODO: check timezone (to_timestamp_ltz), validate escaping
-    # TODO: choose db
-    QUERY_HISTORY_QUERY = """
+class QueryHistory(object):
+
+    INFORMATION_SCHEMA_QUERY_HISTORY = """
     select query_text
-      from table(elementary_db.information_schema.query_history(
-        end_time_range_start=>to_timestamp_ltz('{query_start_time}'),
-        end_time_range_end=>to_timestamp_ltz('{query_end_time}'))) 
+      from table(information_schema.query_history(
+        end_time_range_start=>to_timestamp_ltz(?),
+        {end_time_range_end_expr})) 
         where execution_status = 'SUCCESS'
         order by end_time;
     """
@@ -22,7 +21,7 @@ class QueryHistoryHandler(object):
         self.con = con
         self.should_serialize_query_history = should_serialize_query_history
 
-    def _serialize_query_history(self, queries) -> None:
+    def _serialize_query_history(self, queries: [str]) -> None:
         if self.should_serialize_query_history:
             with open(self.LATEST_QUERY_HISTORY_FILE, 'w') as query_history_file:
                 json.dump(queries, query_history_file)
@@ -34,17 +33,31 @@ class QueryHistoryHandler(object):
                 queries = json.load(query_history_file)
         return queries
 
-    def extract_queries_from_query_history(self, start_date, end_date):
+    @staticmethod
+    def _include_end_date(end_date: datetime) -> datetime:
+        if (end_date.hour, end_date.minute, end_date.second) == (0, 0, 0):
+            return end_date + timedelta(hours=23, minutes=59, seconds=59)
 
-        query_end_time = end_date + timedelta(hours=23, minutes=59, seconds=59)
-        # Load recent queries from history log
+        return end_date
+
+    def extract_queries(self, start_date: datetime, end_date: datetime) -> [str]:
         queries = []
 
         if is_flight_mode_on():
             queries = self._deserialize_query_history()
         else:
             with self.con.cursor() as cursor:
-                cursor.execute(self.QUERY_HISTORY_QUERY.format(query_start_time=start_date, query_end_time=query_end_time))
+                if end_date is None:
+                    cursor.execute(self.INFORMATION_SCHEMA_QUERY_HISTORY.
+                                   format(end_time_range_end_expr='end_time_range_end=>'
+                                                                  'to_timestamp_ltz(current_timestamp())'),
+                                   (start_date,))
+                else:
+                    end_date = self._include_end_date(end_date)
+                    cursor.execute(self.INFORMATION_SCHEMA_QUERY_HISTORY.
+                                   format(end_time_range_end_expr='end_time_range_end=>to_timestamp_ltz(?)'),
+                                   (start_date, end_date))
+
                 rows = cursor.fetchall()
                 for row in rows:
                     queries.append(row[0])
