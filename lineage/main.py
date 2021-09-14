@@ -71,14 +71,15 @@ class RequiredIf(click.Option):
     type=bool,
     default=True,
     help="Indicates if the data lineage graph should be opened in your default browser, if this flag is set to "
-         "no-browser an html file will be saved to your current directory instead of opening it in your browser.",
+         "no-browser an html file will be saved to your current directory instead of opening it in your browser "
+         "(by default the lineage will be opened automatically in your browser).",
 )
 @click.option(
     '--export-query-history/--do-not-export-query-history',
     type=bool,
     default=False,
     help="Indicates if the query history pulled from your warehouse should be saved in your current "
-         "directory.",
+         "directory to a file called latest_query_history.json (by default it won't be saved).",
 )
 @click.option(
     '--name-qualification/--no-name-qualification',
