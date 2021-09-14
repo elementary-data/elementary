@@ -86,7 +86,7 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
          serialize_query_history: bool) -> None:
     query_history = QueryHistoryFactory(profiles_dir, profile_name, serialize_query_history).create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
-    lineage_graph = LineageGraph(show_islands=False)
+    lineage_graph = LineageGraph(show_isolated_nodes=False)
     lineage_graph.init_graph_from_query_list(queries)
     lineage_graph.draw_graph(should_open_browser=open_browser)
 
