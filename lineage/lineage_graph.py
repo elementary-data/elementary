@@ -6,10 +6,10 @@ from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
 import webbrowser
-import logging
-# TODO: add logger and debug logs like a pro
-# TODO: add relevant requirements
+from lineage.utils import get_logger
 from sqllineage.models import Schema, Table
+
+logger = get_logger(__name__)
 
 GRAPH_VISUALIZATION_OPTIONS = """{
             "edges": {
@@ -142,15 +142,18 @@ class LineageGraph(object):
                         self._lineage_graph.remove_node(predecessor)
 
     def init_graph_from_query_list(self, queries: [tuple]) -> None:
+        logger.debug(f'Loading {len(queries)} queries into the lineage graph')
         for query, schema in queries:
             try:
                 analyzed_statements = self._parse_query(query)
             except SQLLineageException as exc:
-                logging.warning(f'SQLLineageException was raised while parsing this query - {query}, '
-                                f'error was {exc}.')
+                logger.debug(f'SQLLineageException was raised while parsing this query -\n{query}\n'
+                             f'Error was -\n{exc}.')
                 continue
 
             self._update_lineage_graph(analyzed_statements, schema)
+
+        logger.debug(f'Finished updating lineage graph!')
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph

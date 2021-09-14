@@ -93,7 +93,8 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     """
     For more details check out our documentation here - https://docs.elementary-data.com/
     """
-    click.echo(f"Any feedback and suggestions are welcomed! join our community - https://bit.ly/slack-elementary\n")
+    click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
+               f"https://bit.ly/slack-elementary\n")
     query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history).create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
     lineage_graph = LineageGraph(show_isolated_nodes=False,
