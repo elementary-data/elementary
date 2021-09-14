@@ -27,7 +27,7 @@ GRAPH_VISUALIZATION_OPTIONS = """{
                     "nodeSpacing": 300,
                     "treeSpacing": 300,
                     "blockShifting": false,
-                    "edgeMinimization": false,
+                    "edgeMinimization": true,
                     "parentCentralization": false,
                     "direction": "LR",
                     "sortMethod": "directed"
