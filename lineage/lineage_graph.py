@@ -101,8 +101,8 @@ class LineageGraph(object):
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
         if self._lineage_graph.has_node(node):
-            node_successors = self._lineage_graph.successors(node)
-            node_predecessors = self._lineage_graph.predecessors(node)
+            node_successors = list(self._lineage_graph.successors(node))
+            node_predecessors = list(self._lineage_graph.predecessors(node))
 
             # networknx's remove_node already takes care of in and out edges
             self._lineage_graph.remove_node(node)
