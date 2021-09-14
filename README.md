@@ -4,7 +4,9 @@ Elementary is an open-source data reliability framework for modern data teams.
 The first module of the framework is data lineage.
 
 **Data lineage made simple, reliable, and automated.**  
-Open-source tool to effortlessly track the flow of data, understand dependencies and analyze impact. 
+Open-source tool to effortlessly track the flow of data, understand dependencies and analyze impact.
+
+If you like what we are building, support us with ![](static/star.png)
 
 ## Features
 
