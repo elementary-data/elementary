@@ -3,12 +3,10 @@ from pyfiglet import Figlet
 from datetime import timedelta, date
 from lineage.lineage_graph import LineageGraph
 from lineage.query_history_factory import QueryHistoryFactory
-from lineage.utils import is_debug_mode_on
 from datetime import datetime
 
-if not is_debug_mode_on():
-    f = Figlet(font='slant')
-    print(f.renderText('Elementary'))
+f = Figlet(font='slant')
+print(f.renderText('Elementary'))
 
 
 class RequiredIf(click.Option):
@@ -86,8 +84,8 @@ class RequiredIf(click.Option):
     '--name-qualification/--no-name-qualification',
     type=bool,
     default=False,
-    help="Indicates if the lineage should display table full name including the database and schema names "
-         "(the default is to show the full name)."
+    help="Indicates if the lineage should display full table names including the relevant database and schema names "
+         "(the default is to show only the table name)."
 )
 def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
          export_query_history: bool, name_qualification: bool) -> None:
