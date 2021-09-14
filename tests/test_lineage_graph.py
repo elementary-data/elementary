@@ -44,7 +44,7 @@ def test_lineage_graph_rename_node():
     di_graph_mock.add_node.assert_called_with('new_node')
 
 
-@pytest.mark.parametrize("sources,targets,edges,show_islands", [
+@pytest.mark.parametrize("sources,targets,edges,show_isolated_nodes", [
     ({'s'}, {'t'}, {('s', 't')}, False),
     ({'s'}, {'t'}, {('s', 't')}, True),
     (set(), {'t'}, set(), True),
@@ -60,8 +60,8 @@ def test_lineage_graph_rename_node():
     ({'s1', 's2'}, set(), set(), True),
     ({'s1', 's2'}, set(), set(), False),
 ])
-def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_islands):
-    reference = LineageGraph(show_islands=show_islands)
+def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolated_nodes):
+    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     reference._lineage_graph = di_graph_mock
 
@@ -77,18 +77,18 @@ def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_islands
     for edge in edges:
         edge_calls.append(mock.call(edge[0], edge[1]))
 
-    if show_islands or len(edges) > 0:
+    if show_isolated_nodes or len(edges) > 0:
         di_graph_mock.add_nodes_from.assert_has_calls(node_calls, any_order=True)
 
     di_graph_mock.add_edge.assert_has_calls(edge_calls, any_order=True)
 
 
-@pytest.mark.parametrize("show_islands", [
+@pytest.mark.parametrize("show_isolated_nodes", [
     (False,),
     (True,),
 ])
-def test_lineage_graph_remove_node(show_islands):
-    reference = LineageGraph(show_islands=show_islands)
+def test_lineage_graph_remove_node(show_isolated_nodes):
+    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
 
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     di_graph_mock.has_node.return_value = True
@@ -106,7 +106,7 @@ def test_lineage_graph_remove_node(show_islands):
     # Validate calling to has node before deleting it
     di_graph_mock.has_node.assert_called_once_with('node')
 
-    if show_islands:
+    if show_isolated_nodes:
         di_graph_mock.remove_node.assert_called_once_with('node')
     else:
         adjacent_nodes = node_successors + node_predecessors

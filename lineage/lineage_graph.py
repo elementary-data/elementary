@@ -48,9 +48,9 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 
 
 class LineageGraph(object):
-    def __init__(self, show_islands: bool = False) -> None:
+    def __init__(self, show_isolated_nodes: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
-        self._show_islands = show_islands
+        self._show_isolated_nodes = show_isolated_nodes
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
@@ -82,10 +82,10 @@ class LineageGraph(object):
             return
 
         if len(sources) > 0 and len(targets) == 0:
-            if self._show_islands:
+            if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(sources)
         elif len(targets) > 0 and len(sources) == 0:
-            if self._show_islands:
+            if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(targets)
         else:
             self._lineage_graph.add_nodes_from(sources)
@@ -109,7 +109,7 @@ class LineageGraph(object):
 
             # Now that we have just deleted the dropped table from the graph, we need to take care of
             # new island nodes.
-            if not self._show_islands:
+            if not self._show_isolated_nodes:
                 for successor in node_successors:
                     if self._lineage_graph.degree(successor) == 0:
                         self._lineage_graph.remove_node(successor)
