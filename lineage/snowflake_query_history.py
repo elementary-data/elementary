@@ -4,7 +4,7 @@ from lineage.query_history import QueryHistory
 
 class SnowflakeQueryHistory(QueryHistory):
     INFORMATION_SCHEMA_QUERY_HISTORY = """
-    select query_text
+    select query_text, schema_name
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(?),
         {end_time_range_end_expr})) 
@@ -14,7 +14,7 @@ class SnowflakeQueryHistory(QueryHistory):
         order by end_time;
     """
 
-    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [str]:
+    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [tuple]:
         queries = []
         with self.con.cursor() as cursor:
             if end_date is None:
@@ -30,6 +30,9 @@ class SnowflakeQueryHistory(QueryHistory):
 
             rows = cursor.fetchall()
             for row in rows:
-                queries.append(row[0])
+                queries.append((row[0], row[1]))
 
         return queries
+
+    def get_database_name(self):
+        return self.con.database
