@@ -6,7 +6,4 @@ networkx~=2.5.1
 sqllineage~=1.2.4
 pyvis~=0.1.9
 setuptools~=56.2.0
-Jinja2==2.11.2
-Flask==1.1.4
-lineage~=1.0.0
 sqlparse~=0.3.1
