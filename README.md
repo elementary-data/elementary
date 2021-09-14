@@ -40,7 +40,7 @@ If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start r
 edl -d ~/.dbt -p <profile_name>
 ```
 
-If you like what we are building, support us with![](static/star.png)
+If you like what we are building, support us with [![](static/star.png)](https://github.com/oravi/lineage/stargazers)
 
 ## Documentation
 
