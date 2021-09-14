@@ -6,7 +6,6 @@ The first module of the framework is data lineage.
 **Data lineage made simple, reliable, and automated.**  
 Open-source tool to effortlessly track the flow of data, understand dependencies and analyze impact.
 
-If you like what we are building, support us with ![](static/star.png)
 
 ## Features
 
@@ -40,6 +39,8 @@ If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start r
 ```bash
 edl -d ~/.dbt -p <profile_name>
 ```
+
+If you like what we are building, support us with![](static/star.png)
 
 ## Documentation
 
