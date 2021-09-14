@@ -10,12 +10,12 @@ class QueryHistory(object):
 
     LATEST_QUERY_HISTORY_FILE = './latest_query_history.json'
 
-    def __init__(self, con, should_serialize_query_history: bool = True) -> None:
+    def __init__(self, con, should_export_query_history: bool = True) -> None:
         self.con = con
-        self.should_serialize_query_history = should_serialize_query_history
+        self.should_export_query_history = should_export_query_history
 
     def _serialize_query_history(self, queries: [str]) -> None:
-        if self.should_serialize_query_history:
+        if self.should_export_query_history:
             with open(self.LATEST_QUERY_HISTORY_FILE, 'w') as query_history_file:
                 json.dump(queries, query_history_file)
 
@@ -43,5 +43,8 @@ class QueryHistory(object):
 
         return queries
 
-    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [str]:
+    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [tuple]:
+        pass
+
+    def get_database_name(self):
         pass

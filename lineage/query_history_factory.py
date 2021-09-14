@@ -8,10 +8,10 @@ snowflake.connector.paramstyle = 'qmark'
 
 class QueryHistoryFactory(object):
 
-    def __init__(self, profiles_dir: str, profile_name: str, serialize_query_history: bool) -> None:
+    def __init__(self, profiles_dir: str, profile_name: str, export_query_history: bool) -> None:
         self.profiles_dir = profiles_dir
         self.profile_name = profile_name
-        self.serialize_query_history = serialize_query_history
+        self.export_query_history = export_query_history
 
     def create_query_history(self) -> QueryHistory:
         credentials = extract_credentials_from_profiles(self.profiles_dir, self.profile_name)
@@ -30,6 +30,6 @@ class QueryHistoryFactory(object):
                 **credentials.auth_args()
             )
 
-            return SnowflakeQueryHistory(snowflake_con, self.serialize_query_history)
+            return SnowflakeQueryHistory(snowflake_con, self.export_query_history)
         else:
             raise Exception("Unsupported profile type")

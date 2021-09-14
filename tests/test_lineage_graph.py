@@ -22,7 +22,7 @@ def create_lineage_result(read, write):
     # is not identified
 ])
 def test_lineage_graph_parse_query(query, expected_parsed_result):
-    reference = LineageGraph()
+    reference = LineageGraph(database_name='elementary_db')
     parsed_results = reference._parse_query(query)
     assert len(parsed_results) == 1
     assert parsed_results[0].read == expected_parsed_result.read
@@ -30,7 +30,7 @@ def test_lineage_graph_parse_query(query, expected_parsed_result):
 
 
 def test_lineage_graph_rename_node():
-    reference = LineageGraph()
+    reference = LineageGraph(database_name='elementary_db')
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     di_graph_mock.has_node.return_value=True
     reference._lineage_graph = di_graph_mock
@@ -61,7 +61,7 @@ def test_lineage_graph_rename_node():
     ({'s1', 's2'}, set(), set(), False),
 ])
 def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolated_nodes):
-    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
+    reference = LineageGraph(database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     reference._lineage_graph = di_graph_mock
 
@@ -88,7 +88,7 @@ def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolate
     (True,),
 ])
 def test_lineage_graph_remove_node(show_isolated_nodes):
-    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
+    reference = LineageGraph(database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
 
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     di_graph_mock.has_node.return_value = True
@@ -115,7 +115,7 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
         di_graph_mock.remove_node.assert_has_calls(calls, any_order=True)
 
 
-@pytest.mark.parametrize("query_list, show_isolated_nodes", [
+@pytest.mark.parametrize("queries, show_isolated_nodes", [
     (['insert into table2 (c1, c2) (select c1, c2 from table1)',
       'insert into loop_table (c1, c2) (select c1, c2 from table1)',
       'insert into table3 (c1, c2) (select c1, c2 from loop_table)',
@@ -129,9 +129,10 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
       'drop table loop_table'],
      True),
 ])
-def test_lineage_graph_init_graph_from_query_list_with_loops(query_list, show_isolated_nodes):
-    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
+def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isolated_nodes):
+    reference = LineageGraph(database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
 
+    query_list = [(query, 'elementary_schema') for query in queries]
     try:
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:

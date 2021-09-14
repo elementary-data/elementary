@@ -40,9 +40,9 @@ class RequiredIf(click.Option):
 @click.option(
     '--start-date', '-s',
     type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
-    default=str(date.today() - timedelta(days=1)),
+    default=str(date.today() - timedelta(days=6)),
     help="Parse queries in query log since this start date (you could also provide a specific time), "
-         "default start date is yesterday."
+         "default start date is 7 days ago."
 )
 @click.option(
     '--end-date', '-e',
@@ -76,17 +76,26 @@ class RequiredIf(click.Option):
          "no-browser an html file will be saved to your current directory instead of opening it in your browser.",
 )
 @click.option(
-    '--serialize-query-history/--no-query-history-serialization',
+    '--export-query-history/--do-not-export-query-history',
     type=bool,
     default=False,
-    help="Indicates if the query history pulled from your warehouse should be serialized and saved in your current "
+    help="Indicates if the query history pulled from your warehouse should be saved in your current "
          "directory.",
 )
+@click.option(
+    '--name-qualification/--no-name-qualification',
+    type=bool,
+    default=False,
+    help="Indicates if the lineage should display table full name including the database and schema names "
+         "(the default is to show the full name)."
+)
 def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
-         serialize_query_history: bool) -> None:
-    query_history = QueryHistoryFactory(profiles_dir, profile_name, serialize_query_history).create_query_history()
+         export_query_history: bool, name_qualification: bool) -> None:
+    query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history).create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
-    lineage_graph = LineageGraph(show_isolated_nodes=False)
+    lineage_graph = LineageGraph(show_isolated_nodes=False,
+                                 database_name=query_history.get_database_name(),
+                                 name_qualification=name_qualification)
     lineage_graph.init_graph_from_query_list(queries)
     lineage_graph.draw_graph(should_open_browser=open_browser)
 

@@ -9,6 +9,8 @@ import webbrowser
 
 # TODO: add logger and debug logs like a pro
 # TODO: add relevant requirements
+from sqllineage.models import Schema, Table
+
 GRAPH_VISUALIZATION_OPTIONS = """{
             "edges": {
                 "color": {
@@ -48,9 +50,12 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 
 
 class LineageGraph(object):
-    def __init__(self, show_isolated_nodes: bool = False) -> None:
+    def __init__(self,  database_name: str, show_isolated_nodes: bool = False, name_qualification: bool = False) \
+            -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
+        self.database_name = database_name.lower()
+        self.name_qualification = name_qualification
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
@@ -59,21 +64,40 @@ class LineageGraph(object):
                                if statement.token_first(skip_cm=True, skip_ws=True)]
         return analyzed_statements
 
-    def _update_lineage_graph(self, analyzed_statements: [LineageResult]) -> None:
+    def _name_qualification(self, table: Table, schema: str) -> str:
+        if self.name_qualification:
+            if not table.schema:
+                if schema is not None:
+                    table.schema = Schema('.'.join([self.database_name, schema]))
+            else:
+                database_name_prefix = '.'.join([self.database_name, ''])
+                if database_name_prefix not in str(table.schema):
+                    table.schema = Schema('.'.join([self.database_name, str(table.schema)]))
+
+            return str(table)
+        else:
+            # Returns only the table name (without db and schema names)
+            return str(table).rsplit('.', 1)[-1]
+
+    def _update_lineage_graph(self, analyzed_statements: [LineageResult], schema: str) -> None:
         for analyzed_statement in analyzed_statements:
             # Handle drop tables, if they exist in the statement
             dropped_tables = analyzed_statement.drop
             for dropped_table in dropped_tables:
-                self._remove_node(str(dropped_table))
+                dropped_table_name = self._name_qualification(dropped_table, schema)
+                self._remove_node(dropped_table_name)
 
             # Handle rename tables
             renamed_tables = analyzed_statement.rename
             for old_table, new_table in renamed_tables:
-                self._rename_node(str(old_table), str(new_table))
+                old_table_name = self._name_qualification(old_table, schema)
+                new_table_name = self._name_qualification(new_table, schema)
+                self._rename_node(old_table_name, new_table_name)
 
             # sqllineage lib marks CTEs as intermediate tables. Remove CTEs (WITH statements) from the source tables.
-            sources = {str(source) for source in analyzed_statement.read - analyzed_statement.intermediate}
-            targets = {str(target) for target in analyzed_statement.write}
+            sources = {self._name_qualification(source, schema) for source in analyzed_statement.read -
+                       analyzed_statement.intermediate}
+            targets = {self._name_qualification(target, schema) for target in analyzed_statement.write}
 
             self._add_nodes_and_edges(sources, targets)
 
@@ -117,15 +141,15 @@ class LineageGraph(object):
                     if self._lineage_graph.has_node(predecessor) and self._lineage_graph.degree(predecessor) == 0:
                         self._lineage_graph.remove_node(predecessor)
 
-    def init_graph_from_query_list(self, queries: [str]) -> None:
-        for query in queries:
+    def init_graph_from_query_list(self, queries: [tuple]) -> None:
+        for query, schema in queries:
             try:
                 analyzed_statements = self._parse_query(query)
             except SQLLineageException as e:
                 #TODO: log exception here
                 continue
 
-            self._update_lineage_graph(analyzed_statements)
+            self._update_lineage_graph(analyzed_statements, schema)
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
@@ -133,7 +157,7 @@ class LineageGraph(object):
         net.from_nx(self._lineage_graph)
         net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
-        net.show("elementary_lineage.html")
+        #net.show("elementary_lineage.html")
         net.save_graph("elementary_lineage.html")
         if should_open_browser:
             webbrowser.open_new_tab('./elementary_lineage.html')
