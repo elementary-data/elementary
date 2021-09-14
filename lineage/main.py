@@ -67,7 +67,7 @@ class RequiredIf(click.Option):
     required_if='profiles_dir'
 )
 @click.option(
-    '--open-browser/--no-browser',
+    '--open-browser', '-o',
     type=bool,
     default=True,
     help="Indicates if the data lineage graph should be opened in your default browser, if this flag is set to "
@@ -75,14 +75,14 @@ class RequiredIf(click.Option):
          "(by default the lineage will be opened automatically in your browser).",
 )
 @click.option(
-    '--export-query-history/--do-not-export-query-history',
+    '--export-query-history', '-h',
     type=bool,
     default=False,
     help="Indicates if the query history pulled from your warehouse should be saved in your current "
          "directory to a file called latest_query_history.json (by default it won't be saved).",
 )
 @click.option(
-    '--name-qualification/--no-name-qualification',
+    '--name-qualification', '-n',
     type=bool,
     default=False,
     help="Indicates if the lineage should display full table names including the relevant database and schema names "
