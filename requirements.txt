@@ -1,7 +1,7 @@
 click
 pyfiglet
 snowflake-connector-python
-dbt
+dbt-core
 networkx
 sqllineage
 pyvis
