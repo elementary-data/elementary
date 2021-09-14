@@ -16,7 +16,6 @@ def is_debug_mode_on() -> bool:
 
 def is_env_var_on(env_var) -> bool:
     if os.getenv(env_var) == '1':
-        # TODO: replace with log
         print(env_var, ' is on!')
         return True
 
