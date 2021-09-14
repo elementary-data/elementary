@@ -18,7 +18,7 @@ install_requirements = [x.strip() for x in package_requirements if ('git+' not i
 dependency_links = [x.strip().replace('git+', '') for x in package_requirements if 'git+' not in x]
 
 setup(
-    name='lineage',
+    name='elementary-lineage',
     description='Presenting data lineage based on your data warehouse query history',
     version='1.0.0',
     packages=find_packages(),
