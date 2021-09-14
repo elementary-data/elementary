@@ -157,7 +157,6 @@ class LineageGraph(object):
         net.from_nx(self._lineage_graph)
         net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
-        #net.show("elementary_lineage.html")
         net.save_graph("elementary_lineage.html")
         if should_open_browser:
             webbrowser.open_new_tab('./elementary_lineage.html')

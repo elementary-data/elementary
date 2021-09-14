@@ -52,7 +52,7 @@ class RequiredIf(click.Option):
 @click.option(
     '--profiles-dir', '-d',
     type=click.Path(),
-    default='',
+    required=True,
     help="You can connect to your data warehouse using your profiles dir, just specify your profiles dir where a "
          "profiles.yml is located (could be a dbt profiles dir).",
     cls=RequiredIf,
@@ -61,7 +61,7 @@ class RequiredIf(click.Option):
 @click.option(
     '--profile-name', '-p',
     type=str,
-    default='',
+    required=True,
     help="The profile name of the chosen profile in your profiles file.",
     cls=RequiredIf,
     required_if='profiles_dir'
