@@ -6,7 +6,7 @@ from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
 import webbrowser
-
+import logging
 # TODO: add logger and debug logs like a pro
 # TODO: add relevant requirements
 from sqllineage.models import Schema, Table
@@ -145,8 +145,9 @@ class LineageGraph(object):
         for query, schema in queries:
             try:
                 analyzed_statements = self._parse_query(query)
-            except SQLLineageException as e:
-                #TODO: log exception here
+            except SQLLineageException as exc:
+                logging.warning(f'SQLLineageException was raised while parsing this query - {query}, '
+                                f'error was {exc}.')
                 continue
 
             self._update_lineage_graph(analyzed_statements, schema)
