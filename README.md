@@ -1,4 +1,4 @@
-![](.assets/headline-git.png)
+![](static/headline-git.png)
 
 Elementary is an open-source data reliability framework for modern data teams.
 The first module of the framework is data lineage.
@@ -33,7 +33,7 @@ edl --help
 Now we need a connection file in a simple YAML called `profiles.yml`.   
 If you don't use dbt, go to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements) for instructions on how to create it. 
 
-If you use ![](.assets/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
+If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
 
 ```bash
 edl -d ~/.dbt -p <profile_name>
@@ -47,14 +47,14 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
 For additional information and help, you can use one of these channels:
 
-* ![](.assets/slack-16.png) [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(live chat with the team, feature requests, community support, discussions, etc.\)
+* ![](static/slack-16.png) [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(live chat with the team, feature requests, community support, discussions, etc.\)
 * 📧Contact us directly at [team@elementary-data.com](mailto:team@elementary-data.com)
 
 ## **Integrations**
 
-* [x] **Snwoflake** ![](.assets/snowflake-16.png)
-* [ ] **BigQuery**  ![](.assets/bigquery-16.png) 
-* [ ] **Redshift**  ![](.assets/redshift-16.png) 
+* [x] **Snwoflake** ![](static/snowflake-16.png)
+* [ ] **BigQuery**  ![](static/bigquery-16.png) 
+* [ ] **Redshift**  ![](static/redshift-16.png) 
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a Github issue.
 
