@@ -23,7 +23,6 @@ setup(
     version='1.0.0',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=install_requirements,
     python_requires='>=3.6.2',
     entry_points='''
         [console_scripts]
@@ -32,6 +31,9 @@ setup(
     author="Elementary",
     keyword="data, lineage, data lineage, data warehouse, DWH",
     long_description=README,
+    install_requires=install_requirements + [
+        'jinja2<3.0.0',
+    ],
     long_description_content_type="text/markdown",
     license='',
     url='https://github.com/TODO',
