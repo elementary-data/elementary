@@ -115,5 +115,24 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
         di_graph_mock.remove_node.assert_has_calls(calls, any_order=True)
 
 
+@pytest.mark.parametrize("query_list, show_isolated_nodes", [
+    (['insert into table2 (c1, c2) (select c1, c2 from table1)',
+      'insert into loop_table (c1, c2) (select c1, c2 from table1)',
+      'insert into table3 (c1, c2) (select c1, c2 from loop_table)',
+      'insert into loop_table (c1, c2) (select c1, c2 from loop_table join table3 on table3.id = loop_table.id)',
+      'drop table loop_table'],
+     False),
+    (['insert into table2 (c1, c2) (select c1, c2 from table1)',
+      'insert into loop_table (c1, c2) (select c1, c2 from table1)',
+      'insert into table3 (c1, c2) (select c1, c2 from loop_table)',
+      'insert into loop_table (c1, c2) (select c1, c2 from loop_table join table3 on table3.id = loop_table.id)',
+      'drop table loop_table'],
+     True),
+])
+def test_lineage_graph_init_graph_from_query_list_with_loops(query_list, show_isolated_nodes):
+    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
 
-
+    try:
+        reference.init_graph_from_query_list(query_list)
+    except Exception as exc:
+        assert False, f"'init_graph_from_query_list' raised an exception {exc}"
