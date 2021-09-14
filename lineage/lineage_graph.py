@@ -111,10 +111,10 @@ class LineageGraph(object):
             # new island nodes.
             if not self._show_isolated_nodes:
                 for successor in node_successors:
-                    if self._lineage_graph.degree(successor) == 0:
+                    if self._lineage_graph.has_node(successor) and self._lineage_graph.degree(successor) == 0:
                         self._lineage_graph.remove_node(successor)
                 for predecessor in node_predecessors:
-                    if self._lineage_graph.degree(predecessor) == 0:
+                    if self._lineage_graph.has_node(predecessor) and self._lineage_graph.degree(predecessor) == 0:
                         self._lineage_graph.remove_node(predecessor)
 
     def init_graph_from_query_list(self, queries: [str]) -> None:
