@@ -33,6 +33,7 @@ setup(
     long_description=README,
     install_requires=install_requirements + [
         'jinja2<3.0.0',
+        'werkzeug<2.0'
     ],
     long_description_content_type="text/markdown",
     license='',
