@@ -90,6 +90,11 @@ class RequiredIf(click.Option):
 )
 def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
          export_query_history: bool, name_qualification: bool) -> None:
+    """
+    For more details check out our documentation here - https://docs.elementary-data.com/
+    """
+    click.echo(f"Any feedback and suggestions are welcomed! join our community - "
+               f"https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg\n")
     query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history).create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
     lineage_graph = LineageGraph(show_isolated_nodes=False,
