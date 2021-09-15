@@ -6,6 +6,8 @@ The first module of the framework is data lineage.
 **Data lineage made simple, reliable, and automated.**  
 Open-source tool to effortlessly track the flow of data, understand dependencies and analyze impact.
 
+![](static/demo_elementary_final.gif)
+
 
 ## Features
 
