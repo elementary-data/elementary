@@ -63,4 +63,4 @@ Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community
 
 ## **License**
 
-Elementary is licensed under Apache License 2.0. See the LICENSE file for licensing information.
+Elementary lineage is licensed under Apache License 2.0. See the LICENSE file for licensing information.
