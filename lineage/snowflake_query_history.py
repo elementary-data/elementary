@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
 from lineage.query_history import QueryHistory
+from lineage.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class SnowflakeQueryHistory(QueryHistory):
@@ -31,6 +34,7 @@ class SnowflakeQueryHistory(QueryHistory):
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str) -> (str, tuple):
         if start_date <= datetime.today() - timedelta(days=7):
             # In case the dates are older than a week ago we will need to pull the history from the account_usage
+            logger.debug("Pulling snowflake query history from account usage")
             query = cls.ACCOUNT_USAGE_QUERY_HISTORY
             if end_date is None:
                 query = query.format(end_time_range_end_expr='end_time <= current_timestamp()')
@@ -39,6 +43,7 @@ class SnowflakeQueryHistory(QueryHistory):
                 query = query.format(end_time_range_end_expr='end_time <= ?')
                 bindings = (start_date, end_date, database_name)
         else:
+            logger.debug("Pulling snowflake query history from information schema")
             query = cls.INFORMATION_SCHEMA_QUERY_HISTORY
             if end_date is None:
                 query = query.format(end_time_range_end_expr='end_time_range_end=>'
@@ -53,6 +58,7 @@ class SnowflakeQueryHistory(QueryHistory):
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [tuple]:
         queries = []
         with self.con.cursor() as cursor:
+            end_date = self._include_end_date(end_date)
             query, bindings = self._build_history_query(start_date, end_date, self.get_database_name())
             cursor.execute(query, bindings)
             rows = cursor.fetchall()
