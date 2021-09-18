@@ -1,7 +1,5 @@
 import pytest
-from unittest import mock
 from datetime import datetime
-
 from lineage.query_history import QueryHistory
 
 
