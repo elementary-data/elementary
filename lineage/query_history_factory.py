@@ -3,7 +3,7 @@ from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
 import snowflake.connector
 
-snowflake.connector.paramstyle = 'qmark'
+snowflake.connector.paramstyle = 'numeric'
 
 
 class QueryHistoryFactory(object):

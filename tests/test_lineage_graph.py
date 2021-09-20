@@ -132,7 +132,7 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
 def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isolated_nodes):
     reference = LineageGraph(database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
 
-    query_list = [(query, 'elementary_schema') for query in queries]
+    query_list = [(query, 'elementary_db', 'elementary_schema') for query in queries]
     try:
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:

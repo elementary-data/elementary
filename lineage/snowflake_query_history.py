@@ -6,29 +6,39 @@ logger = get_logger(__name__)
 
 
 class SnowflakeQueryHistory(QueryHistory):
+    # Note: Here we filter permissively on the configured database_name, basically finding all the queries that are
+    # relevant to this database. Snowflake's query history might show in the database_name column a different db name
+    # than the db name that was part of the query. During the parsing logic in the lineage graph we strictly analyze if
+    # the query was really executed on the configured db and filter it accordingly.
+
     INFORMATION_SCHEMA_QUERY_HISTORY = """
-    select query_text, schema_name
+    select query_text, database_name. schema_name
       from table(information_schema.query_history(
-        end_time_range_start=>to_timestamp_ltz(?),
+        end_time_range_start=>to_timestamp_ltz(:3),
         {end_time_range_end_expr})) 
         where execution_status = 'SUCCESS' and query_type not in 
         ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
-        'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE')
+        'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
+        (query_text not ilike '%.query_history%') and 
+        (query_text ilike :1 or database_name = :2)
         order by end_time;
     """
-
-    # TODO: Maybe use database id instead of name
-    # TODO: when filtering on db name, maybe we should lower the name?
+    INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time_range_end=>to_timestamp_ltz(current_timestamp())'
+    INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = 'end_time_range_end=>to_timestamp_ltz(:4)'
 
     ACCOUNT_USAGE_QUERY_HISTORY = """
-    select query_text, schema_name 
+    select query_text, database_name, schema_name 
         from snowflake.account_usage.query_history 
-        where end_time >= ? and {end_time_range_end_expr} 
+        where end_time >= :3 and {end_time_range_end_expr} 
     and execution_status = 'SUCCESS' and query_type not in 
     ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES',
-    'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and database_name = ? 
+    'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
+    (query_text not ilike '%.query_history%') and 
+    (query_text ilike :1 or database_name = :2) 
     order by end_time;
     """
+    ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time <= current_timestamp()'
+    ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER = 'end_time <= :4'
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str) -> (str, tuple):
@@ -36,22 +46,20 @@ class SnowflakeQueryHistory(QueryHistory):
             # In case the dates are older than a week ago we will need to pull the history from the account_usage
             logger.debug("Pulling snowflake query history from account usage")
             query = cls.ACCOUNT_USAGE_QUERY_HISTORY
-            if end_date is None:
-                query = query.format(end_time_range_end_expr='end_time <= current_timestamp()')
-                bindings = (start_date, database_name)
-            else:
-                query = query.format(end_time_range_end_expr='end_time <= ?')
-                bindings = (start_date, cls._include_end_date(end_date), database_name)
+            end_time_up_to_current_timestamp = cls.ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP
+            end_time_up_to_parameter = cls.ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER
         else:
             logger.debug("Pulling snowflake query history from information schema")
             query = cls.INFORMATION_SCHEMA_QUERY_HISTORY
-            if end_date is None:
-                query = query.format(end_time_range_end_expr='end_time_range_end=>'
-                                                             'to_timestamp_ltz(current_timestamp())')
-                bindings = (start_date,)
-            else:
-                query = query.format(end_time_range_end_expr='end_time_range_end=>to_timestamp_ltz(?)')
-                bindings = (start_date, cls._include_end_date(end_date))
+            end_time_up_to_current_timestamp = cls.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
+            end_time_up_to_parameter = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
+
+        if end_date is None:
+            query = query.format(end_time_range_end_expr=end_time_up_to_current_timestamp)
+            bindings = (f'%{database_name}%', database_name, start_date)
+        else:
+            query = query.format(end_time_range_end_expr=end_time_up_to_parameter)
+            bindings = (f'%{database_name}%', database_name, start_date, cls._include_end_date(end_date))
 
         return query, bindings
 
@@ -62,7 +70,7 @@ class SnowflakeQueryHistory(QueryHistory):
             cursor.execute(query, bindings)
             rows = cursor.fetchall()
             for row in rows:
-                queries.append((row[0], row[1]))
+                queries.append((row[0], row[1], row[2]))
 
         return queries
 
