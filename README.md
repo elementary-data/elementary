@@ -31,7 +31,7 @@ edl --help
 ```
 
 Now we need a connection file in a simple YAML called `profiles.yml`.   
-[Here is a template](static/profile.yml) to create a Snowflake connection profile.
+[Here is a template](static/profiles.yml) to create a Snowflake connection profile.
 For further instructions got to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements). 
 
 If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
