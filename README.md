@@ -1,7 +1,7 @@
 ![](static/headline-git.png)
 
 **Data lineage made simple, reliable, and automated.**  
-Open-source tool to effortlessly track the flow of data, understand dependencies and analyze impact.
+Effortlessly track the flow of data, understand dependencies and analyze impact.
 
 ![](static/Demo_elementary.gif)
 
@@ -31,13 +31,13 @@ edl --help
 ```
 
 Now we need a connection file in a simple YAML called `profiles.yml`.   
-If you don't use dbt, [here is a template](static/profile.yml) to create a Snowflake connection profile.
+[Here is a template](static/profile.yml) to create a Snowflake connection profile.
 For further instructions got to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements). 
 
 If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
 
 ```bash
-edl -d ~/.dbt -p <profile_name>
+edl -d ~/profiles_dir -p <profile_name>
 ```
 
 If you like what we are building, support us with [![](static/star.png)](https://github.com/oravi/lineage/stargazers)
@@ -55,7 +55,7 @@ For additional information and help, you can use one of these channels:
 
 ## **Integrations**
 
-* [x] **Snwoflake** ![](static/snowflake-16.png)
+* [x] **Snowflake** ![](static/snowflake-16.png)
 * [ ] **BigQuery**  ![](static/bigquery-16.png) 
 * [ ] **Redshift**  ![](static/redshift-16.png) 
 
