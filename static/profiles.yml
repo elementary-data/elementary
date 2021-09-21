@@ -1,0 +1,19 @@
+# Template profiles.yml for Snowflake
+
+## profile name, replace 'my_profile' with a name of your choice  ##
+my_profile: 
+
+  outputs:
+    default:
+      type: snowflake
+      account: [account id]
+      
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+      
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+	  # Any schema name is ok, the schema is not used as a filter at the moment, but will be in the future
+      schema: [schema name] 
