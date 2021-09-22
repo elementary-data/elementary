@@ -2,6 +2,8 @@ import pytest
 from unittest import mock
 from sqllineage.core import LineageResult, Table
 import networkx as nx
+from sqllineage.models import Schema
+
 from lineage.lineage_graph import LineageGraph
 
 
@@ -32,7 +34,7 @@ def test_lineage_graph_parse_query(query, expected_parsed_result):
 def test_lineage_graph_rename_node():
     reference = LineageGraph(profile_database_name='elementary_db')
     di_graph_mock = mock.create_autospec(nx.DiGraph)
-    di_graph_mock.has_node.return_value=True
+    di_graph_mock.has_node.return_value = True
     reference._lineage_graph = di_graph_mock
 
     # Test rename_node
@@ -137,3 +139,30 @@ def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isola
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:
         assert False, f"'init_graph_from_query_list' raised an exception {exc}"
+
+
+@pytest.mark.parametrize("table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table, "
+                         "expected_resolved_schema", [
+                             # Always prefer the db and schema from query text over the history db and schema
+                             ('elementary_db.elementary.table1', 'history_db', 'history_schema',
+                              'elementary_db.elementary'),
+                             ('elementary_db.elementary.table1', 'history_db', None, 'elementary_db.elementary'),
+                             ('elementary_db.elementary.table1', None, 'history_schema', 'elementary_db.elementary'),
+                             ('elementary_db.elementary.table1', None, None, 'elementary_db.elementary'),
+                             # Use history_db if query_text contains only schema and table name
+                             ('elementary.table1', 'history_db', 'history_schema', 'history_db.elementary'),
+                             ('elementary.table1', 'history_db', None, 'history_db.elementary'),
+                             ('elementary.table1', None, 'history_schema', Schema.unknown),
+                             ('elementary.table1', None, None, Schema.unknown),
+                             # Use history_db and history schema if query_text contains only table name
+                             ('table1', 'history_db', 'history_schema', 'history_db.history_schema'),
+                             ('table1', 'history_db', None, Schema.unknown),
+                             ('table1', None, 'history_schema', Schema.unknown),
+                             ('table1', None, None, Schema.unknown),
+                         ])
+def test_resolve_table_qualification(table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table,
+                                     expected_resolved_schema):
+    reference = LineageGraph(profile_database_name='profile_elementary_db', profile_schema_name='profile_elementary_sc')
+    resolved_table = reference._resolve_table_qualification(Table(table_name_in_query_text), db_name_in_history_table,
+                                                            schema_name_in_history_table)
+    assert str(resolved_table.schema) == expected_resolved_schema
