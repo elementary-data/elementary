@@ -38,6 +38,8 @@ def test_lineage_graph_rename_node():
     reference._lineage_graph = di_graph_mock
 
     # Test rename_node
+    reference._rename_node(None, 'new_node')  # Should have no impact
+    reference._rename_node('old_node', None)  # Should have no impact
     reference._rename_node('old_node', 'new_node')
 
     # rename_node should check if node exists first
@@ -45,10 +47,15 @@ def test_lineage_graph_rename_node():
     di_graph_mock.remove_node.assert_called_with('old_node')
     di_graph_mock.add_node.assert_called_with('new_node')
 
+    # Test rename_node
+
+
 
 @pytest.mark.parametrize("sources,targets,edges,show_isolated_nodes", [
     ({'s'}, {'t'}, {('s', 't')}, False),
+    ({'s', None}, {'t'}, {('s', 't')}, False),
     ({'s'}, {'t'}, {('s', 't')}, True),
+    ({'s'}, {'t', None}, {('s', 't')}, True),
     (set(), {'t'}, set(), True),
     (set(), {'t'}, set(), False),
     ({'s'}, set(), set(), True),
@@ -57,7 +64,7 @@ def test_lineage_graph_rename_node():
     ({'s1', 's2'}, {'t'}, {('s1', 't'), ('s2', 't')}, False),
     ({'s'}, {'t1', 't2'}, {('s', 't1'), ('s', 't2')}, True),
     ({'s'}, {'t1', 't2'}, {('s', 't1'), ('s', 't2')}, False),
-    (set(), {'t1', 't2'}, set(), True),
+    ({None}, {'t1', 't2'}, set(), True),
     (set(), {'t1', 't2'}, set(), False),
     ({'s1', 's2'}, set(), set(), True),
     ({'s1', 's2'}, set(), set(), False),
@@ -104,6 +111,7 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
 
     # Test remove_node
     reference._remove_node('node')
+    reference._remove_node(None)  # Should have no impact
 
     # Validate calling to has node before deleting it
     di_graph_mock.has_node.assert_called_once_with('node')
@@ -160,9 +168,35 @@ def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isola
                              ('table1', None, 'history_schema', Schema.unknown),
                              ('table1', None, None, Schema.unknown),
                          ])
-def test_resolve_table_qualification(table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table,
+def test_lineage_graph_resolve_table_qualification(table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table,
                                      expected_resolved_schema):
     reference = LineageGraph(profile_database_name='profile_elementary_db', profile_schema_name='profile_elementary_sc')
     resolved_table = reference._resolve_table_qualification(Table(table_name_in_query_text), db_name_in_history_table,
                                                             schema_name_in_history_table)
     assert str(resolved_table.schema) == expected_resolved_schema
+
+
+@pytest.mark.parametrize("resolved_table_name, profile_db_name, profile_schema_name, should_ignore", [
+    ('profile_elementary_db.profile_elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', False),
+    ('elementary_db.elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
+    ('elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
+    ('elementary_db.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
+    (str(Table('table1')), 'profile_elementary_db', 'profile_elementary_sc', True),
+    ('profile_elementary_db.profile_elementary_sc.table1', 'profile_elementary_db', None, False),
+    ('profile_elementary_db.elementary_sc.table1', 'profile_elementary_db', None, False),
+    ('profile_elementary_sc.table1', 'profile_elementary_db', None, True),
+    (str(Table('table1')), 'profile_elementary_db', None, True),
+])
+def test_lineage_graph_should_ignore_table(resolved_table_name, profile_db_name, profile_schema_name, should_ignore):
+    reference = LineageGraph(profile_database_name=profile_db_name, profile_schema_name=profile_schema_name)
+    assert reference._should_ignore_table(Table(resolved_table_name)) == should_ignore
+
+
+@pytest.mark.parametrize("resolved_table_name, show_full_table_names, expected_result", [
+    ('elementary_db.elementary_sc.table1', True, 'elementary_db.elementary_sc.table1'),
+    ('elementary_db.elementary_sc.table1', False, 'table1')
+])
+def test_lineage_graph_name_qualification(resolved_table_name, show_full_table_names, expected_result):
+    reference = LineageGraph(profile_database_name='elementary_db', profile_schema_name='elementary_sc',
+                             full_table_names=show_full_table_names)
+    assert reference._name_qualification(Table(resolved_table_name), '', '') == expected_result
