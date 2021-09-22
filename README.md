@@ -3,7 +3,7 @@
 **Data lineage made simple, reliable, and automated.**  
 Effortlessly track the flow of data, understand dependencies and analyze impact.
 
-![](static/Demo_elementary.gif)
+<img src="static/elementary_demo.gif" width="700"/>
 
 
 ## Features
@@ -30,9 +30,8 @@ pip install elementary-lineage
 edl --help
 ```
 
-Now we need a connection file in a simple YAML called `profiles.yml`.   
-[Here is a template](static/profiles.yml) to create a Snowflake connection profile.
-For further instructions got to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements). 
+Now we need a connection file in a simple YAML called `profiles.yml`. [Here is a template](static/profiles.yml) to create a Snowflake connection profile.   
+For further instructions go to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements). 
 
 If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
 
@@ -40,9 +39,10 @@ If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start r
 edl -d ~/profiles_dir -p <profile_name>
 ```
 
-If you like what we are building, support us with [![](static/star.png)](https://github.com/oravi/lineage/stargazers)
+If you like what we are building, support us with <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a>.
+      
 
-## Documentation
+# Documentation
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
 
@@ -51,7 +51,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 For additional information and help, you can use one of these channels:
 
 * ![](static/slack-16.png) [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(live chat with the team, feature requests, community support, discussions, etc.\)
-* 📧Contact us directly at [team@elementary-data.com](mailto:team@elementary-data.com)
+* 📧 Contact us directly at [team@elementary-data.com](mailto:team@elementary-data.com)
 
 ## **Integrations**
 
