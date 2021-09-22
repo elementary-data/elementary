@@ -9,11 +9,14 @@ my_profile:
       account: [account id]
       
       ## User/password auth, other options (Keypair/SSO) require other configs ##
+     
       user: [username]
       password: [password]
       
+      ## Note that full ineage requires access to account usage data, that is by default only for users with the ACCOUNTADMIN role
+      ## Lineage of last 1-7 days (depending on tier) requires only monitor permmisions
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
-	  # Any schema name is ok, the schema is not used as a filter at the moment, but will be in the future
+      ## Schema is used as filter by default, you can use the 'ignore schema' option to see cross schema lineage
       schema: [schema name] 
