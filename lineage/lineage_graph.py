@@ -197,4 +197,4 @@ class LineageGraph(object):
 
         net.save_graph("elementary_lineage.html")
         if should_open_browser:
-            webbrowser.open_new_tab('./elementary_lineage.html')
+            webbrowser.open_new_tab('elementary_lineage.html')
