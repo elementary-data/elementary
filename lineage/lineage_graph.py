@@ -9,6 +9,7 @@ from pyvis.network import Network
 import webbrowser
 from lineage.utils import get_logger
 from sqllineage.models import Schema, Table
+from tqdm import tqdm
 
 logger = get_logger(__name__)
 
@@ -176,7 +177,7 @@ class LineageGraph(object):
 
     def init_graph_from_query_list(self, queries: [tuple]) -> None:
         logger.debug(f'Loading {len(queries)} queries into the lineage graph')
-        for query, database_name, schema_name in queries:
+        for query, database_name, schema_name in tqdm(queries, desc="Updating lineage graph", colour='green'):
             try:
                 analyzed_statements = self._parse_query(query)
             except SQLLineageException as exc:
