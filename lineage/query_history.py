@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 from lineage.utils import is_flight_mode_on
 import json
 import os
@@ -27,8 +28,8 @@ class QueryHistory(object):
         return queries
 
     @staticmethod
-    def _include_end_date(end_date: datetime) -> datetime:
-        if (end_date.hour, end_date.minute, end_date.second) == (0, 0, 0):
+    def _include_end_date(end_date: datetime) -> Optional[datetime]:
+        if end_date is not None and (end_date.hour, end_date.minute, end_date.second) == (0, 0, 0):
             return end_date + timedelta(hours=23, minutes=59, seconds=59)
 
         return end_date
@@ -47,4 +48,7 @@ class QueryHistory(object):
         pass
 
     def get_database_name(self):
+        pass
+
+    def get_schema_name(self):
         pass
