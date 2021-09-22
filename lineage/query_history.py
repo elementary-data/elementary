@@ -49,3 +49,6 @@ class QueryHistory(object):
 
     def get_database_name(self):
         pass
+
+    def get_schema_name(self):
+        pass
