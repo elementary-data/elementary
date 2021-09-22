@@ -1,4 +1,5 @@
 import itertools
+from typing import Optional
 
 import networkx as nx
 import sqlparse
@@ -36,7 +37,8 @@ GRAPH_VISUALIZATION_OPTIONS = """{
                 }
             },
             "interaction": {
-                "navigationButtons": true
+                "navigationButtons": true,
+                "multiselect": true
             },
             "physics": {
                 "enabled": false,
@@ -50,12 +52,13 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 
 
 class LineageGraph(object):
-    def __init__(self,  database_name: str, show_isolated_nodes: bool = False, name_qualification: bool = False) \
-            -> None:
+    def __init__(self, profile_database_name: str, profile_schema_name: str = None, show_isolated_nodes: bool = False,
+                 full_table_names: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
-        self.database_name = database_name.lower()
-        self.name_qualification = name_qualification
+        self._profile_database_name = profile_database_name
+        self._profile_schema_name = profile_schema_name
+        self._show_full_table_name = full_table_names
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
@@ -64,20 +67,38 @@ class LineageGraph(object):
                                if statement.token_first(skip_cm=True, skip_ws=True)]
         return analyzed_statements
 
-    def _name_qualification(self, table: Table, database_name: str, schema_name: str) -> str:
-        if self.name_qualification:
-            if not table.schema:
-                if database_name is not None and schema_name is not None:
-                    table.schema = Schema(f'{database_name}.{schema_name}')
-            else:
-                if database_name is not None:
-                    parsed_query_schema_name = str(table.schema)
-                    if '.' not in parsed_query_schema_name:
-                        table.schema = Schema(f'{database_name}.{parsed_query_schema_name}')
-
-            return str(table)
+    @staticmethod
+    def _resolve_table_qualification(table: Table, database_name: str, schema_name: str) -> Table:
+        if not table.schema:
+            if database_name is not None and schema_name is not None:
+                table.schema = Schema(f'{database_name}.{schema_name}')
         else:
-            return str(table).rsplit('.', 1)[-1]
+            if database_name is not None:
+                parsed_query_schema_name = str(table.schema)
+                if '.' not in parsed_query_schema_name:
+                    table.schema = Schema(f'{database_name}.{parsed_query_schema_name}')
+        return table
+
+    def _should_ignore_table(self, table: Table) -> bool:
+        if self._profile_schema_name is not None:
+            if str(table.schema) == str(Schema(f'{self._profile_database_name}.{self._profile_schema_name}')):
+                return False
+        else:
+            if str(Schema(self._profile_database_name)) in str(table.schema):
+                return False
+
+        return True
+
+    def _name_qualification(self, table: Table, database_name: str, schema_name: str) -> Optional[str]:
+        table = self._resolve_table_qualification(table, database_name, schema_name)
+
+        if self._should_ignore_table(table):
+            return None
+
+        if self._show_full_table_name:
+            return str(table)
+
+        return str(table).rsplit('.', 1)[-1]
 
     def _update_lineage_graph(self, analyzed_statements: [LineageResult], database_name: str, schema_name: str) -> None:
         for analyzed_statement in analyzed_statements:
@@ -103,6 +124,11 @@ class LineageGraph(object):
             self._add_nodes_and_edges(sources, targets)
 
     def _add_nodes_and_edges(self, sources: {str}, targets: {str}) -> None:
+        if None in sources:
+            sources.remove(None)
+        if None in targets:
+            targets.remove(None)
+
         if not sources and not targets:
             return
 
@@ -119,13 +145,16 @@ class LineageGraph(object):
                 self._lineage_graph.add_edge(source, target)
 
     def _rename_node(self, old_node: str, new_node: str) -> None:
+        if old_node is None or new_node is None:
+            return
+
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
 
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
-        if self._lineage_graph.has_node(node):
+        if node is not None and self._lineage_graph.has_node(node):
             node_successors = list(self._lineage_graph.successors(node))
             node_predecessors = list(self._lineage_graph.predecessors(node))
 

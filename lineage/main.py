@@ -82,14 +82,20 @@ class RequiredIf(click.Option):
          "directory to a file called latest_query_history.json (by default it won't be saved).",
 )
 @click.option(
-    '--name-qualification', '-n',
+    '--full-table-names', '-n',
     type=bool,
     default=False,
     help="Indicates if the lineage should display full table names including the relevant database and schema names "
          "(the default is to show only the table name)."
 )
+@click.option(
+    '--ignore-schema', '-i',
+    type=bool,
+    default=False,
+    help="Indicates if the lineage should filter only on tables in the configured profile's schema."
+)
 def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
-         export_query_history: bool, name_qualification: bool) -> None:
+         export_query_history: bool, full_table_names: bool, ignore_schema: bool) -> None:
     """
     For more details check out our documentation here - https://docs.elementary-data.com/
     """
@@ -98,8 +104,9 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history).create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
     lineage_graph = LineageGraph(show_isolated_nodes=False,
-                                 database_name=query_history.get_database_name(),
-                                 name_qualification=name_qualification)
+                                 profile_database_name=query_history.get_database_name(),
+                                 profile_schema_name=query_history.get_schema_name() if not ignore_schema else None,
+                                 full_table_names=full_table_names)
     lineage_graph.init_graph_from_query_list(queries)
     lineage_graph.draw_graph(should_open_browser=open_browser)
 
