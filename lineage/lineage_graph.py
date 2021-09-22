@@ -73,10 +73,13 @@ class LineageGraph(object):
             if database_name is not None and schema_name is not None:
                 table.schema = Schema(f'{database_name}.{schema_name}')
         else:
-            if database_name is not None:
-                parsed_query_schema_name = str(table.schema)
-                if '.' not in parsed_query_schema_name:
+            parsed_query_schema_name = str(table.schema)
+            if '.' not in parsed_query_schema_name:
+                # Resolved schema is either empty or fully qualified with db_name.schema_name
+                if database_name is not None:
                     table.schema = Schema(f'{database_name}.{parsed_query_schema_name}')
+                else:
+                    table.schema = Schema()
         return table
 
     def _should_ignore_table(self, table: Table) -> bool:
