@@ -7,3 +7,4 @@ sqllineage
 pyvis
 setuptools
 sqlparse
+tqdm
