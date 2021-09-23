@@ -15,7 +15,8 @@ class SnowflakeQueryHistory(QueryHistory):
     select query_text, database_name, schema_name
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
-        {end_time_range_end_expr})) 
+        {end_time_range_end_expr},
+        result_limit=>10000)) 
         where execution_status = 'SUCCESS' and query_type not in 
         ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
         'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
