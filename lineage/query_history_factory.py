@@ -1,4 +1,5 @@
-from lineage.dbt_utils import extract_credentials_from_profiles
+from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from lineage.exceptions import ConfigError
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
 import snowflake.connector
@@ -14,7 +15,7 @@ class QueryHistoryFactory(object):
         self.export_query_history = export_query_history
 
     def create_query_history(self) -> QueryHistory:
-        credentials = extract_credentials_from_profiles(self.profiles_dir, self.profile_name)
+        credentials, profile_data = extract_credentials_and_data_from_profiles(self.profiles_dir, self.profile_name)
         credentials_type = credentials.type
         if credentials_type == 'snowflake':
             snowflake_con = snowflake.connector.connect(
@@ -30,6 +31,7 @@ class QueryHistoryFactory(object):
                 **credentials.auth_args()
             )
 
-            return SnowflakeQueryHistory(snowflake_con, self.export_query_history)
+            return SnowflakeQueryHistory(snowflake_con, self.export_query_history,
+                                         profile_data.get('query_history_source'))
         else:
-            raise Exception("Unsupported profile type")
+            raise ConfigError("Unsupported profile type")
