@@ -1,4 +1,6 @@
 from datetime import datetime, date, timedelta
+
+from lineage.exceptions import ConfigError
 from lineage.query_history import QueryHistory
 from lineage.utils import get_logger
 
@@ -26,6 +28,7 @@ class SnowflakeQueryHistory(QueryHistory):
     """
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time_range_end=>to_timestamp_ltz(current_timestamp())'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = 'end_time_range_end=>to_timestamp_ltz(:3)'
+    QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
 
     ACCOUNT_USAGE_QUERY_HISTORY = """
     select query_text, database_name, schema_name 
@@ -40,16 +43,28 @@ class SnowflakeQueryHistory(QueryHistory):
     """
     ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time <= current_timestamp()'
     ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER = 'end_time <= :3'
+    QUERY_HISTORY_SOURCE_ACCOUNT_USAGE = 'account_usage'
+
+    def __init__(self, con, should_export_query_history: bool = True, query_history_source: str = None) -> None:
+        self.query_history_source = query_history_source.strip().lower() if query_history_source is not None else None
+        super().__init__(con, should_export_query_history)
 
     @classmethod
-    def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str) -> (str, tuple):
-        if start_date.date() <= date.today() - timedelta(days=7):
+    def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, query_history_source: str)\
+            -> (str, tuple):
+        if query_history_source == cls.QUERY_HISTORY_SOURCE_ACCOUNT_USAGE:
             # In case the dates are older than a week ago we will need to pull the history from the account_usage
             logger.debug("Pulling snowflake query history from account usage")
             query = cls.ACCOUNT_USAGE_QUERY_HISTORY
             end_time_up_to_current_timestamp = cls.ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP
             end_time_up_to_parameter = cls.ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER
         else:
+            if start_date.date() <= date.today() - timedelta(days=7):
+                raise ConfigError(f"Cannot retrieve data from more than 7 days ago when pulling history from "
+                                  f"{cls.QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA}, "
+                                  f"use {cls.QUERY_HISTORY_SOURCE_ACCOUNT_USAGE} instead "
+                                  f"(see https://docs.elementary-data.com for more details).")
+
             logger.debug("Pulling snowflake query history from information schema")
             query = cls.INFORMATION_SCHEMA_QUERY_HISTORY
             end_time_up_to_current_timestamp = cls.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
@@ -67,7 +82,8 @@ class SnowflakeQueryHistory(QueryHistory):
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [tuple]:
         queries = []
         with self.con.cursor() as cursor:
-            query, bindings = self._build_history_query(start_date, end_date, self.get_database_name())
+            query, bindings = self._build_history_query(start_date, end_date, self.get_database_name(),
+                                                        self.query_history_source)
             cursor.execute(query, bindings)
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
