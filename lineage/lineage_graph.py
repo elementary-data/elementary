@@ -1,6 +1,6 @@
 import itertools
 from typing import Optional
-
+from datetime import datetime
 import networkx as nx
 import sqlparse
 from sqllineage.core import LineageAnalyzer, LineageResult
@@ -54,12 +54,15 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 
 class LineageGraph(object):
     def __init__(self, profile_database_name: str, profile_schema_name: str = None, show_isolated_nodes: bool = False,
-                 full_table_names: bool = False) -> None:
+                 full_table_names: bool = False, table: str = None, direction: str = None, depth: int = None) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
         self._profile_database_name = profile_database_name
         self._profile_schema_name = profile_schema_name
         self._show_full_table_name = full_table_names
+        self._table = table
+        self._direction = direction
+        self._depth = depth
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
@@ -104,7 +107,9 @@ class LineageGraph(object):
 
         return str(table).rsplit('.', 1)[-1]
 
-    def _update_lineage_graph(self, analyzed_statements: [LineageResult], database_name: str, schema_name: str) -> None:
+    def _update_lineage_graph(self, analyzed_statements: [LineageResult], database_name: str, schema_name: str,
+                              rows_inserted_or_produced: int, end_time: datetime, user_name: str,
+                              role_name: str) -> None:
         for analyzed_statement in analyzed_statements:
             # Handle drop tables, if they exist in the statement
             dropped_tables = analyzed_statement.drop
@@ -125,9 +130,10 @@ class LineageGraph(object):
             targets = {self._name_qualification(target, database_name, schema_name)
                        for target in analyzed_statement.write}
 
-            self._add_nodes_and_edges(sources, targets)
+            self._add_nodes_and_edges(sources, targets, rows_inserted_or_produced, end_time, user_name, role_name)
 
-    def _add_nodes_and_edges(self, sources: {str}, targets: {str}) -> None:
+    def _add_nodes_and_edges(self, sources: {str}, targets: {str}, rows_inserted_or_produced: int,
+                             end_time: datetime, user_name: str, role_name: str) -> None:
         if None in sources:
             sources.remove(None)
         if None in targets:
@@ -136,15 +142,23 @@ class LineageGraph(object):
         if not sources and not targets:
             return
 
+        # TODO: update attributes in any case if node exists (separate it from insertion)
+        # TODO: Check pulling the attributes from the catalog so we can update sources as well
+        target_attributes = {'title': f'Last update details - <br/> '
+                                      f'Time: {end_time}<br/>'
+                                      f'Volume: {rows_inserted_or_produced}<br/>'
+                                      f'User name: {user_name}<br/>'
+                                      f'Role name: {role_name}<br/>'}
+
         if len(sources) > 0 and len(targets) == 0:
             if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(sources)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(targets)
+                self._lineage_graph.add_nodes_from(targets, **target_attributes)
         else:
             self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets)
+            self._lineage_graph.add_nodes_from(targets, **target_attributes)
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
@@ -177,7 +191,8 @@ class LineageGraph(object):
 
     def init_graph_from_query_list(self, queries: [tuple]) -> None:
         logger.debug(f'Loading {len(queries)} queries into the lineage graph')
-        for query, database_name, schema_name in tqdm(queries, desc="Updating lineage graph", colour='green'):
+        for query, database_name, schema_name, rows_inserted_or_produced, end_time, user_name, role_name in \
+                tqdm(queries, desc="Updating lineage graph", colour='green'):
             try:
                 analyzed_statements = self._parse_query(query)
             except SQLLineageException as exc:
@@ -185,9 +200,15 @@ class LineageGraph(object):
                              f'Error was -\n{exc}.')
                 continue
 
-            self._update_lineage_graph(analyzed_statements, database_name, schema_name)
+            self._update_lineage_graph(analyzed_statements, database_name, schema_name, rows_inserted_or_produced,
+                                       end_time, user_name, role_name)
 
         logger.debug(f'Finished updating lineage graph!')
+
+        if self._table is not None:
+            logger.debug(f'Filtering on specific table - {self._table}')
+            if self._direction == 'downstream':
+                self._lineage_graph = nx.bfs_tree(G=self._lineage_graph, source=self._table, depth_limit=self._depth)
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph

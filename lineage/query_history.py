@@ -17,8 +17,12 @@ class QueryHistory(object):
 
     def _serialize_query_history(self, queries: [str]) -> None:
         if self.should_export_query_history:
+            serz_queries = []
+            for query_result in queries:
+                serz_queries.append((query_result[0], query_result[1], query_result[2], query_result[3],
+                                     str(query_result[4])))
             with open(self.LATEST_QUERY_HISTORY_FILE, 'w') as query_history_file:
-                json.dump(queries, query_history_file)
+                json.dump(serz_queries, query_history_file)
 
     def _deserialize_query_history(self) -> [str]:
         queries = []

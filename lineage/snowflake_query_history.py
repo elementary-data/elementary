@@ -13,8 +13,9 @@ class SnowflakeQueryHistory(QueryHistory):
     # than the db name that was part of the query. During the parsing logic in the lineage graph we strictly analyze if
     # the query was really executed on the configured db and filter it accordingly.
 
+    # TODO: decide if we want to filter on rows_inserted / rows_produced
     INFORMATION_SCHEMA_QUERY_HISTORY = """
-    select query_text, database_name, schema_name
+    select query_text, database_name, schema_name, rows_produced, end_time, user_name, role_name
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
         {end_time_range_end_expr},
@@ -23,22 +24,25 @@ class SnowflakeQueryHistory(QueryHistory):
         ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
         'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
         (query_text not ilike '%.query_history%') and 
-        (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1)
+        (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1) and
+        (rows_produced is not null and rows_produced > 0) 
         order by end_time;
     """
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time_range_end=>to_timestamp_ltz(current_timestamp())'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = 'end_time_range_end=>to_timestamp_ltz(:3)'
     QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
 
+    # TODO: decide if we want to filter on rows_inserted / rows_produced
     ACCOUNT_USAGE_QUERY_HISTORY = """
-    select query_text, database_name, schema_name 
+    select query_text, database_name, schema_name, rows_inserted, end_time, user_name, role_name
         from snowflake.account_usage.query_history 
         where end_time >= :2 and {end_time_range_end_expr} 
     and execution_status = 'SUCCESS' and query_type not in 
     ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES',
     'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
     (query_text not ilike '%.query_history%') and
-    (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1)
+    (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1) and
+    (rows_inserted > 0 or rows_updated > 0)
     order by end_time;
     """
     ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time <= current_timestamp()'
@@ -63,7 +67,7 @@ class SnowflakeQueryHistory(QueryHistory):
                 raise ConfigError(f"Cannot retrieve data from more than 7 days ago when pulling history from "
                                   f"{cls.QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA}, "
                                   f"use {cls.QUERY_HISTORY_SOURCE_ACCOUNT_USAGE} instead "
-                                  f"(see https://docs.elementary-data.com for more details).")
+                                  f"(see https://docs.elementary-data.com/integrations/snowflake for more details).")
 
             logger.debug("Pulling snowflake query history from information schema")
             query = cls.INFORMATION_SCHEMA_QUERY_HISTORY
@@ -88,7 +92,7 @@ class SnowflakeQueryHistory(QueryHistory):
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
             for row in rows:
-                queries.append((row[0], row[1], row[2]))
+                queries.append((row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
             logger.debug("Finished fetching snowflake history query results")
 
         return queries
