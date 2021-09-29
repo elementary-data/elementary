@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 import networkx as nx
 import sqlparse
+from lineage.exceptions import ConfigError
 from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
@@ -207,23 +208,32 @@ class LineageGraph(object):
 
         if self._table is not None:
             logger.debug(f'Filtering on specific table - {self._table}')
-            if self._direction == 'downstream':
-                self._lineage_graph = self._upstream_graph()
             if self._direction == 'upstream':
+                logger.debug(f'Starting to build upstream graph for table - {self._table}')
+                self._lineage_graph = self._upstream_graph()
+                logger.debug(f'Finished building upstream graph for table - {self._table}')
+            elif self._direction == 'downstream':
+                logger.debug(f'Starting to build downstream graph for table - {self._table}')
                 self._lineage_graph = self._downstream_graph()
-            if self._direction == 'both':
+                logger.debug(f'Finished building downstream graph for table - {self._table}')
+            elif self._direction == 'both':
+                logger.debug(f'Starting to build upstream & downstream graph for table - {self._table}')
                 upstream_graph = self._upstream_graph()
-                self.draw_graph()
+                logger.debug(f'Finished building upstream graph for table - {self._table}')
                 downstream_graph = self._downstream_graph()
-                self.draw_graph()
+                logger.debug(f'Finished building downstream graph for table - {self._table}')
                 self._lineage_graph = nx.compose(upstream_graph, downstream_graph)
+                logger.debug(f'Finished composing upstream & downstream graphs for table - {self._table}')
+            else:
+                ConfigError('Direction for table filter must be - downstream/upstream/both.')
+
             title = self._lineage_graph.nodes[self._table].get('title', '')
             self._lineage_graph.nodes[self._table].update({'color': '#9FEEDE', 'title': 'SELECTED NODE' + title})
 
-    def _upstream_graph(self):
+    def _downstream_graph(self):
         return nx.bfs_tree(G=self._lineage_graph, source=self._table, depth_limit=self._depth)
 
-    def _downstream_graph(self):
+    def _upstream_graph(self):
         reversed_lineage_graph = self._lineage_graph.reverse(copy=True)
         return nx.bfs_tree(G=reversed_lineage_graph, source=self._table, depth_limit=self._depth).reverse(copy=True)
 
