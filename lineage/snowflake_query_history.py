@@ -24,13 +24,18 @@ class SnowflakeQueryHistory(QueryHistory):
         ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
         'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
         (query_text not ilike '%.query_history%') and 
-        (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1) and
-        (rows_produced is not null and rows_produced > 0) 
+        (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1) 
         order by end_time;
     """
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time_range_end=>to_timestamp_ltz(current_timestamp())'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = 'end_time_range_end=>to_timestamp_ltz(:3)'
     QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
+
+    INFORMATION_SCHEMA_COPY_HISTORY = """
+        select table_name, file_name, schema_name, row_count, last_load_time from information_schema.load_history
+        order by last_load_time
+    """
+
 
     # TODO: decide if we want to filter on rows_inserted / rows_produced
     ACCOUNT_USAGE_QUERY_HISTORY = """
@@ -41,8 +46,7 @@ class SnowflakeQueryHistory(QueryHistory):
     ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES',
     'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
     (query_text not ilike '%.query_history%') and
-    (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1) and
-    (rows_inserted > 0 or rows_updated > 0)
+    (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1)
     order by end_time;
     """
     ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time <= current_timestamp()'
@@ -85,15 +89,22 @@ class SnowflakeQueryHistory(QueryHistory):
 
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [tuple]:
         queries = []
+        database_name = self.get_database_name()
         with self.con.cursor() as cursor:
-            query, bindings = self._build_history_query(start_date, end_date, self.get_database_name(),
-                                                        self.query_history_source)
+            query, bindings = self._build_history_query(start_date, end_date, database_name, self.query_history_source)
             cursor.execute(query, bindings)
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
             for row in rows:
                 queries.append((row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
             logger.debug("Finished fetching snowflake history query results")
+
+            cursor.execute(self.INFORMATION_SCHEMA_COPY_HISTORY)
+            logger.debug("Finished executing snowflake copy history query")
+            rows = cursor.fetchall()
+            for row in rows:
+                queries.append((f"copy into {row[0]} from {row[1]}", database_name, row[2], row[3], row[4], '', ''))
+            logger.debug("Finished executing snowflake copy history query")
 
         return queries
 

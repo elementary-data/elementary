@@ -3,6 +3,8 @@ from typing import Optional
 from datetime import datetime
 import networkx as nx
 import sqlparse
+from sqlparse.sql import Statement
+import re
 from lineage.exceptions import ConfigError
 from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
@@ -65,12 +67,31 @@ class LineageGraph(object):
         self._direction = direction
         self._depth = depth
 
-    @staticmethod
-    def _parse_query(query: str) -> [LineageResult]:
+    @classmethod
+    def _parse_query(cls, query: str) -> [LineageResult]:
         parsed_query = sqlparse.parse(query.strip())
-        analyzed_statements = [LineageAnalyzer().analyze(statement) for statement in parsed_query
-                               if statement.token_first(skip_cm=True, skip_ws=True)]
+        analyzed_statements = []
+        for statement in parsed_query:
+            result = cls._analyze_copy_history_statement(statement)
+            if result is not None:
+                analyzed_statements.append(result)
+            else:
+                if statement.token_first(skip_cm=True, skip_ws=True):
+                    analyzed_statements.append(LineageAnalyzer().analyze(statement))
+
         return analyzed_statements
+
+    @staticmethod
+    def _analyze_copy_history_statement(statement: Statement) -> Optional[LineageResult]:
+        result = re.match('copy into (.*) from (.*)', statement.value)
+        if result is None:
+            return None
+        else:
+            table, remote_file_name = result.groups()
+            lineage_result = LineageResult()
+            lineage_result.read.add(Table(remote_file_name))
+            lineage_result.write.add(Table(table))
+            return lineage_result
 
     @staticmethod
     def _resolve_table_qualification(table: Table, database_name: str, schema_name: str) -> Table:
@@ -97,7 +118,15 @@ class LineageGraph(object):
 
         return True
 
+    @staticmethod
+    def _is_external_file(table: Table) -> bool:
+        table_name = str(table)
+        return 'gcs://' in table_name or 's3://' in table_name
+
     def _name_qualification(self, table: Table, database_name: str, schema_name: str) -> Optional[str]:
+        if self._is_external_file(table):
+            return str(table)
+
         table = self._resolve_table_qualification(table, database_name, schema_name)
 
         if self._should_ignore_table(table):
@@ -147,18 +176,26 @@ class LineageGraph(object):
         # TODO: Check pulling the attributes from the catalog so we can update sources as well
         target_attributes = {'title': f'Last update details - <br/> '
                                       f'Time: {end_time}<br/>'
-                                      f'Volume: {rows_inserted_or_produced}<br/>'
-                                      f'User name: {user_name}<br/>'
-                                      f'Role name: {role_name}<br/>'}
+                                      f'Volume: {rows_inserted_or_produced}<br/>'}
+        if user_name is not None and user_name != '':
+            target_attributes['title'] += f'User name: {user_name}<br/>Role name: {role_name}<br/>'
 
         if len(sources) > 0 and len(targets) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(sources)
+                for source in sources:
+                    if self._is_external_file(source):
+                        self._lineage_graph.add_node(source, color='#BA91E2', title='External file')
+                    else:
+                        self._lineage_graph.add_node(source)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(targets, **target_attributes)
         else:
-            self._lineage_graph.add_nodes_from(sources)
+            for source in sources:
+                if self._is_external_file(source):
+                    self._lineage_graph.add_node(source, color='#BA91E2', title='External file')
+                else:
+                    self._lineage_graph.add_node(source)
             self._lineage_graph.add_nodes_from(targets, **target_attributes)
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
