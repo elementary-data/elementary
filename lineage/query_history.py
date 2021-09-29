@@ -20,7 +20,7 @@ class QueryHistory(object):
             serz_queries = []
             for query_result in queries:
                 serz_queries.append((query_result[0], query_result[1], query_result[2], query_result[3],
-                                     str(query_result[4])))
+                                     query_result[4].strftime('%Y-%m-%d %H:%M:%S'), query_result[5], query_result[6]))
             with open(self.LATEST_QUERY_HISTORY_FILE, 'w') as query_history_file:
                 json.dump(serz_queries, query_history_file)
 
@@ -28,7 +28,10 @@ class QueryHistory(object):
         queries = []
         if os.path.exists(self.LATEST_QUERY_HISTORY_FILE):
             with open(self.LATEST_QUERY_HISTORY_FILE, 'r') as query_history_file:
-                queries = json.load(query_history_file)
+                desr_queries = json.load(query_history_file)
+                for query in desr_queries:
+                    queries.append((query[0], query[1], query[2], query[3],
+                                    datetime.strptime(query[4], '%Y-%m-%d %H:%M:%S'), query[5], query[6]))
         return queries
 
     @staticmethod

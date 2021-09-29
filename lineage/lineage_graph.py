@@ -208,7 +208,24 @@ class LineageGraph(object):
         if self._table is not None:
             logger.debug(f'Filtering on specific table - {self._table}')
             if self._direction == 'downstream':
-                self._lineage_graph = nx.bfs_tree(G=self._lineage_graph, source=self._table, depth_limit=self._depth)
+                self._lineage_graph = self._upstream_graph()
+            if self._direction == 'upstream':
+                self._lineage_graph = self._downstream_graph()
+            if self._direction == 'both':
+                upstream_graph = self._upstream_graph()
+                self.draw_graph()
+                downstream_graph = self._downstream_graph()
+                self.draw_graph()
+                self._lineage_graph = nx.compose(upstream_graph, downstream_graph)
+            title = self._lineage_graph.nodes[self._table].get('title', '')
+            self._lineage_graph.nodes[self._table].update({'color': '#9FEEDE', 'title': 'SELECTED NODE' + title})
+
+    def _upstream_graph(self):
+        return nx.bfs_tree(G=self._lineage_graph, source=self._table, depth_limit=self._depth)
+
+    def _downstream_graph(self):
+        reversed_lineage_graph = self._lineage_graph.reverse(copy=True)
+        return nx.bfs_tree(G=reversed_lineage_graph, source=self._table, depth_limit=self._depth).reverse(copy=True)
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
