@@ -239,7 +239,10 @@ class LineageGraph(object):
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
-        net = Network(height="100%", width="100%", directed=True)
+        net = Network(height="87%", width="100%", directed=True,
+                      heading="<a href='https://github.com/elementary-data/elementary-lineage'>"
+                              "<img border='0' src='https://raw.githubusercontent.com/elementary-data/elementary-lineage/master/static/headline-git.png'>"
+                              "</a>")
         net.from_nx(self._lineage_graph)
         net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
