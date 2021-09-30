@@ -272,7 +272,17 @@ class LineageGraph(object):
 
     def _upstream_graph(self):
         reversed_lineage_graph = self._lineage_graph.reverse(copy=True)
-        return nx.bfs_tree(G=reversed_lineage_graph, source=self._table, depth_limit=self._depth).reverse(copy=True)
+        return nx.bfs_tree(G=reversed_lineage_graph, source=self._table, depth_limit=self._depth).reverse(copy=False)
+
+    def _upstream_graph_2(self):
+        roots = (v for v, d in self._lineage_graph.in_degree() if d == 0)
+        paths = []
+        for root in roots:
+            paths.extend(nx.all_simple_paths(self._lineage_graph, source=root, target=self._table))
+        self._lineage_graph = nx.DiGraph()
+        for path in paths:
+            self._lineage_graph.add_nodes_from(path)
+            self._lineage_graph.add_edges_from(nx.utils.pairwise(path))
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
