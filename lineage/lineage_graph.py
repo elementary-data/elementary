@@ -235,7 +235,7 @@ class LineageGraph(object):
 
     def _upstream_graph(self, target_node: str, depth: Optional[int]) -> nx.DiGraph:
         logger.debug(f'Building an upstream graph for - {target_node}, depth - {depth}')
-        reversed_lineage_graph = self._lineage_graph.reverse(copy=True) #TODO: check if we can skip the copy here
+        reversed_lineage_graph = self._lineage_graph.reverse(copy=True)
         return nx.bfs_tree(G=reversed_lineage_graph, source=target_node, depth_limit=depth).reverse(copy=False)
 
     def _update_selected_node_attributes(self, selected_node: str) -> None:
