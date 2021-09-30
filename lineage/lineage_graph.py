@@ -17,7 +17,10 @@ logger = get_logger(__name__)
 GRAPH_VISUALIZATION_OPTIONS = """{
             "edges": {
                 "color": {
-                    "inherit": true
+                  "color": "rgba(23,107,215,1)",
+                  "highlight": "rgba(23,107,215,1)",
+                  "hover": "rgba(23,107,215,1)",
+                  "inherit": false
                 },
                 "dashes": true,
                 "smooth": {
@@ -39,8 +42,12 @@ GRAPH_VISUALIZATION_OPTIONS = """{
                 }
             },
             "interaction": {
+                "hover": true,
                 "navigationButtons": true,
-                "multiselect": true
+                "multiselect": true,
+                "keyboard": {
+                    "enabled": true
+                }
             },
             "physics": {
                 "enabled": false,
@@ -57,6 +64,8 @@ class LineageGraph(object):
     UPSTREAM_DIRECTION = 'upstream'
     DOWNSTREAM_DIRECTION = 'downstream'
     BOTH_DIRECTIONS = 'both'
+    SELECTED_NODE_COLOR = '#0925C7'
+    SELECTED_NODE_TITLE = 'Selected table<br/>'
 
     def __init__(self, profile_database_name: str, profile_schema_name: str = None, show_isolated_nodes: bool = False,
                  full_table_names: bool = False) -> None:
@@ -216,6 +225,7 @@ class LineageGraph(object):
                               f'{self.DOWNSTREAM_DIRECTION}|{self.BOTH_DIRECTIONS}, '
                               f'Got - {direction} instead.')
 
+        self._update_selected_node_attributes(resolved_selected_table_name)
         logger.debug(f'Finished filtering lineage graph on table - {selected_table}')
         pass
 
@@ -227,6 +237,13 @@ class LineageGraph(object):
         logger.debug(f'Building an upstream graph for - {target_node}, depth - {depth}')
         reversed_lineage_graph = self._lineage_graph.reverse(copy=True) #TODO: check if we can skip the copy here
         return nx.bfs_tree(G=reversed_lineage_graph, source=target_node, depth_limit=depth).reverse(copy=False)
+
+    def _update_selected_node_attributes(self, selected_node: str) -> None:
+        if self._lineage_graph.has_node(selected_node):
+            node = self._lineage_graph.nodes[selected_node]
+            node_title = node.get('title', '')
+            node.update({'color': self.SELECTED_NODE_COLOR,
+                         'title': self.SELECTED_NODE_TITLE + node_title})
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
