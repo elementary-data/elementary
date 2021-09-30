@@ -200,3 +200,39 @@ def test_lineage_graph_name_qualification(resolved_table_name, show_full_table_n
     reference = LineageGraph(profile_database_name='elementary_db', profile_schema_name='elementary_sc',
                              full_table_names=show_full_table_names)
     assert reference._name_qualification(Table(resolved_table_name), '', '') == expected_result
+
+
+def compare_edges(directed_graph: nx.DiGraph, edges: [set]) -> bool:
+    for edge in directed_graph.edges:
+        if (edge[0], edge[1]) not in edges:
+            return False
+    return True
+
+
+@pytest.mark.parametrize("edges, selected_node, depth, expected_remaining_edges", [
+    (nx.path_graph(5).edges, 3, None, {(3, 4)}),
+    (nx.path_graph(5).edges, 3, 1, {(3, 4)}),
+    (nx.path_graph(7).edges, 3, 1, {(3, 4)}),
+    ([(0, 1), (1, 2), (0, 3), (3, 4), (3, 2), (2, 5), (4, 6)], 3, None, {(3, 4), (3, 2), (2, 5), (4, 6)}),
+    ([(0, 1), (1, 2), (0, 3), (3, 4), (3, 2), (2, 5), (4, 6)], 3, 1, {(3, 4), (3, 2)})
+])
+def test_lineage_graph_downstream_graph(edges, selected_node, depth, expected_remaining_edges):
+    reference = LineageGraph(profile_database_name='elementary_db')
+    reference._lineage_graph.add_edges_from(edges)
+    reference._lineage_graph = reference._downstream_graph(selected_node, depth)
+    assert compare_edges(reference._lineage_graph, expected_remaining_edges)
+
+
+@pytest.mark.parametrize("edges, selected_node, depth, expected_remaining_edges", [
+    (nx.path_graph(5).edges, 3, None, {(0, 1), (1, 2), (2, 3)}),
+    (nx.path_graph(5).edges, 3, 1, {(2, 3)}),
+    (nx.path_graph(7).edges, 3, 1, {(2, 3)}),
+    ([(0, 1), (1, 2), (2, 3), (0, 3), (3, 4), (2, 5), (4, 6)], 3, None, {(0, 3), (2, 3), (1, 2), (0, 1)}),
+    ([(0, 1), (1, 2), (2, 3), (0, 3), (3, 4), (2, 5), (4, 6)], 3, 1, {(0, 3), (2, 3)}),
+])
+def test_lineage_graph_upstream_graph(edges, selected_node, depth, expected_remaining_edges):
+    reference = LineageGraph(profile_database_name='elementary_db')
+    reference._lineage_graph.add_edges_from(edges)
+    reference._lineage_graph = reference._upstream_graph(selected_node, depth)
+    assert compare_edges(reference._lineage_graph, expected_remaining_edges)
+
