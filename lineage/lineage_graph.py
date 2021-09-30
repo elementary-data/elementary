@@ -8,6 +8,8 @@ from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
 import webbrowser
+
+from lineage.query_context import QueryContext
 from lineage.utils import get_logger
 from sqllineage.models import Schema, Table
 from tqdm import tqdm
@@ -118,7 +120,9 @@ class LineageGraph(object):
 
         return str(table).rsplit('.', 1)[-1]
 
-    def _update_lineage_graph(self, analyzed_statements: [LineageResult], database_name: str, schema_name: str) -> None:
+    def _update_lineage_graph(self, analyzed_statements: [LineageResult], query_context: QueryContext) -> None:
+        database_name = query_context.queried_database
+        schema_name = query_context.queried_schema
         for analyzed_statement in analyzed_statements:
             # Handle drop tables, if they exist in the statement
             dropped_tables = analyzed_statement.drop
@@ -191,7 +195,7 @@ class LineageGraph(object):
 
     def init_graph_from_query_list(self, queries: [tuple]) -> None:
         logger.debug(f'Loading {len(queries)} queries into the lineage graph')
-        for query, database_name, schema_name in tqdm(queries, desc="Updating lineage graph", colour='green'):
+        for query, query_context in tqdm(queries, desc="Updating lineage graph", colour='green'):
             try:
                 analyzed_statements = self._parse_query(query)
             except SQLLineageException as exc:
@@ -199,7 +203,7 @@ class LineageGraph(object):
                              f'Error was -\n{exc}.')
                 continue
 
-            self._update_lineage_graph(analyzed_statements, database_name, schema_name)
+            self._update_lineage_graph(analyzed_statements, query_context)
 
         logger.debug(f'Finished updating lineage graph!')
 

@@ -1,6 +1,7 @@
 from datetime import datetime, date, timedelta
 
 from lineage.exceptions import ConfigError
+from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.utils import get_logger
 
@@ -14,7 +15,7 @@ class SnowflakeQueryHistory(QueryHistory):
     # the query was really executed on the configured db and filter it accordingly.
 
     INFORMATION_SCHEMA_QUERY_HISTORY = """
-    select query_text, database_name, schema_name
+    select query_text, database_name, schema_name, end_time
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
         {end_time_range_end_expr},
@@ -31,7 +32,7 @@ class SnowflakeQueryHistory(QueryHistory):
     QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
 
     ACCOUNT_USAGE_QUERY_HISTORY = """
-    select query_text, database_name, schema_name 
+    select query_text, database_name, schema_name, end_time
         from snowflake.account_usage.query_history 
         where end_time >= :2 and {end_time_range_end_expr} 
     and execution_status = 'SUCCESS' and query_type not in 
@@ -88,7 +89,7 @@ class SnowflakeQueryHistory(QueryHistory):
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
             for row in rows:
-                queries.append((row[0], row[1], row[2]))
+                queries.append((row[0], QueryContext(row[1], row[2], row[3])))
             logger.debug("Finished fetching snowflake history query results")
 
         return queries
