@@ -209,6 +209,15 @@ def compare_edges(directed_graph: nx.DiGraph, edges: [set]) -> bool:
     return True
 
 
+def create_directed_graph_from_edge_list(edges: [list]) -> nx.DiGraph:
+    G = nx.DiGraph()
+    for edge in edges:
+        G.add_node(edge[0])
+        G.add_node(edge[1])
+        G.add_edge(edge[0], edge[1])
+    return G
+
+
 @pytest.mark.parametrize("edges, selected_node, depth, expected_remaining_edges", [
     (nx.path_graph(5).edges, 3, None, {(3, 4)}),
     (nx.path_graph(5).edges, 3, 1, {(3, 4)}),
@@ -234,5 +243,34 @@ def test_lineage_graph_upstream_graph(edges, selected_node, depth, expected_rema
     reference = LineageGraph(profile_database_name='elementary_db')
     reference._lineage_graph.add_edges_from(edges)
     reference._lineage_graph = reference._upstream_graph(selected_node, depth)
+    assert compare_edges(reference._lineage_graph, expected_remaining_edges)
+
+
+@pytest.mark.parametrize("profile_database_name, profile_schema_name, full_table_names, edges, selected_node, "
+                         "direction, depth, expected_remaining_edges", [
+                            ('db', 'sc', True, [('db.sc.t1', 'db.sc.t2'), ('db.sc.t1', 'db.sc.t3')],
+                             't3', 'upstream', None,
+                             {('db.sc.t1', 'db.sc.t3')}),
+                            ('db', 'sc', True, [('db.sc.t1', 'db.sc.t2'), ('db.sc.t1', 'db.sc.t3')],
+                             'db.sc.t3', 'upstream', None,
+                             {('db.sc.t1', 'db.sc.t3')}),
+                            ('db', 'sc', True, [('db.sc.t1', 'db.sc.t2'), ('db.sc.t1', 'db.sc.t3'),
+                                                ('db.sc.t3', 'db.sc.t4')],
+                             'sc.t1', 'downstream', 1,
+                             {('db.sc.t1', 'db.sc.t3'), ('db.sc.t1', 'db.sc.t2')}),
+                            ('db', 'sc', False, [('t1', 't2'), ('t1', 't3')],
+                             't3', 'upstream', None,
+                             {('t1', 't3')}),
+                            ('db', 'sc', False, [('t1', 't2'), ('t1', 't3'), ('t3', 't4'), ('t4', 't5'), ('t2', 't4'),
+                                                 ('t4', 't6'), ('t6', 't8')],
+                             't4', 'both', 1,
+                             {('t3', 't4'), ('t4', 't5'), ('t2', 't4'), ('t4', 't6')}),
+])
+def test_lineage_graph_filter_on_table(profile_database_name, profile_schema_name, full_table_names, edges,
+                                       selected_node, direction, depth, expected_remaining_edges):
+    reference = LineageGraph(profile_database_name=profile_database_name, profile_schema_name=profile_schema_name,
+                             full_table_names=full_table_names)
+    reference._lineage_graph = create_directed_graph_from_edge_list(edges)
+    reference.filter_on_table(selected_node, direction, depth)
     assert compare_edges(reference._lineage_graph, expected_remaining_edges)
 
