@@ -3,6 +3,7 @@ from typing import Optional
 
 import networkx as nx
 import sqlparse
+from lineage.exceptions import ConfigError
 from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
@@ -53,16 +54,17 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 
 
 class LineageGraph(object):
+    UPSTREAM_DIRECTION = 'upstream'
+    DOWNSTREAM_DIRECTION = 'downstream'
+    BOTH_DIRECTIONS = 'both'
+
     def __init__(self, profile_database_name: str, profile_schema_name: str = None, show_isolated_nodes: bool = False,
-                 full_table_names: bool = False, table: str = None, direction: str = None, depth: int = None) -> None:
+                 full_table_names: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
         self._profile_database_name = profile_database_name
         self._profile_schema_name = profile_schema_name
         self._show_full_table_name = full_table_names
-        self._table = table
-        self._direction = direction
-        self._depth = depth
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
@@ -191,6 +193,40 @@ class LineageGraph(object):
             self._update_lineage_graph(analyzed_statements, database_name, schema_name)
 
         logger.debug(f'Finished updating lineage graph!')
+
+    def filter_on_table(self, selected_table: str, direction: str = None, depth: int = None) -> None:
+        logger.debug(f'Filtering lineage graph on table - {selected_table}')
+        resolved_selected_table_name = self._name_qualification(Table(selected_table), self._profile_database_name,
+                                                                self._profile_schema_name)
+        logger.debug(f'Qualified table name - {resolved_selected_table_name}')
+        if resolved_selected_table_name is None:
+            raise ConfigError(f'Could not resolve table name - {selected_table}, please make sure to '
+                              f'specify a table name that exists in the database configured in your profiles file.')
+
+        if direction == self.DOWNSTREAM_DIRECTION:
+            self._lineage_graph = self._downstream_graph(resolved_selected_table_name, depth)
+        elif direction == self.UPSTREAM_DIRECTION:
+            self._lineage_graph = self._upstream_graph(resolved_selected_table_name, depth)
+        elif direction == self.BOTH_DIRECTIONS:
+            downstream_graph = self._downstream_graph(resolved_selected_table_name, depth)
+            upstream_graph = self._upstream_graph(resolved_selected_table_name, depth)
+            self._lineage_graph = nx.compose(upstream_graph, downstream_graph)
+        else:
+            raise ConfigError(f'Direction must be one of the following - {self.UPSTREAM_DIRECTION}|'
+                              f'{self.DOWNSTREAM_DIRECTION}|{self.BOTH_DIRECTIONS}, '
+                              f'Got - {direction} instead.')
+
+        logger.debug(f'Finished filtering lineage graph on table - {selected_table}')
+        pass
+
+    def _downstream_graph(self, source_node: str, depth: Optional[int]) -> nx.DiGraph:
+        logger.debug(f'Building a downstream graph for - {source_node}, depth - {depth}')
+        return nx.bfs_tree(G=self._lineage_graph, source=source_node, depth_limit=depth)
+
+    def _upstream_graph(self, target_node: str, depth: Optional[int]) -> nx.DiGraph:
+        logger.debug(f'Building an upstream graph for - {target_node}, depth - {depth}')
+        reversed_lineage_graph = self._lineage_graph.reverse(copy=True) #TODO: check if we can skip the copy here
+        return nx.bfs_tree(G=reversed_lineage_graph, source=target_node, depth_limit=depth).reverse(copy=False)
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph

@@ -97,10 +97,16 @@ class RequiredIf(click.Option):
 @click.option(
     '--table', '-t',
     type=str,
-    help="Filter on a table to see upstream and downstream dependencies of this table (see also direction param).",
+    help="Filter on a table to see upstream and downstream dependencies of this table (see also direction param)."
+         " Table name format could be a full name like <db_name>.<schema_name>.<table_name>, a partial name like "
+         "<schema_name>.<table_name> or only a table name <table_name>. If the database name wasn't part of the name "
+         "the profiles database name will be used, if the schema name wasn't part of the name the profiles schema name "
+         "will be used.",
+    default=None
 )
 @click.option('--direction',
-              type=click.Choice(['downstream', 'upstream', 'both']),
+              type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
+                                 LineageGraph.BOTH_DIRECTIONS]),
               help="Sets direction of dependencies when filtering on a specific table (default is both, "
                    "meaning showing both upstream and downstream dependencies of this table).",
               default='both',
@@ -121,16 +127,18 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     """
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
+
     query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history).create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
+
     lineage_graph = LineageGraph(show_isolated_nodes=False,
                                  profile_database_name=query_history.get_database_name(),
                                  profile_schema_name=query_history.get_schema_name() if not ignore_schema else None,
-                                 full_table_names=full_table_names,
-                                 table=table,
-                                 direction=direction,
-                                 depth=depth)
+                                 full_table_names=full_table_names)
     lineage_graph.init_graph_from_query_list(queries)
+    if table is not None:
+        lineage_graph.filter_on_table(table, direction, depth)
+
     lineage_graph.draw_graph(should_open_browser=open_browser)
 
 
