@@ -115,7 +115,7 @@ class RequiredIf(click.Option):
               required_if='table')
 def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
          export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
-         depth: str) -> None:
+         depth: int) -> None:
     """
     For more details check out our documentation here - https://docs.elementary-data.com/
     """
