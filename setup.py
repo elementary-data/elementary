@@ -20,7 +20,7 @@ dependency_links = [x.strip().replace('git+', '') for x in package_requirements 
 setup(
     name='elementary-lineage',
     description='Presenting data lineage based on your data warehouse query history',
-    version='0.0.7',
+    version='0.0.8',
     packages=find_packages(),
     include_package_data=True,
     python_requires='>=3.6.2',
