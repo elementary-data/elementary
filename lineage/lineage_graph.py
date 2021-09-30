@@ -54,12 +54,15 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 
 class LineageGraph(object):
     def __init__(self, profile_database_name: str, profile_schema_name: str = None, show_isolated_nodes: bool = False,
-                 full_table_names: bool = False) -> None:
+                 full_table_names: bool = False, table: str = None, direction: str = None, depth: int = None) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
         self._profile_database_name = profile_database_name
         self._profile_schema_name = profile_schema_name
         self._show_full_table_name = full_table_names
+        self._table = table
+        self._direction = direction
+        self._depth = depth
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
