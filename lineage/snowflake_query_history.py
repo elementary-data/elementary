@@ -15,7 +15,7 @@ class SnowflakeQueryHistory(QueryHistory):
     # the query was really executed on the configured db and filter it accordingly.
 
     INFORMATION_SCHEMA_QUERY_HISTORY = """
-    select query_text, database_name, schema_name, end_time, rows_produced
+    select query_text, database_name, schema_name, end_time, rows_produced, query_type
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
         {end_time_range_end_expr},
@@ -32,7 +32,7 @@ class SnowflakeQueryHistory(QueryHistory):
     QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
 
     ACCOUNT_USAGE_QUERY_HISTORY = """
-    select query_text, database_name, schema_name, end_time, rows_inserted + rows_produced
+    select query_text, database_name, schema_name, end_time, rows_inserted + rows_produced, query_type
         from snowflake.account_usage.query_history 
         where end_time >= :2 and {end_time_range_end_expr} 
     and execution_status = 'SUCCESS' and query_type not in 
@@ -89,7 +89,7 @@ class SnowflakeQueryHistory(QueryHistory):
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
             for row in rows:
-                queries.append((row[0], QueryContext(row[1], row[2], row[3], row[4])))
+                queries.append((row[0], QueryContext(row[1], row[2], row[3], row[4], row[5])))
             logger.debug("Finished fetching snowflake history query results")
 
         return queries
