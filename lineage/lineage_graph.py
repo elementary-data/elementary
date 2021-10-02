@@ -143,9 +143,9 @@ class LineageGraph(object):
             targets = {self._name_qualification(target, database_name, schema_name)
                        for target in analyzed_statement.write}
 
-            self._add_nodes_and_edges(sources, targets)
+            self._add_nodes_and_edges(sources, targets, query_context)
 
-    def _add_nodes_and_edges(self, sources: {str}, targets: {str}) -> None:
+    def _add_nodes_and_edges(self, sources: {str}, targets: {str}, query_context: QueryContext) -> None:
         if None in sources:
             sources.remove(None)
         if None in targets:
@@ -159,10 +159,10 @@ class LineageGraph(object):
                 self._lineage_graph.add_nodes_from(sources)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(targets)
+                self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
         else:
             self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets)
+            self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
