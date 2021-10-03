@@ -60,14 +60,13 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
 **Coming soon:**
 
-Our plan is to eventually build a data observability platform that is open, transparent and powered by the community. 
-A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
-
 * **Dataset monitoring:** Continuously collect and monitor datasets' reliability metrics.
 * **Lineage history:** Store data about lineage versions and changes.
 * **Column level lineage:** Add column-level granularity.
 * **Full lineage:** Integrate with downstream and upstream tools to create a full graph.
 
+Our plan is to eventually build a data observability platform that is open, transparent and powered by the community. 
+A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
 
 
 ## Community & Support
