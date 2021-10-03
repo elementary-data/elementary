@@ -1,8 +1,8 @@
-<p align="left">
+<p align="center">
 <img alt="Logo" src="static/headline-git.png"/>
 </p>
 
-<p align="left">
+<p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-orange"/></a>
 <img alt="Downloads" src="https://pepy.tech/badge/elementary-lineage"/>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-brightgreen"/>
