@@ -20,7 +20,7 @@ without any implementation efforts, security risks or compromises on accuracy.
 <img src="static/elementary_demo.gif" width="600"/>
 
 
-If you like what we are building, support us with <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a>.
+:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
 
 
