@@ -13,10 +13,15 @@ my_profile:
       user: [username]
       password: [password]
       
-      ## Note that full ineage requires access to account usage data, that is by default only for users with the ACCOUNTADMIN role
-      ## Lineage of last 1-7 days (depending on tier) requires only monitor permmisions
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
       ## Schema is used as filter by default, you can use the 'ignore schema' option to see cross schema lineage
-      schema: [schema name] 
+      schema: [schema name]
+      
+      ## OPTIONAL - (NOTE: account_usage requires higher permissions)
+      ## if you want to create the lineage based on queries from more 
+      ## than the last 7 days / 10k queries add this parameter:
+      
+      # query_history_source: account_usage
+      
