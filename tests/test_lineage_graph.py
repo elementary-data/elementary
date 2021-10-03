@@ -5,6 +5,7 @@ import networkx as nx
 from sqllineage.models import Schema
 
 from lineage.lineage_graph import LineageGraph
+from lineage.query_context import QueryContext
 
 
 def create_lineage_result(read, write):
@@ -74,13 +75,14 @@ def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolate
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     reference._lineage_graph = di_graph_mock
 
-    reference._add_nodes_and_edges(sources, targets)
+    empty_query_context = QueryContext()
+    reference._add_nodes_and_edges(sources, targets, empty_query_context)
 
     node_calls = []
     if len(sources) > 0:
         node_calls.append(mock.call(sources))
     if len(targets) > 0:
-        node_calls.append(mock.call(targets))
+        node_calls.append(mock.call(targets, title=empty_query_context.to_html()))
 
     edge_calls = []
     for edge in edges:
@@ -142,7 +144,7 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
 def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isolated_nodes):
     reference = LineageGraph(profile_database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
 
-    query_list = [(query, 'elementary_db', 'elementary_schema') for query in queries]
+    query_list = [(query, QueryContext('elementary_db', 'elementary_schema')) for query in queries]
     try:
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:
