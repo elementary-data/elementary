@@ -75,13 +75,14 @@ def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolate
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     reference._lineage_graph = di_graph_mock
 
-    reference._add_nodes_and_edges(sources, targets)
+    empty_query_context = QueryContext()
+    reference._add_nodes_and_edges(sources, targets, empty_query_context)
 
     node_calls = []
     if len(sources) > 0:
         node_calls.append(mock.call(sources))
     if len(targets) > 0:
-        node_calls.append(mock.call(targets))
+        node_calls.append(mock.call(targets, title=empty_query_context.to_html()))
 
     edge_calls = []
     for edge in edges:
