@@ -8,3 +8,4 @@ pyvis
 setuptools
 sqlparse
 tqdm
+python-dateutil
