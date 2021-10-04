@@ -1,6 +1,7 @@
 import itertools
+from collections import defaultdict
 from typing import Optional
-
+import matplotlib.pyplot as plt
 import networkx as nx
 import sqlparse
 from lineage.exceptions import ConfigError
@@ -8,7 +9,8 @@ from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
 from pyvis.network import Network
 import webbrowser
-
+import base64
+from io import BytesIO
 from lineage.query_context import QueryContext
 from lineage.utils import get_logger
 from sqllineage.models import Schema, Table
@@ -76,6 +78,7 @@ class LineageGraph(object):
         self._profile_database_name = profile_database_name
         self._profile_schema_name = profile_schema_name
         self._show_full_table_name = full_table_names
+        self.catalog = defaultdict(lambda: {'volume': [], 'update_times': [], 'last_html': None})
 
     @staticmethod
     def _parse_query(query: str) -> [LineageResult]:
@@ -145,6 +148,12 @@ class LineageGraph(object):
 
             self._add_nodes_and_edges(sources, targets, query_context)
 
+    def _add_node_to_catalog(self, node: str, query_context: QueryContext) -> None:
+        self.catalog[node]['volume'].append(query_context.query_volume)
+        self.catalog[node]['update_times'].append(
+            query_context.query_time_to_str(query_context.query_time, fmt='%Y-%m-%d %H:%M:%S'))
+        self.catalog[node]['last_html'] = query_context.to_html()
+
     def _add_nodes_and_edges(self, sources: {str}, targets: {str}, query_context: QueryContext) -> None:
         if None in sources:
             sources.remove(None)
@@ -156,13 +165,21 @@ class LineageGraph(object):
 
         if len(sources) > 0 and len(targets) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(sources)
+                for source_node in sources:
+                    self._lineage_graph.add_node(source_node)
+                    self._add_node_to_catalog(source_node, query_context)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
+                for target_node in targets:
+                    self._lineage_graph.add_node(target_node, title=query_context.to_html())
+                    self._add_node_to_catalog(target_node, query_context)
         else:
-            self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
+            for source_node in sources:
+                self._lineage_graph.add_node(source_node)
+                self._add_node_to_catalog(source_node, query_context)
+            for target_node in targets:
+                self._lineage_graph.add_node(target_node, title=query_context.to_html())
+                self._add_node_to_catalog(target_node, query_context)
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
@@ -173,6 +190,10 @@ class LineageGraph(object):
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
+            if old_node in self.catalog:
+                old_node_attributes = self.catalog[old_node]
+                del self.catalog[old_node]
+                self.catalog[new_node] = old_node_attributes
 
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
@@ -192,6 +213,9 @@ class LineageGraph(object):
                 for predecessor in node_predecessors:
                     if self._lineage_graph.has_node(predecessor) and self._lineage_graph.degree(predecessor) == 0:
                         self._lineage_graph.remove_node(predecessor)
+
+            if node in self.catalog:
+                del self.catalog[node]
 
     def init_graph_from_query_list(self, queries: [tuple]) -> None:
         logger.debug(f'Loading {len(queries)} queries into the lineage graph')
@@ -249,7 +273,42 @@ class LineageGraph(object):
             node.update({'color': self.SELECTED_NODE_COLOR,
                          'title': self.SELECTED_NODE_TITLE + node_title})
 
+    def _get_freshness_and_volume_graph_for_node(self, node: str) -> str:
+        times = self.catalog[node]['update_times'][-3:]
+        volumes = self.catalog[node]['volume'][-3:]
+        # plotting a bar chart
+        plt.clf()
+        plt.bar(times, volumes, width=0.2, color=['blue'])
+        plt.xlabel('Time')
+        plt.ylabel('Volume')
+        plt.title(node)
+        fig = plt.gcf()
+        tmpfile = BytesIO()
+        fig.savefig(tmpfile, format='png')
+        encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
+        return f"""
+        <br/><div style="font-family:arial;color:DarkSlateGrey;font-size:110%;">
+                                <strong>
+                                    Freshness & volume graph</br>
+                                </strong>
+                                <img src=\'data:image/png;base64,{encoded}\'>
+        </div>
+        """
+
+    def _enrich_graph_with_monitoring_context(self) -> None:
+        for node in self._lineage_graph.nodes:
+            if node in self.catalog:
+                title_html = f"""
+                <html>
+                    <body>
+                        {self.catalog[node]['last_html'] + self._get_freshness_and_volume_graph_for_node(node)}
+                    </body>
+                </html>
+                """
+                self._lineage_graph.nodes[node]['title'] = title_html
+
     def draw_graph(self, should_open_browser: bool = True) -> None:
+        self._enrich_graph_with_monitoring_context()
         # Visualize the graph
         net = Network(height="100%", width="100%", directed=True)
         net.from_nx(self._lineage_graph)

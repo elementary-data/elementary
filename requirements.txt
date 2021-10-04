@@ -3,8 +3,11 @@ pyfiglet
 snowflake-connector-python
 dbt
 networkx
-sqllineage==1.2.4
+sqllineage
 pyvis
 setuptools
 sqlparse
 tqdm
+python-dateutil
+pytest
+matplotlib
