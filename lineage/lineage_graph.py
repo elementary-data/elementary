@@ -165,18 +165,14 @@ class LineageGraph(object):
 
         if len(sources) > 0 and len(targets) == 0:
             if self._show_isolated_nodes:
-                for source_node in sources:
-                    self._lineage_graph.add_node(source_node)
-                    self._add_node_to_catalog(source_node, query_context)
+                self._lineage_graph.add_nodes_from(sources)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
                 for target_node in targets:
                     self._lineage_graph.add_node(target_node, title=query_context.to_html())
                     self._add_node_to_catalog(target_node, query_context)
         else:
-            for source_node in sources:
-                self._lineage_graph.add_node(source_node)
-                self._add_node_to_catalog(source_node, query_context)
+            self._lineage_graph.add_nodes_from(sources)
             for target_node in targets:
                 self._lineage_graph.add_node(target_node, title=query_context.to_html())
                 self._add_node_to_catalog(target_node, query_context)
@@ -278,7 +274,7 @@ class LineageGraph(object):
         volumes = self.catalog[node]['volume'][-3:]
         # plotting a bar chart
         plt.clf()
-        plt.bar(times, volumes, width=0.2, color=['blue'])
+        plt.bar(times, volumes, width=0.1, color=['blue'])
         plt.xlabel('Time')
         plt.ylabel('Volume')
         plt.title(node)
@@ -291,11 +287,12 @@ class LineageGraph(object):
                                 <strong>
                                     Freshness & volume graph</br>
                                 </strong>
-                                <img src=\'data:image/png;base64,{encoded}\'>
+                                <img width="400" height="300" src=\'data:image/png;base64,{encoded}\'>
         </div>
         """
 
     def _enrich_graph_with_monitoring_context(self) -> None:
+        # TODO: get only nodes with tag = target
         for node in self._lineage_graph.nodes:
             if node in self.catalog:
                 title_html = f"""
