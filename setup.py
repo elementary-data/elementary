@@ -20,15 +20,15 @@ dependency_links = [x.strip().replace('git+', '') for x in package_requirements 
 setup(
     name='elementary-lineage',
     description='Presenting data lineage based on your data warehouse query history',
-    version='0.0.10',
+    version='0.0.11',
     packages=find_packages(),
-    include_package_data=True,
     python_requires='>=3.6.2',
     entry_points='''
         [console_scripts]
         edl=lineage.main:main
     ''',
     author="Elementary",
+    package_data={"": ["header.html"]},
     keyword="data, lineage, data lineage, data warehouse, DWH",
     long_description=README,
     install_requires=install_requirements + [
