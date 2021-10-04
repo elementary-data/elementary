@@ -13,6 +13,7 @@ from lineage.query_context import QueryContext
 from lineage.utils import get_logger
 from sqllineage.models import Schema, Table
 from tqdm import tqdm
+import pkg_resources
 
 logger = get_logger(__name__)
 
@@ -249,9 +250,20 @@ class LineageGraph(object):
             node.update({'color': self.SELECTED_NODE_COLOR,
                          'title': self.SELECTED_NODE_TITLE + node_title})
 
+    @staticmethod
+    def _load_header() -> str:
+        header_content = ""
+        header = pkg_resources.resource_filename(__name__, "header.html")
+
+        if header is not None:
+            with open(header, 'r') as header_file:
+                header_content = header_file.read()
+
+        return header_content
+
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
-        net = Network(height="100%", width="100%", directed=True)
+        net = Network(height="100%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)
         net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
