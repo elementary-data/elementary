@@ -20,8 +20,12 @@ without any implementation efforts, security risks or compromises on accuracy.
 <img src="static/elementary_demo.gif" width="600"/>
 
 
-:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+:construction: **Here is a sneak peek of our next release:** :point_down:	
 
+<img src="static/demo_next_release.gif" width="600"/>
+
+
+:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
 
 ## Quick start
