@@ -20,14 +20,19 @@ def get_random_date(start_date: datetime, end_date: datetime, specific_day: Opti
                     randint(0, 59), randint(0, 59))
 
 
-def generate_query_context(start_date: datetime, end_date: datetime, query_type: str, day: Optional[int] = None) -> \
+def generate_query_context(start_date: datetime, end_date: datetime, query_type: str, day: Optional[int] = None,
+                           introduce_volume_bug: bool = False) -> \
         QueryContext:
     if day is None:
         query_time = get_random_date(start_date, end_date)
     else:
         query_time = get_random_date(start_date, end_date, specific_day=day)
 
-    query_volume = randint(500, 1000)
+    if introduce_volume_bug:
+        query_volume = randint(0, 100)
+    else:
+        query_volume = randint(500, 1000)
+
     return QueryContext('elementary_db', 'elementary', query_time, query_volume, query_type, 'elementary_dbt',
                         'elementary_role')
 
@@ -36,6 +41,11 @@ def generate_queries(start_date: datetime, end_date: datetime) -> [tuple]:
     number_of_days = (end_date - start_date).days
     queries = []
     for day in range(number_of_days):
+        introduce_bug = False
+        # if it's last day, insert a bug
+        if (start_date + timedelta(days=day)).date() == (end_date - timedelta(days=1)).date():
+            introduce_bug = True
+
         queries.append(("insert into salesforce_info select * from salesforce_info_stg",
                         generate_query_context(start_date, end_date, 'INSERT', day).to_dict()))
         queries.append(("insert into sales_contracts select * from salesforce_info",
@@ -43,7 +53,7 @@ def generate_queries(start_date: datetime, end_date: datetime) -> [tuple]:
         queries.append(("insert into sales_reps select * from salesforce_info",
                         generate_query_context(start_date, end_date, 'INSERT', day).to_dict()))
         queries.append(("insert into sales_leads select * from salesforce_info",
-                        generate_query_context(start_date, end_date, 'INSERT', day).to_dict()))
+                        generate_query_context(start_date, end_date, 'INSERT', day, introduce_bug).to_dict()))
         queries.append(("insert into sales_demos select * from salesforce_info",
                         generate_query_context(start_date, end_date, 'INSERT', day).to_dict()))
         queries.append(("insert into demo_conversion_rate select * from sales_demos join sales_leads on "
@@ -67,7 +77,7 @@ def generate_queries(start_date: datetime, end_date: datetime) -> [tuple]:
                         "facebook_marketing_spend.campaign "
                         "join google_ads_marketing_spend on marketing_attribution.campaign = "
                         "google_ads_marketing_spend.campaign",
-                        generate_query_context(start_date, end_date, 'INSERT', day).to_dict()))
+                        generate_query_context(start_date, end_date, 'INSERT', day, introduce_bug).to_dict()))
         queries.append(("insert into marketing_qualified_leads select * from marketing_unified_view join sales_leads "
                         "on marketing_unified_view.anonymous_id = sales_leads.anonymous_id",
                         generate_query_context(start_date, end_date, 'INSERT', day).to_dict()))

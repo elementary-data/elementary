@@ -1,5 +1,6 @@
 import itertools
 from collections import defaultdict
+from statistics import median
 from typing import Optional
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -302,6 +303,22 @@ class LineageGraph(object):
                     </body>
                 </html>
                 """
+
+                node_volumes = self.catalog[node]['volume']
+                if node_volumes[-1] < median(node_volumes) / 2:
+                    self._lineage_graph.nodes[node]['color'] = 'red'
+                    title_html = f"""
+                        <html>
+                            <body>
+                                <div style="font-family:arial;color:tomato;font-size:110%;">
+                                    <strong>
+                                    Warning - last update volume is too low</br></br>
+                                    </strong>
+                                </div>
+                                {self.catalog[node]['last_html'] + self._get_freshness_and_volume_graph_for_node(node)}
+                            </body>
+                        </html>
+                        """
                 self._lineage_graph.nodes[node]['title'] = title_html
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
