@@ -1,4 +1,5 @@
-from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from lineage.bigquery_query_history import BigQueryQueryHistory
+from lineage.dbt_utils import extract_credentials_and_data_from_profiles, get_bigquery_client
 from lineage.exceptions import ConfigError
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
@@ -33,5 +34,8 @@ class QueryHistoryFactory(object):
 
             return SnowflakeQueryHistory(snowflake_con, self.export_query_history,
                                          profile_data.get('query_history_source'))
+        elif credentials_type == 'bigquery':
+            bigquery_client = get_bigquery_client(credentials)
+            return BigQueryQueryHistory(bigquery_client, self.export_query_history, profile_data.get('dataset'))
         else:
             raise ConfigError("Unsupported profile type")
