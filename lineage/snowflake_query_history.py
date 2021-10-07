@@ -1,6 +1,7 @@
 from datetime import datetime, date, timedelta
 
 from lineage.exceptions import ConfigError
+from lineage.query import Query
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.utils import get_logger
@@ -47,9 +48,10 @@ class SnowflakeQueryHistory(QueryHistory):
     ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER = 'end_time <= :3'
     QUERY_HISTORY_SOURCE_ACCOUNT_USAGE = 'account_usage'
 
-    def __init__(self, con, should_export_query_history: bool = True, query_history_source: str = None) -> None:
+    def __init__(self, con, should_export_query_history: bool = True, ignore_schema: bool = False,
+                 query_history_source: str = None) -> None:
         self.query_history_source = query_history_source.strip().lower() if query_history_source is not None else None
-        super().__init__(con, should_export_query_history)
+        super().__init__(con, should_export_query_history, ignore_schema)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, query_history_source: str)\
@@ -81,22 +83,35 @@ class SnowflakeQueryHistory(QueryHistory):
 
         return query, bindings
 
-    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [tuple]:
+    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
         queries = []
-        with self.con.cursor() as cursor:
+        with self._con.cursor() as cursor:
             query, bindings = self._build_history_query(start_date, end_date, self.get_database_name(),
                                                         self.query_history_source)
             cursor.execute(query, bindings)
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
             for row in rows:
-                queries.append((row[0], QueryContext(row[1], row[2], row[3], row[4], row[5], row[6], row[7])))
+                query_context = QueryContext(queried_database=row[1],
+                                             queried_schema=row[2],
+                                             query_time=row[3],
+                                             query_volume=row[4],
+                                             query_type=row[5],
+                                             user_name=row[6],
+                                             role_name=row[7])
+
+                query = Query(raw_query_text=row[0],
+                              query_context=query_context,
+                              profile_database_name=self.get_database_name(),
+                              profile_schema_name=self.get_schema_name())
+
+                queries.append(query)
             logger.debug("Finished fetching snowflake history query results")
 
         return queries
 
     def get_database_name(self):
-        return self.con.database
+        return self._con.database
 
     def get_schema_name(self):
-        return self.con.schema
+        return self._con.schema if not self._ignore_schema else None

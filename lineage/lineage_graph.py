@@ -1,15 +1,11 @@
 import itertools
 from typing import Optional
-
 import networkx as nx
 from lineage.exceptions import ConfigError
 from pyvis.network import Network
 import webbrowser
-
 from lineage.query import Query
-from lineage.query_context import QueryContext
 from lineage.utils import get_logger
-from sqllineage.models import Schema, Table
 from tqdm import tqdm
 import pkg_resources
 
@@ -68,15 +64,14 @@ class LineageGraph(object):
     SELECTED_NODE_COLOR = '#0925C7'
     SELECTED_NODE_TITLE = 'Selected table<br/>'
 
-    def __init__(self, profile_database_name: str, profile_schema_name: str = None, show_isolated_nodes: bool = False,
-                 full_table_names: bool = False) -> None:
+    def __init__(self, show_isolated_nodes: bool = False, show_full_table_names: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
-        self._profile_database_name = profile_database_name
-        self._profile_schema_name = profile_schema_name
-        self._show_full_table_name = full_table_names
+        self._show_full_table_names = show_full_table_names
 
-    def _update_lineage_graph(self, query: Query, query_context: QueryContext) -> None:
+    def _update_lineage_graph(self, query: Query) -> None:
+        query.parse(self._show_full_table_names)
+
         # Handle drop tables, if they exist in the statement
         for dropped_table_name in query.dropped_tables:
             self._remove_node(dropped_table_name)
@@ -85,9 +80,9 @@ class LineageGraph(object):
         for old_table_name, new_table_name in query.renamed_tables:
             self._rename_node(old_table_name, new_table_name)
 
-        self._add_nodes_and_edges(query.source_tables, query.target_tables, query_context)
+        self._add_nodes_and_edges(query.source_tables, query.target_tables, query.get_context_as_html())
 
-    def _add_nodes_and_edges(self, sources: {str}, targets: {str}, query_context: QueryContext) -> None:
+    def _add_nodes_and_edges(self, sources: {str}, targets: {str}, query_context_html: str) -> None:
         if None in sources:
             sources.remove(None)
         if None in targets:
@@ -101,10 +96,10 @@ class LineageGraph(object):
                 self._lineage_graph.add_nodes_from(sources)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
+                self._lineage_graph.add_nodes_from(targets, title=query_context_html)
         else:
             self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
+            self._lineage_graph.add_nodes_from(targets, title=query_context_html)
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
@@ -135,39 +130,30 @@ class LineageGraph(object):
                     if self._lineage_graph.has_node(predecessor) and self._lineage_graph.degree(predecessor) == 0:
                         self._lineage_graph.remove_node(predecessor)
 
-    def init_graph_from_query_list(self, queries: [tuple]) -> None:
+    def init_graph_from_query_list(self, queries: [Query]) -> None:
         logger.debug(f'Loading {len(queries)} queries into the lineage graph')
-        for query_text, query_context in tqdm(queries, desc="Updating lineage graph", colour='green'):
-            query = Query(query_text, query_context, self._profile_database_name, self._profile_schema_name,
-                          self._show_full_table_name)
-            query.parse()
-            self._update_lineage_graph(query, query_context)
+        for query in tqdm(queries, desc="Updating lineage graph", colour='green'):
+            self._update_lineage_graph(query)
 
         logger.debug(f'Finished updating lineage graph!')
 
     def filter_on_table(self, selected_table: str, direction: str = None, depth: int = None) -> None:
         logger.debug(f'Filtering lineage graph on table - {selected_table}')
-        resolved_selected_table_name = self._name_qualification(Table(selected_table), self._profile_database_name,
-                                                                self._profile_schema_name)
-        logger.debug(f'Qualified table name - {resolved_selected_table_name}')
-        if resolved_selected_table_name is None:
-            raise ConfigError(f'Could not resolve table name - {selected_table}, please make sure to '
-                              f'specify a table name that exists in the database configured in your profiles file.')
 
         if direction == self.DOWNSTREAM_DIRECTION:
-            self._lineage_graph = self._downstream_graph(resolved_selected_table_name, depth)
+            self._lineage_graph = self._downstream_graph(selected_table, depth)
         elif direction == self.UPSTREAM_DIRECTION:
-            self._lineage_graph = self._upstream_graph(resolved_selected_table_name, depth)
+            self._lineage_graph = self._upstream_graph(selected_table, depth)
         elif direction == self.BOTH_DIRECTIONS:
-            downstream_graph = self._downstream_graph(resolved_selected_table_name, depth)
-            upstream_graph = self._upstream_graph(resolved_selected_table_name, depth)
+            downstream_graph = self._downstream_graph(selected_table, depth)
+            upstream_graph = self._upstream_graph(selected_table, depth)
             self._lineage_graph = nx.compose(upstream_graph, downstream_graph)
         else:
             raise ConfigError(f'Direction must be one of the following - {self.UPSTREAM_DIRECTION}|'
                               f'{self.DOWNSTREAM_DIRECTION}|{self.BOTH_DIRECTIONS}, '
                               f'Got - {direction} instead.')
 
-        self._update_selected_node_attributes(resolved_selected_table_name)
+        self._update_selected_node_attributes(selected_table)
         logger.debug(f'Finished filtering lineage graph on table - {selected_table}')
         pass
 
