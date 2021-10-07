@@ -2,7 +2,7 @@ from typing import Dict, Any
 import dbt.config
 from dbt.context.base import generate_base_context
 from dbt.exceptions import DbtConfigError
-
+from dbt.adapters.bigquery.connections import BigQueryConnectionManager
 from lineage.exceptions import ConfigError
 from lineage.utils import get_logger
 
@@ -31,3 +31,6 @@ def extract_credentials_and_data_from_profiles(profiles_dir: str, profile_name: 
         logger.debug(f"Failed parsing selected profile - {profiles_dir}, {profile_name}, {exc}")
         raise ConfigError(f"Failed parsing selected profile - {profiles_dir}, {profile_name}")
 
+
+def get_bigquery_client(credentials):
+    return BigQueryConnectionManager.get_bigquery_client(credentials)
