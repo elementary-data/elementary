@@ -19,8 +19,6 @@ class QueryContext(object):
         self.referenced_tables = referenced_tables if referenced_tables is not None else []
         self.destination_table = destination_table
 
-    #TODO: maybe implement QueryContextSnowflake (queried_db, queried_sc) and QueryContextBigquery (ref_tables,
-    # dest_tablee)
     def to_dict(self) -> dict:
         return {'queried_database': self.queried_database,
                 'queried_schema': self.queried_schema,
@@ -43,7 +41,7 @@ class QueryContext(object):
         return query_time.strftime(fmt)
 
     @staticmethod
-    def _html_param_with_default(param: Union[str, int], default: Union[str, int] = 'unknown') -> Union[str, int]:
+    def _html_param_with_default(param: Union[str, int], default: Union[str, int] = 'Unknown') -> Union[str, int]:
         return default if param is None else param
 
     def to_html(self) -> str:
