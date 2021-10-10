@@ -19,7 +19,7 @@ class BigQueryQueryHistory(QueryHistory):
     FROM region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
     WHERE
          project_id = @project_id
-         AND creation_time BETWEEN @start_time AND CURRENT_TIMESTAMP()
+         AND creation_time BETWEEN @start_time AND {creation_time_range_end_expr}
          AND end_time BETWEEN @start_time AND {end_time_range_end_expr}
          AND job_type = "QUERY"
          AND state = "DONE"
@@ -39,18 +39,23 @@ class BigQueryQueryHistory(QueryHistory):
         database_name = self.get_database_name()
         query_parameters = [bigquery.ScalarQueryParameter("project_id", "STRING", database_name),
                             bigquery.ScalarQueryParameter("start_time", "TIMESTAMP", start_date,)]
+
         end_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
+        creation_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
         if end_date is not None:
             query_parameters.append(bigquery.ScalarQueryParameter("end_time",
                                                                   "TIMESTAMP",
                                                                   self._include_end_date(end_date),))
             end_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
+            creation_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
 
         job_config = bigquery.QueryJobConfig(
             query_parameters=query_parameters
         )
 
         job = self._con.query(self.INFORMATION_SCHEMA_QUERY_HISTORY.format(location=self._con.location,
+                                                                           creation_time_range_end_expr=
+                                                                           creation_time_range_end_expr,
                                                                            end_time_range_end_expr=
                                                                            end_time_range_end_expr),
                               job_config=job_config)
