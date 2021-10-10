@@ -1,6 +1,5 @@
 import sqlparse
 from sqllineage.core import LineageAnalyzer, LineageResult
-from sqllineage.exceptions import SQLLineageException
 from lineage.table_resolver import TableResolver
 from lineage.query_context import QueryContext
 from lineage.utils import get_logger
@@ -33,7 +32,7 @@ class Query(object):
         return Query(**query_dict, query_context=query_context)
 
     @staticmethod
-    def _parse_query_text(query_text: str) -> [LineageResult]:
+    def _query_text_to_analyzed_sql_statements(query_text: str) -> [LineageResult]:
         parsed_query = sqlparse.parse(query_text.strip())
         analyzed_statements = [LineageAnalyzer().analyze(statement) for statement in parsed_query
                                if statement.token_first(skip_cm=True, skip_ws=True)]
@@ -42,34 +41,40 @@ class Query(object):
     def get_context_as_html(self) -> str:
         return self._query_context.to_html()
 
-    def parse(self, full_table_names: bool = False):
-        try:
-            table_resolver = TableResolver(self._profile_database_name, self._profile_schema_name,
-                                           self._query_context.queried_database, self._query_context.queried_schema,
-                                           full_table_names)
+    @classmethod
+    def _parse_query_text(cls, table_resolver: TableResolver, raw_query_text: str) -> (set, set, set, set):
+        source_tables = set()
+        target_tables = set()
+        renamed_tables = set()
+        dropped_tables = set()
 
-            analyzed_statements = self._parse_query_text(self._raw_query_text)
-            for analyzed_statement in analyzed_statements:
-                # Handle drop tables, if they exist in the statement
-                dropped_tables = analyzed_statement.drop
-                for dropped_table in dropped_tables:
-                    self.dropped_tables.add(table_resolver.name_qualification(dropped_table))
+        analyzed_statements = cls._query_text_to_analyzed_sql_statements(raw_query_text)
+        for analyzed_statement in analyzed_statements:
+            # Handle drop tables, if they exist in the statement
+            for dropped_table in analyzed_statement.drop:
+                dropped_tables.add(table_resolver.name_qualification(dropped_table))
 
-                # Handle rename tables
-                renamed_tables = analyzed_statement.rename
-                for old_table, new_table in renamed_tables:
-                    old_table_name = table_resolver.name_qualification(old_table)
-                    new_table_name = table_resolver.name_qualification(new_table)
-                    self.renamed_tables.add((old_table_name, new_table_name))
+            # Handle rename tables
+            for old_table, new_table in analyzed_statement.rename:
+                old_table_name = table_resolver.name_qualification(old_table)
+                new_table_name = table_resolver.name_qualification(new_table)
+                renamed_tables.add((old_table_name, new_table_name))
 
-                # sqllineage lib marks CTEs as intermediate tables. Remove CTEs (WITH statements) from the source
-                # tables.
-                self.source_tables = {table_resolver.name_qualification(source)
-                                      for source in analyzed_statement.read - analyzed_statement.intermediate}
+            # sqllineage lib marks CTEs as intermediate tables. Remove CTEs (WITH statements) from the source
+            # tables.
+            if not source_tables:
+                source_tables = {table_resolver.name_qualification(source)
+                                 for source in analyzed_statement.read - analyzed_statement.intermediate}
+            elif len(analyzed_statement.read) > 0:
+                logger.debug(f"Unexpected case when source_tables is already filled. Query -\n{raw_query_text}\n")
 
-                self.target_tables = {table_resolver.name_qualification(target) for target in analyzed_statement.write}
+            if not target_tables:
+                target_tables = {table_resolver.name_qualification(target) for target in analyzed_statement.write}
+            elif len(analyzed_statement.write) > 0:
+                logger.debug(f"Unexpected case when target_tables is already filled. Query -\n{raw_query_text}\n")
 
-        except SQLLineageException as exc:
-            logger.debug(f'SQLLineageException was raised while parsing this query -\n{self._raw_query_text}\n'
-                         f'Error was -\n{exc}.')
+        return source_tables, target_tables, renamed_tables, dropped_tables
+
+    def parse(self, full_table_names: bool = False) -> None:
+        pass
 

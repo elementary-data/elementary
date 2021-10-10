@@ -1,9 +1,9 @@
 from datetime import datetime, date, timedelta
-
 from lineage.exceptions import ConfigError
 from lineage.query import Query
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
+from lineage.snowflake_query import SnowflakeQuery
 from lineage.utils import get_logger
 
 logger = get_logger(__name__)
@@ -100,10 +100,10 @@ class SnowflakeQueryHistory(QueryHistory):
                                              user_name=row[6],
                                              role_name=row[7])
 
-                query = Query(raw_query_text=row[0],
-                              query_context=query_context,
-                              profile_database_name=self.get_database_name(),
-                              profile_schema_name=self.get_schema_name())
+                query = SnowflakeQuery(raw_query_text=row[0],
+                                       query_context=query_context,
+                                       profile_database_name=self.get_database_name(),
+                                       profile_schema_name=self.get_schema_name())
 
                 queries.append(query)
             logger.debug("Finished fetching snowflake history query results")

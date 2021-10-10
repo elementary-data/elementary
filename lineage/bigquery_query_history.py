@@ -56,6 +56,7 @@ class BigQueryQueryHistory(QueryHistory):
                               job_config=job_config)
 
         logger.debug("Finished executing bigquery jobs history query")
+
         queries = []
         rows = job.result()
         for row in rows:
@@ -63,7 +64,7 @@ class BigQueryQueryHistory(QueryHistory):
                                          query_volume=row[2],
                                          query_type=row[3],
                                          user_name=row[4],
-                                         detination_table=row[5],
+                                         destination_table=row[5],
                                          referenced_tables=row[6])
 
             query = BigQueryQuery(raw_query_text=row[0],
