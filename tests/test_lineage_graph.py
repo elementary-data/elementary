@@ -4,36 +4,14 @@ from sqllineage.core import LineageResult, Table
 import networkx as nx
 from sqllineage.models import Schema
 
+from lineage.table_resolver import TableResolver
 from lineage.lineage_graph import LineageGraph
+from lineage.query import Query
 from lineage.query_context import QueryContext
 
 
-def create_lineage_result(read, write):
-    result = LineageResult()
-    if read is not None:
-        result.read = {Table(read)}
-    if write is not None:
-        result.write = {Table(write)}
-    return result
-
-
-@pytest.mark.parametrize("query,expected_parsed_result", [
-    ("insert into target_table (a, b) (select c, count(*) from source_table group by c);",
-     create_lineage_result('source_table', 'target_table')),
-    ("insert into target_table (select c, count(*) from source_table group by c);",
-     create_lineage_result(None, 'target_table'))  # This syntax is not supported currently, therefore source_table
-    # is not identified
-])
-def test_lineage_graph_parse_query(query, expected_parsed_result):
-    reference = LineageGraph(profile_database_name='elementary_db')
-    parsed_results = reference._parse_query(query)
-    assert len(parsed_results) == 1
-    assert parsed_results[0].read == expected_parsed_result.read
-    assert parsed_results[0].write == expected_parsed_result.write
-
-
 def test_lineage_graph_rename_node():
-    reference = LineageGraph(profile_database_name='elementary_db')
+    reference = LineageGraph()
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     di_graph_mock.has_node.return_value = True
     reference._lineage_graph = di_graph_mock
@@ -71,12 +49,12 @@ def test_lineage_graph_rename_node():
     ({'s1', 's2'}, set(), set(), False),
 ])
 def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolated_nodes):
-    reference = LineageGraph(profile_database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
+    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     reference._lineage_graph = di_graph_mock
 
     empty_query_context = QueryContext()
-    reference._add_nodes_and_edges(sources, targets, empty_query_context)
+    reference._add_nodes_and_edges(sources, targets, empty_query_context.to_html())
 
     node_calls = []
     if len(sources) > 0:
@@ -99,7 +77,7 @@ def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolate
     (True,),
 ])
 def test_lineage_graph_remove_node(show_isolated_nodes):
-    reference = LineageGraph(profile_database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
+    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
 
     di_graph_mock = mock.create_autospec(nx.DiGraph)
     di_graph_mock.has_node.return_value = True
@@ -142,66 +120,14 @@ def test_lineage_graph_remove_node(show_isolated_nodes):
      True),
 ])
 def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isolated_nodes):
-    reference = LineageGraph(profile_database_name='elementary_db', show_isolated_nodes=show_isolated_nodes)
+    reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
 
-    query_list = [(query, QueryContext('elementary_db', 'elementary_schema')) for query in queries]
+    query_context = QueryContext('elementary_db', 'elementary_schema')
+    query_list = [Query(query, query_context, 'elementary_db', 'elementary_schema') for query in queries]
     try:
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:
         assert False, f"'init_graph_from_query_list' raised an exception {exc}"
-
-
-@pytest.mark.parametrize("table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table, "
-                         "expected_resolved_schema", [
-                             # Always prefer the db and schema from query text over the history db and schema
-                             ('elementary_db.elementary.table1', 'history_db', 'history_schema',
-                              'elementary_db.elementary'),
-                             ('elementary_db.elementary.table1', 'history_db', None, 'elementary_db.elementary'),
-                             ('elementary_db.elementary.table1', None, 'history_schema', 'elementary_db.elementary'),
-                             ('elementary_db.elementary.table1', None, None, 'elementary_db.elementary'),
-                             # Use history_db if query_text contains only schema and table name
-                             ('elementary.table1', 'history_db', 'history_schema', 'history_db.elementary'),
-                             ('elementary.table1', 'history_db', None, 'history_db.elementary'),
-                             ('elementary.table1', None, 'history_schema', Schema.unknown),
-                             ('elementary.table1', None, None, Schema.unknown),
-                             # Use history_db and history schema if query_text contains only table name
-                             ('table1', 'history_db', 'history_schema', 'history_db.history_schema'),
-                             ('table1', 'history_db', None, Schema.unknown),
-                             ('table1', None, 'history_schema', Schema.unknown),
-                             ('table1', None, None, Schema.unknown),
-                         ])
-def test_lineage_graph_resolve_table_qualification(table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table,
-                                     expected_resolved_schema):
-    reference = LineageGraph(profile_database_name='profile_elementary_db', profile_schema_name='profile_elementary_sc')
-    resolved_table = reference._resolve_table_qualification(Table(table_name_in_query_text), db_name_in_history_table,
-                                                            schema_name_in_history_table)
-    assert str(resolved_table.schema) == expected_resolved_schema
-
-
-@pytest.mark.parametrize("resolved_table_name, profile_db_name, profile_schema_name, should_ignore", [
-    ('profile_elementary_db.profile_elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', False),
-    ('elementary_db.elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
-    ('elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
-    ('elementary_db.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
-    (str(Table('table1')), 'profile_elementary_db', 'profile_elementary_sc', True),
-    ('profile_elementary_db.profile_elementary_sc.table1', 'profile_elementary_db', None, False),
-    ('profile_elementary_db.elementary_sc.table1', 'profile_elementary_db', None, False),
-    ('profile_elementary_sc.table1', 'profile_elementary_db', None, True),
-    (str(Table('table1')), 'profile_elementary_db', None, True),
-])
-def test_lineage_graph_should_ignore_table(resolved_table_name, profile_db_name, profile_schema_name, should_ignore):
-    reference = LineageGraph(profile_database_name=profile_db_name, profile_schema_name=profile_schema_name)
-    assert reference._should_ignore_table(Table(resolved_table_name)) == should_ignore
-
-
-@pytest.mark.parametrize("resolved_table_name, show_full_table_names, expected_result", [
-    ('elementary_db.elementary_sc.table1', True, 'elementary_db.elementary_sc.table1'),
-    ('elementary_db.elementary_sc.table1', False, 'table1')
-])
-def test_lineage_graph_name_qualification(resolved_table_name, show_full_table_names, expected_result):
-    reference = LineageGraph(profile_database_name='elementary_db', profile_schema_name='elementary_sc',
-                             full_table_names=show_full_table_names)
-    assert reference._name_qualification(Table(resolved_table_name), '', '') == expected_result
 
 
 def compare_edges(directed_graph: nx.DiGraph, edges: [set]) -> bool:
@@ -228,7 +154,7 @@ def create_directed_graph_from_edge_list(edges: [list]) -> nx.DiGraph:
     ([(0, 1), (1, 2), (0, 3), (3, 4), (3, 2), (2, 5), (4, 6)], 3, 1, {(3, 4), (3, 2)})
 ])
 def test_lineage_graph_downstream_graph(edges, selected_node, depth, expected_remaining_edges):
-    reference = LineageGraph(profile_database_name='elementary_db')
+    reference = LineageGraph()
     reference._lineage_graph.add_edges_from(edges)
     reference._lineage_graph = reference._downstream_graph(selected_node, depth)
     assert compare_edges(reference._lineage_graph, expected_remaining_edges)
@@ -242,7 +168,7 @@ def test_lineage_graph_downstream_graph(edges, selected_node, depth, expected_re
     ([(0, 1), (1, 2), (2, 3), (0, 3), (3, 4), (2, 5), (4, 6)], 3, 1, {(0, 3), (2, 3)}),
 ])
 def test_lineage_graph_upstream_graph(edges, selected_node, depth, expected_remaining_edges):
-    reference = LineageGraph(profile_database_name='elementary_db')
+    reference = LineageGraph()
     reference._lineage_graph.add_edges_from(edges)
     reference._lineage_graph = reference._upstream_graph(selected_node, depth)
     assert compare_edges(reference._lineage_graph, expected_remaining_edges)
@@ -270,9 +196,10 @@ def test_lineage_graph_upstream_graph(edges, selected_node, depth, expected_rema
 ])
 def test_lineage_graph_filter_on_table(profile_database_name, profile_schema_name, full_table_names, edges,
                                        selected_node, direction, depth, expected_remaining_edges):
-    reference = LineageGraph(profile_database_name=profile_database_name, profile_schema_name=profile_schema_name,
-                             full_table_names=full_table_names)
+    reference = LineageGraph()
+    table_resolver = TableResolver(profile_database_name=profile_database_name, profile_schema_name=profile_schema_name,
+                                   full_table_names=full_table_names)
     reference._lineage_graph = create_directed_graph_from_edge_list(edges)
-    reference.filter_on_table(selected_node, direction, depth)
+    reference.filter_on_table(table_resolver.name_qualification(selected_node), direction, depth)
     assert compare_edges(reference._lineage_graph, expected_remaining_edges)
 

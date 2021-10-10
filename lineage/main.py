@@ -1,6 +1,8 @@
 import click
+from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
 from datetime import timedelta, date
+from lineage.table_resolver import TableResolver
 from lineage.lineage_graph import LineageGraph
 from lineage.query_history_factory import QueryHistoryFactory
 from datetime import datetime
@@ -128,16 +130,23 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 
-    query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history).create_query_history()
+    query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history, ignore_schema).\
+        create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
 
     lineage_graph = LineageGraph(show_isolated_nodes=False,
-                                 profile_database_name=query_history.get_database_name(),
-                                 profile_schema_name=query_history.get_schema_name() if not ignore_schema else None,
-                                 full_table_names=full_table_names)
+                                 show_full_table_names=full_table_names)
     lineage_graph.init_graph_from_query_list(queries)
+
     if table is not None:
-        lineage_graph.filter_on_table(table, direction, depth)
+        table_resolver = TableResolver(profile_database_name=query_history.get_database_name(),
+                                       profile_schema_name=query_history.get_schema_name(),
+                                       full_table_names=full_table_names)
+        resolved_table_name = table_resolver.name_qualification(table)
+        if resolved_table_name is None:
+            raise ConfigError(f'Could not resolve table name - {table}, please make sure to '
+                              f'specify a table name that exists in the database configured in your profiles file.')
+        lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
     lineage_graph.draw_graph(should_open_browser=open_browser)
 
