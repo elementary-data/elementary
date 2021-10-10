@@ -8,6 +8,7 @@ logger = get_logger(__name__)
 
 
 class Query(object):
+    PLATFORM_TYPE = None
 
     def __init__(self, raw_query_text: str, query_context: QueryContext, profile_database_name: str,
                  profile_schema_name: str) -> None:
@@ -24,12 +25,8 @@ class Query(object):
         return {'raw_query_text': self._raw_query_text,
                 'query_context': self._query_context.to_dict(),
                 'profile_database_name': self._profile_database_name,
-                'profile_schema_name': self._profile_schema_name}
-
-    @staticmethod
-    def from_dict(query_dict: dict):
-        query_context = QueryContext.from_dict(query_dict.pop('query_context'))
-        return Query(**query_dict, query_context=query_context)
+                'profile_schema_name': self._profile_schema_name,
+                'platform_type': self.PLATFORM_TYPE}
 
     @staticmethod
     def _query_text_to_analyzed_sql_statements(query_text: str) -> [LineageResult]:
@@ -75,6 +72,11 @@ class Query(object):
 
         return source_tables, target_tables, renamed_tables, dropped_tables
 
+    def _get_platform_type(self) -> str:
+        pass
+
     def parse(self, full_table_names: bool = False) -> None:
         pass
+
+
 
