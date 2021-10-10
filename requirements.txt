@@ -9,3 +9,7 @@ setuptools
 sqlparse
 tqdm
 python-dateutil
+google-cloud-bigquery
+google-api-core
+
+
