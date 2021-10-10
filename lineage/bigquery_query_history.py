@@ -35,30 +35,37 @@ class BigQueryQueryHistory(QueryHistory):
         self.dataset = dataset
         super().__init__(con, should_export_query_history, ignore_schema)
 
-    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
-        database_name = self.get_database_name()
+    @classmethod
+    def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, location: str) -> \
+            (str, []):
         query_parameters = [bigquery.ScalarQueryParameter("project_id", "STRING", database_name),
-                            bigquery.ScalarQueryParameter("start_time", "TIMESTAMP", start_date,)]
+                            bigquery.ScalarQueryParameter("start_time", "TIMESTAMP", start_date)]
 
-        end_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
-        creation_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
+        end_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
+        creation_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP
         if end_date is not None:
             query_parameters.append(bigquery.ScalarQueryParameter("end_time",
                                                                   "TIMESTAMP",
-                                                                  self._include_end_date(end_date),))
-            end_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
-            creation_time_range_end_expr = self.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
+                                                                  cls._include_end_date(end_date)))
+            end_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
+            creation_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
+
+        query = cls.INFORMATION_SCHEMA_QUERY_HISTORY.format(location=location,
+                                                            creation_time_range_end_expr=
+                                                            creation_time_range_end_expr,
+                                                            end_time_range_end_expr=
+                                                            end_time_range_end_expr)
+        return query, query_parameters
+
+    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
+        database_name = self.get_database_name()
+        query, query_parameters = self._build_history_query(start_date, end_date, database_name, self._con.location)
 
         job_config = bigquery.QueryJobConfig(
             query_parameters=query_parameters
         )
 
-        job = self._con.query(self.INFORMATION_SCHEMA_QUERY_HISTORY.format(location=self._con.location,
-                                                                           creation_time_range_end_expr=
-                                                                           creation_time_range_end_expr,
-                                                                           end_time_range_end_expr=
-                                                                           end_time_range_end_expr),
-                              job_config=job_config)
+        job = self._con.query(query, job_config=job_config)
 
         logger.debug("Finished executing bigquery jobs history query")
 
