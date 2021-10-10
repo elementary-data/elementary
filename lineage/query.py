@@ -1,7 +1,7 @@
 import sqlparse
 from sqllineage.core import LineageAnalyzer, LineageResult
 from sqllineage.exceptions import SQLLineageException
-from lineage.TableResolver import TableResolver
+from lineage.table_resolver import TableResolver
 from lineage.query_context import QueryContext
 from lineage.utils import get_logger
 

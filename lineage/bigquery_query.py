@@ -1,4 +1,4 @@
-from lineage.TableResolver import TableResolver
+from lineage.table_resolver import TableResolver
 from lineage.query import Query
 from sqllineage.exceptions import SQLLineageException
 from lineage.utils import get_logger
