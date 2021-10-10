@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Optional
+from lineage.bigquery_query import BigQueryQuery
+from lineage.exceptions import SerializationError
 from lineage.query import Query
+from lineage.snowflake_query import SnowflakeQuery
 from lineage.utils import is_flight_mode_on
 import json
 import os
@@ -31,7 +34,14 @@ class QueryHistory(object):
             with open(self.LATEST_QUERY_HISTORY_FILE, 'r') as query_history_file:
                 queries = json.load(query_history_file)
                 for query_dict in queries:
-                    deserialized_queries.append(Query.from_dict(query_dict))
+                    platform_type = query_dict.pop('platform_type')
+                    if platform_type == SnowflakeQuery.PLATFORM_TYPE:
+                        deserialized_queries.append(SnowflakeQuery.from_dict(query_dict))
+                    elif platform_type == BigQueryQuery.PLATFORM_TYPE:
+                        deserialized_queries.append(BigQueryQuery.from_dict(query_dict))
+                    else:
+                        raise SerializationError(f'Invalid platform type - {platform_type}')
+
         return deserialized_queries
 
     @staticmethod
