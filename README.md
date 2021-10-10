@@ -35,7 +35,7 @@ pip install elementary-lineage
 edl --help
 ```
 
-We need a connection file in a simple YAML called `profiles.yml`. [Here is a template](static/profiles.yml) to create a Snowflake one.   
+We need a connection file in a simple YAML called `profiles.yml`. [Here is a template](static/profiles.yml) to create a Snowflake / BigQuery one.   
 For further instructions go to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements). 
 
 If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
@@ -81,7 +81,7 @@ For additional information and help, you can use one of these channels:
 ## **Integrations**
 
 * [x] **Snowflake** ![](static/snowflake-16.png)
-* [ ] **BigQuery**  ![](static/bigquery-16.png) 
+* [x] **BigQuery**  ![](static/bigquery-16.png) 
 * [ ] **Redshift**  ![](static/redshift-16.png) 
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
