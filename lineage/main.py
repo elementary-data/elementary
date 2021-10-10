@@ -2,7 +2,7 @@ import click
 from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
 from datetime import timedelta, date
-from lineage.TableResolver import TableResolver
+from lineage.table_resolver import TableResolver
 from lineage.lineage_graph import LineageGraph
 from lineage.query_history_factory import QueryHistoryFactory
 from datetime import datetime
