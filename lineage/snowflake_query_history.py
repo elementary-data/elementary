@@ -54,8 +54,8 @@ class SnowflakeQueryHistory(QueryHistory):
         super().__init__(con, should_export_query_history, ignore_schema)
 
     @classmethod
-    def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, query_history_source: str)\
-            -> (str, tuple):
+    def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str,
+                             query_history_source: str) -> (str, tuple):
         if query_history_source == cls.QUERY_HISTORY_SOURCE_ACCOUNT_USAGE:
             # In case the dates are older than a week ago we will need to pull the history from the account_usage
             logger.debug("Pulling snowflake query history from account usage")
