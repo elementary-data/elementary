@@ -7,8 +7,8 @@ class QueryContext(object):
     def __init__(self, queried_database: Optional[str] = None, queried_schema: Optional[str] = None,
                  query_time: Optional[datetime] = None, query_volume: Optional[int] = None,
                  query_type: Optional[str] = None, user_name: Optional[str] = None,
-                 role_name: Optional[str] = None, referenced_tables: dict = None,
-                 detination_table: dict = None) -> None:
+                 role_name: Optional[str] = None, referenced_tables: [dict] = None,
+                 destination_table: dict = None) -> None:
         self.queried_database = queried_database
         self.queried_schema = queried_schema
         self.query_time = query_time
@@ -16,9 +16,11 @@ class QueryContext(object):
         self.query_type = query_type
         self.user_name = user_name
         self.role_name = role_name
-        self.referenced_tables = referenced_tables
-        self.destination_table = detination_table
+        self.referenced_tables = referenced_tables if referenced_tables is not None else []
+        self.destination_table = destination_table
 
+    #TODO: maybe implement QueryContextSnowflake (queried_db, queried_sc) and QueryContextBigquery (ref_tables,
+    # dest_tablee)
     def to_dict(self) -> dict:
         return {'queried_database': self.queried_database,
                 'queried_schema': self.queried_schema,
@@ -26,7 +28,9 @@ class QueryContext(object):
                 'query_volume': self.query_volume,
                 'query_type': self.query_type,
                 'user_name': self.user_name,
-                'role_name': self.role_name}
+                'role_name': self.role_name,
+                'referenced_tables': self.referenced_tables,
+                'destination_table': self.destination_table}
 
     @staticmethod
     def _query_time_to_str(query_time: Optional[datetime], fmt: str = None) -> Optional[str]:

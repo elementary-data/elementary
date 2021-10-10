@@ -23,7 +23,7 @@ def create_lineage_result(read, write):
 def test_query_parse_query_text(query_text, expected_parsed_result):
     empty_context = QueryContext()
     reference = Query(query_text, empty_context, 'elementary_db', 'elementary_sc')
-    parsed_results = reference._parse_query_text(query_text)
+    parsed_results = reference._query_text_to_analyzed_sql_statements(query_text)
     assert len(parsed_results) == 1
     assert parsed_results[0].read == expected_parsed_result.read
     assert parsed_results[0].write == expected_parsed_result.write
