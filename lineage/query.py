@@ -75,7 +75,7 @@ class Query(object):
     def _get_platform_type(self) -> str:
         pass
 
-    def parse(self, full_table_names: bool = False) -> None:
+    def parse(self, full_table_names: bool = False) -> bool:
         pass
 
 

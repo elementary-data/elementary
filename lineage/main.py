@@ -1,4 +1,7 @@
 import click
+
+from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from lineage.tracking import AnonymousTracking
 from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
 from datetime import timedelta, date
@@ -130,8 +133,14 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 
-    query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history, ignore_schema).\
-        create_query_history()
+    credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
+
+    anonymous_tracking = AnonymousTracking(profiles_dir, profile_data.get('anonymous_usage_tracking'))
+    anonymous_tracking.init()
+    anonymous_tracking.send_event('cli-start')
+
+    query_history = QueryHistoryFactory(export_query_history, ignore_schema).create_query_history(credentials,
+                                                                                                  profile_data)
     queries = query_history.extract_queries(start_date, end_date)
 
     lineage_graph = LineageGraph(show_isolated_nodes=False,
@@ -149,6 +158,11 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
         lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
     lineage_graph.draw_graph(should_open_browser=open_browser)
+
+    lineage_properties = lineage_graph.properties()
+    lineage_properties.update(query_history.properties())
+
+    anonymous_tracking.send_event('cli-end', properties=lineage_properties)
 
 
 if __name__ == "__main__":

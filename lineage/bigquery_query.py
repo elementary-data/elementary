@@ -39,7 +39,7 @@ class BigQueryQuery(Query):
 
         return table_resolver.name_qualification(f'{project}.{dataset}.{table}')
 
-    def parse(self, full_table_names: bool = False) -> None:
+    def parse(self, full_table_names: bool = False) -> bool:
         try:
             table_resolver = TableResolver(profile_database_name=self._profile_database_name,
                                            profile_schema_name=self._profile_schema_name,
@@ -63,7 +63,10 @@ class BigQueryQuery(Query):
             else:
                 self.source_tables = source_tables
                 self.target_tables.add(target_table)
+
+            return True
         except SQLLineageException as exc:
             logger.debug(f'SQLLineageException was raised while parsing this query -\n{self._raw_query_text}\n'
                          f'Error was -\n{exc}.')
+        return False
 

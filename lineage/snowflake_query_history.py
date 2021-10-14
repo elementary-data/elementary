@@ -1,4 +1,6 @@
 from datetime import datetime, date, timedelta
+from typing import Optional
+
 from lineage.exceptions import ConfigError
 from lineage.query import Query
 from lineage.query_context import QueryContext
@@ -110,8 +112,13 @@ class SnowflakeQueryHistory(QueryHistory):
 
         return queries
 
-    def get_database_name(self):
+    def get_database_name(self) -> str:
         return self._con.database
 
-    def get_schema_name(self):
+    def get_schema_name(self) -> Optional[str]:
         return self._con.schema if not self._ignore_schema else None
+
+    def properties(self) -> dict:
+        return {'platform_type': 'snowflake',
+                'query_history_source': self.query_history_source,
+                'ignore_schema': self._ignore_schema}

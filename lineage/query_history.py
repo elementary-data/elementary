@@ -64,8 +64,11 @@ class QueryHistory(object):
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
         pass
 
-    def get_database_name(self):
+    def get_database_name(self) -> str:
         pass
 
-    def get_schema_name(self):
+    def get_schema_name(self) -> Optional[str]:
+        pass
+
+    def properties(self) -> dict:
         pass
