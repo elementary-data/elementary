@@ -10,12 +10,12 @@ class AnonymousTracking(object):
     ANONYMOUS_USER_ID_FILE = '.user_id'
     FETCH_API_KEY_AND_URL = 'https://www.elementary-data.com/telemetry'
 
-    def __init__(self, profiles_dir: str, anonymous_usage_tracking: str = None) -> None:
+    def __init__(self, profiles_dir: str, anonymous_usage_tracking: bool = True) -> None:
         self.profiles_dir = profiles_dir
         self.anonymous_user_id = None
         self.api_key = None
         self.url = None
-        self.do_not_track = anonymous_usage_tracking == 'false' or anonymous_usage_tracking == 'False'
+        self.do_not_track = anonymous_usage_tracking is False
 
     def init(self):
         try:
