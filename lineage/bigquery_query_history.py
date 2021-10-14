@@ -94,3 +94,7 @@ class BigQueryQueryHistory(QueryHistory):
 
     def get_schema_name(self) -> Optional[str]:
         return self.dataset if not self._ignore_schema else None
+
+    def properties(self) -> dict:
+        return {'platform_type': 'bigquery',
+                'ignore_schema': self._ignore_schema}

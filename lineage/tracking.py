@@ -6,28 +6,31 @@ from bs4 import BeautifulSoup
 import posthog
 
 
-class Tracking(object):
+class AnonymousTracking(object):
     ANONYMOUS_USER_ID_FILE = '.user_id'
     FETCH_API_KEY_AND_URL = 'https://www.elementary-data.com/telemetry'
 
-    def __init__(self, profiles_dir: str, do_not_track: bool = False) -> None:
+    def __init__(self, profiles_dir: str, anonymous_usage_tracking: str = None) -> None:
         self.profiles_dir = profiles_dir
         self.anonymous_user_id = None
         self.api_key = None
         self.url = None
-        self.do_not_track = do_not_track
+        self.do_not_track = anonymous_usage_tracking == 'false' or anonymous_usage_tracking == 'False'
 
     def init(self):
-        anonymous_user_id_file_name = os.path.join(self.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
-        if os.path.exists(anonymous_user_id_file_name):
-            with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
-                self.anonymous_user_id = anonymous_user_id_file.read()
-        else:
-            self.anonymous_user_id = str(uuid.uuid4())
-            with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
-                anonymous_user_id_file.write(self.anonymous_user_id)
+        try:
+            anonymous_user_id_file_name = os.path.join(self.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
+            if os.path.exists(anonymous_user_id_file_name):
+                with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
+                    self.anonymous_user_id = anonymous_user_id_file.read()
+            else:
+                self.anonymous_user_id = str(uuid.uuid4())
+                with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
+                    anonymous_user_id_file.write(self.anonymous_user_id)
 
-        self.api_key, self.url = self._fetch_api_key_and_url()
+            self.api_key, self.url = self._fetch_api_key_and_url()
+        except Exception:
+            pass
 
     @classmethod
     def _fetch_api_key_and_url(cls) -> (Union[str, None], Union[str, None]):
@@ -46,6 +49,9 @@ class Tracking(object):
         return api_key_and_url[0], api_key_and_url[1]
 
     def send_event(self, name: str, properties: dict = None) -> None:
+        if self.do_not_track:
+            return
+
         if self.api_key is None or self.url is None or self.anonymous_user_id is None:
             return
 
