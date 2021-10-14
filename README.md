@@ -17,12 +17,15 @@ without any implementation efforts, security risks or compromises on accuracy.
 **Data lineage made simple, reliable, and automated.**
 
 
+
+
+:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+
 <img src="static/elementary_demo.gif" width="750"/>
 
 
-(Some features are still under construction :construction:)
+(Some of the tooltip details are still under construction :construction:)
 
-:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
 
 ## Quick start
