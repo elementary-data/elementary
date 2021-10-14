@@ -11,5 +11,7 @@ tqdm
 python-dateutil
 google-cloud-bigquery
 google-api-core
-
+requests
+beautifulsoup4
+posthog
 
