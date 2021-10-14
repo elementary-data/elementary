@@ -1,4 +1,5 @@
 import click
+from lineage.tracking import Tracking
 from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
 from datetime import timedelta, date
@@ -130,6 +131,9 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 
+    tracking = Tracking(profiles_dir)
+    tracking.init()
+    tracking.send_event('cli-start')
     query_history = QueryHistoryFactory(profiles_dir, profile_name, export_query_history, ignore_schema).\
         create_query_history()
     queries = query_history.extract_queries(start_date, end_date)
@@ -149,6 +153,7 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
         lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
     lineage_graph.draw_graph(should_open_browser=open_browser)
+    tracking.send_event('cli-end')
 
 
 if __name__ == "__main__":
