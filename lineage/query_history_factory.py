@@ -32,11 +32,12 @@ class QueryHistoryFactory(object):
                 **credentials.auth_args()
             )
 
-            return SnowflakeQueryHistory(snowflake_con, self._export_query_history, self._ignore_schema,
+            return SnowflakeQueryHistory(snowflake_con, credentials.database, credentials.schema,
+                                         self._export_query_history, self._ignore_schema,
                                          profile_data.get('query_history_source'))
         elif credentials_type == 'bigquery':
             bigquery_client = get_bigquery_client(credentials)
-            return BigQueryQueryHistory(bigquery_client, self._export_query_history, self._ignore_schema,
-                                        profile_data.get('dataset'))
+            return BigQueryQueryHistory(bigquery_client, credentials.database, credentials.schema,
+                                        self._export_query_history, self._ignore_schema)
         else:
             raise ConfigError("Unsupported profile type")

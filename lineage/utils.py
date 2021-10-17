@@ -1,9 +1,12 @@
 import os
 import logging
 import sys
+from pathlib import Path
+import click
 
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 LOG_FILE = "edl.log"
+DBT_DIR = ".dbt"
 
 
 def is_flight_mode_on() -> bool:
@@ -43,3 +46,42 @@ def get_logger(logger_name):
     # with this pattern, it's rarely necessary to propagate the error up to parent
     logger.propagate = False
     return logger
+
+
+def is_dbt_installed() -> bool:
+    if os.path.exists(os.path.join(Path.home(), DBT_DIR)):
+        return True
+    return False
+
+
+def get_run_properties() -> dict:
+
+    click_context = click.get_current_context()
+    if click_context is None:
+        return dict()
+
+    params = click_context.params
+    if params is None:
+        return dict()
+
+    start_date = params.get('start_date')
+    end_date = params.get('end_date')
+    is_filtered = params.get('table') is not None
+
+    start_date_str = None
+    if start_date is not None:
+        start_date_str = start_date.isoformat()
+
+    end_date_str = None
+    if end_date is not None:
+        end_date_str = end_date.isoformat()
+
+    return {'start_date': start_date_str,
+            'end_date': end_date_str,
+            'is_filtered': is_filtered,
+            'open_browser': params.get('open_browser'),
+            'export_query_history': params.get('export_query_history'),
+            'full_table_names': params.get('full_table_names'),
+            'direction': params.get('direction'),
+            'depth': params.get('depth'),
+            'dbt_installed': is_dbt_installed()}
