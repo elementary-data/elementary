@@ -1,9 +1,11 @@
 import uuid
 import os
-from typing import Union
+from typing import Union, Optional
 import requests
 from bs4 import BeautifulSoup
 import posthog
+
+from lineage.utils import get_run_properties
 
 
 class AnonymousTracking(object):
@@ -19,19 +21,16 @@ class AnonymousTracking(object):
         self.run_id = str(uuid.uuid4())
 
     def init(self):
-        try:
-            anonymous_user_id_file_name = os.path.join(self.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
-            if os.path.exists(anonymous_user_id_file_name):
-                with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
-                    self.anonymous_user_id = anonymous_user_id_file.read()
-            else:
-                self.anonymous_user_id = str(uuid.uuid4())
-                with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
-                    anonymous_user_id_file.write(self.anonymous_user_id)
+        anonymous_user_id_file_name = os.path.join(self.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
+        if os.path.exists(anonymous_user_id_file_name):
+            with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
+                self.anonymous_user_id = anonymous_user_id_file.read()
+        else:
+            self.anonymous_user_id = str(uuid.uuid4())
+            with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
+                anonymous_user_id_file.write(self.anonymous_user_id)
 
-            self.api_key, self.url = self._fetch_api_key_and_url()
-        except Exception:
-            pass
+        self.api_key, self.url = self._fetch_api_key_and_url()
 
     @classmethod
     def _fetch_api_key_and_url(cls) -> (Union[str, None], Union[str, None]):
@@ -64,3 +63,30 @@ class AnonymousTracking(object):
         posthog.api_key = self.api_key
         posthog.host = self.url
         posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
+
+
+def track_cli_start(profiles_dir: str, profile_data: dict) -> Optional['AnonymousTracking']:
+    try:
+        anonymous_tracking = AnonymousTracking(profiles_dir, profile_data.get('anonymous_usage_tracking'))
+        anonymous_tracking.init()
+        cli_start_properties = dict()
+        cli_start_properties.update(get_run_properties())
+        anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
+        return anonymous_tracking
+    except Exception:
+        pass
+    return None
+
+
+def track_cli_end(anonymous_tracking: AnonymousTracking, lineage_properties: dict, query_history_properties: dict) \
+        -> None:
+    try:
+        if anonymous_tracking is None:
+            return
+
+        cli_end_properties = dict()
+        cli_end_properties.update(lineage_properties)
+        cli_end_properties.update(query_history_properties)
+        anonymous_tracking.send_event('cli-end', properties=cli_end_properties)
+    except Exception:
+        pass
