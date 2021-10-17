@@ -15,8 +15,11 @@ class QueryHistory(object):
 
     LATEST_QUERY_HISTORY_FILE = './latest_query_history.json'
 
-    def __init__(self, con, should_export_query_history: bool = True, ignore_schema: bool = False) -> None:
+    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
+                 should_export_query_history: bool = True, ignore_schema: bool = False) -> None:
         self._con = con
+        self._profile_database_name = profile_database_name
+        self._profile_schema_name = profile_schema_name
         self._should_export_query_history = should_export_query_history
         self._ignore_schema = ignore_schema
 
@@ -65,10 +68,10 @@ class QueryHistory(object):
         pass
 
     def get_database_name(self) -> str:
-        pass
+        return self._profile_database_name
 
     def get_schema_name(self) -> Optional[str]:
-        pass
+        return self._profile_schema_name if not self._ignore_schema else None
 
     def properties(self) -> dict:
         pass
