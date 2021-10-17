@@ -27,7 +27,7 @@ class SnowflakeQueryHistory(QueryHistory):
         ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
         'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
         (query_text not ilike '%.query_history%') and 
-        (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1)
+        (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or collate(database_name, 'en-ci') = :1)
         order by end_time;
     """
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time_range_end=>to_timestamp_ltz(current_timestamp())'
@@ -43,7 +43,7 @@ class SnowflakeQueryHistory(QueryHistory):
     ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES',
     'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
     (query_text not ilike '%.query_history%') and
-    (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or database_name = :1)
+    (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or collate(database_name, 'en-ci') = :1)
     order by end_time;
     """
     ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time <= current_timestamp()'
