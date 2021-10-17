@@ -1,7 +1,7 @@
 import click
 
 from lineage.dbt_utils import extract_credentials_and_data_from_profiles
-from lineage.tracking import track_cli_start, track_cli_end
+from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
 from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
 from datetime import timedelta, date
@@ -134,30 +134,34 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
                f"https://bit.ly/slack-elementary\n")
 
     credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
-
     anonymous_tracking = track_cli_start(profiles_dir, profile_data)
 
-    query_history = QueryHistoryFactory(export_query_history, ignore_schema).create_query_history(credentials,
-                                                                                                  profile_data)
-    queries = query_history.extract_queries(start_date, end_date)
+    try:
+        query_history = QueryHistoryFactory(export_query_history, ignore_schema).create_query_history(credentials,
+                                                                                                      profile_data)
+        queries = query_history.extract_queries(start_date, end_date)
 
-    lineage_graph = LineageGraph(show_isolated_nodes=False,
-                                 show_full_table_names=full_table_names)
-    lineage_graph.init_graph_from_query_list(queries)
+        lineage_graph = LineageGraph(show_isolated_nodes=False,
+                                     show_full_table_names=full_table_names)
+        lineage_graph.init_graph_from_query_list(queries)
 
-    if table is not None:
-        table_resolver = TableResolver(profile_database_name=credentials.database,
-                                       profile_schema_name=credentials.schema,
-                                       full_table_names=full_table_names)
-        resolved_table_name = table_resolver.name_qualification(table)
-        if resolved_table_name is None:
-            raise ConfigError(f'Could not resolve table name - {table}, please make sure to '
-                              f'specify a table name that exists in the database configured in your profiles file.')
-        lineage_graph.filter_on_table(resolved_table_name, direction, depth)
+        if table is not None:
+            table_resolver = TableResolver(profile_database_name=credentials.database,
+                                           profile_schema_name=credentials.schema,
+                                           full_table_names=full_table_names)
+            resolved_table_name = table_resolver.name_qualification(table)
+            if resolved_table_name is None:
+                raise ConfigError(f'Could not resolve table name - {table}, please make sure to '
+                                  f'specify a table name that exists in the database configured in your profiles file.')
+            lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
-    lineage_graph.draw_graph(should_open_browser=open_browser)
+        lineage_graph.draw_graph(should_open_browser=open_browser)
 
-    track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
+        track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
+
+    except Exception as exc:
+        track_cli_exception(anonymous_tracking, exc)
+        raise
 
 
 if __name__ == "__main__":
