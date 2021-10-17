@@ -16,6 +16,7 @@ class AnonymousTracking(object):
         self.api_key = None
         self.url = None
         self.do_not_track = anonymous_usage_tracking is False
+        self.run_id = str(uuid.uuid4())
 
     def init(self):
         try:
@@ -54,6 +55,11 @@ class AnonymousTracking(object):
 
         if self.api_key is None or self.url is None or self.anonymous_user_id is None:
             return
+
+        if properties is None:
+            properties = dict()
+
+        properties['run_id'] = self.run_id
 
         posthog.api_key = self.api_key
         posthog.host = self.url
