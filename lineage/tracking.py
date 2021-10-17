@@ -4,7 +4,6 @@ from typing import Union, Optional
 import requests
 from bs4 import BeautifulSoup
 import posthog
-
 from lineage.utils import get_run_properties
 
 
@@ -88,5 +87,19 @@ def track_cli_end(anonymous_tracking: AnonymousTracking, lineage_properties: dic
         cli_end_properties.update(lineage_properties)
         cli_end_properties.update(query_history_properties)
         anonymous_tracking.send_event('cli-end', properties=cli_end_properties)
+    except Exception:
+        pass
+
+
+def track_cli_exception(anonymous_tracking: AnonymousTracking, exc: Exception) \
+        -> None:
+    try:
+        if anonymous_tracking is None:
+            return
+
+        cli_exception_properties = dict()
+        cli_exception_properties['exception_type'] = str(type(exc))
+        cli_exception_properties['exception_content'] = str(exc)
+        anonymous_tracking.send_event('cli-exception', properties=cli_exception_properties)
     except Exception:
         pass
