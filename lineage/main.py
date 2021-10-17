@@ -1,7 +1,7 @@
 import click
 
 from lineage.dbt_utils import extract_credentials_and_data_from_profiles
-from lineage.tracking import AnonymousTracking
+from lineage.tracking import track_cli_start, track_cli_end
 from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
 from datetime import timedelta, date
@@ -135,9 +135,7 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
 
     credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
 
-    anonymous_tracking = AnonymousTracking(profiles_dir, profile_data.get('anonymous_usage_tracking'))
-    anonymous_tracking.init()
-    anonymous_tracking.send_event('cli-start')
+    anonymous_tracking = track_cli_start(profiles_dir, profile_data)
 
     query_history = QueryHistoryFactory(export_query_history, ignore_schema).create_query_history(credentials,
                                                                                                   profile_data)
@@ -148,8 +146,8 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     lineage_graph.init_graph_from_query_list(queries)
 
     if table is not None:
-        table_resolver = TableResolver(profile_database_name=query_history.get_database_name(),
-                                       profile_schema_name=query_history.get_schema_name(),
+        table_resolver = TableResolver(profile_database_name=credentials.database,
+                                       profile_schema_name=credentials.schema,
                                        full_table_names=full_table_names)
         resolved_table_name = table_resolver.name_qualification(table)
         if resolved_table_name is None:
@@ -159,10 +157,7 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
 
     lineage_graph.draw_graph(should_open_browser=open_browser)
 
-    lineage_properties = lineage_graph.properties()
-    lineage_properties.update(query_history.properties())
-
-    anonymous_tracking.send_event('cli-end', properties=lineage_properties)
+    track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
 
 
 if __name__ == "__main__":

@@ -30,10 +30,9 @@ class BigQueryQueryHistory(QueryHistory):
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'CURRENT_TIMESTAMP()'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = '@end_time'
 
-    def __init__(self, con, should_export_query_history: bool = True, ignore_schema: bool = False,
-                 dataset: str = None) -> None:
-        self.dataset = dataset
-        super().__init__(con, should_export_query_history, ignore_schema)
+    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
+                 should_export_query_history: bool = True, ignore_schema: bool = False) -> None:
+        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, location: str) -> \
@@ -59,13 +58,17 @@ class BigQueryQueryHistory(QueryHistory):
 
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
         database_name = self.get_database_name()
-        query, query_parameters = self._build_history_query(start_date, end_date, database_name, self._con.location)
+        schema_name = self.get_schema_name()
+        logger.debug(f"Pulling BigQuery history from database - {database_name} and schema - {schema_name}")
+
+        query_text, query_parameters = self._build_history_query(start_date, end_date, database_name,
+                                                                 self._con.location)
 
         job_config = bigquery.QueryJobConfig(
             query_parameters=query_parameters
         )
 
-        job = self._con.query(query, job_config=job_config)
+        job = self._con.query(query_text, job_config=job_config)
 
         logger.debug("Finished executing bigquery jobs history query")
 
@@ -82,18 +85,12 @@ class BigQueryQueryHistory(QueryHistory):
             query = BigQueryQuery(raw_query_text=row[0],
                                   query_context=query_context,
                                   profile_database_name=database_name,
-                                  profile_schema_name=self.get_schema_name())
+                                  profile_schema_name=schema_name)
 
             queries.append(query)
         logger.debug("Finished fetching bigquery history job results")
 
         return queries
-
-    def get_database_name(self) -> str:
-        return self._con.project
-
-    def get_schema_name(self) -> Optional[str]:
-        return self.dataset if not self._ignore_schema else None
 
     def properties(self) -> dict:
         return {'platform_type': 'bigquery',
