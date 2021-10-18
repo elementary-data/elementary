@@ -70,7 +70,7 @@ def generate_queries(start_date: datetime, end_date: datetime) -> [tuple]:
                                       start_date, end_date, day, user_name='airbyte', role_name='airbyte_service').
                        to_dict())
         queries.append(generate_query("insert into marketing_attribution_stg (c1, c2) values (1, 2)",
-                                      start_date, end_date, day, user_name='fivetran', role_name='fivetran_service').
+                                      start_date, end_date, day, user_name='airbyte', role_name='airbyte_service').
                        to_dict())
 
         # Insert as select queries
@@ -120,9 +120,9 @@ def generate_queries(start_date: datetime, end_date: datetime) -> [tuple]:
         queries.append(generate_query("select * from demo_conversion_rate", start_date, end_date, day,
                                       query_type='SELECT', user_name='tableau', role_name='tableau_service').to_dict())
         queries.append(generate_query("select * from closed_won_per_rep", start_date, end_date, day,
-                                      query_type='SELECT', user_name='looker', role_name='looker_service').to_dict())
+                                      query_type='SELECT', user_name='tableau', role_name='tableau_service').to_dict())
         queries.append(generate_query("select * from pipeline_per_stage", start_date, end_date, day,
-                                      query_type='SELECT', user_name='looker', role_name='looker_service').to_dict())
+                                      query_type='SELECT', user_name='tableau', role_name='tableau_service').to_dict())
 
     return queries
 

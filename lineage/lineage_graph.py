@@ -128,7 +128,7 @@ class LineageGraph(object):
                     self._lineage_graph.add_node(bi_node_name,
                                                  shape='image',
                                                  image=bi_node_url,
-                                                 size=15,
+                                                 size=18,
                                                  title=query_context.to_html())
                     self._lineage_graph.add_edge(source_node, bi_node_name)
                     self._add_node_to_catalog(bi_node_name, query_context)
@@ -154,7 +154,7 @@ class LineageGraph(object):
                     self._lineage_graph.add_node(etl_node_name,
                                                  shape='image',
                                                  image=etl_node_url,
-                                                 size=15)
+                                                 size=19)
                     self._lineage_graph.add_edge(etl_node_name, target_node)
         else:
             self._lineage_graph.add_nodes_from(sources)
