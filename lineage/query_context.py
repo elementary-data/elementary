@@ -22,7 +22,7 @@ class QueryContext(object):
     def to_dict(self) -> dict:
         return {'queried_database': self.queried_database,
                 'queried_schema': self.queried_schema,
-                'query_time': self._query_time_to_str(self.query_time),
+                'query_time': self.query_time_to_str(self.query_time),
                 'query_volume': self.query_volume,
                 'query_type': self.query_type,
                 'user_name': self.user_name,
@@ -31,7 +31,7 @@ class QueryContext(object):
                 'destination_table': self.destination_table}
 
     @staticmethod
-    def _query_time_to_str(query_time: Optional[datetime], fmt: str = None) -> Optional[str]:
+    def query_time_to_str(query_time: Optional[datetime], fmt: str = None) -> Optional[str]:
         if query_time is None:
             return None
 
@@ -48,7 +48,7 @@ class QueryContext(object):
         query_type = self._html_param_with_default(self.query_type)
         user_name = self._html_param_with_default(self.user_name)
         role_name = self._html_param_with_default(self.role_name)
-        query_time = self._query_time_to_str(self.query_time, fmt='%Y-%m-%d %H:%M:%S')
+        query_time = self.query_time_to_str(self.query_time, fmt='%Y-%m-%d %H:%M:%S')
         query_volume = self._html_param_with_default(self.query_volume, 0)
         volume_color = "DarkSlateGrey"
         if query_volume == 0:

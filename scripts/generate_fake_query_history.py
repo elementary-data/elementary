@@ -114,6 +114,7 @@ def generate_queries(start_date: datetime, end_date: datetime) -> [tuple]:
                                       "sales_leads on marketing_unified_view.anonymous_id = sales_leads.anonymous_id",
                                       start_date, end_date, day).to_dict())
 
+        # Select queries
         queries.append(generate_query("select * from marketing_qualified_leads", start_date, end_date, day,
                                       query_type='SELECT', user_name='tableau', role_name='tableau_service').to_dict())
         queries.append(generate_query("select * from demo_conversion_rate", start_date, end_date, day,

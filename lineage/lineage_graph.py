@@ -1,7 +1,7 @@
 import itertools
+from collections import defaultdict
 from typing import Optional
 import networkx as nx
-
 from build.lib.lineage.query_context import QueryContext
 from lineage.exceptions import ConfigError
 from pyvis.network import Network
@@ -10,6 +10,10 @@ from lineage.query import Query
 from lineage.utils import get_logger
 from tqdm import tqdm
 import pkg_resources
+import matplotlib.pyplot as plt
+from statistics import median
+import base64
+from io import BytesIO
 
 logger = get_logger(__name__)
 
@@ -72,6 +76,13 @@ class LineageGraph(object):
         self._show_full_table_names = show_full_table_names
         self._queries_count = None
         self._failed_queries_count = 0
+        self.catalog = defaultdict(lambda: {'volume': [], 'update_times': [], 'last_html': None})
+
+    def _add_node_to_catalog(self, node: str, query_context: QueryContext) -> None:
+        self.catalog[node]['volume'].append(query_context.query_volume)
+        self.catalog[node]['update_times'].append(
+            query_context.query_time_to_str(query_context.query_time, fmt='%Y-%m-%d %H:%M:%S'))
+        self.catalog[node]['last_html'] = query_context.to_html()
 
     def _update_lineage_graph(self, query: Query) -> None:
         if not query.parse(self._show_full_table_names):
@@ -120,6 +131,7 @@ class LineageGraph(object):
                                                  size=15,
                                                  title=query_context.to_html())
                     self._lineage_graph.add_edge(source_node, bi_node_name)
+                    self._add_node_to_catalog(bi_node_name, query_context)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
@@ -138,6 +150,7 @@ class LineageGraph(object):
                 for target_node in targets:
                     self._lineage_graph.add_node(target_node,
                                                  title=query_context.to_html())
+                    self._add_node_to_catalog(target_node, query_context)
                     self._lineage_graph.add_node(etl_node_name,
                                                  shape='image',
                                                  image=etl_node_url,
@@ -145,7 +158,9 @@ class LineageGraph(object):
                     self._lineage_graph.add_edge(etl_node_name, target_node)
         else:
             self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
+            for target_node in targets:
+                self._lineage_graph.add_node(target_node, title=query_context.to_html())
+                self._add_node_to_catalog(target_node, query_context)
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
@@ -156,6 +171,10 @@ class LineageGraph(object):
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
+            if old_node in self.catalog:
+                old_node_attributes = self.catalog[old_node]
+                del self.catalog[old_node]
+                self.catalog[new_node] = old_node_attributes
 
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
@@ -175,6 +194,9 @@ class LineageGraph(object):
                 for predecessor in node_predecessors:
                     if self._lineage_graph.has_node(predecessor) and self._lineage_graph.degree(predecessor) == 0:
                         self._lineage_graph.remove_node(predecessor)
+
+            if node in self.catalog:
+                del self.catalog[node]
 
     def init_graph_from_query_list(self, queries: [Query]) -> None:
         self._queries_count = len(queries)
@@ -220,6 +242,57 @@ class LineageGraph(object):
             node.update({'color': self.SELECTED_NODE_COLOR,
                          'title': self.SELECTED_NODE_TITLE + node_title})
 
+    def _get_freshness_and_volume_graph_for_node(self, node: str) -> str:
+        times = self.catalog[node]['update_times'][-3:]
+        volumes = self.catalog[node]['volume'][-3:]
+        # plotting a bar chart
+        plt.clf()
+        plt.bar(times, volumes, width=0.1, color=['blue'])
+        plt.xlabel('Time')
+        plt.ylabel('Volume')
+        plt.title(node)
+        fig = plt.gcf()
+        tmpfile = BytesIO()
+        fig.savefig(tmpfile, format='png')
+        encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
+        return f"""
+        <br/><div style="font-family:arial;color:DarkSlateGrey;font-size:110%;">
+                                <strong>
+                                    Freshness & volume graph</br>
+                                </strong>
+                                <img width="400" height="300" src=\'data:image/png;base64,{encoded}\'>
+        </div>
+        """
+
+    def _enrich_graph_with_monitoring_context(self) -> None:
+        # TODO: get only nodes with tag = target
+        for node in self._lineage_graph.nodes:
+            if node in self.catalog:
+                title_html = f"""
+                <html>
+                    <body>
+                        {self.catalog[node]['last_html'] + self._get_freshness_and_volume_graph_for_node(node)}
+                    </body>
+                </html>
+                """
+
+                node_volumes = self.catalog[node]['volume']
+                if node_volumes[-1] < median(node_volumes) / 2:
+                    self._lineage_graph.nodes[node]['color'] = 'red'
+                    title_html = f"""
+                        <html>
+                            <body>
+                                <div style="font-family:arial;color:tomato;font-size:110%;">
+                                    <strong>
+                                    Warning - last update volume is too low</br></br>
+                                    </strong>
+                                </div>
+                                {self.catalog[node]['last_html'] + self._get_freshness_and_volume_graph_for_node(node)}
+                            </body>
+                        </html>
+                        """
+                self._lineage_graph.nodes[node]['title'] = title_html
+
     @staticmethod
     def _load_header() -> str:
         header_content = ""
@@ -238,6 +311,7 @@ class LineageGraph(object):
                 'failed_queries': self._failed_queries_count}
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
+        self._enrich_graph_with_monitoring_context()
         # Visualize the graph
         net = Network(height="95%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)
