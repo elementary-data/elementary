@@ -24,9 +24,6 @@ without any implementation efforts, security risks or compromises on accuracy.
 <img src="static/elementary_demo.gif" width="750"/>
 
 
-(Some of the tooltip details are still under construction :construction:)
-
-
 
 ## Quick start
 
