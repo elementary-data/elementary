@@ -100,18 +100,49 @@ class LineageGraph(object):
         if len(sources) > 0 and len(targets) == 0:
             if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(sources)
-            if query_context.user_name.lower() == 'tableau' and query_context.role_name.lower() == 'tableau_service':
+
+            user_name = query_context.user_name.lower()
+            bi_node_name = None
+            bi_node_url = None
+            if user_name == 'tableau':
+                bi_node_name = 'Tableau'
+                bi_node_url = 'https://cdn.worldvectorlogo.com/logos/tableau-software.svg'
+            elif user_name == 'looker':
+                bi_node_name = 'Looker'
+                bi_node_url = 'https://seeklogo.com/images/G/google-looker-logo-B27BD25E4E-seeklogo.com.png'
+
+            if bi_node_name is not None:
                 for source_node in sources:
                     self._lineage_graph.add_node(source_node)
-                    self._lineage_graph.add_node('Tableau',
+                    self._lineage_graph.add_node(bi_node_name,
                                                  shape='image',
-                                                 image='https://cdn.worldvectorlogo.com/logos/tableau-software.svg',
+                                                 image=bi_node_url,
                                                  size=15,
                                                  title=query_context.to_html())
-                    self._lineage_graph.add_edge(source_node, 'Tableau')
+                    self._lineage_graph.add_edge(source_node, bi_node_name)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
+
+            user_name = query_context.user_name.lower()
+            etl_node_name = None
+            etl_node_url = None
+            if user_name == 'airbyte':
+                etl_node_name = 'Airbyte'
+                etl_node_url = 'https://img.stackshare.io/service/21342/default_6e06b23ed369812a3f23810d72817bafca9ac5a4.png'
+            elif user_name == 'fivetran':
+                etl_node_name = 'Fivetran'
+                etl_node_url = 'https://store-images.s-microsoft.com/image/apps.13830.d451b47a-6fa6-4741-bfc3-cdd3ce54e65a.5eef8f15-74b2-46d7-a9b8-296e9e69c136.fa0c02b3-78f5-4eb9-b665-948de3615d73'
+
+            if etl_node_name is not None:
+                for target_node in targets:
+                    self._lineage_graph.add_node(target_node,
+                                                 title=query_context.to_html())
+                    self._lineage_graph.add_node(etl_node_name,
+                                                 shape='image',
+                                                 image=etl_node_url,
+                                                 size=15)
+                    self._lineage_graph.add_edge(etl_node_name, target_node)
         else:
             self._lineage_graph.add_nodes_from(sources)
             self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
@@ -208,7 +239,7 @@ class LineageGraph(object):
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
-        net = Network(height="100%", width="100%", directed=True, heading=self._load_header())
+        net = Network(height="95%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)
         net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
