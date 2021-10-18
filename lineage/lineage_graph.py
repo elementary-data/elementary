@@ -1,6 +1,8 @@
 import itertools
 from typing import Optional
 import networkx as nx
+
+from build.lib.lineage.query_context import QueryContext
 from lineage.exceptions import ConfigError
 from pyvis.network import Network
 import webbrowser
@@ -84,9 +86,9 @@ class LineageGraph(object):
         for old_table_name, new_table_name in query.renamed_tables:
             self._rename_node(old_table_name, new_table_name)
 
-        self._add_nodes_and_edges(query.source_tables, query.target_tables, query.get_context_as_html())
+        self._add_nodes_and_edges(query.source_tables, query.target_tables, query.get_context())
 
-    def _add_nodes_and_edges(self, sources: {str}, targets: {str}, query_context_html: str) -> None:
+    def _add_nodes_and_edges(self, sources: {str}, targets: {str}, query_context: 'QueryContext') -> None:
         if None in sources:
             sources.remove(None)
         if None in targets:
@@ -98,12 +100,21 @@ class LineageGraph(object):
         if len(sources) > 0 and len(targets) == 0:
             if self._show_isolated_nodes:
                 self._lineage_graph.add_nodes_from(sources)
+            if query_context.user_name.lower() == 'tableau' and query_context.role_name.lower() == 'tableau_service':
+                for source_node in sources:
+                    self._lineage_graph.add_node(source_node)
+                    self._lineage_graph.add_node('Tableau',
+                                                 shape='image',
+                                                 image='https://cdn.worldvectorlogo.com/logos/tableau-software.svg',
+                                                 size=15,
+                                                 title=query_context.to_html())
+                    self._lineage_graph.add_edge(source_node, 'Tableau')
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(targets, title=query_context_html)
+                self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
         else:
             self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets, title=query_context_html)
+            self._lineage_graph.add_nodes_from(targets, title=query_context.to_html())
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 

@@ -35,8 +35,8 @@ class Query(object):
                                if statement.token_first(skip_cm=True, skip_ws=True)]
         return analyzed_statements
 
-    def get_context_as_html(self) -> str:
-        return self._query_context.to_html()
+    def get_context(self) -> 'QueryContext':
+        return self._query_context
 
     @classmethod
     def _parse_query_text(cls, table_resolver: TableResolver, raw_query_text: str) -> (set, set, set, set):
