@@ -41,7 +41,7 @@ For further instructions go to our [quickstart page](https://docs.elementary-dat
 If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
 
 ```bash
-edl -d ~/profiles_dir -p <profile_name>
+edl -d ~/.dbt -p <profile_name>
 ```
 
 ## Documentation
