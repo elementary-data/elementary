@@ -47,6 +47,7 @@ edl -d ~/.dbt -p <profile_name>
 ## Documentation & Demo
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
+
 We also created a short [demo video](https://www.elementary-data.com/demo). 
 
 
