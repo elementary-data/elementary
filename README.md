@@ -44,9 +44,10 @@ If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start r
 edl -d ~/.dbt -p <profile_name>
 ```
 
-## Documentation
+## Documentation & Demo
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
+We also created a short [demo video](https://www.elementary-data.com/demo). 
 
 
 
