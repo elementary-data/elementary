@@ -65,7 +65,8 @@ class QueryContext(object):
                                 <div style="min-width:62px;display:inline-block">User:</div> {user_name}</br>
                                 <div style="min-width:62px;display:inline-block">Role:</div> {role_name}</br>
                                 <div style="min-width:62px;display:inline-block">Time:</div> {query_time}</br>
-                                <div style="min-width:62px;display:inline-block;">Volume:</div> <a style="color:{volume_color}">{query_volume} rows</a>
+                                <div style="min-width:62px;display:inline-block;">Volume:</div> <a style="color:{volume_color}">{query_volume} rows</a></br>
+                                <div style="min-width:62px;display:inline-block;">dbt-tests:</div> <a style="color:green">pass</a>
                             </div>
                         </body>
                     </html>

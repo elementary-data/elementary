@@ -206,6 +206,10 @@ class LineageGraph(object):
 
         logger.debug(f'Finished updating lineage graph!')
 
+    def init_graph_from_edge_list(self, edges: list) -> None:
+        for edge in edges:
+            self._add_nodes_and_edges({edge[0]}, {edge[1]}, QueryContext())
+
     def filter_on_table(self, selected_table: str, direction: str = None, depth: int = None) -> None:
         logger.debug(f'Filtering lineage graph on table - {selected_table}')
 
@@ -310,8 +314,9 @@ class LineageGraph(object):
                 'queries_count': self._queries_count,
                 'failed_queries': self._failed_queries_count}
 
-    def draw_graph(self, should_open_browser: bool = True) -> None:
-        self._enrich_graph_with_monitoring_context()
+    def draw_graph(self, should_open_browser: bool = True, enrich_with_monitoring: bool = True) -> None:
+        if enrich_with_monitoring:
+            self._enrich_graph_with_monitoring_context()
         # Visualize the graph
         net = Network(height="95%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)
