@@ -26,6 +26,7 @@ without any implementation efforts, security risks or compromises on accuracy.
 ## Sandbox
 
 Try out our new [demo here](https://storage.googleapis.com/elementary_static/elementary_lineage.html).
+
 ## Quick start
 
 ```bash
@@ -61,15 +62,14 @@ We also created a short [demo video](https://docs.elementary-data.com/demo).
 * **Graph filters:** Filter the graph by dataset, dates, direction, and depth. 
 
 
-**Coming soon:**
 
-* **Dataset monitoring:** Continuously collect and monitor datasets' reliability metrics.
-* **Lineage history:** Store data about lineage versions and changes.
-* **Column level lineage:** Add column-level granularity.
-* **Full lineage:** Integrate with downstream and upstream tools to create a full graph.
+**You can impact our next featues in this [roadmap](https://github.com/elementary-data/elementary-lineage/projects/1)** by voting :+1: to issues and oppening new ones.
 
-Our plan is to eventually build a data observability platform that is open, transparent and powered by the community. 
+Our plan is to eventualy build a data observability platform that is open, transparent and powered by the community. 
 A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
+
+
+We are working on **Dataset monitoring**, **Lineage history**, **Column level lineage**, **Full lineage**, and more.
 
 
 ## Community & Support
@@ -78,6 +78,7 @@ For additional information and help, you can use one of these channels:
 
 * [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(Live chat with the team, support, discussions, etc.\)
 * [GitHub issues](https://github.com/elementary-data/elementary-lineage/issues) \(Bug reports, feature requests)
+* [Roadmap](https://github.com/elementary-data/elementary-lineage/projects/1) \(Vote for features and add your inputs)
 * [Twitter](https://twitter.com/ElementaryData) \(Updates on new releases and stuff)
 
 ## **Integrations**
