@@ -35,6 +35,8 @@ class SnowflakeQuery(Query):
                                            self._query_context.queried_database, self._query_context.queried_schema,
                                            full_table_names, self.revert_dollar_sign_placeholder)
 
+            # sqlparse library doesn't behave nicely when there is a $ sign in the table name. Therefore we replace it
+            # with a placeholder (and revert it back later on using our table resolver)
             self.source_tables, self.target_tables, self.renamed_tables, self.dropped_tables = \
                 self._parse_query_text(table_resolver,
                                        self.replace_dollar_sign_with_placeholder(self._raw_query_text))
