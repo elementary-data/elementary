@@ -1,5 +1,4 @@
 from datetime import datetime, date, timedelta
-from typing import Optional
 
 from snowflake.connector.cursor import SnowflakeCursor
 
@@ -38,7 +37,7 @@ class SnowflakeQueryHistory(QueryHistory):
 
     INFORMATION_SCHEMA_VIEWS = """
     select view_definition, table_catalog, table_schema, last_altered, table_owner 
-        from elementary_db.information_schema.views
+        from information_schema.views
         where collate(table_catalog, 'en-ci') = :1 and view_definition is not NULL;
     """
 
