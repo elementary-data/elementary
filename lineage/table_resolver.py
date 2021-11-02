@@ -1,5 +1,5 @@
 from sqllineage.models import Schema, Table
-from typing import Optional, Union
+from typing import Optional, Union, Callable
 from lineage.utils import get_logger
 
 logger = get_logger(__name__)
@@ -8,12 +8,14 @@ logger = get_logger(__name__)
 class TableResolver(object):
 
     def __init__(self, profile_database_name: str, profile_schema_name: str, queried_database_name: str = None,
-                 queried_schema_name: str = None, full_table_names: bool = False) -> None:
+                 queried_schema_name: str = None, full_table_names: bool = False,
+                 remove_special_char_callback: Callable = None) -> None:
         self._profile_database_name = profile_database_name
         self._profile_schema_name = profile_schema_name
         self._queried_database_name = queried_database_name
         self._queried_schema_name = queried_schema_name
         self._show_full_table_name = full_table_names
+        self._remove_special_char_callback = remove_special_char_callback
 
     @staticmethod
     def _resolve_table_qualification(table: Table, database_name: str, schema_name: str) -> Table:
@@ -58,6 +60,9 @@ class TableResolver(object):
             resolved_table_name = str(table)
         else:
             resolved_table_name = str(table).rsplit('.', 1)[-1]
+
+        if self._remove_special_char_callback is not None:
+            resolved_table_name = self._remove_special_char_callback(resolved_table_name)
 
         logger.debug(f'Resolved table name - {resolved_table_name}')
         return resolved_table_name

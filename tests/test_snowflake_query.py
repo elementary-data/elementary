@@ -10,7 +10,13 @@ from lineage.snowflake_query import SnowflakeQuery
     ('insert into db1.sc1.target_table (a, b) (select c, count(*) from sc1.source_table group by c);', 'db1', None,
      'db1', 'sc1', {'db1.sc1.source_table'}, {'db1.sc1.target_table'}),
     ('insert into db1.sc1.target_table (a, b) (select c, count(*) from db1.sc1.source_table group by c);', 'db1', 'sc1',
-     None, None, {'db1.sc1.source_table'}, {'db1.sc1.target_table'})
+     None, None, {'db1.sc1.source_table'}, {'db1.sc1.target_table'}),
+    ('select metadata$filename, metadata$file_row_number, t.$1 t.$2 from @my_gcs_stage (file_format => mycsvformat) t;'
+     , 'db1', 'sc1', None, None, {'db1.sc1.@my_gcs_stage'}, set()),
+    ('CREATE TABLE db1.sc1.B$1 AS ( WITH stuff AS (SELECT * FROM db1.sc1.B$2) select * from stuff)',
+     'db1', 'sc1', None, None, {'db1.sc1.b$2'}, {'db1.sc1.b$1'}),
+    ('CREATE TABLE db1.sc1.B$1 AS ( WITH stuff AS (SELECT * FROM db1.sc1.B$2) select metadata$filename from stuff)',
+     'db1', 'sc1', None, None, {'db1.sc1.b$2'}, {'db1.sc1.b$1'}),
 ])
 def test_snowflake_query_parse(query_text, profile_db, profile_sc, queried_db, queried_sc, expected_source_tables,
                                expected_target_tables):
