@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
-from typing import Optional
+
+from snowflake.connector.cursor import SnowflakeCursor
 
 from lineage.exceptions import ConfigError
 from lineage.query import Query
@@ -33,6 +34,12 @@ class SnowflakeQueryHistory(QueryHistory):
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time_range_end=>to_timestamp_ltz(current_timestamp())'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = 'end_time_range_end=>to_timestamp_ltz(:3)'
     QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
+
+    INFORMATION_SCHEMA_VIEWS = """
+    select view_definition, table_catalog, table_schema, last_altered, table_owner 
+        from information_schema.views
+        where collate(table_catalog, 'en-ci') = :1 and view_definition is not NULL;
+    """
 
     ACCOUNT_USAGE_QUERY_HISTORY = """
     select query_text, database_name, schema_name, end_time, rows_inserted + rows_produced, query_type, user_name, 
@@ -86,6 +93,26 @@ class SnowflakeQueryHistory(QueryHistory):
 
         return query, bindings
 
+    def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor, database_name: str, schema_name: str):
+        view_queries = []
+        cursor.execute(self.INFORMATION_SCHEMA_VIEWS, (database_name, ))
+        rows = cursor.fetchall()
+        for row in rows:
+            query_context = QueryContext(queried_database=row[1],
+                                         queried_schema=row[2],
+                                         query_time=row[3],
+                                         query_type='CREATE_VIEW',
+                                         role_name=row[4])
+
+            query = SnowflakeQuery(raw_query_text=row[0],
+                                   query_context=query_context,
+                                   profile_database_name=database_name,
+                                   profile_schema_name=schema_name)
+
+            view_queries.append(query)
+
+        return view_queries
+
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
         queries = []
         database_name = self.get_database_name()
@@ -115,6 +142,8 @@ class SnowflakeQueryHistory(QueryHistory):
 
                 queries.append(query)
             logger.debug("Finished fetching snowflake history query results")
+
+            queries.extend(self._enrich_history_with_view_definitions(cursor, database_name, schema_name))
 
         return queries
 
