@@ -63,9 +63,9 @@ We also created a short [demo video](https://docs.elementary-data.com/demo).
 
 
 
-**You can impact our next featues in this [roadmap](https://github.com/elementary-data/elementary-lineage/projects/1)** by voting :+1: to issues and oppening new ones.
+**You can impact our next features in this [roadmap](https://github.com/elementary-data/elementary-lineage/projects/1)** by voting :+1: to issues and opening new ones.
 
-Our plan is to eventualy build a data observability platform that is open, transparent and powered by the community. 
+Our plan is to eventually build a data observability platform that is open, transparent and powered by the community. 
 A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
 
 
