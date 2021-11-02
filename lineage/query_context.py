@@ -53,6 +53,23 @@ class QueryContext(object):
         volume_color = "DarkSlateGrey"
         if query_volume == 0:
             volume_color = "tomato"
+        is_view = 'view' in query_type.lower()
+
+        if is_view:
+            return f"""
+                    <html>
+                        <body>
+                            <div style="font-family:arial;color:DarkSlateGrey;font-size:110%;">
+                                <strong>
+                                    Last update</br>
+                                </strong>
+                                <div style="min-width:62px;display:inline-block">Type:</div> {query_type}</br>
+                                <div style="min-width:62px;display:inline-block">Role:</div> {role_name}</br>
+                                <div style="min-width:62px;display:inline-block">Time:</div> {query_time}</br>
+                            </div>
+                        </body>
+                    </html>
+            """
 
         return f"""
                     <html>
