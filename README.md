@@ -25,7 +25,7 @@ without any implementation efforts, security risks or compromises on accuracy.
 
 ## Sandbox
 
-Try out our new [demo here](https://storage.googleapis.com/elementary_static/elementary_lineage.html).
+Try out our new [live demo here](https://www.elementary-data.com/live-demo).
 
 ## Quick start
 
