@@ -197,7 +197,7 @@ class LineageGraph(object):
 
     def draw_graph(self, should_open_browser: bool = True) -> None:
         # Visualize the graph
-        net = Network(height="100%", width="100%", directed=True, heading=self._load_header())
+        net = Network(height="95%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)
         net.set_options(GRAPH_VISUALIZATION_OPTIONS)
 
