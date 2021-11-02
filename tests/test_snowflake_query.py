@@ -17,6 +17,16 @@ from lineage.snowflake_query import SnowflakeQuery
      'db1', 'sc1', None, None, {'db1.sc1.b$2'}, {'db1.sc1.b$1'}),
     ('CREATE TABLE db1.sc1.B$1 AS ( WITH stuff AS (SELECT * FROM db1.sc1.B$2) select metadata$filename from stuff)',
      'db1', 'sc1', None, None, {'db1.sc1.b$2'}, {'db1.sc1.b$1'}),
+    ("""
+    create or replace  view ELEMENTARY_DB.elementary.my_second_dbt_model  as (
+     -- Use the `ref` function to select from other models
+
+    select *
+    from ELEMENTARY_DB.elementary.my_first_dbt_model
+    where id = 1
+     );""",
+     'elementary_db', 'elementary', None, None, {'elementary_db.elementary.my_first_dbt_model'},
+     {'elementary_db.elementary.my_second_dbt_model'}),
 ])
 def test_snowflake_query_parse(query_text, profile_db, profile_sc, queried_db, queried_sc, expected_source_tables,
                                expected_target_tables):
