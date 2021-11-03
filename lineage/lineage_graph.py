@@ -195,7 +195,10 @@ class LineageGraph(object):
                 'queries_count': self._queries_count,
                 'failed_queries': self._failed_queries_count}
 
-    def draw_graph(self, should_open_browser: bool = True) -> None:
+    def draw_graph(self, should_open_browser: bool = True) -> bool:
+        if len(self._lineage_graph.edges) == 0:
+            return False
+
         # Visualize the graph
         net = Network(height="95%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)
@@ -204,3 +207,6 @@ class LineageGraph(object):
         net.save_graph("elementary_lineage.html")
         if should_open_browser:
             webbrowser.open_new_tab('elementary_lineage.html')
+
+        return True
+
