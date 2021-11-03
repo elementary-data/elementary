@@ -1,6 +1,7 @@
 import click
 
 from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from lineage.empty_graph_helper import EmptyGraphHelper
 from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
 from lineage.exceptions import ConfigError
 from pyfiglet import Figlet
@@ -155,7 +156,9 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
                                   f'specify a table name that exists in the database configured in your profiles file.')
             lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
-        lineage_graph.draw_graph(should_open_browser=open_browser)
+        success = lineage_graph.draw_graph(should_open_browser=open_browser)
+        if not success:
+            print(EmptyGraphHelper(credentials.type).get_help_message())
 
         track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
 
