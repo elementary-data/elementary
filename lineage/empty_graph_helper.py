@@ -17,7 +17,6 @@ class EmptyGraphHelper(object):
         We are deeply sorry but unfortunately the result graph is empty.
         Please try the following steps to fix the problem - 
         \t1. Try running again with --ignore-schema=true
-        \t2. Check that you have sufficient permissions
-        \t3. Follow this guide here - {self.get_integration_docs_link()}
-        \t4. Join our slack channel here - https://bit.ly/slack-elementary, we promise to help and be nice! 
+        \t2. Check that you have sufficient permissions (follow this short guide here - {self.get_integration_docs_link()})
+        \t3. Join our slack channel here - https://bit.ly/slack-elementary, we promise to help and be nice! 
         """
