@@ -14,11 +14,11 @@ class EmptyGraphHelper(object):
 
     def get_help_message(self):
         return f"""
-        We are deeply sorry but the lineage graph is empty.\n
+        We are deeply sorry but unfortunately the result graph is empty.\n
         Please try the following steps to fix the problem - \n
         \t1. Try running again with --ignore-schema=true (to avoid filtering queries running only on the schema 
-        configured in your profiles file) 
-        \t2. Check that your configured role in the profiles file has sufficient permissions
-        \t3. Follow this guide here - {self.get_integration_docs_link()}  
+        configured in your profiles file).
+        \t2. Check that your configured role in the profiles file has sufficient permissions.
+        \t3. Follow this guide here - {self.get_integration_docs_link()}.
         \t4. Join our slack channel here - https://bit.ly/slack-elementary, we promise to help and be nice! 
         """
