@@ -110,6 +110,7 @@ class SnowflakeQueryHistory(QueryHistory):
                                    profile_schema_name=schema_name)
 
             view_queries.append(query)
+            self._query_history_stats.update_stats(query_context)
 
         return view_queries
 
@@ -141,6 +142,8 @@ class SnowflakeQueryHistory(QueryHistory):
                                        profile_schema_name=schema_name)
 
                 queries.append(query)
+                self._query_history_stats.update_stats(query_context)
+
             logger.debug("Finished fetching snowflake history query results")
 
             queries.extend(self._enrich_history_with_view_definitions(cursor, database_name, schema_name))
@@ -148,6 +151,7 @@ class SnowflakeQueryHistory(QueryHistory):
         return queries
 
     def properties(self) -> dict:
-        return {'platform_type': 'snowflake',
-                'query_history_source': self.query_history_source,
-                'ignore_schema': self._ignore_schema}
+        query_history_properties = {'platform_type': 'snowflake',
+                                    'query_history_source': self.query_history_source}
+        query_history_properties.update(self._query_history_stats.to_dict())
+        return query_history_properties

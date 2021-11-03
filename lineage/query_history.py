@@ -3,6 +3,7 @@ from typing import Optional
 from lineage.bigquery_query import BigQueryQuery
 from lineage.exceptions import SerializationError
 from lineage.query import Query
+from lineage.query_history_stats import QueryHistoryStats
 from lineage.snowflake_query import SnowflakeQuery
 from lineage.utils import is_flight_mode_on
 import json
@@ -22,6 +23,7 @@ class QueryHistory(object):
         self._profile_schema_name = profile_schema_name
         self._should_export_query_history = should_export_query_history
         self._ignore_schema = ignore_schema
+        self._query_history_stats = QueryHistoryStats()
 
     def _serialize_query_history(self, queries: [str]) -> None:
         if self._should_export_query_history:
