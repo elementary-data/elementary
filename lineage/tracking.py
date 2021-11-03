@@ -68,7 +68,7 @@ def track_cli_start(profiles_dir: str, profile_data: dict) -> Optional['Anonymou
     try:
         anonymous_tracking = AnonymousTracking(profiles_dir, profile_data.get('anonymous_usage_tracking'))
         anonymous_tracking.init()
-        cli_start_properties = dict()
+        cli_start_properties = {'platform_type': profile_data.get('type')}
         cli_start_properties.update(get_run_properties())
         anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
         return anonymous_tracking
