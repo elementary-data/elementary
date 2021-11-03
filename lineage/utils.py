@@ -2,7 +2,10 @@ import os
 import logging
 import sys
 from pathlib import Path
+from typing import Optional
+
 import click
+import pkg_resources
 
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 LOG_FILE = "edl.log"
@@ -54,6 +57,15 @@ def is_dbt_installed() -> bool:
     return False
 
 
+def get_package_version() -> Optional[str]:
+    try:
+        return pkg_resources.get_distribution('elementary-lineage').version
+    except Exception:
+        pass
+
+    return None
+
+
 def get_run_properties() -> dict:
 
     click_context = click.get_current_context()
@@ -84,4 +96,7 @@ def get_run_properties() -> dict:
             'full_table_names': params.get('full_table_names'),
             'direction': params.get('direction'),
             'depth': params.get('depth'),
-            'dbt_installed': is_dbt_installed()}
+            'ignore_schema': params.get('ignore_schema'),
+            'dbt_installed': is_dbt_installed(),
+            'version': get_package_version()}
+

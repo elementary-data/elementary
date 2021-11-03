@@ -88,10 +88,13 @@ class BigQueryQueryHistory(QueryHistory):
                                   profile_schema_name=schema_name)
 
             queries.append(query)
+            self._query_history_stats.update_stats(query_context)
+
         logger.debug("Finished fetching bigquery history job results")
 
         return queries
 
     def properties(self) -> dict:
-        return {'platform_type': 'bigquery',
-                'ignore_schema': self._ignore_schema}
+        query_history_properties = {'platform_type': 'bigquery'}
+        query_history_properties.update(self._query_history_stats.to_dict())
+        return query_history_properties
