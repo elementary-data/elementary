@@ -14,7 +14,7 @@ logger = get_logger(__name__)
 class BigQueryQueryHistory(QueryHistory):
     INFORMATION_SCHEMA_QUERY_HISTORY = """
     SELECT query, end_time, dml_statistics.inserted_row_count + dml_statistics.updated_row_count, statement_type, 
-    user_email, destination_table, referenced_tables
+    user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)
            
     FROM region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
     WHERE
@@ -80,7 +80,8 @@ class BigQueryQueryHistory(QueryHistory):
                                          query_type=row[3],
                                          user_name=row[4],
                                          destination_table=row[5],
-                                         referenced_tables=row[6])
+                                         referenced_tables=row[6],
+                                         duration=row[7])
 
             query = BigQueryQuery(raw_query_text=row[0],
                                   query_context=query_context,
