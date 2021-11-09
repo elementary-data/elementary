@@ -43,8 +43,8 @@ class SnowflakeQuery(Query):
 
             return True
 
-        except SQLLineageException as exc:
-            logger.debug(f'SQLLineageException was raised while parsing this query -\n{self._raw_query_text}\n'
+        except Exception as exc:
+            logger.debug(f'Exception was raised while parsing this query -\n{self._raw_query_text}\n'
                          f'Error was -\n{exc}.')
         return False
 
