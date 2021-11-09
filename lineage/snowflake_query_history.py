@@ -13,6 +13,8 @@ logger = get_logger(__name__)
 
 
 class SnowflakeQueryHistory(QueryHistory):
+    PLATFORM_TYPE = 'snowflake'
+
     # Note: Here we filter permissively on the configured database_name, basically finding all the queries that are
     # relevant to this database. Snowflake's query history might show in the database_name column a different db name
     # than the db name that was part of the query. During the parsing logic in the lineage graph we strictly analyze if
@@ -59,9 +61,10 @@ class SnowflakeQueryHistory(QueryHistory):
 
     def __init__(self, con, profile_database_name: str, profile_schema_name: str,
                  should_export_query_history: bool = True, ignore_schema: bool = False,
-                 query_history_source: str = None) -> None:
+                 full_table_names: bool = False, query_history_source: str = None) -> None:
         self.query_history_source = query_history_source.strip().lower() if query_history_source is not None else None
-        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema)
+        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema,
+                         full_table_names)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str,
@@ -93,8 +96,7 @@ class SnowflakeQueryHistory(QueryHistory):
 
         return query, bindings
 
-    def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor, database_name: str, schema_name: str):
-        view_queries = []
+    def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor, database_name: str, schema_name: str) -> None:
         cursor.execute(self.INFORMATION_SCHEMA_VIEWS, (database_name, ))
         rows = cursor.fetchall()
         for row in rows:
@@ -109,13 +111,9 @@ class SnowflakeQueryHistory(QueryHistory):
                                    profile_database_name=database_name,
                                    profile_schema_name=schema_name)
 
-            view_queries.append(query)
-            self._query_history_stats.update_stats(query_context)
+            self.add_query(query)
 
-        return view_queries
-
-    def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
-        queries = []
+    def _query_history_table(self, start_date: datetime, end_date: datetime) -> None:
         database_name = self.get_database_name()
         schema_name = self.get_schema_name()
 
@@ -142,17 +140,13 @@ class SnowflakeQueryHistory(QueryHistory):
                                        profile_database_name=database_name,
                                        profile_schema_name=schema_name)
 
-                queries.append(query)
-                self._query_history_stats.update_stats(query_context)
+                self.add_query(query)
 
+            self._enrich_history_with_view_definitions(cursor, database_name, schema_name)
             logger.debug("Finished fetching snowflake history query results")
 
-            queries.extend(self._enrich_history_with_view_definitions(cursor, database_name, schema_name))
-
-        return queries
-
     def properties(self) -> dict:
-        query_history_properties = {'platform_type': 'snowflake',
-                                    'query_history_source': self.query_history_source}
-        query_history_properties.update(self._query_history_stats.to_dict())
+        query_history_properties = super().properties()
+        query_history_properties.update({'query_history_source': self.query_history_source})
         return query_history_properties
+

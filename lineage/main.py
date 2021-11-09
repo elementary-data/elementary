@@ -83,7 +83,7 @@ class RequiredIf(click.Option):
 @click.option(
     '--export-query-history', '-h',
     type=bool,
-    default=False,
+    default=True,
     help="Indicates if the query history pulled from your warehouse should be saved in your current "
          "directory to a file called latest_query_history.json (by default it won't be saved).",
 )
@@ -138,12 +138,11 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     anonymous_tracking = track_cli_start(profiles_dir, profile_data)
 
     try:
-        query_history = QueryHistoryFactory(export_query_history, ignore_schema).create_query_history(credentials,
-                                                                                                      profile_data)
+        query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
+            create_query_history(credentials, profile_data)
         queries = query_history.extract_queries(start_date, end_date)
 
-        lineage_graph = LineageGraph(show_isolated_nodes=False,
-                                     show_full_table_names=full_table_names)
+        lineage_graph = LineageGraph(show_isolated_nodes=False)
         lineage_graph.init_graph_from_query_list(queries)
 
         if table is not None:

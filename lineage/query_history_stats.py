@@ -16,7 +16,7 @@ class QueryHistoryStats(object):
             self._users.add(query_context.user_name)
 
         if query_context.role_name is not None:
-            self._users.add(query_context.role_name)
+            self._roles.add(query_context.role_name)
 
     def to_dict(self):
         query_history_stats_dict = self._query_type_stats.copy()
