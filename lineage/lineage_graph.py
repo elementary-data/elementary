@@ -1,6 +1,7 @@
 import itertools
 from typing import Optional
 import networkx as nx
+from collections import defaultdict
 from lineage.exceptions import ConfigError
 from pyvis.network import Network
 import webbrowser
@@ -62,20 +63,14 @@ class LineageGraph(object):
     DOWNSTREAM_DIRECTION = 'downstream'
     BOTH_DIRECTIONS = 'both'
     SELECTED_NODE_COLOR = '#0925C7'
-    SELECTED_NODE_TITLE = 'Selected table<br/>'
+    SELECTED_NODE_TITLE = 'Selected table<br/><br/>'
 
-    def __init__(self, show_isolated_nodes: bool = False, show_full_table_names: bool = False) -> None:
+    def __init__(self, show_isolated_nodes: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
-        self._show_full_table_names = show_full_table_names
-        self._queries_count = None
-        self._failed_queries_count = 0
+        self._catalog = defaultdict(lambda: None)
 
     def _update_lineage_graph(self, query: Query) -> None:
-        if not query.parse(self._show_full_table_names):
-            self._failed_queries_count += 1
-            return
-
         # Handle drop tables, if they exist in the statement
         for dropped_table_name in query.dropped_tables:
             self._remove_node(dropped_table_name)
@@ -100,10 +95,14 @@ class LineageGraph(object):
                 self._lineage_graph.add_nodes_from(sources)
         elif len(targets) > 0 and len(sources) == 0:
             if self._show_isolated_nodes:
-                self._lineage_graph.add_nodes_from(targets, title=query_context_html)
+                for target_node in targets:
+                    self._lineage_graph.add_node(target_node)
+                    self._catalog[target_node] = query_context_html
         else:
             self._lineage_graph.add_nodes_from(sources)
-            self._lineage_graph.add_nodes_from(targets, title=query_context_html)
+            for target_node in targets:
+                self._lineage_graph.add_node(target_node)
+                self._catalog[target_node] = query_context_html
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
@@ -114,6 +113,10 @@ class LineageGraph(object):
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
+            if old_node in self._catalog:
+                old_node_attributes = self._catalog[old_node]
+                del self._catalog[old_node]
+                self._catalog[new_node] = old_node_attributes
 
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
@@ -123,6 +126,8 @@ class LineageGraph(object):
 
             # networknx's remove_node already takes care of in and out edges
             self._lineage_graph.remove_node(node)
+            if node in self._catalog:
+                del self._catalog[node]
 
             # Now that we have just deleted the dropped table from the graph, we need to take care of
             # new island nodes.
@@ -135,8 +140,6 @@ class LineageGraph(object):
                         self._lineage_graph.remove_node(predecessor)
 
     def init_graph_from_query_list(self, queries: [Query]) -> None:
-        self._queries_count = len(queries)
-        logger.debug(f'Loading {self._queries_count} queries into the lineage graph')
         for query in tqdm(queries, desc="Updating lineage graph", colour='green'):
             self._update_lineage_graph(query)
 
@@ -191,14 +194,18 @@ class LineageGraph(object):
 
     def properties(self):
         return {'nodes_count': len(self._lineage_graph.nodes),
-                'edges_count': len(self._lineage_graph.edges),
-                'queries_count': self._queries_count,
-                'failed_queries': self._failed_queries_count}
+                'edges_count': len(self._lineage_graph.edges)}
+
+    def _enrich_graph_with_monitoring_data(self):
+        for node, attr in self._lineage_graph.nodes(data=True):
+            if node in self._catalog:
+                self._lineage_graph.nodes[node]['title'] = attr.get('title', '') + self._catalog[node]
 
     def draw_graph(self, should_open_browser: bool = True) -> bool:
         if len(self._lineage_graph.edges) == 0:
             return False
 
+        self._enrich_graph_with_monitoring_data()
         # Visualize the graph
         net = Network(height="95%", width="100%", directed=True, heading=self._load_header())
         net.from_nx(self._lineage_graph)

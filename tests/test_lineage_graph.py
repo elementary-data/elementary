@@ -56,18 +56,21 @@ def test_lineage_graph_add_nodes_and_edges(sources, targets, edges, show_isolate
     empty_query_context = QueryContext()
     reference._add_nodes_and_edges(sources, targets, empty_query_context.to_html())
 
-    node_calls = []
+    source_nodes_calls = []
+    target_nodes_calls = []
     if len(sources) > 0:
-        node_calls.append(mock.call(sources))
+        source_nodes_calls.append(mock.call(sources))
     if len(targets) > 0:
-        node_calls.append(mock.call(targets, title=empty_query_context.to_html()))
+        for target_node in targets:
+            target_nodes_calls.append(mock.call(target_node))
 
     edge_calls = []
     for edge in edges:
         edge_calls.append(mock.call(edge[0], edge[1]))
 
     if show_isolated_nodes or len(edges) > 0:
-        di_graph_mock.add_nodes_from.assert_has_calls(node_calls, any_order=True)
+        di_graph_mock.add_nodes_from.assert_has_calls(source_nodes_calls, any_order=True)
+        di_graph_mock.add_node.assert_has_calls(target_nodes_calls, any_order=True)
 
     di_graph_mock.add_edge.assert_has_calls(edge_calls, any_order=True)
 

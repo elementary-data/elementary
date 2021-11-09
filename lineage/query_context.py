@@ -2,13 +2,15 @@ from datetime import datetime
 from typing import Optional, Union
 import dateutil.parser
 
+from lineage.utils import format_milliseconds
+
 
 class QueryContext(object):
     def __init__(self, queried_database: Optional[str] = None, queried_schema: Optional[str] = None,
                  query_time: Optional[datetime] = None, query_volume: Optional[int] = None,
                  query_type: Optional[str] = None, user_name: Optional[str] = None,
                  role_name: Optional[str] = None, referenced_tables: [dict] = None,
-                 destination_table: dict = None) -> None:
+                 destination_table: dict = None, duration: int = None) -> None:
         self.queried_database = queried_database
         self.queried_schema = queried_schema
         self.query_time = query_time
@@ -18,6 +20,7 @@ class QueryContext(object):
         self.role_name = role_name
         self.referenced_tables = referenced_tables if referenced_tables is not None else []
         self.destination_table = destination_table
+        self.duration = duration
 
     def to_dict(self) -> dict:
         return {'queried_database': self.queried_database,
@@ -28,7 +31,8 @@ class QueryContext(object):
                 'user_name': self.user_name,
                 'role_name': self.role_name,
                 'referenced_tables': self.referenced_tables,
-                'destination_table': self.destination_table}
+                'destination_table': self.destination_table,
+                'duration': self.duration}
 
     @staticmethod
     def _query_time_to_str(query_time: Optional[datetime], fmt: str = None) -> Optional[str]:
@@ -54,6 +58,9 @@ class QueryContext(object):
         if query_volume == 0:
             volume_color = "tomato"
         is_view = 'view' in query_type.lower()
+        query_duration = 'Unknown'
+        if self.duration is not None:
+            query_duration = format_milliseconds(self.duration)
 
         if is_view:
             return f"""
@@ -82,6 +89,7 @@ class QueryContext(object):
                                 <div style="min-width:62px;display:inline-block">User:</div> {user_name}</br>
                                 <div style="min-width:62px;display:inline-block">Role:</div> {role_name}</br>
                                 <div style="min-width:62px;display:inline-block">Time:</div> {query_time}</br>
+                                <div style="min-width:62px;display:inline-block">Duration:</div> {query_duration}</br>
                                 <div style="min-width:62px;display:inline-block;">Volume:</div> <a style="color:{volume_color}">{query_volume} rows</a>
                             </div>
                         </body>
