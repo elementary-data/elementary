@@ -1,6 +1,5 @@
 from typing import Optional
 from lineage.query_context import QueryContext
-from sqllineage.exceptions import SQLLineageException
 from lineage.table_resolver import TableResolver
 from lineage.query import Query
 from lineage.utils import get_logger
@@ -45,15 +44,15 @@ class BigQueryQuery(Query):
                                            profile_schema_name=self._profile_schema_name,
                                            full_table_names=full_table_names)
 
-            target_table = self._parse_table_json_column(table_resolver, self._query_context.destination_table)
+            target_table = self._parse_table_json_column(table_resolver, self.query_context.destination_table)
             source_tables = set()
-            for referenced_table in self._query_context.referenced_tables:
+            for referenced_table in self.query_context.referenced_tables:
                 source_table = self._parse_table_json_column(table_resolver, referenced_table)
                 source_tables.add(source_table)
 
             query_type = self.EMPTY_QUERY_TYPE
-            if self._query_context.query_type is not None:
-                query_type = self._query_context.query_type
+            if self.query_context.query_type is not None:
+                query_type = self.query_context.query_type
 
             if query_type.startswith(self.DROP_PREFIX):
                 self.dropped_tables.add(target_table)

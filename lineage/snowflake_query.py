@@ -1,5 +1,4 @@
 from lineage.query_context import QueryContext
-from sqllineage.exceptions import SQLLineageException
 from lineage.table_resolver import TableResolver
 from lineage.query import Query
 from lineage.utils import get_logger
@@ -32,7 +31,7 @@ class SnowflakeQuery(Query):
     def parse(self, full_table_names: bool = False) -> bool:
         try:
             table_resolver = TableResolver(self._profile_database_name, self._profile_schema_name,
-                                           self._query_context.queried_database, self._query_context.queried_schema,
+                                           self.query_context.queried_database, self.query_context.queried_schema,
                                            full_table_names, self.revert_dollar_sign_placeholder)
 
             # sqlparse library doesn't behave nicely when there is a $ sign in the table name. Therefore we replace it

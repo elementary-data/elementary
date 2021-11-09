@@ -12,6 +12,8 @@ logger = get_logger(__name__)
 
 
 class BigQueryQueryHistory(QueryHistory):
+    PLATFORM_TYPE = 'bigquery'
+
     INFORMATION_SCHEMA_QUERY_HISTORY = """
     SELECT query, end_time, dml_statistics.inserted_row_count + dml_statistics.updated_row_count, statement_type, 
     user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)
@@ -31,8 +33,10 @@ class BigQueryQueryHistory(QueryHistory):
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = '@end_time'
 
     def __init__(self, con, profile_database_name: str, profile_schema_name: str,
-                 should_export_query_history: bool = True, ignore_schema: bool = False) -> None:
-        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema)
+                 should_export_query_history: bool = True, ignore_schema: bool = False,
+                 full_table_names: bool = False) -> None:
+        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema,
+                         full_table_names)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, location: str) -> \
@@ -72,7 +76,6 @@ class BigQueryQueryHistory(QueryHistory):
 
         logger.debug("Finished executing bigquery jobs history query")
 
-        queries = []
         rows = job.result()
         for row in rows:
             query_context = QueryContext(query_time=row[1],
@@ -88,14 +91,7 @@ class BigQueryQueryHistory(QueryHistory):
                                   profile_database_name=database_name,
                                   profile_schema_name=schema_name)
 
-            queries.append(query)
-            self._query_history_stats.update_stats(query_context)
+            self.add_query(query)
 
         logger.debug("Finished fetching bigquery history job results")
 
-        return queries
-
-    def properties(self) -> dict:
-        query_history_properties = {'platform_type': 'bigquery'}
-        query_history_properties.update(self._query_history_stats.to_dict())
-        return query_history_properties

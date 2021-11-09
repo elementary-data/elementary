@@ -65,19 +65,12 @@ class LineageGraph(object):
     SELECTED_NODE_COLOR = '#0925C7'
     SELECTED_NODE_TITLE = 'Selected table<br/><br/>'
 
-    def __init__(self, show_isolated_nodes: bool = False, show_full_table_names: bool = False) -> None:
+    def __init__(self, show_isolated_nodes: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
-        self._show_full_table_names = show_full_table_names
-        self._queries_count = None
-        self._failed_queries_count = 0
         self._catalog = defaultdict(lambda: None)
 
     def _update_lineage_graph(self, query: Query) -> None:
-        if not query.parse(self._show_full_table_names):
-            self._failed_queries_count += 1
-            return
-
         # Handle drop tables, if they exist in the statement
         for dropped_table_name in query.dropped_tables:
             self._remove_node(dropped_table_name)
@@ -147,8 +140,6 @@ class LineageGraph(object):
                         self._lineage_graph.remove_node(predecessor)
 
     def init_graph_from_query_list(self, queries: [Query]) -> None:
-        self._queries_count = len(queries)
-        logger.debug(f'Loading {self._queries_count} queries into the lineage graph')
         for query in tqdm(queries, desc="Updating lineage graph", colour='green'):
             self._update_lineage_graph(query)
 
@@ -203,9 +194,7 @@ class LineageGraph(object):
 
     def properties(self):
         return {'nodes_count': len(self._lineage_graph.nodes),
-                'edges_count': len(self._lineage_graph.edges),
-                'queries_count': self._queries_count,
-                'failed_queries': self._failed_queries_count}
+                'edges_count': len(self._lineage_graph.edges)}
 
     def _enrich_graph_with_monitoring_data(self):
         for node, attr in self._lineage_graph.nodes(data=True):
