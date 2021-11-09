@@ -10,7 +10,7 @@ class QueryContext(object):
                  query_time: Optional[datetime] = None, query_volume: Optional[int] = None,
                  query_type: Optional[str] = None, user_name: Optional[str] = None,
                  role_name: Optional[str] = None, referenced_tables: [dict] = None,
-                 destination_table: dict = None, duration = None) -> None:
+                 destination_table: dict = None, duration: int = None) -> None:
         self.queried_database = queried_database
         self.queried_schema = queried_schema
         self.query_time = query_time
