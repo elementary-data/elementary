@@ -83,7 +83,7 @@ class RequiredIf(click.Option):
 @click.option(
     '--export-query-history', '-h',
     type=bool,
-    default=False,
+    default=True,
     help="Indicates if the query history pulled from your warehouse should be saved in your current "
          "directory to a file called latest_query_history.json (by default it won't be saved).",
 )
@@ -138,22 +138,23 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     anonymous_tracking = track_cli_start(profiles_dir, profile_data)
 
     try:
-        query_history = QueryHistoryFactory(export_query_history, ignore_schema).create_query_history(credentials,
-                                                                                                      profile_data)
+        query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
+            create_query_history(credentials, profile_data)
         queries = query_history.extract_queries(start_date, end_date)
 
-        lineage_graph = LineageGraph(show_isolated_nodes=False,
-                                     show_full_table_names=full_table_names)
+        lineage_graph = LineageGraph(show_isolated_nodes=False)
         lineage_graph.init_graph_from_query_list(queries)
 
         if table is not None:
             table_resolver = TableResolver(profile_database_name=credentials.database,
-                                           profile_schema_name=credentials.schema,
+                                           profile_schema_name=credentials.schema if not ignore_schema else None,
+                                           queried_database_name=credentials.database,
+                                           queried_schema_name=credentials.schema,
                                            full_table_names=full_table_names)
             resolved_table_name = table_resolver.name_qualification(table)
             if resolved_table_name is None:
-                raise ConfigError(f'Could not resolve table name - {table}, please make sure to '
-                                  f'specify a table name that exists in the database configured in your profiles file.')
+                raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name'
+                                  f'that is aligned with the database and schema in your profiles.yml file.')
             lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
         success = lineage_graph.draw_graph(should_open_browser=open_browser)

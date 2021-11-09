@@ -13,7 +13,7 @@ class Query(object):
     def __init__(self, raw_query_text: str, query_context: QueryContext, profile_database_name: str,
                  profile_schema_name: str) -> None:
         self._raw_query_text = raw_query_text
-        self._query_context = query_context
+        self.query_context = query_context
         self._profile_database_name = profile_database_name
         self._profile_schema_name = profile_schema_name
         self.dropped_tables = set()
@@ -23,7 +23,7 @@ class Query(object):
 
     def to_dict(self) -> dict:
         return {'raw_query_text': self._raw_query_text,
-                'query_context': self._query_context.to_dict(),
+                'query_context': self.query_context.to_dict(),
                 'profile_database_name': self._profile_database_name,
                 'profile_schema_name': self._profile_schema_name,
                 'platform_type': self.PLATFORM_TYPE}
@@ -36,7 +36,7 @@ class Query(object):
         return analyzed_statements
 
     def get_context_as_html(self) -> str:
-        return self._query_context.to_html()
+        return self.query_context.to_html()
 
     @classmethod
     def _parse_query_text(cls, table_resolver: TableResolver, raw_query_text: str) -> (set, set, set, set):
