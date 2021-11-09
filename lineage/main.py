@@ -148,12 +148,14 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
 
         if table is not None:
             table_resolver = TableResolver(profile_database_name=credentials.database,
-                                           profile_schema_name=credentials.schema,
+                                           profile_schema_name=credentials.schema if not ignore_schema else None,
+                                           queried_database_name=credentials.database,
+                                           queried_schema_name=credentials.schema,
                                            full_table_names=full_table_names)
             resolved_table_name = table_resolver.name_qualification(table)
             if resolved_table_name is None:
-                raise ConfigError(f'Could not resolve table name - {table}, please make sure to '
-                                  f'specify a table name that exists in the database configured in your profiles file.')
+                raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name'
+                                  f'that is aligned with the database and schema in your profiles.yml file.')
             lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
         success = lineage_graph.draw_graph(should_open_browser=open_browser)

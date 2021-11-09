@@ -120,10 +120,10 @@ class LineageGraph(object):
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
-            if old_node in self.catalog:
-                old_node_attributes = self.catalog[old_node]
-                del self.catalog[old_node]
-                self.catalog[new_node] = old_node_attributes
+            if old_node in self._catalog:
+                old_node_attributes = self._catalog[old_node]
+                del self._catalog[old_node]
+                self._catalog[new_node] = old_node_attributes
 
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
