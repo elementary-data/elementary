@@ -1,9 +1,9 @@
 from datetime import datetime, date, timedelta
 
 from snowflake.connector.cursor import SnowflakeCursor
+from tqdm import tqdm
 
 from lineage.exceptions import ConfigError
-from lineage.query import Query
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query import SnowflakeQuery
@@ -21,7 +21,8 @@ class SnowflakeQueryHistory(QueryHistory):
     # the query was really executed on the configured db and filter it accordingly.
 
     INFORMATION_SCHEMA_QUERY_HISTORY = """
-    select query_text, database_name, schema_name, end_time, rows_produced, query_type, user_name, role_name, total_elapsed_time
+    select query_text, database_name, schema_name, end_time, rows_produced, query_type, user_name, role_name, 
+    total_elapsed_time, query_id
       from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
         {end_time_range_end_expr},
@@ -44,8 +45,8 @@ class SnowflakeQueryHistory(QueryHistory):
     """
 
     ACCOUNT_USAGE_QUERY_HISTORY = """
-    select query_text, database_name, schema_name, end_time, rows_inserted + rows_produced, query_type, user_name, 
-    role_name, total_elapsed_time
+    select query_text, database_name, schema_name, end_time, rows_inserted + rows_updated, query_type, user_name, 
+    role_name, total_elapsed_time, query_id
         from snowflake.account_usage.query_history 
         where end_time >= :2 and {end_time_range_end_expr} 
     and execution_status = 'SUCCESS' and query_type not in 
@@ -99,7 +100,7 @@ class SnowflakeQueryHistory(QueryHistory):
     def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor, database_name: str, schema_name: str) -> None:
         cursor.execute(self.INFORMATION_SCHEMA_VIEWS, (database_name, ))
         rows = cursor.fetchall()
-        for row in rows:
+        for row in tqdm(rows, desc="Extracting and parsing view definitions", colour='green'):
             query_context = QueryContext(queried_database=row[1],
                                          queried_schema=row[2],
                                          query_time=row[3],
@@ -125,7 +126,7 @@ class SnowflakeQueryHistory(QueryHistory):
             cursor.execute(query_text, bindings)
             logger.debug("Finished executing snowflake history query")
             rows = cursor.fetchall()
-            for row in rows:
+            for row in tqdm(rows, desc="Extracting and parsing queries from query history", colour='green'):
                 query_context = QueryContext(queried_database=row[1],
                                              queried_schema=row[2],
                                              query_time=row[3],
@@ -133,7 +134,8 @@ class SnowflakeQueryHistory(QueryHistory):
                                              query_type=row[5],
                                              user_name=row[6],
                                              role_name=row[7],
-                                             duration=row[8])
+                                             duration=row[8],
+                                             query_id=row[9])
 
                 query = SnowflakeQuery(raw_query_text=row[0],
                                        query_context=query_context,

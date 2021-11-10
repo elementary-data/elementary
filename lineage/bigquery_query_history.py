@@ -1,5 +1,4 @@
-from typing import Optional
-
+from tqdm import tqdm
 from google.cloud import bigquery
 from lineage.bigquery_query import BigQueryQuery
 from lineage.query import Query
@@ -16,7 +15,8 @@ class BigQueryQueryHistory(QueryHistory):
 
     INFORMATION_SCHEMA_QUERY_HISTORY = """
     SELECT query, end_time, dml_statistics.inserted_row_count + dml_statistics.updated_row_count, statement_type, 
-    user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)
+    user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND),
+    job_id
            
     FROM region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
     WHERE
@@ -76,15 +76,16 @@ class BigQueryQueryHistory(QueryHistory):
 
         logger.debug("Finished executing bigquery jobs history query")
 
-        rows = job.result()
-        for row in rows:
+        rows = list(job.result())
+        for row in tqdm(rows, desc="Extracting and parsing queries from query history", colour='green'):
             query_context = QueryContext(query_time=row[1],
                                          query_volume=row[2],
                                          query_type=row[3],
                                          user_name=row[4],
                                          destination_table=row[5],
                                          referenced_tables=row[6],
-                                         duration=row[7])
+                                         duration=row[7],
+                                         query_id=row[8])
 
             query = BigQueryQuery(raw_query_text=row[0],
                                   query_context=query_context,
