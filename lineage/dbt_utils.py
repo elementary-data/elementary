@@ -120,7 +120,8 @@ class LineageYamlGenerator(object):
 
     @staticmethod
     def get_model_columns(dbt_catalog: dict, model_name: str) -> []:
-        return [column_metadata['name'] for column, column_metadata in dbt_catalog['nodes'][model_name]['columns'].items()]
+        return [column_metadata['name'] for column, column_metadata in
+                dbt_catalog['nodes'][model_name]['columns'].items()]
 
     @staticmethod
     def resolve_column(target_column_name: str, source_models: [], dbt_catalog: dict) -> str:
@@ -157,6 +158,33 @@ class LineageYamlGenerator(object):
                 table_and_column_list = self.get_tables_and_columns(compiled_sql, dialect='bigquery')
                 sql_hash = self.hash_on_tables_and_columns(table_and_column_list)
                 model_name = dbt_model["name"]
+                yaml_name = f'{model_name}.yml'
+                yaml_file_path = os.path.join(lineage_dir_path, yaml_name)
+                use_current_mapping = False
+                previous_yml_dict = {}
+                if os.path.exists(yaml_file_path):
+                    with open(yaml_file_path, "r") as stream:
+                        try:
+                            previous_yml_dict = yaml.safe_load(stream)
+                            previous_sql_hash = previous_yml_dict.get('sql_hash')
+                            if sql_hash == previous_sql_hash:
+                                print(f'Yaml - {yaml_file_path} already exists and no change is required')
+                                continue
+                            else:
+                                regenerate = input(f'Yaml - {yaml_file_path} already exists and query was changed, '
+                                                   f'do you want to re-generate this yaml file (y/n)?')
+                                if regenerate.strip().lower() not in {'yes', 'y'}:
+                                    continue
+
+                                use_current_mapping = input('Do you want to use existing column mapping (y/n)?')
+                                if use_current_mapping.strip().lower() in {'yes', 'y'}:
+                                    use_current_mapping = True
+                                else:
+                                    use_current_mapping = False
+
+                        except yaml.YAMLError as exc:
+                            raise #TODO: fix
+
                 source_models = []
                 depends_on_models = dbt_model.get('depends_on', {}).get('nodes', [])
                 for source in depends_on_models:
@@ -171,11 +199,14 @@ class LineageYamlGenerator(object):
                                               'name': f'model.{self.get_alias_from_relation_name(source)}',
                                               'alias': self.get_alias_from_relation_name(source)})
                 target_columns = self.get_model_columns(dbt_catalog, node_name)
-                columns = {}
-                for target_column in target_columns:
-                    columns[f'{model_name}.{target_column}'] = self.resolve_column(target_column_name=target_column,
-                                                                                   source_models=source_models,
-                                                                                   dbt_catalog=dbt_catalog)
+                if use_current_mapping and previous_yml_dict:
+                    columns = previous_yml_dict['columns']
+                else:
+                    columns = {}
+                    for target_column in target_columns:
+                        columns[f'{model_name}.{target_column}'] = self.resolve_column(target_column_name=target_column,
+                                                                                       source_models=source_models,
+                                                                                       dbt_catalog=dbt_catalog)
                 edl_lineage = {'sql': literal_unicode(compiled_sql),
                                'sql_hash': sql_hash,
                                'target': {self.strip_relation_name(dbt_model['relation_name']): {'alias': model_name}},
@@ -185,8 +216,8 @@ class LineageYamlGenerator(object):
                                'validated': False,
                                'version': '1.0.0'
                                }
-                yaml_name = f'{model_name}.yml'
-                with open(os.path.join(lineage_dir_path, yaml_name), 'w') as yaml_file:
+
+                with open(yaml_file_path, 'w') as yaml_file:
                     yaml_file.write(yaml.dump(edl_lineage, default_flow_style=False))
                     print(f'Generated yaml - {os.path.join(lineage_dir_path, yaml_name)} successfully')
 
