@@ -1,6 +1,6 @@
 import click
 
-from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from lineage.dbt_utils import extract_credentials_and_data_from_profiles, LineageYamlGenerator
 from lineage.empty_graph_helper import EmptyGraphHelper
 from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
 from lineage.exceptions import ConfigError
@@ -10,6 +10,8 @@ from lineage.table_resolver import TableResolver
 from lineage.lineage_graph import LineageGraph
 from lineage.query_history_factory import QueryHistoryFactory
 from datetime import datetime
+
+from lineage.utils import get_lineage_yml_files_in_dir
 
 f = Figlet(font='slant')
 print(f.renderText('Elementary'))
@@ -58,7 +60,7 @@ class RequiredIf(click.Option):
 @click.option(
     '--profiles-dir', '-d',
     type=click.Path(exists=True),
-    required=True,
+    required=False,
     help="You can connect to your data warehouse using your profiles dir, just specify your profiles dir where a "
          "profiles.yml is located (could be a dbt profiles dir).",
     cls=RequiredIf,
@@ -67,7 +69,7 @@ class RequiredIf(click.Option):
 @click.option(
     '--profile-name', '-p',
     type=str,
-    required=True,
+    required=False,
     help="The profile name of the chosen profile in your profiles file.",
     cls=RequiredIf,
     required_if='profiles_dir'
@@ -88,10 +90,10 @@ class RequiredIf(click.Option):
          "directory to a file called latest_query_history.json (by default it won't be saved).",
 )
 @click.option(
-    '--full-table-names', '-n',
+    '--full-names', '-n',
     type=bool,
     default=False,
-    help="Indicates if the lineage should display full table names including the relevant database and schema names "
+    help="Indicates if the lineage should display full names including the relevant database and schema names "
          "(the default is to show only the table name)."
 )
 @click.option(
@@ -115,56 +117,87 @@ class RequiredIf(click.Option):
                                  LineageGraph.BOTH_DIRECTIONS]),
               help="Sets direction of dependencies when filtering on a specific table (default is both, "
                    "meaning showing both upstream and downstream dependencies of this table).",
-              default='both',
-              cls=RequiredIf,
-              required_if='table')
+              default='both')
+              #cls=RequiredIf,
+              #required_if='table')
 @click.option('--depth',
               type=int,
               help="Sets how many levels of dependencies to show when filtering on a specific table "
                    "(default is showing all levels of dependencies).",
-              default=None,
-              cls=RequiredIf,
-              required_if='table')
+              default=None)
+              #cls=RequiredIf,
+              #required_if='table')
+@click.option(
+    '--yml-dir', '-y',
+    type=str,
+    help="",
+    default=None
+)
+@click.option(
+    '--generate-yaml', '-g',
+    type=str,
+    help="dbt project dir",
+    default=None
+)
+@click.option(
+    '--column', '-c',
+    type=str,
+    help="",
+    default=None,
+    cls=RequiredIf,
+    required_if='yml_dir'
+)
 def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
-         export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
-         depth: int) -> None:
+         export_query_history: bool, full_names: bool, ignore_schema: bool, table: str, direction: str,
+         depth: int, yml_dir: str, generate_yaml: str, column: str) -> None:
     """
     For more details check out our documentation here - https://docs.elementary-data.com/
     """
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 
-    credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
-    anonymous_tracking = track_cli_start(profiles_dir, profile_data)
+    if generate_yaml is not None:
+        yaml_generator = LineageYamlGenerator(generate_yaml)
+        yaml_generator.create_yml_files_for_dbt_models()
+        return
+
+    #anonymous_tracking = track_cli_start(profiles_dir, profile_data)
 
     try:
-        query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
-            create_query_history(credentials, profile_data)
-        queries = query_history.extract_queries(start_date, end_date)
+        lineage_graph = LineageGraph(show_isolated_nodes=False, show_full_names=full_names)
+        if yml_dir is None:
+            credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
+            query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_names).\
+                create_query_history(credentials, profile_data)
+            queries = query_history.extract_queries(start_date, end_date)
+            lineage_graph.init_graph_from_query_list(queries)
 
-        lineage_graph = LineageGraph(show_isolated_nodes=False)
-        lineage_graph.init_graph_from_query_list(queries)
+            if table is not None:
+                table_resolver = TableResolver(profile_database_name=credentials.database,
+                                               profile_schema_name=credentials.schema if not ignore_schema else None,
+                                               queried_database_name=credentials.database,
+                                               queried_schema_name=credentials.schema,
+                                               full_table_names=full_names)
+                resolved_table_name = table_resolver.name_qualification(table)
+                if resolved_table_name is None:
+                    raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name'
+                                      f'that is aligned with the database and schema in your profiles.yml file.')
+                lineage_graph.filter_on_node(resolved_table_name, direction, depth)
+        else:
+            yml_files = get_lineage_yml_files_in_dir(yml_dir)
+            lineage_graph.init_graph_from_yml_files(yml_files)
 
-        if table is not None:
-            table_resolver = TableResolver(profile_database_name=credentials.database,
-                                           profile_schema_name=credentials.schema if not ignore_schema else None,
-                                           queried_database_name=credentials.database,
-                                           queried_schema_name=credentials.schema,
-                                           full_table_names=full_table_names)
-            resolved_table_name = table_resolver.name_qualification(table)
-            if resolved_table_name is None:
-                raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name'
-                                  f'that is aligned with the database and schema in your profiles.yml file.')
-            lineage_graph.filter_on_table(resolved_table_name, direction, depth)
+            if column is not None:
+                lineage_graph.filter_on_node(column, direction, depth)
 
         success = lineage_graph.draw_graph(should_open_browser=open_browser)
         if not success:
             print(EmptyGraphHelper(credentials.type).get_help_message())
 
-        track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
+        #track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
 
     except Exception as exc:
-        track_cli_exception(anonymous_tracking, exc)
+        #track_cli_exception(anonymous_tracking, exc)
         raise
 
 

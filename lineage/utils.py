@@ -3,7 +3,6 @@ import logging
 import sys
 from pathlib import Path
 from typing import Optional
-
 import click
 import pkg_resources
 
@@ -117,3 +116,8 @@ def format_milliseconds(duration: int) -> str:
     return f'{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms'
 
 
+def get_lineage_yml_files_in_dir(dirname: str):
+    filenames = []
+    for path in Path(dirname).rglob('lineage/*.yml'):
+        filenames.append(str(path))
+    return filenames

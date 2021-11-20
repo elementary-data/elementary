@@ -203,6 +203,6 @@ def test_lineage_graph_filter_on_table(profile_database_name, profile_schema_nam
     table_resolver = TableResolver(profile_database_name=profile_database_name, profile_schema_name=profile_schema_name,
                                    full_table_names=full_table_names)
     reference._lineage_graph = create_directed_graph_from_edge_list(edges)
-    reference.filter_on_table(table_resolver.name_qualification(selected_node), direction, depth)
+    reference.filter_on_node(table_resolver.name_qualification(selected_node), direction, depth)
     assert compare_edges(reference._lineage_graph, expected_remaining_edges)
 
