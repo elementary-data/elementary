@@ -202,8 +202,7 @@ class LineageGraph(object):
                                     Lineage details</br>
                                 </strong>
                                 <div style="min-width:74px;display:inline-block">Table:</div> {target_table_name}</br>
-                                <div style="min-width:74px;display:inline-block">Column:</div> {target_column_name}</br>
-                                <div style="min-width:74px;display:inline-block">SQL Hash:</div> {yml_dict.get('sql_hash', '')}</br></br>    
+                                <div style="min-width:74px;display:inline-block">Column:</div> <b>{target_column_name}</b></br></br>    
                                 <strong>
                                     SQL Raw</br>
                                 </strong>

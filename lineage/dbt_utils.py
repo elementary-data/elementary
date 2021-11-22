@@ -207,15 +207,14 @@ class LineageYamlGenerator(object):
                         columns[f'{model_name}.{target_column}'] = self.resolve_column(target_column_name=target_column,
                                                                                        source_models=source_models,
                                                                                        dbt_catalog=dbt_catalog)
-                edl_lineage = {'sql': literal_unicode(compiled_sql),
-                               'sql_hash': sql_hash,
+                edl_lineage = {'validated': False,
                                'target': {self.strip_relation_name(dbt_model['relation_name']): {'alias': model_name}},
                                'sources': {self.strip_relation_name(source_model['relation_name']):
                                                {'alias': source_model['alias']} for source_model in source_models},
                                'columns': columns,
-                               'validated': False,
-                               'version': '1.0.0'
-                               }
+                               'sql': literal_unicode(compiled_sql),
+                               'sql_hash': sql_hash,
+                               'version': '1.0.0'}
 
                 with open(yaml_file_path, 'w') as yaml_file:
                     yaml_file.write(yaml.dump(edl_lineage, default_flow_style=False))
