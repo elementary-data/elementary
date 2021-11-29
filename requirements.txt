@@ -14,4 +14,6 @@ google-api-core
 requests
 beautifulsoup4
 posthog
+sqlfluff
+
 
