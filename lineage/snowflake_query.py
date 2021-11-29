@@ -54,13 +54,12 @@ class SnowflakeQuery(Query):
                 continue
 
             if seg.is_type('table_reference') and look_for_target:
-                table_name = table_resolver.name_qualification(seg.raw)
-                target_tables.add(table_name)
+                target_tables.add(table_resolver.name_qualification(seg.raw))
 
             if look_for_source:
-                sources = list(seg.recursive_crawl('table_reference'))
-                for source in sources:
-                    source_tables.add(table_resolver.name_qualification(source.raw))
+                source_table_references = list(seg.recursive_crawl('table_reference'))
+                for source_table_reference in source_table_references:
+                    source_tables.add(table_resolver.name_qualification(source_table_reference.raw))
 
         return source_tables, target_tables
 
