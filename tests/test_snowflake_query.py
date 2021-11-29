@@ -1,6 +1,7 @@
 import pytest
-from build.lib.lineage.query_context import QueryContext
+from lineage.query_context import QueryContext
 from lineage.snowflake_query import SnowflakeQuery
+from lineage.table_resolver import TableResolver
 
 
 @pytest.mark.parametrize("query_text, profile_db, profile_sc, queried_db, queried_sc, expected_source_tables,"
@@ -75,4 +76,30 @@ def test_snowflake_query_parse_with_alter_table(query_text, profile_db, profile_
     assert reference.renamed_tables == expected_renamed_tables
 
 
+@pytest.mark.parametrize("query_text, db, sc, expected_source_tables, expected_target_tables", [
+                        ("""MERGE INTO db.sc.target_table        AS  dest
+                            USING db.sc.source_table             AS  src
+                                ON  src.id =  dest.id
+                            WHEN NOT matched THEN INSERT
+                                (id, a, b)
+                            VALUES
+                                (id, a, b)
+                            """,
+                            'db', 'sc', {'db.sc.source_table'}, {'db.sc.target_table'}),
+                        ("""MERGE INTO db.sc.target_table        AS  dest
+                            USING (SELECT * FROM db.sc.source_table) AS src
+                                ON  src.id =  dest.id
+                            WHEN NOT matched THEN INSERT
+                                (id, a, b)
+                            VALUES
+                                (id, a, b)
+                            """,
+                         'db', 'sc', {'db.sc.source_table'}, {'db.sc.target_table'}),
+])
+def test_snowflake_query_parse_with_merge_query(query_text, db, sc, expected_source_tables, expected_target_tables):
+
+    table_resolver = TableResolver(db, sc, db, sc, True)
+    sources, targets = SnowflakeQuery._parse_merge_query(table_resolver, query_text)
+    assert expected_source_tables == sources
+    assert expected_target_tables == targets
 
