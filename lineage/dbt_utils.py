@@ -7,7 +7,7 @@ import google.cloud.bigquery
 import google.cloud.exceptions
 from google.api_core import client_info
 from lineage.exceptions import ConfigError
-from lineage.utils import get_logger
+from lineage.utils import get_logger, get_yml_files_in_dir
 import json
 import os
 import oyaml as yaml
@@ -145,12 +145,61 @@ class LineageYamlGenerator(object):
     def get_alias_from_relation_name(cls, relation_name: str) -> str:
         return cls.strip_relation_name(relation_name).rsplit('.', 1)[-1]
 
+    def enrich_schema_yml_files(self):
+        dbt_target_dir = get_dbt_target_dir(self.dbt_dir)
+        dbt_manifest = load_dbt_manifest(dbt_target_dir)
+        dbt_catalog = load_dbt_catalog(dbt_target_dir)
+        schema_files = get_yml_files_in_dir(self.dbt_dir, 'schema.yml', 'target')
+        nodes_dict = dbt_manifest['nodes']
+
+        for schema_file in schema_files:
+            with open(schema_file, "r") as schema_content:
+                schema_dict = yaml.safe_load(schema_content)
+                models = schema_dict['models']
+                for model in models:
+                    schema_model_columns = model['columns']
+                    model_name = f'model.jaffle_shop.{model["name"]}'
+                    catalog_columns = self.get_model_columns(dbt_catalog, model_name)
+                    dbt_model = nodes_dict[model_name]
+                    source_models = []
+                    compiled_sql = dbt_model['compiled_sql']
+                    depends_on_models = dbt_model.get('depends_on', {}).get('nodes', [])
+                    for source in depends_on_models:
+                        source_relation_name = dbt_manifest['nodes'][source]['relation_name']
+                        source_models.append({'relation_name': source_relation_name,
+                                              'name': source,
+                                              'alias': self.get_alias_from_relation_name(source_relation_name)})
+                    if len(source_models) == 0:
+                        sources = self.get_tables(compiled_sql, dialect='bigquery')
+                        for source in sources:
+                            source_models.append({'relation_name': source,
+                                                  'name': f'model.jaffle_shop.{self.get_alias_from_relation_name(source)}',
+                                                  'alias': self.get_alias_from_relation_name(source)})
+
+                    for column in catalog_columns:
+                        found = False
+                        depends_on = self.resolve_column(column, source_models, dbt_catalog)
+
+                        for schema_column in schema_model_columns:
+                            if column == schema_column['name']:
+                                schema_column['depends_on'] = {'columns': depends_on}
+                                found = True
+                        if not found:
+                            schema_model_columns.append({'name': column, 'depends_on': {'columns': depends_on}})
+
+            with open(schema_file, 'w') as yaml_file:
+                yaml_file.write(yaml.dump(schema_dict, default_flow_style=False))
+                print(f'Updated {schema_file} successfully')
+
+
+
     def create_yml_files_for_dbt_models(self) -> None:
         lineage_dir_path = self.create_lineage_dir(self.dbt_dir)
         dbt_target_dir = get_dbt_target_dir(self.dbt_dir)
         dbt_manifest = load_dbt_manifest(dbt_target_dir)
         dbt_catalog = load_dbt_catalog(dbt_target_dir)
         nodes_dict = dbt_manifest['nodes']
+
         for node_name, node_metadata in nodes_dict.items():
             if node_metadata['resource_type'] == 'model':
                 dbt_model = node_metadata

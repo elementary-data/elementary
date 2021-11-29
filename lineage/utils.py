@@ -116,8 +116,10 @@ def format_milliseconds(duration: int) -> str:
     return f'{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms'
 
 
-def get_lineage_yml_files_in_dir(dirname: str):
+def get_yml_files_in_dir(dirname: str, pattern: str, exclude: str = None) -> []:
     filenames = []
-    for path in Path(dirname).rglob('lineage/*.yml'):
+    for path in Path(dirname).rglob(pattern):
+        if exclude is not None and exclude in str(path):
+            continue
         filenames.append(str(path))
     return filenames

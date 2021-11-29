@@ -11,7 +11,7 @@ from lineage.lineage_graph import LineageGraph
 from lineage.query_history_factory import QueryHistoryFactory
 from datetime import datetime
 
-from lineage.utils import get_lineage_yml_files_in_dir
+from lineage.utils import get_yml_files_in_dir
 
 f = Figlet(font='slant')
 print(f.renderText('Elementary'))
@@ -158,7 +158,7 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
 
     if generate_yaml is not None:
         yaml_generator = LineageYamlGenerator(generate_yaml)
-        yaml_generator.create_yml_files_for_dbt_models()
+        yaml_generator.enrich_schema_yml_files()
         return
 
     #anonymous_tracking = track_cli_start(profiles_dir, profile_data)
@@ -184,8 +184,8 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
                                       f'that is aligned with the database and schema in your profiles.yml file.')
                 lineage_graph.filter_on_node(resolved_table_name, direction, depth)
         else:
-            yml_files = get_lineage_yml_files_in_dir(yml_dir)
-            lineage_graph.init_graph_from_yml_files(yml_files)
+            yml_files = get_yml_files_in_dir(yml_dir, 'schema.yml', 'target')
+            lineage_graph.init_graph_from_schema_files(yml_files)
 
             if column is not None:
                 lineage_graph.filter_on_node(column, direction, depth)

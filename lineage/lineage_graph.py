@@ -168,6 +168,28 @@ class LineageGraph(object):
 
         logger.debug(f'Finished updating lineage graph!')
 
+    def init_graph_from_schema_files(self, schema_yml_files: [str]):
+        for yml_file in schema_yml_files:
+            with open(yml_file, "r") as stream:
+                try:
+                    yml_dict = yaml.safe_load(stream)
+                    models = yml_dict['models']
+                    for model in models:
+                        model_name = model['name']
+                        columns = model['columns']
+                        for column in columns:
+                            if 'depends_on' in column:
+                                depends_on_columns = column['depends_on']['columns']
+                                #is_validated = column['depends_on'].get('validated')
+                                #edge_color = 'red' if not is_validated  else None
+                                #edge_title = 'link is validated' if is_validated else 'link is not validated'
+                                self._add_nodes_and_edges(sources={depends_on_columns},
+                                                          targets={f'{model_name}.{column["name"]}'},
+                                                          query_context_html='')
+                except yaml.YAMLError as exc:
+                    raise
+                    # TODO: fix
+
     def init_graph_from_yml_files(self, yml_files: [str]) -> None:
         for yml_file in yml_files:
             with open(yml_file, "r") as stream:
