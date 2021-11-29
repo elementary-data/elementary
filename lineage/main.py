@@ -97,8 +97,9 @@ class RequiredIf(click.Option):
 @click.option(
     '--ignore-schema', '-i',
     type=bool,
-    default=False,
-    help="Indicates if the lineage should filter only on tables in the configured profile's schema."
+    default=True,
+    help="Indicates if the lineage should ignore the configured profile's schema and present every table in the "
+         "configured database."
 )
 @click.option(
     '--table', '-t',

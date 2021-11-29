@@ -16,7 +16,7 @@ class EmptyGraphHelper(object):
         return f"""
         We are deeply sorry but unfortunately the result graph is empty.
         Please try the following steps to fix the problem - 
-        \t1. Try running again with --ignore-schema=true
+        \t1. Try running again with a broader date range
         \t2. Check that you have sufficient permissions (follow this short guide here - {self.get_integration_docs_link()})
         \t3. Join our slack channel here - https://bit.ly/slack-elementary, we promise to help and be nice! 
         """
