@@ -17,8 +17,7 @@ my_snowflake_profile:
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
-      ## Schema is used as filter by default, you can use the 'ignore schema' 
-      ## option to see cross schema lineage
+      ## Schema is not used as filter by default, you can use the 'ignore schema' option set to false to improve run times in large databases
       schema: [schema name]
       ## OPTIONAL - if you want to create the lineage based on queries from more 
       ## than the last 7 days or you have 10k or more queries in the history pulled during 
