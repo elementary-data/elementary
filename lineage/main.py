@@ -1,6 +1,9 @@
+import os
+
 import click
 
-from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from lineage.dbt_models_column_lineage import DbtModelsColumnLineage
+from lineage.dbt_utils import extract_credentials_and_data_from_profiles, load_dbt_catalog, load_dbt_manifest
 from lineage.empty_graph_helper import EmptyGraphHelper
 from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
 from lineage.exceptions import ConfigError
@@ -40,7 +43,18 @@ class RequiredIf(click.Option):
             ctx, opts, args)
 
 
-@click.command()
+@click.group()
+def lineage():
+    """
+    For more details check out our documentation here - https://docs.elementary-data.com/
+    """
+    click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
+               f"https://bit.ly/slack-elementary\n")
+
+    pass
+
+
+@lineage.command()
 @click.option(
     '--start-date', '-s',
     type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
@@ -116,7 +130,7 @@ class RequiredIf(click.Option):
                                  LineageGraph.BOTH_DIRECTIONS]),
               help="Sets direction of dependencies when filtering on a specific table (default is both, "
                    "meaning showing both upstream and downstream dependencies of this table).",
-              default='both',
+              default=LineageGraph.BOTH_DIRECTIONS,
               cls=RequiredIf,
               required_if='table')
 @click.option('--depth',
@@ -126,22 +140,16 @@ class RequiredIf(click.Option):
               default=None,
               cls=RequiredIf,
               required_if='table')
-def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
-         export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
-         depth: int) -> None:
-    """
-    For more details check out our documentation here - https://docs.elementary-data.com/
-    """
-    click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
-               f"https://bit.ly/slack-elementary\n")
-
+def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
+                  export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
+                  depth: int) -> None:
     credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
     anonymous_tracking = track_cli_start(profiles_dir, profile_data)
 
     try:
-        query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
+        query_history_handler = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
             create_query_history(credentials, profile_data)
-        queries = query_history.extract_queries(start_date, end_date)
+        queries = query_history_handler.extract_queries(start_date, end_date)
 
         lineage_graph = LineageGraph(show_isolated_nodes=False)
         lineage_graph.init_graph_from_query_list(queries)
@@ -167,6 +175,52 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
     except Exception as exc:
         track_cli_exception(anonymous_tracking, exc)
         raise
+
+
+@lineage.command()
+@click.option(
+    '--analyze', '-a',
+    type=bool,
+    default=False,
+    help="Analyze dbt modules and enrich schema.yml files with column dependencies",
+)
+@click.option(
+    '--run', '-r',
+    type=bool,
+    default=False,
+    help="Generate lineage based on the column dependencies",
+)
+@click.option(
+    '--column', '-c',
+    type=str,
+    help="Filter on a column to see upstream and downstream dependencies of this column (see also direction param).",
+    default=None
+)
+@click.option('--direction',
+              type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
+                                 LineageGraph.BOTH_DIRECTIONS]),
+              help="Sets direction of dependencies when filtering on a specific column (default is both, "
+                   "meaning showing both upstream and downstream dependencies of this column).",
+              default=LineageGraph.BOTH_DIRECTIONS,
+              cls=RequiredIf,
+              required_if='column')
+@click.option('--depth',
+              type=int,
+              help="Sets how many levels of dependencies to show when filtering on a specific column "
+                   "(default is showing all levels of dependencies).",
+              default=None,
+              cls=RequiredIf,
+              required_if='column')
+def dbt(analyze: bool, run: bool, column: str, direction: str, depth: int):
+
+    current_dir = os.getcwd()
+    if analyze:
+        dbt_models_column_lineage = DbtModelsColumnLineage(current_dir)
+        dbt_models_column_lineage.enrich_schema_files()
+
+
+def main():
+    lineage()
 
 
 if __name__ == "__main__":

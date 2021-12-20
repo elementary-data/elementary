@@ -1,3 +1,5 @@
+import json
+import os
 from typing import Dict, Any
 import dbt.config
 from dbt.context.base import generate_base_context
@@ -8,6 +10,7 @@ import google.cloud.exceptions
 from google.api_core import client_info
 from lineage.exceptions import ConfigError
 from lineage.utils import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -52,3 +55,24 @@ def get_bigquery_client(profile_credentials):
         location=location,
         client_info=info,
     )
+
+
+def get_dbt_target_dir(dbt_dir: str) -> str:
+    dbt_target_dir = os.path.join(dbt_dir, 'target')
+    if not os.path.exists(dbt_target_dir):
+        raise ConfigError('Could not find target dir. Please make sure to run this command from a valid dbt project '
+                          'and after running both "dbt run" and "dbt docs generate"')
+
+    return dbt_target_dir
+
+
+def load_dbt_manifest(dbt_target_dir: str) -> dict:
+    return json.load(open(os.path.join(dbt_target_dir, 'manifest.json'), 'r'))
+
+
+def load_dbt_catalog(dbt_target_dir: str) -> dict:
+    return json.load(open(os.path.join(dbt_target_dir, 'catalog.json'), 'r'))
+
+
+def get_model_name(model: str) -> str:
+    return model.rsplit('.', 1)[-1].strip('`')
