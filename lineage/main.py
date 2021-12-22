@@ -179,16 +179,10 @@ def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, p
 
 @lineage.command()
 @click.option(
-    '--analyze', '-a',
-    type=bool,
-    default=False,
-    help="Analyze dbt modules and enrich schema.yml files with column dependencies",
+    '--analyze', 'mode', flag_value='analyze', default=True
 )
 @click.option(
-    '--run', '-r',
-    type=bool,
-    default=False,
-    help="Generate lineage based on the column dependencies",
+    '--run', 'mode', flag_value='run'
 )
 @click.option(
     '--column', '-c',
@@ -211,12 +205,14 @@ def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, p
               default=None,
               cls=RequiredIf,
               required_if='column')
-def dbt(analyze: bool, run: bool, column: str, direction: str, depth: int):
+def dbt(mode: str, column: str, direction: str, depth: int):
 
     current_dir = os.getcwd()
-    if analyze:
-        dbt_models_column_lineage = DbtModelsColumnLineage(current_dir)
+    dbt_models_column_lineage = DbtModelsColumnLineage(current_dir)
+    if mode == 'analyze':
         dbt_models_column_lineage.enrich_schema_files()
+    elif mode == 'run':
+        dbt_models_column_lineage.draw_lineage_from_schema_files(column, direction, depth)
 
 
 def main():

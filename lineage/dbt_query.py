@@ -60,21 +60,23 @@ class DbtQuery(object):
         #TODO: not sure that we need this across queries (maybe only the sources for this model will suffice)
         self.column_to_source = column_to_source
         self.source_to_column = source_to_column
+        self.source_columns = []
+        for source, columns in self.source_to_column.items():
+            for column in columns:
+                column_name = '.'.join([get_model_name(source), column])
+                self.source_columns.append(column_name)
         self.query_graph = nx.DiGraph()
 
     @classmethod
     def extract_column_and_alias_from_select_clause(cls, select_clause_element):
-        column = None
         column_alias = None
 
-        found_columns = [column_reference.raw.lower() for column_reference in select_clause_element.recursive_crawl('column_reference', 'wildcard_expression')]
-        if len(found_columns) == 1:
-            column = found_columns[0]
+        columns = [column_reference.raw.lower() for column_reference in select_clause_element.recursive_crawl('column_reference', 'wildcard_expression')]
         found_alias = [alias_ref.raw.lower().replace('as', '').strip() for alias_ref in select_clause_element.recursive_crawl('alias_expression')]
         if len(found_alias) == 1:
             column_alias = found_alias[0]
 
-        return column, column_alias
+        return columns, column_alias
 
     @classmethod
     def extract_table_and_alias_from_from_expression(cls, from_expression):
@@ -92,12 +94,17 @@ class DbtQuery(object):
 
     @classmethod
     def get_subquery_selected_columns(cls, segments):
+        #TODO: can we extract sources and target here instead of sources and alias? this will simplify the code later
         column_list = []
 
         for seg in segments:
             if seg.is_type('select_clause_element'):
-                column, column_alias = cls.extract_column_and_alias_from_select_clause(seg)
-                if column is not None:
+                columns, column_alias = cls.extract_column_and_alias_from_select_clause(seg)
+                #TODO: currently we assume that two or more columns can compound one target column if they have the
+                # same alias. Is it possible that two or more columns will be used without an alias?
+                # Meaning - what do you do if you have a column like this -> select sum(col1, col2) from table1 (do we need to give it a temp name?)
+                # It won't work for the CTE / subquery that comes afterwards so maybe not a real problem
+                for column in columns:
                     column_list.append({'name': column, 'alias': column_alias})
 
         for seg in segments:
@@ -120,6 +127,19 @@ class DbtQuery(object):
 
         return table_list
 
+    def get_subquery_join_columns(self, segments, subquery_sources):
+        column_list = []
+
+        for seg in segments:
+            if seg.is_type('join_on_condition'):
+                extracted_columns, _ = self.extract_column_and_alias_from_select_clause(seg)
+                #TODO: do this with a separate expand alias function (see also TODO comment in expand_subquery_column)
+                return [[self.expand_subquery_column(column, subquery_sources)[0] for column in extracted_columns]]
+        for seg in segments:
+            column_list.extend(self.get_subquery_join_columns(seg.segments, subquery_sources))
+
+        return column_list
+
     @classmethod
     def get_ctes(cls, parsed_query: ParsedString):
         return parsed_query.tree.recursive_crawl('common_table_expression')
@@ -133,9 +153,8 @@ class DbtQuery(object):
     def expand_wildcard(self, source_name):
         return ['.'.join([source_name, c]) for c in self.source_to_column[source_name]]
 
-    def expand_subquery_column(self, subquery_column: dict, subquery_sources: list) -> list:
-        subquery_column_name = subquery_column['name']
-
+    def expand_subquery_column(self, subquery_column_name: str, subquery_sources: list) -> list:
+        #TODO: extract to a separate function the ability to expand a table alias - i,e c.id to customers.id
         if '.' in subquery_column_name:
             subquery_column_source, subquery_column_name = subquery_column_name.rsplit('.', 1)
             for subquery_source in subquery_sources:
@@ -159,13 +178,16 @@ class DbtQuery(object):
             return expanded_columns
 
     def parse_subquery(self, subquery, subquery_target: str):
+        #TODO: we travere the tree multiple times, can we do it more efficently?
         subquery_columns = self.get_subquery_selected_columns(subquery.segments)
         subquery_sources = self.get_subquery_selected_tables(subquery.segments)
+        subquery_join_columns = self.get_subquery_join_columns(subquery.segments, subquery_sources)
 
-        subquery_source_to_target_column_list = []
+        subquery_source_to_target_column_list = set()
         for subquery_column in subquery_columns:
             subquery_column_alias = subquery_column['alias']
-            expanded_subquery_columns = self.expand_subquery_column(subquery_column, subquery_sources)
+            subquery_column_name = subquery_column['name']
+            expanded_subquery_columns = self.expand_subquery_column(subquery_column_name, subquery_sources)
             for expanded_subquery_source_column in expanded_subquery_columns:
                 # TODO: handle differently between wildcard and regular column
                 if subquery_column_alias is not None:
@@ -180,7 +202,12 @@ class DbtQuery(object):
                 self.column_to_source[target_column_name].add(subquery_target)
                 self.source_to_column[subquery_target].add(target_column_name)
 
-                subquery_source_to_target_column_list.append((expanded_subquery_source_column, subquery_target_column))
+                subquery_source_to_target_column_list.add((expanded_subquery_source_column, subquery_target_column))
+
+                for join_columns in subquery_join_columns:
+                    if expanded_subquery_source_column in join_columns:
+                        for join_column in join_columns:
+                            subquery_source_to_target_column_list.add((join_column, subquery_target_column))
 
         return subquery_source_to_target_column_list
 
@@ -222,16 +249,15 @@ class DbtQuery(object):
         return self.find_model_column_dependencies(model_columns)
 
     def find_model_column_dependencies(self, model_columns: list) -> dict:
-        source_nodes = [node for node, indegree in
-                        self.query_graph.in_degree(self.query_graph.nodes()) if indegree == 0]
+        # source_nodes = [node for node, indegree in
+        #                 self.query_graph.in_degree(self.query_graph.nodes()) if indegree == 0]
         model_column_dependencies = defaultdict(lambda: [])
-        # TODO: find more effecient way to implement this and also validate that it's no a CTE node
+        # TODO: find more efficient way to implement this and also validate that it's no a CTE node
         for model_column in model_columns:
-            for source_node in source_nodes:
+            for source_node in self.source_columns:
                 paths = list(nx.all_simple_paths(self.query_graph, source=source_node, target=model_column))
-                if len(paths) > 0:
-                    for path in paths:
-                        model_column_dependencies[model_column].append(path[0])
+                for path in paths:
+                    model_column_dependencies[model_column].append(path[0])
         return model_column_dependencies
 
     def draw_query_graph(self):
