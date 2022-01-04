@@ -11,9 +11,9 @@ from tqdm import tqdm
 from json_schema_for_humans.generate import generate_from_filename, generate_from_schema
 from json_schema_for_humans.generation_configuration import GenerationConfiguration
 import webbrowser
-import yaml
 import os
 import subprocess
+from ruamel.yaml import YAML
 
 snowflake.connector.paramstyle = 'numeric'
 
@@ -77,7 +77,11 @@ def init(ctx):
     elementary_dbt_package = {'git': ELEMENTARY_DBT_PACKAGE,
                               'revision': ELEMENTARY_DBT_PACKAGE_VERSION}
 
-    print("Adding elementary data reliability package to your dbt packages\n")
+    yaml = YAML()
+    yaml.indent(mapping=4, offset=4)
+    yaml.preserve_quotes = True
+
+    print("Adding elementary data reliability package to your dbt packages.")
     dbt_packages = {'packages': []}
     if os.path.exists('packages.yml'):
         with open('packages.yml', 'r') as packages_file:
@@ -91,21 +95,26 @@ def init(ctx):
         with open('packages.yml', 'w') as packages_file:
             yaml.dump(dbt_packages, packages_file)
 
-    print("Running 'dbt deps' to download the elementary data reliability package\n")
+    print("Running 'dbt deps' to download the package (this might take a while).")
     dbt_deps_result = subprocess.run(["dbt", "deps"], check=False, capture_output=True)
     if dbt_deps_result.returncode != 0:
         print(dbt_deps_result.stdout.decode('utf-8'))
         return
 
-    print("Adding elementary data reliability package to your dbt_project.yml\n")
+    print("Adding elementary data reliability package to your 'dbt_project.yml'.")
     with open('dbt_project.yml', 'r') as dbt_project_file:
         dbt_project = yaml.load(dbt_project_file)
 
-    dbt_project['models'] = dbt_project.get('models', {}).update({ELEMENTARY_DBT_PACKAGE_NAME: {'+enabled': False}})
+    elementary_dbt_package_models = {ELEMENTARY_DBT_PACKAGE_NAME: {'+enabled': False}}
+    if 'models' in dbt_project and dbt_project['models'] is not None:
+        dbt_project['models'].update(elementary_dbt_package_models)
+    else:
+        dbt_project['models'] = elementary_dbt_package_models
+
     with open('dbt_project.yml', 'w') as dbt_project_file:
         yaml.dump(dbt_project, dbt_project_file)
 
-    print("Running 'dbt deps' to download elementary data reliability package dependencies\n")
+    print("Running 'dbt deps' to download elementary data reliability package dependencies (this might take a while).")
     os.chdir(os.path.join('dbt_packages', ELEMENTARY_DBT_PACKAGE_NAME))
     dbt_deps_result = subprocess.run(["dbt", "deps"], check=False, capture_output=True)
     if dbt_deps_result.returncode != 0:
