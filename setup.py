@@ -25,16 +25,19 @@ setup(
     python_requires='>=3.6.2',
     entry_points='''
         [console_scripts]
-        edl=lineage.main:main
+        edr=observability.main:elementary_data_reliability
     ''',
     author="Elementary",
     package_data={"": ["header.html"]},
     keyword="data, lineage, data lineage, data warehouse, DWH",
     long_description=README,
     install_requires=install_requirements + [
-        'jinja2<3.0.0',
+        'Jinja2==2.11.3',
+        'werkzeug>=1,<3',
+        'flask < 1.1.1',
         'werkzeug<2.0',
-        'urllib3<1.26'
+        'json-schema-for-humans<0.35'
+        #'urllib3<1.26'
     ],
     long_description_content_type="text/markdown",
     license='',

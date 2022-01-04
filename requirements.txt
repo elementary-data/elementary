@@ -1,7 +1,11 @@
 click
 pyfiglet
 snowflake-connector-python
-dbt
+dbt-core
+dbt-postgres
+dbt-redshift
+dbt-snowflake
+dbt-bigquery
 networkx
 sqllineage==1.2.4
 pyvis
