@@ -8,14 +8,16 @@ from lineage.dbt_utils import extract_credentials_and_data_from_profiles
 from genson import SchemaBuilder
 import json
 from tqdm import tqdm
-from json_schema_for_humans.generate import generate_from_filename, generate_from_schema
+from json_schema_for_humans.generate import generate_from_filename
 from json_schema_for_humans.generation_configuration import GenerationConfiguration
 import webbrowser
+from datetime import datetime
 import os
 import subprocess
 from ruamel.yaml import YAML
 import glob
 from os.path import expanduser
+import io
 
 snowflake.connector.paramstyle = 'numeric'
 
@@ -24,14 +26,11 @@ print(f.renderText('Elementary'))
 
 ELEMENTARY_DBT_PACKAGE_NAME = 'elementary_observability'
 ELEMENTARY_DBT_PACKAGE = 'git@github.com:elementary-data/elementary-dbt.git'
-ELEMENTARY_DBT_PACKAGE_VERSION = 'master'
+ELEMENTARY_DBT_PACKAGE_VERSION = 'json_schemas'
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style
 yaml.preserve_quotes = True
-# import yaml
-# import yamlloader
 
 
 # TODO: move this to a view in our dbt pakcage
@@ -107,13 +106,18 @@ def init(ctx):
         with open('packages.yml', 'r') as packages_file:
             dbt_packages = yaml.load(packages_file)
 
-    current_installed_packages = {package.get('package') or package.get('git') for package in
-                                  dbt_packages.get('packages', [])}
+    #TODO: replace revision with version once deployed to dbt hub
+    found = False
+    for dbt_package in dbt_packages['packages']:
+        if dbt_package.get('package') == ELEMENTARY_DBT_PACKAGE or dbt_package.get('git') == ELEMENTARY_DBT_PACKAGE:
+            dbt_package['revision'] = ELEMENTARY_DBT_PACKAGE_VERSION
+            found = True
 
-    if ELEMENTARY_DBT_PACKAGE not in current_installed_packages:
+    if not found:
         dbt_packages['packages'].append(elementary_dbt_package)
-        with open('packages.yml', 'w') as packages_file:
-            yaml.dump(dbt_packages, packages_file)
+
+    with open('packages.yml', 'w') as packages_file:
+        yaml.dump(dbt_packages, packages_file)
 
     print("Running 'dbt deps' to download the package (this might take a while).")
     dbt_deps_result = subprocess.run(["dbt", "deps"], check=False, capture_output=True)
@@ -152,14 +156,28 @@ def init(ctx):
     type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
     default=str(date.today() - timedelta(days=2))
 )
-def profile_sources(ctx, start_time):
+@click.option(
+    '--html', '-h',
+    type=bool,
+    default=True,
+)
+@click.option(
+    '--update-sources', '-u',
+    type=bool,
+    default=True,
+)
+@click.option(
+    '--selected-source', '-f',
+    type=str,
+    default=None
+)
+def profile_sources(ctx, start_time: datetime, html: bool, update_sources: bool, selected_source: str):
     click.echo(f"Debug is {'on' if ctx.obj['DEBUG'] else 'off'}")
 
     if not os.path.exists('dbt_project.yml'):
         raise ConfigError('Please run this command from your main dbt project')
 
     with open('dbt_project.yml', 'r') as dbt_project_file:
-        #dbt_project = yaml.load(dbt_project_file, Loader=yamlloader.ordereddict.CSafeLoader)
         dbt_project = yaml.load(dbt_project_file)
 
     #TODO: make this a dbt utility
@@ -184,10 +202,11 @@ def profile_sources(ctx, start_time):
         #TODO: use specific exception
         raise ConfigError(f'Unsupported platform {credentials_type}')
 
+    config = GenerationConfiguration(copy_css=True, expand_buttons=True, template_name='js', show_toc=False)
+
     schema_file_paths = glob.glob(os.path.join('models', '*.yml'))
     for schema_file_path in schema_file_paths:
         with open(str(schema_file_path), 'r') as schema_file:
-            #model_schema = yaml.load(schema_file, Loader=yamlloader.ordereddict.CSafeLoader)
             model_schema = yaml.load(schema_file)
             if 'sources' in model_schema:
                 sources = model_schema['sources']
@@ -201,6 +220,9 @@ def profile_sources(ctx, start_time):
                     source_tables = source.get('tables')
 
                     if source_name is None or source_loaded_at_field is None or source_tables is None:
+                        continue
+
+                    if selected_source is not None and selected_source != source_name:
                         continue
 
                     for source_table in source_tables:
@@ -225,12 +247,48 @@ def profile_sources(ctx, start_time):
                                                            f"from {source_name}.{source_table_name}", colour='green'):
                                     builder.add_object(json.loads(row[0]))
 
-                    # TODO: Maybe should be under the column itself
-                    source['meta'] = {'json_schema': builder.to_schema()}
+                        # TODO: Maybe should be under the column itself
+                        source_table_schema = builder.to_schema()
+                        source_table['meta'] = {'json_schema': source_table_schema}
+                        if html:
+                            # TODO: create these under temp or a folder that gets cleaned
+                            json_file_name = f"{source_table_name}.json"
+                            with open(json_file_name, 'w') as json_file:
+                                json_file.write(json.dumps(source_table_schema))
+                            html_file_name = f"{source_table_name}.html"
+                            generate_from_filename(json_file_name, html_file_name, config=config)
+                            webbrowser.open(html_file_name)
 
-        with open(str(schema_file_path), 'w') as schema_file:
-            #yaml.dump(model_schema, schema_file, width=100, Dumper=yamlloader.ordereddict.CDumper)
-            yaml.dump(model_schema, schema_file)
+        if update_sources:
+            with open(str(schema_file_path), 'w') as schema_file:
+                yaml.dump(model_schema, schema_file)
+
+
+@elementary_data_reliability.command()
+@click.pass_context
+def run(ctx):
+
+    if not os.path.exists('dbt_project.yml'):
+        raise ConfigError('Please run this command from your main dbt project')
+
+    print("Running elementary observability dbt package (this might take a while).")
+    os.chdir(os.path.join('dbt_packages', ELEMENTARY_DBT_PACKAGE_NAME))
+    dbt_snapshot_result = subprocess.run(["dbt", "snapshot"], check=False, capture_output=True)
+    if dbt_snapshot_result.returncode != 0:
+        print(dbt_snapshot_result.stdout.decode('utf-8'))
+        return
+
+    if ctx.obj['DEBUG']:
+        print(dbt_snapshot_result.stdout)
+
+    dbt_run_result = subprocess.run(["dbt", "run", "-m", ELEMENTARY_DBT_PACKAGE_NAME], check=False, capture_output=True)
+    if dbt_run_result.returncode != 0:
+        print(dbt_run_result.stdout.decode('utf-8'))
+        return
+
+    print("Elementary observability package was run successfully.")
+    if ctx.obj['DEBUG']:
+        print(dbt_run_result.stdout)
 
 
 if __name__ == "__main__":
