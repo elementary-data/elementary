@@ -60,7 +60,7 @@ SELECT_SCHEMA_CHANGES_ALERTS = """
 """
 
 MONITORING_CONFIGURATION_EXISTS = """
-    SELECT count(*) from monitoring_configuration;
+    SELECT count(*) from IDENTIFIER(:1);
 """
 
 
@@ -381,11 +381,16 @@ def run(ctx, update_config):
 
     monitoring_configuration_exists = False
     with snowflake_con.cursor() as cursor:
-        cursor.execute(MONITORING_CONFIGURATION_EXISTS)
-        results = cursor.fetchall()
-        for result in results:
-            if result[0] > 0:
-                monitoring_configuration_exists = True
+        try:
+            #TODO: query this only if it exists in the information schema, move to the dbt package
+            cursor.execute(MONITORING_CONFIGURATION_EXISTS, ('.'.join([credentials.database, credentials.schema,
+                                                                       'monitoring_configuration']),))
+            results = cursor.fetchall()
+            for result in results:
+                if result[0] > 0:
+                    monitoring_configuration_exists = True
+        except snowflake.connector.errors.ProgrammingError:
+            pass
 
     if not monitoring_configuration_exists or update_config:
         Path('seeds').mkdir(parents=True, exist_ok=True)
