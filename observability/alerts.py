@@ -64,8 +64,9 @@ class SchemaChangeUnstructuredDataAlert(Alert):
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Description:*\nOut of {self.total_rows} rows, {self.bad_rows} rows did not fit "
-                                    f"any of your JSON schemas (Bad rows rate {self.bad_rows_rate}"
+                            "text": f"*Description:*\nBad rows rate is {self.bad_rows_rate}%!\n"
+                                    f"Out of {self.total_rows} rows, {self.bad_rows} rows did not fit "
+                                    f"any of your JSON schemas."
                         }
                     ]
                 }
