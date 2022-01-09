@@ -1,8 +1,8 @@
 from typing import Any
 
 from lineage.bigquery_query_history import BigQueryQueryHistory
-from lineage.dbt_utils import extract_credentials_and_data_from_profiles, get_bigquery_client
-from lineage.exceptions import ConfigError
+from lineage.dbt_utils import get_bigquery_client
+from exceptions.exceptions import ConfigError
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
 import snowflake.connector

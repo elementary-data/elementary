@@ -2,7 +2,7 @@ import click
 from datetime import date, timedelta
 import snowflake.connector
 
-from build.lib.lineage.exceptions import ConfigError
+from exceptions.exceptions import ConfigError
 from lineage.dbt_utils import extract_credentials_and_data_from_profiles
 from genson import SchemaBuilder
 import json
@@ -20,7 +20,7 @@ from pathlib import Path
 
 
 from observability.alerts import SchemaChangeUnstructuredDataAlert
-from utils.yaml_utils import get_ordered_yaml
+from utils.yaml import get_ordered_yaml
 
 snowflake.connector.paramstyle = 'numeric'
 
@@ -72,8 +72,7 @@ def observability(ctx, debug):
 @click.pass_context
 def init(ctx):
     if not os.path.exists('dbt_project.yml'):
-        # TODO: Exceptions should be in a common module and not here
-        raise ConfigError('Please run this command from your main dbt project')
+        raise ConfigError("Please run this command from a dbt project directory")
 
     #TODO: replace with dbt hub name and latest version once we deploy to dbt hub
 

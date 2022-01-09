@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from lineage.bigquery_query import BigQueryQuery
-from lineage.exceptions import SerializationError
+from exceptions.exceptions import SerializationError
 from lineage.query import Query
 from lineage.query_history_stats import QueryHistoryStats
 from lineage.snowflake_query import SnowflakeQuery

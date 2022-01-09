@@ -6,7 +6,7 @@ from dbt.adapters.bigquery.connections import BigQueryConnectionManager
 import google.cloud.bigquery
 import google.cloud.exceptions
 from google.api_core import client_info
-from lineage.exceptions import ConfigError
+from exceptions.exceptions import ConfigError
 from lineage.utils import get_logger
 
 logger = get_logger(__name__)
