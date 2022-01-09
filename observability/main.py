@@ -188,8 +188,6 @@ def init(ctx):
     default=None
 )
 def profile_sources(ctx, start_time: datetime, html: bool, update_sources: bool, selected_source: str):
-    click.echo(f"Debug is {'on' if ctx.obj['DEBUG'] else 'off'}")
-
     if not os.path.exists('dbt_project.yml'):
         raise ConfigError('Please run this command from your main dbt project')
 
