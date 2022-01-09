@@ -25,7 +25,7 @@ setup(
     python_requires='>=3.6.2',
     entry_points='''
         [console_scripts]
-        edr=observability.main:elementary_data_reliability
+        edr=cli.cli:cli
     ''',
     author="Elementary",
     package_data={"": ["header.html"]},
