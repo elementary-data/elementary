@@ -1,5 +1,4 @@
 import click
-from pyfiglet import Figlet
 from datetime import date, timedelta
 import snowflake.connector
 
@@ -25,8 +24,6 @@ from observability.alerts import SchemaChangeUnstructuredDataAlert
 
 snowflake.connector.paramstyle = 'numeric'
 
-f = Figlet(font='slant')
-print(f.renderText('Elementary'))
 
 ELEMENTARY_DBT_PACKAGE_NAME = 'elementary_observability'
 ELEMENTARY_DBT_PACKAGE = 'git@github.com:elementary-data/elementary-dbt.git'
@@ -99,12 +96,12 @@ def write_schema_json_to_output_files(json_schema: dict) -> None:
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 @click.pass_context
-def elementary_data_reliability(ctx, debug):
+def observability(ctx, debug):
     ctx.ensure_object(dict)
     ctx.obj['DEBUG'] = debug
 
 
-@elementary_data_reliability.command()
+@observability.command()
 @click.pass_context
 def init(ctx):
     if not os.path.exists('dbt_project.yml'):
@@ -165,7 +162,7 @@ def init(ctx):
           "Please make sure to commit your packages.yml and dbt_project.yml files.")
 
 
-@elementary_data_reliability.command()
+@observability.command()
 @click.pass_context
 @click.option(
     '--start-time', '-s',
@@ -337,7 +334,7 @@ def sources_to_csv(dbt_project_path: str, profile_database: str, csv_file_name: 
                                                  'monitored': column_monitored})
 
 
-@elementary_data_reliability.command()
+@observability.command()
 @click.pass_context
 @click.option(
     '--update-config', '-u',
@@ -432,4 +429,4 @@ def run(ctx, update_config):
 
 
 if __name__ == "__main__":
-    elementary_data_reliability()
+    observability()

@@ -4,15 +4,11 @@ from lineage.dbt_utils import extract_credentials_and_data_from_profiles
 from lineage.empty_graph_helper import EmptyGraphHelper
 from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
 from lineage.exceptions import ConfigError
-from pyfiglet import Figlet
 from datetime import timedelta, date
 from lineage.table_resolver import TableResolver
 from lineage.lineage_graph import LineageGraph
 from lineage.query_history_factory import QueryHistoryFactory
 from datetime import datetime
-
-f = Figlet(font='slant')
-print(f.renderText('Elementary'))
 
 
 class RequiredIf(click.Option):
@@ -40,7 +36,15 @@ class RequiredIf(click.Option):
             ctx, opts, args)
 
 
-@click.command()
+@click.group()
+@click.option('--debug/--no-debug', default=False)
+@click.pass_context
+def lineage(ctx, debug):
+    ctx.ensure_object(dict)
+    ctx.obj['DEBUG'] = debug
+
+
+@lineage.command()
 @click.option(
     '--start-date', '-s',
     type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
@@ -126,9 +130,9 @@ class RequiredIf(click.Option):
               default=None,
               cls=RequiredIf,
               required_if='table')
-def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
-         export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
-         depth: int) -> None:
+def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
+                  export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
+                  depth: int) -> None:
     """
     For more details check out our documentation here - https://docs.elementary-data.com/
     """
@@ -170,4 +174,4 @@ def main(start_date: datetime, end_date: datetime, profiles_dir: str, profile_na
 
 
 if __name__ == "__main__":
-    main()
+    lineage()
