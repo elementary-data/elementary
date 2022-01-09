@@ -13,7 +13,6 @@ import webbrowser
 from datetime import datetime
 import os
 import subprocess
-from ruamel.yaml import YAML
 import glob
 from os.path import expanduser
 import csv
@@ -21,6 +20,7 @@ from pathlib import Path
 
 
 from observability.alerts import SchemaChangeUnstructuredDataAlert
+from utils.yaml_utils import get_ordered_yaml
 
 snowflake.connector.paramstyle = 'numeric'
 
@@ -29,9 +29,7 @@ ELEMENTARY_DBT_PACKAGE_NAME = 'elementary_observability'
 ELEMENTARY_DBT_PACKAGE = 'git@github.com:elementary-data/elementary-dbt.git'
 ELEMENTARY_DBT_PACKAGE_VERSION = 'json_schemas'
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.preserve_quotes = True
+yaml = get_ordered_yaml()
 
 
 # TODO: move this to a view in our dbt pakcage
@@ -60,37 +58,6 @@ MONITORING_CONFIGURATION_EXISTS = """
     SELECT count(*) from IDENTIFIER(:1);
 """
 
-
-class RequiredIf(click.Option):
-    def __init__(self, *args, **kwargs):
-        self.required_if = kwargs.pop('required_if')
-        assert self.required_if, "'required_if' parameter required"
-        kwargs['help'] = (kwargs.get('help', '') +
-                          ' NOTE: This argument must be configured together with %s.' %
-                          self.required_if
-                          ).strip()
-        super(RequiredIf, self).__init__(*args, **kwargs)
-
-    def handle_parse_result(self, ctx, opts, args):
-        we_are_present = self.name in opts
-        other_present = self.required_if in opts
-
-        if we_are_present and not other_present:
-            raise click.UsageError(
-                "Illegal usage: `%s` must be configured with `%s`" % (
-                    self.name, self.required_if))
-        else:
-            self.prompt = None
-
-        return super(RequiredIf, self).handle_parse_result(
-            ctx, opts, args)
-
-
-def write_schema_json_to_output_files(json_schema: dict) -> None:
-    with open("my_schema.json", 'w') as schema_json_file:
-        schema_json_file.write(json.dumps(json_schema))
-    with open('my_schema.yml', 'w') as schema_yml_file:
-        yaml.dump(json_schema, schema_yml_file, allow_unicode=True)
 
 
 @click.group()
