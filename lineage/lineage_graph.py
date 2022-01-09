@@ -2,7 +2,7 @@ import itertools
 from typing import Optional
 import networkx as nx
 from collections import defaultdict
-from lineage.exceptions import ConfigError
+from exceptions.exceptions import ConfigError
 from pyvis.network import Network
 import webbrowser
 from lineage.query import Query

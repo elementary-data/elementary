@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 from snowflake.connector.cursor import SnowflakeCursor
 from tqdm import tqdm
 
-from lineage.exceptions import ConfigError
+from exceptions.exceptions import ConfigError
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query import SnowflakeQuery
