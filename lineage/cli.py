@@ -1,6 +1,6 @@
 import click
 
-from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from utils.dbt import extract_credentials_and_data_from_profiles
 from lineage.empty_graph_helper import EmptyGraphHelper
 from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
 from exceptions.exceptions import ConfigError
