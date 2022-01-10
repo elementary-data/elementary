@@ -1,0 +1,3 @@
+packages:
+  - git: git@github.com:elementary-data/elementary-dbt.git
+    revision: json_schemas
