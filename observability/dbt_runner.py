@@ -1,4 +1,5 @@
 import subprocess
+from typing import Union
 
 from utils.log import get_logger
 
@@ -6,7 +7,7 @@ logger = get_logger(__name__)
 
 
 class DbtRunner(object):
-    def __init__(self, project_dir: str, profiles_dir: str):
+    def __init__(self, project_dir: str, profiles_dir: str) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
 
@@ -32,7 +33,7 @@ class DbtRunner(object):
     def snapshot(self) -> bool:
         return self._run_command(['snapshot'])
 
-    def run(self, model=None) -> bool:
+    def run(self, model: Union[str, None] = None) -> bool:
         command_args = ['run']
         if model is not None:
             command_args.extend(['-m', model])
