@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import snowflake.connector
 
 from exceptions.exceptions import ConfigError
-from lineage.dbt_utils import extract_credentials_and_data_from_profiles
+from utils.dbt import extract_credentials_and_data_from_profiles
 from genson import SchemaBuilder
 import json
 from tqdm import tqdm

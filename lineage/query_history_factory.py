@@ -1,7 +1,7 @@
 from typing import Any
 
 from lineage.bigquery_query_history import BigQueryQueryHistory
-from lineage.dbt_utils import get_bigquery_client
+from utils.dbt import get_bigquery_client
 from exceptions.exceptions import ConfigError
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
