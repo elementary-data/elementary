@@ -4,7 +4,7 @@ class Error(Exception):
 
 
 class ConfigError(Error):
-    """Exception raised for errors in the profiles configuration"""
+    """Exception raised for errors in configuration"""
     def __init__(self, message):
         self.message = message
 
