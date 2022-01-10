@@ -1,6 +1,6 @@
 from sqllineage.models import Schema, Table
 from typing import Optional, Union, Callable
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 

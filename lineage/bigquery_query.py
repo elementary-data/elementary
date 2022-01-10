@@ -2,7 +2,7 @@ from typing import Optional
 from lineage.query_context import QueryContext
 from lineage.table_resolver import TableResolver
 from lineage.query import Query
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 
