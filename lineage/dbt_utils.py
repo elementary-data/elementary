@@ -7,7 +7,7 @@ import google.cloud.bigquery
 import google.cloud.exceptions
 from google.api_core import client_info
 from exceptions.exceptions import ConfigError
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 

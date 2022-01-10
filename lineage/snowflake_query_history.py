@@ -7,7 +7,7 @@ from exceptions.exceptions import ConfigError
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query import SnowflakeQuery
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 

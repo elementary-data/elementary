@@ -2,7 +2,7 @@ import sqlparse
 from sqllineage.core import LineageAnalyzer, LineageResult
 from lineage.table_resolver import TableResolver
 from lineage.query_context import QueryContext
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 

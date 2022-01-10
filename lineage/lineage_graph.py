@@ -6,7 +6,7 @@ from exceptions.exceptions import ConfigError
 from pyvis.network import Network
 import webbrowser
 from lineage.query import Query
-from lineage.utils import get_logger
+from utils.log import get_logger
 from tqdm import tqdm
 import pkg_resources
 

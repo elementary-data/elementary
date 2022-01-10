@@ -5,7 +5,7 @@ from exceptions.exceptions import SerializationError
 from lineage.query import Query
 from lineage.query_history_stats import QueryHistoryStats
 from lineage.snowflake_query import SnowflakeQuery
-from lineage.utils import is_flight_mode_on
+from utils.env_vars import is_flight_mode_on
 import json
 import os
 
