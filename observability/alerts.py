@@ -2,9 +2,24 @@ from datetime import datetime
 import requests
 import json
 
+from exceptions.exceptions import InvalidAlertType
+
 
 class Alert(object):
     ALERT_DESCRIPTION = None
+
+    @staticmethod
+    def create_alert_from_row(alert_row: list) -> 'Alert':
+        alert_type = alert_row[0]
+        #TODO: change alert type to be similar to alert description
+        if alert_type == 'schema_change_from_configuration':
+            return SchemaChangeAlert(alert_row[1],
+                                     alert_row[2],
+                                     alert_row[3],
+                                     alert_row[4],
+                                     alert_row[5])
+        else:
+            raise InvalidAlertType(f'Got invalid alert type - {alert_type}')
 
     @staticmethod
     def send(webhook: str, data: dict, content_types: str = "application/json"):
@@ -16,6 +31,52 @@ class Alert(object):
     def send_to_slack(self, webhook: str):
         data = self.to_slack_message()
         self.send(webhook, data)
+
+
+class SchemaChangeAlert(Alert):
+    ALERT_DESCRIPTION = "Schema change detected"
+
+    def __init__(self, table_name, detected_at, description, alert_details_keys, alert_details_values):
+        self.table_name = table_name
+        self.detected_at = detected_at
+        self.description = description
+        self.alert_details_keys = alert_details_keys
+        self.alert_details_values = alert_details_values
+
+    def to_slack_message(self) -> dict:
+        return {
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"You have a new alert:\n*{self.ALERT_DESCRIPTION}*"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Table:*\n{self.table_name}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*When:*\n{self.detected_at}"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Description:*\n{self.description}"
+                        }
+                    ]
+                }
+            ]
+        }
 
 
 class SchemaChangeUnstructuredDataAlert(Alert):

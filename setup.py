@@ -28,7 +28,7 @@ setup(
         edr=cli.cli:cli
     ''',
     author="Elementary",
-    package_data={"": ["header.html"]},
+    package_data={"": ["header.html", "dbt_project/*"]},
     keyword="data, lineage, data lineage, data warehouse, DWH",
     long_description=README,
     install_requires=install_requirements + [
