@@ -1,6 +1,6 @@
 from typing import Union
 
-from utils.yaml import get_ordered_yaml
+from utils.ordered_yaml import OrderedYaml
 import os
 
 
@@ -12,13 +12,13 @@ class Config(object):
         self.config_dir_path = config_dir_path
         self.profiles_dir_path = profiles_dir_path
         self.config_file_path = os.path.join(self.config_dir_path, self.CONFIG_FILE_NAME)
-        self.yaml = get_ordered_yaml()
+        self.ordered_yaml = OrderedYaml()
 
     def _get_monitoring_configuration(self) -> dict:
         if not os.path.exists(self.config_file_path):
             return {}
 
-        config_dict = self.yaml.load(self.config_file_path)
+        config_dict = self.ordered_yaml.load(self.config_file_path)
         return config_dict.get('monitoring_configuration', {})
 
     def get_slack_notification_webhook(self) -> Union[str, None]:
@@ -31,7 +31,7 @@ class Config(object):
         config_files = monitoring_config.get('config_files', [])
         sources = []
         for config_file in config_files:
-            config_dict = self.yaml.load(config_file)
+            config_dict = self.ordered_yaml.load(config_file)
             sources.extend(config_dict.get('sources', []))
 
         return sources

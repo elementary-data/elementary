@@ -1,3 +1,4 @@
+import os.path
 from typing import Dict, Any
 import dbt.config
 from dbt.context.base import generate_base_context
@@ -9,6 +10,8 @@ from google.api_core import client_info
 from exceptions.exceptions import ConfigError
 from utils.log import get_logger
 import snowflake.connector
+
+from utils.ordered_yaml import OrderedYaml
 
 snowflake.connector.paramstyle = 'numeric'
 
@@ -70,3 +73,10 @@ def get_snowflake_client(profile_credentials):
         application='elementary',
         **profile_credentials.auth_args()
     )
+
+
+def get_profile_name_from_dbt_project(dbt_project_path: str) -> str:
+    ordered_yaml = OrderedYaml()
+    dbt_project_dict = ordered_yaml.load(os.path.join(dbt_project_path, 'dbt_project.yml'))
+    return dbt_project_dict['profile']
+
