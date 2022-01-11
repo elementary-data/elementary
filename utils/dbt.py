@@ -8,6 +8,9 @@ import google.cloud.exceptions
 from google.api_core import client_info
 from exceptions.exceptions import ConfigError
 from utils.log import get_logger
+import snowflake.connector
+
+snowflake.connector.paramstyle = 'numeric'
 
 logger = get_logger(__name__)
 
@@ -51,4 +54,19 @@ def get_bigquery_client(profile_credentials):
         creds,
         location=location,
         client_info=info,
+    )
+
+
+def get_snowflake_client(profile_credentials):
+    return snowflake.connector.connect(
+        account=profile_credentials.account,
+        user=profile_credentials.user,
+        database=profile_credentials.database,
+        schema=profile_credentials.schema,
+        warehouse=profile_credentials.warehouse,
+        role=profile_credentials.role,
+        autocommit=True,
+        client_session_keep_alive=profile_credentials.client_session_keep_alive,
+        application='elementary',
+        **profile_credentials.auth_args()
     )
