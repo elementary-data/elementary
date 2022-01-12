@@ -180,7 +180,12 @@ def profile_sources(ctx, start_time: datetime, html: bool, update_sources: bool,
     default=os.path.join(expanduser('~'), '.dbt')
 )
 @click.option(
-    '--force-update-dbt-package', '-f',
+    '--update-dbt-package', '-u',
+    type=bool,
+    default=False
+)
+@click.option(
+    '--full-refresh-dbt-package', '-f',
     type=bool,
     default=False
 )
@@ -189,10 +194,11 @@ def profile_sources(ctx, start_time: datetime, html: bool, update_sources: bool,
     type=bool,
     default=False
 )
-def run(ctx, config_dir_path, profiles_dir_path, force_update_dbt_package, reload_monitoring_configuration):
+def run(ctx, config_dir_path, profiles_dir_path, update_dbt_package, full_refresh_dbt_package,
+        reload_monitoring_configuration):
     config = Config(config_dir_path, profiles_dir_path)
     data_monitoring = DataMonitoring.create_data_monitoring(config)
-    data_monitoring.run(force_update_dbt_package, reload_monitoring_configuration)
+    data_monitoring.run(update_dbt_package, reload_monitoring_configuration, full_refresh_dbt_package)
 
 
 if __name__ == "__main__":
