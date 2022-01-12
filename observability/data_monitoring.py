@@ -32,12 +32,12 @@ class DataMonitoring(object):
     """
 
     SELECT_ALERTS_QUERY = """
-        SELECT alert_type, full_table_name, detected_at, description, alert_details_keys, alert_details_values 
+        SELECT alert_type, full_table_name, detected_at, alert_reason, alert_details_keys, alert_details_values 
             FROM ELEMENTARY_ALERTS;
     """
 
     SELECT_NEW_ALERTS_QUERY = """
-        SELECT alert_type, full_table_name, detected_at, description, alert_details_keys, alert_details_values 
+        SELECT alert_type, full_table_name, detected_at, alert_reason, alert_details_keys, alert_details_values 
             FROM ELEMENTARY_ALERTS
             WHERE detected_at > :1;
     """
@@ -176,7 +176,8 @@ class DataMonitoring(object):
                 alert = Alert.create_alert_from_row(alert_row)
                 alert.send_to_slack(slack_webhook)
 
-    def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False) -> None:
+    def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False,
+            dbt_full_refresh: bool = False) -> None:
         if not self._dbt_package_exists() or force_update_dbt_packages:
             if not self.dbt_runner.deps():
                 return
@@ -190,7 +191,7 @@ class DataMonitoring(object):
         # Run elementary observability dbt package
         if not self.dbt_runner.snapshot():
             return
-        if not self.dbt_runner.run(model=self.DBT_PACKAGE_NAME):
+        if not self.dbt_runner.run(model=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh):
             return
 
         self._send_alerts_to_slack(last_alert_time)

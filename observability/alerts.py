@@ -12,7 +12,7 @@ class Alert(object):
     def create_alert_from_row(alert_row: list) -> 'Alert':
         alert_type = alert_row[0]
         #TODO: change alert type to be similar to alert description
-        if alert_type == 'schema_change_from_configuration':
+        if alert_type in {'table_schema_change', 'column_schema_change'}:
             return SchemaChangeAlert(alert_row[1],
                                      alert_row[2],
                                      alert_row[3],
