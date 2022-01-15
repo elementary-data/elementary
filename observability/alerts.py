@@ -1,19 +1,22 @@
-from datetime import datetime
 import requests
 import json
-
 from exceptions.exceptions import InvalidAlertType
+from utils.time import convert_utc_time_to_local_time
 
 
 class Alert(object):
     ALERT_DESCRIPTION = None
 
+    def __init__(self, alert_id):
+        self.alert_id = alert_id
+
     @staticmethod
     def create_alert_from_row(alert_row: list) -> 'Alert':
-        alert_id, detected_at, full_table_name, alert_type, sub_type, alert_reason_value, alert_details_keys, \
-            alert_details_values = alert_row
+        alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type, \
+            alert_description = alert_row
         if alert_type == 'schema_change':
-            return SchemaChangeAlert(full_table_name, detected_at, alert_reason_value, sub_type)
+            return SchemaChangeAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
+                                     alert_description)
         else:
             raise InvalidAlertType(f'Got invalid alert type - {alert_type}')
 
@@ -28,24 +31,32 @@ class Alert(object):
         data = self.to_slack_message()
         self.send(webhook, data)
 
+    @property
+    def id(self):
+        return self.alert_id
+
 
 class SchemaChangeAlert(Alert):
     ALERT_DESCRIPTION = "Schema change detected"
 
-    def __init__(self, table_name, detected_at, description, sub_type):
-        self.table_name = table_name
-        self.detected_at = detected_at
-        self.description = description
+    def __init__(self, alert_id, database_name, schema_name, table_name, detected_at, sub_type, description):
+        super().__init__(alert_id)
+        self.table_name = '.'.join([database_name, schema_name, table_name]).lower()
+        self.detected_at = convert_utc_time_to_local_time(detected_at).strftime('%Y-%m-%d %H:%M:%S')
+        self.description = description.lower()
         self.change_type = ' '.join([word[0].upper() + word[1:] for word in sub_type.split('_')])
 
     def to_slack_message(self) -> dict:
         return {
             "blocks": [
                 {
+                    "type": "divider"
+                },
+                {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"You have a new alert:\n*{self.ALERT_DESCRIPTION}*"
+                        "text": f":small_red_triangle:*{self.ALERT_DESCRIPTION}*"
                     }
                 },
                 {
@@ -53,7 +64,7 @@ class SchemaChangeAlert(Alert):
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Table:*\n{self.table_name}"
+                            "text": f">*Table:*\n>{self.table_name}"
                         },
                         {
                             "type": "mrkdwn",
@@ -66,7 +77,7 @@ class SchemaChangeAlert(Alert):
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Change Type:*\n{self.change_type}"
+                            "text": f">*Change Type:*\n>{self.change_type}"
                         },
                         {
                             "type": "mrkdwn",
@@ -78,58 +89,5 @@ class SchemaChangeAlert(Alert):
         }
 
 
-class SchemaChangeUnstructuredDataAlert(Alert):
-    ALERT_DESCRIPTION = "Schema change in unstructured data detected"
 
-    def __init__(self, table_name, total_rows, bad_rows, bad_rows_rate, batch_min_time,
-                 batch_max_time, validation_details):
-        self.table_name = table_name
-        self.total_rows = total_rows
-        self.bad_rows = bad_rows
-        self.bad_rows_rate = bad_rows_rate
-        self.batch_min_time = batch_min_time
-        self.batch_max_time = batch_max_time
-        self.validation_details = validation_details
-
-    def to_slack_message(self) -> dict:
-        return {
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"You have a new alert:\n*{self.ALERT_DESCRIPTION}*"
-                    }
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Table:*\n{self.table_name}"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*When:*\n{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                        }
-                    ]
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Batch:*\n{self.batch_min_time.strftime('%Y-%m-%d %H:%M:%S')} - "
-                                    f"{self.batch_max_time.strftime('%Y-%m-%d %H:%M:%S')}"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Description:*\nBad rows rate is {self.bad_rows_rate}%!\n"
-                                    f"Out of {self.total_rows} rows, {self.bad_rows} rows did not fit "
-                                    f"any of your JSON schemas."
-                        }
-                    ]
-                }
-            ]
-        }
 
