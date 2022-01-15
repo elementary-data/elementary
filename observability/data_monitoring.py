@@ -13,6 +13,7 @@ from utils.dbt import extract_credentials_and_data_from_profiles, get_profile_na
 
 FILE_DIR = os.path.dirname(__file__)
 
+#TODO: change the dbt_project to be consistent with the lib version
 
 #TODO: maybe change to schema monitoring
 class DataMonitoring(object):
@@ -26,22 +27,16 @@ class DataMonitoring(object):
     MONITORING_TABLES_CONFIGURATION = 'monitoring_tables_configuration'
     MONITORING_COLUMNS_CONFIGURATION = 'monitoring_columns_configuration'
 
-    LAST_ALERT_TIME_QUERY = """
-        SELECT MAX(detected_at) 
-            FROM ELEMENTARY_ALERTS;
-    """
-
-    SELECT_ALERTS_QUERY = """
-        SELECT alert_id, detected_at, full_table_name, alert_type, sub_type, alert_reason_value, alert_details_keys, 
-               alert_details_values  
-            FROM ELEMENTARY_ALERTS;
-    """
-
     SELECT_NEW_ALERTS_QUERY = """
-        SELECT alert_id, detected_at, full_table_name, alert_type, sub_type, alert_reason_value, alert_details_keys, 
-               alert_details_values 
+        SELECT alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type, 
+               alert_description
             FROM ELEMENTARY_ALERTS
-            WHERE detected_at > :1;
+            WHERE alert_sent = FALSE;
+    """
+
+    UPDATE_SENT_ALERTS = """
+        UPDATE ELEMENTARY_ALERTS set alert_sent = TRUE
+            WHERE alert_id in (%s) 
     """
 
     COUNT_ROWS_QUERY = None
@@ -107,6 +102,7 @@ class DataMonitoring(object):
                                                                                      'alert_on_schema_changes'])
             column_config_csv_writer.writeheader()
 
+            #TODO: use schema if exists instead of source name, use identifier if exists instead of table / column name
             sources = self.config.get_sources()
             for source in sources:
                 #TODO: Decide if we need to do extra effort here to bring the relevant db from the profile that
@@ -160,23 +156,23 @@ class DataMonitoring(object):
     def _run_query(self, query: str, params: tuple = None) -> list:
         pass
 
-    def get_last_alert_time(self) -> Union[str, None]:
-        pass
-
     def monitoring_configuration_exists(self) -> bool:
         pass
 
-    def _send_alerts_to_slack(self, last_alert_time: Union[str, None]) -> None:
+    def _update_sent_alerts(self, alert_ids) -> None:
+        #TODO: check result - in snowflake there should be a column number of rows updated, at least log it without validating the result
+        self._run_query(self.UPDATE_SENT_ALERTS, (alert_ids,))
+
+    def _send_alerts_to_slack(self) -> None:
         slack_webhook = self.config.get_slack_notification_webhook()
         if slack_webhook is not None:
-            if last_alert_time is not None:
-                alert_rows = self._run_query(self.SELECT_NEW_ALERTS_QUERY, (last_alert_time,))
-            else:
-                alert_rows = self._run_query(self.SELECT_ALERTS_QUERY)
-
+            alert_rows = self._run_query(self.SELECT_NEW_ALERTS_QUERY)
+            sent_alerts = []
             for alert_row in alert_rows:
                 alert = Alert.create_alert_from_row(alert_row)
                 alert.send_to_slack(slack_webhook)
+                sent_alerts.append(alert.id)
+            self._update_sent_alerts(sent_alerts)
 
     def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False,
             dbt_full_refresh: bool = False) -> None:
@@ -188,16 +184,13 @@ class DataMonitoring(object):
             if not self._update_configuration():
                 return
 
-        last_alert_time = self.get_last_alert_time()
-
         # Run elementary observability dbt package
         if not self.dbt_runner.snapshot():
             return
         if not self.dbt_runner.run(model=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh):
             return
 
-        # TODO: mark alerts in db as sent
-        self._send_alerts_to_slack(last_alert_time)
+        self._send_alerts_to_slack()
 
 
 class SnowflakeDataMonitoring(DataMonitoring):
@@ -230,16 +223,6 @@ class SnowflakeDataMonitoring(DataMonitoring):
 
         return 0
 
-    def get_last_alert_time(self) -> Union[str, None]:
-        try:
-            results = self._run_query(self.LAST_ALERT_TIME_QUERY)
-            if len(results) == 1:
-                return results[0][0]
-        except snowflake.connector.errors.ProgrammingError:
-            pass
-
-        return None
-
     def monitoring_configuration_exists(self) -> bool:
         if self._count_rows_in_table(self.MONITORING_SCHEMAS_CONFIGURATION) > 0:
             return True
@@ -251,4 +234,5 @@ class SnowflakeDataMonitoring(DataMonitoring):
             return True
 
         return False
+
 
