@@ -10,14 +10,10 @@ class Alert(object):
 
     @staticmethod
     def create_alert_from_row(alert_row: list) -> 'Alert':
-        alert_type = alert_row[0]
-        #TODO: change alert type to be similar to alert description
-        if alert_type in {'table_schema_change', 'column_schema_change'}:
-            return SchemaChangeAlert(alert_row[1],
-                                     alert_row[2],
-                                     alert_row[3],
-                                     alert_row[4],
-                                     alert_row[5])
+        alert_id, detected_at, full_table_name, alert_type, sub_type, alert_reason_value, alert_details_keys, \
+            alert_details_values = alert_row
+        if alert_type == 'schema_change':
+            return SchemaChangeAlert(full_table_name, detected_at, alert_reason_value, sub_type)
         else:
             raise InvalidAlertType(f'Got invalid alert type - {alert_type}')
 
@@ -36,12 +32,11 @@ class Alert(object):
 class SchemaChangeAlert(Alert):
     ALERT_DESCRIPTION = "Schema change detected"
 
-    def __init__(self, table_name, detected_at, description, alert_details_keys, alert_details_values):
+    def __init__(self, table_name, detected_at, description, sub_type):
         self.table_name = table_name
         self.detected_at = detected_at
         self.description = description
-        self.alert_details_keys = alert_details_keys
-        self.alert_details_values = alert_details_values
+        self.change_type = ' '.join([word[0].upper() + word[1:] for word in sub_type.split('_')])
 
     def to_slack_message(self) -> dict:
         return {
@@ -69,6 +64,10 @@ class SchemaChangeAlert(Alert):
                 {
                     "type": "section",
                     "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Change Type:*\n{self.change_type}"
+                        },
                         {
                             "type": "mrkdwn",
                             "text": f"*Description:*\n{self.description}"
