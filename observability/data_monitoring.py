@@ -32,12 +32,14 @@ class DataMonitoring(object):
     """
 
     SELECT_ALERTS_QUERY = """
-        SELECT alert_type, full_table_name, detected_at, alert_reason, alert_details_keys, alert_details_values 
+        SELECT alert_id, detected_at, full_table_name, alert_type, sub_type, alert_reason_value, alert_details_keys, 
+               alert_details_values  
             FROM ELEMENTARY_ALERTS;
     """
 
     SELECT_NEW_ALERTS_QUERY = """
-        SELECT alert_type, full_table_name, detected_at, alert_reason, alert_details_keys, alert_details_values 
+        SELECT alert_id, detected_at, full_table_name, alert_type, sub_type, alert_reason_value, alert_details_keys, 
+               alert_details_values 
             FROM ELEMENTARY_ALERTS
             WHERE detected_at > :1;
     """
@@ -194,6 +196,7 @@ class DataMonitoring(object):
         if not self.dbt_runner.run(model=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh):
             return
 
+        # TODO: mark alerts in db as sent
         self._send_alerts_to_slack(last_alert_time)
 
 
