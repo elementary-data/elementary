@@ -14,8 +14,6 @@ from utils.dbt import extract_credentials_and_data_from_profiles, get_profile_na
 FILE_DIR = os.path.dirname(__file__)
 
 
-#TODO: change the dbt_project to be consistent with the lib version
-#TODO: maybe change to schema monitoring
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary_observability'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
