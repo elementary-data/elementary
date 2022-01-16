@@ -18,8 +18,6 @@ import glob
 from os.path import expanduser
 from utils.ordered_yaml import OrderedYaml
 
-snowflake.connector.paramstyle = 'numeric'
-
 
 ELEMENTARY_DBT_PACKAGE_NAME = 'elementary_observability'
 ELEMENTARY_DBT_PACKAGE = 'git@github.com:elementary-data/elementary-dbt.git'

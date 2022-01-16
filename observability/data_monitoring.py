@@ -13,8 +13,8 @@ from utils.dbt import extract_credentials_and_data_from_profiles, get_profile_na
 
 FILE_DIR = os.path.dirname(__file__)
 
-#TODO: change the dbt_project to be consistent with the lib version
 
+#TODO: change the dbt_project to be consistent with the lib version
 #TODO: maybe change to schema monitoring
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary_observability'
@@ -36,7 +36,7 @@ class DataMonitoring(object):
 
     UPDATE_SENT_ALERTS = """
         UPDATE ELEMENTARY_ALERTS set alert_sent = TRUE
-            WHERE alert_id in (%s) 
+            WHERE alert_id IN (%s); 
     """
 
     COUNT_ROWS_QUERY = None
@@ -51,7 +51,7 @@ class DataMonitoring(object):
         profile_name = get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH)
         credentials, profile_data = extract_credentials_and_data_from_profiles(config.profiles_dir_path, profile_name)
         if credentials.type == 'snowflake':
-            snowflake_conn = get_snowflake_client(credentials)
+            snowflake_conn = get_snowflake_client(credentials, server_side_binding=False)
             return SnowflakeDataMonitoring(config, snowflake_conn)
         else:
             raise ConfigError("Unsupported platform")
@@ -172,7 +172,9 @@ class DataMonitoring(object):
                 alert = Alert.create_alert_from_row(alert_row)
                 alert.send_to_slack(slack_webhook)
                 sent_alerts.append(alert.id)
-            self._update_sent_alerts(sent_alerts)
+
+            if len(sent_alerts) > 0:
+                self._update_sent_alerts(sent_alerts)
 
     def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False,
             dbt_full_refresh: bool = False) -> None:
@@ -196,7 +198,7 @@ class DataMonitoring(object):
 class SnowflakeDataMonitoring(DataMonitoring):
 
     COUNT_ROWS_QUERY = """
-    SELECT count(*) FROM IDENTIFIER(:1)
+    SELECT count(*) FROM IDENTIFIER(%s)
     """
 
     def __init__(self, config: 'Config', db_connection: Any):
