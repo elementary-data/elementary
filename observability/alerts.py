@@ -43,7 +43,7 @@ class SchemaChangeAlert(Alert):
         super().__init__(alert_id)
         self.table_name = '.'.join([database_name, schema_name, table_name]).lower()
         self.detected_at = convert_utc_time_to_local_time(detected_at).strftime('%Y-%m-%d %H:%M:%S')
-        self.description = description.lower()
+        self.description = description[0].upper() + description[1:].lower()
         self.change_type = ' '.join([word[0].upper() + word[1:] for word in sub_type.split('_')])
 
     def to_slack_message(self) -> dict:
