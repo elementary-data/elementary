@@ -13,8 +13,6 @@ import snowflake.connector
 
 from utils.ordered_yaml import OrderedYaml
 
-snowflake.connector.paramstyle = 'numeric'
-
 logger = get_logger(__name__)
 
 
@@ -60,7 +58,10 @@ def get_bigquery_client(profile_credentials):
     )
 
 
-def get_snowflake_client(profile_credentials):
+def get_snowflake_client(profile_credentials, server_side_binding=True):
+    if server_side_binding:
+        snowflake.connector.paramstyle = 'numeric'
+
     return snowflake.connector.connect(
         account=profile_credentials.account,
         user=profile_credentials.user,
