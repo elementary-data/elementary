@@ -21,7 +21,7 @@ class DataMonitoring(object):
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
     #TODO: maybe use the dbt_project.yml seeds path
-    DBT_PROJECT_SEEDS_PATH = os.path.join(DBT_PROJECT_PATH, 'seeds')
+    DBT_PROJECT_SEEDS_PATH = os.path.join(DBT_PROJECT_PATH, 'data')
 
     MONITORING_SCHEMAS_CONFIGURATION = 'monitoring_schemas_configuration'
     MONITORING_TABLES_CONFIGURATION = 'monitoring_tables_configuration'

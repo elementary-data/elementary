@@ -36,7 +36,6 @@ setup(
         'werkzeug>=1,<3',
         'flask < 1.1.1',
         'werkzeug<2.0',
-        'json-schema-for-humans<0.35'
         #'urllib3<1.26'
     ],
     long_description_content_type="text/markdown",
