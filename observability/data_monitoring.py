@@ -17,6 +17,7 @@ FILE_DIR = os.path.dirname(__file__)
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary_observability'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
+    DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
     #TODO: maybe use the dbt_project.yml seeds path
     DBT_PROJECT_SEEDS_PATH = os.path.join(DBT_PROJECT_PATH, 'data')
@@ -58,8 +59,7 @@ class DataMonitoring(object):
         pass
 
     def _dbt_package_exists(self) -> bool:
-        dbt_package_path = os.path.join(self.DBT_PROJECT_PACKAGES_PATH)
-        return os.path.exists(dbt_package_path)
+        return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
     @staticmethod
     def _alert_on_schema_changes(source_dict: dict) -> Union[bool, None]:

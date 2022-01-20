@@ -10,14 +10,12 @@ yaml = OrderedYaml()
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
-@click.pass_context
-def observability(ctx, debug):
-    ctx.ensure_object(dict)
-    ctx.obj['DEBUG'] = debug
+def observability(debug):
+    if debug:
+        os.environ['DEBUG'] = '1'
 
 
 @observability.command()
-@click.pass_context
 @click.option(
     '--config-dir-path', '-c',
     type=str,
@@ -43,7 +41,7 @@ def observability(ctx, debug):
     type=bool,
     default=False
 )
-def run(ctx, config_dir_path, profiles_dir_path, update_dbt_package, full_refresh_dbt_package,
+def run(config_dir_path, profiles_dir_path, update_dbt_package, full_refresh_dbt_package,
         reload_monitoring_configuration):
     config = Config(config_dir_path, profiles_dir_path)
     data_monitoring = DataMonitoring.create_data_monitoring(config)
