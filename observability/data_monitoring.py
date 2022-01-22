@@ -17,6 +17,7 @@ FILE_DIR = os.path.dirname(__file__)
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary_observability'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
+    # Compatibility for previous dbt versions
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
     #TODO: maybe use the dbt_project.yml seeds path
@@ -26,6 +27,7 @@ class DataMonitoring(object):
     MONITORING_TABLES_CONFIGURATION = 'monitoring_tables_configuration'
     MONITORING_COLUMNS_CONFIGURATION = 'monitoring_columns_configuration'
 
+    #TODO: change alerts table name once the dbt package is fixed
     SELECT_NEW_ALERTS_QUERY = """
         SELECT alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type, 
                alert_description
@@ -54,9 +56,6 @@ class DataMonitoring(object):
             return SnowflakeDataMonitoring(config, snowflake_conn)
         else:
             raise ConfigError("Unsupported platform")
-
-    def _monitor_schema_changes(self, reload_monitoring_configuration: bool = False):
-        pass
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
