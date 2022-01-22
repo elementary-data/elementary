@@ -22,19 +22,28 @@ def read_csv(csv_path):
     return csv_lines
 
 
-def test_data_monitoring_run_monitoring_config_does_not_exist():
-    config_mock = mock.create_autospec(Config)
-    config_mock.get_sources.return_value = SOURCES['sources']
-
-    config_mock.profiles_dir_path = 'bla'
+@pytest.fixture
+def snowflake_con():
     snowflake_con = mock.create_autospec(SnowflakeConnection)
     snowflake_cur = mock.create_autospec(SnowflakeCursor)
     snowflake_con.cursor.return_value = snowflake_cur
+    return snowflake_con
+
+
+@pytest.fixture
+def config():
+    config_mock = mock.create_autospec(Config)
+    config_mock.profiles_dir_path = 'bla'
+    return config_mock
+
+
+def test_data_monitoring_run_monitoring_config_does_not_exist(config, snowflake_con):
+    config.get_sources.return_value = SOURCES['sources']
 
     # Scenario 1 - configuration doesn't exist yet
-    snowflake_cur.fetchall.return_value = []
+    snowflake_con.cursor.return_value.fetchall.return_value = []
 
-    reference = SnowflakeDataMonitoring(config_mock, snowflake_con)
+    reference = SnowflakeDataMonitoring(config, snowflake_con)
     reference.dbt_runner = mock.create_autospec(DbtRunner)
 
     shutil.rmtree(reference.DBT_PROJECT_SEEDS_PATH)
