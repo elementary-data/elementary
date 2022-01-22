@@ -8,9 +8,22 @@ from observability.dbt_runner import DbtRunner
 from observability.config import Config
 from observability.data_monitoring import SnowflakeDataMonitoring, DataMonitoring
 
-SOURCES = {'sources': [{'name': 'unit_tests',
-                        'database': 'elementary_tests',
-                        'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}
+SOURCES = {'sources':
+               [{'name': 'unit_tests',
+                 'database': 'elementary_tests',
+                 'meta': {'observability': {'alert_on_schema_changes': 'true'}},
+                 'tables':
+                     [{'name': 'groups',
+                       'meta': {'observability': {'alert_on_schema_changes': 'true'}},
+                       'columns':
+                           [{'name': 'group_a',
+                             'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]},
+                {'schema': 'unit_tests_2',
+                 'database': 'elementary_tests_2',
+                 'meta': {'observability': {'alert_on_schema_changes': 'true'}},
+                 'tables':
+                     [{'identifier': 'groups_2',
+                       'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]}
 
 
 def read_csv(csv_path):
@@ -71,7 +84,6 @@ def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
 
     snowflake_data_mon = SnowflakeDataMonitoring(config_mock, snowflake_con_mock)
     snowflake_data_mon.dbt_runner = dbt_runner_mock
-    snowflake_data_mon._dbt_package_exists = lambda: True
     return snowflake_data_mon
 
 
@@ -104,28 +116,37 @@ def delete_dbt_package(data_monitoring):
         shutil.rmtree(data_monitoring.DBT_PROJECT_PACKAGES_PATH)
 
 
-@pytest.mark.parametrize("full_refresh, update_dbt_package, reload_config", [
-    (True, True, False),
-    (True, False, False),
-    (True, True, True),
-    (True, False, True),
-    (False, True, False),
-    (False, False, False),
-    (False, True, True),
-    (False, False, True),
+@pytest.mark.parametrize("full_refresh, update_dbt_package, reload_config, dbt_package_exists", [
+    (True, True, False, False),
+    (True, False, False, False),
+    (True, True, True, False),
+    (True, False, True, False),
+    (True, True, False, True),
+    (True, False, False, True),
+    (True, True, True, True),
+    (True, False, True, True),
+    (False, True, False, False),
+    (False, False, False, False),
+    (False, True, True, False),
+    (False, False, True, False),
+    (False, True, False, True),
+    (False, False, False, True),
+    (False, True, True, True),
+    (False, False, True, True),
 ])
-def test_data_monitoring_run_config_does_not_exist(full_refresh, update_dbt_package, reload_config,
+def test_data_monitoring_run_config_does_not_exist(full_refresh, update_dbt_package, reload_config, dbt_package_exists,
                                                    snowflake_data_monitoring_empty_config_in_db):
     snowflake_data_monitoring = snowflake_data_monitoring_empty_config_in_db
     delete_configuration(snowflake_data_monitoring)
     delete_dbt_package(snowflake_data_monitoring)
+    snowflake_data_monitoring._dbt_package_exists = lambda: dbt_package_exists
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
     # The function we test
     snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_packages=update_dbt_package,
                                   reload_monitoring_configuration=reload_config)
 
-    if update_dbt_package:
+    if update_dbt_package or not dbt_package_exists:
         dbt_runner_mock.deps.assert_called()
     else:
         dbt_runner_mock.deps.assert_not_called()
@@ -139,26 +160,36 @@ def test_data_monitoring_run_config_does_not_exist(full_refresh, update_dbt_pack
     dbt_runner_mock.run.assert_called()
 
 
-@pytest.mark.parametrize("full_refresh, update_dbt_package, reload_config", [
-    (True, True, False),
-    (True, False, False),
-    (True, True, True),
-    (True, False, True),
-    (False, True, False),
-    (False, False, False),
-    (False, True, True),
-    (False, False, True),
+@pytest.mark.parametrize("full_refresh, update_dbt_package, reload_config, dbt_package_exists", [
+    (True, True, False, False),
+    (True, False, False, False),
+    (True, True, True, False),
+    (True, False, True, False),
+    (True, True, False, True),
+    (True, False, False, True),
+    (True, True, True, True),
+    (True, False, True, True),
+    (False, True, False, False),
+    (False, False, False, False),
+    (False, True, True, False),
+    (False, False, True, False),
+    (False, True, False, True),
+    (False, False, False, True),
+    (False, True, True, True),
+    (False, False, True, True),
 ])
-def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, snowflake_data_monitoring):
+def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, dbt_package_exists,
+                             snowflake_data_monitoring):
     delete_dbt_package(snowflake_data_monitoring)
     delete_configuration(snowflake_data_monitoring)
+    snowflake_data_monitoring._dbt_package_exists = lambda: dbt_package_exists
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
     # The function we test
     snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_packages=update_dbt_package,
                                   reload_monitoring_configuration=reload_config)
 
-    if update_dbt_package:
+    if update_dbt_package or not dbt_package_exists:
         dbt_runner_mock.deps.assert_called()
     else:
         dbt_runner_mock.deps.assert_not_called()
@@ -172,3 +203,41 @@ def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, sn
     # Validate that dbt snapshot and dbt run were called as well
     dbt_runner_mock.snapshot.assert_called()
     dbt_runner_mock.run.assert_called_with(model=snowflake_data_monitoring.DBT_PACKAGE_NAME, full_refresh=full_refresh)
+
+
+def test_data_monitoring_update_configuration_in_db(snowflake_data_monitoring):
+    delete_configuration(snowflake_data_monitoring)
+    # The function we test
+    snowflake_data_monitoring._update_configuration()
+    schema_config_csv_path = os.path.join(snowflake_data_monitoring.DBT_PROJECT_SEEDS_PATH,
+                                          f'{snowflake_data_monitoring.MONITORING_SCHEMAS_CONFIGURATION}.csv')
+    tables_config_csv_path = os.path.join(snowflake_data_monitoring.DBT_PROJECT_SEEDS_PATH,
+                                          f'{snowflake_data_monitoring.MONITORING_TABLES_CONFIGURATION}.csv')
+    columns_config_csv_path = os.path.join(snowflake_data_monitoring.DBT_PROJECT_SEEDS_PATH,
+                                           f'{snowflake_data_monitoring.MONITORING_COLUMNS_CONFIGURATION}.csv')
+
+    schema_configuration_csv_lines = read_csv(schema_config_csv_path)
+    assert schema_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
+    assert schema_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
+    assert schema_configuration_csv_lines[0]['alert_on_schema_changes'] == \
+           SOURCES['sources'][0]['meta']['observability']['alert_on_schema_changes']
+
+    assert schema_configuration_csv_lines[1]['database_name'] == SOURCES['sources'][1]['database']
+    assert schema_configuration_csv_lines[1]['schema_name'] == SOURCES['sources'][1]['schema']
+    assert schema_configuration_csv_lines[1]['alert_on_schema_changes'] == \
+       SOURCES['sources'][1]['meta']['observability']['alert_on_schema_changes']
+
+    table_configuration_csv_lines = read_csv(tables_config_csv_path)
+    assert table_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
+    assert table_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
+    assert table_configuration_csv_lines[0]['table_name'] == SOURCES['sources'][0]['tables'][0]['name']
+
+    assert table_configuration_csv_lines[1]['database_name'] == SOURCES['sources'][1]['database']
+    assert table_configuration_csv_lines[1]['schema_name'] == SOURCES['sources'][1]['schema']
+    assert table_configuration_csv_lines[1]['table_name'] == SOURCES['sources'][1]['tables'][0]['identifier']
+
+    column_configuration_csv_lines = read_csv(columns_config_csv_path)
+    assert column_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
+    assert column_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
+    assert column_configuration_csv_lines[0]['table_name'] == SOURCES['sources'][0]['tables'][0]['name']
+    assert column_configuration_csv_lines[0]['column_name'] == SOURCES['sources'][0]['tables'][0]['columns'][0]['name']

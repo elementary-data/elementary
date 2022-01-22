@@ -99,37 +99,33 @@ class DataMonitoring(object):
                                                                                      'alert_on_schema_changes'])
             column_config_csv_writer.writeheader()
 
-            #TODO: use schema if exists instead of source name, use identifier if exists instead of table / column name
             sources = self.config.get_sources()
             for source in sources:
-                #TODO: Decide if we need to do extra effort here to bring the relevant db from the profile that
-                # is defined in source project
                 source_db = source.get('database')
                 if source_db is None:
                     continue
 
-                #TODO: validate name represents a schema
-                source_name = source.get('name')
-                if source_name is None:
+                schema_name = source.get('schema', source.get('name'))
+                if schema_name is None:
                     continue
 
                 alert_on_schema_changes = self._alert_on_schema_changes(source)
                 #TODO: should we validate type of 'alert_on_schema_changes' is bool?
                 if alert_on_schema_changes is not None:
                     schema_config_csv_writer.writerow({'database_name': source_db,
-                                                       'schema_name': source_name,
+                                                       'schema_name': schema_name,
                                                        'alert_on_schema_changes': alert_on_schema_changes})
 
                 source_tables = source.get('tables', [])
                 for source_table in source_tables:
-                    table_name = source_table.get('name')
+                    table_name = source_table.get('identifier', source_table.get('name'))
                     if table_name is None:
                         continue
 
                     alert_on_schema_changes = self._alert_on_schema_changes(source_table)
                     if alert_on_schema_changes is not None:
                         table_config_csv_writer.writerow({'database_name': source_db,
-                                                          'schema_name': source_name,
+                                                          'schema_name': schema_name,
                                                           'table_name': table_name,
                                                           'alert_on_schema_changes': alert_on_schema_changes})
 
@@ -142,7 +138,7 @@ class DataMonitoring(object):
                         alert_on_schema_changes = self._alert_on_schema_changes(source_column)
                         if alert_on_schema_changes is not None:
                             column_config_csv_writer.writerow({'database_name': source_db,
-                                                               'schema_name': source_name,
+                                                               'schema_name': schema_name,
                                                                'table_name': table_name,
                                                                'column_name': column_name,
                                                                'column_type': column_type,
