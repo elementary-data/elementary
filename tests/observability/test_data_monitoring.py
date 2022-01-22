@@ -2,7 +2,11 @@ import pytest
 import csv
 import os
 import shutil
+import json
 from unittest import mock
+from datetime import datetime
+
+from observability.alerts import Alert
 from snowflake.connector.connection import SnowflakeConnection, SnowflakeCursor
 from observability.dbt_runner import DbtRunner
 from observability.config import Config
@@ -25,6 +29,9 @@ SOURCES = {'sources':
                      [{'identifier': 'groups_2',
                        'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]}
 
+
+WEBHOOK_URL = 'https://my_webhook'
+ALERT_ROW = ['123', datetime.now(), 'db', 'sc', 't1', 'c1', 'schema_change', 'column_added', 'Column was added']
 
 def read_csv(csv_path):
     csv_lines = []
@@ -49,6 +56,7 @@ def config_mock():
     config_mock = mock.create_autospec(Config)
     config_mock.profiles_dir_path = 'profiles_dir_path'
     config_mock.get_sources.return_value = SOURCES['sources']
+    config_mock.get_slack_notification_webhook.return_value = WEBHOOK_URL
     return config_mock
 
 
@@ -58,7 +66,7 @@ def dbt_runner_mock():
 
 
 @pytest.fixture
-def snowflake_data_monitoring_empty_config_in_db(config_mock, snowflake_con_mock, dbt_runner_mock):
+def snowflake_data_monitoring_with_empty_config_in_db(config_mock, snowflake_con_mock, dbt_runner_mock):
     # This mock cursor returns empty list to simulate empty configuration
     snowflake_cursor_context_manager_return_value = snowflake_con_mock.cursor.return_value.__enter__.return_value
     snowflake_cursor_context_manager_return_value.fetchall.return_value = []
@@ -77,6 +85,23 @@ def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
     def execute_query_side_effect(*args, **kwargs):
         if 'count(*)' in args[0].lower():
             snowflake_cursor_context_manager_return_value.fetchall.return_value = [[1]]
+        else:
+            snowflake_cursor_context_manager_return_value.fetchall.return_value = []
+
+    snowflake_cursor_context_manager_return_value.execute.side_effect = execute_query_side_effect
+
+    snowflake_data_mon = SnowflakeDataMonitoring(config_mock, snowflake_con_mock)
+    snowflake_data_mon.dbt_runner = dbt_runner_mock
+    return snowflake_data_mon
+
+
+@pytest.fixture
+def snowflake_data_monitoring_with_alerts_in_db(config_mock, snowflake_con_mock, dbt_runner_mock):
+    snowflake_cursor_context_manager_return_value = snowflake_con_mock.cursor.return_value.__enter__.return_value
+
+    def execute_query_side_effect(*args, **kwargs):
+        if args[0] == DataMonitoring.SELECT_NEW_ALERTS_QUERY:
+            snowflake_cursor_context_manager_return_value.fetchall.return_value = [ALERT_ROW]
         else:
             snowflake_cursor_context_manager_return_value.fetchall.return_value = []
 
@@ -135,14 +160,14 @@ def delete_dbt_package(data_monitoring):
     (False, False, True, True),
 ])
 def test_data_monitoring_run_config_does_not_exist(full_refresh, update_dbt_package, reload_config, dbt_package_exists,
-                                                   snowflake_data_monitoring_empty_config_in_db):
-    snowflake_data_monitoring = snowflake_data_monitoring_empty_config_in_db
+                                                   snowflake_data_monitoring_with_empty_config_in_db):
+    snowflake_data_monitoring = snowflake_data_monitoring_with_empty_config_in_db
     delete_configuration(snowflake_data_monitoring)
     delete_dbt_package(snowflake_data_monitoring)
     snowflake_data_monitoring._dbt_package_exists = lambda: dbt_package_exists
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
-    # The function we test
+    # The test function
     snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_packages=update_dbt_package,
                                   reload_monitoring_configuration=reload_config)
 
@@ -185,7 +210,7 @@ def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, db
     snowflake_data_monitoring._dbt_package_exists = lambda: dbt_package_exists
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
-    # The function we test
+    # The test function
     snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_packages=update_dbt_package,
                                   reload_monitoring_configuration=reload_config)
 
@@ -207,8 +232,10 @@ def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, db
 
 def test_data_monitoring_update_configuration_in_db(snowflake_data_monitoring):
     delete_configuration(snowflake_data_monitoring)
-    # The function we test
+
+    # The test function
     snowflake_data_monitoring._update_configuration()
+
     schema_config_csv_path = os.path.join(snowflake_data_monitoring.DBT_PROJECT_SEEDS_PATH,
                                           f'{snowflake_data_monitoring.MONITORING_SCHEMAS_CONFIGURATION}.csv')
     tables_config_csv_path = os.path.join(snowflake_data_monitoring.DBT_PROJECT_SEEDS_PATH,
@@ -241,3 +268,13 @@ def test_data_monitoring_update_configuration_in_db(snowflake_data_monitoring):
     assert column_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
     assert column_configuration_csv_lines[0]['table_name'] == SOURCES['sources'][0]['tables'][0]['name']
     assert column_configuration_csv_lines[0]['column_name'] == SOURCES['sources'][0]['tables'][0]['columns'][0]['name']
+
+
+@mock.patch('requests.post')
+def test_data_monitoring_send_alerts(requests_post_mock, snowflake_data_monitoring_with_alerts_in_db):
+    snowflake_data_monitoring = snowflake_data_monitoring_with_alerts_in_db
+    alert = Alert.create_alert_from_row(ALERT_ROW)
+    # The test function
+    snowflake_data_monitoring._send_alerts_to_slack()
+    requests_post_mock.assert_called_once_with(url=WEBHOOK_URL, headers={'Content-type': 'application/json'},
+                                               data=json.dumps(alert.to_slack_message()))
