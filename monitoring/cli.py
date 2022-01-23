@@ -2,8 +2,8 @@ import click
 import os
 from os.path import expanduser
 from utils.ordered_yaml import OrderedYaml
-from observability.config import Config
-from observability.data_monitoring import DataMonitoring
+from monitoring.config import Config
+from monitoring.data_monitoring import DataMonitoring
 
 yaml = OrderedYaml()
 

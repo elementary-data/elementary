@@ -5,11 +5,11 @@ import json
 from unittest import mock
 from datetime import datetime
 
-from observability.alerts import Alert
+from monitoring.alerts import Alert
 from snowflake.connector.connection import SnowflakeConnection, SnowflakeCursor
-from observability.dbt_runner import DbtRunner
-from observability.config import Config
-from observability.data_monitoring import SnowflakeDataMonitoring, DataMonitoring
+from monitoring.dbt_runner import DbtRunner
+from monitoring.config import Config
+from monitoring.data_monitoring import SnowflakeDataMonitoring, DataMonitoring
 
 WEBHOOK_URL = 'https://my_webhook'
 ALERT_ROW = ['123', datetime.now(), 'db', 'sc', 't1', 'c1', 'schema_change', 'column_added', 'Column was added']

@@ -2,7 +2,7 @@ import pytest
 import os
 import csv
 from utils.ordered_yaml import OrderedYaml
-from observability.config import Config
+from monitoring.config import Config
 
 FILE_DIR = os.path.dirname(__file__)
 

@@ -1,8 +1,11 @@
 import click
+import os
+from os.path import expanduser
 
+from lineage.utils import is_dbt_installed, get_package_version
 from utils.dbt import extract_credentials_and_data_from_profiles
 from lineage.empty_graph_helper import EmptyGraphHelper
-from lineage.tracking import track_cli_start, track_cli_end, track_cli_exception
+from lineage.tracking import track_lineage_start, track_lineage_end, track_lineage_exception
 from exceptions.exceptions import ConfigError
 from datetime import timedelta, date
 from lineage.table_resolver import TableResolver
@@ -36,6 +39,41 @@ class RequiredIf(click.Option):
             ctx, opts, args)
 
 
+def get_cli_properties() -> dict:
+
+    click_context = click.get_current_context()
+    if click_context is None:
+        return dict()
+
+    params = click_context.params
+    if params is None:
+        return dict()
+
+    start_date = params.get('start_date')
+    end_date = params.get('end_date')
+    is_filtered = params.get('table') is not None
+
+    start_date_str = None
+    if start_date is not None:
+        start_date_str = start_date.isoformat()
+
+    end_date_str = None
+    if end_date is not None:
+        end_date_str = end_date.isoformat()
+
+    return {'start_date': start_date_str,
+            'end_date': end_date_str,
+            'is_filtered': is_filtered,
+            'open_browser': params.get('open_browser'),
+            'export_query_history': params.get('export_query_history'),
+            'full_table_names': params.get('full_table_names'),
+            'direction': params.get('direction'),
+            'depth': params.get('depth'),
+            'ignore_schema': params.get('ignore_schema'),
+            'dbt_installed': is_dbt_installed(),
+            'version': get_package_version()}
+
+
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 @click.pass_context
@@ -60,8 +98,14 @@ def lineage(ctx, debug):
          "you could also provide a specific time), default is current time."
 )
 @click.option(
+    '--config-dir', '-c',
+    type=str,
+    default=os.path.join(expanduser('~'), '.edr')
+)
+@click.option(
     '--profiles-dir', '-d',
     type=click.Path(exists=True),
+    default=os.path.join(expanduser('~'), '.dbt'),
     required=True,
     help="You can connect to your data warehouse using your profiles dir, just specify your profiles dir where a "
          "profiles.yml is located (could be a dbt profiles dir).",
@@ -130,9 +174,9 @@ def lineage(ctx, debug):
               default=None,
               cls=RequiredIf,
               required_if='table')
-def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, profile_name: str, open_browser: bool,
-                  export_query_history: bool, full_table_names: bool, ignore_schema: bool, table: str, direction: str,
-                  depth: int) -> None:
+def query_history(start_date: datetime, end_date: datetime, config_dir: str, profiles_dir: str, profile_name: str,
+                  open_browser: bool, export_query_history: bool, full_table_names: bool, ignore_schema: bool,
+                  table: str, direction: str, depth: int) -> None:
     """
     For more details check out our documentation here - https://docs.elementary-data.com/
     """
@@ -140,7 +184,7 @@ def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, p
                f"https://bit.ly/slack-elementary\n")
 
     credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
-    anonymous_tracking = track_cli_start(profiles_dir, profile_data)
+    anonymous_tracking = track_lineage_start(config_dir, profiles_dir, profile_data, get_cli_properties())
 
     try:
         query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
@@ -166,10 +210,10 @@ def query_history(start_date: datetime, end_date: datetime, profiles_dir: str, p
         if not success:
             print(EmptyGraphHelper(credentials.type).get_help_message())
 
-        track_cli_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
+        track_lineage_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
 
     except Exception as exc:
-        track_cli_exception(anonymous_tracking, exc)
+        track_lineage_exception(anonymous_tracking, exc)
         raise
 
 
