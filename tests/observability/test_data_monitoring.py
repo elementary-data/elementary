@@ -12,7 +12,7 @@ from observability.dbt_runner import DbtRunner
 from observability.config import Config
 from observability.data_monitoring import SnowflakeDataMonitoring, DataMonitoring
 
-SOURCES = {'sources':
+SOURCES = [{'sources':
                [{'name': 'unit_tests',
                  'database': 'elementary_tests',
                  'meta': {'observability': {'alert_on_schema_changes': 'true'}},
@@ -27,11 +27,12 @@ SOURCES = {'sources':
                  'meta': {'observability': {'alert_on_schema_changes': 'true'}},
                  'tables':
                      [{'identifier': 'groups_2',
-                       'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]}
+                       'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]}]
 
 
 WEBHOOK_URL = 'https://my_webhook'
 ALERT_ROW = ['123', datetime.now(), 'db', 'sc', 't1', 'c1', 'schema_change', 'column_added', 'Column was added']
+
 
 def read_csv(csv_path):
     csv_lines = []
@@ -55,7 +56,7 @@ def snowflake_con_mock():
 def config_mock():
     config_mock = mock.create_autospec(Config)
     config_mock.profiles_dir_path = 'profiles_dir_path'
-    config_mock.get_sources.return_value = SOURCES['sources']
+    config_mock.get_dbt_project_sources.return_value = SOURCES
     config_mock.get_slack_notification_webhook.return_value = WEBHOOK_URL
     return config_mock
 
@@ -123,9 +124,9 @@ def assert_configuration_exists(data_monitoring):
                                        f'{data_monitoring.MONITORING_COLUMNS_CONFIGURATION}.csv'))
     schema_configuration_csv_lines = read_csv(schema_config_csv_path)
     # Sanity check on the created configuration CSVs
-    assert len(schema_configuration_csv_lines) == len(SOURCES['sources'])
-    assert schema_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
-    assert schema_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
+    assert len(schema_configuration_csv_lines) == len(SOURCES[0]['sources'])
+    assert schema_configuration_csv_lines[0]['database_name'] == SOURCES[0]['sources'][0]['database']
+    assert schema_configuration_csv_lines[0]['schema_name'] == SOURCES[0]['sources'][0]['name']
 
 
 def delete_configuration(data_monitoring):
@@ -244,30 +245,33 @@ def test_data_monitoring_update_configuration_in_db(snowflake_data_monitoring):
                                            f'{snowflake_data_monitoring.MONITORING_COLUMNS_CONFIGURATION}.csv')
 
     schema_configuration_csv_lines = read_csv(schema_config_csv_path)
-    assert schema_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
-    assert schema_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
-    assert schema_configuration_csv_lines[0]['alert_on_schema_changes'] == \
-           SOURCES['sources'][0]['meta']['observability']['alert_on_schema_changes']
+    assert schema_configuration_csv_lines[0]['database_name'] == SOURCES[0]['sources'][0]['database']
+    assert schema_configuration_csv_lines[0]['schema_name'] == SOURCES[0]['sources'][0]['name']
+    assert schema_configuration_csv_lines[0]['alert_on_schema_changes'].lower() == \
+           SOURCES[0]['sources'][0]['meta']['observability']['alert_on_schema_changes'].lower()
 
-    assert schema_configuration_csv_lines[1]['database_name'] == SOURCES['sources'][1]['database']
-    assert schema_configuration_csv_lines[1]['schema_name'] == SOURCES['sources'][1]['schema']
-    assert schema_configuration_csv_lines[1]['alert_on_schema_changes'] == \
-       SOURCES['sources'][1]['meta']['observability']['alert_on_schema_changes']
+    assert schema_configuration_csv_lines[1]['database_name'] == SOURCES[0]['sources'][1]['database']
+    assert schema_configuration_csv_lines[1]['schema_name'] == SOURCES[0]['sources'][1]['schema']
+    assert schema_configuration_csv_lines[1]['alert_on_schema_changes'].lower() == \
+           SOURCES[0]['sources'][1]['meta']['observability']['alert_on_schema_changes'].lower()
 
     table_configuration_csv_lines = read_csv(tables_config_csv_path)
-    assert table_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
-    assert table_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
-    assert table_configuration_csv_lines[0]['table_name'] == SOURCES['sources'][0]['tables'][0]['name']
+    assert table_configuration_csv_lines[0]['database_name'] == SOURCES[0]['sources'][0]['database']
+    assert table_configuration_csv_lines[0]['schema_name'] == SOURCES[0]['sources'][0]['name']
+    assert table_configuration_csv_lines[0]['table_name'] == SOURCES[0]['sources'][0]['tables'][0]['name']
 
-    assert table_configuration_csv_lines[1]['database_name'] == SOURCES['sources'][1]['database']
-    assert table_configuration_csv_lines[1]['schema_name'] == SOURCES['sources'][1]['schema']
-    assert table_configuration_csv_lines[1]['table_name'] == SOURCES['sources'][1]['tables'][0]['identifier']
+    assert table_configuration_csv_lines[1]['database_name'] == SOURCES[0]['sources'][1]['database']
+    assert table_configuration_csv_lines[1]['schema_name'] == SOURCES[0]['sources'][1]['schema']
+    assert table_configuration_csv_lines[1]['table_name'] == SOURCES[0]['sources'][1]['tables'][0]['identifier']
 
     column_configuration_csv_lines = read_csv(columns_config_csv_path)
-    assert column_configuration_csv_lines[0]['database_name'] == SOURCES['sources'][0]['database']
-    assert column_configuration_csv_lines[0]['schema_name'] == SOURCES['sources'][0]['name']
-    assert column_configuration_csv_lines[0]['table_name'] == SOURCES['sources'][0]['tables'][0]['name']
-    assert column_configuration_csv_lines[0]['column_name'] == SOURCES['sources'][0]['tables'][0]['columns'][0]['name']
+    assert column_configuration_csv_lines[0]['database_name'] == SOURCES[0]['sources'][0]['database']
+    assert column_configuration_csv_lines[0]['schema_name'] == SOURCES[0]['sources'][0]['name']
+    assert column_configuration_csv_lines[0]['table_name'] == SOURCES[0]['sources'][0]['tables'][0]['name']
+    assert column_configuration_csv_lines[0]['column_name'] == \
+           SOURCES[0]['sources'][0]['tables'][0]['columns'][0]['name']
+    assert column_configuration_csv_lines[0]['alert_on_schema_changes'].lower() == \
+        SOURCES[0]['sources'][0]['tables'][0]['columns'][0]['meta']['observability']['alert_on_schema_changes'].lower()
 
 
 @mock.patch('requests.post')

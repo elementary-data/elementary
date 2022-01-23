@@ -1,5 +1,5 @@
 import os.path
-from typing import Dict, Any
+from typing import Dict, Any, Union
 import dbt.config
 from dbt.context.base import generate_base_context
 from dbt.exceptions import DbtConfigError
@@ -80,4 +80,20 @@ def get_profile_name_from_dbt_project(dbt_project_path: str) -> str:
     ordered_yaml = OrderedYaml()
     dbt_project_dict = ordered_yaml.load(os.path.join(dbt_project_path, 'dbt_project.yml'))
     return dbt_project_dict['profile']
+
+
+def get_model_paths_from_dbt_project(dbt_project_path: str) -> list:
+    ordered_yaml = OrderedYaml()
+    dbt_project_dict = ordered_yaml.load(os.path.join(dbt_project_path, 'dbt_project.yml'))
+    return dbt_project_dict.get('model-paths', dbt_project_dict.get('source-paths', ['models']))
+
+
+def get_target_database_name(profiles_dir: str, dbt_project_path: str) -> Union[str, None]:
+    try:
+        profile_name = get_profile_name_from_dbt_project(dbt_project_path)
+        credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
+        return credentials.database
+    except Exception:
+        pass
+    return None
 
