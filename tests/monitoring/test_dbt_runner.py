@@ -1,6 +1,6 @@
 import pytest
 from unittest import mock
-from observability.dbt_runner import DbtRunner
+from monitoring.dbt_runner import DbtRunner
 
 
 @pytest.mark.parametrize("command", [
