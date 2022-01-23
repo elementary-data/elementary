@@ -1,5 +1,4 @@
 import pytest
-import csv
 import os
 import shutil
 import json
@@ -12,35 +11,8 @@ from observability.dbt_runner import DbtRunner
 from observability.config import Config
 from observability.data_monitoring import SnowflakeDataMonitoring, DataMonitoring
 
-SOURCES = [{'sources':
-               [{'name': 'unit_tests',
-                 'database': 'elementary_tests',
-                 'meta': {'observability': {'alert_on_schema_changes': 'true'}},
-                 'tables':
-                     [{'name': 'groups',
-                       'meta': {'observability': {'alert_on_schema_changes': 'true'}},
-                       'columns':
-                           [{'name': 'group_a',
-                             'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]},
-                {'schema': 'unit_tests_2',
-                 'database': 'elementary_tests_2',
-                 'meta': {'observability': {'alert_on_schema_changes': 'true'}},
-                 'tables':
-                     [{'identifier': 'groups_2',
-                       'meta': {'observability': {'alert_on_schema_changes': 'true'}}}]}]}]
-
-
 WEBHOOK_URL = 'https://my_webhook'
 ALERT_ROW = ['123', datetime.now(), 'db', 'sc', 't1', 'c1', 'schema_change', 'column_added', 'Column was added']
-
-
-def read_csv(csv_path):
-    csv_lines = []
-    with open(csv_path, 'r') as csvfile:
-        csv_reader = csv.DictReader(csvfile)
-        for row in csv_reader:
-            csv_lines.append(row)
-    return csv_lines
 
 
 @pytest.fixture
@@ -56,8 +28,8 @@ def snowflake_con_mock():
 def config_mock():
     config_mock = mock.create_autospec(Config)
     config_mock.profiles_dir_path = 'profiles_dir_path'
-    config_mock.get_dbt_project_sources.return_value = SOURCES
     config_mock.get_slack_notification_webhook.return_value = WEBHOOK_URL
+    config_mock.monitoring_configuration_in_dbt_sources_to_csv.return_value = None
     return config_mock
 
 
@@ -117,14 +89,8 @@ def assert_configuration_exists(data_monitoring):
     assert os.path.exists(data_monitoring.DBT_PROJECT_SEEDS_PATH)
     monitoring_config_csv_path = os.path.join(data_monitoring.DBT_PROJECT_SEEDS_PATH,
                                               f'{data_monitoring.MONITORING_CONFIGURATION}.csv')
-    assert os.path.exists(monitoring_config_csv_path)
-    monitoring_configuration_csv_lines = read_csv(monitoring_config_csv_path)
-    # Sanity check on the created configuration CSVs
-    assert len(monitoring_configuration_csv_lines) == 5
-    assert monitoring_configuration_csv_lines[0]['database_name'] == SOURCES[0]['sources'][0]['database']
-    assert monitoring_configuration_csv_lines[0]['schema_name'] == SOURCES[0]['sources'][0]['name']
-    assert monitoring_configuration_csv_lines[0]['alert_on_schema_changes'].lower() == \
-           SOURCES[0]['sources'][0]['meta']['observability']['alert_on_schema_changes'].lower()
+    config_mock = data_monitoring.config
+    config_mock.monitoring_configuration_in_dbt_sources_to_csv.assert_called_once_with(monitoring_config_csv_path)
 
 
 def delete_configuration(data_monitoring):
@@ -227,47 +193,6 @@ def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, db
     # Validate that dbt snapshot and dbt run were called as well
     dbt_runner_mock.snapshot.assert_called()
     dbt_runner_mock.run.assert_called_with(model=snowflake_data_monitoring.DBT_PACKAGE_NAME, full_refresh=full_refresh)
-
-
-def test_data_monitoring_update_configuration_in_db(snowflake_data_monitoring):
-    delete_configuration(snowflake_data_monitoring)
-
-    # The test function
-    snowflake_data_monitoring._update_configuration()
-
-    monitoring_config_csv_path = os.path.join(snowflake_data_monitoring.DBT_PROJECT_SEEDS_PATH,
-                                              f'{snowflake_data_monitoring.MONITORING_CONFIGURATION}.csv')
-
-    monitoring_config_csv_lines = read_csv(monitoring_config_csv_path)
-    assert monitoring_config_csv_lines[0]['database_name'] == SOURCES[0]['sources'][0]['database']
-    assert monitoring_config_csv_lines[0]['schema_name'] == SOURCES[0]['sources'][0]['name']
-    assert monitoring_config_csv_lines[0]['alert_on_schema_changes'].lower() == \
-           SOURCES[0]['sources'][0]['meta']['observability']['alert_on_schema_changes'].lower()
-
-    assert monitoring_config_csv_lines[1]['database_name'] == SOURCES[0]['sources'][0]['database']
-    assert monitoring_config_csv_lines[1]['schema_name'] == SOURCES[0]['sources'][0]['name']
-    assert monitoring_config_csv_lines[1]['table_name'] == SOURCES[0]['sources'][0]['tables'][0]['name']
-    assert monitoring_config_csv_lines[1]['alert_on_schema_changes'].lower() == \
-           SOURCES[0]['sources'][0]['tables'][0]['meta']['observability']['alert_on_schema_changes'].lower()
-
-    assert monitoring_config_csv_lines[2]['database_name'] == SOURCES[0]['sources'][0]['database']
-    assert monitoring_config_csv_lines[2]['schema_name'] == SOURCES[0]['sources'][0]['name']
-    assert monitoring_config_csv_lines[2]['table_name'] == SOURCES[0]['sources'][0]['tables'][0]['name']
-    assert monitoring_config_csv_lines[2]['column_name'] == \
-           SOURCES[0]['sources'][0]['tables'][0]['columns'][0]['name']
-    assert monitoring_config_csv_lines[2]['alert_on_schema_changes'].lower() == \
-        SOURCES[0]['sources'][0]['tables'][0]['columns'][0]['meta']['observability']['alert_on_schema_changes'].lower()
-
-    assert monitoring_config_csv_lines[3]['database_name'] == SOURCES[0]['sources'][1]['database']
-    assert monitoring_config_csv_lines[3]['schema_name'] == SOURCES[0]['sources'][1]['schema']
-    assert monitoring_config_csv_lines[3]['alert_on_schema_changes'].lower() == \
-           SOURCES[0]['sources'][1]['meta']['observability']['alert_on_schema_changes'].lower()
-
-    assert monitoring_config_csv_lines[4]['database_name'] == SOURCES[0]['sources'][1]['database']
-    assert monitoring_config_csv_lines[4]['schema_name'] == SOURCES[0]['sources'][1]['schema']
-    assert monitoring_config_csv_lines[4]['table_name'] == SOURCES[0]['sources'][1]['tables'][0]['identifier']
-    assert monitoring_config_csv_lines[4]['alert_on_schema_changes'].lower() == \
-           SOURCES[0]['sources'][1]['tables'][0]['meta']['observability']['alert_on_schema_changes'].lower()
 
 
 @mock.patch('requests.post')
