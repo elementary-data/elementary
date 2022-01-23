@@ -57,8 +57,8 @@ class Config(object):
     @staticmethod
     def _alert_on_schema_changes(source_dict: dict) -> Union[bool, None]:
         metadata = source_dict.get('meta', {})
-        observability = metadata.get('observability', {})
-        alert_on_schema_changes = observability.get('alert_on_schema_changes')
+        edr_config = metadata.get('edr', {})
+        alert_on_schema_changes = edr_config.get('schema_changes')
 
         # Normalize alert_on_schema_changes to handle both booleans and strings
         alert_on_schema_changes_str = str(alert_on_schema_changes).lower()
