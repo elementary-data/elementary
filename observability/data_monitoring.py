@@ -20,7 +20,6 @@ class DataMonitoring(object):
     # Compatibility for previous dbt versions
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
-    #TODO: maybe use the dbt_project.yml seeds path
     DBT_PROJECT_SEEDS_PATH = os.path.join(DBT_PROJECT_PATH, 'data')
 
     MONITORING_SCHEMAS_CONFIGURATION = 'monitoring_schemas_configuration'
@@ -64,7 +63,16 @@ class DataMonitoring(object):
     def _alert_on_schema_changes(source_dict: dict) -> Union[bool, None]:
         metadata = source_dict.get('meta', {})
         observability = metadata.get('observability', {})
-        return observability.get('alert_on_schema_changes')
+        alert_on_schema_changes = observability.get('alert_on_schema_changes')
+
+        # Normalize alert_on_schema_changes to handle both booleans and strings
+        alert_on_schema_changes_str = str(alert_on_schema_changes).lower()
+        if alert_on_schema_changes_str == 'false':
+            return False
+        elif alert_on_schema_changes == 'true':
+            return True
+        else:
+            return None
 
     #TODO: maybe break it down a bit to smaller functions
     def _update_configuration(self) -> bool:
@@ -99,50 +107,52 @@ class DataMonitoring(object):
                                                                                      'alert_on_schema_changes'])
             column_config_csv_writer.writeheader()
 
-            sources = self.config.get_sources()
-            for source in sources:
-                source_db = source.get('database')
-                if source_db is None:
-                    continue
-
-                schema_name = source.get('schema', source.get('name'))
-                if schema_name is None:
-                    continue
-
-                alert_on_schema_changes = self._alert_on_schema_changes(source)
-                #TODO: should we validate type of 'alert_on_schema_changes' is bool?
-                if alert_on_schema_changes is not None:
-                    schema_config_csv_writer.writerow({'database_name': source_db,
-                                                       'schema_name': schema_name,
-                                                       'alert_on_schema_changes': alert_on_schema_changes})
-
-                source_tables = source.get('tables', [])
-                for source_table in source_tables:
-                    table_name = source_table.get('identifier', source_table.get('name'))
-                    if table_name is None:
+            all_configured_sources = self.config.get_dbt_project_sources()
+            for sources_dict in all_configured_sources:
+                sources = sources_dict.get('sources', [])
+                target_database = sources_dict.get('dbt_project_target_database')
+                for source in sources:
+                    source_db = source.get('database', target_database)
+                    if source_db is None:
                         continue
 
-                    alert_on_schema_changes = self._alert_on_schema_changes(source_table)
-                    if alert_on_schema_changes is not None:
-                        table_config_csv_writer.writerow({'database_name': source_db,
-                                                          'schema_name': schema_name,
-                                                          'table_name': table_name,
-                                                          'alert_on_schema_changes': alert_on_schema_changes})
+                    schema_name = source.get('schema', source.get('name'))
+                    if schema_name is None:
+                        continue
 
-                    source_columns = source_table.get('columns', [])
-                    for source_column in source_columns:
-                        column_name = source_column.get('name')
-                        if column_name is None:
+                    alert_on_schema_changes = self._alert_on_schema_changes(source)
+                    if alert_on_schema_changes is not None:
+                        schema_config_csv_writer.writerow({'database_name': source_db,
+                                                           'schema_name': schema_name,
+                                                           'alert_on_schema_changes': alert_on_schema_changes})
+
+                    source_tables = source.get('tables', [])
+                    for source_table in source_tables:
+                        table_name = source_table.get('identifier', source_table.get('name'))
+                        if table_name is None:
                             continue
-                        column_type = source_column.get('meta', {}).get('type')
-                        alert_on_schema_changes = self._alert_on_schema_changes(source_column)
+
+                        alert_on_schema_changes = self._alert_on_schema_changes(source_table)
                         if alert_on_schema_changes is not None:
-                            column_config_csv_writer.writerow({'database_name': source_db,
-                                                               'schema_name': schema_name,
-                                                               'table_name': table_name,
-                                                               'column_name': column_name,
-                                                               'column_type': column_type,
-                                                               'alert_on_schema_changes': alert_on_schema_changes})
+                            table_config_csv_writer.writerow({'database_name': source_db,
+                                                              'schema_name': schema_name,
+                                                              'table_name': table_name,
+                                                              'alert_on_schema_changes': alert_on_schema_changes})
+
+                        source_columns = source_table.get('columns', [])
+                        for source_column in source_columns:
+                            column_name = source_column.get('name')
+                            if column_name is None:
+                                continue
+                            column_type = source_column.get('meta', {}).get('type')
+                            alert_on_schema_changes = self._alert_on_schema_changes(source_column)
+                            if alert_on_schema_changes is not None:
+                                column_config_csv_writer.writerow({'database_name': source_db,
+                                                                   'schema_name': schema_name,
+                                                                   'table_name': table_name,
+                                                                   'column_name': column_name,
+                                                                   'column_type': column_type,
+                                                                   'alert_on_schema_changes': alert_on_schema_changes})
 
         return self.dbt_runner.seed()
 

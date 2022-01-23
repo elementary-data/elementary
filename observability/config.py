@@ -1,5 +1,7 @@
 from typing import Union
+import glob
 
+from utils.dbt import get_model_paths_from_dbt_project, get_target_database_name
 from utils.ordered_yaml import OrderedYaml
 import os
 
@@ -25,13 +27,25 @@ class Config(object):
         monitoring_config = self._get_monitoring_configuration()
         return monitoring_config.get(self.SLACK_NOTIFICATION_WEBHOOK)
 
-    def get_sources(self) -> list:
-        monitoring_config = self._get_monitoring_configuration()
-        #TODO: maybe proivde here a list of dbt projects
-        config_files = monitoring_config.get('config_files', [])
-        sources = []
-        for config_file in config_files:
-            config_dict = self.ordered_yaml.load(config_file)
-            sources.extend(config_dict.get('sources', []))
+    @staticmethod
+    def _find_schema_yml_files_in_dbt_project(dbt_project_models_path: str) -> list:
+        return glob.glob(os.path.join(dbt_project_models_path, '*.yml'), recursive=True)
 
+    def get_dbt_project_sources(self) -> list:
+        monitoring_config = self._get_monitoring_configuration()
+        dbt_projects = monitoring_config.get('dbt_projects', [])
+        sources = []
+        for dbt_project_path in dbt_projects:
+            dbt_project_target_database = get_target_database_name(self.profiles_dir_path, dbt_project_path)
+            model_paths = get_model_paths_from_dbt_project(dbt_project_path)
+            for model_path in model_paths:
+                dbt_project_models_path = os.path.join(dbt_project_path, model_path)
+                schema_yml_files = self._find_schema_yml_files_in_dbt_project(dbt_project_models_path)
+                for schema_yml_file in schema_yml_files:
+                    schema_dict = self.ordered_yaml.load(schema_yml_file)
+                    schema_sources = schema_dict.get('sources')
+                    if schema_sources is not None:
+                        dbt_project_sources = {'sources': schema_sources,
+                                               'dbt_project_target_database': dbt_project_target_database}
+                        sources.append(dbt_project_sources)
         return sources
