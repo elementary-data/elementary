@@ -22,9 +22,7 @@ class DataMonitoring(object):
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
     DBT_PROJECT_SEEDS_PATH = os.path.join(DBT_PROJECT_PATH, 'data')
 
-    MONITORING_SCHEMAS_CONFIGURATION = 'monitoring_schemas_configuration'
-    MONITORING_TABLES_CONFIGURATION = 'monitoring_tables_configuration'
-    MONITORING_COLUMNS_CONFIGURATION = 'monitoring_columns_configuration'
+    MONITORING_CONFIGURATION = 'monitoring_configuration'
 
     #TODO: change alerts table name once the dbt package is fixed
     SELECT_NEW_ALERTS_QUERY = """
@@ -80,32 +78,15 @@ class DataMonitoring(object):
         if not os.path.exists(target_csv_dir):
             os.makedirs(target_csv_dir)
 
-        schema_config_csv_path = os.path.join(target_csv_dir, f'{self.MONITORING_SCHEMAS_CONFIGURATION}.csv')
-        table_config_csv_path = os.path.join(target_csv_dir, f'{self.MONITORING_TABLES_CONFIGURATION}.csv')
-        column_config_csv_path = os.path.join(target_csv_dir, f'{self.MONITORING_COLUMNS_CONFIGURATION}.csv')
+        monitoring_config_csv_path = os.path.join(target_csv_dir, f'{self.MONITORING_CONFIGURATION}.csv')
 
-        with open(schema_config_csv_path, 'w') as schema_config_csv, \
-             open(table_config_csv_path, 'w') as table_config_csv, \
-             open(column_config_csv_path, 'w') as column_config_csv:
-
-            schema_config_csv_writer = csv.DictWriter(schema_config_csv, fieldnames=['database_name',
-                                                                                     'schema_name',
-                                                                                     'alert_on_schema_changes'])
-            schema_config_csv_writer.writeheader()
-
-            table_config_csv_writer = csv.DictWriter(table_config_csv, fieldnames=['database_name',
-                                                                                   'schema_name',
-                                                                                   'table_name',
-                                                                                   'alert_on_schema_changes'])
-            table_config_csv_writer.writeheader()
-
-            column_config_csv_writer = csv.DictWriter(column_config_csv, fieldnames=['database_name',
-                                                                                     'schema_name',
-                                                                                     'table_name',
-                                                                                     'column_name',
-                                                                                     'column_type',
-                                                                                     'alert_on_schema_changes'])
-            column_config_csv_writer.writeheader()
+        with open(monitoring_config_csv_path, 'w') as monitoring_config_csv:
+            monitoring_config_csv_writer = csv.DictWriter(monitoring_config_csv, fieldnames=['database_name',
+                                                                                             'schema_name',
+                                                                                             'table_name',
+                                                                                             'column_name',
+                                                                                             'alert_on_schema_changes'])
+            monitoring_config_csv_writer.writeheader()
 
             all_configured_sources = self.config.get_dbt_project_sources()
             for sources_dict in all_configured_sources:
@@ -122,9 +103,11 @@ class DataMonitoring(object):
 
                     alert_on_schema_changes = self._alert_on_schema_changes(source)
                     if alert_on_schema_changes is not None:
-                        schema_config_csv_writer.writerow({'database_name': source_db,
-                                                           'schema_name': schema_name,
-                                                           'alert_on_schema_changes': alert_on_schema_changes})
+                        monitoring_config_csv_writer.writerow({'database_name': source_db,
+                                                               'schema_name': schema_name,
+                                                               'table_name': None,
+                                                               'column_name': None,
+                                                               'alert_on_schema_changes': alert_on_schema_changes})
 
                     source_tables = source.get('tables', [])
                     for source_table in source_tables:
@@ -134,10 +117,11 @@ class DataMonitoring(object):
 
                         alert_on_schema_changes = self._alert_on_schema_changes(source_table)
                         if alert_on_schema_changes is not None:
-                            table_config_csv_writer.writerow({'database_name': source_db,
-                                                              'schema_name': schema_name,
-                                                              'table_name': table_name,
-                                                              'alert_on_schema_changes': alert_on_schema_changes})
+                            monitoring_config_csv_writer.writerow({'database_name': source_db,
+                                                                   'schema_name': schema_name,
+                                                                   'table_name': table_name,
+                                                                   'column_name': None,
+                                                                   'alert_on_schema_changes': alert_on_schema_changes})
 
                         source_columns = source_table.get('columns', [])
                         for source_column in source_columns:
@@ -147,12 +131,12 @@ class DataMonitoring(object):
                             column_type = source_column.get('meta', {}).get('type')
                             alert_on_schema_changes = self._alert_on_schema_changes(source_column)
                             if alert_on_schema_changes is not None:
-                                column_config_csv_writer.writerow({'database_name': source_db,
-                                                                   'schema_name': schema_name,
-                                                                   'table_name': table_name,
-                                                                   'column_name': column_name,
-                                                                   'column_type': column_type,
-                                                                   'alert_on_schema_changes': alert_on_schema_changes})
+                                monitoring_config_csv_writer.writerow({'database_name': source_db,
+                                                                       'schema_name': schema_name,
+                                                                       'table_name': table_name,
+                                                                       'column_name': column_name,
+                                                                       'alert_on_schema_changes':
+                                                                           alert_on_schema_changes})
 
         return self.dbt_runner.seed()
 
@@ -229,13 +213,7 @@ class SnowflakeDataMonitoring(DataMonitoring):
         return 0
 
     def monitoring_configuration_exists(self) -> bool:
-        if self._count_rows_in_table(self.MONITORING_SCHEMAS_CONFIGURATION) > 0:
-            return True
-
-        if self._count_rows_in_table(self.MONITORING_TABLES_CONFIGURATION) > 0:
-            return True
-
-        if self._count_rows_in_table(self.MONITORING_COLUMNS_CONFIGURATION) > 0:
+        if self._count_rows_in_table(self.MONITORING_CONFIGURATION) > 0:
             return True
 
         return False
