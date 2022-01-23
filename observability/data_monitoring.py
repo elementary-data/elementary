@@ -7,7 +7,9 @@ from observability.dbt_runner import DbtRunner
 from observability.config import Config
 from utils.dbt import extract_credentials_and_data_from_profiles, get_profile_name_from_dbt_project, \
     get_snowflake_client
+from utils.log import get_logger
 
+logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
 
 
@@ -21,16 +23,15 @@ class DataMonitoring(object):
 
     MONITORING_CONFIGURATION = 'monitoring_configuration'
 
-    #TODO: change alerts table name once the dbt package is fixed
     SELECT_NEW_ALERTS_QUERY = """
         SELECT alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type, 
                alert_description
-            FROM ELEMENTARY_ALERTS
+            FROM ALERTS
             WHERE alert_sent = FALSE;
     """
 
     UPDATE_SENT_ALERTS = """
-        UPDATE ELEMENTARY_ALERTS set alert_sent = TRUE
+        UPDATE ALERTS set alert_sent = TRUE
             WHERE alert_id IN (%s); 
     """
 
@@ -71,8 +72,8 @@ class DataMonitoring(object):
         pass
 
     def _update_sent_alerts(self, alert_ids) -> None:
-        #TODO: check result - in snowflake there should be a column number of rows updated, at least log it without validating the result
-        self._run_query(self.UPDATE_SENT_ALERTS, (alert_ids,))
+        results = self._run_query(self.UPDATE_SENT_ALERTS, (alert_ids,))
+        logger.debug(f"Updated sent alerts -\n{str(results)}")
 
     def _send_alerts_to_slack(self) -> None:
         slack_webhook = self.config.get_slack_notification_webhook()
