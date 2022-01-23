@@ -6,8 +6,7 @@ from monitoring.config import Config
 
 FILE_DIR = os.path.dirname(__file__)
 
-CONFIG = {'monitoring_configuration': {'slack_notification_webhook': 'test_slack_webhook',
-                                       'dbt_projects': [FILE_DIR]}}
+CONFIG = {'slack_notification_webhook': 'test_slack_webhook', 'dbt_projects': [FILE_DIR]}
 
 SOURCES = {'sources':
                 [{'name': 'unit_tests',
@@ -81,7 +80,7 @@ def config():
 
 
 def test_config_get_slack_notification_webhook(config):
-    assert config.get_slack_notification_webhook() == CONFIG['monitoring_configuration']['slack_notification_webhook']
+    assert config.get_slack_notification_webhook() == CONFIG['slack_notification_webhook']
 
 
 def test_config__get_sources_from_all_dbt_projects(config):
