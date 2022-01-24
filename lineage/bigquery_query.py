@@ -40,8 +40,8 @@ class BigQueryQuery(Query):
 
     def parse(self, full_table_names: bool = False) -> bool:
         try:
-            table_resolver = TableResolver(profile_database_name=self._profile_database_name,
-                                           profile_schema_name=self._profile_schema_name,
+            table_resolver = TableResolver(database_name=self._database_name,
+                                           schema_name=self._schema_name,
                                            full_table_names=full_table_names)
 
             target_table = self._parse_table_json_column(table_resolver, self.query_context.destination_table)

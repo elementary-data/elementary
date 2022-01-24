@@ -74,15 +74,7 @@ def get_cli_properties() -> dict:
             'version': get_package_version()}
 
 
-@click.group()
-@click.option('--debug/--no-debug', default=False)
-@click.pass_context
-def lineage(ctx, debug):
-    ctx.ensure_object(dict)
-    ctx.obj['DEBUG'] = debug
-
-
-@lineage.command()
+@click.command()
 @click.option(
     '--start-date', '-s',
     type=click.DateTime(formats=["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]),
@@ -98,6 +90,16 @@ def lineage(ctx, debug):
          "you could also provide a specific time), default is current time."
 )
 @click.option(
+    '--database', '-db',
+    type=str,
+    required=True
+)
+@click.option(
+    '--schema', '-sch',
+    type=str,
+    default=None
+)
+@click.option(
     '--config-dir', '-c',
     type=str,
     default=os.path.join(expanduser('~'), '.edr')
@@ -106,7 +108,6 @@ def lineage(ctx, debug):
     '--profiles-dir', '-d',
     type=click.Path(exists=True),
     default=os.path.join(expanduser('~'), '.dbt'),
-    required=True,
     help="You can connect to your data warehouse using your profiles dir, just specify your profiles dir where a "
          "profiles.yml is located (could be a dbt profiles dir).",
     cls=RequiredIf,
@@ -115,7 +116,7 @@ def lineage(ctx, debug):
 @click.option(
     '--profile-name', '-p',
     type=str,
-    required=True,
+    default='edr',
     help="The profile name of the chosen profile in your profiles file.",
     cls=RequiredIf,
     required_if='profiles_dir'
@@ -143,13 +144,6 @@ def lineage(ctx, debug):
          "(the default is to show only the table name)."
 )
 @click.option(
-    '--ignore-schema', '-i',
-    type=bool,
-    default=True,
-    help="Indicates if the lineage should ignore the configured profile's schema and present every table in the "
-         "configured database."
-)
-@click.option(
     '--table', '-t',
     type=str,
     help="Filter on a table to see upstream and downstream dependencies of this table (see also direction param)."
@@ -174,12 +168,9 @@ def lineage(ctx, debug):
               default=None,
               cls=RequiredIf,
               required_if='table')
-def query_history(start_date: datetime, end_date: datetime, config_dir: str, profiles_dir: str, profile_name: str,
-                  open_browser: bool, export_query_history: bool, full_table_names: bool, ignore_schema: bool,
-                  table: str, direction: str, depth: int) -> None:
-    """
-    For more details check out our documentation here - https://docs.elementary-data.com/
-    """
+def lineage(start_date: datetime, end_date: datetime, database: str, schema: str, config_dir: str,
+            profiles_dir: str, profile_name: str, open_browser: bool, export_query_history: bool,
+            full_table_names: bool, table: str, direction: str, depth: int) -> None:
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 
@@ -187,18 +178,16 @@ def query_history(start_date: datetime, end_date: datetime, config_dir: str, pro
     anonymous_tracking = track_lineage_start(config_dir, profiles_dir, profile_data, get_cli_properties())
 
     try:
-        query_history = QueryHistoryFactory(export_query_history, ignore_schema, full_table_names).\
+        query_history_extractor = QueryHistoryFactory(database, schema, export_query_history, full_table_names).\
             create_query_history(credentials, profile_data)
-        queries = query_history.extract_queries(start_date, end_date)
+        queries = query_history_extractor.extract_queries(start_date, end_date)
 
         lineage_graph = LineageGraph(show_isolated_nodes=False)
         lineage_graph.init_graph_from_query_list(queries)
 
         if table is not None:
-            table_resolver = TableResolver(profile_database_name=credentials.database,
-                                           profile_schema_name=credentials.schema if not ignore_schema else None,
-                                           queried_database_name=credentials.database,
-                                           queried_schema_name=credentials.schema,
+            table_resolver = TableResolver(database_name=database,
+                                           schema_name=schema,
                                            full_table_names=full_table_names)
             resolved_table_name = table_resolver.name_qualification(table)
             if resolved_table_name is None:
@@ -210,7 +199,7 @@ def query_history(start_date: datetime, end_date: datetime, config_dir: str, pro
         if not success:
             print(EmptyGraphHelper(credentials.type).get_help_message())
 
-        track_lineage_end(anonymous_tracking, lineage_graph.properties(), query_history.properties())
+        track_lineage_end(anonymous_tracking, lineage_graph.properties(), query_history_extractor.properties())
 
     except Exception as exc:
         track_lineage_exception(anonymous_tracking, exc)

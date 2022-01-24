@@ -1,6 +1,6 @@
 import pytest
 from unittest import mock
-from monitoring.dbt_runner import DbtRunner
+from monitor.dbt_runner import DbtRunner
 
 
 @pytest.mark.parametrize("command", [

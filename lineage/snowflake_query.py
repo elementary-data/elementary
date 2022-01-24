@@ -76,7 +76,7 @@ class SnowflakeQuery(Query):
 
     def parse(self, full_table_names: bool = False) -> bool:
         try:
-            table_resolver = TableResolver(self._profile_database_name, self._profile_schema_name,
+            table_resolver = TableResolver(self._database_name, self._schema_name,
                                            self.query_context.queried_database, self.query_context.queried_schema,
                                            full_table_names, self.revert_dollar_sign_placeholder)
 

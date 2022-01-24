@@ -6,7 +6,7 @@ f = Figlet(font='slant')
 print(f.renderText('Elementary'))
 
 root_folder = os.path.join(os.path.dirname(__file__), '..')
-modules = ['lineage', 'observability']
+modules = ['lineage', 'monitor']
 
 
 class ElementaryCLI(click.MultiCommand):
@@ -27,7 +27,7 @@ class ElementaryCLI(click.MultiCommand):
         return ns[name]
 
 
-cli = ElementaryCLI(help='Open source data reliability solution')
+cli = ElementaryCLI(help='Open source data reliability solution (https://docs.elementary-data.com/)')
 
 if __name__ == '__main__':
     cli()

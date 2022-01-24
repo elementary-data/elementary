@@ -17,14 +17,12 @@ class QueryHistory(object):
     SUCCESS_QUERIES_FILE = './latest_query_history.json'
     FAILED_QUERIES_FILE = './failed_queries.json'
 
-    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
-                 should_export_query_history: bool = True, ignore_schema: bool = False,
+    def __init__(self, con, database_name: str, schema_name: str, should_export_query_history: bool = True,
                  full_table_names: bool = False) -> None:
         self._con = con
-        self._profile_database_name = profile_database_name
-        self._profile_schema_name = profile_schema_name
+        self._database_name = database_name
+        self._schema_name = schema_name
         self._should_export_query_history = should_export_query_history
-        self._ignore_schema = ignore_schema
         self._full_table_names = full_table_names
         self._query_history_stats = QueryHistoryStats()
         self.success_queries = []
@@ -82,12 +80,6 @@ class QueryHistory(object):
 
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
         pass
-
-    def get_database_name(self) -> str:
-        return self._profile_database_name
-
-    def get_schema_name(self) -> Optional[str]:
-        return self._profile_schema_name if not self._ignore_schema else None
 
     def properties(self) -> dict:
         failed_queries_count = len(self.failed_queries)

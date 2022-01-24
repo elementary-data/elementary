@@ -20,7 +20,7 @@ def create_bigquery_table_colum(project_id, dataset_id, table_id):
     (create_bigquery_table_colum('db1', 'sc1', 'anont1'), True, None), #anon represents a temp cached table and therefore should be ignored
 ])
 def test_bigquery_query_parse_table_json_column(json_table_column, full_table_names, expected_parsed_result):
-    table_resolver = TableResolver(profile_database_name='db1', profile_schema_name='sc1',
+    table_resolver = TableResolver(database_name='db1', schema_name='sc1',
                                    full_table_names=full_table_names)
     assert BigQueryQuery._parse_table_json_column(table_resolver, json_table_column) == expected_parsed_result
 
