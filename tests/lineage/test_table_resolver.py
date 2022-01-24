@@ -28,8 +28,8 @@ def test_lineage_graph_resolve_table_qualification(table_name_in_query_text,
                                                    schema_name_in_history_table,
                                                    expected_resolved_schema):
 
-    reference = TableResolver(profile_database_name='profile_elementary_db',
-                              profile_schema_name='profile_elementary_sc',
+    reference = TableResolver(database_name='profile_elementary_db',
+                              schema_name='profile_elementary_sc',
                               queried_database_name=db_name_in_history_table,
                               queried_schema_name=schema_name_in_history_table)
 
@@ -51,7 +51,7 @@ def test_lineage_graph_resolve_table_qualification(table_name_in_query_text,
     (str(Table('table1')), 'profile_elementary_db', None, True),
 ])
 def test_lineage_graph_should_ignore_table(resolved_table_name, profile_db_name, profile_schema_name, should_ignore):
-    reference = TableResolver(profile_database_name=profile_db_name, profile_schema_name=profile_schema_name)
+    reference = TableResolver(database_name=profile_db_name, schema_name=profile_schema_name)
     assert reference._should_ignore_table(Table(resolved_table_name)) == should_ignore
 
 
@@ -60,7 +60,7 @@ def test_lineage_graph_should_ignore_table(resolved_table_name, profile_db_name,
     ('elementary_db.elementary_sc.table1', False, 'table1')
 ])
 def test_lineage_graph_name_qualification(resolved_table_name, show_full_table_names, expected_result):
-    reference = TableResolver(profile_database_name='elementary_db', profile_schema_name='elementary_sc',
+    reference = TableResolver(database_name='elementary_db', schema_name='elementary_sc',
                               queried_database_name='', queried_schema_name='',
                               full_table_names=show_full_table_names)
 

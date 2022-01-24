@@ -200,7 +200,7 @@ def test_lineage_graph_upstream_graph(edges, selected_node, depth, expected_rema
 def test_lineage_graph_filter_on_table(profile_database_name, profile_schema_name, full_table_names, edges,
                                        selected_node, direction, depth, expected_remaining_edges):
     reference = LineageGraph()
-    table_resolver = TableResolver(profile_database_name=profile_database_name, profile_schema_name=profile_schema_name,
+    table_resolver = TableResolver(database_name=profile_database_name, schema_name=profile_schema_name,
                                    full_table_names=full_table_names)
     reference._lineage_graph = create_directed_graph_from_edge_list(edges)
     reference.filter_on_table(table_resolver.name_qualification(selected_node), direction, depth)

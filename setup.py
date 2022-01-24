@@ -48,7 +48,8 @@ setup(
         'typing-extensions<3.11,>=3.7.4',
         'flask<1.1.1',
         'Jinja2>=2.10.1,<3',
-        'tomli<2.0.0,>=0.2.6'
+        'tomli<2.0.0,>=0.2.6',
+        'urllib3<1.26,>=1.20'
     ],
     long_description_content_type="text/markdown",
     license='',

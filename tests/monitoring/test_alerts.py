@@ -4,7 +4,7 @@ from datetime import datetime
 
 from utils.time import convert_utc_time_to_local_time
 
-from monitoring.alerts import Alert, SchemaChangeAlert
+from monitor.alerts import Alert, SchemaChangeAlert
 
 
 def test_alert_create_alert_from_row():

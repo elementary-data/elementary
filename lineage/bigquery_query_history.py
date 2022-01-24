@@ -32,11 +32,9 @@ class BigQueryQueryHistory(QueryHistory):
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'CURRENT_TIMESTAMP()'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = '@end_time'
 
-    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
-                 should_export_query_history: bool = True, ignore_schema: bool = False,
+    def __init__(self, con, database_name: str, schema_name: str, should_export_query_history: bool = True,
                  full_table_names: bool = False) -> None:
-        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema,
-                         full_table_names)
+        super().__init__(con, database_name, schema_name, should_export_query_history, full_table_names)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, location: str) -> \
@@ -61,11 +59,9 @@ class BigQueryQueryHistory(QueryHistory):
         return query, query_parameters
 
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
-        database_name = self.get_database_name()
-        schema_name = self.get_schema_name()
-        logger.debug(f"Pulling BigQuery history from database - {database_name} and schema - {schema_name}")
+        logger.debug(f"Pulling BigQuery history from database - {self._database_name} and schema - {self._schema_name}")
 
-        query_text, query_parameters = self._build_history_query(start_date, end_date, database_name,
+        query_text, query_parameters = self._build_history_query(start_date, end_date, self._database_name,
                                                                  self._con.location)
 
         job_config = bigquery.QueryJobConfig(
@@ -89,8 +85,8 @@ class BigQueryQueryHistory(QueryHistory):
 
             query = BigQueryQuery(raw_query_text=row[0],
                                   query_context=query_context,
-                                  profile_database_name=database_name,
-                                  profile_schema_name=schema_name)
+                                  database_name=self._database_name,
+                                  schema_name=self._schema_name)
 
             self.add_query(query)
 

@@ -2,9 +2,9 @@ import os
 from typing import Any
 import snowflake.connector.errors
 from exceptions.exceptions import ConfigError
-from monitoring.alerts import Alert
-from monitoring.dbt_runner import DbtRunner
-from monitoring.config import Config
+from monitor.alerts import Alert
+from monitor.dbt_runner import DbtRunner
+from monitor.config import Config
 from utils.dbt import extract_credentials_and_data_from_profiles, get_profile_name_from_dbt_project, \
     get_snowflake_client
 from utils.log import get_logger
