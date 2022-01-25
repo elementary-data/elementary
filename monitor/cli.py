@@ -1,11 +1,37 @@
 import click
 import os
 from os.path import expanduser
+
+from lineage.utils import is_dbt_installed, get_package_version
+from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
+from utils.dbt import get_profile_name_from_dbt_project
 from utils.ordered_yaml import OrderedYaml
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
 
 yaml = OrderedYaml()
+
+
+def get_cli_properties() -> dict:
+
+    click_context = click.get_current_context()
+    if click_context is None:
+        return dict()
+
+    params = click_context.params
+    if params is None:
+        return dict()
+
+    reload_monitoring_configuration = params.get('reload_monitoring_configuration')
+    update_dbt_package = params.get('update_dbt_package')
+    full_refresh_dbt_package = params.get('full_refresh_dbt_package')
+
+    return {'reload_monitoring_configuration': reload_monitoring_configuration,
+            'update_dbt_package': update_dbt_package,
+            'full_refresh_dbt_package': full_refresh_dbt_package,
+            'dbt_installed': is_dbt_installed(),
+            'version': get_package_version()}
+
 
 
 @click.command()
@@ -44,12 +70,19 @@ yaml = OrderedYaml()
     help="Force running a full refresh of all incremental models in the edr dbt package (usually this is not needed, "
          "see documentation to learn more)."
 )
-def monitor(config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package,
-            reload_monitoring_configuration):
+def monitor(reload_monitoring_configuration, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
-    data_monitoring = DataMonitoring.create_data_monitoring(config_dir, profiles_dir)
-    data_monitoring.run(update_dbt_package, reload_monitoring_configuration, full_refresh_dbt_package)
+    config = Config(config_dir, profiles_dir, get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH))
+    anonymous_tracking = AnonymousTracking(config)
+    track_cli_start(anonymous_tracking, 'monitor', get_cli_properties())
+    try:
+        data_monitoring = DataMonitoring.create_data_monitoring(config)
+        data_monitoring.run(reload_monitoring_configuration, update_dbt_package, full_refresh_dbt_package)
+        track_cli_end(anonymous_tracking, 'monitor', data_monitoring.execution_properties())
+    except Exception as exc:
+        track_cli_exception(anonymous_tracking, 'monitor', exc)
+        raise
 
 
 if __name__ == "__main__":

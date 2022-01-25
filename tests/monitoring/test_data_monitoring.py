@@ -133,7 +133,7 @@ def test_data_monitoring_run_config_does_not_exist(full_refresh, update_dbt_pack
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
     # The test function
-    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_packages=update_dbt_package,
+    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_package=update_dbt_package,
                                   reload_monitoring_configuration=reload_config)
 
     if update_dbt_package or not dbt_package_exists:
@@ -176,7 +176,7 @@ def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, db
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
     # The test function
-    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_packages=update_dbt_package,
+    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_package=update_dbt_package,
                                   reload_monitoring_configuration=reload_config)
 
     if update_dbt_package or not dbt_package_exists:
@@ -196,10 +196,18 @@ def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, db
 
 
 @mock.patch('requests.post')
-def test_data_monitoring_send_alerts(requests_post_mock, snowflake_data_monitoring_with_alerts_in_db):
-    snowflake_data_monitoring = snowflake_data_monitoring_with_alerts_in_db
+def test_data_monitoring_send_alert_to_slack(requests_post_mock, snowflake_data_monitoring):
     alert = Alert.create_alert_from_row(ALERT_ROW)
     # The test function
-    snowflake_data_monitoring._send_alerts_to_slack()
+    snowflake_data_monitoring._send_to_slack([alert])
     requests_post_mock.assert_called_once_with(url=WEBHOOK_URL, headers={'Content-type': 'application/json'},
                                                data=json.dumps(alert.to_slack_message()))
+
+
+def test_data_monitoring_send_alerts(snowflake_data_monitoring_with_alerts_in_db):
+    snowflake_data_monitoring = snowflake_data_monitoring_with_alerts_in_db
+    alerts = snowflake_data_monitoring._query_alerts()
+    expected_alerts = [Alert.create_alert_from_row(ALERT_ROW)]
+    assert len(alerts) == len(expected_alerts)
+    assert alerts[0].id == expected_alerts[0].id
+    assert type(alerts[0]) == type(expected_alerts[0])

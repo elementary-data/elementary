@@ -85,10 +85,10 @@ class QueryHistory(object):
         failed_queries_count = len(self.failed_queries)
         success_queries_count = len(self.success_queries)
         queries_count = success_queries_count + failed_queries_count
-        query_history_properties = {'failed_queries': failed_queries_count,
-                                    'success_queries': success_queries_count,
-                                    'queries_count': queries_count,
-                                    'platform_type': self.PLATFORM_TYPE}
-        query_history_properties.update(self._query_history_stats.to_dict())
+        query_history_properties = {'query_history_properties': {'failed_queries': failed_queries_count,
+                                                                 'success_queries': success_queries_count,
+                                                                 'queries_count': queries_count,
+                                                                 'platform_type': self.PLATFORM_TYPE}}
+        query_history_properties.update({'query_stats': self._query_history_stats.to_dict()})
         return query_history_properties
 
