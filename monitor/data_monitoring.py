@@ -37,15 +37,14 @@ class DataMonitoring(object):
 
     COUNT_ROWS_QUERY = None
 
-    def __init__(self, config: 'Config', db_connection: Any) -> None:
+    def __init__(self, config: Config, db_connection: Any) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.db_connection = db_connection
+        self.execution_properties = {}
 
     @staticmethod
-    def create_data_monitoring(config_dir: str, profiles_dir: str) -> 'DataMonitoring':
-        profile_name = get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH)
-        config = Config(config_dir, profiles_dir, profile_name)
+    def create_data_monitoring(config: Config) -> 'DataMonitoring':
         if config.platform == 'snowflake':
             snowflake_conn = get_snowflake_client(config.credentials, server_side_binding=False)
             return SnowflakeDataMonitoring(config, snowflake_conn)
@@ -75,41 +74,87 @@ class DataMonitoring(object):
         results = self._run_query(self.UPDATE_SENT_ALERTS, (alert_ids,))
         logger.debug(f"Updated sent alerts -\n{str(results)}")
 
-    def _send_alerts_to_slack(self) -> None:
+    def _query_alerts(self) -> list:
+        alert_rows = self._run_query(self.SELECT_NEW_ALERTS_QUERY)
+        self.execution_properties['alert_rows'] = len(alert_rows)
+        alerts = []
+        for alert_row in alert_rows:
+            alerts.append(Alert.create_alert_from_row(alert_row))
+        return alerts
+
+    def _send_to_slack(self, alerts: [Alert]) -> None:
         slack_webhook = self.config.get_slack_notification_webhook()
         if slack_webhook is not None:
-            alert_rows = self._run_query(self.SELECT_NEW_ALERTS_QUERY)
             sent_alerts = []
-            for alert_row in alert_rows:
-                alert = Alert.create_alert_from_row(alert_row)
+            for alert in alerts:
                 alert.send_to_slack(slack_webhook)
                 sent_alerts.append(alert.id)
 
-            if len(sent_alerts) > 0:
+            sent_alert_count = len(sent_alerts)
+            self.execution_properties['sent_alert_count'] = sent_alert_count
+            if sent_alert_count > 0:
                 self._update_sent_alerts(sent_alerts)
+        else:
+            logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
+                        "a slack webhook)")
 
-    def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False,
-            dbt_full_refresh: bool = False) -> None:
-        if not self._dbt_package_exists() or force_update_dbt_packages:
+    def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
+        internal_dbt_package_exists = self._dbt_package_exists()
+        self.execution_properties['dbt_package_exists'] = internal_dbt_package_exists
+        self.execution_properties['force_update_dbt_packages'] = force_update_dbt_packages
+        if not internal_dbt_package_exists or force_update_dbt_packages:
             #TODO: should we updated revision to latest?
             logger.info("Downloading edr internal dbt package")
-            if not self.dbt_runner.deps():
+            package_downloaded = self.dbt_runner.deps()
+            self.execution_properties['package_downloaded'] = package_downloaded
+            if not package_downloaded:
+                logger.info('Could not download internal dbt package')
                 return
 
-        if not self.monitoring_configuration_exists() or reload_monitoring_configuration:
+    def _upload_monitoring_configuration_if_needed(self, reload_monitoring_configuration: bool):
+        monitoring_configuration_exists = self.monitoring_configuration_exists()
+        self.execution_properties['monitoring_configuration_exists'] = monitoring_configuration_exists
+        self.execution_properties['reload_monitoring_configuration'] = reload_monitoring_configuration
+        if not monitoring_configuration_exists or reload_monitoring_configuration:
             logger.info("Uploading monitoring configuration")
-            if not self._update_configuration():
+            config_updated = self._update_configuration()
+            self.execution_properties['config_updated'] = config_updated
+            if not config_updated:
+                logger.info('Could not upload monitoring configuration')
                 return
 
-        # Run elementary dbt package
-        logger.info("Taking schema snapshots")
-        if not self.dbt_runner.snapshot():
-            return
-        logger.info("Running edr internal dbt package")
-        if not self.dbt_runner.run(model=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh):
+    def _send_alerts(self):
+        alerts = self._query_alerts()
+        alert_count = len(alerts)
+        self.execution_properties['alert_count'] = alert_count
+        if alert_count > 0:
+            self._send_to_slack(alerts)
+
+    def run(self, reload_monitoring_configuration: bool = False, force_update_dbt_package: bool = False,
+            dbt_full_refresh: bool = False) -> None:
+
+        self._download_dbt_package_if_needed(force_update_dbt_package)
+        self._upload_monitoring_configuration_if_needed(reload_monitoring_configuration)
+
+        logger.info("Running dbt snapshots to detect changes in schemas")
+        success = self.dbt_runner.snapshot()
+        self.execution_properties['snapshot_success'] = success
+        if not success:
+            logger.info('Could not run dbt snapshot successfully')
             return
 
-        self._send_alerts_to_slack()
+        logger.info("Running edr internal dbt package")
+        success = self.dbt_runner.run(model=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh)
+        self.execution_properties['run_success'] = success
+        if not success:
+            logger.info('Could not run dbt run successfully')
+            return
+
+        self._send_alerts()
+
+    def properties(self):
+        data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
+        return data_monitoring_properties
 
 
 class SnowflakeDataMonitoring(DataMonitoring):

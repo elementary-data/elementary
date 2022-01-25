@@ -146,6 +146,6 @@ class SnowflakeQueryHistory(QueryHistory):
 
     def properties(self) -> dict:
         query_history_properties = super().properties()
-        query_history_properties.update({'query_history_source': self.query_history_source})
+        query_history_properties['query_history_properties'].update({'query_history_source': self.query_history_source})
         return query_history_properties
 

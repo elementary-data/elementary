@@ -1,6 +1,10 @@
 import click
 from pyfiglet import Figlet
 import os
+from os.path import expanduser
+
+from config.config import Config
+from tracking.anonymous_tracking import AnonymousTracking, track_cli_help
 
 f = Figlet(font='slant')
 print(f.renderText('Elementary'))
@@ -25,6 +29,20 @@ class ElementaryCLI(click.MultiCommand):
             code = compile(f.read(), fn, 'exec')
             eval(code, ns, ns)
         return ns[name]
+
+    def format_help(self, ctx, formatter):
+        try:
+            config = Config(config_dir=os.path.join(expanduser('~'), '.edr'),
+                            profiles_dir=os.path.join(expanduser('~'), '.dbt'),
+                            profile_name='elementary')
+            anonymous_tracking = AnonymousTracking(config)
+            track_cli_help(anonymous_tracking)
+        except Exception as exec:
+            pass
+        self.format_usage(ctx, formatter)
+        self.format_help_text(ctx, formatter)
+        self.format_options(ctx, formatter)
+        self.format_epilog(ctx, formatter)
 
 
 cli = ElementaryCLI(help='Open source data reliability solution (https://docs.elementary-data.com/)')

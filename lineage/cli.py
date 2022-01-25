@@ -6,7 +6,7 @@ from config.config import Config
 from lineage.utils import is_dbt_installed, get_package_version
 from utils.dbt import extract_credentials_and_data_from_profiles
 from lineage.empty_graph_helper import EmptyGraphHelper
-from lineage.tracking import track_lineage_start, track_lineage_end, track_lineage_exception
+from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
 from exceptions.exceptions import ConfigError
 from datetime import timedelta, date
 from lineage.table_resolver import TableResolver
@@ -183,7 +183,8 @@ def lineage(start_date: datetime, end_date: datetime, database: str, schema: str
                f"https://bit.ly/slack-elementary\n")
 
     config = Config(config_dir, profiles_dir, profile_name)
-    anonymous_tracking = track_lineage_start(config, get_cli_properties())
+    anonymous_tracking = AnonymousTracking(config)
+    track_cli_start(anonymous_tracking, 'lineage', get_cli_properties())
 
     try:
         query_history_extractor = QueryHistoryFactory(database, schema, export_query_history, full_table_names).\
@@ -207,10 +208,12 @@ def lineage(start_date: datetime, end_date: datetime, database: str, schema: str
         if not success:
             print(EmptyGraphHelper(config.platform).get_help_message())
 
-        track_lineage_end(anonymous_tracking, lineage_graph.properties(), query_history_extractor.properties())
+        execution_properties = query_history_extractor.properties()
+        execution_properties.update(lineage_graph.properties())
+        track_cli_end(anonymous_tracking, 'lineage', execution_properties)
 
     except Exception as exc:
-        track_lineage_exception(anonymous_tracking, exc)
+        track_cli_exception(anonymous_tracking, 'lineage', exc)
         raise
 
 
