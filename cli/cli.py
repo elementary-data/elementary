@@ -37,7 +37,7 @@ class ElementaryCLI(click.MultiCommand):
                             profile_name='elementary')
             anonymous_tracking = AnonymousTracking(config)
             track_cli_help(anonymous_tracking)
-        except Exception as exec:
+        except Exception:
             pass
         self.format_usage(ctx, formatter)
         self.format_help_text(ctx, formatter)

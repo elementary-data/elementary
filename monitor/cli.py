@@ -79,7 +79,7 @@ def monitor(reload_monitoring_configuration, config_dir, profiles_dir, update_db
     try:
         data_monitoring = DataMonitoring.create_data_monitoring(config)
         data_monitoring.run(reload_monitoring_configuration, update_dbt_package, full_refresh_dbt_package)
-        track_cli_end(anonymous_tracking, 'monitor', data_monitoring.execution_properties())
+        track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties())
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor', exc)
         raise

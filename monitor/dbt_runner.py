@@ -16,7 +16,7 @@ class DbtRunner(object):
         dbt_command.extend(command_args)
         dbt_command.extend(['--project-dir', self.project_dir])
         dbt_command.extend(['--profiles-dir', self.profiles_dir])
-        logger.debug(f"Running {' '.join(dbt_command)} (this might take a while)")
+        logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=True)
         logger.info(result.stdout.decode('utf-8'))
         if result.returncode != 0:
