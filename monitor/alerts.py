@@ -7,7 +7,7 @@ from utils.time import convert_utc_time_to_local_time
 class Alert(object):
     ALERT_DESCRIPTION = None
 
-    def __init__(self, alert_id):
+    def __init__(self, alert_id) -> None:
         self.alert_id = alert_id
 
     @staticmethod
@@ -24,7 +24,7 @@ class Alert(object):
     def send(webhook: str, data: dict, content_types: str = "application/json"):
         requests.post(url=webhook, headers={'Content-type': content_types}, data=json.dumps(data))
 
-    def to_slack_message(self):
+    def to_slack_message(self) -> dict:
         pass
 
     def send_to_slack(self, webhook: str):
@@ -32,14 +32,14 @@ class Alert(object):
         self.send(webhook, data)
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.alert_id
 
 
 class SchemaChangeAlert(Alert):
     ALERT_DESCRIPTION = "Schema change detected"
 
-    def __init__(self, alert_id, database_name, schema_name, table_name, detected_at, sub_type, description):
+    def __init__(self, alert_id, database_name, schema_name, table_name, detected_at, sub_type, description) -> None:
         super().__init__(alert_id)
         self.table_name = '.'.join([database_name, schema_name, table_name]).lower()
         self.detected_at = convert_utc_time_to_local_time(detected_at).strftime('%Y-%m-%d %H:%M:%S')

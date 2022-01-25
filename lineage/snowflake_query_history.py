@@ -23,7 +23,7 @@ class SnowflakeQueryHistory(QueryHistory):
     INFORMATION_SCHEMA_QUERY_HISTORY = """
     select query_text, database_name, schema_name, end_time, rows_produced, query_type, user_name, role_name, 
     total_elapsed_time, query_id
-      from table(information_schema.query_history(
+      from table(IDENTIFIER(:1).information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
         {end_time_range_end_expr},
         result_limit=>10000)) 
@@ -40,7 +40,7 @@ class SnowflakeQueryHistory(QueryHistory):
 
     INFORMATION_SCHEMA_VIEWS = """
     select view_definition, table_catalog, table_schema, last_altered, table_owner 
-        from information_schema.views
+        from IDENTIFIER(:1).information_schema.views
         where collate(table_catalog, 'en-ci') = :1 and view_definition is not NULL;
     """
 
