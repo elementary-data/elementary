@@ -84,7 +84,7 @@ class DataMonitoring(object):
         return alerts
 
     def _send_to_slack(self, alerts: [Alert]) -> None:
-        slack_webhook = self.config.get_slack_notification_webhook()
+        slack_webhook = self.config.slack_notification_webhook
         if slack_webhook is not None:
             sent_alerts = []
             for alert in alerts:
