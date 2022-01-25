@@ -14,7 +14,7 @@ FILE_DIR = os.path.dirname(__file__)
 
 
 class DataMonitoring(object):
-    DBT_PACKAGE_NAME = 'elementary_observability'
+    DBT_PACKAGE_NAME = 'elementary_data_reliability'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
     # Compatibility for previous dbt versions
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
@@ -91,16 +91,20 @@ class DataMonitoring(object):
     def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False,
             dbt_full_refresh: bool = False) -> None:
         if not self._dbt_package_exists() or force_update_dbt_packages:
+            logger.info("Downloading edr internal dbt package")
             if not self.dbt_runner.deps():
                 return
 
         if not self.monitoring_configuration_exists() or reload_monitoring_configuration:
+            logger.info("Uploading monitoring configuration")
             if not self._update_configuration():
                 return
 
-        # Run elementary observability dbt package
+        # Run elementary dbt package
+        logger.info("Taking schema snapshots")
         if not self.dbt_runner.snapshot():
             return
+        logger.info("Running edr internal dbt package")
         if not self.dbt_runner.run(model=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh):
             return
 
