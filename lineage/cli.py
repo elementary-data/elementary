@@ -94,22 +94,22 @@ def get_cli_properties() -> dict:
     '--database', '-db',
     type=str,
     required=True,
-    help="The database name that will ."
+    help="Provide a database name to see the lineage for tables and views in this database."
 )
 @click.option(
     '--schema', '-sch',
     type=str,
-    default=None
+    default=None,
+    help="Filter on a schema to see tables and views only in this specific schema."
 )
 @click.option(
     '--table', '-t',
     type=str,
-    help="Filter on a table to see upstream and downstream dependencies of this table (see also direction param)."
-         " Table name format could be a full name like <db_name>.<schema_name>.<table_name>, a partial name like "
-         "<schema_name>.<table_name> or only a table name <table_name>. If the database name wasn't part of the name "
-         "the profiles database name will be used, if the schema name wasn't part of the name the profiles schema name "
-         "will be used.",
-    default=None
+    help="Filter on a table to see upstream and downstream dependencies of this table "
+         "(see also direction & depth parameters).",
+    default=None,
+    cls=RequiredIf,
+    required_if='schema'
 )
 @click.option('--direction',
               type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
@@ -131,14 +131,16 @@ def get_cli_properties() -> dict:
 @click.option(
     '--config-dir', '-c',
     type=str,
-    default=os.path.join(expanduser('~'), '.edr')
+    default=os.path.join(expanduser('~'), '.edr'),
+    help="Global settings for edr are configured in a config.yml file in this directory "
+         "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
 )
 @click.option(
     '--profiles-dir', '-d',
     type=click.Path(exists=True),
     default=os.path.join(expanduser('~'), '.dbt'),
-    help="You can connect to your data warehouse using your profiles dir, just specify your profiles dir where a "
-         "profiles.yml is located (could be a dbt profiles dir).",
+    help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
+         "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
     cls=RequiredIf,
     required_if='profile_name'
 )
@@ -146,7 +148,9 @@ def get_cli_properties() -> dict:
     '--profile-name', '-p',
     type=str,
     default='elementary',
-    help="The profile name of the chosen profile in your profiles file.",
+    help="The profile in your profiles.yml file that will be used as connection details to your data warehouse "
+         "(if you configured 'elementary' profile in your profiles.yml, no need to provide this parameter as we use it "
+         "as default).",
     cls=RequiredIf,
     required_if='profiles_dir'
 )

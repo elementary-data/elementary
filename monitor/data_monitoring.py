@@ -91,6 +91,7 @@ class DataMonitoring(object):
     def run(self, force_update_dbt_packages: bool = False, reload_monitoring_configuration: bool = False,
             dbt_full_refresh: bool = False) -> None:
         if not self._dbt_package_exists() or force_update_dbt_packages:
+            #TODO: should we updated revision to latest?
             logger.info("Downloading edr internal dbt package")
             if not self.dbt_runner.deps():
                 return
