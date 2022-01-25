@@ -117,7 +117,7 @@ def test_config__alert_on_schema_changes(alert_on_schema_changes, expected_resul
 
 
 def test_config_monitoring_configuration_in_dbt_sources_to_csv(config):
-    target_csv_path = os.path.join(FILE_DIR, '../monitoring/monitoring_configuration.csv')
+    target_csv_path = os.path.join(FILE_DIR, '../monitor/monitoring_configuration.csv')
 
     # The test function
     config.monitoring_configuration_in_dbt_sources_to_csv(target_csv_path)
