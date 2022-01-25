@@ -8,6 +8,8 @@ from utils.dbt import get_model_paths_from_dbt_project, get_target_database_name
     extract_credentials_and_data_from_profiles
 from utils.ordered_yaml import OrderedYaml
 
+ordered_yaml = OrderedYaml()
+
 
 class Config(object):
     SLACK_NOTIFICATION_WEBHOOK = 'slack_notification_webhook'
@@ -20,13 +22,13 @@ class Config(object):
         self.credentials, self.profiles_data = extract_credentials_and_data_from_profiles(profiles_dir,
                                                                                           profile_name)
         self.config_file_path = os.path.join(self.config_dir, self.CONFIG_FILE_NAME)
-        self.ordered_yaml = OrderedYaml()
+        self.config_dict = self._load_configuration()
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_file_path):
             return {}
 
-        return self.ordered_yaml.load(self.config_file_path)
+        return ordered_yaml.load(self.config_file_path)
 
     @property
     def query_history_source(self):
@@ -38,11 +40,11 @@ class Config(object):
 
     @property
     def anonymous_tracking_enabled(self) -> bool:
-        return self.profiles_data.get('anonymous_usage_tracking', True)
+        return self.config_dict.get('anonymous_usage_tracking', True)
 
-    def get_slack_notification_webhook(self) -> Union[str, None]:
-        config_dict = self._load_configuration()
-        return config_dict.get(self.SLACK_NOTIFICATION_WEBHOOK)
+    @property
+    def slack_notification_webhook(self) -> Union[str, None]:
+        return self.config_dict.get(self.SLACK_NOTIFICATION_WEBHOOK)
 
     @staticmethod
     def _find_schema_yml_files_in_dbt_project(dbt_project_models_path: str) -> list:
@@ -60,7 +62,7 @@ class Config(object):
                     dbt_project_models_path = os.path.join(dbt_project_path, model_path)
                     schema_yml_files = self._find_schema_yml_files_in_dbt_project(dbt_project_models_path)
                     for schema_yml_file in schema_yml_files:
-                        schema_dict = self.ordered_yaml.load(schema_yml_file)
+                        schema_dict = ordered_yaml.load(schema_yml_file)
                         schema_sources = schema_dict.get('sources')
                         if schema_sources is not None:
                             dbt_project_sources = {'sources': schema_sources,

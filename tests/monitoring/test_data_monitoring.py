@@ -28,7 +28,7 @@ def snowflake_con_mock():
 def config_mock():
     config_mock = mock.create_autospec(Config)
     config_mock.profiles_dir = 'profiles_dir_path'
-    config_mock.get_slack_notification_webhook.return_value = WEBHOOK_URL
+    config_mock.slack_notification_webhook = WEBHOOK_URL
     config_mock.monitoring_configuration_in_dbt_sources_to_csv.return_value = None
     return config_mock
 

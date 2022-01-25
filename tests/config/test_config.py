@@ -80,7 +80,7 @@ def config():
 
 
 def test_config_get_slack_notification_webhook(config):
-    assert config.get_slack_notification_webhook() == CONFIG['slack_notification_webhook']
+    assert config.slack_notification_webhook == CONFIG['slack_notification_webhook']
 
 
 def test_config__get_sources_from_all_dbt_projects(config):
