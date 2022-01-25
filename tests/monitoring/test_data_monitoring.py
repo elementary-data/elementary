@@ -8,7 +8,7 @@ from datetime import datetime
 from monitor.alerts import Alert
 from snowflake.connector.connection import SnowflakeConnection, SnowflakeCursor
 from monitor.dbt_runner import DbtRunner
-from monitor.config import Config
+from config.config import Config
 from monitor.data_monitoring import SnowflakeDataMonitoring, DataMonitoring
 
 WEBHOOK_URL = 'https://my_webhook'
@@ -27,7 +27,7 @@ def snowflake_con_mock():
 @pytest.fixture
 def config_mock():
     config_mock = mock.create_autospec(Config)
-    config_mock.profiles_dir_path = 'profiles_dir_path'
+    config_mock.profiles_dir = 'profiles_dir_path'
     config_mock.get_slack_notification_webhook.return_value = WEBHOOK_URL
     config_mock.monitoring_configuration_in_dbt_sources_to_csv.return_value = None
     return config_mock

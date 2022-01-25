@@ -4,7 +4,7 @@ import snowflake.connector.errors
 from exceptions.exceptions import ConfigError
 from monitor.alerts import Alert
 from monitor.dbt_runner import DbtRunner
-from monitor.config import Config
+from config.config import Config
 from utils.dbt import extract_credentials_and_data_from_profiles, get_profile_name_from_dbt_project, \
     get_snowflake_client
 from utils.log import get_logger
@@ -39,15 +39,15 @@ class DataMonitoring(object):
 
     def __init__(self, config: 'Config', db_connection: Any) -> None:
         self.config = config
-        self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir_path)
+        self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.db_connection = db_connection
 
     @staticmethod
-    def create_data_monitoring(config: 'Config') -> 'DataMonitoring':
+    def create_data_monitoring(config_dir: str, profiles_dir: str) -> 'DataMonitoring':
         profile_name = get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH)
-        credentials, profile_data = extract_credentials_and_data_from_profiles(config.profiles_dir_path, profile_name)
-        if credentials.type == 'snowflake':
-            snowflake_conn = get_snowflake_client(credentials, server_side_binding=False)
+        config = Config(config_dir, profiles_dir, profile_name)
+        if config.platform == 'snowflake':
+            snowflake_conn = get_snowflake_client(config.credentials, server_side_binding=False)
             return SnowflakeDataMonitoring(config, snowflake_conn)
         else:
             raise ConfigError("Unsupported platform")

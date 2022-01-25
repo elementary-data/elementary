@@ -2,7 +2,7 @@ import pytest
 import os
 import csv
 from utils.ordered_yaml import OrderedYaml
-from monitor.config import Config
+from config.config import Config
 
 FILE_DIR = os.path.dirname(__file__)
 
@@ -76,7 +76,7 @@ def read_csv(csv_path):
 @pytest.fixture
 def config():
     create_config_files()
-    return Config(config_dir_path=FILE_DIR, profiles_dir_path=FILE_DIR)
+    return Config(config_dir=FILE_DIR, profiles_dir=FILE_DIR, profile_name='elementary')
 
 
 def test_config_get_slack_notification_webhook(config):
@@ -117,7 +117,7 @@ def test_config__alert_on_schema_changes(alert_on_schema_changes, expected_resul
 
 
 def test_config_monitoring_configuration_in_dbt_sources_to_csv(config):
-    target_csv_path = os.path.join(FILE_DIR, 'monitoring_configuration.csv')
+    target_csv_path = os.path.join(FILE_DIR, '../monitoring/monitoring_configuration.csv')
 
     # The test function
     config.monitoring_configuration_in_dbt_sources_to_csv(target_csv_path)

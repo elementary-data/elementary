@@ -1,14 +1,17 @@
 from typing import Optional
 
+from config.config import Config
 from utils.anonymous_tracking import AnonymousTracking
 
 
-def track_lineage_start(config_dir: str, profiles_dir: str, profile_data: dict, cli_properties: dict) -> \
+def track_lineage_start(config: 'Config', cli_properties: dict) -> \
         Optional['AnonymousTracking']:
     try:
-        anonymous_tracking = AnonymousTracking(config_dir, profiles_dir, profile_data.get('anonymous_usage_tracking'))
+        anonymous_tracking = AnonymousTracking(config.config_dir,
+                                               config.profiles_dir,
+                                               config.anonymous_tracking_enabled())
         anonymous_tracking.init()
-        cli_start_properties = {'platform_type': profile_data.get('type')}
+        cli_start_properties = {'platform_type': config.platform}
         cli_start_properties.update(cli_properties)
         anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
         return anonymous_tracking

@@ -2,7 +2,7 @@ import click
 import os
 from os.path import expanduser
 from utils.ordered_yaml import OrderedYaml
-from monitor.config import Config
+from config.config import Config
 from monitor.data_monitoring import DataMonitoring
 
 yaml = OrderedYaml()
@@ -38,8 +38,7 @@ def monitor(config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_packa
             reload_monitoring_configuration):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
-    config = Config(config_dir, profiles_dir)
-    data_monitoring = DataMonitoring.create_data_monitoring(config)
+    data_monitoring = DataMonitoring.create_data_monitoring(config_dir, profiles_dir)
     data_monitoring.run(update_dbt_package, reload_monitoring_configuration, full_refresh_dbt_package)
 
 

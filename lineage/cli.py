@@ -2,6 +2,7 @@ import click
 import os
 from os.path import expanduser
 
+from config.config import Config
 from lineage.utils import is_dbt_installed, get_package_version
 from utils.dbt import extract_credentials_and_data_from_profiles
 from lineage.empty_graph_helper import EmptyGraphHelper
@@ -116,7 +117,7 @@ def get_cli_properties() -> dict:
 @click.option(
     '--profile-name', '-p',
     type=str,
-    default='edr',
+    default='elementary',
     help="The profile name of the chosen profile in your profiles file.",
     cls=RequiredIf,
     required_if='profiles_dir'
@@ -174,12 +175,12 @@ def lineage(start_date: datetime, end_date: datetime, database: str, schema: str
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 
-    credentials, profile_data = extract_credentials_and_data_from_profiles(profiles_dir, profile_name)
-    anonymous_tracking = track_lineage_start(config_dir, profiles_dir, profile_data, get_cli_properties())
+    config = Config(config_dir, profiles_dir, profile_name)
+    anonymous_tracking = track_lineage_start(config, get_cli_properties())
 
     try:
         query_history_extractor = QueryHistoryFactory(database, schema, export_query_history, full_table_names).\
-            create_query_history(credentials, profile_data)
+            create_query_history(config)
         queries = query_history_extractor.extract_queries(start_date, end_date)
 
         lineage_graph = LineageGraph(show_isolated_nodes=False)
@@ -197,7 +198,7 @@ def lineage(start_date: datetime, end_date: datetime, database: str, schema: str
 
         success = lineage_graph.draw_graph(should_open_browser=open_browser)
         if not success:
-            print(EmptyGraphHelper(credentials.type).get_help_message())
+            print(EmptyGraphHelper(config.platform).get_help_message())
 
         track_lineage_end(anonymous_tracking, lineage_graph.properties(), query_history_extractor.properties())
 
