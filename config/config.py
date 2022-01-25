@@ -85,7 +85,8 @@ class Config(object):
         else:
             return None
 
-    def monitoring_configuration_in_dbt_sources_to_csv(self, target_csv_path: str) -> None:
+    def monitoring_configuration_in_dbt_sources_to_csv(self, target_csv_path: str) -> int:
+        row_count = 0
         with open(target_csv_path, 'w') as target_csv:
             target_csv_writer = csv.DictWriter(target_csv, fieldnames=['database_name',
                                                                        'schema_name',
@@ -114,6 +115,7 @@ class Config(object):
                                                     'table_name': None,
                                                     'column_name': None,
                                                     'alert_on_schema_changes': alert_on_schema_changes})
+                        row_count += 1
 
                     source_tables = source.get('tables', [])
                     for source_table in source_tables:
@@ -128,6 +130,7 @@ class Config(object):
                                                         'table_name': table_name,
                                                         'column_name': None,
                                                         'alert_on_schema_changes': alert_on_schema_changes})
+                            row_count += 1
 
                         source_columns = source_table.get('columns', [])
                         for source_column in source_columns:
@@ -142,3 +145,5 @@ class Config(object):
                                                             'table_name': table_name,
                                                             'column_name': column_name,
                                                             'alert_on_schema_changes': alert_on_schema_changes})
+                                row_count += 1
+        return row_count
