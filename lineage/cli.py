@@ -93,12 +93,40 @@ def get_cli_properties() -> dict:
 @click.option(
     '--database', '-db',
     type=str,
-    required=True
+    required=True,
+    help="The database name that will ."
 )
 @click.option(
     '--schema', '-sch',
     type=str,
     default=None
+)
+@click.option(
+    '--table', '-t',
+    type=str,
+    help="Filter on a table to see upstream and downstream dependencies of this table (see also direction param)."
+         " Table name format could be a full name like <db_name>.<schema_name>.<table_name>, a partial name like "
+         "<schema_name>.<table_name> or only a table name <table_name>. If the database name wasn't part of the name "
+         "the profiles database name will be used, if the schema name wasn't part of the name the profiles schema name "
+         "will be used.",
+    default=None
+)
+@click.option('--direction',
+              type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
+                                 LineageGraph.BOTH_DIRECTIONS]),
+              help="Sets direction of dependencies when filtering on a specific table (default is both, "
+                   "meaning showing both upstream and downstream dependencies of this table).",
+              default='both',
+              cls=RequiredIf,
+              required_if='table'
+)
+@click.option('--depth',
+              type=int,
+              help="Sets how many levels of dependencies to show when filtering on a specific table "
+                   "(default is showing all levels of dependencies).",
+              default=None,
+              cls=RequiredIf,
+              required_if='table'
 )
 @click.option(
     '--config-dir', '-c',
@@ -144,34 +172,9 @@ def get_cli_properties() -> dict:
     help="Indicates if the lineage should display full table names including the relevant database and schema names "
          "(the default is to show only the table name)."
 )
-@click.option(
-    '--table', '-t',
-    type=str,
-    help="Filter on a table to see upstream and downstream dependencies of this table (see also direction param)."
-         " Table name format could be a full name like <db_name>.<schema_name>.<table_name>, a partial name like "
-         "<schema_name>.<table_name> or only a table name <table_name>. If the database name wasn't part of the name "
-         "the profiles database name will be used, if the schema name wasn't part of the name the profiles schema name "
-         "will be used.",
-    default=None
-)
-@click.option('--direction',
-              type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
-                                 LineageGraph.BOTH_DIRECTIONS]),
-              help="Sets direction of dependencies when filtering on a specific table (default is both, "
-                   "meaning showing both upstream and downstream dependencies of this table).",
-              default='both',
-              cls=RequiredIf,
-              required_if='table')
-@click.option('--depth',
-              type=int,
-              help="Sets how many levels of dependencies to show when filtering on a specific table "
-                   "(default is showing all levels of dependencies).",
-              default=None,
-              cls=RequiredIf,
-              required_if='table')
-def lineage(start_date: datetime, end_date: datetime, database: str, schema: str, config_dir: str,
-            profiles_dir: str, profile_name: str, open_browser: bool, export_query_history: bool,
-            full_table_names: bool, table: str, direction: str, depth: int) -> None:
+def lineage(start_date: datetime, end_date: datetime, database: str, schema: str, table: str, direction: str,
+            depth: int, config_dir: str, profiles_dir: str, profile_name: str, open_browser: bool,
+            export_query_history: bool, full_table_names: bool) -> None:
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
 

@@ -18,7 +18,7 @@ class BigQueryQueryHistory(QueryHistory):
     user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND),
     job_id
            
-    FROM region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+    FROM {project_id}.region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
     WHERE
          project_id = @project_id
          AND creation_time BETWEEN @start_time AND {creation_time_range_end_expr}
@@ -51,7 +51,8 @@ class BigQueryQueryHistory(QueryHistory):
             end_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
             creation_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
 
-        query = cls.INFORMATION_SCHEMA_QUERY_HISTORY.format(location=location,
+        query = cls.INFORMATION_SCHEMA_QUERY_HISTORY.format(project_id=database_name,
+                                                            location=location,
                                                             creation_time_range_end_expr=
                                                             creation_time_range_end_expr,
                                                             end_time_range_end_expr=
