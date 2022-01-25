@@ -54,13 +54,14 @@ class DataMonitoring(object):
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
-    def _update_configuration(self) -> bool:
+    def _upload_configuration(self) -> bool:
         target_csv_dir = self.DBT_PROJECT_SEEDS_PATH
         if not os.path.exists(target_csv_dir):
             os.makedirs(target_csv_dir)
 
         monitoring_config_csv_path = os.path.join(target_csv_dir, f'{self.MONITORING_CONFIGURATION}.csv')
-        self.config.monitoring_configuration_in_dbt_sources_to_csv(monitoring_config_csv_path)
+        csv_row_count = self.config.monitoring_configuration_in_dbt_sources_to_csv(monitoring_config_csv_path)
+        self.execution_properties['configuration_csv_row_count'] = csv_row_count
 
         return self.dbt_runner.seed()
 
@@ -117,8 +118,8 @@ class DataMonitoring(object):
         self.execution_properties['reload_monitoring_configuration'] = reload_monitoring_configuration
         if not monitoring_configuration_exists or reload_monitoring_configuration:
             logger.info("Uploading monitoring configuration")
-            config_updated = self._update_configuration()
-            self.execution_properties['config_updated'] = config_updated
+            config_updated = self._upload_configuration()
+            self.execution_properties['config_uploaded'] = config_updated
             if not config_updated:
                 logger.info('Could not upload monitoring configuration')
                 return
