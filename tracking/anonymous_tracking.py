@@ -73,20 +73,16 @@ class AnonymousTracking(object):
         posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
 
 
-def track_cli_start(anonymous_tracking: AnonymousTracking, module_name: str, cli_properties: dict) -> \
-        Optional[AnonymousTracking]:
+def track_cli_start(anonymous_tracking: AnonymousTracking, module_name: str, cli_properties: dict) -> None:
     try:
         cli_start_properties = {'cli_properties': cli_properties,
                                 'module_name': module_name}
         anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
-        return anonymous_tracking
     except Exception:
         pass
-    return None
 
 
-def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execution_properties: dict) \
-        -> None:
+def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execution_properties: dict) -> None:
     try:
         if anonymous_tracking is None:
             return
@@ -98,8 +94,7 @@ def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execu
         pass
 
 
-def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str, exc: Exception) \
-        -> None:
+def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str, exc: Exception) -> None:
     try:
         if anonymous_tracking is None:
             return
@@ -113,4 +108,7 @@ def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str,
 
 
 def track_cli_help(anonymous_tracking: AnonymousTracking):
-    anonymous_tracking.send_event('cli-help')
+    try:
+        anonymous_tracking.send_event('cli-help')
+    except Exception:
+        pass
