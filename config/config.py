@@ -4,7 +4,8 @@ from typing import Union
 import glob
 
 from exceptions.exceptions import ConfigError
-from utils.dbt import get_model_paths_from_dbt_project, get_target_database_name
+from utils.dbt import get_model_paths_from_dbt_project, get_target_database_name, \
+    extract_credentials_and_data_from_profiles
 from utils.ordered_yaml import OrderedYaml
 
 
@@ -12,10 +13,13 @@ class Config(object):
     SLACK_NOTIFICATION_WEBHOOK = 'slack_notification_webhook'
     CONFIG_FILE_NAME = 'config.yml'
 
-    def __init__(self, config_dir_path: str, profiles_dir_path: str) -> None:
-        self.config_dir_path = config_dir_path
-        self.profiles_dir_path = profiles_dir_path
-        self.config_file_path = os.path.join(self.config_dir_path, self.CONFIG_FILE_NAME)
+    def __init__(self, config_dir: str, profiles_dir: str, profile_name: str) -> None:
+        self.config_dir = config_dir
+        self.profiles_dir = profiles_dir
+        self.profile_name = profile_name
+        self.credentials, self.profiles_data = extract_credentials_and_data_from_profiles(profiles_dir,
+                                                                                          profile_name)
+        self.config_file_path = os.path.join(self.config_dir, self.CONFIG_FILE_NAME)
         self.ordered_yaml = OrderedYaml()
 
     def _load_configuration(self) -> dict:
@@ -23,6 +27,18 @@ class Config(object):
             return {}
 
         return self.ordered_yaml.load(self.config_file_path)
+
+    @property
+    def query_history_source(self):
+        return self.profiles_data.get('query_history_source')
+
+    @property
+    def platform(self):
+        return self.profiles_data.get('type', 'unknown')
+
+    @property
+    def anonymous_tracking_enabled(self) -> bool:
+        return self.profiles_data.get('anonymous_usage_tracking', True)
 
     def get_slack_notification_webhook(self) -> Union[str, None]:
         config_dict = self._load_configuration()
@@ -38,7 +54,7 @@ class Config(object):
         sources = []
         for dbt_project_path in dbt_projects:
             try:
-                dbt_project_target_database = get_target_database_name(self.profiles_dir_path, dbt_project_path)
+                dbt_project_target_database = get_target_database_name(self.profiles_dir, dbt_project_path)
                 model_paths = get_model_paths_from_dbt_project(dbt_project_path)
                 for model_path in model_paths:
                     dbt_project_models_path = os.path.join(dbt_project_path, model_path)
