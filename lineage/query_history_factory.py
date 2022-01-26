@@ -10,7 +10,7 @@ from lineage.snowflake_query_history import SnowflakeQueryHistory
 
 class QueryHistoryFactory(object):
 
-    def __init__(self, database_name: str, schema_name: str, export_query_history: bool, ignore_schema: bool = False,
+    def __init__(self, database_name: str, schema_name: str, export_query_history: bool,
                  full_table_names: bool = False) -> None:
         self.database_name = database_name
         self.schema_name = schema_name

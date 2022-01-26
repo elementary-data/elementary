@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Union
 import dateutil.parser
 
-from lineage.utils import format_milliseconds
+from utils.time import format_milliseconds
 
 
 class QueryContext(object):

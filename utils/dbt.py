@@ -1,4 +1,6 @@
+import os
 import os.path
+from pathlib import Path
 from typing import Dict, Any, Union
 import dbt.config
 from dbt.context.base import generate_base_context
@@ -14,6 +16,8 @@ import snowflake.connector
 from utils.ordered_yaml import OrderedYaml
 
 logger = get_logger(__name__)
+
+DBT_DEFAULT_DIR = ".dbt"
 
 
 def extract_profile_data(profiles_raw: Dict[str, Any], profile_name: str, target_name: str) -> Dict[str, Any]:
@@ -97,3 +101,8 @@ def get_target_database_name(profiles_dir: str, dbt_project_path: str) -> Union[
         pass
     return None
 
+
+def is_dbt_installed() -> bool:
+    if os.path.exists(os.path.join(Path.home(), DBT_DEFAULT_DIR)):
+        return True
+    return False
