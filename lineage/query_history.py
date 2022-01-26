@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from lineage.bigquery_query import BigQueryQuery
-from lineage.exceptions import SerializationError
+from exceptions.exceptions import SerializationError
 from lineage.query import Query
 from lineage.query_history_stats import QueryHistoryStats
 from lineage.snowflake_query import SnowflakeQuery
-from lineage.utils import is_flight_mode_on
+from utils.env_vars import is_flight_mode_on
 import json
 import os
 
@@ -17,14 +17,12 @@ class QueryHistory(object):
     SUCCESS_QUERIES_FILE = './latest_query_history.json'
     FAILED_QUERIES_FILE = './failed_queries.json'
 
-    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
-                 should_export_query_history: bool = True, ignore_schema: bool = False,
+    def __init__(self, con, database_name: str, schema_name: str, should_export_query_history: bool = True,
                  full_table_names: bool = False) -> None:
         self._con = con
-        self._profile_database_name = profile_database_name
-        self._profile_schema_name = profile_schema_name
+        self._database_name = database_name
+        self._schema_name = schema_name
         self._should_export_query_history = should_export_query_history
-        self._ignore_schema = ignore_schema
         self._full_table_names = full_table_names
         self._query_history_stats = QueryHistoryStats()
         self.success_queries = []
@@ -83,20 +81,14 @@ class QueryHistory(object):
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
         pass
 
-    def get_database_name(self) -> str:
-        return self._profile_database_name
-
-    def get_schema_name(self) -> Optional[str]:
-        return self._profile_schema_name if not self._ignore_schema else None
-
     def properties(self) -> dict:
         failed_queries_count = len(self.failed_queries)
         success_queries_count = len(self.success_queries)
         queries_count = success_queries_count + failed_queries_count
-        query_history_properties = {'failed_queries': failed_queries_count,
-                                    'success_queries': success_queries_count,
-                                    'queries_count': queries_count,
-                                    'platform_type': self.PLATFORM_TYPE}
-        query_history_properties.update(self._query_history_stats.to_dict())
+        query_history_properties = {'query_history_properties': {'failed_queries': failed_queries_count,
+                                                                 'success_queries': success_queries_count,
+                                                                 'queries_count': queries_count,
+                                                                 'platform_type': self.PLATFORM_TYPE}}
+        query_history_properties.update({'query_stats': self._query_history_stats.to_dict()})
         return query_history_properties
 

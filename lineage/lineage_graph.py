@@ -2,11 +2,11 @@ import itertools
 from typing import Optional
 import networkx as nx
 from collections import defaultdict
-from lineage.exceptions import ConfigError
+from exceptions.exceptions import ConfigError
 from pyvis.network import Network
 import webbrowser
 from lineage.query import Query
-from lineage.utils import get_logger
+from utils.log import get_logger
 from tqdm import tqdm
 import pkg_resources
 
@@ -193,8 +193,8 @@ class LineageGraph(object):
         return header_content
 
     def properties(self):
-        return {'nodes_count': len(self._lineage_graph.nodes),
-                'edges_count': len(self._lineage_graph.edges)}
+        return {'lineage_properties': {'nodes_count': len(self._lineage_graph.nodes),
+                                       'edges_count': len(self._lineage_graph.edges)}}
 
     def _enrich_graph_with_monitoring_data(self):
         for node, attr in self._lineage_graph.nodes(data=True):

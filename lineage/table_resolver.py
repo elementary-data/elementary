@@ -1,17 +1,17 @@
 from sqllineage.models import Schema, Table
 from typing import Optional, Union, Callable
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 
 
 class TableResolver(object):
 
-    def __init__(self, profile_database_name: str, profile_schema_name: str, queried_database_name: str = None,
+    def __init__(self, database_name: str, schema_name: str, queried_database_name: str = None,
                  queried_schema_name: str = None, full_table_names: bool = False,
                  remove_special_char_callback: Callable = None) -> None:
-        self._profile_database_name = profile_database_name
-        self._profile_schema_name = profile_schema_name
+        self._database_name = database_name
+        self._schema_name = schema_name
         self._queried_database_name = queried_database_name
         self._queried_schema_name = queried_schema_name
         self._show_full_table_name = full_table_names
@@ -33,11 +33,11 @@ class TableResolver(object):
         return table
 
     def _should_ignore_table(self, table: Table) -> bool:
-        if self._profile_schema_name is not None:
-            if str(table.schema) == str(Schema(f'{self._profile_database_name}.{self._profile_schema_name}')):
+        if self._schema_name is not None:
+            if str(table.schema) == str(Schema(f'{self._database_name}.{self._schema_name}')):
                 return False
         else:
-            if str(Schema(self._profile_database_name)) in str(table.schema):
+            if str(Schema(self._database_name)) in str(table.schema):
                 return False
 
         return True
@@ -48,8 +48,8 @@ class TableResolver(object):
 
         # If queried database and schema names exist, prefer them when resolving the table name
         database_name = self._queried_database_name if self._queried_database_name is not None else \
-            self._profile_database_name
-        schema_name = self._queried_schema_name if self._queried_schema_name is not None else self._profile_schema_name
+            self._database_name
+        schema_name = self._queried_schema_name if self._queried_schema_name is not None else self._schema_name
 
         table = self._resolve_table_qualification(table, database_name, schema_name)
 
