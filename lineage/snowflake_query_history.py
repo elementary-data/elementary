@@ -23,7 +23,7 @@ class SnowflakeQueryHistory(QueryHistory):
     INFORMATION_SCHEMA_QUERY_HISTORY = """
     select query_text, database_name, schema_name, end_time, rows_produced, query_type, user_name, role_name, 
     total_elapsed_time, query_id
-      from table(IDENTIFIER(:1).information_schema.query_history(
+      from table(information_schema.query_history(
         end_time_range_start=>to_timestamp_ltz(:2),
         {end_time_range_end_expr},
         result_limit=>10000)) 
@@ -40,7 +40,7 @@ class SnowflakeQueryHistory(QueryHistory):
 
     INFORMATION_SCHEMA_VIEWS = """
     select view_definition, table_catalog, table_schema, last_altered, table_owner 
-        from IDENTIFIER(:1).information_schema.views
+        from information_schema.views
         where collate(table_catalog, 'en-ci') = :1 and view_definition is not NULL;
     """
 
@@ -59,6 +59,8 @@ class SnowflakeQueryHistory(QueryHistory):
     ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'end_time <= current_timestamp()'
     ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER = 'end_time <= :3'
     QUERY_HISTORY_SOURCE_ACCOUNT_USAGE = 'account_usage'
+
+    USE_DATABASE = 'use database IDENTIFIER(:1);'
 
     def __init__(self, con, database_name: str, schema_name: str,
                  should_export_query_history: bool = True, full_table_names: bool = False,
@@ -118,6 +120,7 @@ class SnowflakeQueryHistory(QueryHistory):
                      f"{self._schema_name}")
 
         with self._con.cursor() as cursor:
+            cursor.execute(self.USE_DATABASE, (self._database_name,))
             query_text, bindings = self._build_history_query(start_date, end_date, self._database_name,
                                                              self.query_history_source)
             cursor.execute(query_text, bindings)
