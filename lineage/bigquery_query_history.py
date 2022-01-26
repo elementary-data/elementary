@@ -4,7 +4,7 @@ from lineage.bigquery_query import BigQueryQuery
 from lineage.query import Query
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
-from lineage.utils import get_logger
+from utils.log import get_logger
 from datetime import datetime
 
 logger = get_logger(__name__)
@@ -18,7 +18,7 @@ class BigQueryQueryHistory(QueryHistory):
     user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND),
     job_id
            
-    FROM region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+    FROM {project_id}.region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
     WHERE
          project_id = @project_id
          AND creation_time BETWEEN @start_time AND {creation_time_range_end_expr}
@@ -32,11 +32,9 @@ class BigQueryQueryHistory(QueryHistory):
     INFO_SCHEMA_END_TIME_UP_TO_CURRENT_TIMESTAMP = 'CURRENT_TIMESTAMP()'
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = '@end_time'
 
-    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
-                 should_export_query_history: bool = True, ignore_schema: bool = False,
+    def __init__(self, con, database_name: str, schema_name: str, should_export_query_history: bool = True,
                  full_table_names: bool = False) -> None:
-        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema,
-                         full_table_names)
+        super().__init__(con, database_name, schema_name, should_export_query_history, full_table_names)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str, location: str) -> \
@@ -53,7 +51,8 @@ class BigQueryQueryHistory(QueryHistory):
             end_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
             creation_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
 
-        query = cls.INFORMATION_SCHEMA_QUERY_HISTORY.format(location=location,
+        query = cls.INFORMATION_SCHEMA_QUERY_HISTORY.format(project_id=database_name,
+                                                            location=location,
                                                             creation_time_range_end_expr=
                                                             creation_time_range_end_expr,
                                                             end_time_range_end_expr=
@@ -61,11 +60,9 @@ class BigQueryQueryHistory(QueryHistory):
         return query, query_parameters
 
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> [Query]:
-        database_name = self.get_database_name()
-        schema_name = self.get_schema_name()
-        logger.debug(f"Pulling BigQuery history from database - {database_name} and schema - {schema_name}")
+        logger.debug(f"Pulling BigQuery history from database - {self._database_name} and schema - {self._schema_name}")
 
-        query_text, query_parameters = self._build_history_query(start_date, end_date, database_name,
+        query_text, query_parameters = self._build_history_query(start_date, end_date, self._database_name,
                                                                  self._con.location)
 
         job_config = bigquery.QueryJobConfig(
@@ -89,8 +86,8 @@ class BigQueryQueryHistory(QueryHistory):
 
             query = BigQueryQuery(raw_query_text=row[0],
                                   query_context=query_context,
-                                  profile_database_name=database_name,
-                                  profile_schema_name=schema_name)
+                                  database_name=self._database_name,
+                                  schema_name=self._schema_name)
 
             self.add_query(query)
 

@@ -3,11 +3,11 @@ from datetime import datetime, date, timedelta
 from snowflake.connector.cursor import SnowflakeCursor
 from tqdm import tqdm
 
-from lineage.exceptions import ConfigError
+from exceptions.exceptions import ConfigError
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query import SnowflakeQuery
-from lineage.utils import get_logger
+from utils.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -60,12 +60,13 @@ class SnowflakeQueryHistory(QueryHistory):
     ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER = 'end_time <= :3'
     QUERY_HISTORY_SOURCE_ACCOUNT_USAGE = 'account_usage'
 
-    def __init__(self, con, profile_database_name: str, profile_schema_name: str,
-                 should_export_query_history: bool = True, ignore_schema: bool = False,
-                 full_table_names: bool = False, query_history_source: str = None) -> None:
+    USE_DATABASE = 'use database IDENTIFIER(:1);'
+
+    def __init__(self, con, database_name: str, schema_name: str,
+                 should_export_query_history: bool = True, full_table_names: bool = False,
+                 query_history_source: str = None) -> None:
         self.query_history_source = query_history_source.strip().lower() if query_history_source is not None else None
-        super().__init__(con, profile_database_name, profile_schema_name, should_export_query_history, ignore_schema,
-                         full_table_names)
+        super().__init__(con, database_name, schema_name, should_export_query_history, full_table_names)
 
     @classmethod
     def _build_history_query(cls, start_date: datetime, end_date: datetime, database_name: str,
@@ -97,8 +98,8 @@ class SnowflakeQueryHistory(QueryHistory):
 
         return query, bindings
 
-    def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor, database_name: str, schema_name: str) -> None:
-        cursor.execute(self.INFORMATION_SCHEMA_VIEWS, (database_name, ))
+    def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor) -> None:
+        cursor.execute(self.INFORMATION_SCHEMA_VIEWS, (self._database_name, ))
         rows = cursor.fetchall()
         for row in tqdm(rows, desc="Extracting and parsing view definitions", colour='green'):
             query_context = QueryContext(queried_database=row[1],
@@ -109,19 +110,18 @@ class SnowflakeQueryHistory(QueryHistory):
 
             query = SnowflakeQuery(raw_query_text=row[0],
                                    query_context=query_context,
-                                   profile_database_name=database_name,
-                                   profile_schema_name=schema_name)
+                                   database_name=self._database_name,
+                                   schema_name=self._schema_name)
 
             self.add_query(query)
 
     def _query_history_table(self, start_date: datetime, end_date: datetime) -> None:
-        database_name = self.get_database_name()
-        schema_name = self.get_schema_name()
-
-        logger.debug(f"Pulling snowflake query history from database - {database_name} and schema - {schema_name}")
+        logger.debug(f"Pulling snowflake query history from database - {self._database_name} and schema - "
+                     f"{self._schema_name}")
 
         with self._con.cursor() as cursor:
-            query_text, bindings = self._build_history_query(start_date, end_date, database_name,
+            cursor.execute(self.USE_DATABASE, (self._database_name,))
+            query_text, bindings = self._build_history_query(start_date, end_date, self._database_name,
                                                              self.query_history_source)
             cursor.execute(query_text, bindings)
             logger.debug("Finished executing snowflake history query")
@@ -139,16 +139,16 @@ class SnowflakeQueryHistory(QueryHistory):
 
                 query = SnowflakeQuery(raw_query_text=row[0],
                                        query_context=query_context,
-                                       profile_database_name=database_name,
-                                       profile_schema_name=schema_name)
+                                       database_name=self._database_name,
+                                       schema_name=self._schema_name)
 
                 self.add_query(query)
 
-            self._enrich_history_with_view_definitions(cursor, database_name, schema_name)
+            self._enrich_history_with_view_definitions(cursor)
             logger.debug("Finished fetching snowflake history query results")
 
     def properties(self) -> dict:
         query_history_properties = super().properties()
-        query_history_properties.update({'query_history_source': self.query_history_source})
+        query_history_properties['query_history_properties'].update({'query_history_source': self.query_history_source})
         return query_history_properties
 

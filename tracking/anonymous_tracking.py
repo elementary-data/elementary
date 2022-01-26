@@ -1,27 +1,35 @@
-import uuid
 import os
+import uuid
 from typing import Union, Optional
+
+import posthog
 import requests
 from bs4 import BeautifulSoup
-import posthog
-from lineage.utils import get_run_properties
+
+from config.config import Config
 
 
 class AnonymousTracking(object):
     ANONYMOUS_USER_ID_FILE = '.user_id'
     FETCH_API_KEY_AND_URL = 'https://www.elementary-data.com/telemetry'
 
-    def __init__(self, profiles_dir: str, anonymous_usage_tracking: bool = True) -> None:
-        self.profiles_dir = profiles_dir
+    def __init__(self, config: Config) -> None:
         self.anonymous_user_id = None
         self.api_key = None
         self.url = None
-        self.do_not_track = anonymous_usage_tracking is False
+        self.config = config
+        self.do_not_track = config.anonymous_tracking_enabled is False
         self.run_id = str(uuid.uuid4())
+        self.init()
 
     def init(self):
-        anonymous_user_id_file_name = os.path.join(self.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
-        if os.path.exists(anonymous_user_id_file_name):
+        legacy_anonymous_user_id_file_name = os.path.join(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
+        anonymous_user_id_file_name = os.path.join(self.config.config_dir, self.ANONYMOUS_USER_ID_FILE)
+        # First check legacy file path
+        if os.path.exists(legacy_anonymous_user_id_file_name):
+            with open(legacy_anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
+                self.anonymous_user_id = anonymous_user_id_file.read()
+        elif os.path.exists(anonymous_user_id_file_name):
             with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
                 self.anonymous_user_id = anonymous_user_id_file.read()
         else:
@@ -58,48 +66,49 @@ class AnonymousTracking(object):
             properties = dict()
 
         properties['run_id'] = self.run_id
+        properties['platform'] = self.config.platform
 
         posthog.api_key = self.api_key
         posthog.host = self.url
         posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
 
 
-def track_cli_start(profiles_dir: str, profile_data: dict) -> Optional['AnonymousTracking']:
+def track_cli_start(anonymous_tracking: AnonymousTracking, module_name: str, cli_properties: dict) -> None:
     try:
-        anonymous_tracking = AnonymousTracking(profiles_dir, profile_data.get('anonymous_usage_tracking'))
-        anonymous_tracking.init()
-        cli_start_properties = {'platform_type': profile_data.get('type')}
-        cli_start_properties.update(get_run_properties())
+        cli_start_properties = {'cli_properties': cli_properties,
+                                'module_name': module_name}
         anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
-        return anonymous_tracking
     except Exception:
         pass
-    return None
 
 
-def track_cli_end(anonymous_tracking: AnonymousTracking, lineage_properties: dict, query_history_properties: dict) \
-        -> None:
+def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execution_properties: dict) -> None:
     try:
         if anonymous_tracking is None:
             return
 
-        cli_end_properties = dict()
-        cli_end_properties.update(lineage_properties)
-        cli_end_properties.update(query_history_properties)
+        cli_end_properties = {'execution_properties': execution_properties,
+                              'module_name': module_name}
         anonymous_tracking.send_event('cli-end', properties=cli_end_properties)
     except Exception:
         pass
 
 
-def track_cli_exception(anonymous_tracking: AnonymousTracking, exc: Exception) \
-        -> None:
+def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str, exc: Exception) -> None:
     try:
         if anonymous_tracking is None:
             return
 
-        cli_exception_properties = dict()
-        cli_exception_properties['exception_type'] = str(type(exc))
-        cli_exception_properties['exception_content'] = str(exc)
+        cli_exception_properties = {'exception_properties': {'exception_type': str(type(exc)),
+                                                             'exception_content': str(exc)},
+                                    'module_name': module_name}
         anonymous_tracking.send_event('cli-exception', properties=cli_exception_properties)
+    except Exception:
+        pass
+
+
+def track_cli_help(anonymous_tracking: AnonymousTracking):
+    try:
+        anonymous_tracking.send_event('cli-help')
     except Exception:
         pass
