@@ -2,9 +2,9 @@ import click
 import os
 from os.path import expanduser
 
-from lineage.utils import is_dbt_installed, get_package_version
+from utils.package import get_package_version
 from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
-from utils.dbt import get_profile_name_from_dbt_project
+from utils.dbt import get_profile_name_from_dbt_project, is_dbt_installed
 from utils.ordered_yaml import OrderedYaml
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring

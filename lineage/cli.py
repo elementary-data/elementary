@@ -3,8 +3,8 @@ import os
 from os.path import expanduser
 
 from config.config import Config
-from lineage.utils import is_dbt_installed, get_package_version
-from utils.dbt import extract_credentials_and_data_from_profiles
+from utils.package import get_package_version
+from utils.dbt import is_dbt_installed
 from lineage.empty_graph_helper import EmptyGraphHelper
 from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
 from exceptions.exceptions import ConfigError
@@ -70,7 +70,6 @@ def get_cli_properties() -> dict:
             'full_table_names': params.get('full_table_names'),
             'direction': params.get('direction'),
             'depth': params.get('depth'),
-            'ignore_schema': params.get('ignore_schema'),
             'dbt_installed': is_dbt_installed(),
             'version': get_package_version()}
 
@@ -107,9 +106,7 @@ def get_cli_properties() -> dict:
     type=str,
     help="Filter on a table to see upstream and downstream dependencies of this table "
          "(see also direction & depth parameters).",
-    default=None,
-    cls=RequiredIf,
-    required_if='schema'
+    default=None
 )
 @click.option('--direction',
               type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
@@ -200,8 +197,10 @@ def lineage(start_date: datetime, end_date: datetime, database: str, schema: str
                                            full_table_names=full_table_names)
             resolved_table_name = table_resolver.name_qualification(table)
             if resolved_table_name is None:
-                raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name'
-                                  f'that is aligned with the database and schema in your profiles.yml file.')
+                raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name '
+                                  f'that is aligned with the database and schema parameters.\n'
+                                  f'If you do not provide schema, add the schema as a prefix in the table filter - '
+                                  f'edr lineage -db <database_name> -t <schema_name>.<table_name>')
             lineage_graph.filter_on_table(resolved_table_name, direction, depth)
 
         success = lineage_graph.draw_graph(should_open_browser=open_browser)
