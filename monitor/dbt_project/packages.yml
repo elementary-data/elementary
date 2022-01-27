@@ -1,4 +1,4 @@
 packages:
-  - git: elementary-data/elementary_data_reliability
+  - package: elementary-data/elementary_data_reliability
     version: 0.1.0
 
