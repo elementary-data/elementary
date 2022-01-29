@@ -28,8 +28,11 @@ class SnowflakeQueryHistory(QueryHistory):
         {end_time_range_end_expr},
         result_limit=>10000)) 
         where execution_status = 'SUCCESS' and query_type not in 
-        ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 
-        'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
+        ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 'GET_FILES',
+         'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE', 'ALTER_NETWORK_POLICY', 'ALTER_ACCOUNT', 
+         'ALTER_TABLE_DROP_CLUSTERING_KEY', 'ALTER_USER',  'CREATE_CUSTOMER_ACCOUNT', 'CREATE_NETWORK_POLICY', 
+         'CREATE_ROLE', 'CREATE_USER', 'DESCRIBE_QUERY', 'DROP_NETWORK_POLICY', 'DROP_ROLE', 'DROP_USER', 'LIST_FILES',
+         'REMOVE_FILES', 'REVOKE','UNKNOWN', 'DELETE', 'SELECT') and
         (query_text not ilike '%.query_history%') and 
         (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or collate(database_name, 'en-ci') = :1)
         order by end_time;
@@ -49,9 +52,12 @@ class SnowflakeQueryHistory(QueryHistory):
     role_name, total_elapsed_time, query_id
         from snowflake.account_usage.query_history 
         where end_time >= :2 and {end_time_range_end_expr} 
-    and execution_status = 'SUCCESS' and query_type not in 
-    ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES',
-    'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE') and
+        and execution_status = 'SUCCESS' and query_type not in 
+        ('SHOW', 'COPY', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM', 'PUT_FILES', 'GET_FILES',
+         'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE', 'ALTER_NETWORK_POLICY', 'ALTER_ACCOUNT', 
+         'ALTER_TABLE_DROP_CLUSTERING_KEY', 'ALTER_USER',  'CREATE_CUSTOMER_ACCOUNT', 'CREATE_NETWORK_POLICY', 
+         'CREATE_ROLE', 'CREATE_USER', 'DESCRIBE_QUERY', 'DROP_NETWORK_POLICY', 'DROP_ROLE', 'DROP_USER', 'LIST_FILES',
+         'REMOVE_FILES', 'REVOKE','UNKNOWN', 'DELETE', 'SELECT') and
     (query_text not ilike '%.query_history%') and
     (contains(collate(query_text, 'en-ci'), collate(:1, 'en-ci')) or collate(database_name, 'en-ci') = :1)
     order by end_time;
