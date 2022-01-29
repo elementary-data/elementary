@@ -3,8 +3,10 @@
 ###########################
 
 ## SNOWFLAKE ##
-## profile name, replace 'my_snowflake_profile' with a name of your choice  ##
-my_snowflake_profile: 
+## By default, the tool expects the profile name 'elementary'  ##
+## This profile will be used for elementary's outputs. We      ##
+## reccomend creating a dedicated database, or at least schame ##
+elementary: 
   outputs:
     default:
       type: snowflake
@@ -17,7 +19,6 @@ my_snowflake_profile:
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
-      ## Schema is not used as filter by default, you can use the 'ignore schema' option set to false to improve run times in large databases
       schema: [schema name]
       ## OPTIONAL - if you want to create the lineage based on queries from more 
       ## than the last 7 days or you have 10k or more queries in the history pulled during 
@@ -25,8 +26,10 @@ my_snowflake_profile:
       query_history_source: account_usage
 
 ## BIGQUERY ##
-## profile name, replace 'my_bigquery_profile' with a name of your choice  ##
-my_bigquery_profile: 
+## By default, the tool expects the profile name 'elementary'  ##
+## This profile will be used for elementary's outputs. We      ##
+## reccomend creating a dedicated database, or at least schame ##
+elementary: 
   outputs:
     default:  
       type: bigquery
@@ -36,8 +39,6 @@ my_bigquery_profile:
       keyfile: [full path to your keyfile]
       
       project: [project id]
-      ## Dataset is used as filter by default, you can use the 'ignore schema' 
-      ## option to see cross dataset lineage (only in the same location)
       dataset: [dataset name]
       threads: 1
       ## Location is mandatory, can be one of US or EU, or a regional location
