@@ -1,0 +1,10 @@
+###########################
+## Template config.yml   ##
+###########################
+
+# alerts destination #
+slack_notification_webhook: <your_slack_webhook_url>
+
+# projects to monitor #
+dbt_projects:
+  - <your_dbt_project_path>
