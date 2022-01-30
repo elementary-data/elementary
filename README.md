@@ -45,7 +45,7 @@ We need a connection profile in `profiles.yml`. [Here is a template](static/prof
 For further instructions and guides to start using the different modules, go to our [quickstart page](https://docs.elementary-data.com/quickstart). 
 
 After you created a [connection profile](https://docs.elementary-data.com/guides/connection-profile), generate a lineage graph:
-```
+```bash
 # Creates a lineage graph from queries executed between 7 days ago and current time, 
 # for the database named 'my_db'
 
@@ -53,7 +53,7 @@ edr lineage -db my_db
 ```
 
 Afte you [configure sources to monitor](https://docs.elementary-data.com/guides/connection-profile), execute it using:
-```
+```bash
 edr monitor
 ```
 
