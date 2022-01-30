@@ -44,6 +44,18 @@ edr --help
 We need a connection profile in `profiles.yml`. [Here is a template](static/profiles.yml) to create one.   
 For further instructions and guides to start using the different modules, go to our [quickstart page](https://docs.elementary-data.com/quickstart). 
 
+After you created a [connection profile](https://docs.elementary-data.com/guides/connection-profile), generate a lineage graph:
+```
+# Creates a lineage graph from queries executed between 7 days ago and current time, 
+# for the database named 'my_db'
+
+edr lineage -db my_db
+```
+
+Afte you [configure sources to monitor](https://docs.elementary-data.com/guides/connection-profile), execute it using:
+```
+edr monitor
+```
 
 ## Documentation & Demo
 
