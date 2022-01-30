@@ -9,8 +9,8 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='elementary-lineage',
-    description='Presenting data lineage based on your data warehouse query history',
-    version='0.0.23',
+    description='Presenting data lineage and providing monitoring for your data warehouse',
+    version='0.1.0',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
@@ -19,7 +19,8 @@ setup(
     ''',
     author="Elementary",
     package_data={"": ["header.html", "dbt_project/*"]},
-    keyword="data, lineage, data lineage, data warehouse, DWH",
+    keyword="data, lineage, data lineage, data warehouse, DWH, observability, data monitoring, data observability, "
+            "Snowflake, BigQuery, data reliability, analytics engineering",
     long_description=README,
     install_requires=[
         'click>=8,<9',
