@@ -10,7 +10,7 @@ networkx
 sqllineage==1.2.4
 pyvis
 sqlparse
-tqdm
+alive-progress
 python-dateutil
 google-cloud-bigquery
 google-api-core
