@@ -37,20 +37,18 @@ class Query(object):
     def get_context_as_html(self) -> str:
         return self.query_context.to_html()
 
-    @classmethod
-    def _parse_platform_specific_queries(cls, table_resolver: TableResolver, raw_query_text: str) -> (set, set):
+    def _parse_platform_specific_queries(self, table_resolver: TableResolver, raw_query_text: str) -> (set, set):
         return set(), set()
 
-    @classmethod
-    def _parse_query_text(cls, table_resolver: TableResolver, raw_query_text: str) -> (set, set, set, set):
+    def _parse_query_text(self, table_resolver: TableResolver, raw_query_text: str) -> (set, set, set, set):
         renamed_tables = set()
         dropped_tables = set()
 
-        source_tables, target_tables = cls._parse_platform_specific_queries(table_resolver, raw_query_text)
+        source_tables, target_tables = self._parse_platform_specific_queries(table_resolver, raw_query_text)
         if len(source_tables) > 0 or len(target_tables) > 0:
             return source_tables, target_tables, renamed_tables, dropped_tables
 
-        analyzed_statements = cls._query_text_to_analyzed_sql_statements(raw_query_text)
+        analyzed_statements = self._query_text_to_analyzed_sql_statements(raw_query_text)
         for analyzed_statement in analyzed_statements:
             # Handle drop tables, if they exist in the statement
             for dropped_table in analyzed_statement.drop:

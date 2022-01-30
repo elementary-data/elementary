@@ -63,12 +63,13 @@ class SnowflakeQuery(Query):
 
         return source_tables, target_tables
 
-    @classmethod
-    def _parse_platform_specific_queries(cls, table_resolver: TableResolver, raw_query_text: str) -> (set, set):
+    def _parse_platform_specific_queries(self, table_resolver: TableResolver, raw_query_text: str) -> (set, set):
         source_tables = set()
         target_tables = set()
         try:
-            source_tables, target_tables = cls._parse_merge_query(table_resolver, raw_query_text)
+            query_type = self.query_context.query_type
+            if query_type is not None and query_type.lower() == 'merge':
+                source_tables, target_tables = self._parse_merge_query(table_resolver, raw_query_text)
         except Exception as exc:
             logger.debug(f'Exception was raised while parsing this query with sqlfluff -\n{raw_query_text}\n'
                          f'Error was -\n{exc}.')

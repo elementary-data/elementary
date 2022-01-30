@@ -7,7 +7,7 @@ from pyvis.network import Network
 import webbrowser
 from lineage.query import Query
 from utils.log import get_logger
-from tqdm import tqdm
+from alive_progress import alive_it
 import pkg_resources
 
 logger = get_logger(__name__)
@@ -140,7 +140,8 @@ class LineageGraph(object):
                         self._lineage_graph.remove_node(predecessor)
 
     def init_graph_from_query_list(self, queries: [Query]) -> None:
-        for query in tqdm(queries, desc="Updating lineage graph", colour='green'):
+        queries_with_progress_bar = alive_it(queries, title='Updating lineage graph')
+        for query in queries_with_progress_bar:
             self._update_lineage_graph(query)
 
         logger.debug(f'Finished updating lineage graph!')
