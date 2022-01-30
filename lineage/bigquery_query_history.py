@@ -1,4 +1,4 @@
-from tqdm import tqdm
+from alive_progress import alive_it
 from google.cloud import bigquery
 from lineage.bigquery_query import BigQueryQuery
 from lineage.query import Query
@@ -6,6 +6,8 @@ from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from utils.log import get_logger
 from datetime import datetime
+
+from utils.thread_spinner import ThreadSpinner
 
 logger = get_logger(__name__)
 
@@ -69,12 +71,15 @@ class BigQueryQueryHistory(QueryHistory):
             query_parameters=query_parameters
         )
 
+        spinner = ThreadSpinner(title='Pulling query history from BigQuery')
+        spinner.start()
         job = self._con.query(query_text, job_config=job_config)
-
         logger.debug("Finished executing bigquery jobs history query")
-
         rows = list(job.result())
-        for row in tqdm(rows, desc="Extracting and parsing queries from query history", colour='green'):
+        spinner.stop()
+
+        rows_with_progress_bar = alive_it(rows, title="Parsing queries")
+        for row in rows_with_progress_bar:
             query_context = QueryContext(query_time=row[1],
                                          query_volume=row[2],
                                          query_type=row[3],

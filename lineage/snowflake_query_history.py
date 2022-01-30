@@ -1,13 +1,12 @@
 from datetime import datetime, date, timedelta
-
 from snowflake.connector.cursor import SnowflakeCursor
-from tqdm import tqdm
-
+from alive_progress import alive_it
 from exceptions.exceptions import ConfigError
 from lineage.query_context import QueryContext
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query import SnowflakeQuery
 from utils.log import get_logger
+from utils.thread_spinner import ThreadSpinner
 
 logger = get_logger(__name__)
 
@@ -105,9 +104,13 @@ class SnowflakeQueryHistory(QueryHistory):
         return query, bindings
 
     def _enrich_history_with_view_definitions(self, cursor: SnowflakeCursor) -> None:
+        spinner = ThreadSpinner(title='Pulling view definitions from Snowflake')
+        spinner.start()
         cursor.execute(self.INFORMATION_SCHEMA_VIEWS, (self._database_name, ))
         rows = cursor.fetchall()
-        for row in tqdm(rows, desc="Extracting and parsing view definitions", colour='green'):
+        spinner.stop()
+        rows_with_progress_bar = alive_it(rows, title="Parsing view definitions")
+        for row in rows_with_progress_bar:
             query_context = QueryContext(queried_database=row[1],
                                          queried_schema=row[2],
                                          query_time=row[3],
@@ -129,10 +132,16 @@ class SnowflakeQueryHistory(QueryHistory):
             cursor.execute(self.USE_DATABASE, (self._database_name,))
             query_text, bindings = self._build_history_query(start_date, end_date, self._database_name,
                                                              self.query_history_source)
+
+            spinner = ThreadSpinner(title='Pulling query history from Snowflake')
+            spinner.start()
             cursor.execute(query_text, bindings)
-            logger.debug("Finished executing snowflake history query")
+            logger.debug(f"Fetching results from Snowflake")
             rows = cursor.fetchall()
-            for row in tqdm(rows, desc="Extracting and parsing queries from query history", colour='green'):
+            spinner.stop()
+
+            rows_with_progress_bar = alive_it(rows, title="Parsing queries")
+            for row in rows_with_progress_bar:
                 query_context = QueryContext(queried_database=row[1],
                                              queried_schema=row[2],
                                              query_time=row[3],
