@@ -10,11 +10,15 @@
 </p>
 
 
-Elementary was built out of the need to **effortlessly and immediately gain visibility** into the data stack,
-starting with tracing the actual upstream & downstream dependencies in the data warehouse, 
-without any implementation efforts, security risks or compromises on accuracy. 
+Our goal is to provide data teams **immediate visibility, detection of data issues, and impact analysis.** 
+We focus on **simple effortless setup**, and integrations with the existing stack.
 
-**Data lineage made simple, reliable, and automated.**
+Our first two modules:
+
+* **Data lineage made simple, reliable, and automated**
+Tracing the actual upstream & downstream dependencies in the data warehouse, without any implementation efforts or security risks.
+* **Detection of changes in source tables**
+Get Slack alerts on changes in your source tables, detect breaking changes and discover new data you can leverage. 
 
 
 
@@ -32,19 +36,14 @@ Try out our new [live demo here](https://www.elementary-data.com/live-demo).
 ```bash
 pip install elementary-lineage
 
-# The tool is named edl (Elementary Data Lineage),
+# The tool is named edr (Elementary Data Reliability),
 # run it to validate the installation:
-edl --help
+edr --help
 ```
 
-We need a connection file in a simple YAML called `profiles.yml`. [Here is a template](static/profiles.yml) to create a Snowflake / BigQuery one.   
-For further instructions go to our [quickstart page](https://docs.elementary-data.com/quickstart#requirements). 
+We need a connection profile in `profiles.yml`. [Here is a template](static/profiles.yml) to create one.   
+For further instructions and guides to start using the different modules, go to our [quickstart page](https://docs.elementary-data.com/quickstart). 
 
-If you use ![](static/dbt-16.png)[dbt](https://www.getdbt.com/), you can start right away by running this command with the path to your `profiles.yml` and the relevant profile name:
-
-```bash
-edl -d ~/.dbt -p <profile_name>
-```
 
 ## Documentation & Demo
 
@@ -55,19 +54,24 @@ We also created a short [demo video](https://docs.elementary-data.com/demo).
 
 ## Features
 
-* **Lineage visualization:** Visual map of data flow and dependencies in the data warehouse. 
-* **Dataset status:** Present data about freshness and volume on the lineage graph.
-* **Accuracy:** Reflects the actual state in the DWH based on logs.
-* **Plug-and-play:** No need for code changes.
-* **Graph filters:** Filter the graph by dataset, dates, direction, and depth. 
+**Data lineage**
+* **Lineage visualization**: Visual map of data flow and dependencies in the data warehouse. 
+* **Dataset status**: Present data about freshness and volume on the lineage graph.
+* **Accuracy**: Reflects the actual state in the DWH based on logs.
+* **Plug-and-play**: No need for code changes.
+* **Graph filters**: Filter the graph by dataset, dates, direction, and depth. 
 
+**Source tables monitoring**
+* **Slack notifications**.
+* **Detect deletions:** columns and tables that were removed.
+* **Detect data type** changes.
+* **Detect new data:** columns and tables that were added.
 
 
 **You can impact our next features in this [roadmap](https://github.com/elementary-data/elementary-lineage/projects/1)** by voting :+1: to issues and opening new ones.
 
 Our plan is to eventually build a data observability platform that is open, transparent and powered by the community. 
 A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
-
 
 We are working on **Dataset monitoring**, **Lineage history**, **Column level lineage**, **Full lineage**, and more.
 
@@ -84,7 +88,7 @@ For additional information and help, you can use one of these channels:
 ## **Integrations**
 
 * [x] **Snowflake** ![](static/snowflake-16.png)
-* [x] **BigQuery**  ![](static/bigquery-16.png) 
+* [x] **BigQuery**  ![](static/bigquery-16.png) - Lineage only
 * [ ] **Redshift**  ![](static/redshift-16.png) 
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
