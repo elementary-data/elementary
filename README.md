@@ -36,7 +36,7 @@ Try out our live lineage [sandbox here](https://www.elementary-data.com/live-dem
 ## Quick start
 
 ```bash
-pip install elementary-lineage
+pip install elementary-data
 
 # The tool is named edr (Elementary Data Reliability),
 # run it to validate the installation:
