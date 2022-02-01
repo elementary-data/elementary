@@ -10,26 +10,28 @@
 </p>
 
 
-Our goal is to provide data teams **immediate visibility, detection of data issues, and impact analysis.** 
-We focus on **simple effortless setup**, and integrations with the existing stack.
+Our goal is to provide data teams with **immediate visibility, detection of data issues, and impact analysis.**</br>
+We focus on providing a **simple setup**, **integrations** with the existing stack, and **centralized metadata** in your own data warehouse.
 
-Our first two modules:
+## Supported use cases
 
-* **Data lineage made simple, reliable, and automated**
-Tracing the actual upstream & downstream dependencies in the data warehouse, without any implementation efforts or security risks.
-* **Detection of changes in source tables**
-Get Slack alerts on changes in your source tables, detect breaking changes and discover new data you can leverage. 
+**Live data lineage**
+* An end-to-end view of data enriched with operational context like freshness, volume, duration, and permissions.
+* View data that has been transformed with or without dbt, or across all of your dbt projects.
+
+**Source tables monitoring**
+- Detect breaking changes and discover new data you can leverage in your source tables. 
+- Simple and minimal configuration (it can also be read from your dbt sources definitions).
+
+**Alerts**
+- Slack alerts on breaking changes and new data can be configured within minutes.
 
 
-
-
-:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+## Demo & sandbox
+Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
 <img src="static/elementary_demo.gif" width="750"/>
-
-## Sandbox
-
-Try out our new [live demo here](https://www.elementary-data.com/live-demo).
+:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
 ## Quick start
 
@@ -41,10 +43,9 @@ pip install elementary-lineage
 edr --help
 ```
 
-We need a connection profile in `profiles.yml`. [Here is a template](static/profiles.yml) to create one.   
-For further instructions and guides to start using the different modules, go to our [quickstart page](https://docs.elementary-data.com/quickstart). 
+Add your data warehouse connection details in a `profiles.yml` file, see our [quickstart page](https://docs.elementary-data.com/quickstart) to learn more or use [this template here](static/profiles.yml). Yes, if you are a dbt user we use dbt's profiles.yml by default (simply add a new profile called 'elementary').
 
-After you created a [connection profile](https://docs.elementary-data.com/guides/connection-profile), generate a lineage graph:
+Now, generate a lineage graph:
 ```bash
 # Creates a lineage graph from queries executed between 7 days ago and current time, 
 # for the database named 'my_db'
@@ -52,24 +53,26 @@ After you created a [connection profile](https://docs.elementary-data.com/guides
 edr lineage -db my_db
 ```
 
-Afte you [configure sources to monitor](https://docs.elementary-data.com/guides/connection-profile), execute it using:
+After you [configure sources to monitor](https://docs.elementary-data.com/guides/sources-monitoring/configure-datasets-to-monitor), execute it using:
 ```bash
 edr monitor
 ```
 
-## Documentation & Demo
+To continuously monitor your data, schedule this command to run periodically with your existing orchestration solution (we highly recommend running it at least once a day).
 
+## Documentation
+
+Want to learn more on how to quickly get started with it? go to our [quickstart page](https://docs.elementary-data.com/quickstart).</br>
+Have questions about the configuration? go to our [configuration FAQ here](https://docs.elementary-data.com/guides/connection-profile).</br>
+Curious to learn about the different modules? use this [overview](https://docs.elementary-data.com/guides/modules-overview).</br>
 Our full documentation is [available here](https://docs.elementary-data.com/). 
-We also created a short [demo video](https://docs.elementary-data.com/demo). 
-
-
 
 ## Features
 
 **Data lineage**
-* **Lineage visualization**: Visual map of data flow and dependencies in the data warehouse. 
-* **Dataset status**: Present data about freshness and volume on the lineage graph.
-* **Accuracy**: Reflects the actual state in the DWH based on logs.
+* **Lineage visualization**: Visual map of data flow and dependencies in the data warehouse, including legacy that is not managed by dbt. 
+* **Dataset status**: Present data about freshness, volume, permissions and more on the lineage graph itself.
+* **Accuracy**: Reflects the actual state in the DWH based on logs and your query history.
 * **Plug-and-play**: No need for code changes.
 * **Graph filters**: Filter the graph by dataset, dates, direction, and depth. 
 
@@ -79,14 +82,10 @@ We also created a short [demo video](https://docs.elementary-data.com/demo).
 * **Detect data type** changes.
 * **Detect new data:** columns and tables that were added.
 
-
 **You can impact our next features in this [roadmap](https://github.com/elementary-data/elementary-lineage/projects/1)** by voting :+1: to issues and opening new ones.
 
-Our plan is to eventually build a data observability platform that is open, transparent and powered by the community. 
+We aim to build an open, transparent, and community-powered data observability platform.
 A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
-
-We are working on **Dataset monitoring**, **Lineage history**, **Column level lineage**, **Full lineage**, and more.
-
 
 ## Community & Support
 
@@ -99,7 +98,7 @@ For additional information and help, you can use one of these channels:
 
 ## **Integrations**
 
-* [x] **Snowflake** ![](static/snowflake-16.png)
+* [x] **Snowflake** ![](static/snowflake-16.png) - Lineage & monitoring
 * [x] **BigQuery**  ![](static/bigquery-16.png) - Lineage only
 * [ ] **Redshift**  ![](static/redshift-16.png) 
 
@@ -107,4 +106,4 @@ Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community
 
 ## **License**
 
-Elementary lineage is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary-lineage/blob/master/LICENSE) file for licensing information.
+Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary-lineage/blob/master/LICENSE) file for licensing information.
