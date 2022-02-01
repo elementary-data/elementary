@@ -62,9 +62,16 @@ To continuously monitor your data, schedule this command to run periodically wit
 
 ## Documentation
 
-Want to learn more on how to quickly get started with it? go to our [quickstart page](https://docs.elementary-data.com/quickstart).</br>
-Have questions about the configuration? go to our [configuration FAQ here](https://docs.elementary-data.com/guides/connection-profile).</br>
-Curious to learn about the different modules? use this [overview](https://docs.elementary-data.com/guides/modules-overview).</br>
+Want to learn more on how to quickly get started with it? 
+Go to our [quickstart page](https://docs.elementary-data.com/quickstart).</br>
+
+Have questions about the configuration? 
+Go to our [configuration FAQ here](https://docs.elementary-data.com/guides/connection-profile).</br>
+
+Curious to learn about the different modules?
+Use this [modules overview](https://docs.elementary-data.com/guides/modules-overview).</br>
+
+
 Our full documentation is [available here](https://docs.elementary-data.com/). 
 
 ## Features
