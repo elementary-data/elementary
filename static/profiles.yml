@@ -5,7 +5,7 @@
 ## SNOWFLAKE ##
 ## By default, the tool expects the profile name 'elementary'  ##
 ## This profile will be used for elementary's outputs. We      ##
-## reccomend creating a dedicated database, or at least schame ##
+## reccomend creating a dedicated database, or at least schema ##
 elementary: 
   outputs:
     default:
@@ -28,7 +28,7 @@ elementary:
 ## BIGQUERY ##
 ## By default, the tool expects the profile name 'elementary'  ##
 ## This profile will be used for elementary's outputs. We      ##
-## reccomend creating a dedicated database, or at least schame ##
+## reccomend creating a dedicated database, or at least schema ##
 elementary: 
   outputs:
     default:  
