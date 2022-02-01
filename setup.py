@@ -8,9 +8,9 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(
-    name='elementary-lineage',
-    description='Presenting data lineage and providing monitoring for your data warehouse',
-    version='0.1.0',
+    name='elementary-data',
+    description='Data monitoring and lineage',
+    version='0.1.1',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
@@ -20,7 +20,7 @@ setup(
     author="Elementary",
     package_data={"": ["header.html", "dbt_project/*"]},
     keyword="data, lineage, data lineage, data warehouse, DWH, observability, data monitoring, data observability, "
-            "Snowflake, BigQuery, data reliability, analytics engineering",
+            "Snowflake, BigQuery, Redshift, data reliability, analytics engineering",
     long_description=README,
     install_requires=[
         'click>=8,<9',
@@ -54,7 +54,7 @@ setup(
     ],
     long_description_content_type="text/markdown",
     license='',
-    url='https://github.com/elementary-data/elementary-lineage',
+    url='https://github.com/elementary-data/elementary',
     author_email='or@elementary-data.com',
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
