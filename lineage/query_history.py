@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Union
 from lineage.bigquery_query import BigQueryQuery
 from exceptions.exceptions import SerializationError
 from lineage.query import Query
@@ -17,16 +17,25 @@ class QueryHistory(object):
     SUCCESS_QUERIES_FILE = './latest_query_history.json'
     FAILED_QUERIES_FILE = './failed_queries.json'
 
-    def __init__(self, con, database_name: str, schema_name: str, should_export_query_history: bool = True,
-                 full_table_names: bool = False) -> None:
+    def __init__(self, con, dbs: str, should_export_query_history: bool = True, full_table_names: bool = True) -> None:
         self._con = con
-        self._database_name = database_name
-        self._schema_name = schema_name
+        self._dbs = self.str_to_list(dbs)
         self._should_export_query_history = should_export_query_history
         self._full_table_names = full_table_names
         self._query_history_stats = QueryHistoryStats()
         self.success_queries = []
         self.failed_queries = []
+
+    @staticmethod
+    def str_to_list(dbs_str: str) -> Union[list, None]:
+        if dbs_str is None:
+            return None
+
+        return [db.strip() for db in dbs_str.split(',')]
+
+    @staticmethod
+    def _normalize_database_name(db: str) -> str:
+        return db.lower().replace('-', '_').replace(' ', '').replace('`', '').replace('"', '')
 
     @staticmethod
     def serialize_queries_to_file(filename: str, queries: [Query]) -> None:

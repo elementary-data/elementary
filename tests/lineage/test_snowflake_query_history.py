@@ -27,6 +27,6 @@ from lineage.snowflake_query_history import SnowflakeQueryHistory
 def test_snowflake_query_history_build_history_query(mock_date, start_date, end_date, database_name, query_type,
                                                      expected_bindings):
     mock_date.today.return_value = date(2025, 9, 18)
-    query, bindings = SnowflakeQueryHistory._build_history_query(start_date, end_date, database_name, query_type)
+    query, bindings = SnowflakeQueryHistory._account_usage_query_history(start_date, end_date, database_name, query_type)
     assert query_type in query
     assert bindings == expected_bindings

@@ -77,8 +77,7 @@ class SnowflakeQuery(Query):
 
     def parse(self, full_table_names: bool = False) -> bool:
         try:
-            table_resolver = TableResolver(self._database_name, self._schema_name,
-                                           self.query_context.queried_database, self.query_context.queried_schema,
+            table_resolver = TableResolver(self.query_context.queried_database, self.query_context.queried_schema,
                                            full_table_names, self.revert_dollar_sign_placeholder)
 
             # sqlparse library doesn't behave nicely when there is a $ sign in the table name. Therefore we replace it

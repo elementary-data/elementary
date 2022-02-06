@@ -202,6 +202,12 @@ class LineageGraph(object):
             if node in self._catalog:
                 self._lineage_graph.nodes[node]['title'] = attr.get('title', '') + self._catalog[node]
 
+    def export_graph_to_file(self):
+        pass
+
+    def load_graph_from_file(self):
+        pass
+
     def draw_graph(self, should_open_browser: bool = True) -> bool:
         if len(self._lineage_graph.edges) == 0:
             return False
