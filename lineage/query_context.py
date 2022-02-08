@@ -9,8 +9,8 @@ class QueryContext(object):
     def __init__(self, queried_database: Optional[str] = None, queried_schema: Optional[str] = None,
                  query_time: Optional[datetime] = None, query_volume: Optional[int] = None,
                  query_type: Optional[str] = None, user_name: Optional[str] = None,
-                 role_name: Optional[str] = None, referenced_tables: [dict] = None,
-                 destination_table: dict = None, duration: int = None,
+                 role_name: Optional[str] = None, referenced_tables: [dict, list] = None,
+                 destination_table: [dict, str] = None, duration: int = None,
                  query_id: str = None) -> None:
         self.queried_database = queried_database
         self.queried_schema = queried_schema

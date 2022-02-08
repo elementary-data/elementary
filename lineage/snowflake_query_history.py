@@ -48,7 +48,9 @@ class SnowflakeQueryHistory(QueryHistory):
             table_owner as user_name,
             null as role_name,
             null as total_elapsed_time,
-            null as query_id
+            null as query_id,
+            null as target_table,
+            null as source_tables
         from {database_name}.information_schema.views
         where lower(table_schema) != 'information_schema' 
         and view_definition is not NULL
@@ -276,7 +278,9 @@ class SnowflakeQueryHistory(QueryHistory):
                                              user_name=row[6],
                                              role_name=row[7],
                                              duration=row[8],
-                                             query_id=row[9])
+                                             query_id=row[9],
+                                             destination_table=row[10],
+                                             referenced_tables=row[11])
 
                 query = SnowflakeQuery(raw_query_text=row[0],
                                        query_context=query_context)
