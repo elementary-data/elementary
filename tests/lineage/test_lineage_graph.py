@@ -126,7 +126,7 @@ def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isola
     reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
 
     query_context = QueryContext('elementary_db', 'elementary_schema')
-    query_list = [Query(query, query_context, 'elementary_db', 'elementary_schema') for query in queries]
+    query_list = [Query(query, query_context) for query in queries]
     try:
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:

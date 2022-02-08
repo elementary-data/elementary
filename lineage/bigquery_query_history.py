@@ -73,15 +73,11 @@ class BigQueryQueryHistory(QueryHistory):
                        end_time_range_end_expr=end_time_range_end_expr)
 
         dbs_count = len(dbs)
-        union_all_dbs = ''
-        for i in range(0, dbs_count, 2):
-            current_db = dbs[i]
-            union_all_dbs += cls.SELECT_FROM_INFORMATION_SCHEMA_QUERY_HISTORY.\
-                format(database_name_normalized=cls._normalize_database_name(current_db))
-            if i + 1 < dbs_count:
-                next_db = dbs[i + 1]
-                union_all_dbs += ' union all ' + cls.SELECT_FROM_INFORMATION_SCHEMA_QUERY_HISTORY. \
-                    format(database_name_normalized=cls._normalize_database_name(next_db))
+        union_all_dbs = cls.SELECT_FROM_INFORMATION_SCHEMA_QUERY_HISTORY.\
+            format(database_name_normalized=cls._normalize_database_name(dbs[0]))
+        for i in range(1, dbs_count):
+            union_all_dbs += ' union all ' + cls.SELECT_FROM_INFORMATION_SCHEMA_QUERY_HISTORY. \
+                format(database_name_normalized=cls._normalize_database_name(dbs[i]))
 
         query_text += cls.UNION_ALL_DBS.format(union_all_dbs=union_all_dbs)
 

@@ -34,7 +34,7 @@ def test_snowflake_query_parse(query_text, profile_db, profile_sc, queried_db, q
     empty_context = QueryContext(queried_database=profile_db, queried_schema=profile_sc)
     full_table_names = True
 
-    reference = SnowflakeQuery(query_text, empty_context, profile_db, profile_sc)
+    reference = SnowflakeQuery(query_text, empty_context)
     reference.parse(full_table_names=full_table_names)
 
     assert reference.source_tables == expected_source_tables
@@ -53,7 +53,7 @@ def test_snowflake_query_parse_with_drop_table_statement(query_text, profile_db,
     empty_context = QueryContext(queried_database=profile_db, queried_schema=profile_sc)
     full_table_names = True
 
-    reference = SnowflakeQuery(query_text, empty_context, profile_db, profile_sc)
+    reference = SnowflakeQuery(query_text, empty_context)
     reference.parse(full_table_names=full_table_names)
 
     assert len(reference.dropped_tables) == len(expected_dropped_tables)
@@ -70,7 +70,7 @@ def test_snowflake_query_parse_with_alter_table(query_text, profile_db, profile_
     empty_context = QueryContext(queried_database=profile_db, queried_schema=profile_sc)
     full_table_names = True
 
-    reference = SnowflakeQuery(query_text, empty_context, profile_db, profile_sc)
+    reference = SnowflakeQuery(query_text, empty_context)
     reference.parse(full_table_names=full_table_names)
 
     assert reference.renamed_tables == expected_renamed_tables
@@ -98,7 +98,7 @@ def test_snowflake_query_parse_with_alter_table(query_text, profile_db, profile_
 ])
 def test_snowflake_query_parse_with_merge_query(query_text, db, sc, expected_source_tables, expected_target_tables):
 
-    table_resolver = TableResolver(db, sc, db, sc, True)
+    table_resolver = TableResolver(db, sc, True)
     sources, targets = SnowflakeQuery._parse_merge_query(table_resolver, query_text)
     assert expected_source_tables == sources
     assert expected_target_tables == targets
