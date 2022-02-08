@@ -28,31 +28,13 @@ def test_lineage_graph_resolve_table_qualification(table_name_in_query_text,
                                                    schema_name_in_history_table,
                                                    expected_resolved_schema):
 
-    reference = TableResolver(database_name='profile_elementary_db',
-                              schema_name='profile_elementary_sc',
-                              queried_database_name=db_name_in_history_table,
-                              queried_schema_name=schema_name_in_history_table)
+    reference = TableResolver(database_name=db_name_in_history_table,
+                              schema_name=schema_name_in_history_table)
 
     resolved_table = reference._resolve_table_qualification(Table(table_name_in_query_text), db_name_in_history_table,
                                                             schema_name_in_history_table)
 
     assert str(resolved_table.schema) == expected_resolved_schema
-
-
-@pytest.mark.parametrize("resolved_table_name, profile_db_name, profile_schema_name, should_ignore", [
-    ('profile_elementary_db.profile_elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', False),
-    ('elementary_db.elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
-    ('elementary_sc.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
-    ('elementary_db.table1', 'profile_elementary_db', 'profile_elementary_sc', True),
-    (str(Table('table1')), 'profile_elementary_db', 'profile_elementary_sc', True),
-    ('profile_elementary_db.profile_elementary_sc.table1', 'profile_elementary_db', None, False),
-    ('profile_elementary_db.elementary_sc.table1', 'profile_elementary_db', None, False),
-    ('profile_elementary_sc.table1', 'profile_elementary_db', None, True),
-    (str(Table('table1')), 'profile_elementary_db', None, True),
-])
-def test_lineage_graph_should_ignore_table(resolved_table_name, profile_db_name, profile_schema_name, should_ignore):
-    reference = TableResolver(database_name=profile_db_name, schema_name=profile_schema_name)
-    assert reference._should_ignore_table(Table(resolved_table_name)) == should_ignore
 
 
 @pytest.mark.parametrize("resolved_table_name, show_full_table_names, expected_result", [
@@ -61,7 +43,6 @@ def test_lineage_graph_should_ignore_table(resolved_table_name, profile_db_name,
 ])
 def test_lineage_graph_name_qualification(resolved_table_name, show_full_table_names, expected_result):
     reference = TableResolver(database_name='elementary_db', schema_name='elementary_sc',
-                              queried_database_name='', queried_schema_name='',
                               full_table_names=show_full_table_names)
 
     assert reference.name_qualification(Table(resolved_table_name)) == expected_result
