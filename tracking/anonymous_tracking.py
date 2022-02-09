@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Union, Optional
+from typing import Union
 
 import posthog
 import requests
@@ -34,8 +34,6 @@ class AnonymousTracking(object):
                 self.anonymous_user_id = anonymous_user_id_file.read()
         else:
             self.anonymous_user_id = str(uuid.uuid4())
-            if not os.path.exists(self.config.config_dir):
-                os.makedirs(self.config.config_dir)
             with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
                 anonymous_user_id_file.write(self.anonymous_user_id)
 
