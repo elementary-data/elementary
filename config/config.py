@@ -21,14 +21,17 @@ class Config(object):
         self.profile_name = profile_name
         self.credentials, self.profiles_data = extract_credentials_and_data_from_profiles(profiles_dir,
                                                                                           profile_name)
-        self.config_file_path = os.path.join(self.config_dir, self.CONFIG_FILE_NAME)
         self.config_dict = self._load_configuration()
 
     def _load_configuration(self) -> dict:
-        if not os.path.exists(self.config_file_path):
+        if not os.path.exists(self.config_dir):
+            os.makedirs(self.config_dir)
+
+        config_file_path = os.path.join(self.config_dir, self.CONFIG_FILE_NAME)
+        if not os.path.exists(config_file_path):
             return {}
 
-        return ordered_yaml.load(self.config_file_path)
+        return ordered_yaml.load(config_file_path)
 
     @property
     def query_history_source(self):
@@ -45,6 +48,13 @@ class Config(object):
     @property
     def slack_notification_webhook(self) -> Union[str, None]:
         return self.config_dict.get(self.SLACK_NOTIFICATION_WEBHOOK)
+
+    @property
+    def target_dir(self) -> str:
+        target_path = self.config_dict.get('target-path')
+        if not target_path:
+            return os.getcwd()
+        return target_path
 
     @staticmethod
     def _find_schema_yml_files_in_dbt_project(dbt_project_models_path: str) -> list:

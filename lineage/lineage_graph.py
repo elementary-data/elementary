@@ -1,4 +1,5 @@
 import itertools
+import os.path
 from typing import Optional
 import networkx as nx
 from collections import defaultdict
@@ -8,6 +9,7 @@ import webbrowser
 from lineage.query import Query
 from utils.log import get_logger
 from alive_progress import alive_it
+import json
 import pkg_resources
 
 logger = get_logger(__name__)
@@ -65,10 +67,13 @@ class LineageGraph(object):
     SELECTED_NODE_COLOR = '#0925C7'
     SELECTED_NODE_TITLE = 'Selected table<br/><br/>'
 
+    LINEAGE_GRAPH_FILE_MAME = 'lineage_graph.gpickle'
+    LINEAGE_GRAPH_ATTRIBUTES_FILE_NAME = 'graph_attributes.json'
+
     def __init__(self, show_isolated_nodes: bool = False) -> None:
         self._lineage_graph = nx.DiGraph()
         self._show_isolated_nodes = show_isolated_nodes
-        self._catalog = defaultdict(lambda: None)
+        self._graph_attributes = defaultdict(lambda: None)
 
     def _update_lineage_graph(self, query: Query) -> None:
         # Handle drop tables, if they exist in the statement
@@ -97,12 +102,12 @@ class LineageGraph(object):
             if self._show_isolated_nodes:
                 for target_node in targets:
                     self._lineage_graph.add_node(target_node)
-                    self._catalog[target_node] = query_context_html
+                    self._graph_attributes[target_node] = query_context_html
         else:
             self._lineage_graph.add_nodes_from(sources)
             for target_node in targets:
                 self._lineage_graph.add_node(target_node)
-                self._catalog[target_node] = query_context_html
+                self._graph_attributes[target_node] = query_context_html
             for source, target in itertools.product(sources, targets):
                 self._lineage_graph.add_edge(source, target)
 
@@ -113,10 +118,10 @@ class LineageGraph(object):
         if self._lineage_graph.has_node(old_node):
             # Rename in place instead of copying the entire lineage graph
             nx.relabel_nodes(self._lineage_graph, {old_node: new_node}, copy=False)
-            if old_node in self._catalog:
-                old_node_attributes = self._catalog[old_node]
-                del self._catalog[old_node]
-                self._catalog[new_node] = old_node_attributes
+            if old_node in self._graph_attributes:
+                old_node_attributes = self._graph_attributes[old_node]
+                del self._graph_attributes[old_node]
+                self._graph_attributes[new_node] = old_node_attributes
 
     def _remove_node(self, node: str) -> None:
         # First let's check if the node exists in the graph
@@ -126,8 +131,8 @@ class LineageGraph(object):
 
             # networknx's remove_node already takes care of in and out edges
             self._lineage_graph.remove_node(node)
-            if node in self._catalog:
-                del self._catalog[node]
+            if node in self._graph_attributes:
+                del self._graph_attributes[node]
 
             # Now that we have just deleted the dropped table from the graph, we need to take care of
             # new island nodes.
@@ -199,14 +204,26 @@ class LineageGraph(object):
 
     def _enrich_graph_with_monitoring_data(self):
         for node, attr in self._lineage_graph.nodes(data=True):
-            if node in self._catalog:
-                self._lineage_graph.nodes[node]['title'] = attr.get('title', '') + self._catalog[node]
+            if node in self._graph_attributes:
+                self._lineage_graph.nodes[node]['title'] = attr.get('title', '') + self._graph_attributes[node]
 
-    def export_graph_to_file(self):
-        pass
+    def export_graph_to_file(self, target_dir_path: str) -> None:
+        lineage_graph_file_path = os.path.join(target_dir_path, self.LINEAGE_GRAPH_FILE_MAME)
+        lineage_graph_attributes_file_path = os.path.join(target_dir_path,
+                                                          self.LINEAGE_GRAPH_ATTRIBUTES_FILE_NAME)
 
-    def load_graph_from_file(self):
-        pass
+        nx.write_gpickle(self._lineage_graph, lineage_graph_file_path)
+        with open(lineage_graph_attributes_file_path, 'w') as graph_attributes_file:
+            json.dump(self._graph_attributes, graph_attributes_file)
+
+    def load_graph_from_file(self, target_dir_path: str) -> None:
+        lineage_graph_file_path = os.path.join(target_dir_path, self.LINEAGE_GRAPH_FILE_MAME)
+        lineage_graph_attributes_file_path = os.path.join(target_dir_path,
+                                                          self.LINEAGE_GRAPH_ATTRIBUTES_FILE_NAME)
+
+        self._lineage_graph = nx.read_gpickle(lineage_graph_file_path)
+        with open(lineage_graph_attributes_file_path, 'r') as graph_attributes_file:
+            self._graph_attributes = json.load(graph_attributes_file)
 
     def draw_graph(self, should_open_browser: bool = True) -> bool:
         if len(self._lineage_graph.edges) == 0:

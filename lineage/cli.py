@@ -167,7 +167,7 @@ def lineage(ctx, database: str, schema: str, table: str, direction: str, depth: 
     try:
 
         lineage_graph = LineageGraph()
-        lineage_graph.load_graph_from_file()
+        lineage_graph.load_graph_from_file(config.target_dir)
 
         if table is not None:
             table_resolver = TableResolver(database_name=database,
@@ -252,9 +252,9 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
         query_history_extractor = QueryHistoryFactory.create_query_history(config, databases)
         queries = query_history_extractor.extract_queries(start_date, end_date)
 
-        lineage_graph = LineageGraph(show_isolated_nodes=False)
+        lineage_graph = LineageGraph()
         lineage_graph.init_graph_from_query_list(queries)
-        lineage_graph.export_graph_to_file()
+        lineage_graph.export_graph_to_file(config.target_dir)
 
         execution_properties = query_history_extractor.properties()
         execution_properties.update(lineage_graph.properties())

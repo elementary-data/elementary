@@ -25,8 +25,19 @@ class SnowflakeQueryHistory(QueryHistory):
     #TODO: Test how it beahves with identifier string that is enclosed in double quotes (db name is "my db")
     INFORMATION_SCHEMA_QUERY_HISTORY_AND_VIEWS = """
     {database_name_normalized}_query_history as (
-    select query_text, database_name, schema_name, end_time, rows_produced, query_type, user_name, role_name, 
-    total_elapsed_time, query_id
+        select 
+            query_text, 
+            database_name, 
+            schema_name, 
+            end_time,
+            rows_produced, 
+            query_type, 
+            user_name, 
+            role_name, 
+            total_elapsed_time, 
+            query_id,
+            null as target_table,
+            null as source_tables
       from table({database_name}.information_schema.query_history(end_time_range_start=>to_timestamp_ltz(%(start_date)s),
         {end_time_range_end_expr}))
         where execution_status = 'SUCCESS' and query_type not in 
@@ -35,7 +46,9 @@ class SnowflakeQueryHistory(QueryHistory):
          'ALTER_TABLE_DROP_CLUSTERING_KEY', 'ALTER_USER',  'CREATE_CUSTOMER_ACCOUNT', 'CREATE_NETWORK_POLICY', 
          'CREATE_ROLE', 'CREATE_USER', 'DESCRIBE_QUERY', 'DROP_NETWORK_POLICY', 'DROP_ROLE', 'DROP_USER', 'LIST_FILES',
          'REMOVE_FILES', 'REVOKE','UNKNOWN', 'DELETE', 'SELECT') and
-        (query_text not ilike '%%.query_history%%')
+        (query_text not ilike '%%.query_history%%') and
+        (lower(query_text) like '%%{database_name}%%' 
+         or lower(database_name) = '{database_name}')
     ),
     {database_name_normalized}_views as (
         select 
@@ -53,7 +66,9 @@ class SnowflakeQueryHistory(QueryHistory):
             null as source_tables
         from {database_name}.information_schema.views
         where lower(table_schema) != 'information_schema' 
-        and view_definition is not NULL
+              and view_definition is not NULL
+              and (lower(view_definition) like '%%{database_name}%%' 
+                   or lower(table_catalog) = '{database_name}')
     ),
     {database_name_normalized}_history_and_views as (
         select * from {database_name_normalized}_query_history union all select * from {database_name_normalized}_views
@@ -137,8 +152,8 @@ class SnowflakeQueryHistory(QueryHistory):
               ('SHOW', 'COMMIT', 'DESCRIBE', 'ROLLBACK', 'CREATE_STREAM', 'DROP_STREAM',
                 'BEGIN_TRANSACTION', 'GRANT', 'ALTER_SESSION', 'USE', 'ALTER_NETWORK_POLICY', 'ALTER_ACCOUNT',
                 'ALTER_TABLE_DROP_CLUSTERING_KEY', 'ALTER_USER',  'CREATE_CUSTOMER_ACCOUNT', 'CREATE_NETWORK_POLICY',
-                'CREATE_ROLE', 'CREATE_USER', 'DESCRIBE_QUERY', 'DROP_NETWORK_POLICY', 'DROP_ROLE', 'DROP_USER', 'LIST_FILES',
-                'REMOVE_FILES', 'REVOKE')
+                'CREATE_ROLE', 'CREATE_USER', 'DESCRIBE_QUERY', 'DROP_NETWORK_POLICY', 'DROP_ROLE', 'DROP_USER', 
+                'LIST_FILES', 'REMOVE_FILES', 'REVOKE')
      ),
      
      views as (
@@ -212,13 +227,14 @@ class SnowflakeQueryHistory(QueryHistory):
             params = {'start_date': start_date}
         else:
             end_time_range_end_expr = cls.INFO_SCHEMA_END_TIME_UP_TO_PARAMETER
-            params = {'start_date': start_date, 'end_date': cls._include_end_date(end_date)}
+            params = {'start_date': start_date,
+                      'end_date': cls._include_end_date(end_date)}
 
         query_text = 'with'
         for db in dbs:
             query_text += cls.INFORMATION_SCHEMA_QUERY_HISTORY_AND_VIEWS. \
                 format(database_name_normalized=cls._normalize_database_name(db),
-                       database_name=db,
+                       database_name=db.lower(),
                        end_time_range_end_expr=end_time_range_end_expr)
 
         dbs_count = len(dbs)
@@ -235,22 +251,18 @@ class SnowflakeQueryHistory(QueryHistory):
     def _account_usage_query_history(cls, start_date: datetime, end_date: datetime, dbs: list) -> (str, dict):
         logger.debug("Pulling snowflake query history from account usage")
         if end_date is None:
-            query_text = cls.ACCOUNT_USAGE_QUERY_HISTORY.format(
-                database_names=tuple(dbs),
-                database_names_in_like_statement=tuple([f'%{db}%' for db in dbs]),
-                end_time_range_end_expr=cls.ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP)
+            query_text = cls.ACCOUNT_USAGE_QUERY_HISTORY.format(end_time_range_end_expr=
+                                                                cls.ACCOUNT_USAGE_END_TIME_UP_TO_CURRENT_TIMESTAMP)
             params = {'start_date': start_date,
-                      'database_names': dbs,
-                      'database_names_in_like_statement': [f'%{db}%' for db in dbs]}
+                      'database_names': [db.lower() for db in dbs],
+                      'database_names_in_like_statement': [f'%{db.lower()}%' for db in dbs]}
         else:
-            query_text = cls.ACCOUNT_USAGE_QUERY_HISTORY.format(
-                database_names=tuple(dbs),
-                database_names_in_like_statement=tuple([f'%{db}%' for db in dbs]),
-                end_time_range_end_expr=cls.ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER)
+            query_text = cls.ACCOUNT_USAGE_QUERY_HISTORY.format(end_time_range_end_expr=
+                                                                cls.ACCOUNT_USAGE_END_TIME_UP_TO_PARAMETER)
             params = {'start_date': start_date,
                       'end_date': cls._include_end_date(end_date),
-                      'database_names': dbs,
-                      'database_names_in_like_statement': [f'%{db}%' for db in dbs]}
+                      'database_names': [db.lower() for db in dbs],
+                      'database_names_in_like_statement': [f'%{db.lower()}%' for db in dbs]}
 
         return query_text, params
 
@@ -258,7 +270,7 @@ class SnowflakeQueryHistory(QueryHistory):
         logger.debug(f"Pulling snowflake query history for the following databases - {self._dbs}")
 
         with self._con.cursor() as cursor:
-            if self.query_history_source == self.ACCOUNT_USAGE_QUERY_HISTORY:
+            if self.query_history_source == self.QUERY_HISTORY_SOURCE_ACCOUNT_USAGE:
                 query_text, params = self._account_usage_query_history(start_date, end_date, self._dbs)
             else:
                 query_text, params = self._info_schema_query_history(start_date, end_date, self._dbs)

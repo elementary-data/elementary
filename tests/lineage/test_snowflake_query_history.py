@@ -25,7 +25,7 @@ def expected_params(start_date, end_date=None, dbs=None, dbs_in_like_statement=N
                                       datetime(2025, 9, 12, 23, 59, 59),
                                       ['db'],
                                       ['%db%'])),
-    (datetime(2025, 9, 11, 1, 33, 7), datetime(2025, 9, 12, 1, 33, 7), ['db', 'db1', 'db2'],
+    (datetime(2025, 9, 11, 1, 33, 7), datetime(2025, 9, 12, 1, 33, 7), ['DB', 'DB1', 'db2'],
      'account_usage', expected_params(datetime(2025, 9, 11, 1, 33, 7),
                                       datetime(2025, 9, 12, 1, 33, 7),
                                       ['db', 'db1', 'db2'],
