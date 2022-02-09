@@ -1,6 +1,6 @@
 import itertools
 import os.path
-from typing import Optional
+from typing import Optional, Union
 import networkx as nx
 from collections import defaultdict
 from exceptions.exceptions import ConfigError
@@ -178,17 +178,18 @@ class LineageGraph(object):
             self.filter_on_database(database_filter)
             return
 
-    def get_subgraph(self, nodes: set, upstream_depth: int, downstream_depth: int) -> nx.DiGraph:
+    def get_subgraph(self, nodes: set, upstream_depth: Union[int, None], downstream_depth: Union[int, None]) \
+            -> nx.DiGraph:
         subgraph = nx.DiGraph()
         subgraph.add_nodes_from((n, self._lineage_graph.nodes[n]) for n in nodes)
         subgraph.add_edges_from((n, nbr, d) for n, nbrs in self._lineage_graph.adj.items() if n in nodes
                                 for nbr, d in nbrs.items() if nbr in nodes)
 
-        if upstream_depth > 0:
+        if upstream_depth is None or upstream_depth > 0:
             source_nodes = [x for x in subgraph.nodes() if subgraph.in_degree(x) == 0]
             for node in source_nodes:
                 subgraph = nx.compose(subgraph, self._upstream_graph(node, upstream_depth))
-        if downstream_depth > 0:
+        if downstream_depth is None or downstream_depth > 0:
             last_nodes = [x for x in subgraph.nodes() if subgraph.out_degree(x) == 0]
             for node in last_nodes:
                 subgraph = nx.compose(subgraph, self._downstream_graph(node, downstream_depth))
@@ -218,34 +219,20 @@ class LineageGraph(object):
 
     def filter_on_table(self, table_filter: str) -> None:
         upstream_depth, table_name, downstream_depth = self.parse_filter(table_filter)
-        matched_nodes = []
+        matched_nodes = set()
         for node in self._lineage_graph.nodes:
             node_database_name, node_schema_name, node_table_name = [part.lower() for part in node.split('.')]
             normalized_table_name = table_name.lower()
             if normalized_table_name == node_table_name or normalized_table_name == '.'.join([node_schema_name,
                                                                                               node_table_name]):
-                matched_nodes.append(node)
+                matched_nodes.add(node)
 
-        if len(matched_nodes) != 1:
-            raise ConfigError(f"Found {len(matched_nodes)} matches in graph, please make sure you specify a unique name "
-                              f"(use schema as a prefix if you have tables with the same name)")
-
-        selected_table = matched_nodes[0]
-        logger.debug(f'Filtering lineage graph on table - {selected_table}')
-
-        if downstream_depth > 0 and upstream_depth == 0:
-            self._lineage_graph = self._downstream_graph(selected_table, downstream_depth)
-        elif upstream_depth > 0 and downstream_depth == 0:
-            self._lineage_graph = self._upstream_graph(selected_table, upstream_depth)
-        else:
-            downstream_depth = downstream_depth if downstream_depth > 0 else None
-            upstream_depth = upstream_depth if upstream_depth > 0 else None
-            downstream_graph = self._downstream_graph(selected_table, downstream_depth)
-            upstream_graph = self._upstream_graph(selected_table, upstream_depth)
-            self._lineage_graph = nx.compose(upstream_graph, downstream_graph)
-
-        self._update_selected_node_attributes(selected_table)
-        logger.debug(f'Finished filtering lineage graph on table - {selected_table}')
+        if upstream_depth == 0 and downstream_depth == 0:
+            upstream_depth = None
+            downstream_depth = None
+        self._lineage_graph = self.get_subgraph(matched_nodes, upstream_depth, downstream_depth)
+        if len(matched_nodes) == 1:
+            self._update_selected_node_attributes(matched_nodes.pop())
 
     def _downstream_graph(self, source_node: str, depth: Optional[int]) -> nx.DiGraph:
         logger.debug(f'Building a downstream graph for - {source_node}, depth - {depth}')
