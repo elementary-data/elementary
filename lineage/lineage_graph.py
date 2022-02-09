@@ -152,20 +152,42 @@ class LineageGraph(object):
         logger.debug(f'Finished updating lineage graph!')
 
     @staticmethod
-    def parse_filter(filter_str: str) -> (int, str, int):
+    def parse_filter(filter_str: str) -> (Union[int, None], str, Union[int, None]):
         split_filter = [split_str.strip() for split_str in filter_str.split('+')]
+        upstream_depth = 0
+        downstream_depth = 0
+        selected_item = None
+
         if len(split_filter) == 1:
-            return 0, split_filter[0], 0
+            selected_item = split_filter[0]
         elif len(split_filter) == 2:
             if split_filter[0].isnumeric():
-                return int(split_filter[0]), split_filter[1], 0
+                upstream_depth = int(split_filter[0])
+                selected_item = split_filter[1]
             elif split_filter[1].isnumeric():
-                return 0, split_filter[0], int(split_filter[1])
+                selected_item = split_filter[0]
+                downstream_depth = int(split_filter[1])
+            elif split_filter[0] == '':
+                upstream_depth = None
+                selected_item = split_filter[1]
+            elif split_filter[1] == '':
+                selected_item = split_filter[0]
+                downstream_depth = None
         elif len(split_filter) == 3:
-            if split_filter[0].isnumeric() and split_filter[2].isnumeric():
-                return int(split_filter[0]), split_filter[1], int(split_filter[2])
+            if split_filter[0].isnumeric():
+                upstream_depth = int(split_filter[0])
+            elif split_filter[0] == '':
+                upstream_depth = None
+            if split_filter[2].isnumeric():
+                downstream_depth = int(split_filter[2])
+            elif split_filter[2] == '':
+                downstream_depth = None
+            selected_item = split_filter[1]
 
-        raise ConfigError('Invalid graph filter')
+        if selected_item is None:
+            raise ConfigError('Invalid graph filter')
+
+        return upstream_depth, selected_item, downstream_depth
 
     def filter(self, database_filter: str, schema_filter: str, table_filter: str) -> None:
         if table_filter is not None:
@@ -227,9 +249,6 @@ class LineageGraph(object):
                                                                                               node_table_name]):
                 matched_nodes.add(node)
 
-        if upstream_depth == 0 and downstream_depth == 0:
-            upstream_depth = None
-            downstream_depth = None
         self._lineage_graph = self.get_subgraph(matched_nodes, upstream_depth, downstream_depth)
         if len(matched_nodes) == 1:
             self._update_selected_node_attributes(matched_nodes.pop())
@@ -289,7 +308,7 @@ class LineageGraph(object):
             self._graph_attributes = json.load(graph_attributes_file)
 
     def draw_graph(self, should_open_browser: bool = True, full_table_names: bool = True) -> bool:
-        if len(self._lineage_graph.edges) == 0:
+        if len(self._lineage_graph.edges) == 0 and len(self._lineage_graph.nodes) == 0:
             return False
 
         self._enrich_graph_with_monitoring_data()
