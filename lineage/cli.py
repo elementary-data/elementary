@@ -8,9 +8,7 @@ from utils.package import get_package_version
 from utils.dbt import is_dbt_installed
 from lineage.empty_graph_helper import EmptyGraphHelper
 from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
-from exceptions.exceptions import ConfigError
 from datetime import timedelta, date
-from lineage.table_resolver import TableResolver
 from lineage.lineage_graph import LineageGraph
 from datetime import datetime
 
@@ -79,18 +77,21 @@ def get_cli_properties() -> dict:
 @click.option(
     '--database', '-db',
     type=str,
-    help="Filter on a database to see upstream and downstream dependencies of this database."
+    help="Filter on a database to see upstream and downstream dependencies of this database "
+         "(use X+<database_name>+Y to see X upstream dependencies and Y downstream dependencies)."
 )
 @click.option(
     '--schema', '-sch',
     type=str,
     default=None,
-    help="Filter on a schema to see upstream and downstream dependencies of this schema."
+    help="Filter on a schema to see upstream and downstream dependencies of this schema "
+         "(use X+<schema_name>+Y to see X upstream dependencies and Y downstream dependencies)."
 )
 @click.option(
     '--table', '-t',
     type=str,
-    help="Filter on a table to see upstream and downstream dependencies of this table.",
+    help="Filter on a table to see upstream and downstream dependencies of this table "
+         "(use X+<table_name>+Y to see X upstream dependencies and Y downstream dependencies).",
     default=None
 )
 @click.option(
@@ -106,7 +107,7 @@ def get_cli_properties() -> dict:
     type=bool,
     default=True,
     help="Indicates if the lineage should display full table names including the relevant database and schema names "
-         "(the default is to show only the table name)."
+         "(the default is to show full table names)."
 )
 @click.option(
     '--config-dir', '-c',
@@ -184,7 +185,8 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
     type=str,
     default=None,
     required=True,
-    help=""
+    help="Generate the lineage graph for databases that are included in this list "
+         "(to provide more than one database name use ',' between the db names - <db_name1>,<db_name2>).."
 )
 @click.option(
     '--config-dir', '-c',
