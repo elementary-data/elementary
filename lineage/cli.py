@@ -79,37 +79,19 @@ def get_cli_properties() -> dict:
 @click.option(
     '--database', '-db',
     type=str,
-    help="Provide a database name to see the lineage for tables and views in this database."
+    help="Filter on a database to see upstream and downstream dependencies of this database."
 )
 @click.option(
     '--schema', '-sch',
     type=str,
     default=None,
-    help="Filter on a schema to see tables and views only in this specific schema."
+    help="Filter on a schema to see upstream and downstream dependencies of this schema."
 )
 @click.option(
     '--table', '-t',
     type=str,
-    help="Filter on a table to see upstream and downstream dependencies of this table "
-         "(see also direction & depth parameters).",
+    help="Filter on a table to see upstream and downstream dependencies of this table.",
     default=None
-)
-@click.option('--direction',
-              type=click.Choice([LineageGraph.UPSTREAM_DIRECTION, LineageGraph.DOWNSTREAM_DIRECTION,
-                                 LineageGraph.BOTH_DIRECTIONS]),
-              help="Sets direction of dependencies when filtering on a specific table (default is both, "
-                   "meaning showing both upstream and downstream dependencies of this table).",
-              default='both',
-              cls=RequiredIf,
-              required_if='table'
-)
-@click.option('--depth',
-              type=int,
-              help="Sets how many levels of dependencies to show when filtering on a specific table "
-                   "(default is showing all levels of dependencies).",
-              default=None,
-              cls=RequiredIf,
-              required_if='table'
 )
 @click.option(
     '--open-browser', '-o',
@@ -122,7 +104,7 @@ def get_cli_properties() -> dict:
 @click.option(
     '--full-table-names', '-n',
     type=bool,
-    default=False,
+    default=True,
     help="Indicates if the lineage should display full table names including the relevant database and schema names "
          "(the default is to show only the table name)."
 )
@@ -153,8 +135,8 @@ def get_cli_properties() -> dict:
     required_if='profiles_dir'
 )
 @click.pass_context
-def lineage(ctx, database: str, schema: str, table: str, direction: str, depth: int, open_browser: bool,
-            full_table_names: bool, config_dir: str, profiles_dir: str, profile_name: str) -> None:
+def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, full_table_names: bool,
+            config_dir: str, profiles_dir: str, profile_name: str) -> None:
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
@@ -168,22 +150,11 @@ def lineage(ctx, database: str, schema: str, table: str, direction: str, depth: 
 
         lineage_graph = LineageGraph()
         lineage_graph.load_graph_from_file(config.target_dir)
+        lineage_graph.filter(database, schema, table)
 
-        if table is not None:
-            table_resolver = TableResolver(database_name=database,
-                                           schema_name=schema,
-                                           full_table_names=full_table_names)
-            resolved_table_name = table_resolver.name_qualification(table)
-            if resolved_table_name is None:
-                raise ConfigError(f'Could not resolve table name - {table}, please make sure to provide a table name '
-                                  f'that is aligned with the database and schema parameters.\n'
-                                  f'If you do not provide schema, add the schema as a prefix in the table filter - '
-                                  f'edr lineage -db <database_name> -t <schema_name>.<table_name>')
-            lineage_graph.filter_on_table(resolved_table_name, direction, depth)
-
-        success = lineage_graph.draw_graph(should_open_browser=open_browser)
+        success = lineage_graph.draw_graph(should_open_browser=open_browser, full_table_names=full_table_names)
         if not success:
-            print(EmptyGraphHelper(config.platform).get_help_message())
+            print(EmptyGraphHelper.get_help_message())
 
         execution_properties = lineage_graph.properties()
         track_cli_end(anonymous_tracking, 'lineage', execution_properties)
