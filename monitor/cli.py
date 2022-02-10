@@ -70,18 +70,19 @@ def get_cli_properties() -> dict:
     help="Force running a full refresh of all incremental models in the edr dbt package (usually this is not needed, "
          "see documentation to learn more)."
 )
-def monitor(reload_monitoring_configuration, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
+@click.pass_context
+def monitor(ctx, reload_monitoring_configuration, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     config = Config(config_dir, profiles_dir, get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH))
     anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'monitor', get_cli_properties())
+    track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring.create_data_monitoring(config)
         data_monitoring.run(reload_monitoring_configuration, update_dbt_package, full_refresh_dbt_package)
-        track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties())
+        track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'monitor', exc)
+        track_cli_exception(anonymous_tracking, 'monitor', exc, ctx.command.name)
         raise
 
 

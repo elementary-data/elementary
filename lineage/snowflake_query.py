@@ -1,3 +1,5 @@
+from typing import Union
+
 from lineage.query_context import QueryContext
 from lineage.table_resolver import TableResolver
 from lineage.query import Query
@@ -13,6 +15,8 @@ DOLLAR_SIGN_PLACEHOLDER = '__dollar_sign__'
 
 class SnowflakeQuery(Query):
     PLATFORM_TYPE = 'SNOWFLAKE'
+
+    DDL_QUERY_TYPES_PREFIX = {'DROP', 'RENAME', 'ALTER'}
 
     @staticmethod
     def from_dict(query_dict: dict):
@@ -75,17 +79,34 @@ class SnowflakeQuery(Query):
                          f'Error was -\n{exc}.')
         return source_tables, target_tables
 
+    @classmethod
+    def _is_ddl(cls, query_type: Union[str, None]):
+        if query_type is None:
+            return False
+
+        for ddl_query_type_prefix in cls.DDL_QUERY_TYPES_PREFIX:
+            if query_type.startswith(ddl_query_type_prefix):
+                return True
+
+        return False
+
     def parse(self, full_table_names: bool = False) -> bool:
         try:
-            table_resolver = TableResolver(self._database_name, self._schema_name,
-                                           self.query_context.queried_database, self.query_context.queried_schema,
+            table_resolver = TableResolver(self.query_context.queried_database, self.query_context.queried_schema,
                                            full_table_names, self.revert_dollar_sign_placeholder)
 
-            # sqlparse library doesn't behave nicely when there is a $ sign in the table name. Therefore we replace it
-            # with a placeholder (and revert it back later on using our table resolver)
-            raw_query_text = self.replace_dollar_sign_with_placeholder(self._raw_query_text)
-            self.source_tables, self.target_tables, self.renamed_tables, self.dropped_tables = \
-                self._parse_query_text(table_resolver, raw_query_text)
+            ddl_query = self._is_ddl(self.query_context.query_type)
+            if self.query_context.destination_table is not None and self.query_context.referenced_tables is not \
+                    None and not ddl_query:
+                self.source_tables = {table_resolver.name_qualification(source_table) for source_table in
+                                      self.query_context.referenced_tables}
+                self.target_tables = {table_resolver.name_qualification(self.query_context.destination_table)}
+            else:
+                # sqlparse library doesn't behave nicely when there is a $ sign in the table name.
+                # Therefore we replace it with a placeholder (and revert it back later on using our table resolver)
+                raw_query_text = self.replace_dollar_sign_with_placeholder(self._raw_query_text)
+                self.source_tables, self.target_tables, self.renamed_tables, self.dropped_tables = \
+                    self._parse_query_text(table_resolver, raw_query_text)
 
             return True
 

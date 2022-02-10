@@ -22,4 +22,8 @@ class ThreadSpinner(object):
         self.thread.join()
         self.stop_spinner = False
 
+    def __enter__(self):
+        self.start()
 
+    def __exit__(self, type, value, traceback):
+        self.stop()
