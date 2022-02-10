@@ -211,6 +211,7 @@ class SnowflakeQueryHistory(QueryHistory):
     def __init__(self, con, dbs: Union[str, None], should_export_query_history: bool = True,
                  full_table_names: bool = True, query_history_source: str = None) -> None:
         self.query_history_source = query_history_source.strip().lower() if query_history_source is not None else None
+        self.access_history_queries = 0
         super().__init__(con, dbs, should_export_query_history, full_table_names)
 
     @classmethod
@@ -298,11 +299,14 @@ class SnowflakeQueryHistory(QueryHistory):
                                        query_context=query_context)
 
                 self.add_query(query)
-
+                # This is mainly used for debugging
+                if query_context.destination_table is not None and query_context.referenced_tables is not None:
+                    self.access_history_queries += 1
             logger.debug("Finished fetching snowflake history query results")
 
     def properties(self) -> dict:
         query_history_properties = super().properties()
-        query_history_properties['query_history_properties'].update({'query_history_source': self.query_history_source})
+        query_history_properties['query_history_properties'].update(
+            {'query_history_source': self.query_history_source, 'access_history_queries': self.access_history_queries})
         return query_history_properties
 
