@@ -289,7 +289,7 @@ class LineageGraph(object):
             if node in self._graph_attributes:
                 self._lineage_graph.nodes[node]['title'] = attr.get('title', '') + self._graph_attributes[node]
 
-    def export_graph_to_file(self, target_dir_path: str) -> None:
+    def export_graph_to_files(self, target_dir_path: str) -> None:
         lineage_graph_file_path = os.path.join(target_dir_path, self.LINEAGE_GRAPH_FILE_MAME)
         lineage_graph_attributes_file_path = os.path.join(target_dir_path,
                                                           self.LINEAGE_GRAPH_ATTRIBUTES_FILE_NAME)
@@ -298,14 +298,19 @@ class LineageGraph(object):
         with open(lineage_graph_attributes_file_path, 'w') as graph_attributes_file:
             json.dump(self._graph_attributes, graph_attributes_file)
 
-    def load_graph_from_file(self, target_dir_path: str) -> None:
+    def load_graph_from_files(self, target_dir_path: str) -> bool:
         lineage_graph_file_path = os.path.join(target_dir_path, self.LINEAGE_GRAPH_FILE_MAME)
         lineage_graph_attributes_file_path = os.path.join(target_dir_path,
                                                           self.LINEAGE_GRAPH_ATTRIBUTES_FILE_NAME)
 
+        if not os.path.exists(lineage_graph_file_path) or not os.path.exists(lineage_graph_attributes_file_path):
+            return False
+
         self._lineage_graph = nx.read_gpickle(lineage_graph_file_path)
         with open(lineage_graph_attributes_file_path, 'r') as graph_attributes_file:
             self._graph_attributes = json.load(graph_attributes_file)
+
+        return True
 
     def draw_graph(self, should_open_browser: bool = True, full_table_names: bool = True) -> bool:
         if len(self._lineage_graph.edges) == 0 and len(self._lineage_graph.nodes) == 0:

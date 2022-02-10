@@ -3,6 +3,7 @@ import os
 from os.path import expanduser
 
 from config.config import Config
+from exceptions.exceptions import ConfigError
 from lineage.query_history_factory import QueryHistoryFactory
 from utils.package import get_package_version
 from utils.dbt import is_dbt_installed
@@ -166,16 +167,25 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
     config = Config(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_properties(), ctx.command.name)
+    execution_properties = dict()
 
     try:
         lineage_graph = LineageGraph()
-        lineage_graph.load_graph_from_file(config.target_dir)
+        success = lineage_graph.load_graph_from_files(config.target_dir)
+        if not success:
+            dbs = input("Lineage files were not found, please provide all database names that should be included: ")
+            ctx.invoke(generate, databases=dbs)
+            success = lineage_graph.load_graph_from_files(config.target_dir)
+            if not success:
+                raise ConfigError("Could not find lineage files, please run 'edr lineage generate' first")
+            execution_properties['lineage_files_were_generated'] = True
+
         lineage_graph.filter(database, schema, table)
         success = lineage_graph.draw_graph(should_open_browser=open_browser, full_table_names=full_table_names)
         if not success:
             print(EmptyGraphHelper.get_help_message())
 
-        execution_properties = lineage_graph.properties()
+        execution_properties.update(lineage_graph.properties())
         track_cli_end(anonymous_tracking, 'lineage', execution_properties, ctx.command.name)
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'lineage', exc, ctx.command.name)
@@ -244,7 +254,7 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
 
         lineage_graph = LineageGraph()
         lineage_graph.init_graph_from_query_list(queries)
-        lineage_graph.export_graph_to_file(config.target_dir)
+        lineage_graph.export_graph_to_files(config.target_dir)
 
         execution_properties = query_history_extractor.properties()
         execution_properties.update(lineage_graph.properties())
