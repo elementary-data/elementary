@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Union, Optional
+from typing import Union
 
 import posthog
 import requests
@@ -34,8 +34,6 @@ class AnonymousTracking(object):
                 self.anonymous_user_id = anonymous_user_id_file.read()
         else:
             self.anonymous_user_id = str(uuid.uuid4())
-            if not os.path.exists(self.config.config_dir):
-                os.makedirs(self.config.config_dir)
             with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
                 anonymous_user_id_file.write(self.anonymous_user_id)
 
@@ -75,35 +73,41 @@ class AnonymousTracking(object):
         posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
 
 
-def track_cli_start(anonymous_tracking: AnonymousTracking, module_name: str, cli_properties: dict) -> None:
+def track_cli_start(anonymous_tracking: AnonymousTracking, module_name: str, cli_properties: dict,
+                    command: str = None) -> None:
     try:
         cli_start_properties = {'cli_properties': cli_properties,
-                                'module_name': module_name}
+                                'module_name': module_name,
+                                'command': command}
         anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
     except Exception:
         pass
 
 
-def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execution_properties: dict) -> None:
+def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execution_properties: dict,
+                  command: str = None) -> None:
     try:
         if anonymous_tracking is None:
             return
 
         cli_end_properties = {'execution_properties': execution_properties,
-                              'module_name': module_name}
+                              'module_name': module_name,
+                              'command': command}
         anonymous_tracking.send_event('cli-end', properties=cli_end_properties)
     except Exception:
         pass
 
 
-def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str, exc: Exception) -> None:
+def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str, exc: Exception,
+                        command: str = None) -> None:
     try:
         if anonymous_tracking is None:
             return
 
         cli_exception_properties = {'exception_properties': {'exception_type': str(type(exc)),
                                                              'exception_content': str(exc)},
-                                    'module_name': module_name}
+                                    'module_name': module_name,
+                                    'command': command}
         anonymous_tracking.send_event('cli-exception', properties=cli_exception_properties)
     except Exception:
         pass

@@ -10,11 +10,9 @@ logger = get_logger(__name__)
 class Query(object):
     PLATFORM_TYPE = None
 
-    def __init__(self, raw_query_text: str, query_context: QueryContext, database_name: str, schema_name: str) -> None:
+    def __init__(self, raw_query_text: str, query_context: QueryContext) -> None:
         self._raw_query_text = raw_query_text
         self.query_context = query_context
-        self._database_name = database_name
-        self._schema_name = schema_name
         self.dropped_tables = set()
         self.renamed_tables = set()
         self.source_tables = set()
@@ -23,8 +21,6 @@ class Query(object):
     def to_dict(self) -> dict:
         return {'raw_query_text': self._raw_query_text,
                 'query_context': self.query_context.to_dict(),
-                'database_name': self._database_name,
-                'schema_name': self._schema_name,
                 'platform_type': self.PLATFORM_TYPE}
 
     @staticmethod

@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 setup(
     name='elementary-data',
     description='Data monitoring and lineage',
-    version='0.1.2',
+    version='0.1.3',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''

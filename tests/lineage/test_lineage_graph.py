@@ -126,7 +126,7 @@ def test_lineage_graph_init_graph_from_query_list_with_loops(queries, show_isola
     reference = LineageGraph(show_isolated_nodes=show_isolated_nodes)
 
     query_context = QueryContext('elementary_db', 'elementary_schema')
-    query_list = [Query(query, query_context, 'elementary_db', 'elementary_schema') for query in queries]
+    query_list = [Query(query, query_context) for query in queries]
     try:
         reference.init_graph_from_query_list(query_list)
     except Exception as exc:
@@ -189,11 +189,13 @@ def test_lineage_graph_upstream_graph(edges, selected_node, depth, expected_rema
                                                 ('db.sc.t3', 'db.sc.t4')],
                              'sc.t1', 'downstream', 1,
                              {('db.sc.t1', 'db.sc.t3'), ('db.sc.t1', 'db.sc.t2')}),
-                            ('db', 'sc', False, [('t1', 't2'), ('t1', 't3')],
+                            ('db', 'sc', False, [('db.sc.t1', 'db.sc.t2'), ('db.sc.t1', 'db.sc.t3')],
                              't3', 'upstream', None,
                              {('t1', 't3')}),
-                            ('db', 'sc', False, [('t1', 't2'), ('t1', 't3'), ('t3', 't4'), ('t4', 't5'), ('t2', 't4'),
-                                                 ('t4', 't6'), ('t6', 't8')],
+                            ('db', 'sc', False, [('db.sc.t1', 'db.sc.t2'), ('db.sc.t1', 'db.sc.t3'),
+                                                 ('db.sc.t3', 'db.sc.t4'), ('db.sc.t4', 'db.sc.t5'),
+                                                 ('db.sc.t2', 'db.sc.t4'), ('db.sc.t4', 'db.sc.t6'),
+                                                 ('db.sc.t6', 'db.sc.t8')],
                              't4', 'both', 1,
                              {('t3', 't4'), ('t4', 't5'), ('t2', 't4'), ('t4', 't6')}),
 ])
@@ -203,6 +205,6 @@ def test_lineage_graph_filter_on_table(profile_database_name, profile_schema_nam
     table_resolver = TableResolver(database_name=profile_database_name, schema_name=profile_schema_name,
                                    full_table_names=full_table_names)
     reference._lineage_graph = create_directed_graph_from_edge_list(edges)
-    reference.filter_on_table(table_resolver.name_qualification(selected_node), direction, depth)
+    reference.filter_on_table(table_resolver.name_qualification(selected_node))
     assert compare_edges(reference._lineage_graph, expected_remaining_edges)
 
