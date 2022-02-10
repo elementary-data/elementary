@@ -12,6 +12,7 @@ class BigQueryQuery(Query):
     EMPTY_QUERY_TYPE = ''
     DROP_PREFIX = 'DROP'
     ALTER_PREFIX = 'ALTER'
+    VIEW_SUFFIX = 'VIEW'
     PLATFORM_TYPE = 'BIGQUERY'
 
     @staticmethod
@@ -57,6 +58,9 @@ class BigQueryQuery(Query):
             elif query_type.startswith(self.ALTER_PREFIX):
                 _, _, self.renamed_tables, _ = \
                     self._parse_query_text(table_resolver, self._raw_query_text)
+            elif query_type.endswith(self.VIEW_SUFFIX):
+                self.source_tables, self.target_tables, _, _ = self._parse_query_text(table_resolver,
+                                                                                      self._raw_query_text)
             else:
                 self.source_tables = source_tables
                 self.target_tables.add(target_table)
