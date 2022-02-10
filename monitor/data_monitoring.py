@@ -104,7 +104,6 @@ class DataMonitoring(object):
         self.execution_properties['dbt_package_exists'] = internal_dbt_package_exists
         self.execution_properties['force_update_dbt_packages'] = force_update_dbt_packages
         if not internal_dbt_package_exists or force_update_dbt_packages:
-            #TODO: should we updated revision to latest?
             logger.info("Downloading edr internal dbt package")
             package_downloaded = self.dbt_runner.deps()
             self.execution_properties['package_downloaded'] = package_downloaded

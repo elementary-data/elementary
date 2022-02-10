@@ -249,10 +249,8 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
         execution_properties = query_history_extractor.properties()
         execution_properties.update(lineage_graph.properties())
 
-        #TODO: add 'generate' to the tracking
         track_cli_end(anonymous_tracking, 'lineage', execution_properties, ctx.command.name)
     except Exception as exc:
-        #TODO: add 'generate' to the tracking
         track_cli_exception(anonymous_tracking, 'lineage', exc, ctx.command.name)
         raise
 

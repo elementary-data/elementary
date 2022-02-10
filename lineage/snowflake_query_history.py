@@ -20,9 +20,6 @@ class SnowflakeQueryHistory(QueryHistory):
     # than the db name that was part of the query. During the parsing logic in the lineage graph we strictly analyze if
     # the query was really executed on the configured db and filter it accordingly.
 
-    #TODO: filter on time
-    #TODO: should we recieve db name as query param? does it matter if it's open source?
-    #TODO: Test how it beahves with identifier string that is enclosed in double quotes (db name is "my db")
     INFORMATION_SCHEMA_QUERY_HISTORY_AND_VIEWS = """
     {database_name_normalized}_query_history as (
         select 
@@ -90,8 +87,6 @@ class SnowflakeQueryHistory(QueryHistory):
     INFO_SCHEMA_END_TIME_UP_TO_PARAMETER = 'end_time_range_end=>to_timestamp_ltz(%(end_date)s)'
     QUERY_HISTORY_SOURCE_INFORMATION_SCHEMA = 'information_schema'
 
-    #TODO: in the db filter should we do - %.<db_name>% or is it good enough as it's implemented now
-    #TODO: should we recieve db names as query param? does it matter if it's open source?
     ACCOUNT_USAGE_QUERY_HISTORY = """
     with source_access_history as (
         select *
