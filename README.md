@@ -1,5 +1,5 @@
 <p align="center">
-<img alt="Logo" src="static/headline-git.png"/>
+<img alt="Logo" src="static/logo_elementary.png"/ width="600">
 </p>
 
 <p align="center">
@@ -15,16 +15,12 @@ We focus on providing a **simple setup**, **integrations** with the existing sta
 
 ## Supported use cases
 
-**Live data lineage**
-* An end-to-end view of data enriched with operational context like freshness, volume, duration, and permissions.
-* View data that has been transformed with or without dbt, or across all of your dbt projects.
+**Live data lineage** - Enriched with operational context like freshness, volume, duration.
 
-**Source tables monitoring**
-- Detect breaking changes and discover new data you can leverage in your source tables. 
-- Simple and minimal configuration (it can also be read from your dbt sources definitions).
+**Source tables monitoring** - Detect breaking changes and discover new data you can leverage in your source tables. 
 
-**Alerts**
-- Slack alerts on breaking changes and new data can be configured within minutes.
+**Alerts** - Slack alerts on breaking changes and new data can be configured within minutes.
+
 
 
 ## Demo & sandbox
@@ -34,6 +30,8 @@ Try out our live lineage [sandbox here](https://www.elementary-data.com/live-dem
 :star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
 ## Quick start
+
+**Install & connect**
 
 ```bash
 pip install elementary-data
@@ -45,20 +43,30 @@ edr --help
 
 Add your data warehouse connection details in a `profiles.yml` file, see our [quickstart page](https://docs.elementary-data.com/quickstart) to learn more or use [this template here](static/profiles.yml). Yes, if you are a dbt user we use dbt's profiles.yml by default (simply add a new profile called 'elementary').
 
-Now, generate a lineage graph:
-```bash
-# Creates a lineage graph from queries executed between 7 days ago and current time, 
-# for the database named 'my_db'
+**Data lineage**
 
-edr lineage -db my_db
+```bash
+
+# Generate data lineage graph
+edr lineage 
+
+# Filter the graph for a specific table, direction and depth
+edr lineage -t +my_table+3
+
 ```
+
+**Data monitoring**
+
 
 After you [configure sources to monitor](https://docs.elementary-data.com/guides/sources-monitoring/configure-datasets-to-monitor), execute it using:
 ```bash
 edr monitor
 ```
 
-To continuously monitor your data, schedule this command to run periodically with your existing orchestration solution (we highly recommend running it at least once a day).
+To learn how to continuously monitor your data and use our Slack integration refer to our [documentation](https://docs.elementary-data.com/). 
+
+<img alt="Slack" src="static/slack_alert.png" width="500">
+
 
 ## Documentation
 
@@ -83,7 +91,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 * **Plug-and-play**: No need for code changes.
 * **Graph filters**: Filter the graph by dataset, dates, direction, and depth. 
 
-**Source tables monitoring**
+**Tables monitoring**
 * **Slack notifications**.
 * **Detect deletions:** columns and tables that were removed.
 * **Detect data type** changes.
