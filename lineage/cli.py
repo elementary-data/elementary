@@ -38,7 +38,29 @@ class RequiredIf(click.Option):
             ctx, opts, args)
 
 
-def get_cli_properties() -> dict:
+def get_cli_lineage_properties() -> dict:
+
+    click_context = click.get_current_context()
+    if click_context is None:
+        return dict()
+
+    params = click_context.params
+    if params is None:
+        return dict()
+
+    is_filtered = False
+    if params.get('table') is not None or params.get('schema') is not None or params.get('database') is not None:
+        is_filtered = True
+
+    return {'is_filtered': is_filtered,
+            'open_browser': params.get('open_browser'),
+            'full_table_names': params.get('full_table_names'),
+            'command': click_context.command.name,
+            'dbt_installed': is_dbt_installed(),
+            'version': get_package_version()}
+
+
+def get_cli_lineage_generate_properties() -> dict:
 
     click_context = click.get_current_context()
     if click_context is None:
@@ -50,7 +72,7 @@ def get_cli_properties() -> dict:
 
     start_date = params.get('start_date')
     end_date = params.get('end_date')
-    is_filtered = params.get('table') is not None
+    limited_dbs = True if params.get('databases') is not None else False
 
     start_date_str = None
     if start_date is not None:
@@ -62,13 +84,7 @@ def get_cli_properties() -> dict:
 
     return {'start_date': start_date_str,
             'end_date': end_date_str,
-            'is_filtered': is_filtered,
-            'open_browser': params.get('open_browser'),
-            'export_query_history': params.get('export_query_history'),
-            'full_table_names': params.get('full_table_names'),
-            'direction': params.get('direction'),
-            'depth': params.get('depth'),
-            'command': click_context.command.name,
+            'limited_dbs': limited_dbs,
             'dbt_installed': is_dbt_installed(),
             'version': get_package_version()}
 
@@ -78,20 +94,24 @@ def get_cli_properties() -> dict:
     '--database', '-db',
     type=str,
     help="Filter on a database to see upstream and downstream dependencies of this database "
-         "(use X+<database_name>+Y to see X upstream dependencies and Y downstream dependencies)."
+         "(use X+<database_name>+Y to see X upstream dependencies and Y downstream dependencies, "
+         "operator '+' could also be used without a depth limit).",
+    default=None
 )
 @click.option(
     '--schema', '-sch',
     type=str,
     default=None,
     help="Filter on a schema to see upstream and downstream dependencies of this schema "
-         "(use X+<schema_name>+Y to see X upstream dependencies and Y downstream dependencies)."
+         "(use X+<schema_name>+Y to see X upstream dependencies and Y downstream dependencies, "
+         "operator '+' could also be used without a depth limit).",
 )
 @click.option(
     '--table', '-t',
     type=str,
     help="Filter on a table to see upstream and downstream dependencies of this table "
-         "(use X+<table_name>+Y to see X upstream dependencies and Y downstream dependencies).",
+         "(use X+<table_name>+Y to see X upstream dependencies and Y downstream dependencies, "
+         "operator '+' could also be used without a depth limit).",
     default=None
 )
 @click.option(
@@ -145,23 +165,20 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
 
     config = Config(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'lineage', get_cli_properties())
+    track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_properties(), ctx.command.name)
 
     try:
-
         lineage_graph = LineageGraph()
         lineage_graph.load_graph_from_file(config.target_dir)
         lineage_graph.filter(database, schema, table)
-
         success = lineage_graph.draw_graph(should_open_browser=open_browser, full_table_names=full_table_names)
         if not success:
             print(EmptyGraphHelper.get_help_message())
 
         execution_properties = lineage_graph.properties()
-        track_cli_end(anonymous_tracking, 'lineage', execution_properties)
-
+        track_cli_end(anonymous_tracking, 'lineage', execution_properties, ctx.command.name)
     except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'lineage', exc)
+        track_cli_exception(anonymous_tracking, 'lineage', exc, ctx.command.name)
         raise
 
 
@@ -219,7 +236,7 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
              profiles_dir: str, profile_name: str):
     config = Config(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'lineage', get_cli_properties())
+    track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_generate_properties(), ctx.command.name)
 
     try:
         query_history_extractor = QueryHistoryFactory.create_query_history(config, databases)
@@ -233,10 +250,10 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
         execution_properties.update(lineage_graph.properties())
 
         #TODO: add 'generate' to the tracking
-        track_cli_end(anonymous_tracking, 'lineage', execution_properties)
+        track_cli_end(anonymous_tracking, 'lineage', execution_properties, ctx.command.name)
     except Exception as exc:
         #TODO: add 'generate' to the tracking
-        track_cli_exception(anonymous_tracking, 'lineage', exc)
+        track_cli_exception(anonymous_tracking, 'lineage', exc, ctx.command.name)
         raise
 
 
