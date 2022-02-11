@@ -22,12 +22,14 @@ We focus on providing a **simple setup**, **integrations** with the existing sta
 **Alerts** - Slack alerts on breaking changes and new data can be configured within minutes.
 
 
+:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+
+<img src="static/elementary_demo.gif" width="750"/>
+
 
 ## Demo & sandbox
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
-<img src="static/elementary_demo.gif" width="750"/>
-:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
 ## Quick start
 
