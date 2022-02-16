@@ -227,11 +227,21 @@ class LineageGraph(object):
 
         self._lineage_graph = self.get_subgraph(nodes_in_db, upstream_depth, downstream_depth)
 
+    @staticmethod
+    def _split_graph_node_name(node: str) -> (Union[str, None], Union[str, None], Union[str, None]):
+        split_node = [part.lower() for part in node.split('.')]
+        if len(split_node) != 3:
+            return None, None, None
+        node_database_name, node_schema_name, node_table_name = split_node
+        return node_database_name, node_schema_name, node_table_name
+
     def filter_on_schema(self, schema_filter: str) -> None:
         upstream_depth, schema_name, downstream_depth = self.parse_filter(schema_filter)
         nodes_in_schema = set()
         for node in self._lineage_graph:
-            node_database_name, node_schema_name, node_table_name = [part.lower() for part in node.split('.')]
+            node_database_name, node_schema_name, _ = self._split_graph_node_name(node)
+            if node_schema_name is None:
+                continue
             normalized_schema_name = schema_name.lower()
             if normalized_schema_name == node_schema_name or normalized_schema_name == \
                     '.'.join([node_database_name, node_schema_name]):
@@ -243,7 +253,9 @@ class LineageGraph(object):
         upstream_depth, table_name, downstream_depth = self.parse_filter(table_filter)
         matched_nodes = set()
         for node in self._lineage_graph.nodes:
-            node_database_name, node_schema_name, node_table_name = [part.lower() for part in node.split('.')]
+            _, node_schema_name, node_table_name = self._split_graph_node_name(node)
+            if node_table_name is None or node_schema_name is None:
+                continue
             normalized_table_name = table_name.lower()
             if normalized_table_name == node_table_name or normalized_table_name == '.'.join([node_schema_name,
                                                                                               node_table_name]):

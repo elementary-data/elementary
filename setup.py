@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 setup(
     name='elementary-data',
     description='Data monitoring and lineage',
-    version='0.1.4',
+    version='0.1.5',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
@@ -42,7 +42,7 @@ setup(
         'requests>=2.7,<3.0.0',
         'beautifulsoup4',
         'posthog',
-        'sqlfluff',
+        'sqlfluff<0.9.0',
         'ruamel.yaml',
         # Indirect
         'protobuf<4,>=3.13.0',
