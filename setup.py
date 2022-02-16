@@ -42,7 +42,7 @@ setup(
         'requests>=2.7,<3.0.0',
         'beautifulsoup4',
         'posthog',
-        'sqlfluff',
+        'sqlfluff<0.9.0',
         'ruamel.yaml',
         # Indirect
         'protobuf<4,>=3.13.0',
