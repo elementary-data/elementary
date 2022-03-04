@@ -34,7 +34,7 @@ Try out our live lineage [sandbox here](https://www.elementary-data.com/live-dem
 
 Data monitoring - Demo coming soon.
 
-<img alt="Slack" src="static/slack_alert.png" width="500">
+<img alt="Slack" src="static/slack_2_alerts.png" width="500">
 
 
 ## Documentation
