@@ -33,11 +33,11 @@ class DbtRunner(object):
     def snapshot(self) -> bool:
         return self._run_command(['snapshot'])
 
-    def run(self, model: Union[str, None] = None, full_refresh: bool = False) -> bool:
+    def run(self, select: Union[str, None] = None, full_refresh: bool = False) -> bool:
         command_args = ['run']
         if full_refresh:
             command_args.append('--full-refresh')
-        if model is not None:
-            command_args.extend(['-m', model])
+        if select is not None:
+            command_args.extend(['-s', select])
         return self._run_command(command_args)
 

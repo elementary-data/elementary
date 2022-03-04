@@ -1,4 +1,4 @@
 packages:
-  - package: elementary-data/elementary_data_reliability
-    version: 0.1.0
+  - git: git@github.com:elementary-data/dbt-data-reliability.git
+    revision: master
 
