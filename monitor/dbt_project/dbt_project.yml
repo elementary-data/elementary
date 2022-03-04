@@ -2,7 +2,7 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'elementary'
+name: 'elementary_internal'
 version: '1.0.0'
 config-version: 2
 
@@ -28,12 +28,17 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
+vars:
+  edr_cli_run: true
 
 # In this example config, we tell dbt to build all models in the example/ directory
 # as tables. These settings can be overridden in the individual model files
 # using the `{{ config(...) }}` macro.
 models:
+
   ## Prevent the cli from uploading configuration from this internal dbt project,
   ## configuration should be uploaded from the user's dbt project.
-  elementary_sources:
-    +enabled: false
+  elementary:
+    edr_sources:
+      +enabled: false
+
