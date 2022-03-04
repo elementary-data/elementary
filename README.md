@@ -1,5 +1,5 @@
 <p align="center">
-<img alt="Logo" src="static/logo_elementary.png"/ width="600">
+<img alt="Logo" src="static/headline_git.png"/ width="600">
 </p>
 
 <p align="center">
@@ -9,26 +9,32 @@
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/elementary-data/elementary-lineage?color=ff69b4"/>
 </p>
 
+Monitor your data warehouse in minutes, and **be the first to know of data issues**. Gain immediate **visibility**, **monitor** your data and operation, **detect** data issues, and understand the **impact and root cause**. 
 
-Our goal is to provide data teams with **immediate visibility, detection of data issues, and impact analysis.**</br>
-We focus on providing a **simple setup**, **integrations** with the existing stack, and **centralized metadata** in your own data warehouse.
+* **Data monitoring** - Set up monitoring for your warehouse in minutes, collect data quality metrics and detect data issues before your users do. 
 
-## Supported use cases
+* **Data lineage made simple, reliable, and automated** - Tracing the actual upstream & downstream dependencies in the data warehouse.
 
-**Live data lineage** - Enriched with operational context like freshness, volume, duration.
+* **Operational monitoring** - Collect dbt artifacts, run and test results as part of your runs. Monitor the operations of your data stack, and centralize metadata easily. 
 
-**Source tables monitoring** - Detect breaking changes and discover new data you can leverage in your source tables. 
-
-**Alerts** - Slack alerts on breaking changes and new data can be configured within minutes.
+* **Slack alerts** - Get notifications on data issues, schema changes, jobs and tests failures. 
 
 
-:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
 
-<img src="static/elementary_demo.gif" width="750"/>
+## 
 
+Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
+
+:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+
+##
 
 ## Demo & sandbox
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
+
+Data monitoring - Demo coming soon.
+
+<img alt="Slack" src="static/slack_alert.png" width="500">
 
 
 ## Quick start
@@ -38,12 +44,23 @@ Try out our live lineage [sandbox here](https://www.elementary-data.com/live-dem
 ```bash
 pip install elementary-data
 
-# The tool is named edr (Elementary Data Reliability),
-# run it to validate the installation:
 edr --help
 ```
 
 Add your data warehouse connection details in a `profiles.yml` file, see our [quickstart page](https://docs.elementary-data.com/quickstart) to learn more or use [this template here](static/profiles.yml). Yes, if you are a dbt user we use dbt's profiles.yml by default (simply add a new profile called 'elementary').
+
+
+**Data monitoring**
+
+Add our dbt package to your project, and configure monitors. 
+Execute it using:
+```bash
+edr monitor
+```
+
+To learn how to continuously monitor your data and get Slack notifications refer [data monitoring documentation](https://docs.elementary-data.com/guides/data-monitoring). 
+
+
 
 **Data lineage**
 
@@ -56,18 +73,7 @@ edr lineage
 edr lineage -t +my_table+3
 
 ```
-
-**Data monitoring**
-
-
-After you [configure sources to monitor](https://docs.elementary-data.com/guides/sources-monitoring/configure-datasets-to-monitor), execute it using:
-```bash
-edr monitor
-```
-
-To learn how to continuously monitor your data and use our Slack integration refer to our [documentation](https://docs.elementary-data.com/). 
-
-<img alt="Slack" src="static/slack_alert.png" width="500">
+To learn more refer [data lineage documentation](https://docs.elementary-data.com/guides/data-lineage).
 
 
 ## Documentation
@@ -84,25 +90,6 @@ Use this [modules overview](https://docs.elementary-data.com/guides/modules-over
 
 Our full documentation is [available here](https://docs.elementary-data.com/). 
 
-## Features
-
-**Data lineage**
-* **Lineage visualization**: Visual map of data flow and dependencies in the data warehouse, including legacy that is not managed by dbt. 
-* **Dataset status**: Present data about freshness, volume, permissions and more on the lineage graph itself.
-* **Accuracy**: Reflects the actual state in the DWH based on logs and your query history.
-* **Plug-and-play**: No need for code changes.
-* **Graph filters**: Filter the graph by dataset, dates, direction, and depth. 
-
-**Tables monitoring**
-* **Slack notifications**.
-* **Detect deletions:** columns and tables that were removed.
-* **Detect data type** changes.
-* **Detect new data:** columns and tables that were added.
-
-**You can impact our next features in this [roadmap](https://github.com/elementary-data/elementary-lineage/projects/1)** by voting :+1: to issues and opening new ones.
-
-We aim to build an open, transparent, and community-powered data observability platform.
-A solution that data teams could easily integrate into their workflows, detect data incidents and prevent them from even happening in the first place.
 
 ## Community & Support
 
