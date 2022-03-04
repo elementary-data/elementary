@@ -33,15 +33,7 @@ def get_cli_properties() -> dict:
             'version': get_package_version()}
 
 
-
 @click.command()
-@click.option(
-    '--reload-monitoring-configuration', '-r',
-    type=bool,
-    default=False,
-    help="edr automatically uploads the monitoring configuration if it does not exist in your data warehouse, "
-         "use this flag if you changed your configuration and want to reload it."
-)
 @click.option(
     '--config-dir', '-c',
     type=str,
@@ -71,7 +63,7 @@ def get_cli_properties() -> dict:
          "see documentation to learn more)."
 )
 @click.pass_context
-def monitor(ctx, reload_monitoring_configuration, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
+def monitor(ctx, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     config = Config(config_dir, profiles_dir, get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH))
@@ -79,7 +71,7 @@ def monitor(ctx, reload_monitoring_configuration, config_dir, profiles_dir, upda
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring.create_data_monitoring(config)
-        data_monitoring.run(reload_monitoring_configuration, update_dbt_package, full_refresh_dbt_package)
+        data_monitoring.run(update_dbt_package, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor', exc, ctx.command.name)

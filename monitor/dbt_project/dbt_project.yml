@@ -33,3 +33,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 # as tables. These settings can be overridden in the individual model files
 # using the `{{ config(...) }}` macro.
 models:
+  ## Prevent the cli from uploading configuration from this internal dbt project,
+  ## configuration should be uploaded from the user's dbt project.
+  elementary_sources:
+    +enabled: false

@@ -17,6 +17,9 @@ class Alert(object):
         if alert_type == 'schema_change':
             return SchemaChangeAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
                                      alert_description)
+        elif alert_type == 'anomaly_detection':
+            return AnomalyDetectionAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
+                                         alert_description)
         else:
             raise InvalidAlertType(f'Got invalid alert type - {alert_type}')
 
@@ -89,5 +92,54 @@ class SchemaChangeAlert(Alert):
         }
 
 
+class AnomalyDetectionAlert(Alert):
+    ALERT_DESCRIPTION = "Data anomaly detected"
 
+    def __init__(self, alert_id, database_name, schema_name, table_name, detected_at, sub_type, description) -> None:
+        super().__init__(alert_id)
+        self.table_name = '.'.join([database_name, schema_name, table_name]).lower()
+        self.detected_at = convert_utc_time_to_local_time(detected_at).strftime('%Y-%m-%d %H:%M:%S')
+        self.description = description[0].upper() + description[1:].lower()
+        self.anomaly_type = ' '.join([word[0].upper() + word[1:] for word in sub_type.split('_')])
 
+    def to_slack_message(self) -> dict:
+        return {
+            "blocks": [
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f":small_red_triangle:*{self.ALERT_DESCRIPTION}*"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f">*Table:*\n>{self.table_name}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*When:*\n{self.detected_at}"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f">*Change Type:*\n>{self.anomaly_type}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Description:*\n{self.description}"
+                        }
+                    ]
+                }
+            ]
+        }
