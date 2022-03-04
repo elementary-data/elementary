@@ -1,5 +1,5 @@
 <p align="center">
-<img alt="Logo" src="static/headline_git.png"/ width="600">
+<img alt="Logo" src="static/git_head.png"/ width="600">
 </p>
 
 <p align="center">
@@ -35,6 +35,18 @@ Try out our live lineage [sandbox here](https://www.elementary-data.com/live-dem
 Data monitoring - Demo coming soon.
 
 <img alt="Slack" src="static/slack_alert.png" width="500">
+
+
+## Documentation
+
+How to start? [Quickstart](https://docs.elementary-data.com/quickstart).</br>
+
+Questions about the configuration? [Configuration FAQ here](https://docs.elementary-data.com/guides/connection-profile).</br>
+
+Curious to learn about the different modules? [Modules overview](https://docs.elementary-data.com/guides/modules-overview).</br>
+
+
+Our full documentation is [available here](https://docs.elementary-data.com/). 
 
 
 ## Quick start
@@ -74,21 +86,6 @@ edr lineage -t +my_table+3
 
 ```
 To learn more refer [data lineage documentation](https://docs.elementary-data.com/guides/data-lineage).
-
-
-## Documentation
-
-Want to learn more on how to quickly get started with it? 
-Go to our [quickstart page](https://docs.elementary-data.com/quickstart).</br>
-
-Have questions about the configuration? 
-Go to our [configuration FAQ here](https://docs.elementary-data.com/guides/connection-profile).</br>
-
-Curious to learn about the different modules?
-Use this [modules overview](https://docs.elementary-data.com/guides/modules-overview).</br>
-
-
-Our full documentation is [available here](https://docs.elementary-data.com/). 
 
 
 ## Community & Support
