@@ -1,5 +1,5 @@
 <p align="center">
-<img alt="Logo" src="static/git_head.png"/ width="600">
+<img alt="Logo" src="static/headline_git.png"/ width="600">
 </p>
 
 <p align="center">
