@@ -30,8 +30,15 @@ class Alert(object):
     def to_slack_message(self) -> dict:
         pass
 
-    def send_to_slack(self, webhook: str):
-        data = self.to_slack_message()
+    def to_slack_workflows_message(self) -> dict:
+        pass
+
+    def send_to_slack(self, webhook: str, is_slack_workflow = False):
+        data = {}
+        if is_slack_workflow:
+            data = self.to_slack_workflows_message()
+        else:
+            data = self.to_slack_message()
         self.send(webhook, data)
 
     @property
@@ -91,6 +98,15 @@ class SchemaChangeAlert(Alert):
             ]
         }
 
+    def to_slack_workflows_message(self) -> dict:
+        return {
+            "alert_description": self.ALERT_DESCRIPTION,
+            "table_name": self.table_name,
+            "detected_at": self.detected_at,
+            "type": self.change_type,
+            "description": self.description
+        }
+
 
 class AnomalyDetectionAlert(Alert):
     ALERT_DESCRIPTION = "Data anomaly detected"
@@ -142,4 +158,13 @@ class AnomalyDetectionAlert(Alert):
                     ]
                 }
             ]
+        }
+
+    def to_slack_workflows_message(self) -> dict:
+        return {
+            "alert_description": self.ALERT_DESCRIPTION,
+            "table_name": self.table_name,
+            "detected_at": self.detected_at,
+            "type": self.anomaly_type,
+            "description": self.description
         }

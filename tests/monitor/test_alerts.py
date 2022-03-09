@@ -23,3 +23,14 @@ def test_schema_change_alert_to_slack_message():
     assert alert.description.lower() in schema_change_slack_msg_str
     local_time = convert_utc_time_to_local_time(alert_time)
     assert local_time.strftime('%Y-%m-%d %H:%M:%S') in schema_change_slack_msg_str
+
+
+def test_schema_change_alert_to_slack_workflow_message():
+    alert_time = datetime.now()
+    alert = SchemaChangeAlert('123', 'db', 'sc', 't1', alert_time, 'column_added', 'Column was added')
+    schema_change_slack_msg_str = json.dumps(alert.to_slack_workflows_message()).lower()
+    assert alert.table_name.lower() in schema_change_slack_msg_str
+    assert alert.change_type.lower() in schema_change_slack_msg_str
+    assert alert.description.lower() in schema_change_slack_msg_str
+    local_time = convert_utc_time_to_local_time(alert_time)
+    assert local_time.strftime('%Y-%m-%d %H:%M:%S') in schema_change_slack_msg_str
