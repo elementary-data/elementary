@@ -53,7 +53,7 @@ class Config(object):
 
     @property
     def is_slack_workflow(self) -> bool:
-        return True if self.config_dict.get(self.SLACK).get(self.WORKFLOWS) else False 
+        return True if self.config_dict.get(self.SLACK) and self.config_dict.get(self.SLACK).get(self.WORKFLOWS) else False 
 
     @property
     def target_dir(self) -> str:
