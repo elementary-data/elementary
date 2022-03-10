@@ -103,19 +103,6 @@ def snowflake_data_monitoring_with_alerts_in_db(config_mock, snowflake_con_mock,
     return snowflake_data_mon
 
 
-def assert_configuration_exists(data_monitoring):
-    assert os.path.exists(data_monitoring.DBT_PROJECT_SEEDS_PATH)
-    monitoring_config_csv_path = os.path.join(data_monitoring.DBT_PROJECT_SEEDS_PATH,
-                                              f'{data_monitoring.MONITORING_CONFIGURATION}.csv')
-    config_mock = data_monitoring.config
-    config_mock.monitoring_configuration_in_dbt_sources_to_csv.assert_called_once_with(monitoring_config_csv_path)
-
-
-def delete_configuration(data_monitoring):
-    if os.path.exists(data_monitoring.DBT_PROJECT_SEEDS_PATH):
-        shutil.rmtree(data_monitoring.DBT_PROJECT_SEEDS_PATH)
-
-
 def delete_dbt_package(data_monitoring):
     if os.path.exists(data_monitoring.DBT_PROJECT_MODULES_PATH):
         shutil.rmtree(data_monitoring.DBT_PROJECT_MODULES_PATH)
@@ -124,93 +111,39 @@ def delete_dbt_package(data_monitoring):
         shutil.rmtree(data_monitoring.DBT_PROJECT_PACKAGES_PATH)
 
 
-@pytest.mark.parametrize("full_refresh, update_dbt_package, reload_config, dbt_package_exists", [
-    (True, True, False, False),
-    (True, False, False, False),
-    (True, True, True, False),
-    (True, False, True, False),
-    (True, True, False, True),
-    (True, False, False, True),
-    (True, True, True, True),
-    (True, False, True, True),
-    (False, True, False, False),
-    (False, False, False, False),
-    (False, True, True, False),
-    (False, False, True, False),
-    (False, True, False, True),
-    (False, False, False, True),
-    (False, True, True, True),
-    (False, False, True, True),
+
+@pytest.mark.parametrize("full_refresh, update_dbt_package, dbt_package_exists", [
+    (True, True, False),
+    (True, False, False),
+    (True, True, False),
+    (True, False, False),
+    (True, True, True),
+    (True, False, True),
+    (True, True, True),
+    (True, False, True),
+    (False, True, False),
+    (False, False, False),
+    (False, True, False),
+    (False, False, False),
+    (False, True, True),
+    (False, False, True),
+    (False, True, True),
+    (False, False, True),
 ])
-def test_data_monitoring_run_config_does_not_exist(full_refresh, update_dbt_package, reload_config, dbt_package_exists,
-                                                   snowflake_data_monitoring_with_empty_config_in_db):
-    snowflake_data_monitoring = snowflake_data_monitoring_with_empty_config_in_db
-    delete_configuration(snowflake_data_monitoring)
+def test_data_monitoring_run(full_refresh, update_dbt_package, dbt_package_exists, snowflake_data_monitoring):
     delete_dbt_package(snowflake_data_monitoring)
     snowflake_data_monitoring._dbt_package_exists = lambda: dbt_package_exists
     dbt_runner_mock = snowflake_data_monitoring.dbt_runner
 
     # The test function
-    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_package=update_dbt_package,
-                                  reload_monitoring_configuration=reload_config)
+    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_package=update_dbt_package)
 
     if update_dbt_package or not dbt_package_exists:
         dbt_runner_mock.deps.assert_called()
     else:
         dbt_runner_mock.deps.assert_not_called()
 
-    # Validate configuration exists in the dbt_project seed path
-    assert_configuration_exists(snowflake_data_monitoring)
-    dbt_runner_mock.seed.assert_called()
-
-    # Validate that snapshot and run were called as well
-    dbt_runner_mock.snapshot.assert_called()
-    dbt_runner_mock.run.assert_called()
-
-
-@pytest.mark.parametrize("full_refresh, update_dbt_package, reload_config, dbt_package_exists", [
-    (True, True, False, False),
-    (True, False, False, False),
-    (True, True, True, False),
-    (True, False, True, False),
-    (True, True, False, True),
-    (True, False, False, True),
-    (True, True, True, True),
-    (True, False, True, True),
-    (False, True, False, False),
-    (False, False, False, False),
-    (False, True, True, False),
-    (False, False, True, False),
-    (False, True, False, True),
-    (False, False, False, True),
-    (False, True, True, True),
-    (False, False, True, True),
-])
-def test_data_monitoring_run(full_refresh, update_dbt_package, reload_config, dbt_package_exists,
-                             snowflake_data_monitoring):
-    delete_dbt_package(snowflake_data_monitoring)
-    delete_configuration(snowflake_data_monitoring)
-    snowflake_data_monitoring._dbt_package_exists = lambda: dbt_package_exists
-    dbt_runner_mock = snowflake_data_monitoring.dbt_runner
-
-    # The test function
-    snowflake_data_monitoring.run(dbt_full_refresh=full_refresh, force_update_dbt_package=update_dbt_package,
-                                  reload_monitoring_configuration=reload_config)
-
-    if update_dbt_package or not dbt_package_exists:
-        dbt_runner_mock.deps.assert_called()
-    else:
-        dbt_runner_mock.deps.assert_not_called()
-
-    if reload_config:
-        assert_configuration_exists(snowflake_data_monitoring)
-        dbt_runner_mock.seed.assert_called()
-    else:
-        dbt_runner_mock.seed.assert_not_called()
-
-    # Validate that dbt snapshot and dbt run were called as well
-    dbt_runner_mock.snapshot.assert_called()
-    dbt_runner_mock.run.assert_called_with(model=snowflake_data_monitoring.DBT_PACKAGE_NAME, full_refresh=full_refresh)
+    dbt_runner_mock.run.assert_called_with(select=snowflake_data_monitoring.DBT_PACKAGE_NAME, full_refresh=full_refresh)
 
 
 @mock.patch('requests.post')

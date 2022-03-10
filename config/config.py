@@ -49,11 +49,19 @@ class Config(object):
 
     @property
     def slack_notification_webhook(self) -> Union[str, None]:
-        return self.config_dict.get(self.SLACK).get(self.NOTIFICATION_WEBHOOK) if self.config_dict.get(self.SLACK) else None
+        slack_config = self.config_dict.get(self.SLACK)
+        if slack_config is not None:
+            return slack_config.get(self.NOTIFICATION_WEBHOOK)
+        return None
 
     @property
     def is_slack_workflow(self) -> bool:
-        return True if self.config_dict.get(self.SLACK) and self.config_dict.get(self.SLACK).get(self.WORKFLOWS) else False 
+        slack_config = self.config_dict.get(self.SLACK)
+        if slack_config is not None:
+            workflows = slack_config.get(self.WORKFLOWS)
+            if workflows is True:
+                return True
+        return False
 
     @property
     def target_dir(self) -> str:
