@@ -12,7 +12,9 @@ ordered_yaml = OrderedYaml()
 
 
 class Config(object):
-    SLACK_NOTIFICATION_WEBHOOK = 'slack_notification_webhook'
+    SLACK = 'slack'
+    NOTIFICATION_WEBHOOK = 'notification_webhook'
+    WORKFLOWS = 'workflows'
     CONFIG_FILE_NAME = 'config.yml'
 
     def __init__(self, config_dir: str, profiles_dir: str, profile_name: str) -> None:
@@ -47,7 +49,11 @@ class Config(object):
 
     @property
     def slack_notification_webhook(self) -> Union[str, None]:
-        return self.config_dict.get(self.SLACK_NOTIFICATION_WEBHOOK)
+        return self.config_dict.get(self.SLACK).get(self.NOTIFICATION_WEBHOOK) if self.config_dict.get(self.SLACK) else None
+
+    @property
+    def is_slack_workflow(self) -> bool:
+        return True if self.config_dict.get(self.SLACK) and self.config_dict.get(self.SLACK).get(self.WORKFLOWS) else False 
 
     @property
     def target_dir(self) -> str:

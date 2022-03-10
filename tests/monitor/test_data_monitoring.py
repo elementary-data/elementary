@@ -29,9 +29,18 @@ def config_mock():
     config_mock = mock.create_autospec(Config)
     config_mock.profiles_dir = 'profiles_dir_path'
     config_mock.slack_notification_webhook = WEBHOOK_URL
+    config_mock.is_slack_workflow = False
     config_mock.monitoring_configuration_in_dbt_sources_to_csv.return_value = None
     return config_mock
 
+@pytest.fixture
+def slack_workflows_config_mock():
+    config_mock = mock.create_autospec(Config)
+    config_mock.profiles_dir = 'profiles_dir_path'
+    config_mock.slack_notification_webhook = WEBHOOK_URL
+    config_mock.is_slack_workflow = True
+    config_mock.monitoring_configuration_in_dbt_sources_to_csv.return_value = None
+    return config_mock
 
 @pytest.fixture
 def dbt_runner_mock():
@@ -50,8 +59,7 @@ def snowflake_data_monitoring_with_empty_config_in_db(config_mock, snowflake_con
     return snowflake_data_mon
 
 
-@pytest.fixture
-def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
+def create_snowflake_data_mon(config_mock, snowflake_con_mock, dbt_runner_mock):
     # This cursor mock will use the side effect to return non empty configuration
     snowflake_cursor_context_manager_return_value = snowflake_con_mock.cursor.return_value.__enter__.return_value
 
@@ -65,7 +73,17 @@ def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
 
     snowflake_data_mon = SnowflakeDataMonitoring(config_mock, snowflake_con_mock)
     snowflake_data_mon.dbt_runner = dbt_runner_mock
-    return snowflake_data_mon
+    return snowflake_data_mon    
+
+
+@pytest.fixture
+def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
+    return create_snowflake_data_mon(config_mock, snowflake_con_mock, dbt_runner_mock)
+
+
+@pytest.fixture
+def snowflake_data_monitoring_slack_workflow(slack_workflows_config_mock, snowflake_con_mock, dbt_runner_mock):
+    return create_snowflake_data_mon(slack_workflows_config_mock, snowflake_con_mock, dbt_runner_mock)
 
 
 @pytest.fixture
@@ -203,6 +221,12 @@ def test_data_monitoring_send_alert_to_slack(requests_post_mock, snowflake_data_
     requests_post_mock.assert_called_once_with(url=WEBHOOK_URL, headers={'Content-type': 'application/json'},
                                                data=json.dumps(alert.to_slack_message()))
 
+@mock.patch('requests.post')
+def test_data_monitoring_send_alert_to_slack_workflows(requests_post_mock, snowflake_data_monitoring_slack_workflow):
+    alert = Alert.create_alert_from_row(ALERT_ROW)
+    snowflake_data_monitoring_slack_workflow._send_to_slack([alert])
+    requests_post_mock.assert_called_once_with(url=WEBHOOK_URL, headers={'Content-type': 'application/json'},
+                                               data=json.dumps(alert.to_slack_workflows_message()))
 
 def test_data_monitoring_send_alerts(snowflake_data_monitoring_with_alerts_in_db):
     snowflake_data_monitoring = snowflake_data_monitoring_with_alerts_in_db
@@ -211,3 +235,5 @@ def test_data_monitoring_send_alerts(snowflake_data_monitoring_with_alerts_in_db
     assert len(alerts) == len(expected_alerts)
     assert alerts[0].id == expected_alerts[0].id
     assert type(alerts[0]) == type(expected_alerts[0])
+
+

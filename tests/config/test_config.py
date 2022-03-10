@@ -6,7 +6,9 @@ from config.config import Config
 
 FILE_DIR = os.path.dirname(__file__)
 
-CONFIG = {'slack_notification_webhook': 'test_slack_webhook', 'dbt_projects': [FILE_DIR]}
+CONFIG = {'slack': { 'notification_webhook': 'test_slack_webhook', 'workflows': False }, 'dbt_projects': [FILE_DIR]}
+
+WORKFLOWS_CONFIG = {'slack': { 'notification_webhook': 'test_slack_webhook', 'workflows': True }, 'dbt_projects': [FILE_DIR]}
 
 SOURCES = {'sources':
                 [{'name': 'unit_tests',
@@ -53,15 +55,15 @@ PROFILES = {'elementary': {'target': 'prod',
                                             'query_tag': 'best_tag'}}}}
 
 
-def create_config_files():
+def create_config_files(config: dict):
     yml = OrderedYaml()
-    yml.dump(CONFIG, os.path.join(FILE_DIR, 'config.yml'))
+    yml.dump(config, os.path.join(FILE_DIR, 'config.yml'))
     schema_path = os.path.join(FILE_DIR, 'models')
     if not os.path.exists(schema_path):
         os.makedirs(schema_path)
     yml.dump(SOURCES, os.path.join(schema_path, 'schema.yml'))
     yml.dump(DBT_PROJECT, os.path.join(FILE_DIR, 'dbt_project.yml'))
-    yml.dump(PROFILES, os.path.join(FILE_DIR, 'profiles.yml'))
+    yml.dump(PROFILES, os.path.join(FILE_DIR, 'profiles.yml'))   
 
 
 def read_csv(csv_path):
@@ -75,12 +77,20 @@ def read_csv(csv_path):
 
 @pytest.fixture
 def config():
-    create_config_files()
+    create_config_files(CONFIG)
+    return Config(config_dir=FILE_DIR, profiles_dir=FILE_DIR, profile_name='elementary')
+
+@pytest.fixture
+def slack_workflows_config():
+    create_config_files(WORKFLOWS_CONFIG)
     return Config(config_dir=FILE_DIR, profiles_dir=FILE_DIR, profile_name='elementary')
 
 
 def test_config_get_slack_notification_webhook(config):
-    assert config.slack_notification_webhook == CONFIG['slack_notification_webhook']
+    assert config.slack_notification_webhook == CONFIG['slack']['notification_webhook']
+
+def test_slack_workflows_config_get_workflows(slack_workflows_config):
+    assert slack_workflows_config.is_slack_workflow == WORKFLOWS_CONFIG['slack']['workflows']
 
 
 def test_config__get_sources_from_all_dbt_projects(config):

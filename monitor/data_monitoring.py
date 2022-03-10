@@ -70,7 +70,7 @@ class DataMonitoring(object):
         if slack_webhook is not None:
             sent_alerts = []
             for alert in alerts:
-                alert.send_to_slack(slack_webhook)
+                alert.send_to_slack(slack_webhook, self.config.is_slack_workflow)
                 sent_alerts.append(alert.id)
 
             sent_alert_count = len(sent_alerts)
