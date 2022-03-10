@@ -49,7 +49,7 @@ class Config(object):
 
     @property
     def slack_notification_webhook(self) -> Union[str, None]:
-        return self.config_dict.get(self.SLACK).get(self.NOTIFICATION_WEBHOOK)
+        return self.config_dict.get(self.SLACK).get(self.NOTIFICATION_WEBHOOK) if self.config_dict.get(self.SLACK) else None
 
     @property
     def is_slack_workflow(self) -> bool:
