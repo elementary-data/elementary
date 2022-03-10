@@ -59,8 +59,7 @@ def snowflake_data_monitoring_with_empty_config_in_db(config_mock, snowflake_con
     return snowflake_data_mon
 
 
-@pytest.fixture
-def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
+def create_snowflake_data_mon(config_mock, snowflake_con_mock, dbt_runner_mock):
     # This cursor mock will use the side effect to return non empty configuration
     snowflake_cursor_context_manager_return_value = snowflake_con_mock.cursor.return_value.__enter__.return_value
 
@@ -74,25 +73,17 @@ def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
 
     snowflake_data_mon = SnowflakeDataMonitoring(config_mock, snowflake_con_mock)
     snowflake_data_mon.dbt_runner = dbt_runner_mock
-    return snowflake_data_mon
+    return snowflake_data_mon    
+
+
+@pytest.fixture
+def snowflake_data_monitoring(config_mock, snowflake_con_mock, dbt_runner_mock):
+    return create_snowflake_data_mon(config_mock, snowflake_con_mock, dbt_runner_mock)
 
 
 @pytest.fixture
 def snowflake_data_monitoring_slack_workflow(slack_workflows_config_mock, snowflake_con_mock, dbt_runner_mock):
-    # This cursor mock will use the side effect to return non empty configuration
-    snowflake_cursor_context_manager_return_value = snowflake_con_mock.cursor.return_value.__enter__.return_value
-
-    def execute_query_side_effect(*args, **kwargs):
-        if 'count(*)' in args[0].lower():
-            snowflake_cursor_context_manager_return_value.fetchall.return_value = [[1]]
-        else:
-            snowflake_cursor_context_manager_return_value.fetchall.return_value = []
-
-    snowflake_cursor_context_manager_return_value.execute.side_effect = execute_query_side_effect
-
-    snowflake_data_mon = SnowflakeDataMonitoring(slack_workflows_config_mock, snowflake_con_mock)
-    snowflake_data_mon.dbt_runner = dbt_runner_mock
-    return snowflake_data_mon
+    return create_snowflake_data_mon(slack_workflows_config_mock, snowflake_con_mock, dbt_runner_mock)
 
 
 @pytest.fixture
