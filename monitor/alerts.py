@@ -34,7 +34,6 @@ class Alert(object):
         pass
 
     def send_to_slack(self, webhook: str, is_slack_workflow = False):
-        data = {}
         if is_slack_workflow:
             data = self.to_slack_workflows_message()
         else:
