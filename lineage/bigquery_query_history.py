@@ -22,7 +22,7 @@ class BigQueryQueryHistory(QueryHistory):
     user_email, destination_table, referenced_tables, TIMESTAMP_DIFF(end_time, start_time, MILLISECOND),
     job_id
            
-    FROM {database_name}.region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+    FROM `{database_name}.region-{location}.INFORMATION_SCHEMA.JOBS_BY_PROJECT`
     WHERE
          project_id = '{database_name}'
          AND creation_time BETWEEN @start_time AND {creation_time_range_end_expr}
