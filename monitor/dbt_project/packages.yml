@@ -1,3 +1,3 @@
 packages:
-  - package: elementary-data/elementary
-    version: 0.2.0
+  - git: git@github.com:elementary-data/dbt-data-reliability-tests.git
+    revision: anomaly_tests

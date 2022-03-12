@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: alerts
+    description: >
+      The detected changes, filtered only to the ones that should be alerted according to the configuration.
+      edr CLI queries this table to send Slack alerts, and updates the status using 'alert_sent' column.
+      This is an incremental model, with 'alert_id' as unique key.
+    columns:
+      - name: alert_id
+        description: "Unique id of the alert, used as key, based on the unique id of the tables of the detected changes."
+        tests:
+          - not_null
+          - unique
+
+      - name: detected_at
+        description: "Change detection time."
+        tests:
+          - not_null
+
+      - name: database_name
+        description: "Name of the database."
+        tests:
+          - not_null
+
+      - name: schema_name
+        description: "Name of the schema."
+        tests:
+          - not_null
+
+      - name: table_name
+        description: "Name of the table."
+        tests:
+          - not_null
+
+      - name: column_name
+        description: "Name of the column."
+
+
+      - name: alert_type
+        description: "The type of alert, indicating the module that detected it."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [ 'schema_change' ]
+
+
+      - name: sub_type
+        description: "The detected change."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [ 'column_added', 'column_removed', 'type_changed', 'table_added', 'table_removed' ]
+
+      - name: alert_description
+        description: "Description of the detected change."
+        tests:
+          - not_null
+
+      - name: alert_sent
+        description: "Boolean used by edr to track which alerts were sent via Slack."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [ 'false', 'true' ]
