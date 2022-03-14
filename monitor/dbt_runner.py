@@ -1,37 +1,58 @@
 import subprocess
 from typing import Union
-
+import json
 from utils.log import get_logger
 
 logger = get_logger(__name__)
 
 
 class DbtRunner(object):
+    ELEMENTARY_LOG_PREFIX = 'Elementary: '
     def __init__(self, project_dir: str, profiles_dir: str) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
 
-    def _run_command(self, command_args: list) -> bool:
+    def _run_command(self, command_args: list, json_logs=False) -> (bool, str):
         dbt_command = ['dbt']
         dbt_command.extend(command_args)
         dbt_command.extend(['--project-dir', self.project_dir])
         dbt_command.extend(['--profiles-dir', self.profiles_dir])
+        if json_logs:
+            dbt_command.extend(['--log-format', 'json'])
         logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=True)
-        logger.info(result.stdout.decode('utf-8'))
         if result.returncode != 0:
-            return False
+            return False, result.stdout.decode('utf-8')
 
-        return True
+        return True, result.stdout.decode('utf-8')
 
     def deps(self) -> bool:
-        return self._run_command(['deps'])
+        success, command_output = self._run_command(['deps'])
+        logger.info(command_output)
+        return success
 
     def seed(self) -> bool:
-        return self._run_command(['seed'])
+        success, command_output = self._run_command(['seed'])
+        logger.info(command_output)
+        return success
 
     def snapshot(self) -> bool:
-        return self._run_command(['snapshot'])
+        success, command_output = self._run_command(['snapshot'])
+        logger.info(command_output)
+        return success
+
+    def run_operation(self, macro_name, json_logs=True) -> Union[None, str]:
+        success, command_output = self._run_command(['run-operation', macro_name], json_logs)
+        if json_logs:
+            json_messages = command_output.splitlines()
+            for json_message in json_messages:
+                log_message_dict = json.loads(json_message)
+                log_message_data_dict = log_message_dict.get('data')
+                if log_message_data_dict is not None:
+                    log_message = log_message_data_dict.get('msg')
+                    if log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
+                        return log_message.replace(self.ELEMENTARY_LOG_PREFIX, '')
+        return None
 
     def run(self, select: Union[str, None] = None, full_refresh: bool = False) -> bool:
         command_args = ['run']
@@ -39,5 +60,6 @@ class DbtRunner(object):
             command_args.append('--full-refresh')
         if select is not None:
             command_args.extend(['-s', select])
-        return self._run_command(command_args)
-
+        success, command_output = self._run_command(command_args)
+        logger.info(command_output)
+        return success
