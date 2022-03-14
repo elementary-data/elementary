@@ -14,11 +14,11 @@ class DbtRunner(object):
 
     def _run_command(self, command_args: list, json_logs=False) -> (bool, str):
         dbt_command = ['dbt']
+        if json_logs:
+            dbt_command.extend(['--log-format', 'json'])
         dbt_command.extend(command_args)
         dbt_command.extend(['--project-dir', self.project_dir])
         dbt_command.extend(['--profiles-dir', self.profiles_dir])
-        if json_logs:
-            dbt_command.extend(['--log-format', 'json'])
         logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=True)
         if result.returncode != 0:
@@ -50,7 +50,7 @@ class DbtRunner(object):
                 log_message_data_dict = log_message_dict.get('data')
                 if log_message_data_dict is not None:
                     log_message = log_message_data_dict.get('msg')
-                    if log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
+                    if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
                         return log_message.replace(self.ELEMENTARY_LOG_PREFIX, '')
         return None
 

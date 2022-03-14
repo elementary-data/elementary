@@ -15,6 +15,7 @@ FILE_DIR = os.path.dirname(__file__)
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
+    DBT_PROJECT_MODELS_PATH = os.path.join(FILE_DIR, 'dbt_project', 'models')
     # Compatibility for previous dbt versions
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
@@ -100,9 +101,26 @@ class DataMonitoring(object):
         if alert_count > 0:
             self._send_to_slack(alerts)
 
+    def _create_configuration(self) -> bool:
+        logger.info("Converting configuration to sources")
+        sources_yml = self.dbt_runner.run_operation(macro_name='get_configuration_as_sources_yml')
+        if sources_yml is not None:
+            if not os.path.exists(self.DBT_PROJECT_MODELS_PATH):
+                os.makedirs(self.DBT_PROJECT_MODELS_PATH)
+            sources_file_path = os.path.join(self.DBT_PROJECT_MODELS_PATH, 'sources.yml')
+            with open(sources_file_path, 'w') as sources_file:
+                sources_file.write(sources_yml)
+            return True
+        return False
+
     def run(self, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False) -> None:
 
         self._download_dbt_package_if_needed(force_update_dbt_package)
+
+        success = self._create_configuration()
+        if not success:
+            logger.info('Could not create configuration successfully')
+            return
 
         logger.info("Running edr internal dbt package")
         success = self.dbt_runner.run(select=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh)
