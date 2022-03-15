@@ -63,3 +63,11 @@ class DbtRunner(object):
         success, command_output = self._run_command(command_args)
         logger.info(command_output)
         return success
+
+    def test(self, select: Union[str, None] = None):
+        command_args = ['test']
+        if select is not None:
+            command_args.extend(['-s', select])
+        success, command_output = self._run_command(command_args)
+        logger.info(command_output)
+        return success
