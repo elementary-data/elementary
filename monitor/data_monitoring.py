@@ -101,9 +101,9 @@ class DataMonitoring(object):
         if alert_count > 0:
             self._send_to_slack(alerts)
 
-    def _create_configuration(self) -> bool:
-        logger.info("Converting configuration to sources")
-        sources_yml = self.dbt_runner.run_operation(macro_name='get_configuration_as_sources_yml')
+    def _read_configuration_to_sources_file(self) -> bool:
+        logger.info("Reading configuration and writing to sources.yml")
+        sources_yml = self.dbt_runner.run_operation(macro_name='read_configuration_to_sources_yml')
         if sources_yml is not None:
             if not os.path.exists(self.DBT_PROJECT_MODELS_PATH):
                 os.makedirs(self.DBT_PROJECT_MODELS_PATH)
@@ -117,7 +117,7 @@ class DataMonitoring(object):
 
         self._download_dbt_package_if_needed(force_update_dbt_package)
 
-        success = self._create_configuration()
+        success = self._read_configuration_to_sources_file()
         if not success:
             logger.info('Could not create configuration successfully')
             return
