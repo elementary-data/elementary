@@ -132,8 +132,12 @@ class DataMonitoring(object):
         logger.info("Running internal dbt data tests to collect metrics and calculate anomalies")
         success = self.dbt_runner.test(select="tag:elementary")
         self.execution_properties['test_success'] = success
+
+        logger.info("Running internal dbt run to aggregate alerts")
+        success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
+        self.execution_properties['alerts_run_success'] = success
         if not success:
-            logger.info('Could not run dbt test successfully')
+            logger.info('Could not aggregate alerts successfully')
             return
 
         self._send_alerts()
