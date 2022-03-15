@@ -122,8 +122,8 @@ class DataMonitoring(object):
             logger.info('Could not create configuration successfully')
             return
 
-        logger.info("Running edr internal dbt package")
-        success = self.dbt_runner.run(select=self.DBT_PACKAGE_NAME, full_refresh=dbt_full_refresh)
+        logger.info("Running edr internal dbt project")
+        success = self.dbt_runner.run(full_refresh=dbt_full_refresh)
         self.execution_properties['run_success'] = success
         if not success:
             logger.info('Could not run dbt run successfully')
