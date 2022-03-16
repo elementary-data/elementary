@@ -3,14 +3,14 @@
 </p>
 
 <p align="center">
-<a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-orange"/></a>
+<a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
+<a href="https://docs.elementary-data.com/"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-brightgreen"/>
-<img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads"/>
-</p>
 
+  
 Monitor your data warehouse in minutes, and **be the first to know of data issues**. Gain immediate **visibility**, **monitor** your data and operation, **detect** data issues, and understand the **impact and root cause**. 
 
-* **Data monitoring** - Set up monitoring for your warehouse in minutes, collect data quality metrics and detect data issues before your users do. 
+* **Data anomalies monitoring as dbt tests** - Continuous monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection, configured and executed as dbt tests. 
 
 * **Data lineage made simple, reliable, and automated** - Tracing the actual upstream & downstream dependencies in the data warehouse.
 
@@ -18,15 +18,32 @@ Monitor your data warehouse in minutes, and **be the first to know of data issue
 
 * **Slack alerts** - Get notifications on data issues, schema changes, jobs and tests failures. 
 
-
-
-## 
-
-Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
-
 :star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+ 
+
+## Quick start
+  
+[Quick start: Data monitoring as dbt tests in minutes](https://docs.elementary-data.com/quickstart). 
+
+[Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
+
+Our full documentation is [available here](https://docs.elementary-data.com/). 
 
 ##
+Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
+
+(Not a dbt user? you can still use Elementary data monitoring, reach out to us on Slack and we will help).
+  
+  
+## Data anomalies monitoring as dbt tests
+
+Elementary delivers **data monitoring and anomaly detection as dbt tests.** 
+  
+Elementary dbt tests are data monitors that collect metrics and metadata over time. 
+On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers. 
+  
+**Elementary data monitors as tests are configured and executed like native tests in your project!**
+
 
 ## Demo & sandbox
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
@@ -35,56 +52,6 @@ Data monitoring - Demo coming soon.
 
 <img alt="Slack" src="static/slack_2_alerts.png" width="500">
 
-
-## Documentation
-
-How to start? [Quickstart](https://docs.elementary-data.com/quickstart).</br>
-
-Questions about the configuration? [Configuration FAQ here](https://docs.elementary-data.com/guides/connection-profile).</br>
-
-Curious to learn about the different modules? [Modules overview](https://docs.elementary-data.com/guides/modules-overview).</br>
-
-
-Our full documentation is [available here](https://docs.elementary-data.com/). 
-
-
-## Quick start
-
-**Install & connect**
-
-```bash
-pip install elementary-data
-
-edr --help
-```
-
-Add your data warehouse connection details in a `profiles.yml` file, see our [quickstart page](https://docs.elementary-data.com/quickstart) to learn more or use [this template here](static/profiles.yml). Yes, if you are a dbt user we use dbt's profiles.yml by default (simply add a new profile called 'elementary').
-
-
-**Data monitoring**
-
-Add our dbt package to your project, and configure monitors. 
-Execute it using:
-```bash
-edr monitor
-```
-
-To learn how to continuously monitor your data and get Slack notifications refer [data monitoring documentation](https://docs.elementary-data.com/guides/data-monitoring). 
-
-
-
-**Data lineage**
-
-```bash
-
-# Generate data lineage graph
-edr lineage 
-
-# Filter the graph for a specific table, direction and depth
-edr lineage -t +my_table+3
-
-```
-To learn more refer [data lineage documentation](https://docs.elementary-data.com/guides/data-lineage).
 
 
 ## Community & Support
