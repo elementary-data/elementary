@@ -43,7 +43,8 @@ class DataMonitoring(object):
     @staticmethod
     def create_data_monitoring(config: Config) -> 'DataMonitoring':
         if config.platform == 'snowflake':
-            snowflake_conn = get_snowflake_client(config.credentials, server_side_binding=False)
+            snowflake_conn = get_snowflake_client(config.credentials, server_side_binding=False,
+                                                  custom_schema='elementary')
             return SnowflakeDataMonitoring(config, snowflake_conn)
         else:
             raise ConfigError("Unsupported platform")

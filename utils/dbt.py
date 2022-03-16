@@ -62,15 +62,17 @@ def get_bigquery_client(profile_credentials):
     )
 
 
-def get_snowflake_client(profile_credentials, server_side_binding=True):
+def get_snowflake_client(profile_credentials, server_side_binding=True, custom_schema=None):
     if server_side_binding:
         snowflake.connector.paramstyle = 'numeric'
-
+    schema = profile_credentials.schema
+    if custom_schema is not None:
+        schema = schema + '_' + custom_schema
     return snowflake.connector.connect(
         account=profile_credentials.account,
         user=profile_credentials.user,
         database=profile_credentials.database,
-        schema=profile_credentials.schema,
+        schema=schema,
         warehouse=profile_credentials.warehouse,
         role=profile_credentials.role,
         autocommit=True,
