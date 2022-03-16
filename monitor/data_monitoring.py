@@ -113,25 +113,27 @@ class DataMonitoring(object):
             return True
         return False
 
-    def run(self, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False) -> None:
+    def run(self, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False,
+            alerts_only: bool = True) -> None:
 
         self._download_dbt_package_if_needed(force_update_dbt_package)
 
-        success = self._read_configuration_to_sources_file()
-        if not success:
-            logger.info('Could not create configuration successfully')
-            return
+        if not alerts_only:
+            success = self._read_configuration_to_sources_file()
+            if not success:
+                logger.info('Could not create configuration successfully')
+                return
 
-        logger.info("Running internal dbt run to create metadata and process configuration")
-        success = self.dbt_runner.run(full_refresh=dbt_full_refresh)
-        self.execution_properties['run_success'] = success
-        if not success:
-            logger.info('Could not run dbt run successfully')
-            return
+            logger.info("Running internal dbt run to create metadata and process configuration")
+            success = self.dbt_runner.run(full_refresh=dbt_full_refresh)
+            self.execution_properties['run_success'] = success
+            if not success:
+                logger.info('Could not run dbt run successfully')
+                return
 
-        logger.info("Running internal dbt data tests to collect metrics and calculate anomalies")
-        success = self.dbt_runner.test(select="tag:elementary")
-        self.execution_properties['test_success'] = success
+            logger.info("Running internal dbt data tests to collect metrics and calculate anomalies")
+            success = self.dbt_runner.test(select="tag:elementary")
+            self.execution_properties['test_success'] = success
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)

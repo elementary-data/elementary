@@ -19,43 +19,46 @@
             {% set table_database_name = table_config['DATABASE_NAME'] %}
             {% set table_schema_name = table_config['SCHEMA_NAME'] %}
             {% set table_name = table_config['TABLE_NAME'] %}
-            {% set table_monitors = table_config['TABLE_MONITORS'] %}
+            {% set table_monitors_list = table_config['TABLE_MONITORS'] %}
             {% set monitor_schema_changes = table_config['MONITOR_SCHEMA_CHANGES'] %}
             {% set columns_monitored = table_config['COLUMNS_MONITORED'] %}
             {% set column_name = table_config['COLUMN_NAME'] %}
-            {% set column_monitors = table_config['COLUMN_MONITORS'] %}
+            {% set column_monitors_list = table_config['COLUMN_MONITORS'] %}
             {% set schema_changes_test_enabled = False %}
-            {% if table_monitors %}
-                {% set table_monitors = fromjson(table_monitors) %}
+            {% if table_monitors_list %}
+                {% set table_monitors_list = fromjson(table_monitors_list) %}
             {% endif %}
-            {% if column_monitors %}
-                {% set column_monitors = fromjson(column_monitors) %}
+            {% if column_monitors_list %}
+                {% set column_monitors_list = fromjson(column_monitors_list) %}
             {% endif %}
 
             {% set table_key = table_database_name ~ '.' ~ table_schema_name ~ '.' ~ table_name %}
             {% set table_dict = tables_dict.get(table_key) %}
             {% if not table_dict %}
                 {% set table_dict = {'name': table_name,
-                                     'tests': [],
-                                     'columns': []
-                                     } %}
-                {% if table_monitors is not none %}
-                    {% do table_dict['tests'].append({'elementary.table_anomalies': {'table_tests': table_monitors,
+                     'tests': [],
+                     'columns': []
+                     } %}
+                {% for table_monitors in table_monitors_list %}
+                    {% if 'schema_changes' in table_monitors %}
+                        {% do table_dict['tests'].append({'elementary.schema_changes': {'tags': ['elementary']}}) %}
+                    {% endif %}
+                    {% do table_dict['tests'].append({'elementary.table_anomalies': {'table_anomalies': table_monitors,
                                                                                      'tags': ['elementary']}}) %}
-                {% endif %}
-                {% if monitor_schema_changes %}
-                    {% do table_dict['tests'].append({'elementary.schema_changes': {'tags': ['elementary']}}) %}
-                {% endif %}
+                {% endfor %}
             {% endif %}
             {% if column_name and columns_monitored %}
                 {% if column_name ==  '__ALL_COLUMNS__' %}
-                    {% do table_dict['tests'].append({'elementary.all_columns_anomalies':
-                                                        {'column_tests': column_monitors, 'tags': ['elementary']}}) %}
+                    {% for column_monitors in column_monitors_list %}
+                        {% do table_dict['tests'].append({'elementary.all_columns_anomalies':
+                                                        {'column_anomalies': column_monitors, 'tags': ['elementary']}}) %}
+                    {% endfor %}
                 {% else %}
-                    {% do table_dict['columns'].append({'name': column_name,
-                                                        'tests': [{'elementary.column_anomalies': {
-                                                                        'column_tests': column_monitors,
-                                                                        'tags': ['elementary']}}]}) %}
+                    {% set column_dict = {'name': column_name, 'tests': []} %}
+                    {% for column_monitors in column_monitors_list %}
+                        {% do column_dict['tests'].append({'elementary.column_anomalies':
+                                                        {'column_anomalies': column_monitors, 'tags': ['elementary']}}) %}
+                    {% endfor %}
                 {% endif %}
             {% endif %}
             {% do tables_dict.update({table_key: table_dict}) %}
