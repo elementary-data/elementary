@@ -18,7 +18,7 @@ Monitor your data warehouse in minutes, and **be the first to know of data issue
 
 * **Slack alerts** - Get notifications on data issues, schema changes, jobs and tests failures. 
 
-:star: If you like what we are building, support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
  
 
 ## Quick start
