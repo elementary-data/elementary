@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 setup(
     name='elementary-data',
     description='Data monitoring and lineage',
-    version='0.2.3',
+    version='0.2.4',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
@@ -50,7 +50,8 @@ setup(
         'flask<1.1.1',
         'Jinja2>=2.10.1,<3',
         'tomli<2.0.0,>=0.2.6',
-        'urllib3<1.26,>=1.20'
+        'urllib3<1.26,>=1.20',
+        'MarkupSafe==2.0.1'
     ],
     long_description_content_type="text/markdown",
     license='',
