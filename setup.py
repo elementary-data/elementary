@@ -35,7 +35,7 @@ setup(
         'sqllineage==1.2.4',
         'pyvis>=0.1,<1',
         'sqlparse>=0.3.1,<0.5',
-        'alive-progress',
+        'alive-progress<=2.3.1',
         'python-dateutil>=2.7.2,<3.0.0',
         'google-cloud-bigquery>=1.25.0,<3',
         'google-api-core>=1.16.0,<3',
