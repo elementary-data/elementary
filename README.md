@@ -7,17 +7,13 @@
 <a href="https://docs.elementary-data.com/"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-brightgreen"/>
 
+## Use cases
+Monitor your data warehouse in minutes:
+* **Data anomalies monitoring as dbt tests**
+* **Data lineage made simple, reliable, and automated**
+* **dbt operational monitoring**
+* **Slack alerts**
   
-Monitor your data warehouse in minutes, and **be the first to know of data issues**. Gain immediate **visibility**, **monitor** your data and operation, **detect** data issues, and understand the **impact and root cause**. 
-
-* **Data anomalies monitoring as dbt tests** - Continuous monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection, configured and executed as dbt tests. 
-
-* **Data lineage made simple, reliable, and automated** - Tracing the actual upstream & downstream dependencies in the data warehouse.
-
-* **Operational monitoring** - Collect dbt artifacts, run and test results as part of your runs. Monitor the operations of your data stack, and centralize metadata easily. 
-
-* **Slack alerts** - Get notifications on data issues, schema changes, jobs and tests failures. 
-
 :star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
  
 
