@@ -148,7 +148,7 @@ class AnomalyDetectionAlert(Alert):
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f">*Change Type:*\n>{self.anomaly_type}"
+                            "text": f">*Anomaly Type:*\n>{self.anomaly_type}"
                         },
                         {
                             "type": "mrkdwn",
