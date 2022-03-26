@@ -42,9 +42,9 @@ On each execution, the tests analyze the new data, compare it to historical metr
 
 
 ## Demo & sandbox
-Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
-Data monitoring - Demo coming soon.
+Data anomalies monitoring as dbt tests [demo video](https://www.elementary-data.com/demo).  
+Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
 <img alt="Slack" src="static/slack_2_alerts.png" width="400">       <img alt="configuration" src="static/properties_yml_.png" width="300">
   
