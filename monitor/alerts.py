@@ -14,7 +14,7 @@ class Alert(object):
     @staticmethod
     def create_alert_from_row(alert_row: dict) -> 'Alert':
         alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type, \
-            alert_description = alert_row.values()
+            alert_description, owner, tags, alert_results_query, other = alert_row.values()
         detected_at = datetime.fromisoformat(detected_at)
         if alert_type == 'schema_change':
             return SchemaChangeAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
@@ -22,6 +22,9 @@ class Alert(object):
         elif alert_type == 'anomaly_detection':
             return AnomalyDetectionAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
                                          alert_description)
+        elif alert_type == 'dbt_test':
+            return DbtTestAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
+                                alert_description, owner, tags, alert_results_query, other)
         else:
             raise InvalidAlertType(f'Got invalid alert type - {alert_type}')
 
@@ -169,3 +172,119 @@ class AnomalyDetectionAlert(Alert):
             "type": self.anomaly_type,
             "description": self.description
         }
+
+
+class DbtTestAlert(Alert):
+    ALERT_DESCRIPTION = "dbt test alert"
+
+    def __init__(self, alert_id, database_name, schema_name, table_name, detected_at, sub_type, description,
+                 owner, tags, alert_results_query, other) -> None:
+        super().__init__(alert_id)
+        self.table_name = '.'.join([database_name, schema_name, table_name]).lower()
+        self.detected_at = convert_utc_time_to_local_time(detected_at).strftime('%Y-%m-%d %H:%M:%S')
+        self.owners = json.loads(owner) if owner else ''
+        if isinstance(self.owners, list):
+            self.owners = ', '.join(self.owners)
+        self.tags = json.loads(tags) if tags else ''
+        if isinstance(self.tags, list):
+            self.tags = [f'#{tag}' for tag in self.tags]
+            self.tags = ', '.join(self.tags)
+        self.status = sub_type
+        self.dbt_test_query = f'```{alert_results_query.strip()}```' if alert_results_query else ''
+        test_metadata = json.loads(other) if other else {}
+        self.test_name = test_metadata.get('name')
+        self.test_kwargs = f"`{test_metadata.get('kwargs')}`"
+        self.error_message = description if description else 'No error message'
+
+    def to_slack_message(self) -> dict:
+        return {
+            "attachments": [
+                {
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f":small_red_triangle:*{self.ALERT_DESCRIPTION}*"
+                            }
+                        },
+                        {
+                            "type": "divider"
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Table:*\n{self.table_name}"
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*When:*\n{self.detected_at}"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Status:*\n{self.status}"
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Test name:*\n{self.test_name}"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Owners:*\n{self.owners}"
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Tags:*\n{self.tags}"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "divider"
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"*Error message:*\n{self.error_message}"
+                            }
+                        },
+                        {
+                            "type": "divider"
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"*Test Parameters:*\n{self.test_kwargs}"
+                            }
+                        },
+                        {
+                            "type": "divider"
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"*Test Query:*\n{self.dbt_test_query}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+
+    def to_slack_workflows_message(self) -> dict:
+        #TODO: implement this func
+        pass
