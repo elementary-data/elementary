@@ -193,7 +193,7 @@ class DbtTestAlert(Alert):
         self.dbt_test_query = f'```{alert_results_query.strip()}```' if alert_results_query else ''
         test_metadata = json.loads(other) if other else {}
         self.test_name = test_metadata.get('name')
-        self.test_kwargs = f"`{test_metadata.get('kwargs')}`"
+        self.test_params = f"`{test_metadata.get('kwargs')}`"
         self.error_message = description if description else 'No error message'
 
     def to_slack_message(self) -> dict:
@@ -267,7 +267,7 @@ class DbtTestAlert(Alert):
                             "type": "section",
                             "text": {
                                 "type": "mrkdwn",
-                                "text": f"*Test Parameters:*\n{self.test_kwargs}"
+                                "text": f"*Test Parameters:*\n{self.test_params}"
                             }
                         },
                         {
@@ -286,5 +286,14 @@ class DbtTestAlert(Alert):
         }
 
     def to_slack_workflows_message(self) -> dict:
-        #TODO: implement this func
-        pass
+        return {
+            "alert_description": self.ALERT_DESCRIPTION,
+            "table_name": self.table_name,
+            "detected_at": self.detected_at,
+            "test_name": self.test_name,
+            "owners": self.owners,
+            "tags": self.tags,
+            "error_message": self.error_message,
+            "test_params": self.test_params,
+            "test_query": self.dbt_test_query
+        }
