@@ -50,8 +50,9 @@ class DbtRunner(object):
         success, _ = self._run_command(['snapshot'])
         return success
 
-    def run_operation(self, macro_name, json_logs=True) -> Union[None, str]:
+    def run_operation(self, macro_name, json_logs=True) -> list:
         success, command_output = self._run_command(['run-operation', macro_name], json_logs)
+        run_operation_results = []
         if json_logs:
             json_messages = command_output.splitlines()
             for json_message in json_messages:
@@ -60,8 +61,8 @@ class DbtRunner(object):
                 if log_message_data_dict is not None:
                     log_message = log_message_data_dict.get('msg')
                     if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
-                        return log_message.replace(self.ELEMENTARY_LOG_PREFIX, '')
-        return None
+                        run_operation_results.append(log_message.replace(self.ELEMENTARY_LOG_PREFIX, ''))
+        return run_operation_results
 
     def run(self, models: Union[str, None] = None, select: Union[str, None] = None, full_refresh: bool = False) -> bool:
         command_args = ['run']
