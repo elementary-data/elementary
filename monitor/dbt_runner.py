@@ -50,8 +50,12 @@ class DbtRunner(object):
         success, _ = self._run_command(['snapshot'])
         return success
 
-    def run_operation(self, macro_name, json_logs=True) -> list:
-        success, command_output = self._run_command(['run-operation', macro_name], json_logs)
+    def run_operation(self, macro_name: str, json_logs: bool = True, macro_args: dict = None) -> list:
+        command_args = ['run-operation', macro_name]
+        if macro_args is not None:
+            json_args = json.dumps(macro_args)
+            command_args.extend(['--args', json_args])
+        success, command_output = self._run_command(command_args, json_logs)
         run_operation_results = []
         if json_logs:
             json_messages = command_output.splitlines()
