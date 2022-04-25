@@ -4,6 +4,7 @@ from monitor.dbt_runner import DbtRunner
 from config.config import Config
 from utils.log import get_logger
 import json
+from alive_progress import alive_it
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -52,7 +53,8 @@ class DataMonitoring(object):
         slack_webhook = self.config.slack_notification_webhook
         if slack_webhook is not None:
             sent_alerts = []
-            for alert in alerts:
+            alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
+            for alert in alerts_with_progress_bar:
                 alert.send_to_slack(slack_webhook, self.config.is_slack_workflow)
                 sent_alerts.append(alert.id)
 

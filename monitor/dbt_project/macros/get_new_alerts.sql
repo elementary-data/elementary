@@ -1,12 +1,12 @@
 {% macro get_new_alerts() %}
     -- depends_on: {{ ref('alerts') }}
+    {% set current_date = dbt_utils.date_trunc('day', dbt_utils.current_timestamp()) %}
     {% set select_new_alerts_query %}
         SELECT alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type,
                alert_description
         FROM {{ ref('alerts') }}
-        WHERE alert_sent = FALSE
+        WHERE alert_sent = FALSE and detected_at >= {{ get_alerts_time_limit() }}
     {% endset %}
-
     {% set results = run_query(select_new_alerts_query) %}
     {% set new_alerts = [] %}
     {% for result in results %}
