@@ -1,12 +1,8 @@
 import os
-from typing import Any
-from exceptions.exceptions import ConfigError
 from monitor.alerts import Alert
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
-from utils.dbt import get_snowflake_client, get_bigquery_client
 from utils.log import get_logger
-from google.cloud import bigquery
 import json
 
 logger = get_logger(__name__)
