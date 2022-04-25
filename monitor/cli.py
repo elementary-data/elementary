@@ -70,7 +70,7 @@ def monitor(ctx, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
-        data_monitoring = DataMonitoring.create_data_monitoring(config)
+        data_monitoring = DataMonitoring(config)
         data_monitoring.run(update_dbt_package, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:

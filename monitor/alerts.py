@@ -2,6 +2,7 @@ import requests
 import json
 from exceptions.exceptions import InvalidAlertType
 from utils.time import convert_utc_time_to_local_time
+from datetime import datetime
 
 
 class Alert(object):
@@ -11,9 +12,10 @@ class Alert(object):
         self.alert_id = alert_id
 
     @staticmethod
-    def create_alert_from_row(alert_row: list) -> 'Alert':
+    def create_alert_from_row(alert_row: dict) -> 'Alert':
         alert_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type, \
-            alert_description = alert_row
+            alert_description = alert_row.values()
+        detected_at = datetime.fromisoformat(detected_at)
         if alert_type == 'schema_change':
             return SchemaChangeAlert(alert_id, database_name, schema_name, table_name, detected_at, sub_type,
                                      alert_description)
