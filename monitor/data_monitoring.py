@@ -41,7 +41,8 @@ class DataMonitoring(object):
                                           json_logs=False)
 
     def _query_alerts(self) -> list:
-        json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts')
+        json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts',
+                                                        macro_args={'days_back': 7})
         self.execution_properties['alert_rows'] = len(json_alert_rows)
         alerts = []
         for json_alert_row in json_alert_rows:
