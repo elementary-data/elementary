@@ -7,23 +7,23 @@
 }}
 
 with alerts_schema_changes as (
-
     select * from {{ ref('elementary', 'alerts_schema_changes') }}
-
 ),
 
 alerts_data_monitoring as (
-
     select * from {{ ref('elementary', 'alerts_data_monitoring') }}
+),
 
+alerts_dbt_tests as (
+    select * from {{ ref('elementary', 'alerts_dbt_tests') }}
 ),
 
 all_alerts as (
-
      select * from alerts_schema_changes
      union all
      select * from alerts_data_monitoring
-
+     union all
+     select * from alerts_dbt_tests
 )
 
 select *, false as alert_sent
