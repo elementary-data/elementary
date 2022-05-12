@@ -5,6 +5,7 @@ from config.config import Config
 from utils.log import get_logger
 import json
 from alive_progress import alive_it
+from typing import Union
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -18,11 +19,12 @@ class DataMonitoring(object):
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(self, config: Config, days_back: int) -> None:
+    def __init__(self, config: Config, days_back: int, slack_webhook: Union[str, None]) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.execution_properties = {}
         self.days_back = days_back
+        self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -52,12 +54,11 @@ class DataMonitoring(object):
         return alerts
 
     def _send_to_slack(self, alerts: [Alert]) -> None:
-        slack_webhook = self.config.slack_notification_webhook
-        if slack_webhook is not None:
+        if self.slack_webhook is not None:
             sent_alerts = []
             alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
             for alert in alerts_with_progress_bar:
-                alert.send_to_slack(slack_webhook, self.config.is_slack_workflow)
+                alert.send_to_slack(self.slack_webhook, self.config.is_slack_workflow)
                 sent_alerts.append(alert.id)
 
             sent_alert_count = len(sent_alerts)
