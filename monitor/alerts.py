@@ -120,9 +120,7 @@ class DbtTestAlert(Alert):
         self.add_fields_section_to_slack_message(slack_message,
                                                  [f"*Status:*\n{self.status}", f"*Test name:*\n{self.test_name}"])
 
-        if self.owners or self.tags:
-            self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
+        self.add_fields_section_to_slack_message(slack_message, [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
 
         if self.error_message:
             self.add_text_section_to_slack_message(slack_message,
@@ -208,9 +206,8 @@ class ElementaryDataAlert(DbtTestAlert):
         self.add_fields_section_to_slack_message(slack_message,
                                                  [f"*Test name:*\n{self.test_name}",
                                                   f"*{self.sub_type_title}:*\n{self.sub_type_value}"])
-        if self.owners or self.tags:
-            self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
+
+        self.add_fields_section_to_slack_message(slack_message, [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
 
         if self.description:
             self.add_text_section_to_slack_message(slack_message, f"*Description:*\n{self.description}", divider=True)
