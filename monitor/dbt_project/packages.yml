@@ -1,5 +1,5 @@
 packages:
   - package: dbt-labs/dbt_utils
-    version: [">=0.8.0", "<0.9.0"] #TODO: fix
-  - git: git@github.com:elementary-data/dbt-data-reliability.git
-    revision: operational_alerts
+    version: [">=0.8.0", "<0.9.0"]
+  - package: elementary-data/elementary
+    version: 0.3.15
