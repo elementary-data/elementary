@@ -10,50 +10,38 @@
     {% set results = run_query(select_new_alerts_query) %}
     {% set new_alerts = [] %}
     {% for result in results %}
-        {% set alert_results_query = result[11] %}
-        {% set alert_type = result[6] %}
-        {% set alert_results = none %}
-        {% set serializable_test_results = none %}
+        {% set result_dict = result.dict() %}
+        {% set alert_results_query = elementary.insensitive_get_dict_value(result_dict, 'alert_results_query') %}
+        {% set alert_type = elementary.insensitive_get_dict_value(result_dict, 'alert_type') %}
+        {% set status = elementary.insensitive_get_dict_value(result_dict, 'status') | lower %}
 
-        {% if alert_results_query %}
+        {% set serializable_test_results = none %}
+        {% if alert_results_query and status != 'error' and alert_type == 'dbt_test' %}
             {% set alert_results_query_with_limit = alert_results_query ~ ' limit ' ~ results_sample_limit %}
             {% set test_results = run_query(alert_results_query_with_limit) %}
-            {% set serializable_test_results = agate_to_json(test_results) %}
+            {% set test_rows_sample = elementary.agate_to_json(test_results) %}
         {% endif %}
 
-        {% set new_alert_dict = {'alert_id': result[0],
-                                 'detected_at': result[1].isoformat(),
-                                 'database_name': result[2],
-                                 'schema_name': result[3],
-                                 'table_name': result[4],
-                                 'column_name': result[5],
+        {% set new_alert_dict = {'alert_id': elementary.insensitive_get_dict_value(result_dict, 'alert_id'),
+                                 'detected_at': elementary.insensitive_get_dict_value(result_dict, 'detected_at').isoformat(),
+                                 'database_name': elementary.insensitive_get_dict_value(result_dict, 'database_name'),
+                                 'schema_name': elementary.insensitive_get_dict_value(result_dict, 'schema_name'),
+                                 'table_name': elementary.insensitive_get_dict_value(result_dict, 'table_name'),
+                                 'column_name': elementary.insensitive_get_dict_value(result_dict, 'column_name'),
                                  'alert_type': alert_type,
-                                 'sub_type': result[7],
-                                 'alert_description': result[8],
-                                 'owners': result[9],
-                                 'tags': result[10],
+                                 'sub_type': elementary.insensitive_get_dict_value(result_dict, 'sub_type'),
+                                 'alert_description': elementary.insensitive_get_dict_value(result_dict, 'alert_description'),
+                                 'owners': elementary.insensitive_get_dict_value(result_dict, 'owners'),
+                                 'tags': elementary.insensitive_get_dict_value(result_dict, 'tags'),
                                  'alert_results_query': alert_results_query,
-                                 'alert_results': serializable_test_results,
-                                 'other': result[12],
-                                 'test_name': result[13],
-                                 'test_params': result[14],
-                                 'severity': result[15],
-                                 'status': result[16]} %}
+                                 'alert_results': test_rows_sample,
+                                 'other': elementary.insensitive_get_dict_value(result_dict, 'other'),
+                                 'test_name': elementary.insensitive_get_dict_value(result_dict, 'test_name'),
+                                 'test_params': elementary.insensitive_get_dict_value(result_dict, 'test_params'),
+                                 'severity': elementary.insensitive_get_dict_value(result_dict, 'severity'),
+                                 'status': status} %}
         {% set new_alert_json = tojson(new_alert_dict) %}
         {% do elementary.edr_log(new_alert_json) %}
     {% endfor %}
 {% endmacro %}
 
-{% macro agate_to_json(agate_table) %}
-    {% set column_types = agate_table.column_types %}
-    {% set serializable_rows = [] %}
-    {% for agate_row in agate_table.rows %}
-        {% set serializable_row = {} %}
-        {% for col_name, col_value in agate_row.items() %}
-            {% set serializable_col_value = column_types[loop.index0].jsonify(col_value) %}
-            {% do serializable_row.update({col_name: serializable_col_value}) %}
-        {% endfor %}
-        {% do serializable_rows.append(serializable_row) %}
-    {% endfor %}
-    {{ return(tojson(serializable_rows)) }}
-{% endmacro %}

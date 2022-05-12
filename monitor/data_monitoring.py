@@ -18,10 +18,11 @@ class DataMonitoring(object):
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, days_back: int) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.execution_properties = {}
+        self.days_back = days_back
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -42,7 +43,7 @@ class DataMonitoring(object):
 
     def _query_alerts(self) -> list:
         json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts',
-                                                        macro_args={'days_back': 7})
+                                                        macro_args={'days_back': self.days_back})
         self.execution_properties['alert_rows'] = len(json_alert_rows)
         alerts = []
         for json_alert_row in json_alert_rows:
