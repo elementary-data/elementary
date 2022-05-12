@@ -15,7 +15,7 @@
         {% set alert_type = elementary.insensitive_get_dict_value(result_dict, 'alert_type') %}
         {% set status = elementary.insensitive_get_dict_value(result_dict, 'status') | lower %}
 
-        {% set serializable_test_results = none %}
+        {% set test_rows_sample = none %}
         {% if alert_results_query and status != 'error' and alert_type == 'dbt_test' %}
             {% set alert_results_query_with_limit = alert_results_query ~ ' limit ' ~ results_sample_limit %}
             {% set test_results = run_query(alert_results_query_with_limit) %}
