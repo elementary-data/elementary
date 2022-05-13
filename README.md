@@ -46,7 +46,7 @@ On each execution, the tests analyze the new data, compare it to historical metr
 Data anomalies monitoring as dbt tests [demo video](https://www.elementary-data.com/demo).  
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
-<img alt="Slack" src="static/Slack_alerts_new_format.png" width="500">       <img alt="configuration" src="static/properties_yml_.png" width="350">
+<img alt="Slack" src="static/Slack_alerts_new_format.png" width="450">       <img alt="configuration" src="static/properties_yml_.png" width="320">
   
 
 
