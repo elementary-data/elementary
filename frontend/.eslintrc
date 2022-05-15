@@ -1,0 +1,57 @@
+{
+  "extends": ["airbnb", "airbnb-typescript", "airbnb/hooks", "prettier"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src", "node_modules"]
+      }
+    }
+  },
+  "rules": {
+    "func-names": "off",
+    "no-nested-ternary": "off",
+    "no-param-reassign": "off",
+    "no-underscore-dangle": "off",
+    "no-restricted-exports": "off",
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling"],
+        "pathGroups": [
+          {
+            "pattern": "styled-components",
+            "group": "builtin",
+            "position": "before"
+          },
+          { "pattern": "react-dom", "group": "builtin", "position": "before" },
+          { "pattern": "react", "group": "builtin", "position": "before" },
+          { "pattern": "shared/**", "group": "external", "position": "after" }
+        ],
+        "pathGroupsExcludedImportTypes": [
+          "react",
+          "react-dom",
+          "styled-components"
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/*.test.ts", "**/*.spec.ts", "**/*.stories.tsx"]
+      }
+    ],
+    "jsx-a11y/label-has-associated-control": "off",
+    "jsx-a11y/anchor-is-valid": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/function-component-definition": "off",
+    "react/require-default-props": "off"
+  }
+}
