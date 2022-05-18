@@ -66,7 +66,6 @@ class AnonymousTracking(object):
             properties = dict()
 
         properties['run_id'] = self.run_id
-        properties['platform'] = self.config.platform
 
         posthog.api_key = self.api_key
         posthog.host = self.url

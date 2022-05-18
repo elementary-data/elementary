@@ -2,7 +2,7 @@ import click
 import os
 from os.path import expanduser
 
-from config.config import Config
+from lineage.lineage_config import LineageConfig
 from exceptions.exceptions import ConfigError
 from lineage.query_history_factory import QueryHistoryFactory
 from utils.package import get_package_version
@@ -164,7 +164,7 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
     if ctx.invoked_subcommand is not None:
         return
 
-    config = Config(config_dir, profiles_dir, profile_name)
+    config = LineageConfig(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_properties(), ctx.command.name)
     execution_properties = dict()
@@ -244,7 +244,7 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
 @click.pass_context
 def generate(ctx, start_date: datetime, end_date: datetime, databases: str, config_dir: str,
              profiles_dir: str, profile_name: str):
-    config = Config(config_dir, profiles_dir, profile_name)
+    config = LineageConfig(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_generate_properties(), ctx.command.name)
 
