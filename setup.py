@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 setup(
     name='elementary-data',
     description='Data monitoring and lineage',
-    version='0.2.8',
+    version='0.2.9',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
@@ -48,6 +48,8 @@ setup(
                     'google-cloud-bigquery>=1.25.0,<3',
                     'google-api-core>=1.16.0,<3',
                     'python-dateutil>=2.7.2,<3.0.0',
+                    # temp solution until refactor of utils.dbt
+                    'dbt-bigquery>=0.20,<2.0.0',
                     # Indirect
                     'protobuf<4,>=3.13.0',
                     'typing-extensions<3.11,>=3.7.4',
