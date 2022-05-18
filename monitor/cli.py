@@ -4,7 +4,6 @@ from os.path import expanduser
 
 from utils.package import get_package_version
 from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
-from utils.dbt import get_profile_name_from_dbt_project, is_dbt_installed
 from utils.ordered_yaml import OrderedYaml
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
@@ -29,7 +28,6 @@ def get_cli_properties() -> dict:
     return {'reload_monitoring_configuration': reload_monitoring_configuration,
             'update_dbt_package': update_dbt_package,
             'full_refresh_dbt_package': full_refresh_dbt_package,
-            'dbt_installed': is_dbt_installed(),
             'version': get_package_version()}
 
 
@@ -78,7 +76,7 @@ def get_cli_properties() -> dict:
 def monitor(ctx, days_back, slack_webhook, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
-    config = Config(config_dir, profiles_dir, get_profile_name_from_dbt_project(DataMonitoring.DBT_PROJECT_PATH))
+    config = Config(config_dir, profiles_dir)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:

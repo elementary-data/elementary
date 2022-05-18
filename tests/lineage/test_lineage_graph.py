@@ -10,26 +10,6 @@ from lineage.query import Query
 from lineage.query_context import QueryContext
 
 
-def test_lineage_graph_rename_node():
-    reference = LineageGraph()
-    di_graph_mock = mock.create_autospec(nx.DiGraph)
-    di_graph_mock.has_node.return_value = True
-    reference._lineage_graph = di_graph_mock
-
-    # Test rename_node
-    reference._rename_node(None, 'new_node')  # Should have no impact
-    reference._rename_node('old_node', None)  # Should have no impact
-    reference._rename_node('old_node', 'new_node')
-
-    # rename_node should check if node exists first
-    di_graph_mock.has_node.assert_called_once_with('old_node')
-    di_graph_mock.remove_node.assert_called_with('old_node')
-    di_graph_mock.add_node.assert_called_with('new_node')
-
-    # Test rename_node
-
-
-
 @pytest.mark.parametrize("sources,targets,edges,show_isolated_nodes", [
     ({'s'}, {'t'}, {('s', 't')}, False),
     ({'s', None}, {'t'}, {('s', 't')}, False),

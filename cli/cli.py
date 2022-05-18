@@ -25,16 +25,18 @@ class ElementaryCLI(click.MultiCommand):
     def get_command(self, ctx, name):
         ns = {}
         fn = os.path.join(root_folder, name, 'cli.py')
-        with open(fn) as f:
-            code = compile(f.read(), fn, 'exec')
-            eval(code, ns, ns)
+        try:
+            with open(fn) as f:
+                code = compile(f.read(), fn, 'exec')
+                eval(code, ns, ns)
+        except Exception:
+            return None
         return ns[name]
 
     def format_help(self, ctx, formatter):
         try:
             config = Config(config_dir=os.path.join(expanduser('~'), '.edr'),
-                            profiles_dir=os.path.join(expanduser('~'), '.dbt'),
-                            profile_name='elementary')
+                            profiles_dir=os.path.join(expanduser('~'), '.dbt'))
             anonymous_tracking = AnonymousTracking(config)
             track_cli_help(anonymous_tracking)
         except Exception:
