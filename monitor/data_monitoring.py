@@ -86,6 +86,15 @@ class DataMonitoring(object):
         alert_count = len(alerts)
         self.execution_properties['alert_count'] = alert_count
         if alert_count > 0:
+            alerts_dict = {}
+            for alert in alerts:
+                model_unique_id = alert.model_unique_id
+                if model_unique_id in alerts_dict:
+                    alerts_dict[model_unique_id].append(alert.to_dict())
+                else:
+                    alerts_dict[model_unique_id] = [alert.to_dict()]
+            with open(os.path.join(self.config.target_dir, 'test_results.json'), 'w') as test_results_file:
+                json.dump(alerts_dict, test_results_file)
             self._send_to_slack(alerts)
 
     def _read_configuration_to_sources_file(self) -> bool:
@@ -130,6 +139,40 @@ class DataMonitoring(object):
             return
 
         self._send_alerts()
+        self._get_models()
+
+    def _get_models(self):
+        results = self.dbt_runner.run_operation(macro_name='get_models')
+        if results:
+            with open(os.path.join(self.config.target_dir, 'models.json'), 'w') as models_json_file:
+                models_json_file.write(results[0])
+
+            models = json.loads(results[0])
+            dbt_sidebar = {}
+            for model_unique_id, model_dict in models.items():
+                model_full_path = model_dict.get('full_path')
+                if model_full_path:
+                    split_path = model_full_path.split('/')
+                    package_name = model_dict.get('package_name')
+                    if package_name and split_path:
+                        split_path.insert(0, package_name)
+                    current_path = dbt_sidebar
+                    for part in split_path:
+                        if part.endswith('sql'):
+                            if 'files' in current_path:
+                                if model_unique_id not in current_path['files']:
+                                    current_path['files'].append(model_unique_id)
+                            else:
+                                current_path['files'] = [model_unique_id]
+                        else:
+                            if part not in current_path:
+                                current_path[part] = {}
+                            current_path = current_path[part]
+
+            with open(os.path.join(self.config.target_dir, 'dbt_sidebar.json'), 'w') as dbt_sidebar_file:
+                json.dump(dbt_sidebar, dbt_sidebar_file)
+
+
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
