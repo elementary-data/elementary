@@ -5,10 +5,12 @@ from datetime import datetime
 from clients.slack.slack_client import SlackClient
 import re
 
+
 class Alert(object):
-    def __init__(self, alert_id, model_unique_id) -> None:
+    def __init__(self, alert_id, model_unique_id, status) -> None:
         self.alert_id = alert_id
         self.model_unique_id = model_unique_id
+        self.alert_status = status
 
     @staticmethod
     def create_alert_from_row(alert_row: dict) -> 'Alert':
@@ -44,6 +46,13 @@ class Alert(object):
 
     def to_dict(self) -> dict:
         pass
+
+    def get_detection_time_utc(self):
+        pass
+
+    @property
+    def status(self):
+        return self.alert_status.lower()
 
     @staticmethod
     def add_fields_section_to_slack_message(slack_message: dict, section_msgs: list, divider: bool = False):
@@ -111,7 +120,7 @@ class DbtTestAlert(Alert):
     def __init__(self, alert_id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name, column_name, alert_type, sub_type,
                  alert_description, owners, tags, alert_results_query, alert_results, other, test_name, test_params,
                  severity, status) -> None:
-        super().__init__(alert_id, model_unique_id)
+        super().__init__(alert_id, model_unique_id, status)
         self.test_unique_id = test_unique_id
         self.alert_type = alert_type
         self.alert_title = "dbt test alert"
@@ -121,8 +130,8 @@ class DbtTestAlert(Alert):
         self.table_unique_id = '.'.join([database_name, schema_name, table_name]).lower()
         self.detected_at = None
         if detected_at:
-            detected_at = datetime.fromisoformat(detected_at)
-            self.detected_at = convert_utc_time_to_local_time(detected_at).strftime('%Y-%m-%d %H:%M:%S')
+            self.detected_at_utc = datetime.fromisoformat(detected_at)
+            self.detected_at = convert_utc_time_to_local_time(self.detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
         self.owners = json.loads(owners) if owners else ''
         if isinstance(self.owners, list):
             self.owners = ', '.join(self.owners)
@@ -132,20 +141,23 @@ class DbtTestAlert(Alert):
             self.tags = ', '.join(self.tags)
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name)
-        self.status = status
         self.other = other
         self.sub_type = sub_type
         self.alert_results_query = alert_results_query.strip() if alert_results_query else ''
         self.alert_results = alert_results if alert_results else ''
         self.test_params = test_params
         self.error_message = alert_description if alert_description else 'No error message'
-        self.failed_rows_count = re.search(r'\d+', self.error_message).group()
-        if self.failed_rows_count:
-            self.failed_rows_count = int(self.failed_rows_count)
+        found_rows_number = re.search(r'\d+', self.error_message)
+        if found_rows_number:
+            found_rows_number = found_rows_number.group()
+            self.failed_rows_count = int(found_rows_number)
         self.column_name = column_name if column_name else ''
         self.icon = ':small_red_triangle:'
         if severity and severity.lower() == 'warn':
             self.icon = ':warning:'
+
+    def get_detection_time_utc(self):
+        return self.detected_at_utc
 
     def to_slack_message(self) -> dict:
         slack_message = {
@@ -164,7 +176,7 @@ class DbtTestAlert(Alert):
                                                  divider=True)
 
         self.add_fields_section_to_slack_message(slack_message,
-                                                 [f"*Status:*\n{self.status}", f"*Test name:*\n{self.test_name}"])
+                                                 [f"*Status:*\n{self.alert_status}", f"*Test name:*\n{self.test_name}"])
 
         self.add_fields_section_to_slack_message(slack_message, [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
 
@@ -202,7 +214,7 @@ class DbtTestAlert(Alert):
             'owners': self.owners,
             'tags': self.tags,
             'test_name': self.test_name,
-            'status': self.status,
+            'status': self.alert_status,
             'alert_results_query': self.alert_results_query,
             'alert_results': self.alert_results,
             'test_params': self.test_params,
@@ -220,14 +232,16 @@ class DbtTestAlert(Alert):
                 'test_name': self.test_name,
                 'test_display_name': self.test_display_name,
                 'latest_run_time': self.detected_at,
-                'latest_run_status': self.status,
+                'latest_run_time_utc': self.detected_at_utc.strftime('%Y-%m-%d %H:%M:%S'),
+                'latest_run_status': self.alert_status,
                 'model_unique_id': self.model_unique_id,
                 'table_unique_id': self.table_unique_id,
                 'test_type': 'dbt',
+                'test_sub_type': self.alert_type,
                 'test_query': self.alert_results_query,
                 'test_params': self.test_params,
-                'test_results': {'display_name': self.test_display_name + '- failed results sample',
-                                 'results_sample': self.alert_results,
+                'test_results': {'display_name': self.test_display_name + ' - failed results sample',
+                                 'results_sample': json.loads(self.alert_results),
                                  'error_message': self.error_message,
                                  'failed_rows_count': self.failed_rows_count}}
 
@@ -236,7 +250,7 @@ class ElementaryDataAlert(DbtTestAlert):
     def __init__(self, alert_id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name, column_name,
                  alert_type, sub_type, alert_description, owners, tags, alert_results_query, alert_results, other,
                  test_name, test_params, severity, status) -> None:
-        super().__init__(alert_id, test_unique_id, model_unique_id, detected_at, database_name, schema_name, table_name, column_name,
+        super().__init__(alert_id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name, column_name,
                          alert_type, sub_type, alert_description, owners, tags, alert_results_query, alert_results,
                          other, test_name, test_params, severity, status)
 
@@ -254,10 +268,14 @@ class ElementaryDataAlert(DbtTestAlert):
         self.sub_type_value = self.display_name(self.sub_type)
         self.description = alert_description[0].upper() + alert_description[1:].lower() if alert_description else ''
         test_params = json.loads(test_params) if test_params else {}
-        self.test_params = {'timestamp_column': test_params.get('timestamp_column'),
-                            'anomaly_threshold': test_params.get('anomaly_score_threshold')}
-        self.test_results = alert_results
+        self.test_params = {'timestamp_column': test_params.get('timestamp_column')}
         self.metrics_unit = self.get_metrics_unit(self.sub_type)
+        self.test_results = None
+        if self.alert_type == 'anomaly_detection':
+            self.test_params['anomaly_threshold'] = test_params.get('anomaly_score_threshold')
+            self.test_results = {'display_name': self.sub_type_value,
+                                 'metrics': json.loads(self.alert_results),
+                                 'metrics_unit': self.metrics_unit}
 
     @staticmethod
     def get_metrics_unit(metric_name):
@@ -323,7 +341,7 @@ class ElementaryDataAlert(DbtTestAlert):
             'owners': self.owners,
             'tags': self.tags,
             'test_name': self.test_name,
-            'status': self.status,
+            'status': self.alert_status,
             'alert_results_query': self.alert_results_query,
             'alert_results': self.alert_results,
             'test_params': self.test_params,
@@ -343,12 +361,12 @@ class ElementaryDataAlert(DbtTestAlert):
                 'test_name': self.test_name,
                 'test_display_name': self.test_display_name,
                 'latest_run_time': self.detected_at,
-                'latest_run_status': self.status,
+                'latest_run_time_utc': self.detected_at_utc.strftime('%Y-%m-%d %H:%M:%S'),
+                'latest_run_status': self.alert_status,
                 'model_unique_id': self.model_unique_id,
                 'table_unique_id': self.table_unique_id,
                 'test_type': 'elementary',
+                'test_sub_type': self.alert_type,
                 'test_query': self.alert_results_query,
                 'test_params': self.test_params,
-                'test_results': {'display_name': self.sub_type_value,
-                                 'metrics': self.alert_results,
-                                 'metrics_unit': self.metrics_unit}}
+                'test_results': self.test_results}

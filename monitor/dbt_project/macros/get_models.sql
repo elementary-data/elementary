@@ -28,7 +28,7 @@
         {% set normalized_model_dict = {'model_name': elementary.insensitive_get_dict_value(model_dict, 'model_name'),
                                         'model_unique_id': model_unique_id,
                                         'database_name': elementary.insensitive_get_dict_value(model_dict, 'database_name'),
-                                        'database_name': elementary.insensitive_get_dict_value(model_dict, 'database_name'),
+                                        'schema_name': elementary.insensitive_get_dict_value(model_dict, 'schema_name'),
                                         'table_name': elementary.insensitive_get_dict_value(model_dict, 'table_name'),
                                         'owner': elementary.insensitive_get_dict_value(model_dict, 'owner'),
                                         'tags': elementary.insensitive_get_dict_value(model_dict, 'tags'),

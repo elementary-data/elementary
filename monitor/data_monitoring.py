@@ -3,6 +3,7 @@ from monitor.alerts import Alert
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
 from utils.log import get_logger
+from utils.time import get_days_diff_from_now
 import json
 from alive_progress import alive_it
 from typing import List, Optional
@@ -74,6 +75,7 @@ class DataMonitoring(object):
             )
             if sent_successfully:
                 sent_alerts.append(alert.id)
+
             else:
                 logger.info(f"Could not sent the alert - {alert.id}")
         
@@ -81,6 +83,10 @@ class DataMonitoring(object):
         self.execution_properties['sent_alert_count'] = sent_alert_count
         if sent_alert_count > 0:
             self._update_sent_alerts(sent_alerts)
+
+        else:
+            logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
+                        "a slack webhook)")
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -100,15 +106,42 @@ class DataMonitoring(object):
         self.execution_properties['alert_count'] = alert_count
         if alert_count > 0:
             alerts_dict = {}
+            totals_dict = {}
             for alert in alerts:
                 model_unique_id = alert.model_unique_id
                 if model_unique_id in alerts_dict:
                     alerts_dict[model_unique_id].append(alert.to_dict())
                 else:
                     alerts_dict[model_unique_id] = [alert.to_dict()]
+                alert_days_diff = get_days_diff_from_now(alert.get_detection_time_utc())
+                total_keys = []
+                if alert_days_diff < 1:
+                    total_keys.append('1d')
+                if alert_days_diff < 7:
+                    total_keys.append('7d')
+                if alert_days_diff < 30:
+                    total_keys.append('30d')
+                if model_unique_id not in totals_dict:
+                    totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0},
+                                                    '7d': {'errors': 0, 'warnings': 0, 'resolved': 0},
+                                                    '30d': {'errors': 0, 'warnings': 0, 'resolved': 0}}
+                if alert.status == 'warn':
+                    totals_status = 'warnings'
+                elif alert.status == 'error' or alert.status == 'fail':
+                    totals_status = 'errors'
+                else:
+                    totals_status = None
+                if totals_status is not None:
+                    for key in total_keys:
+                        totals_dict[model_unique_id][key][totals_status] += 1
+
             with open(os.path.join(self.config.target_dir, 'test_results.json'), 'w') as test_results_file:
                 json.dump(alerts_dict, test_results_file)
-            self._send_to_slack(alerts)
+
+            with open(os.path.join(self.config.target_dir, 'totals.json'), 'w') as totals_file:
+                json.dump(totals_dict, totals_file)
+
+            #self._send_to_slack(alerts)
 
     def _read_configuration_to_sources_file(self) -> bool:
         logger.info("Reading configuration and writing to sources.yml")
@@ -144,12 +177,12 @@ class DataMonitoring(object):
             success = self.dbt_runner.test(select="tag:elementary")
             self.execution_properties['test_success'] = success
 
-        logger.info("Running internal dbt run to aggregate alerts")
-        success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
-        self.execution_properties['alerts_run_success'] = success
-        if not success:
-            logger.info('Could not aggregate alerts successfully')
-            return
+        # logger.info("Running internal dbt run to aggregate alerts")
+        # success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
+        # self.execution_properties['alerts_run_success'] = success
+        # if not success:
+        #     logger.info('Could not aggregate alerts successfully')
+        #     return
 
         self._send_alerts()
         self._get_models()
@@ -185,11 +218,6 @@ class DataMonitoring(object):
             with open(os.path.join(self.config.target_dir, 'dbt_sidebar.json'), 'w') as dbt_sidebar_file:
                 json.dump(dbt_sidebar, dbt_sidebar_file)
 
-
-
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
         return data_monitoring_properties
-
-
-
