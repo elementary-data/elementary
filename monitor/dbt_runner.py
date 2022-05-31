@@ -68,7 +68,7 @@ class DbtRunner(object):
                 log_message_data_dict = log_message_dict.get('data')
                 if log_message_data_dict is not None:
                     if not success and error_logs and log_message_dict['level'] == 'error':
-                        run_operation_results.append(log_message_data_dict)
+                        logger.error(log_message_data_dict)
                         continue
                     log_message = log_message_data_dict.get('msg')
                     if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
