@@ -51,8 +51,7 @@ class DbtRunner(object):
         success, _ = self._run_command(['snapshot'])
         return success
 
-    def run_operation(self, macro_name: str, json_logs: bool = True, macro_args: dict = None,
-                      error_logs: bool = False) -> list:
+    def run_operation(self, macro_name: str, json_logs: bool = True, macro_args: dict = None) -> list:
         command_args = ['run-operation', macro_name]
         if macro_args is not None:
             json_args = json.dumps(macro_args)
@@ -67,7 +66,7 @@ class DbtRunner(object):
                 log_message_dict = json.loads(json_message)
                 log_message_data_dict = log_message_dict.get('data')
                 if log_message_data_dict is not None:
-                    if not success and error_logs and log_message_dict['level'] == 'error':
+                    if not success and log_message_dict['level'] == 'error':
                         logger.error(log_message_data_dict)
                         continue
                     log_message = log_message_data_dict.get('msg')
