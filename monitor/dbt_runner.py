@@ -1,6 +1,7 @@
+import json
 import subprocess
 from typing import Union
-import json
+
 from utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -50,12 +51,15 @@ class DbtRunner(object):
         success, _ = self._run_command(['snapshot'])
         return success
 
-    def run_operation(self, macro_name: str, json_logs: bool = True, macro_args: dict = None) -> list:
+    def run_operation(self, macro_name: str, json_logs: bool = True, macro_args: dict = None,
+                      log_errors: bool = False) -> list:
         command_args = ['run-operation', macro_name]
         if macro_args is not None:
             json_args = json.dumps(macro_args)
             command_args.extend(['--args', json_args])
         success, command_output = self._run_command(command_args, json_logs)
+        if log_errors and not success:
+            logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
         if json_logs:
             json_messages = command_output.splitlines()
@@ -63,6 +67,9 @@ class DbtRunner(object):
                 log_message_dict = json.loads(json_message)
                 log_message_data_dict = log_message_dict.get('data')
                 if log_message_data_dict is not None:
+                    if log_errors and log_message_dict['level'] == 'error':
+                        logger.error(log_message_data_dict)
+                        continue
                     log_message = log_message_data_dict.get('msg')
                     if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
                         run_operation_results.append(log_message.replace(self.ELEMENTARY_LOG_PREFIX, ''))
