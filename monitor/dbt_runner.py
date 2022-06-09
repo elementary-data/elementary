@@ -15,7 +15,12 @@ class DbtRunner(object):
         self.profiles_dir = profiles_dir
         self.target = target
 
-    def _run_command(self, command_args: list, json_logs=False) -> (bool, str):
+    def _run_command(
+        self,
+        command_args: list,
+        json_logs: bool = False,
+        vars: Optional[dict] = None
+    ) -> (bool, str):
         dbt_command = ['dbt']
         capture_output = False
         if json_logs:
@@ -26,6 +31,9 @@ class DbtRunner(object):
         dbt_command.extend(['--profiles-dir', self.profiles_dir])
         if self.target:
             dbt_command.extend(['--target', self.target])
+        if vars:
+            json_vars = json.dumps(vars)
+            command_args.extend(['--vars', json_vars])
         logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=capture_output)
         output = None
@@ -42,7 +50,7 @@ class DbtRunner(object):
 
     def seed(self, select: Optional[str] = None) -> bool:
         command_args = ['seed']
-        if select is not None:
+        if select:
             command_args.extend(['-s', select])
         success, _ = self._run_command(command_args)
         return success
@@ -57,16 +65,13 @@ class DbtRunner(object):
         json_logs: bool = True,
         macro_args: Optional[dict] = None,
         log_errors: bool = False,
-        dbt_vars: Optional[dict] = None
+        vars: Optional[dict] = None
     ) -> list:
         command_args = ['run-operation', macro_name]
-        if macro_args is not None:
+        if macro_args:
             json_args = json.dumps(macro_args)
             command_args.extend(['--args', json_args])
-        if dbt_vars is not None:
-            json_vars = json.dumps(dbt_vars)
-            command_args.extend(['--vars', json_vars])
-        success, command_output = self._run_command(command_args, json_logs)
+        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars)
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
@@ -89,27 +94,25 @@ class DbtRunner(object):
         models: Optional[str] = None,
         select: Optional[str] = None,
         full_refresh: bool = False,
-        dbt_vars: Optional[dict] = None,
+        vars: Optional[dict] = None,
     ) -> bool:
         command_args = ['run']
         if full_refresh:
             command_args.append('--full-refresh')
-        if models is not None:
+        if models:
             command_args.extend(['-m', models])
-        if select is not None:
+        if select:
             command_args.extend(['-s', select])
-        if dbt_vars is not None:
-            json_vars = json.dumps(dbt_vars)
-            command_args.extend(['--vars', json_vars])
-        success, _ = self._run_command(command_args)
+        success, _ = self._run_command(command_args=command_args, vars=vars)
         return success
 
-    def test(self, select: Optional[str] = None, dbt_vars: Optional[dict] = None) -> bool:
+    def test(
+        self,
+        select: Optional[str] = None,
+        vars: Optional[dict] = None
+    ) -> bool:
         command_args = ['test']
-        if select is not None:
+        if select:
             command_args.extend(['-s', select])
-        if dbt_vars is not None:
-            json_vars = json.dumps(dbt_vars)
-            command_args.extend(['--vars', json_vars])
-        success, _ = self._run_command(command_args)
+        success, _ = self._run_command(command_args=command_args, vars=vars)
         return success
