@@ -33,7 +33,7 @@ class DbtRunner(object):
             dbt_command.extend(['--target', self.target])
         if vars:
             json_vars = json.dumps(vars)
-            command_args.extend(['--vars', json_vars])
+            dbt_command.extend(['--vars', json_vars])
         logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=capture_output)
         output = None
