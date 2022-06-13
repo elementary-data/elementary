@@ -1,8 +1,8 @@
-import requests
 import json
 from exceptions.exceptions import InvalidAlertType
 from utils.time import convert_utc_time_to_local_time
 from datetime import datetime
+from clients.slack import SlackClient
 
 
 class Alert(object):
@@ -16,10 +16,11 @@ class Alert(object):
             return DbtTestAlert(*alert_row.values())
         else:
             return ElementaryDataAlert(*alert_row.values())
-
+    
     @staticmethod
-    def send(webhook: str, data: dict, content_types: str = "application/json"):
-        requests.post(url=webhook, headers={'Content-type': content_types}, data=json.dumps(data))
+    def send(slack_token: str, channel_name: str, data: dict):
+        slack_client = SlackClient(slack_token)
+        slack_client.send_message(channel_name=channel_name, attachments=json.dumps(data))
 
     def to_slack_message(self) -> dict:
         pass
@@ -56,12 +57,16 @@ class Alert(object):
         })
         slack_message['attachments'][0]['blocks'].extend(block)
 
-    def send_to_slack(self, webhook: str, is_slack_workflow: bool = False):
+    def send_to_slack(self, slack_token: str, channel_name: str, is_slack_workflow: bool = False):
         if is_slack_workflow:
             data = self.to_slack_workflows_message()
         else:
             data = self.to_slack_message()
-        self.send(webhook, data)
+        self.send(
+            slack_token=slack_token,
+            channel_name=channel_name,    
+            data=data
+        )
 
     @property
     def id(self) -> str:

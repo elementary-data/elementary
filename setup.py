@@ -31,6 +31,7 @@ setup(
         'posthog',
         'ruamel.yaml',
         'alive-progress<=2.3.1'
+        'slack_sdk'
     ],
     extras_require={
         'snowflake': ['dbt-snowflake>=0.20,<2.0.0'],

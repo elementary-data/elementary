@@ -5,8 +5,8 @@ from utils.ordered_yaml import OrderedYaml
 
 FILE_DIR = os.path.dirname(__file__)
 
-CONFIG = {'slack': { 'notification_webhook': 'test_slack_webhook', 'workflows': False}}
-WORKFLOWS_CONFIG = {'slack': { 'notification_webhook': 'test_slack_webhook', 'workflows': True }}
+CONFIG = {'slack': { 'token': 'test_slack_token', 'channel_name': 'test_channel_name', 'workflows': False}}
+WORKFLOWS_CONFIG = {'slack': { 'token': 'test_slack_token', 'channel_name': 'test_channel_name', 'workflows': True }}
 
 
 def create_config_files(config: dict):
@@ -26,9 +26,11 @@ def slack_workflows_config():
     return Config(config_dir=FILE_DIR, profiles_dir=FILE_DIR)
 
 
-def test_config_get_slack_notification_webhook(config):
-    assert config.slack_notification_webhook == CONFIG['slack']['notification_webhook']
+def test_config_get_slack_token(config: Config):
+    assert config.slack_token == CONFIG['slack']['token']
 
+def test_config_get_slack_notification_channel_name(config: Config):
+    assert config.slack_notification_channel_name == CONFIG['slack']['notification_channel_name']
 
 def test_slack_workflows_config_get_workflows(slack_workflows_config):
     assert slack_workflows_config.is_slack_workflow == WORKFLOWS_CONFIG['slack']['workflows']

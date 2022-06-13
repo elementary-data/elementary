@@ -5,7 +5,7 @@ from config.config import Config
 from utils.log import get_logger
 import json
 from alive_progress import alive_it
-from typing import Union
+from typing import Optional
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -19,12 +19,19 @@ class DataMonitoring(object):
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(self, config: Config, days_back: int, slack_webhook: Union[str, None]) -> None:
+    def __init__(
+        self,
+        config: Config,
+        days_back: int,
+        slack_token: Optional[str] = None,
+        slack_channel_name: Optional[str] = None
+    ) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.execution_properties = {}
         self.days_back = days_back
-        self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
+        self.slack_token = slack_token or self.config.slack_token
+        self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -54,11 +61,11 @@ class DataMonitoring(object):
         return alerts
 
     def _send_to_slack(self, alerts: [Alert]) -> None:
-        if self.slack_webhook is not None:
+        if self.slack_token and self.slack_channel_name:
             sent_alerts = []
             alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
             for alert in alerts_with_progress_bar:
-                alert.send_to_slack(self.slack_webhook, self.config.is_slack_workflow)
+                alert.send_to_slack(self.slack_token, self.slack_channel_name, self.config.is_slack_workflow)
                 sent_alerts.append(alert.id)
 
             sent_alert_count = len(sent_alerts)
@@ -66,8 +73,8 @@ class DataMonitoring(object):
             if sent_alert_count > 0:
                 self._update_sent_alerts(sent_alerts)
         else:
-            logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
-                        "a slack webhook)")
+            logger.info("Alerts found but slack token is not configured or slack channel is not provided (see documentation on how to configure "
+                        "a slack token)")
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()

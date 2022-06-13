@@ -39,10 +39,16 @@ def get_cli_properties() -> dict:
     help="Set a limit to how far back edr should look for new alerts"
 )
 @click.option(
-    '--slack-webhook', '-s',
+    '--slack-token', '-s',
     type=str,
     default=None,
-    help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
+    help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
+)
+@click.option(
+    '--slack-channel-name', '-ch',
+    type=str,
+    default=None,
+    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
 )
 @click.option(
     '--config-dir', '-c',
@@ -73,14 +79,23 @@ def get_cli_properties() -> dict:
          "see documentation to learn more)."
 )
 @click.pass_context
-def monitor(ctx, days_back, slack_webhook, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package):
+def monitor(
+    ctx,
+    days_back,
+    slack_token,
+    slack_channel_name,
+    config_dir,
+    profiles_dir,
+    update_dbt_package,
+    full_refresh_dbt_package
+):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     config = Config(config_dir, profiles_dir)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
-        data_monitoring = DataMonitoring(config, days_back, slack_webhook)
+        data_monitoring = DataMonitoring(config, days_back, slack_token, slack_channel_name)
         data_monitoring.run(update_dbt_package, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
