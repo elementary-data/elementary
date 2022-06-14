@@ -5,7 +5,7 @@ from config.config import Config
 from utils.log import get_logger
 import json
 from alive_progress import alive_it
-from typing import Optional
+from typing import List, Optional
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -23,6 +23,7 @@ class DataMonitoring(object):
         self,
         config: Config,
         days_back: int,
+        slack_webhook: Optional[str] = None, 
         slack_token: Optional[str] = None,
         slack_channel_name: Optional[str] = None
     ) -> None:
@@ -30,6 +31,7 @@ class DataMonitoring(object):
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.execution_properties = {}
         self.days_back = days_back
+        self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
 
@@ -37,7 +39,7 @@ class DataMonitoring(object):
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
     @staticmethod
-    def _split_list_to_chunks(items: list, chunk_size: int = 50) -> [list]:
+    def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
         chunk_list = []
         for i in range(0, len(items), chunk_size):
             chunk_list.append(items[i: i + chunk_size])
@@ -60,21 +62,25 @@ class DataMonitoring(object):
             alerts.append(Alert.create_alert_from_row(alert_row))
         return alerts
 
-    def _send_to_slack(self, alerts: [Alert]) -> None:
-        if self.slack_token and self.slack_channel_name:
-            sent_alerts = []
-            alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
-            for alert in alerts_with_progress_bar:
-                alert.send_to_slack(self.slack_token, self.slack_channel_name, self.config.is_slack_workflow)
+    def _send_to_slack(self, alerts: List[Alert]) -> None:
+        sent_alerts = []
+        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
+        for alert in alerts_with_progress_bar:
+            sent_successfully = alert.send_to_slack(
+                slack_token=self.slack_token,
+                channel_name=self.slack_channel_name,
+                slack_webhook=self.slack_webhook,
+                is_slack_workflow=self.config.is_slack_workflow
+            )
+            if sent_successfully:
                 sent_alerts.append(alert.id)
-
-            sent_alert_count = len(sent_alerts)
-            self.execution_properties['sent_alert_count'] = sent_alert_count
-            if sent_alert_count > 0:
-                self._update_sent_alerts(sent_alerts)
-        else:
-            logger.info("Alerts found but slack token is not configured or slack channel is not provided (see documentation on how to configure "
-                        "a slack token)")
+            else:
+                logger.info(f"Could not sent the alert - {alert.id}")
+        
+        sent_alert_count = len(sent_alerts)
+        self.execution_properties['sent_alert_count'] = sent_alert_count
+        if sent_alert_count > 0:
+            self._update_sent_alerts(sent_alerts)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()

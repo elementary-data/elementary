@@ -2,7 +2,7 @@ import json
 from exceptions.exceptions import InvalidAlertType
 from utils.time import convert_utc_time_to_local_time
 from datetime import datetime
-from clients.slack import SlackClient
+from clients.slack.slack_client import SlackClient
 
 
 class Alert(object):
@@ -18,9 +18,22 @@ class Alert(object):
             return ElementaryDataAlert(*alert_row.values())
     
     @staticmethod
-    def send(slack_token: str, channel_name: str, data: dict):
-        slack_client = SlackClient(slack_token)
-        slack_client.send_message(channel_name=channel_name, attachments=json.dumps(data))
+    def send(
+        message: str = None,
+        attachments: list = None,
+        blocks: list = None,
+        slack_token: str = None,
+        channel_name: str = None,
+        slack_webhook: str = None
+    ) -> bool:
+        slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
+        sent_successfully = slack_client.send_message(
+            channel_name=channel_name,
+            message=message,
+            attachments=attachments,
+            blocks=blocks
+        )
+        return sent_successfully
 
     def to_slack_message(self) -> dict:
         pass
@@ -57,16 +70,28 @@ class Alert(object):
         })
         slack_message['attachments'][0]['blocks'].extend(block)
 
-    def send_to_slack(self, slack_token: str, channel_name: str, is_slack_workflow: bool = False):
+    def send_to_slack(
+        self,
+        slack_token: str = None,
+        channel_name: str = None,
+        slack_webhook: str = None,
+        is_slack_workflow: bool = False
+    ) -> bool:
         if is_slack_workflow:
-            data = self.to_slack_workflows_message()
+            # Only webhooks support slack workflows
+            message = json.dumps(self.to_slack_workflows_message())
+            return self.send(
+                slack_webhook=slack_webhook,
+                message=message
+            )
         else:
-            data = self.to_slack_message()
-        self.send(
-            slack_token=slack_token,
-            channel_name=channel_name,    
-            data=data
-        )
+            attachments = self.to_slack_message()["attachments"]
+            return self.send(
+                slack_token=slack_token,
+                channel_name=channel_name,
+                slack_webhook=slack_webhook,
+                attachments=attachments
+            )
 
     @property
     def id(self) -> str:

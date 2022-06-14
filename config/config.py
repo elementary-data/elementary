@@ -9,6 +9,7 @@ class Config(object):
     SLACK = 'slack'
     TOKEN = 'token'
     NOTIFICATION_CHANNEL_NAME = 'channel_name'
+    NOTIFICATION_WEBHOOK = 'notification_webhook'
     WORKFLOWS = 'workflows'
     CONFIG_FILE_NAME = 'config.yml'
 
@@ -43,6 +44,13 @@ class Config(object):
         slack_config = self.config_dict.get(self.SLACK)
         if slack_config is not None:
             return slack_config.get(self.NOTIFICATION_CHANNEL_NAME)
+        return None
+    
+    @property
+    def slack_notification_webhook(self) -> Union[str, None]:
+        slack_config = self.config_dict.get(self.SLACK)
+        if slack_config is not None:
+            return slack_config.get(self.NOTIFICATION_WEBHOOK)
         return None
 
     @property

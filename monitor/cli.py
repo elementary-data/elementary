@@ -39,7 +39,13 @@ def get_cli_properties() -> dict:
     help="Set a limit to how far back edr should look for new alerts"
 )
 @click.option(
-    '--slack-token', '-s',
+    '--slack-webhook', '-s',
+    type=str,
+    default=None,
+    help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
+)
+@click.option(
+    '--slack-token', '-t',
     type=str,
     default=None,
     help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
@@ -82,6 +88,7 @@ def get_cli_properties() -> dict:
 def monitor(
     ctx,
     days_back,
+    slack_webhook,
     slack_token,
     slack_channel_name,
     config_dir,
@@ -95,7 +102,13 @@ def monitor(
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
-        data_monitoring = DataMonitoring(config, days_back, slack_token, slack_channel_name)
+        data_monitoring = DataMonitoring(
+            config=config,
+            days_back=days_back,
+            slack_webhook=slack_webhook,
+            slack_token=slack_token,
+            slack_channel_name=slack_channel_name
+        )
         data_monitoring.run(update_dbt_package, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
