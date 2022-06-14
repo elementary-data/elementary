@@ -1,17 +1,22 @@
-import click
 import os
+from datetime import datetime
+from datetime import timedelta, date
 from os.path import expanduser
 
-from lineage.lineage_config import LineageConfig
+import click
+
 from exceptions.exceptions import ConfigError
-from lineage.query_history_factory import QueryHistoryFactory
-from utils.package import get_package_version
-from utils.dbt import is_dbt_installed
 from lineage.empty_graph_helper import EmptyGraphHelper
-from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
-from datetime import timedelta, date
+from lineage.lineage_config import LineageConfig
 from lineage.lineage_graph import LineageGraph
-from datetime import datetime
+from lineage.query_history_factory import QueryHistoryFactory
+from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
+from utils.dbt import is_dbt_installed
+from utils.package import get_package_version
+
+
+class ContextObjectKeys:
+    CONFIG = 'config'
 
 
 class RequiredIf(click.Option):
@@ -40,7 +45,6 @@ class RequiredIf(click.Option):
 
 
 def get_cli_lineage_properties() -> dict:
-
     click_context = click.get_current_context()
     if click_context is None:
         return dict()
@@ -62,7 +66,6 @@ def get_cli_lineage_properties() -> dict:
 
 
 def get_cli_lineage_generate_properties() -> dict:
-
     click_context = click.get_current_context()
     if click_context is None:
         return dict()
@@ -161,10 +164,14 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
             config_dir: str, profiles_dir: str, profile_name: str) -> None:
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
+
+    ctx.ensure_object(dict)
+    config = LineageConfig(config_dir, profiles_dir, profile_name)
+    ctx.obj[ContextObjectKeys.CONFIG] = config
+
     if ctx.invoked_subcommand is not None:
         return
 
-    config = LineageConfig(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_properties(), ctx.command.name)
     execution_properties = dict()
@@ -215,36 +222,9 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
     help="Generate the lineage graph for databases that are included in this list "
          "(to provide more than one database name use ',' between the db names - <db_name1>,<db_name2>).."
 )
-@click.option(
-    '--config-dir', '-c',
-    type=str,
-    default=os.path.join(expanduser('~'), '.edr'),
-    help="Global settings for edr are configured in a config.yml file in this directory "
-         "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
-)
-@click.option(
-    '--profiles-dir', '-d',
-    type=click.Path(exists=True),
-    default=os.path.join(expanduser('~'), '.dbt'),
-    help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-         "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
-    cls=RequiredIf,
-    required_if='profile_name'
-)
-@click.option(
-    '--profile-name', '-p',
-    type=str,
-    default='elementary',
-    help="The profile in your profiles.yml file that will be used as connection details to your data warehouse "
-         "(if you configured 'elementary' profile in your profiles.yml, no need to provide this parameter as we use it "
-         "as default).",
-    cls=RequiredIf,
-    required_if='profiles_dir'
-)
 @click.pass_context
-def generate(ctx, start_date: datetime, end_date: datetime, databases: str, config_dir: str,
-             profiles_dir: str, profile_name: str):
-    config = LineageConfig(config_dir, profiles_dir, profile_name)
+def generate(ctx, start_date: datetime, end_date: datetime, databases: str):
+    config = ctx.obj[ContextObjectKeys.CONFIG]
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_generate_properties(), ctx.command.name)
 
