@@ -149,7 +149,7 @@ class DataMonitoring(object):
         return alerts_and_totals
             #self._send_to_slack(alerts)
 
-    def run(self, days_back: int, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False) -> None:
+    def run(self, days_back: int, dbt_full_refresh: bool = False) -> None:
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
@@ -160,7 +160,7 @@ class DataMonitoring(object):
 
         self._send_alerts(days_back)
 
-    def generate_report(self, force_update_dbt_package: bool = False):
+    def generate_report(self):
         elementary_output = {}
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
