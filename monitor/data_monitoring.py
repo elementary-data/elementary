@@ -97,6 +97,7 @@ class DataMonitoring(object):
                     alerts_dict[model_unique_id].append(alert.to_dict())
                 else:
                     alerts_dict[model_unique_id] = [alert.to_dict()]
+
                 alert_days_diff = get_days_diff_from_now(alert.get_detection_time_utc())
                 total_keys = []
                 if alert_days_diff < 1:

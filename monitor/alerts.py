@@ -113,6 +113,7 @@ class DbtTestAlert(Alert):
         self.test_display_name = self.display_name(test_name)
         self.other = other
         self.sub_type = sub_type
+        self.sub_type_value = self.display_name(self.sub_type)
         self.alert_results_query = alert_results_query.strip() if alert_results_query else ''
         self.alert_results = alert_results if alert_results else ''
         self.test_params = test_params
@@ -214,8 +215,8 @@ class DbtTestAlert(Alert):
                 'latest_run_status': self.alert_status,
                 'model_unique_id': self.model_unique_id,
                 'table_unique_id': self.table_unique_id,
-                'test_type': 'dbt',
-                'test_sub_type': self.alert_type,
+                'test_type': self.alert_type,
+                'test_sub_type': self.sub_type,
                 'test_query': self.alert_results_query,
                 'test_params': self.test_params,
                 'test_results': self.test_results}
@@ -240,7 +241,6 @@ class ElementaryDataAlert(DbtTestAlert):
         else:
             raise InvalidAlertType(f'Got invalid alert type - {self.alert_type}')
 
-        self.sub_type_value = self.display_name(self.sub_type)
         self.description = alert_description[0].upper() + alert_description[1:].lower() if alert_description else ''
         test_params = json.loads(test_params) if test_params else {}
         self.test_params = {'timestamp_column': test_params.get('timestamp_column')}
@@ -345,8 +345,8 @@ class ElementaryDataAlert(DbtTestAlert):
                 'latest_run_status': self.alert_status,
                 'model_unique_id': self.model_unique_id,
                 'table_unique_id': self.table_unique_id,
-                'test_type': 'elementary',
-                'test_sub_type': self.alert_type,
+                'test_type': self.alert_type,
+                'test_sub_type': self.sub_type_value,
                 'test_query': self.alert_results_query,
                 'test_params': self.test_params,
                 'test_results': self.test_results}

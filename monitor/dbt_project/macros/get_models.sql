@@ -12,7 +12,7 @@
               package_name,
               description,
               original_path as full_path
-            from elementary_tests.new_tests_4_elementary.dbt_sources
+            from {{ ref('dbt_sources') }}
           ),
 
           models as (
@@ -27,7 +27,7 @@
               package_name,
               description,
               original_path as full_path
-            from elementary_tests.new_tests_4_elementary.dbt_models
+            from {{ ref('dbt_models') }}
           ),
 
           models_and_sources as (
