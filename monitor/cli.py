@@ -119,7 +119,7 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package):
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        data_monitoring.generate_report(update_dbt_package)
+        data_monitoring.generate_report()
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-report', exc, ctx.command.name)
