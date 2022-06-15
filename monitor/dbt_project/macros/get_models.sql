@@ -1,6 +1,7 @@
 {% macro get_models() %}
     {% set dbt_models_relation = ref('elementary', 'dbt_models') %}
     {%- if elementary.relation_exists(dbt_models_relation) -%}
+        --{# TODO: should we group by #}
         {% set get_models_query %}
               with dbt_artifacts_models as (
                 select
