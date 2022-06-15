@@ -106,12 +106,12 @@ def monitor(
     try:
         data_monitoring = DataMonitoring(
             config=config,
-            days_back=days_back,
+            force_update_dbt_package=update_dbt_package,
             slack_webhook=slack_webhook,
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        data_monitoring.run(days_back, update_dbt_package, full_refresh_dbt_package)
+        data_monitoring.run(days_back, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor', exc, ctx.command.name)
@@ -146,7 +146,7 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package):
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
-        data_monitoring = DataMonitoring(config)
+        data_monitoring = DataMonitoring(config, update_dbt_package)
         data_monitoring.generate_report(update_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
