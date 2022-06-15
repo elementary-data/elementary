@@ -15,7 +15,7 @@ def convert_utc_time_to_local_time(utc_time: 'datetime') -> 'datetime':
 
 def get_days_diff_from_now(utc_time):
     current_utc_time = datetime.utcnow()
-    diff = current_utc_time - utc_time
+    diff = current_utc_time - utc_time.replace(tzinfo=None)
     return diff.days
 
 
