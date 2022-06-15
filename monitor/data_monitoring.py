@@ -4,9 +4,10 @@ from monitor.dbt_runner import DbtRunner
 from config.config import Config
 from utils.log import get_logger
 from utils.time import get_days_diff_from_now
+from utils.json_utils import try_load_json
 import json
 from alive_progress import alive_it
-from typing import Union
+from typing import Union, Optional
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -175,8 +176,10 @@ class DataMonitoring(object):
         self._download_dbt_package_if_needed(force_update_dbt_package)
 
         elementary_output = {}
-        models_and_sidebar = self._get_models()
-        elementary_output.update(models_and_sidebar)
+        models, dbt_sidebar = self._get_dbt_models_and_sidebar()
+        elementary_output['models'] = models
+        elementary_output['dbt_sidebar'] = dbt_sidebar
+
         alerts_and_totals = self._send_alerts(7)
         elementary_output.update(alerts_and_totals)
         import webbrowser
@@ -199,51 +202,77 @@ class DataMonitoring(object):
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
 
-    def _get_models(self):
+    def _get_dbt_models_and_sidebar(self):
+        models = {}
+        dbt_sidebar = {}
         results = self.dbt_runner.run_operation(macro_name='get_models')
-        models_and_sidebar = {}
         if results:
-            models = results[0]
-            with open(os.path.join(self.config.target_dir, 'models.json'), 'w') as models_json_file:
-                models_json_file.write(models)
-            models_and_sidebar.update({'models': json.loads(models)})
-            models = json.loads(results[0])
-            dbt_sidebar = {}
-            for model_unique_id, model_dict in models.items():
-                is_source_model = False
-                #TODO: add this as a flag from the query itself (because there we know that it has been pulled from sources table)
-                if model_unique_id.startswith('source.'):
-                    is_source_model = True
-                model_full_path = model_dict.get('full_path')
-                model_name = model_dict.get('model_name')
-                if model_full_path:
-                    split_path = model_full_path.split('/')
-                    package_name = model_dict.get('package_name')
-                    if package_name and split_path:
-                        split_path.insert(0, package_name)
-                    current_path = dbt_sidebar
-                    for part in split_path:
-                        if is_source_model:
-                            if part == 'models':
-                                part = 'sources'
-                            elif part.endswith('yml'):
-                                part = model_name + '.sql'
+            model_dicts = json.loads(results[0])
+            for model_dict in model_dicts:
+                model_unique_id = model_dict.get('unique_id')
+                self._normalize_dbt_model_dict(model_dict)
+                models[model_unique_id] = model_dict
+                self._update_dbt_sidebar(dbt_sidebar, model_unique_id, model_dict.get('normalized_full_path'),
+                                         model_dict.get('package_name'))
 
-                        if part.endswith('sql'):
-                            if 'files' in current_path:
-                                if model_unique_id not in current_path['files']:
-                                    current_path['files'].append(model_unique_id)
-                            else:
-                                current_path['files'] = [model_unique_id]
-                        else:
-                            if part not in current_path:
-                                current_path[part] = {}
-                            current_path = current_path[part]
+        results = self.dbt_runner.run_operation(macro_name='get_sources')
+        if results:
+            source_dicts = json.loads(results[0])
+            for source_dict in source_dicts:
+                source_unique_id = source_dict.get('unique_id')
+                self._normalize_dbt_model_dict(source_dict, is_source=True)
+                models[source_unique_id] = source_dict
+                self._update_dbt_sidebar(dbt_sidebar, source_unique_id, source_dict.get('normalized_full_path'),
+                                         source_dict.get('package_name'))
+        return models, dbt_sidebar
 
-            with open(os.path.join(self.config.target_dir, 'dbt_sidebar.json'), 'w') as dbt_sidebar_file:
-                json.dump(dbt_sidebar, dbt_sidebar_file)
-            models_and_sidebar.update({'dbt_sidebar': dbt_sidebar})
-        return models_and_sidebar
+    @staticmethod
+    def _update_dbt_sidebar(dbt_sidebar: dict, model_unique_id: str, model_full_path: str,
+                            model_package_name: Optional[str]) -> None:
+        if model_unique_id is None or model_full_path is None:
+            return
+        model_full_path_split = model_full_path.split(os.path.sep)
+        if model_package_name and model_full_path_split:
+            model_full_path_split.insert(0, model_package_name)
+        for part in model_full_path_split:
+            if part.endswith('.sql'):
+                if 'files' in dbt_sidebar:
+                    if model_unique_id not in dbt_sidebar['files']:
+                        dbt_sidebar['files'].append(model_unique_id)
+                else:
+                    dbt_sidebar['files'] = [model_unique_id]
+            else:
+                if part not in dbt_sidebar:
+                    dbt_sidebar[part] = {}
+                dbt_sidebar = dbt_sidebar[part]
+
+    @staticmethod
+    def _normalize_dbt_model_dict(model: dict, is_source: bool = False) -> None:
+        model_full_path = model.get('full_path')
+        model_full_path_split = model_full_path.split(os.path.sep)
+        file_name = None
+        if model_full_path and model_full_path_split:
+            file_name = model_full_path_split[-1]
+        model['file_name'] = file_name
+        owners = model.get('owners')
+        loaded_owners = try_load_json(owners)
+        if loaded_owners:
+            owners = loaded_owners
+        tags = model.get('tags')
+        loaded_tags = try_load_json(tags)
+        if loaded_tags:
+            tags = loaded_tags
+        model['owners'] = owners
+        model['tags'] = tags
+        model_name = model.get('name')
+        model['model_name'] = model_name
+        model['normalized_full_path'] = model_full_path
+        if is_source:
+            if model_full_path_split[0] == 'models':
+                model_full_path_split[0] = 'sources'
+            if model_full_path_split[-1].endswith('.yml'):
+                model_full_path_split[-1] = model_name + '.sql'
+            model['normalized_full_path'] = os.path.sep.join(model_full_path_split)
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
