@@ -131,7 +131,7 @@ class DbtTestAlert(Alert):
                 found_rows_number = found_rows_number.group()
                 self.failed_rows_count = int(found_rows_number)
             self.test_results = {'display_name': self.test_display_name + ' - failed results sample',
-                                 'results_sample': json.loads(self.alert_results),
+                                 'results_sample': self.alert_results,
                                  'error_message': self.error_message,
                                  'failed_rows_count': self.failed_rows_count}
 
@@ -249,7 +249,7 @@ class ElementaryDataAlert(DbtTestAlert):
         if self.alert_type == 'anomaly_detection':
             self.test_params['anomaly_threshold'] = test_params.get('anomaly_score_threshold')
             self.test_results = {'display_name': self.sub_type_value,
-                                 'metrics': json.loads(self.alert_results),
+                                 'metrics': self.alert_results,
                                  'metrics_unit': self.metrics_unit,
                                  'result_description': self.description}
         elif self.alert_type == 'schema_change':

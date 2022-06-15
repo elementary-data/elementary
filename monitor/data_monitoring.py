@@ -3,7 +3,7 @@ from monitor.alerts import Alert
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
 from utils.log import get_logger
-from utils.time import get_days_diff_from_now
+from utils.time import get_days_diff_from_now, get_now_utc_str
 from utils.json_utils import try_load_json
 import json
 from alive_progress import alive_it
@@ -89,48 +89,8 @@ class DataMonitoring(object):
         alerts = self._query_alerts(days_back)
         alert_count = len(alerts)
         self.execution_properties['alert_count'] = alert_count
-        alerts_and_totals = {}
         if alert_count > 0:
-            alerts_dict = {}
-            totals_dict = {}
-            for alert in alerts:
-                model_unique_id = alert.model_unique_id
-                if model_unique_id in alerts_dict:
-                    alerts_dict[model_unique_id].append(alert.to_dict())
-                else:
-                    alerts_dict[model_unique_id] = [alert.to_dict()]
-
-                alert_days_diff = get_days_diff_from_now(alert.get_detection_time_utc())
-                total_keys = []
-                if alert_days_diff < 1:
-                    total_keys.append('1d')
-                if alert_days_diff < 7:
-                    total_keys.append('7d')
-                if alert_days_diff < 30:
-                    total_keys.append('30d')
-                if model_unique_id not in totals_dict:
-                    totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0},
-                                                    '7d': {'errors': 0, 'warnings': 0, 'resolved': 0},
-                                                    '30d': {'errors': 0, 'warnings': 0, 'resolved': 0}}
-                if alert.status == 'warn':
-                    totals_status = 'warnings'
-                elif alert.status == 'error' or alert.status == 'fail':
-                    totals_status = 'errors'
-                else:
-                    totals_status = None
-                if totals_status is not None:
-                    for key in total_keys:
-                        totals_dict[model_unique_id][key][totals_status] += 1
-
-            with open(os.path.join(self.config.target_dir, 'test_results.json'), 'w') as test_results_file:
-                json.dump(alerts_dict, test_results_file)
-
-            with open(os.path.join(self.config.target_dir, 'totals.json'), 'w') as totals_file:
-                json.dump(totals_dict, totals_file)
-
-            alerts_and_totals.update({'test_results': alerts_dict, 'totals': totals_dict})
-        return alerts_and_totals
-            #self._send_to_slack(alerts)
+            self._send_to_slack(alerts)
 
     def run(self, days_back: int, dbt_full_refresh: bool = False) -> None:
 
@@ -145,12 +105,14 @@ class DataMonitoring(object):
 
     def generate_report(self):
         elementary_output = {}
+        elementary_output['creation_time'] = get_now_utc_str()
+        test_results, totals = self._get_test_results()
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
+        elementary_output['test_results'] = test_results
+        elementary_output['totals'] = totals
 
-        alerts_and_totals = self._send_alerts(7)
-        elementary_output.update(alerts_and_totals)
         import webbrowser
         with open(os.path.join(FILE_DIR, 'index.html'), 'r') as index_html_file:
             html_code = index_html_file.read()
@@ -170,6 +132,47 @@ class DataMonitoring(object):
 
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
+
+    def _get_test_results(self):
+        results = self.dbt_runner.run_operation(macro_name='get_test_results')
+        alerts_dict = {}
+        totals_dict = {}
+        if results:
+            test_results = json.loads(results[0])
+            for alert_row in test_results:
+                #TODO: change object to test result?
+                #TODO: handle last min, max in metrics graph, last or anomalous?
+                alert = Alert.create_alert_from_row(alert_row)
+                model_unique_id = alert.model_unique_id
+                if model_unique_id in alerts_dict:
+                    alerts_dict[model_unique_id].append(alert.to_dict())
+                else:
+                    alerts_dict[model_unique_id] = [alert.to_dict()]
+
+                alert_days_diff = get_days_diff_from_now(alert.get_detection_time_utc())
+                total_keys = []
+                if alert_days_diff < 1:
+                    total_keys.append('1d')
+                if alert_days_diff < 7:
+                    total_keys.append('7d')
+                if alert_days_diff < 30:
+                    total_keys.append('30d')
+                if model_unique_id not in totals_dict:
+                    totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0},
+                                                    '7d': {'errors': 0, 'warnings': 0, 'resolved': 0},
+                                                    '30d': {'errors': 0, 'warnings': 0, 'resolved': 0}}
+                #TODO: add total passed
+                if alert.status == 'warn':
+                    totals_status = 'warnings'
+                elif alert.status == 'error' or alert.status == 'fail':
+                    totals_status = 'errors'
+                else:
+                    totals_status = None
+                if totals_status is not None:
+                    for key in total_keys:
+                        totals_dict[model_unique_id][key][totals_status] += 1
+
+        return alerts_dict, totals_dict
 
     def _get_dbt_models_and_sidebar(self):
         models = {}

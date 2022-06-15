@@ -2,6 +2,7 @@
     {% set sources_dict = {} %}
     {% set dbt_sources_relation = ref('elementary', 'dbt_sources') %}
     {%- if elementary.relation_exists(dbt_sources_relation) -%}
+        --{# TODO: should we group by #}
         {% set get_sources_query %}
             with dbt_artifacts_sources as (
                 select
