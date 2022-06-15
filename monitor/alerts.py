@@ -117,14 +117,22 @@ class DbtTestAlert(Alert):
         self.alert_results = alert_results if alert_results else ''
         self.test_params = test_params
         self.error_message = alert_description if alert_description else 'No error message'
-        found_rows_number = re.search(r'\d+', self.error_message)
-        if found_rows_number:
-            found_rows_number = found_rows_number.group()
-            self.failed_rows_count = int(found_rows_number)
         self.column_name = column_name if column_name else ''
         self.icon = ':small_red_triangle:'
+        #TODO: change this to be based on status
         if severity and severity.lower() == 'warn':
             self.icon = ':warning:'
+        self.test_results = None
+        if status != 'pass':
+            found_rows_number = re.search(r'\d+', self.error_message)
+            self.failed_rows_count = -1
+            if found_rows_number:
+                found_rows_number = found_rows_number.group()
+                self.failed_rows_count = int(found_rows_number)
+            self.test_results = {'display_name': self.test_display_name + ' - failed results sample',
+                                 'results_sample': json.loads(self.alert_results),
+                                 'error_message': self.error_message,
+                                 'failed_rows_count': self.failed_rows_count}
 
     def get_detection_time_utc(self):
         return self.detected_at_utc
@@ -210,10 +218,7 @@ class DbtTestAlert(Alert):
                 'test_sub_type': self.alert_type,
                 'test_query': self.alert_results_query,
                 'test_params': self.test_params,
-                'test_results': {'display_name': self.test_display_name + ' - failed results sample',
-                                 'results_sample': json.loads(self.alert_results),
-                                 'error_message': self.error_message,
-                                 'failed_rows_count': self.failed_rows_count}}
+                'test_results': self.test_results}
 
 
 class ElementaryDataAlert(DbtTestAlert):
@@ -245,7 +250,12 @@ class ElementaryDataAlert(DbtTestAlert):
             self.test_params['anomaly_threshold'] = test_params.get('anomaly_score_threshold')
             self.test_results = {'display_name': self.sub_type_value,
                                  'metrics': json.loads(self.alert_results),
-                                 'metrics_unit': self.metrics_unit}
+                                 'metrics_unit': self.metrics_unit,
+                                 'result_description': self.description}
+        elif self.alert_type == 'schema_change':
+            self.test_results = {'display_name': self.sub_type_value.lower(),
+                                 'result_description': self.description}
+
 
     @staticmethod
     def get_metrics_unit(metric_name):
