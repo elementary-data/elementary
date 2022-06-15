@@ -21,11 +21,13 @@ class DataMonitoring(object):
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(self, config: Config, slack_webhook: Union[str, None] = None) -> None:
+    def __init__(self, config: Config, force_update_dbt_package: bool = False,
+                 slack_webhook: Optional[str] = None) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.execution_properties = {}
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
+        self._download_dbt_package_if_needed(force_update_dbt_package)
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -130,39 +132,7 @@ class DataMonitoring(object):
         return alerts_and_totals
             #self._send_to_slack(alerts)
 
-    def _read_configuration_to_sources_file(self) -> bool:
-        logger.info("Reading configuration and writing to sources.yml")
-        sources_yml = self.dbt_runner.run_operation(macro_name='read_configuration_to_sources_yml')
-        if sources_yml is not None:
-            if not os.path.exists(self.DBT_PROJECT_MODELS_PATH):
-                os.makedirs(self.DBT_PROJECT_MODELS_PATH)
-            sources_file_path = os.path.join(self.DBT_PROJECT_MODELS_PATH, 'sources.yml')
-            with open(sources_file_path, 'w') as sources_file:
-                sources_file.write(sources_yml)
-            return True
-        return False
-
-    def run(self, days_back: int, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False,
-            alerts_only: bool = True) -> None:
-
-        self._download_dbt_package_if_needed(force_update_dbt_package)
-
-        if not alerts_only:
-            success = self._read_configuration_to_sources_file()
-            if not success:
-                logger.info('Could not create configuration successfully')
-                return
-
-            logger.info("Running internal dbt run to create metadata and process configuration")
-            success = self.dbt_runner.run(full_refresh=dbt_full_refresh)
-            self.execution_properties['run_success'] = success
-            if not success:
-                logger.info('Could not run dbt run successfully')
-                return
-
-            logger.info("Running internal dbt data tests to collect metrics and calculate anomalies")
-            success = self.dbt_runner.test(select="tag:elementary")
-            self.execution_properties['test_success'] = success
+    def run(self, days_back: int, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False) -> None:
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
@@ -171,10 +141,9 @@ class DataMonitoring(object):
             logger.info('Could not aggregate alerts successfully')
             return
 
+        self._send_alerts(days_back)
+
     def generate_report(self, force_update_dbt_package: bool = False):
-
-        self._download_dbt_package_if_needed(force_update_dbt_package)
-
         elementary_output = {}
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
