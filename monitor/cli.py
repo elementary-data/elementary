@@ -31,7 +31,7 @@ def get_cli_properties() -> dict:
             'version': get_package_version()}
 
 
-@click.command()
+@click.group(invoke_without_command=True)
 @click.option(
     '--days-back', '-d',
     type=int,
@@ -98,6 +98,8 @@ def monitor(
 ):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
+    if ctx.invoked_subcommand is not None:
+        return
     config = Config(config_dir, profiles_dir)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
@@ -109,11 +111,48 @@ def monitor(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        data_monitoring.run(update_dbt_package, full_refresh_dbt_package)
+        data_monitoring.run(days_back, update_dbt_package, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor', exc, ctx.command.name)
         raise
+
+
+@monitor.command()
+@click.option(
+    '--config-dir', '-c',
+    type=str,
+    default=os.path.join(expanduser('~'), '.edr'),
+    help="Global settings for edr are configured in a config.yml file in this directory "
+         "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
+)
+@click.option(
+    '--profiles-dir', '-p',
+    type=str,
+    default=os.path.join(expanduser('~'), '.dbt'),
+    help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
+         "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
+)
+@click.option(
+    '--update-dbt-package', '-u',
+    type=bool,
+    default=False,
+    help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
+         "see documentation to learn more)."
+)
+@click.pass_context
+def report(ctx, config_dir, profiles_dir, update_dbt_package):
+    config = Config(config_dir, profiles_dir)
+    anonymous_tracking = AnonymousTracking(config)
+    track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
+    try:
+        data_monitoring = DataMonitoring(config)
+        data_monitoring.generate_report(update_dbt_package)
+        track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
+    except Exception as exc:
+        track_cli_exception(anonymous_tracking, 'monitor-report', exc, ctx.command.name)
+        raise
+    return
 
 
 if __name__ == "__main__":

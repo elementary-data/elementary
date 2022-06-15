@@ -31,7 +31,6 @@ class DataMonitoring(object):
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir)
         self.execution_properties = {}
-        self.days_back = days_back
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
@@ -53,9 +52,9 @@ class DataMonitoring(object):
                                           macro_args={'alert_ids': alert_ids_chunk},
                                           json_logs=False)
 
-    def _query_alerts(self) -> list:
+    def _query_alerts(self, days_back: int) -> list:
         json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts',
-                                                        macro_args={'days_back': self.days_back})
+                                                        macro_args={'days_back': days_back})
         self.execution_properties['alert_rows'] = len(json_alert_rows)
         alerts = []
         for json_alert_row in json_alert_rows:
@@ -100,8 +99,8 @@ class DataMonitoring(object):
                 logger.info('Could not download internal dbt package')
                 return
 
-    def _send_alerts(self):
-        alerts = self._query_alerts()
+    def _send_alerts(self, days_back: int):
+        alerts = self._query_alerts(days_back)
         alert_count = len(alerts)
         self.execution_properties['alert_count'] = alert_count
         alerts_and_totals = {}
@@ -159,7 +158,7 @@ class DataMonitoring(object):
             return True
         return False
 
-    def run(self, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False,
+    def run(self, days_back: int, force_update_dbt_package: bool = False, dbt_full_refresh: bool = False,
             alerts_only: bool = True) -> None:
 
         self._download_dbt_package_if_needed(force_update_dbt_package)
@@ -188,21 +187,25 @@ class DataMonitoring(object):
             logger.info('Could not aggregate alerts successfully')
             return
 
+    def generate_report(self, force_update_dbt_package: bool = False):
+
+        self._download_dbt_package_if_needed(force_update_dbt_package)
+
         elementary_output = {}
         models_and_sidebar = self._get_models()
         elementary_output.update(models_and_sidebar)
-        alerts_and_totals = self._send_alerts()
+        alerts_and_totals = self._send_alerts(7)
         elementary_output.update(alerts_and_totals)
         import webbrowser
         with open(os.path.join(FILE_DIR, 'index.html'), 'r') as index_html_file:
             html_code = index_html_file.read()
             elementary_output_str = json.dumps(elementary_output)
             elementary_output_html = f"""
-                {html_code}
-                <script>
-                    var elementaryData = {elementary_output_str}
-                </script>
-            """
+                    {html_code}
+                    <script>
+                        var elementaryData = {elementary_output_str}
+                    </script>
+                """
             elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
             with open(elementary_html_file_path, 'w') as elementary_output_html_file:
                 elementary_output_html_file.write(elementary_output_html)
