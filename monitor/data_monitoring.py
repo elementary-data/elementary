@@ -104,6 +104,7 @@ class DataMonitoring(object):
         alerts = self._query_alerts()
         alert_count = len(alerts)
         self.execution_properties['alert_count'] = alert_count
+        alerts_and_totals = {}
         if alert_count > 0:
             alerts_dict = {}
             totals_dict = {}
@@ -141,6 +142,8 @@ class DataMonitoring(object):
             with open(os.path.join(self.config.target_dir, 'totals.json'), 'w') as totals_file:
                 json.dump(totals_dict, totals_file)
 
+            alerts_and_totals.update({'test_results': alerts_dict, 'totals': totals_dict})
+        return alerts_and_totals
             #self._send_to_slack(alerts)
 
     def _read_configuration_to_sources_file(self) -> bool:
@@ -177,26 +180,55 @@ class DataMonitoring(object):
             success = self.dbt_runner.test(select="tag:elementary")
             self.execution_properties['test_success'] = success
 
-        # logger.info("Running internal dbt run to aggregate alerts")
-        # success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
-        # self.execution_properties['alerts_run_success'] = success
-        # if not success:
-        #     logger.info('Could not aggregate alerts successfully')
-        #     return
+        logger.info("Running internal dbt run to aggregate alerts")
+        success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
+        self.execution_properties['alerts_run_success'] = success
+        if not success:
+            logger.info('Could not aggregate alerts successfully')
+            return
 
-        self._send_alerts()
-        self._get_models()
+        elementary_output = {}
+        models_and_sidebar = self._get_models()
+        elementary_output.update(models_and_sidebar)
+        alerts_and_totals = self._send_alerts()
+        elementary_output.update(alerts_and_totals)
+        import webbrowser
+        with open(os.path.join(FILE_DIR, 'index.html'), 'r') as index_html_file:
+            html_code = index_html_file.read()
+            elementary_output_str = json.dumps(elementary_output)
+            elementary_output_html = f"""
+                {html_code}
+                <script>
+                    var elementaryData = {elementary_output_str}
+                </script>
+            """
+            elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
+            with open(elementary_html_file_path, 'w') as elementary_output_html_file:
+                elementary_output_html_file.write(elementary_output_html)
+            with open(os.path.join(self.config.target_dir, 'elementary_output.json'), 'w') as \
+                    elementary_output_json_file:
+                elementary_output_json_file.write(elementary_output_str)
+
+            elementary_html_file_path = 'file://' + elementary_html_file_path
+            webbrowser.open_new_tab(elementary_html_file_path)
 
     def _get_models(self):
         results = self.dbt_runner.run_operation(macro_name='get_models')
+        models_and_sidebar = {}
         if results:
+            models = results[0]
             with open(os.path.join(self.config.target_dir, 'models.json'), 'w') as models_json_file:
-                models_json_file.write(results[0])
-
+                models_json_file.write(models)
+            models_and_sidebar.update({'models': json.loads(models)})
             models = json.loads(results[0])
             dbt_sidebar = {}
             for model_unique_id, model_dict in models.items():
+                is_source_model = False
+                #TODO: add this as a flag from the query itself (because there we know that it has been pulled from sources table)
+                if model_unique_id.startswith('source.'):
+                    is_source_model = True
                 model_full_path = model_dict.get('full_path')
+                model_name = model_dict.get('model_name')
                 if model_full_path:
                     split_path = model_full_path.split('/')
                     package_name = model_dict.get('package_name')
@@ -204,6 +236,12 @@ class DataMonitoring(object):
                         split_path.insert(0, package_name)
                     current_path = dbt_sidebar
                     for part in split_path:
+                        if is_source_model:
+                            if part == 'models':
+                                part = 'sources'
+                            elif part.endswith('yml'):
+                                part = model_name + '.sql'
+
                         if part.endswith('sql'):
                             if 'files' in current_path:
                                 if model_unique_id not in current_path['files']:
@@ -217,6 +255,9 @@ class DataMonitoring(object):
 
             with open(os.path.join(self.config.target_dir, 'dbt_sidebar.json'), 'w') as dbt_sidebar_file:
                 json.dump(dbt_sidebar, dbt_sidebar_file)
+
+            models_and_sidebar.update({'dbt_sidebar': dbt_sidebar})
+        return models_and_sidebar
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
