@@ -143,6 +143,7 @@ class DataMonitoring(object):
 
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
+            self.execution_properties['report_success'] = True
 
     def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')
@@ -160,12 +161,12 @@ class DataMonitoring(object):
                     test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
 
                 self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
-                                                 test_result_object.status)
+                                                 test_result_object.status, test_result_object.test_type)
 
+        self.execution_properties['test_result_totals'] = test_result_totals_api_dict
         return test_results_api_dict, test_result_totals_api_dict
 
-    @staticmethod
-    def _update_test_results_totals(totals_dict, model_unique_id, days_diff, status):
+    def _update_test_results_totals(self, totals_dict, model_unique_id, days_diff, status, test_type):
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
                                             '7d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
@@ -248,13 +249,19 @@ class DataMonitoring(object):
             file_name = model_full_path_split[-1]
         model['file_name'] = file_name
         owners = model.get('owners')
-        loaded_owners = try_load_json(owners)
-        if loaded_owners:
-            owners = loaded_owners
+        if owners:
+            loaded_owners = try_load_json(owners)
+            if loaded_owners:
+                owners = loaded_owners
+            else:
+                owners = [owners]
         tags = model.get('tags')
-        loaded_tags = try_load_json(tags)
-        if loaded_tags:
-            tags = loaded_tags
+        if tags:
+            loaded_tags = try_load_json(tags)
+            if loaded_tags:
+                tags = loaded_tags
+            else:
+                tags = [tags]
         model['owners'] = owners
         model['tags'] = tags
         model_name = model.get('name')
