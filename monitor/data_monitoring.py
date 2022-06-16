@@ -142,6 +142,8 @@ class DataMonitoring(object):
             for alert_row in test_results:
                 #TODO: change object to test result?
                 #TODO: handle last min, max in metrics graph, last or anomalous?
+                #TODO: fixed anomaly threshold field
+                days_diff = alert_row.pop('days_diff')
                 alert = Alert.create_alert_from_row(alert_row)
                 model_unique_id = alert.model_unique_id
                 if model_unique_id in alerts_dict:
@@ -149,30 +151,36 @@ class DataMonitoring(object):
                 else:
                     alerts_dict[model_unique_id] = [alert.to_dict()]
 
-                alert_days_diff = get_days_diff_from_now(alert.get_detection_time_utc())
-                total_keys = []
-                if alert_days_diff < 1:
-                    total_keys.append('1d')
-                if alert_days_diff < 7:
-                    total_keys.append('7d')
-                if alert_days_diff < 30:
-                    total_keys.append('30d')
-                if model_unique_id not in totals_dict:
-                    totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0},
-                                                    '7d': {'errors': 0, 'warnings': 0, 'resolved': 0},
-                                                    '30d': {'errors': 0, 'warnings': 0, 'resolved': 0}}
-                #TODO: add total passed
-                if alert.status == 'warn':
-                    totals_status = 'warnings'
-                elif alert.status == 'error' or alert.status == 'fail':
-                    totals_status = 'errors'
-                else:
-                    totals_status = None
-                if totals_status is not None:
-                    for key in total_keys:
-                        totals_dict[model_unique_id][key][totals_status] += 1
+                self._update_test_results_totals(totals_dict, model_unique_id, days_diff, alert.status)
 
         return alerts_dict, totals_dict
+
+    @staticmethod
+    def _update_test_results_totals(totals_dict, model_unique_id, days_diff, status):
+        if model_unique_id not in totals_dict:
+            totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
+                                            '7d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
+                                            '30d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0}}
+        total_keys = []
+        if days_diff < 1:
+            total_keys.append('1d')
+        if days_diff < 7:
+            total_keys.append('7d')
+        if days_diff < 30:
+            total_keys.append('30d')
+
+        if status == 'warn':
+            totals_status = 'warnings'
+        elif status == 'error' or status == 'fail':
+            totals_status = 'errors'
+        elif status == 'pass':
+            totals_status = 'passed'
+        else:
+            totals_status = None
+
+        if totals_status is not None:
+            for key in total_keys:
+                totals_dict[model_unique_id][key][totals_status] += 1
 
     def _get_dbt_models_and_sidebar(self):
         models = {}
