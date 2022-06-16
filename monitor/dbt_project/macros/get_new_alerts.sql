@@ -14,18 +14,18 @@
     {% for result in results %}
         {% set result_dict = result.dict() %}
         {% set alert_results_query = elementary.insensitive_get_dict_value(result_dict, 'alert_results_query') %}
-        {% set alert_type = elementary.insensitive_get_dict_value(result_dict, 'alert_type') %}
+        {% set test_type = elementary.insensitive_get_dict_value(result_dict, 'test_type') %}
         {% set status = elementary.insensitive_get_dict_value(result_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}
         {% if alert_results_query and status != 'error' %}
-            {% set test_query = alert_results_query %}
-            {% if alert_type == 'dbt_test' %}
-                {% set test_query = alert_results_query ~ ' limit ' ~ results_sample_limit %}
+            {% set test_rows_sample_query = alert_results_query %}
+            {% if test_type == 'dbt_test' %}
+                {% set test_rows_sample_query = test_rows_sample_query ~ ' limit ' ~ results_sample_limit %}
             {% endif %}
 
-            {% set test_results = run_query(test_query) %}
-            {% set test_rows_sample = elementary.agate_to_json(test_results) %}
+            {% set test_rows_sample_agate = run_query(test_rows_sample_query) %}
+            {% set test_rows_sample = elementary.agate_to_json(test_rows_sample_agate) %}
         {% endif %}
 
         {% set new_alert_dict = {'alert_id': elementary.insensitive_get_dict_value(result_dict, 'alert_id'),
