@@ -216,7 +216,7 @@ def send_report(
         slack_client.upload_file(
             channel_name=slack_channel_name,
             file_path=os.path.join(config.target_dir, 'elementary.html'), 
-            message="Elemantary run report"
+            message="Elemantary monitor report"
         )
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
