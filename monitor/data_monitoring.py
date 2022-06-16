@@ -48,13 +48,13 @@ class DataMonitoring(object):
                                           json_logs=False)
 
     def _query_alerts(self, days_back: int) -> list:
-        json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts',
-                                                        macro_args={'days_back': days_back})
-        self.execution_properties['alert_rows'] = len(json_alert_rows)
+        results = self.dbt_runner.run_operation(macro_name='get_new_alerts', macro_args={'days_back': days_back})
         test_result_alerts = []
-        for json_alert_row in json_alert_rows:
-            test_result_alert_dict = json.loads(json_alert_row)
-            test_result_alerts.append(TestResult.create_test_result_from_dict(test_result_alert_dict))
+        if results:
+            test_result_alert_dicts = json.loads(results[0])
+            self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
+            for test_result_alert_dict in test_result_alert_dicts:
+                test_result_alerts.append(TestResult.create_test_result_from_dict(test_result_alert_dict))
         return test_result_alerts
 
     def _send_to_slack(self, test_result_alerts: [TestResult]) -> None:
