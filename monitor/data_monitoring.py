@@ -8,6 +8,7 @@ from utils.json_utils import try_load_json
 import json
 from alive_progress import alive_it
 from typing import Optional
+import pkg_resources
 import webbrowser
 
 logger = get_logger(__name__)
@@ -113,7 +114,8 @@ class DataMonitoring(object):
         elementary_output['test_results'] = test_results
         elementary_output['totals'] = test_result_totals
 
-        with open(os.path.join(FILE_DIR, 'index.html'), 'r') as index_html_file:
+        html_index_path = pkg_resources.resource_filename(__name__, "index.html")
+        with open(html_index_path, 'r') as index_html_file:
             html_code = index_html_file.read()
             elementary_output_str = json.dumps(elementary_output)
             elementary_output_html = f"""
