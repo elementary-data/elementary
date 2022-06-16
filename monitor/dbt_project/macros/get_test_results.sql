@@ -26,7 +26,6 @@
         {% set test_type = elementary.insensitive_get_dict_value(result_dict, 'test_type') %}
         {% set status = elementary.insensitive_get_dict_value(result_dict, 'status') | lower %}
 
-        --{# TODO: maybe move to handle_run_result #}
         {% set test_rows_sample = none %}
         {% if test_results_query and status != 'error' %}
             {% set test_query = test_results_query %}
