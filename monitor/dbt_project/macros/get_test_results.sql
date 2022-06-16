@@ -1,19 +1,22 @@
 {%- macro get_test_results(results_sample_limit = 5) -%}
-    --{# TODO: how do we show only last (if we had the same test in the last x days) #}
     {% set select_test_results %}
         with elemetary_test_results as (
             select * from {{ ref('elementary', 'elementary_test_results') }}
         ),
 
         tests_in_last_30_days as (
-            select *
+            select *,
+                  {{ dbt_utils.datediff(elementary.cast_as_timestamp('detected_at'), dbt_utils.current_timestamp(), 'day') }} as days_diff,
+                  row_number() over (partition by model_unique_id, test_unique_id order by detected_at desc) as row_number
                 from elemetary_test_results
-                where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(30) }}
+                where {{ dbt_utils.datediff(elementary.cast_as_timestamp('detected_at'), dbt_utils.current_timestamp(), 'day') }} < 30
+        ),
+
+        latest_tests_in_the_last_30_days as (
+            select * from tests_in_last_30_days where row_number = 1
         )
 
-        select *,
-               {{ dbt_utils.datediff(elementary.cast_as_timestamp('detected_at'), dbt_utils.current_timestamp(), 'day') }} as days_diff
-               from tests_in_last_30_days
+        select * from latest_tests_in_the_last_30_days
     {%- endset -%}
     {% set query_results_agate = run_query(select_test_results) %}
     {% set query_results = elementary.agate_to_dicts(query_results_agate) %}
