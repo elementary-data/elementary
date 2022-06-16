@@ -16,7 +16,7 @@
 * **Data lineage made simple, reliable, and automated**
   
 
-<img alt="UI" src="static/UI.gif" width="800">
+<img alt="UI" src="static/ui_for_git.png" width="800">
  
 
 ## Quick start
