@@ -56,19 +56,18 @@ class DataMonitoring(object):
                                           json_logs=False)
 
     def _query_alerts(self, days_back: int) -> list:
-        results = self.dbt_runner.run_operation(macro_name='get_new_alerts', macro_args={'days_back': days_back})
+        json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts',
+                                                        macro_args={'days_back': days_back})
+        self.execution_properties['alert_rows'] = len(json_alert_rows)
         test_result_alerts = []
-        if results:
-            test_result_alert_dicts = json.loads(results[0])
-            self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
-            for test_result_alert_dict in test_result_alert_dicts:
-                test_result_alerts.append(TestResult.create_test_result_from_dict(test_result_alert_dict))
+        for json_alert_row in json_alert_rows:
+            test_result_alert_dict = json.loads(json_alert_row)
+            test_result_alerts.append(TestResult.create_test_result_from_dict(test_result_alert_dict))
         return test_result_alerts
 
-<<<<<<< HEAD
-    def _send_to_slack(self, alerts: List[Alert]) -> None:
+    def _send_to_slack(self, test_result_alerts: List[TestResult]) -> None:
         sent_alerts = []
-        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
+        alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
             sent_successfully = alert.send_to_slack(
                 slack_token=self.slack_token,
@@ -77,14 +76,6 @@ class DataMonitoring(object):
                 is_slack_workflow=self.config.is_slack_workflow
             )
             if sent_successfully:
-=======
-    def _send_to_slack(self, test_result_alerts: [TestResult]) -> None:
-        if self.slack_webhook is not None:
-            sent_alerts = []
-            alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
-            for alert in alerts_with_progress_bar:
-                alert.send_to_slack(self.slack_webhook, self.config.is_slack_workflow)
->>>>>>> 8752a34 (Refactored alerts to test results)
                 sent_alerts.append(alert.id)
             else:
                 logger.info(f"Could not sent the alert - {alert.id}")
