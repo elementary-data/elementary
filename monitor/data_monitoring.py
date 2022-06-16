@@ -150,8 +150,8 @@ class DataMonitoring(object):
         test_results_api_dict = {}
         test_result_totals_api_dict = {}
         if results:
-            test_result_dict = json.loads(results[0])
-            for test_result_dict in test_result_dict:
+            test_result_dicts = json.loads(results[0])
+            for test_result_dict in test_result_dicts:
                 days_diff = test_result_dict.pop('days_diff')
                 test_result_object = TestResult.create_test_result_from_dict(test_result_dict)
                 model_unique_id = test_result_object.model_unique_id
@@ -161,12 +161,12 @@ class DataMonitoring(object):
                     test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
 
                 self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
-                                                 test_result_object.status, test_result_object.test_type)
+                                                 test_result_object.status)
 
-        self.execution_properties['test_result_totals'] = test_result_totals_api_dict
+            self.execution_properties['test_results'] = len(test_result_dicts)
         return test_results_api_dict, test_result_totals_api_dict
 
-    def _update_test_results_totals(self, totals_dict, model_unique_id, days_diff, status, test_type):
+    def _update_test_results_totals(self, totals_dict, model_unique_id, days_diff, status):
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
                                             '7d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
