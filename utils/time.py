@@ -13,12 +13,6 @@ def convert_utc_time_to_local_time(utc_time: 'datetime') -> 'datetime':
     return utc_time.astimezone(to_zone)
 
 
-def get_days_diff_from_now(utc_time) -> int:
-    current_utc_time = datetime.utcnow()
-    diff = current_utc_time - utc_time.replace(tzinfo=None)
-    return diff.days
-
-
 def get_now_utc_str() -> str:
     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
