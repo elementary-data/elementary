@@ -19,7 +19,7 @@
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(alert_results_query, alert_type, results_sample_limit) %}
         {%- endif -%}
 
-        {% set new_alert_dict = {'alert_id': elementary.insensitive_get_dict_value(result_dict, 'alert_id'),
+        {% set new_alert_dict = {'id': elementary.insensitive_get_dict_value(result_dict, 'alert_id'),
                                  'model_unique_id': elementary.insensitive_get_dict_value(result_dict, 'model_unique_id'),
                                  'test_unique_id': elementary.insensitive_get_dict_value(result_dict, 'test_unique_id'),
                                  'detected_at': elementary.insensitive_get_dict_value(result_dict, 'detected_at').isoformat(),
@@ -27,13 +27,13 @@
                                  'schema_name': elementary.insensitive_get_dict_value(result_dict, 'schema_name'),
                                  'table_name': elementary.insensitive_get_dict_value(result_dict, 'table_name'),
                                  'column_name': elementary.insensitive_get_dict_value(result_dict, 'column_name'),
-                                 'alert_type': alert_type,
-                                 'sub_type': elementary.insensitive_get_dict_value(result_dict, 'sub_type'),
-                                 'alert_description': elementary.insensitive_get_dict_value(result_dict, 'alert_description'),
+                                 'test_type': alert_type,
+                                 'test_sub_type': elementary.insensitive_get_dict_value(result_dict, 'sub_type'),
+                                 'test_results_description': elementary.insensitive_get_dict_value(result_dict, 'alert_description'),
                                  'owners': elementary.insensitive_get_dict_value(result_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(result_dict, 'tags'),
-                                 'alert_results_query': alert_results_query,
-                                 'alert_results': test_rows_sample,
+                                 'test_results_query': alert_results_query,
+                                 'test_results_sample': test_rows_sample,
                                  'other': elementary.insensitive_get_dict_value(result_dict, 'other'),
                                  'test_name': elementary.insensitive_get_dict_value(result_dict, 'test_name'),
                                  'test_params': elementary.insensitive_get_dict_value(result_dict, 'test_params'),
