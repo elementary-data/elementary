@@ -264,7 +264,7 @@ class ElementaryTestResult(DbtTestResult):
 
         if self.test_type == 'anomaly_detection':
             test_params = {'timestamp_column': self.test_params.get('timestamp_column'),
-                           'anomaly_score_threshold': self.test_params.get('sensitivity')}
+                           'anomaly_threshold': self.test_params.get('sensitivity')}
             test_results = {'display_name': self.test_sub_type_display_name,
                             'metrics': self.test_rows_sample,
                             'result_description': self.test_results_description}
