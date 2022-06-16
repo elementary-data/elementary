@@ -136,7 +136,7 @@ class DataMonitoring(object):
     def _get_test_results(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')
         alerts_dict = {}
-        totals_dict = {}
+        test_result_totals_dict = {}
         if results:
             test_results = json.loads(results[0])
             for alert_row in test_results:
@@ -151,9 +151,9 @@ class DataMonitoring(object):
                 else:
                     alerts_dict[model_unique_id] = [alert.to_dict()]
 
-                self._update_test_results_totals(totals_dict, model_unique_id, days_diff, alert.status)
+                self._update_test_results_totals(test_result_totals_dict, model_unique_id, days_diff, alert.status)
 
-        return alerts_dict, totals_dict
+        return alerts_dict, test_result_totals_dict
 
     @staticmethod
     def _update_test_results_totals(totals_dict, model_unique_id, days_diff, status):
