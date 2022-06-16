@@ -1,5 +1,5 @@
 <p align="center">
-<img alt="Logo" src="static/git_head.png"/ width="600">
+<img alt="Logo" src="static/headline_orange.png"/ width="600">
 </p>
 
 <p align="center">
@@ -7,14 +7,16 @@
 <a href="https://docs.elementary-data.com/"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-brightgreen"/>
 
-## Use cases
-Monitor your data warehouse in minutes:
-* **Data anomalies monitoring as dbt tests**
-* **Data lineage made simple, reliable, and automated**
-* **dbt operational monitoring**
-* **Slack alerts**
+## Open source data observability
   
-:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+* **Data anomalies monitoring as dbt tests**
+* **dbt observability**
+* **Data observability UI**
+* **Slack alerts**
+* **Data lineage made simple, reliable, and automated**
+  
+
+<img alt="UI" src="static/UI.gif" width="800">
  
 
 ## Quick start
@@ -24,12 +26,13 @@ Monitor your data warehouse in minutes:
 [Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
 
 Our full documentation is [available here](https://docs.elementary-data.com/). 
-
+  
 ##
+
+:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
+  
 Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
-(Not a dbt user? you can still use Elementary data monitoring, reach out to us on Slack and we will help).
-  
   
 ## Data anomalies monitoring as dbt tests
 
@@ -40,15 +43,12 @@ On each execution, the tests analyze the new data, compare it to historical metr
   
 **Elementary data monitors as tests are configured and executed like native tests in your project!**
 
-
+  
+  
 ## Demo & sandbox
 
 Data anomalies monitoring as dbt tests [demo video](https://www.elementary-data.com/demo).  
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
-
-<img alt="Slack" src="static/Slack_alerts_new_format.png" width="450">       <img alt="configuration" src="static/properties_yml_.png" width="320">
-  
-
 
 
 ## Community & Support
