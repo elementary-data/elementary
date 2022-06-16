@@ -3,12 +3,12 @@ from monitor.alerts import Alert
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
 from utils.log import get_logger
-from utils.time import get_days_diff_from_now, get_now_utc_str
+from utils.time import get_now_utc_str
 from utils.json_utils import try_load_json
 import json
 from alive_progress import alive_it
 from typing import List, Optional
-
+import webbrowser
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -77,7 +77,6 @@ class DataMonitoring(object):
             )
             if sent_successfully:
                 sent_alerts.append(alert.id)
-
             else:
                 logger.info(f"Could not sent the alert - {alert.id}")
         
@@ -85,10 +84,6 @@ class DataMonitoring(object):
         self.execution_properties['sent_alert_count'] = sent_alert_count
         if sent_alert_count > 0:
             self._update_sent_alerts(sent_alerts)
-
-        else:
-            logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
-                        "a slack webhook)")
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -123,14 +118,13 @@ class DataMonitoring(object):
     def generate_report(self):
         elementary_output = {}
         elementary_output['creation_time'] = get_now_utc_str()
-        test_results, totals = self._get_test_results()
+        test_results, test_result_totals = self._get_test_results()
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
         elementary_output['test_results'] = test_results
-        elementary_output['totals'] = totals
+        elementary_output['totals'] = test_result_totals
 
-        import webbrowser
         with open(os.path.join(FILE_DIR, 'index.html'), 'r') as index_html_file:
             html_code = index_html_file.read()
             elementary_output_str = json.dumps(elementary_output)
