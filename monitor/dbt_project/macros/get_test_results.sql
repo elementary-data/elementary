@@ -12,13 +12,13 @@
         )
 
         select *,
-               {{ dbt_utils.datediff(dbt_utils.current_timestamp(), elementary.cast_as_timestamp('detected_at'), 'day') }} as day_diff
+               {{ dbt_utils.datediff(elementary.cast_as_timestamp('detected_at'), dbt_utils.current_timestamp(), 'day') }} as days_diff
                from tests_in_last_30_days
     {%- endset -%}
-    {% set query_results = run_query(select_test_results) %}
+    {% set query_results_agate = run_query(select_test_results) %}
+    {% set query_results = elementary.agate_to_dicts(query_results_agate) %}
     {% set test_results = [] %}
-    {%- for result_row in query_results -%}
-        {% set result_dict = result_row.dict() %}
+    {%- for result_dict in query_results -%}
         {% set test_results_query = elementary.insensitive_get_dict_value(result_dict, 'test_results_query') %}
         {% set test_type = elementary.insensitive_get_dict_value(result_dict, 'test_type') %}
         {% set status = elementary.insensitive_get_dict_value(result_dict, 'status') | lower %}
@@ -38,7 +38,7 @@
         {% set new_alert_dict = {'alert_id': elementary.insensitive_get_dict_value(result_dict, 'id'),
                                  'model_unique_id': elementary.insensitive_get_dict_value(result_dict, 'model_unique_id'),
                                  'test_unique_id': elementary.insensitive_get_dict_value(result_dict, 'test_unique_id'),
-                                 'detected_at': elementary.insensitive_get_dict_value(result_dict, 'detected_at').isoformat(),
+                                 'detected_at': elementary.insensitive_get_dict_value(result_dict, 'detected_at'),
                                  'database_name': elementary.insensitive_get_dict_value(result_dict, 'database_name'),
                                  'schema_name': elementary.insensitive_get_dict_value(result_dict, 'schema_name'),
                                  'table_name': elementary.insensitive_get_dict_value(result_dict, 'table_name'),
@@ -54,7 +54,8 @@
                                  'test_name': elementary.insensitive_get_dict_value(result_dict, 'test_name'),
                                  'test_params': elementary.insensitive_get_dict_value(result_dict, 'test_params'),
                                  'severity': elementary.insensitive_get_dict_value(result_dict, 'severity'),
-                                 'status': status} %}
+                                 'status': status,
+                                 'days_diff': elementary.insensitive_get_dict_value(result_dict, 'days_diff')} %}
         {% do test_results.append(new_alert_dict) %}
     {%- endfor -%}
     {% do elementary.edr_log(tojson(test_results)) %}
