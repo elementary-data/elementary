@@ -1,5 +1,5 @@
 import os
-from monitor.alerts import Alert
+from monitor.test_result import TestResult
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
 from utils.log import get_logger
@@ -51,16 +51,16 @@ class DataMonitoring(object):
         json_alert_rows = self.dbt_runner.run_operation(macro_name='get_new_alerts',
                                                         macro_args={'days_back': days_back})
         self.execution_properties['alert_rows'] = len(json_alert_rows)
-        alerts = []
+        test_result_alerts = []
         for json_alert_row in json_alert_rows:
-            alert_row = json.loads(json_alert_row)
-            alerts.append(Alert.create_alert_from_row(alert_row))
-        return alerts
+            test_result_alert_dict = json.loads(json_alert_row)
+            test_result_alerts.append(TestResult.create_test_result_from_dict(test_result_alert_dict))
+        return test_result_alerts
 
-    def _send_to_slack(self, alerts: [Alert]) -> None:
+    def _send_to_slack(self, test_result_alerts: [TestResult]) -> None:
         if self.slack_webhook is not None:
             sent_alerts = []
-            alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
+            alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
             for alert in alerts_with_progress_bar:
                 alert.send_to_slack(self.slack_webhook, self.config.is_slack_workflow)
                 sent_alerts.append(alert.id)
@@ -106,7 +106,7 @@ class DataMonitoring(object):
     def generate_report(self):
         elementary_output = {}
         elementary_output['creation_time'] = get_now_utc_str()
-        test_results, test_result_totals = self._get_test_results()
+        test_results, test_result_totals = self._get_test_results_and_totals()
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
@@ -132,27 +132,25 @@ class DataMonitoring(object):
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
 
-    def _get_test_results(self):
+    def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')
-        alerts_dict = {}
-        test_result_totals_dict = {}
+        test_results_api_dict = {}
+        test_result_totals_api_dict = {}
         if results:
-            test_results = json.loads(results[0])
-            for alert_row in test_results:
-                #TODO: change object to test result?
-                #TODO: handle last min, max in metrics graph, last or anomalous?
-                #TODO: fixed anomaly threshold field
-                days_diff = alert_row.pop('days_diff')
-                alert = Alert.create_alert_from_row(alert_row)
-                model_unique_id = alert.model_unique_id
-                if model_unique_id in alerts_dict:
-                    alerts_dict[model_unique_id].append(alert.to_dict())
+            test_result_dict = json.loads(results[0])
+            for test_result_dict in test_result_dict:
+                days_diff = test_result_dict.pop('days_diff')
+                test_result_object = TestResult.create_test_result_from_dict(test_result_dict)
+                model_unique_id = test_result_object.model_unique_id
+                if model_unique_id in test_results_api_dict:
+                    test_results_api_dict[model_unique_id].append(test_result_object.to_test_result_api_dict())
                 else:
-                    alerts_dict[model_unique_id] = [alert.to_dict()]
+                    test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
 
-                self._update_test_results_totals(test_result_totals_dict, model_unique_id, days_diff, alert.status)
+                self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
+                                                 test_result_object.status)
 
-        return alerts_dict, test_result_totals_dict
+        return test_results_api_dict, test_result_totals_api_dict
 
     @staticmethod
     def _update_test_results_totals(totals_dict, model_unique_id, days_diff, status):

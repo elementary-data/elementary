@@ -16,7 +16,11 @@
             select * from tests_in_last_30_days where row_number = 1
         )
 
-        select * from latest_tests_in_the_last_30_days
+        select id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
+               column_name, test_type, test_sub_type, test_results_description, owners, tags,
+               test_results_query, other, test_name, test_params, severity, status, days_diff
+
+        from latest_tests_in_the_last_30_days
     {%- endset -%}
     {% set elementary_test_results_agate = run_query(select_test_results) %}
     {% set test_result_dicts = elementary.agate_to_dicts(elementary_test_results_agate) %}
