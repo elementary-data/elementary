@@ -179,6 +179,12 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package):
          "see documentation to learn more)."
 )
 @click.option(
+    '--slack-webhook', '-s',
+    type=str,
+    default=None,
+    help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
+)
+@click.option(
     '--slack-token', '-t',
     type=str,
     default=None,
@@ -196,6 +202,7 @@ def send_report(
     config_dir,
     profiles_dir,
     update_dbt_package,
+    slack_webhook,
     slack_token,
     slack_channel_name
 ):
@@ -205,7 +212,7 @@ def send_report(
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
         data_monitoring.generate_report()
-        slack_client = SlackClient.initial(token=slack_token)
+        slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
         slack_client.upload_file(
             channel_name=slack_channel_name,
             file_path=os.path.join(config.target_dir, 'elementary.html'), 
