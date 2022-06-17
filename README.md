@@ -10,7 +10,6 @@
 ## Open source data observability
   
 * **Data anomalies monitoring as dbt tests**
-* **dbt observability**
 * **Data observability UI**
 * **Slack alerts**
 * **Data lineage made simple, reliable, and automated**
