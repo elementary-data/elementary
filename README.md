@@ -11,6 +11,7 @@
   
 * **Data anomalies monitoring as dbt tests**
 * **Data observability UI**
+* **dbt artifacts uploader**
 * **Slack alerts**
 * **Data lineage made simple, reliable, and automated**
   
