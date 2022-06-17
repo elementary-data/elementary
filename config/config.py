@@ -11,9 +11,10 @@ class Config(object):
     WORKFLOWS = 'workflows'
     CONFIG_FILE_NAME = 'config.yml'
 
-    def __init__(self, config_dir: str, profiles_dir: str) -> None:
+    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None) -> None:
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
+        self.profile_target = profile_target
         self.config_dict = self._load_configuration()
 
     def _load_configuration(self) -> dict:
