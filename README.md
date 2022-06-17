@@ -17,7 +17,10 @@
   
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
+
+### Checkout the [live demo](https://www.elementary-data.com/data-observability-demo)
  
+  
 
 ## Quick start
   
@@ -47,7 +50,7 @@ On each execution, the tests analyze the new data, compare it to historical metr
   
 ## Demo & sandbox
 
-Data anomalies monitoring as dbt tests [demo video](https://www.elementary-data.com/demo).  
+Data anomalies monitoring as dbt tests [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).  
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
 
