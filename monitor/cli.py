@@ -92,7 +92,6 @@ def get_cli_properties() -> dict:
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
 @click.pass_context
-<<<<<<< HEAD
 def monitor(
     ctx,
     days_back,
@@ -102,12 +101,9 @@ def monitor(
     config_dir,
     profiles_dir,
     update_dbt_package,
-    full_refresh_dbt_package
+    full_refresh_dbt_package,
+    profile_target
 ):
-=======
-def monitor(ctx, days_back, slack_webhook, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package,
-            profile_target):
->>>>>>> master
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
