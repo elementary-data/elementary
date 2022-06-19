@@ -46,7 +46,7 @@ def get_cli_properties() -> dict:
     help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
 )
 @click.option(
-    '--slack-token', '-t',
+    '--slack-token', '-st',
     type=str,
     default=None,
     help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
@@ -198,7 +198,7 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
 )
 @click.option(
-    '--slack-token', '-t',
+    '--slack-token', '-st',
     type=str,
     default=None,
     help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
