@@ -15,6 +15,8 @@ from clients.slack.slack_client import SlackClient
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
 
+DEFAULT_DAYS_BACK = 7
+
 
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary'
@@ -107,7 +109,7 @@ class DataMonitoring(object):
         if alert_count > 0:
             self._send_to_slack(alerts)
 
-    def run(self, days_back: int, dbt_full_refresh: bool = False) -> None:
+    def run(self, days_back: int = DEFAULT_DAYS_BACK, dbt_full_refresh: bool = False) -> None:
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)

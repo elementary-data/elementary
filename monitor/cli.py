@@ -85,7 +85,16 @@ def monitor(
     
     MonitorWorkflow(
         click_context=ctx,
-        module_name="monitor"
+        module_name="monitor",
+        days_back=days_back,
+        slack_webhook=slack_webhook,
+        slack_token=slack_token,
+        slack_channel_name=slack_channel_name,
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        update_dbt_package=update_dbt_package,
+        full_refresh_dbt_package=full_refresh_dbt_package,
+        profile_target=profile_target,
     ).run()
 
 
@@ -121,7 +130,11 @@ def monitor(
 def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     ReportWorkflow(
         click_context=ctx,
-        module_name="monitor-report"
+        module_name="monitor-report",
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        profile_target=profile_target,
+        update_dbt_package=update_dbt_package
     ).run()
 
 
@@ -184,7 +197,14 @@ def send_report(
 ):
     SendReportWorkflow(
         click_context=ctx,
-        module_name="monitor-send-report"
+        module_name="monitor-send-report",
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        profile_target=profile_target,
+        slack_webhook=slack_webhook,
+        slack_token=slack_token,
+        slack_channel_name=slack_channel_name,
+        update_dbt_package=update_dbt_package
     ).run()
 
 
