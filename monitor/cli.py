@@ -182,29 +182,10 @@ def send_report(
     slack_channel_name,
     profile_target
 ):
-<<<<<<< HEAD
     SendReportWorkflow(
         click_context=ctx,
         module_name="monitor-send-report"
     ).run()
-=======
-    config = Config(config_dir, profiles_dir, profile_target)
-    anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
-    try:
-        data_monitoring = DataMonitoring(config, update_dbt_package)
-        data_monitoring.generate_report()
-        slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
-        slack_client.upload_file(
-            channel_name=slack_channel_name,
-            file_path=os.path.join(config.target_dir, 'elementary.html'), 
-            message="Elemantary monitor report"
-        )
-    except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
-        raise
-    return
->>>>>>> attaching-report-to-slack
 
 
 if __name__ == "__main__":
