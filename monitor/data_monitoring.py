@@ -30,6 +30,7 @@ class DataMonitoring(object):
         self.execution_properties = {}
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self._download_dbt_package_if_needed(force_update_dbt_package)
+        self.status_code = 0
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -55,7 +56,12 @@ class DataMonitoring(object):
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
-                test_result_alerts.append(TestResult.create_test_result_from_dict(test_result_alert_dict))
+                test_result_object = TestResult.create_test_result_from_dict(test_result_alert_dict)
+                if test_result_object:
+                    test_result_alerts.append(test_result_object)
+                else:
+                    self.status_code = 1
+
         return test_result_alerts
 
     def _send_to_slack(self, test_result_alerts: [TestResult]) -> None:
@@ -71,6 +77,7 @@ class DataMonitoring(object):
             if sent_alert_count > 0:
                 self._update_sent_alerts(sent_alerts)
         else:
+            self.status_code = 1
             logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
                         "a slack webhook)")
 
@@ -84,6 +91,7 @@ class DataMonitoring(object):
             self.execution_properties['package_downloaded'] = package_downloaded
             if not package_downloaded:
                 logger.info('Could not download internal dbt package')
+                self.status_code = 1
                 return
 
     def _send_alerts(self, days_back: int):
@@ -93,18 +101,22 @@ class DataMonitoring(object):
         if alert_count > 0:
             self._send_to_slack(alerts)
 
-    def run(self, days_back: int, dbt_full_refresh: bool = False) -> None:
+    def run(self, days_back: int, dbt_full_refresh: bool = False) -> int:
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
         self.execution_properties['alerts_run_success'] = success
         if not success:
             logger.info('Could not aggregate alerts successfully')
-            return
+            self.execution_properties['run_status_code'] = 1
+            return 1
 
         self._send_alerts(days_back)
+        self.execution_properties['run_end'] = True
+        self.execution_properties['run_status_code'] = self.status_code
+        return self.status_code
 
-    def generate_report(self):
+    def generate_report(self) -> int:
         elementary_output = {}
         elementary_output['creation_time'] = get_now_utc_str()
         test_results, test_result_totals = self._get_test_results_and_totals()
@@ -133,7 +145,9 @@ class DataMonitoring(object):
 
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
-            self.execution_properties['report_success'] = True
+            self.execution_properties['report_end'] = True
+            self.execution_properties['report_status_code'] = self.status_code
+            return self.status_code
 
     def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')
@@ -144,14 +158,17 @@ class DataMonitoring(object):
             for test_result_dict in test_result_dicts:
                 days_diff = test_result_dict.pop('days_diff')
                 test_result_object = TestResult.create_test_result_from_dict(test_result_dict)
-                model_unique_id = test_result_object.model_unique_id
-                if model_unique_id in test_results_api_dict:
-                    test_results_api_dict[model_unique_id].append(test_result_object.to_test_result_api_dict())
-                else:
-                    test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
+                if test_result_object:
+                    model_unique_id = test_result_object.model_unique_id
+                    if model_unique_id in test_results_api_dict:
+                        test_results_api_dict[model_unique_id].append(test_result_object.to_test_result_api_dict())
+                    else:
+                        test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
 
-                self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
-                                                 test_result_object.status)
+                    self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
+                                                     test_result_object.status)
+                else:
+                    self.status_code = 1
 
             self.execution_properties['test_results'] = len(test_result_dicts)
         return test_results_api_dict, test_result_totals_api_dict
