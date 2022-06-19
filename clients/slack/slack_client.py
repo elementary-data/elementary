@@ -28,15 +28,15 @@ class SlackClient(ABC):
 
     @abstractmethod
     def _initial_client(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def send_message(self,**kwargs):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def upload_file(self,**kwargs):
-        pass
+        raise NotImplementedError
 
 
 class SlackWebClient(SlackClient):

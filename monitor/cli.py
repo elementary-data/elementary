@@ -209,6 +209,12 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     default=None,
     help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
 )
+@click.option(
+    '--profile-target', '-t',
+    type=str,
+    default=None,
+    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -217,9 +223,10 @@ def send_report(
     update_dbt_package,
     slack_webhook,
     slack_token,
-    slack_channel_name
+    slack_channel_name,
+    profile_target
 ):
-    config = Config(config_dir, profiles_dir)
+    config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
