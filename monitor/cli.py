@@ -85,7 +85,14 @@ def get_cli_properties() -> dict:
     help="Force running a full refresh of all incremental models in the edr dbt package (usually this is not needed, "
          "see documentation to learn more)."
 )
+@click.option(
+    '--profile-target', '-t',
+    type=str,
+    default=None,
+    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+)
 @click.pass_context
+<<<<<<< HEAD
 def monitor(
     ctx,
     days_back,
@@ -97,11 +104,15 @@ def monitor(
     update_dbt_package,
     full_refresh_dbt_package
 ):
+=======
+def monitor(ctx, days_back, slack_webhook, config_dir, profiles_dir, update_dbt_package, full_refresh_dbt_package,
+            profile_target):
+>>>>>>> master
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
         return
-    config = Config(config_dir, profiles_dir)
+    config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
@@ -141,9 +152,15 @@ def monitor(
     help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
          "see documentation to learn more)."
 )
+@click.option(
+    '--profile-target', '-t',
+    type=str,
+    default=None,
+    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+)
 @click.pass_context
-def report(ctx, config_dir, profiles_dir, update_dbt_package):
-    config = Config(config_dir, profiles_dir)
+def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
+    config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:

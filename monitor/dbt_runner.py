@@ -1,6 +1,6 @@
 import json
 import subprocess
-from typing import Optional
+from typing import Optional, Tuple
 
 from utils.log import get_logger
 
@@ -20,7 +20,7 @@ class DbtRunner(object):
         command_args: list,
         json_logs: bool = False,
         vars: Optional[dict] = None
-    ) -> (bool, str):
+    ) -> Tuple[bool, str]:
         dbt_command = ['dbt']
         capture_output = False
         if json_logs:

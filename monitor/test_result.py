@@ -235,7 +235,6 @@ class ElementaryTestResult(DbtTestResult):
                          test_results_query, test_rows_sample, other, test_name, test_params, severity, status)
 
         self.test_results_description = self.description_display_name(test_results_description)
-        self.test_params = try_load_json(test_params) if test_params else {}
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:
         anomalous_value = None
@@ -291,17 +290,18 @@ class ElementaryTestResult(DbtTestResult):
                 self.add_fields_section_to_slack_message(slack_message, column_msgs, divider=True)
             if self.test_params:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Parameters:*\n{self.test_params}",
+                                                       f"*Test Parameters:*\n`{self.test_params}`",
                                                        divider=True)
             return slack_message
 
     def to_test_result_api_dict(self):
-        test_params = self.test_params
+        test_params = try_load_json(self.test_params) if self.test_params else {}
         test_results = None
-
         if self.test_type == 'anomaly_detection':
-            test_params = {'timestamp_column': self.test_params.get('timestamp_column'),
-                           'anomaly_threshold': self.test_params.get('sensitivity')}
+            timestamp_column = test_params.get('timestamp_column')
+            sensitivity = test_params.get('sensitivity')
+            test_params = {'timestamp_column': timestamp_column,
+                           'anomaly_threshold': sensitivity}
             self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
             test_results = {'display_name': self.test_sub_type_display_name,
                             'metrics': self.test_rows_sample,
