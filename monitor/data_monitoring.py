@@ -10,6 +10,7 @@ from alive_progress import alive_it
 from typing import List, Optional
 import pkg_resources
 import webbrowser
+from clients.slack.slack_client import SlackClient
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -37,6 +38,7 @@ class DataMonitoring(object):
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
+        self.slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
 
     def _dbt_package_exists(self) -> bool:
@@ -146,6 +148,17 @@ class DataMonitoring(object):
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
             self.execution_properties['report_success'] = True
+    
+    def send_report(self):
+        elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
+        if os.path.exists(elementary_html_file_path):
+            self.slack_client.upload_file(
+                channel_name=self.slack_channel_name,
+                file_path=elementary_html_file_path,
+                message="Elemantary monitor report"
+            )
+        else:
+            logger.error('Could not send "Elementary monitor report" because it is not exists.')
 
     def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')

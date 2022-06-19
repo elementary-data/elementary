@@ -2,34 +2,8 @@ import click
 import os
 from os.path import expanduser
 
-from utils.package import get_package_version
-from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
-from utils.ordered_yaml import OrderedYaml
-from config.config import Config
-from monitor.data_monitoring import DataMonitoring
-from clients.slack.slack_client import SlackClient
-
-yaml = OrderedYaml()
-
-
-def get_cli_properties() -> dict:
-
-    click_context = click.get_current_context()
-    if click_context is None:
-        return dict()
-
-    params = click_context.params
-    if params is None:
-        return dict()
-
-    reload_monitoring_configuration = params.get('reload_monitoring_configuration')
-    update_dbt_package = params.get('update_dbt_package')
-    full_refresh_dbt_package = params.get('full_refresh_dbt_package')
-
-    return {'reload_monitoring_configuration': reload_monitoring_configuration,
-            'update_dbt_package': update_dbt_package,
-            'full_refresh_dbt_package': full_refresh_dbt_package,
-            'version': get_package_version()}
+from monitor.workflows.monitor_workflow import MonitorWorkflow
+from monitor.workflows.report_workflow import ReportWorkflow, SendReportWorkflow
 
 
 @click.group(invoke_without_command=True)
@@ -108,22 +82,11 @@ def monitor(
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
         return
-    config = Config(config_dir, profiles_dir, profile_target)
-    anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
-    try:
-        data_monitoring = DataMonitoring(
-            config=config,
-            force_update_dbt_package=update_dbt_package,
-            slack_webhook=slack_webhook,
-            slack_token=slack_token,
-            slack_channel_name=slack_channel_name
-        )
-        data_monitoring.run(days_back, full_refresh_dbt_package)
-        track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
-    except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'monitor', exc, ctx.command.name)
-        raise
+    
+    MonitorWorkflow(
+        click_context=ctx,
+        module_name="monitor"
+    ).run()
 
 
 @monitor.command()
@@ -156,17 +119,10 @@ def monitor(
 )
 @click.pass_context
 def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
-    config = Config(config_dir, profiles_dir, profile_target)
-    anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
-    try:
-        data_monitoring = DataMonitoring(config, update_dbt_package)
-        data_monitoring.generate_report()
-        track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
-    except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'monitor-report', exc, ctx.command.name)
-        raise
-    return
+    ReportWorkflow(
+        click_context=ctx,
+        module_name="monitor-report"
+    ).run()
 
 
 @monitor.command()
@@ -209,6 +165,12 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     default=None,
     help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
 )
+@click.option(
+    '--profile-target', '-t',
+    type=str,
+    default=None,
+    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -217,24 +179,13 @@ def send_report(
     update_dbt_package,
     slack_webhook,
     slack_token,
-    slack_channel_name
+    slack_channel_name,
+    profile_target
 ):
-    config = Config(config_dir, profiles_dir)
-    anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
-    try:
-        data_monitoring = DataMonitoring(config, update_dbt_package)
-        data_monitoring.generate_report()
-        slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
-        slack_client.upload_file(
-            channel_name=slack_channel_name,
-            file_path=os.path.join(config.target_dir, 'elementary.html'), 
-            message="Elemantary monitor report"
-        )
-    except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
-        raise
-    return
+    SendReportWorkflow(
+        click_context=ctx,
+        module_name="monitor-send-report"
+    ).run()
 
 
 if __name__ == "__main__":
