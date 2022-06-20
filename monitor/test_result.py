@@ -68,7 +68,7 @@ class TestResult(object):
         requests.post(url=webhook, headers={'Content-type': "application/json"}, data=json.dumps(data))
 
     @staticmethod
-    def display_name(str_value):
+    def display_name(str_value: Optional[str]) -> str:
         return ' '.join([word[0].upper() + word[1:] for word in str_value.split('_')])
 
     @staticmethod
@@ -104,8 +104,12 @@ class DbtTestResult(TestResult):
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name)
         self.other = other
-        self.test_sub_type = test_sub_type
-        self.test_sub_type_display_name = self.display_name(test_sub_type)
+        if test_sub_type:
+            self.test_sub_type = test_sub_type
+            self.test_sub_type_display_name = self.display_name(test_sub_type)
+        else:
+            self.test_sub_type = ''
+            self.test_sub_type_display_name = ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
         self.test_params = test_params
