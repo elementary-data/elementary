@@ -3,10 +3,12 @@ import json
 from utils.time import convert_utc_time_to_local_time
 from datetime import datetime
 from utils.json_utils import try_load_json
+from typing import Optional
+from utils.log import get_logger
 import re
 
+logger = get_logger(__name__)
 
-#TODO: handle last min, max in metrics graph, last or anomalous?
 class TestResult(object):
     def __init__(self, id, model_unique_id, test_unique_id, status) -> None:
         self.id = id
@@ -15,12 +17,16 @@ class TestResult(object):
         self.status = status
 
     @staticmethod
-    def create_test_result_from_dict(test_result_dict: dict) -> 'TestResult':
+    def create_test_result_from_dict(test_result_dict: dict) -> Optional['TestResult']:
         test_type = test_result_dict.get('test_type')
-        if test_type == 'dbt_test':
-            return DbtTestResult(**test_result_dict)
-        else:
-            return ElementaryTestResult(**test_result_dict)
+        try:
+            if test_type == 'dbt_test':
+                return DbtTestResult(**test_result_dict)
+            else:
+                return ElementaryTestResult(**test_result_dict)
+        except Exception:
+            logger.exception(f"Failed parsing test result - {json.dumps(test_result_dict)}")
+            return None
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:
         pass
@@ -62,7 +68,7 @@ class TestResult(object):
         requests.post(url=webhook, headers={'Content-type': "application/json"}, data=json.dumps(data))
 
     @staticmethod
-    def display_name(str_value):
+    def display_name(str_value: str) -> str:
         return ' '.join([word[0].upper() + word[1:] for word in str_value.split('_')])
 
     @staticmethod
@@ -98,8 +104,8 @@ class DbtTestResult(TestResult):
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name)
         self.other = other
-        self.test_sub_type = test_sub_type
-        self.test_sub_type_display_name = self.display_name(test_sub_type)
+        self.test_sub_type = test_sub_type if test_sub_type else ''
+        self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
         self.test_params = test_params
