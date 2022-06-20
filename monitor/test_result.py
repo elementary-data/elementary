@@ -68,7 +68,7 @@ class TestResult(object):
         requests.post(url=webhook, headers={'Content-type': "application/json"}, data=json.dumps(data))
 
     @staticmethod
-    def display_name(str_value: Optional[str]) -> str:
+    def display_name(str_value: str) -> str:
         return ' '.join([word[0].upper() + word[1:] for word in str_value.split('_')])
 
     @staticmethod
