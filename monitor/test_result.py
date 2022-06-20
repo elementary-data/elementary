@@ -25,8 +25,8 @@ class TestResult(object):
             else:
                 return ElementaryTestResult(**test_result_dict)
         except Exception:
-            logger.error(f"Failed parsing test result - {json.dumps(test_result_dict)}")
-        return None
+            logger.exception(f"Failed parsing test result - {json.dumps(test_result_dict)}")
+            return None
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:
         pass
@@ -104,12 +104,8 @@ class DbtTestResult(TestResult):
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name)
         self.other = other
-        if test_sub_type:
-            self.test_sub_type = test_sub_type
-            self.test_sub_type_display_name = self.display_name(test_sub_type)
-        else:
-            self.test_sub_type = ''
-            self.test_sub_type_display_name = ''
+        self.test_sub_type = test_sub_type if test_sub_type else ''
+        self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
         self.test_params = test_params

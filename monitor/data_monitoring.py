@@ -30,7 +30,7 @@ class DataMonitoring(object):
         self.execution_properties = {}
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.status_code = 0
+        self.success = True
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -60,7 +60,7 @@ class DataMonitoring(object):
                 if test_result_object:
                     test_result_alerts.append(test_result_object)
                 else:
-                    self.status_code = 1
+                    self.success = False
 
         return test_result_alerts
 
@@ -77,7 +77,7 @@ class DataMonitoring(object):
             if sent_alert_count > 0:
                 self._update_sent_alerts(sent_alerts)
         else:
-            self.status_code = 1
+            self.success = False
             logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
                         "a slack webhook)")
 
@@ -91,7 +91,7 @@ class DataMonitoring(object):
             self.execution_properties['package_downloaded'] = package_downloaded
             if not package_downloaded:
                 logger.info('Could not download internal dbt package')
-                self.status_code = 1
+                self.success = False
                 return
 
     def _send_alerts(self, days_back: int):
@@ -101,22 +101,23 @@ class DataMonitoring(object):
         if alert_count > 0:
             self._send_to_slack(alerts)
 
-    def run(self, days_back: int, dbt_full_refresh: bool = False) -> int:
+    def run(self, days_back: int, dbt_full_refresh: bool = False) -> bool:
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
         self.execution_properties['alerts_run_success'] = success
         if not success:
             logger.info('Could not aggregate alerts successfully')
-            self.execution_properties['run_status_code'] = 1
-            return 1
+            self.success = False
+            self.execution_properties['success'] = self.success
+            return self.success
 
         self._send_alerts(days_back)
         self.execution_properties['run_end'] = True
-        self.execution_properties['run_status_code'] = self.status_code
-        return self.status_code
+        self.execution_properties['success'] = self.success
+        return self.success
 
-    def generate_report(self) -> int:
+    def generate_report(self) -> bool:
         elementary_output = {}
         elementary_output['creation_time'] = get_now_utc_str()
         test_results, test_result_totals = self._get_test_results_and_totals()
@@ -146,8 +147,8 @@ class DataMonitoring(object):
             elementary_html_file_path = 'file://' + elementary_html_file_path
             webbrowser.open_new_tab(elementary_html_file_path)
             self.execution_properties['report_end'] = True
-            self.execution_properties['report_status_code'] = self.status_code
-            return self.status_code
+            self.execution_properties['success'] = self.success
+            return self.success
 
     def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')
@@ -168,7 +169,7 @@ class DataMonitoring(object):
                     self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
                                                      test_result_object.status)
                 else:
-                    self.status_code = 1
+                    self.success = False
 
             self.execution_properties['test_results'] = len(test_result_dicts)
         return test_results_api_dict, test_result_totals_api_dict
