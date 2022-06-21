@@ -120,7 +120,11 @@ def monitor(
             slack_channel_name=slack_channel_name
         )
         data_monitoring.run(days_back, full_refresh_dbt_package)
+        success = data_monitoring.run(days_back, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
+        if not success:
+            return 1
+        return 0
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor', exc, ctx.command.name)
         raise
@@ -161,12 +165,14 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        data_monitoring.generate_report()
+        success = data_monitoring.generate_report()
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
+        if not success:
+            return 1
+        return 0
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-report', exc, ctx.command.name)
         raise
-    return
 
 
 @monitor.command()
@@ -231,17 +237,19 @@ def send_report(
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        data_monitoring.generate_report()
+        generated_report_successfully = data_monitoring.generate_report()
         slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
-        slack_client.upload_file(
+        sent_report_successfully = slack_client.upload_file(
             channel_name=slack_channel_name,
             file_path=os.path.join(config.target_dir, 'elementary.html'), 
             message="Elemantary monitor report"
         )
+        if not (generated_report_successfully and sent_report_successfully):
+            return 1
+        return 0
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
         raise
-    return
 
 
 if __name__ == "__main__":
