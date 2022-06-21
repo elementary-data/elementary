@@ -18,7 +18,6 @@ YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
 
 
-
 class DataMonitoring(object):
     DBT_PACKAGE_NAME = 'elementary'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
