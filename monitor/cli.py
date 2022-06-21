@@ -83,7 +83,7 @@ def monitor(
     if ctx.invoked_subcommand is not None:
         return
     
-    MonitorWorkflow(
+    success = MonitorWorkflow(
         click_context=ctx,
         module_name="monitor",
         days_back=days_back,
@@ -96,6 +96,9 @@ def monitor(
         full_refresh_dbt_package=full_refresh_dbt_package,
         profile_target=profile_target,
     ).run()
+    if not success:
+        return 1
+    return 0
 
 
 @monitor.command()
@@ -128,7 +131,7 @@ def monitor(
 )
 @click.pass_context
 def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
-    ReportWorkflow(
+    success = ReportWorkflow(
         click_context=ctx,
         module_name="monitor-report",
         config_dir=config_dir,
@@ -136,6 +139,9 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
         profile_target=profile_target,
         update_dbt_package=update_dbt_package
     ).run()
+    if not success:
+        return 1
+    return 0
 
 
 @monitor.command()
@@ -195,7 +201,7 @@ def send_report(
     slack_channel_name,
     profile_target
 ):
-    SendReportWorkflow(
+    success = SendReportWorkflow(
         click_context=ctx,
         module_name="monitor-send-report",
         config_dir=config_dir,
@@ -206,6 +212,9 @@ def send_report(
         slack_channel_name=slack_channel_name,
         update_dbt_package=update_dbt_package
     ).run()
+    if not success:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

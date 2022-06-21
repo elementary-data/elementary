@@ -36,7 +36,7 @@ class BaseWorkflow(ABC):
         self.anonymous_tracking = self._initial_anonymous_tracking()
         self.data_monitoring = self._initial_data_monitoring()
 
-    def run(self) -> None:
+    def run(self) -> bool:
         try: 
             track_cli_start(
                 anonymous_tracking=self.anonymous_tracking,
@@ -51,6 +51,7 @@ class BaseWorkflow(ABC):
                 execution_properties=self._get_cli_properties(),
                 command=self.command.name
             )
+            return self.data_monitoring.success
         except Exception as exc:
             track_cli_exception(
                 anonymous_tracking=self.anonymous_tracking,
