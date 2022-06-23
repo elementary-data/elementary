@@ -159,7 +159,7 @@ class DataMonitoring(object):
                         var elementaryData = {elementary_output_str}
                     </script>
                 """
-            elementary_html_file_name = f"elementary - {now_utc} utc.html"
+            elementary_html_file_name = f"elementary - {now_utc} utc.html".replace(" ","_")
             elementary_html_path = os.path.join(self.config.target_dir, elementary_html_file_name)
             with open(elementary_html_path, 'w') as elementary_output_html_file:
                 elementary_output_html_file.write(elementary_output_html)
