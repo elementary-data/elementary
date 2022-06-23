@@ -4,6 +4,7 @@ from os.path import expanduser
 
 from utils.package import get_package_version
 from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
+from utils.cli_utils import RequiredIf
 from utils.ordered_yaml import OrderedYaml
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
@@ -49,13 +50,17 @@ def get_cli_properties() -> dict:
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
+    help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_channel_name"
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
+    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_token"
 )
 @click.option(
     '--config-dir', '-c',
@@ -207,13 +212,17 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
+    help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_channel_name"
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
+    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_token"
 )
 @click.option(
     '--profile-target', '-t',
@@ -238,11 +247,11 @@ def send_report(
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
         generated_report_successfully = data_monitoring.generate_report()
-        slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
+        slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
         sent_report_successfully = slack_client.upload_file(
             channel_name=slack_channel_name,
             file_path=os.path.join(config.target_dir, 'elementary.html'), 
-            message="Elemantary monitor report"
+            message="Elementary monitoring report"
         )
         if not (generated_report_successfully and sent_report_successfully):
             return 1

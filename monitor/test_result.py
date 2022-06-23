@@ -37,7 +37,7 @@ class TestResult(object):
         channel_name: str = None,
         slack_webhook: str = None
     ) -> bool:
-        slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
+        slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
         sent_successfully = slack_client.send_message(
             channel_name=channel_name,
             message=message,

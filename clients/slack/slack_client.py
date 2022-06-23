@@ -16,9 +16,9 @@ class SlackClient(ABC):
         self.client = self._initial_client()
     
     @staticmethod
-    def initial(token: str = None, webhook: str = None):
+    def init(token: str = None, webhook: str = None):
         if not (token or webhook):
-            error_message = "Could not initial slack client - you must provide slack token or slack webhook! (see documentation on how to configure a slack token)"
+            error_message = "Could not initialize slack client - you must provide either a slack token or a slack webhook! (see documentation on how to configure a slack token / webhook)"
             logger.error(error_message)
             raise Exception(error_message)
         elif token:
@@ -60,7 +60,7 @@ class SlackWebClient(SlackClient):
             logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
             return False
     
-    def upload_file(self, channel_name: str, file_path: str, message: str = None) -> None:
+    def upload_file(self, channel_name: str, file_path: str, message: str = None) -> bool:
         channel_id = self._get_channel_id(channel_name)
         in_channel = self._join_channel(channel_id)
         if not (channel_id and in_channel):
