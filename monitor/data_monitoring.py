@@ -42,7 +42,8 @@ class DataMonitoring(object):
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
-        self.slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
+        # slack client is optional
+        self.slack_client = SlackClient.init(token=self.slack_token, webhook=self.slack_webhook) if (self.slack_token or self.slack_webhook) else None
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
