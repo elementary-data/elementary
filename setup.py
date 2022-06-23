@@ -30,7 +30,7 @@ setup(
         'beautifulsoup4',
         'posthog',
         'ruamel.yaml',
-        'alive-progress<=2.3.1'
+        'alive-progress<=2.3.1',
         'slack-sdk<4.0',
         'pydantic<2.0'
     ],
