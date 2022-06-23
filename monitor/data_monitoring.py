@@ -1,6 +1,6 @@
 import os
 from monitor.test_result import TestResult
-from monitor.dbt_runner import DbtRunner
+from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
 from clients.slack.slack_client import SlackClient
 from clients.slack.schema import SlackMessageSchema
@@ -238,6 +238,7 @@ class DataMonitoring(object):
         models = {}
         dbt_sidebar = {}
         results = self.dbt_runner.run_operation(macro_name='get_models')
+        breakpoint()
         if results:
             model_dicts = json.loads(results[0])
             for model_dict in model_dicts:
