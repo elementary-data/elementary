@@ -1,4 +1,9 @@
 import os
+
+from yaml import serialize
+from monitor.api.models.models import ModelsAPI
+from monitor.api.models.schema import NormalizedModelSchema
+from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.test_result import TestResult
 from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
@@ -9,7 +14,7 @@ from utils.time import get_now_utc_str
 from utils.json_utils import try_load_json
 import json
 from alive_progress import alive_it
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 import pkg_resources
 import webbrowser
 
@@ -42,7 +47,8 @@ class DataMonitoring(object):
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
-        self.slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
+        # slack client is optional
+        self.slack_client = SlackClient.init(token=self.slack_token, webhook=self.slack_webhook) if (self.slack_token or self.slack_webhook) else None
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -234,98 +240,21 @@ class DataMonitoring(object):
             for key in total_keys:
                 totals_dict[model_unique_id][key][totals_status] += 1
 
-    def _get_dbt_models_and_sidebar(self):
-        models = {}
-        dbt_sidebar = {}
-        results = self.dbt_runner.run_operation(macro_name='get_models')
-        breakpoint()
-        if results:
-            model_dicts = json.loads(results[0])
-            for model_dict in model_dicts:
-                model_unique_id = model_dict.get('unique_id')
-                self._normalize_dbt_model_dict(model_dict)
-                models[model_unique_id] = model_dict
-                self._update_dbt_sidebar(
-                    dbt_sidebar=dbt_sidebar,
-                    model_unique_id=model_unique_id,
-                    model_full_path=model_dict.get('normalized_full_path')
-                )
+    def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
+        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
 
-        results = self.dbt_runner.run_operation(macro_name='get_sources')
-        if results:
-            source_dicts = json.loads(results[0])
-            for source_dict in source_dicts:
-                source_unique_id = source_dict.get('unique_id')
-                self._normalize_dbt_model_dict(source_dict, is_source=True)
-                models[source_unique_id] = source_dict
-                self._update_dbt_sidebar(
-                    dbt_sidebar=dbt_sidebar,
-                    model_unique_id=source_unique_id,
-                    model_full_path=source_dict.get('normalized_full_path')
-                )
-        return models, dbt_sidebar
+        models = models_api.get_models()
+        sources = models_api.get_sources()
 
-    @staticmethod
-    def _update_dbt_sidebar(dbt_sidebar: dict, model_unique_id: str, model_full_path: str) -> None:
-        if model_unique_id is None or model_full_path is None:
-            return
-        model_full_path_split = model_full_path.split(os.path.sep)
-        for part in model_full_path_split:
-            if part.endswith('.sql'):
-                if 'files' in dbt_sidebar:
-                    if model_unique_id not in dbt_sidebar['files']:
-                        dbt_sidebar['files'].append(model_unique_id)
-                else:
-                    dbt_sidebar['files'] = [model_unique_id]
-            else:
-                if part not in dbt_sidebar:
-                    dbt_sidebar[part] = {}
-                dbt_sidebar = dbt_sidebar[part]
+        models_and_sources = dict(**models, **sources)
+        serializeable_models = dict()
+        for key in models_and_sources.keys():
+            serializeable_models[key] = dict(models_and_sources[key])
 
-    @staticmethod
-    def _normalize_dbt_model_dict(model: dict, is_source: bool = False) -> None:
-        owners = model.get('owners')
-        if owners:
-            loaded_owners = try_load_json(owners)
-            if loaded_owners:
-                owners = loaded_owners
-            else:
-                owners = [owners]
-        tags = model.get('tags')
-        if tags:
-            loaded_tags = try_load_json(tags)
-            if loaded_tags:
-                tags = loaded_tags
-            else:
-                tags = [tags]
-        model['owners'] = owners
-        model['tags'] = tags
-        model_name = model.get('name')
-        model['model_name'] = model_name
-        model['normalized_full_path'] = DataMonitoring._normalize_model_path(
-            model_path=model.get('full_path'),
-            model_package_name=model.get('package_name'),
-            is_source=is_source
-        )
-    
-    @staticmethod
-    def _normalize_model_path(model_path: str, model_package_name: Optional[str] = None, is_source: bool = False) -> str:
-        splited_model_path = model_path.split(os.path.sep)
-        model_file_name = splited_model_path[-1]
-
-        # If source, change models directory into sources and file extension from .yml to .sql
-        if is_source:
-            if splited_model_path[0] == "models":
-                splited_model_path[0] = "sources"
-            if model_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail = model_file_name.rpartition(YAML_FILE_EXTENSION)
-                splited_model_path[-1] = head + SQL_FILE_EXTENSION + tail
+        dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
         
-        # Add package name to model path
-        if model_package_name:
-            splited_model_path.insert(0, model_package_name)
-        
-        return os.path.sep.join(splited_model_path)
+        return serializeable_models, dbt_sidebar
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}

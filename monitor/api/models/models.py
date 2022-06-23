@@ -1,8 +1,9 @@
 import json
 import os
-from typing import Optional
+from typing import Dict, Optional
 
 from clients.api.api import APIClient
+from monitor.api.models.schema import ModelSchema, NormalizedModelSchema
 from utils.json_utils import try_load_json
 
 YAML_FILE_EXTENSION = ".yml"
@@ -10,58 +11,58 @@ SQL_FILE_EXTENSION = ".sql"
 
 
 class ModelsAPI(APIClient):
-    def get_models(self) -> dict:
+    def get_models(self) -> Dict[str, NormalizedModelSchema]:
         models_results = self.dbt_runner.run_operation(macro_name='get_models')
         models = dict()
         if models_results:
-            models_data = json.loads(models_results[0])
+            models_data = [ModelSchema(**model) for model in json.loads(models_results[0])]
             for model_data in models_data:
                 normalized_model = ModelsAPI._normalize_dbt_model_dict(model_data)
-                model_unique_id = normalized_model.get('unique_id')
+                model_unique_id = normalized_model.unique_id
                 models[model_unique_id] = normalized_model
         return models
     
-    def get_sources(self) -> dict:
+    def get_sources(self) -> Dict[str, NormalizedModelSchema]:
         sources_results = self.dbt_runner.run_operation(macro_name='get_sources')
         sources = dict()
         if sources_results:
-            sources_data = json.loads(sources_results[0])
+            sources_data = [ModelSchema(**source) for source in json.loads(sources_results[0])]
             for source_data in sources_data:
                 normalized_source = self._normalize_dbt_model_dict(source_data, is_source=True)
-                source_unique_id = normalized_source.get('unique_id')
+                source_unique_id = normalized_source.unique_id
                 sources[source_unique_id] = normalized_source
         return sources
 
     @staticmethod
-    def _normalize_dbt_model_dict(model: dict, is_source: bool = False) -> dict:
-        model_name = model.get('name')
+    def _normalize_dbt_model_dict(model: ModelSchema, is_source: bool = False) -> NormalizedModelSchema:
+        model_name = model.name
 
-        owners = model.get('owners')
+        owners = model.owners
         if owners:
             loaded_owners = try_load_json(owners)
-            if loaded_owners:
+            if loaded_owners is not None:
                 owners = loaded_owners
             else:
                 owners = [owners]
 
-        tags = model.get('tags')
+        tags = model.tags
         if tags:
             loaded_tags = try_load_json(tags)
-            if loaded_tags:
+            if loaded_tags is not None:
                 tags = loaded_tags
             else:
                 tags = [tags]
         
-        normalized_model = dict(**model)
+        normalized_model = dict(model)
         normalized_model['owners'] = owners
         normalized_model['tags'] = tags
         normalized_model['model_name'] = model_name
         normalized_model['normalized_full_path'] = ModelsAPI._normalize_model_path(
-            model_path=model.get('full_path'),
-            model_package_name=model.get('package_name'),
+            model_path=model.full_path,
+            model_package_name=model.package_name,
             is_source=is_source
         )
-        return normalized_model
+        return NormalizedModelSchema(**normalized_model)
     
     @staticmethod
     def _normalize_model_path(model_path: str, model_package_name: Optional[str] = None, is_source: bool = False) -> str:
