@@ -48,7 +48,7 @@ class DataMonitoring(object):
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
         # slack client is optional
-        self.slack_client = SlackClient.init(token=self.slack_token, webhook=self.slack_webhook) if (self.slack_token or self.slack_webhook) else None
+        self.slack_client = SlackClient.create_slack_client(token=self.slack_token, webhook=self.slack_webhook) if (self.slack_token or self.slack_webhook) else None
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -98,7 +98,7 @@ class DataMonitoring(object):
             if sent_successfully:
                 sent_alerts.append(alert.id)
             else:
-                logger.info(f"Could not sent the alert - {alert.id}")
+                logger.error(f"Could not sent the alert - {alert.id}. Full alert: {json.dumps(dict(alert_slack_message))}")
                 self.success = False
         
         sent_alert_count = len(sent_alerts)
@@ -142,9 +142,11 @@ class DataMonitoring(object):
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self) -> bool:
+    def generate_report(self) -> Tuple[bool, str]:
+        now_utc = get_now_utc_str()
+
         elementary_output = {}
-        elementary_output['creation_time'] = get_now_utc_str()
+        elementary_output['creation_time'] = now_utc
         test_results, test_result_totals = self._get_test_results_and_totals()
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
@@ -162,31 +164,31 @@ class DataMonitoring(object):
                         var elementaryData = {elementary_output_str}
                     </script>
                 """
-            elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
-            with open(elementary_html_file_path, 'w') as elementary_output_html_file:
+            elementary_html_file_name = f"elementary - {now_utc} utc.html".replace(" ", "_").replace(":", "-")
+            elementary_html_path = os.path.join(self.config.target_dir, elementary_html_file_name)
+            with open(elementary_html_path, 'w') as elementary_output_html_file:
                 elementary_output_html_file.write(elementary_output_html)
             with open(os.path.join(self.config.target_dir, 'elementary_output.json'), 'w') as \
                     elementary_output_json_file:
                 elementary_output_json_file.write(elementary_output_str)
 
-            elementary_html_file_path = 'file://' + elementary_html_file_path
+            elementary_html_file_path = 'file://' + elementary_html_path
             webbrowser.open_new_tab(elementary_html_file_path)
             self.execution_properties['report_end'] = True
             self.execution_properties['success'] = self.success
-            return self.success
+            return self.success, elementary_html_path
     
-    def send_report(self) -> bool:
-        elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
-        if os.path.exists(elementary_html_file_path):
+    def send_report(self, elementary_html_path: str) -> bool:
+        if os.path.exists(elementary_html_path):
             file_uploaded_succesfully = self.slack_client.upload_file(
                 channel_name=self.slack_channel_name,
-                file_path=elementary_html_file_path,
+                file_path=elementary_html_path,
                 message=SlackMessageSchema(text="Elementary monitoring report")
             )
             if not file_uploaded_succesfully:
                 self.success = False
         else:
-            logger.error('Could not send "Elementary monitor report" because it is not exists.')
+            logger.error('Could not send Elementary monitoring report because it does not exist')
             self.success = False
         return self.success
 
