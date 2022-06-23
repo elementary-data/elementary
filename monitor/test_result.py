@@ -32,7 +32,7 @@ class TestResult(object):
             else:
                 return ElementaryTestResult(**test_result_dict)
         except Exception:
-            logger.exception(f"Failed parsing test result - {json.dumps(test_result_dict)}")
+            logger.error(f"Failed parsing test result - {json.dumps(test_result_dict)}")
             return None
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:

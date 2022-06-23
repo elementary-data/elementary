@@ -42,7 +42,7 @@ class DataMonitoring(object):
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
-        self.slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
+        self.slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -71,8 +71,7 @@ class DataMonitoring(object):
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
                 test_result_object = TestResult.create_test_result_from_dict(
-                    test_result_alert_dict=test_result_alert_dict,
-                    slack_client=self.slack_client
+                    test_result_dict=test_result_alert_dict,
                 )
                 if test_result_object:
                     test_result_alerts.append(test_result_object)
