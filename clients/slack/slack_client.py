@@ -18,7 +18,7 @@ class SlackClient(ABC):
         self.client = self._initial_client()
     
     @staticmethod
-    def init(token: str = None, webhook: str = None):
+    def create_slack_client(token: str = None, webhook: str = None):
         if not (token or webhook):
             error_message = "Could not initialize slack client - you must provide either a slack token or a slack webhook! (see documentation on how to configure a slack token / webhook)"
             logger.error(error_message)

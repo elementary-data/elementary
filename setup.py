@@ -31,8 +31,8 @@ setup(
         'posthog',
         'ruamel.yaml',
         'alive-progress<=2.3.1'
-        'slack_sdk',
-        'pydantic'
+        'slack_sdk<4.0',
+        'pydantic<2.0'
     ],
     extras_require={
         'snowflake': ['dbt-snowflake>=0.20,<2.0.0'],

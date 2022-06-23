@@ -251,8 +251,8 @@ def send_report(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        generated_report_successfully = data_monitoring.generate_report()
-        sent_report_successfully = data_monitoring.send_report()
+        generated_report_successfully, elementary_html_path = data_monitoring.generate_report()
+        sent_report_successfully = data_monitoring.send_report(elementary_html_path)
         if not (generated_report_successfully and sent_report_successfully):
             return 1
         return 0
