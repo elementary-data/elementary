@@ -4,6 +4,8 @@ import json
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 
+from clients.slack.schema import SlackMessageSchema
+
 logger = logging.getLogger(__name__)
 
 OK_STATUS_CODE = 200
@@ -43,7 +45,7 @@ class SlackWebClient(SlackClient):
     def _initial_client(self):
         return WebClient(token=self.token)
 
-    def send_message(self, channel_name: str, message: str = None, attachments: list = None, blocks: list = None, **kwargs) -> bool:
+    def send_message(self, channel_name: str, message: SlackMessageSchema, **kwargs) -> bool:
         channel_id = self._get_channel_id(channel_name)
         in_channel = self._join_channel(channel_id)
         if not (channel_id and in_channel):
@@ -51,16 +53,16 @@ class SlackWebClient(SlackClient):
         try:
             self.client.chat_postMessage(
                 channel=channel_id,
-                text=message,
-                blocks=json.dumps(blocks) if blocks else None,
-                attachments=json.dumps(attachments) if attachments else None
+                text=message.text,
+                blocks=json.dumps(message.blocks) if message.blocks else None,
+                attachments=json.dumps(message.attachments) if message.attachments else None
             )
             return True
         except SlackApiError as e:
             logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
             return False
     
-    def upload_file(self, channel_name: str, file_path: str, message: str = None) -> bool:
+    def upload_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
         channel_id = self._get_channel_id(channel_name)
         in_channel = self._join_channel(channel_id)
         if not (channel_id and in_channel):
@@ -68,7 +70,7 @@ class SlackWebClient(SlackClient):
         try:
             self.client.files_upload(
                 channels=channel_id,
-                initial_comment=message,
+                initial_comment=message.text,
                 file=file_path
             )
             return True
@@ -101,11 +103,11 @@ class SlackWebhook(SlackClient):
     def _initial_client(self):
         return WebhookClient(url=self.webhook, default_headers={"Content-type": "application/json"}) 
 
-    def send_message(self, message: str = None, attachments: list = None, blocks: list = None, **kwargs) -> bool:
+    def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
         response = self.client.send(
-            text=message,
-            blocks=blocks,
-            attachments=attachments
+            text=message.text,
+            blocks=message.blocks,
+            attachments=message.attachments
         )
         if response.status_code == OK_STATUS_CODE:
             return True

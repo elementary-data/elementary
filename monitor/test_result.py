@@ -5,12 +5,19 @@ from utils.json_utils import try_load_json
 from typing import Optional
 from utils.log import get_logger
 import re
-from clients.slack.slack_client import SlackClient
+from clients.slack.schema import SlackMessageSchema
 
 logger = get_logger(__name__)
 
+
 class TestResult(object):
-    def __init__(self, id, model_unique_id, test_unique_id, status) -> None:
+    def __init__(
+        self,
+        id: str,
+        model_unique_id: str,
+        test_unique_id: str,
+        status: str,
+    ) -> None:
         self.id = id
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
@@ -27,24 +34,6 @@ class TestResult(object):
         except Exception:
             logger.exception(f"Failed parsing test result - {json.dumps(test_result_dict)}")
             return None
-
-    @staticmethod
-    def send(
-        message: str = None,
-        attachments: list = None,
-        blocks: list = None,
-        slack_token: str = None,
-        channel_name: str = None,
-        slack_webhook: str = None
-    ) -> bool:
-        slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
-        sent_successfully = slack_client.send_message(
-            channel_name=channel_name,
-            message=message,
-            attachments=attachments,
-            blocks=blocks
-        )
-        return sent_successfully
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:
         pass
@@ -81,28 +70,11 @@ class TestResult(object):
         })
         slack_message['attachments'][0]['blocks'].extend(block)
 
-    def send_to_slack(
-        self,
-        slack_token: str = None,
-        channel_name: str = None,
-        slack_webhook: str = None,
-        is_slack_workflow: bool = False
-    ) -> bool:
-        if is_slack_workflow:
-            # Only webhooks support slack workflows
-            message = json.dumps(self.to_slack_message())
-            return self.send(
-                slack_webhook=slack_webhook,
-                message=message
-            )
-        else:
-            attachments = self.to_slack_message()["attachments"]
-            return self.send(
-                slack_token=slack_token,
-                channel_name=channel_name,
-                slack_webhook=slack_webhook,
-                attachments=attachments
-            )
+    def generate_slack_message(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        return SlackMessageSchema(
+            text=json.dumps(self.to_slack_message()) if is_slack_workflow else None,
+            attachments=self.to_slack_message()["attachments"] if not is_slack_workflow else None
+        )
 
     @staticmethod
     def display_name(str_value: str) -> str:
@@ -117,9 +89,29 @@ class TestResult(object):
 
 
 class DbtTestResult(TestResult):
-    def __init__(self, id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-                 column_name, test_type, test_sub_type, test_results_description, owners, tags, test_results_query,
-                 test_rows_sample, other, test_name, test_params, severity, status) -> None:
+    def __init__(
+        self,
+        id,
+        model_unique_id,
+        test_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type,
+        test_sub_type,
+        test_results_description,
+        owners,
+        tags,
+        test_results_query,
+        test_rows_sample,
+        other,
+        test_name,
+        test_params,
+        severity,
+        status
+    ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
         self.test_unique_id = test_unique_id
         self.test_type = test_type
@@ -233,13 +225,51 @@ class DbtTestResult(TestResult):
 
 
 class ElementaryTestResult(DbtTestResult):
-    def __init__(self, id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-                 column_name, test_type, test_sub_type, test_results_description, owners, tags, test_results_query,
-                 test_rows_sample, other, test_name, test_params, severity, status) -> None:
-        super().__init__(id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-                         column_name, test_type, test_sub_type, test_results_description, owners, tags,
-                         test_results_query, test_rows_sample, other, test_name, test_params, severity, status)
-
+    def __init__(
+        self,
+        id,
+        model_unique_id,
+        test_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type,
+        test_sub_type,
+        test_results_description,
+        owners,
+        tags,
+        test_results_query,
+        test_rows_sample,
+        other,
+        test_name,
+        test_params,
+        severity,
+        status
+    ) -> None:
+        super().__init__(
+            id,
+            model_unique_id,
+            test_unique_id,
+            detected_at,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            test_type,
+            test_sub_type,
+            test_results_description,
+            owners,
+            tags,
+            test_results_query,
+            test_rows_sample,
+            other,
+            test_name,
+            test_params,
+            severity,
+            status
+        )
         self.test_results_description = self.description_display_name(test_results_description)
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:

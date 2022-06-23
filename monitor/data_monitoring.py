@@ -2,6 +2,8 @@ import os
 from monitor.test_result import TestResult
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
+from clients.slack.slack_client import SlackClient
+from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 from utils.json_utils import try_load_json
@@ -40,6 +42,7 @@ class DataMonitoring(object):
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
+        self.slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -67,7 +70,10 @@ class DataMonitoring(object):
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
-                test_result_object = TestResult.create_test_result_from_dict(test_result_alert_dict)
+                test_result_object = TestResult.create_test_result_from_dict(
+                    test_result_alert_dict=test_result_alert_dict,
+                    slack_client=self.slack_client
+                )
                 if test_result_object:
                     test_result_alerts.append(test_result_object)
                 else:
@@ -79,11 +85,10 @@ class DataMonitoring(object):
         sent_alerts = []
         alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
-            sent_successfully = alert.send_to_slack(
-                slack_token=self.slack_token,
+            alert_slack_message: SlackMessageSchema = alert.generate_slack_message(is_slack_workflow=self.config.is_slack_workflow)
+            sent_successfully = self.slack_client.send_message(
                 channel_name=self.slack_channel_name,
-                slack_webhook=self.slack_webhook,
-                is_slack_workflow=self.config.is_slack_workflow
+                message=alert_slack_message
             )
             if sent_successfully:
                 sent_alerts.append(alert.id)
@@ -164,6 +169,21 @@ class DataMonitoring(object):
             self.execution_properties['report_end'] = True
             self.execution_properties['success'] = self.success
             return self.success
+    
+    def send_report(self) -> bool:
+        elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
+        if os.path.exists(elementary_html_file_path):
+            file_uploaded_succesfully = self.slack_client.upload_file(
+                channel_name=self.slack_channel_name,
+                file_path=elementary_html_file_path,
+                message=SlackMessageSchema(text="Elementary monitoring report")
+            )
+            if not file_uploaded_succesfully:
+                self.success = False
+        else:
+            logger.error('Could not send "Elementary monitor report" because it is not exists.')
+            self.success = False
+        return self.success
 
     def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')

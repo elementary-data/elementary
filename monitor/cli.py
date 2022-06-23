@@ -8,7 +8,6 @@ from utils.cli_utils import RequiredIf
 from utils.ordered_yaml import OrderedYaml
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
-from clients.slack.slack_client import SlackClient
 
 yaml = OrderedYaml()
 
@@ -245,14 +244,15 @@ def send_report(
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
-        data_monitoring = DataMonitoring(config, update_dbt_package)
-        generated_report_successfully = data_monitoring.generate_report()
-        slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
-        sent_report_successfully = slack_client.upload_file(
-            channel_name=slack_channel_name,
-            file_path=os.path.join(config.target_dir, 'elementary.html'), 
-            message="Elementary monitoring report"
+        data_monitoring = DataMonitoring(
+            config=config,
+            force_update_dbt_package=update_dbt_package,
+            slack_webhook=slack_webhook,
+            slack_token=slack_token,
+            slack_channel_name=slack_channel_name
         )
+        generated_report_successfully = data_monitoring.generate_report()
+        sent_report_successfully = data_monitoring.send_report()
         if not (generated_report_successfully and sent_report_successfully):
             return 1
         return 0
