@@ -2,12 +2,14 @@ import os
 from monitor.test_result import TestResult
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
+from clients.slack.slack_client import SlackClient
+from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 from utils.json_utils import try_load_json
 import json
 from alive_progress import alive_it
-from typing import Optional
+from typing import List, Optional, Tuple
 import pkg_resources
 import webbrowser
 
@@ -26,12 +28,22 @@ class DataMonitoring(object):
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(self, config: Config, force_update_dbt_package: bool = False,
-                 slack_webhook: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        config: Config,
+        force_update_dbt_package: bool = False,
+        slack_webhook: Optional[str] = None, 
+        slack_token: Optional[str] = None,
+        slack_channel_name: Optional[str] = None
+    ) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
+        self.slack_token = slack_token or self.config.slack_token
+        self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
+        # slack client is optional
+        self.slack_client = SlackClient.create_slack_client(token=self.slack_token, webhook=self.slack_webhook) if (self.slack_token or self.slack_webhook) else None
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -39,7 +51,7 @@ class DataMonitoring(object):
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
     @staticmethod
-    def _split_list_to_chunks(items: list, chunk_size: int = 50) -> [list]:
+    def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
         chunk_list = []
         for i in range(0, len(items), chunk_size):
             chunk_list.append(items[i: i + chunk_size])
@@ -59,7 +71,9 @@ class DataMonitoring(object):
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
-                test_result_object = TestResult.create_test_result_from_dict(test_result_alert_dict)
+                test_result_object = TestResult.create_test_result_from_dict(
+                    test_result_dict=test_result_alert_dict,
+                )
                 if test_result_object:
                     test_result_alerts.append(test_result_object)
                 else:
@@ -67,22 +81,25 @@ class DataMonitoring(object):
 
         return test_result_alerts
 
-    def _send_to_slack(self, test_result_alerts: [TestResult]) -> None:
-        if self.slack_webhook is not None:
-            sent_alerts = []
-            alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
-            for alert in alerts_with_progress_bar:
-                alert.send_to_slack(self.slack_webhook, self.config.is_slack_workflow)
+    def _send_to_slack(self, test_result_alerts: List[TestResult]) -> None:
+        sent_alerts = []
+        alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
+        for alert in alerts_with_progress_bar:
+            alert_slack_message: SlackMessageSchema = alert.generate_slack_message(is_slack_workflow=self.config.is_slack_workflow)
+            sent_successfully = self.slack_client.send_message(
+                channel_name=self.slack_channel_name,
+                message=alert_slack_message
+            )
+            if sent_successfully:
                 sent_alerts.append(alert.id)
-
-            sent_alert_count = len(sent_alerts)
-            self.execution_properties['sent_alert_count'] = sent_alert_count
-            if sent_alert_count > 0:
-                self._update_sent_alerts(sent_alerts)
-        else:
-            self.success = False
-            logger.info("Alerts found but slack webhook is not configured (see documentation on how to configure "
-                        "a slack webhook)")
+            else:
+                logger.error(f"Could not sent the alert - {alert.id}. Full alert: {json.dumps(dict(alert_slack_message))}")
+                self.success = False
+        
+        sent_alert_count = len(sent_alerts)
+        self.execution_properties['sent_alert_count'] = sent_alert_count
+        if sent_alert_count > 0:
+            self._update_sent_alerts(sent_alerts)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -120,9 +137,11 @@ class DataMonitoring(object):
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self) -> bool:
+    def generate_report(self) -> Tuple[bool, str]:
+        now_utc = get_now_utc_str()
+
         elementary_output = {}
-        elementary_output['creation_time'] = get_now_utc_str()
+        elementary_output['creation_time'] = now_utc
         test_results, test_result_totals = self._get_test_results_and_totals()
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         elementary_output['models'] = models
@@ -140,18 +159,33 @@ class DataMonitoring(object):
                         var elementaryData = {elementary_output_str}
                     </script>
                 """
-            elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
-            with open(elementary_html_file_path, 'w') as elementary_output_html_file:
+            elementary_html_file_name = f"elementary - {now_utc} utc.html".replace(" ", "_").replace(":", "-")
+            elementary_html_path = os.path.join(self.config.target_dir, elementary_html_file_name)
+            with open(elementary_html_path, 'w') as elementary_output_html_file:
                 elementary_output_html_file.write(elementary_output_html)
             with open(os.path.join(self.config.target_dir, 'elementary_output.json'), 'w') as \
                     elementary_output_json_file:
                 elementary_output_json_file.write(elementary_output_str)
 
-            elementary_html_file_path = 'file://' + elementary_html_file_path
+            elementary_html_file_path = 'file://' + elementary_html_path
             webbrowser.open_new_tab(elementary_html_file_path)
             self.execution_properties['report_end'] = True
             self.execution_properties['success'] = self.success
-            return self.success
+            return self.success, elementary_html_path
+    
+    def send_report(self, elementary_html_path: str) -> bool:
+        if os.path.exists(elementary_html_path):
+            file_uploaded_succesfully = self.slack_client.upload_file(
+                channel_name=self.slack_channel_name,
+                file_path=elementary_html_path,
+                message=SlackMessageSchema(text="Elementary monitoring report")
+            )
+            if not file_uploaded_succesfully:
+                self.success = False
+        else:
+            logger.error('Could not send Elementary monitoring report because it does not exist')
+            self.success = False
+        return self.success
 
     def _get_test_results_and_totals(self):
         results = self.dbt_runner.run_operation(macro_name='get_test_results')

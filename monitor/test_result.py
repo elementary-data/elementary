@@ -1,4 +1,3 @@
-import requests
 import json
 from utils.time import convert_utc_time_to_local_time
 from datetime import datetime
@@ -6,11 +5,19 @@ from utils.json_utils import try_load_json
 from typing import Optional
 from utils.log import get_logger
 import re
+from clients.slack.schema import SlackMessageSchema
 
 logger = get_logger(__name__)
 
+
 class TestResult(object):
-    def __init__(self, id, model_unique_id, test_unique_id, status) -> None:
+    def __init__(
+        self,
+        id: str,
+        model_unique_id: str,
+        test_unique_id: str,
+        status: str,
+    ) -> None:
         self.id = id
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
@@ -25,7 +32,7 @@ class TestResult(object):
             else:
                 return ElementaryTestResult(**test_result_dict)
         except Exception:
-            logger.exception(f"Failed parsing test result - {json.dumps(test_result_dict)}")
+            logger.error(f"Failed parsing test result - {json.dumps(test_result_dict)}")
             return None
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:
@@ -63,9 +70,11 @@ class TestResult(object):
         })
         slack_message['attachments'][0]['blocks'].extend(block)
 
-    def send_to_slack(self, webhook: str, is_slack_workflow: bool = False):
-        data = self.to_slack_message(is_slack_workflow)
-        requests.post(url=webhook, headers={'Content-type': "application/json"}, data=json.dumps(data))
+    def generate_slack_message(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        return SlackMessageSchema(
+            text=json.dumps(self.to_slack_message()) if is_slack_workflow else None,
+            attachments=self.to_slack_message()["attachments"] if not is_slack_workflow else None
+        )
 
     @staticmethod
     def display_name(str_value: str) -> str:
@@ -80,9 +89,29 @@ class TestResult(object):
 
 
 class DbtTestResult(TestResult):
-    def __init__(self, id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-                 column_name, test_type, test_sub_type, test_results_description, owners, tags, test_results_query,
-                 test_rows_sample, other, test_name, test_params, severity, status) -> None:
+    def __init__(
+        self,
+        id,
+        model_unique_id,
+        test_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type,
+        test_sub_type,
+        test_results_description,
+        owners,
+        tags,
+        test_results_query,
+        test_rows_sample,
+        other,
+        test_name,
+        test_params,
+        severity,
+        status
+    ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
         self.test_unique_id = test_unique_id
         self.test_type = test_type
@@ -196,13 +225,51 @@ class DbtTestResult(TestResult):
 
 
 class ElementaryTestResult(DbtTestResult):
-    def __init__(self, id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-                 column_name, test_type, test_sub_type, test_results_description, owners, tags, test_results_query,
-                 test_rows_sample, other, test_name, test_params, severity, status) -> None:
-        super().__init__(id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-                         column_name, test_type, test_sub_type, test_results_description, owners, tags,
-                         test_results_query, test_rows_sample, other, test_name, test_params, severity, status)
-
+    def __init__(
+        self,
+        id,
+        model_unique_id,
+        test_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type,
+        test_sub_type,
+        test_results_description,
+        owners,
+        tags,
+        test_results_query,
+        test_rows_sample,
+        other,
+        test_name,
+        test_params,
+        severity,
+        status
+    ) -> None:
+        super().__init__(
+            id,
+            model_unique_id,
+            test_unique_id,
+            detected_at,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            test_type,
+            test_sub_type,
+            test_results_description,
+            owners,
+            tags,
+            test_results_query,
+            test_rows_sample,
+            other,
+            test_name,
+            test_params,
+            severity,
+            status
+        )
         self.test_results_description = self.description_display_name(test_results_description)
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:

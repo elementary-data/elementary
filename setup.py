@@ -30,7 +30,9 @@ setup(
         'beautifulsoup4',
         'posthog',
         'ruamel.yaml',
-        'alive-progress<=2.3.1'
+        'alive-progress<=2.3.1',
+        'slack-sdk<4.0',
+        'pydantic<2.0'
     ],
     extras_require={
         'snowflake': ['dbt-snowflake>=0.20,<2.0.0'],

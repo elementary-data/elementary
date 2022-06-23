@@ -19,3 +19,4 @@ beautifulsoup4
 posthog
 sqlfluff
 ruamel.yaml
+slack_sdk

@@ -7,36 +7,12 @@ from exceptions.exceptions import ConfigError
 from lineage.query_history_factory import QueryHistoryFactory
 from utils.package import get_package_version
 from utils.dbt import is_dbt_installed
+from utils.cli_utils import RequiredIf
 from lineage.empty_graph_helper import EmptyGraphHelper
 from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
 from datetime import timedelta, date
 from lineage.lineage_graph import LineageGraph
 from datetime import datetime
-
-
-class RequiredIf(click.Option):
-    def __init__(self, *args, **kwargs):
-        self.required_if = kwargs.pop('required_if')
-        assert self.required_if, "'required_if' parameter required"
-        kwargs['help'] = (kwargs.get('help', '') +
-                          ' NOTE: This argument must be configured together with %s.' %
-                          self.required_if
-                          ).strip()
-        super(RequiredIf, self).__init__(*args, **kwargs)
-
-    def handle_parse_result(self, ctx, opts, args):
-        we_are_present = self.name in opts
-        other_present = self.required_if in opts
-
-        if we_are_present and not other_present:
-            raise click.UsageError(
-                "Illegal usage: `%s` must be configured with `%s`" % (
-                    self.name, self.required_if))
-        else:
-            self.prompt = None
-
-        return super(RequiredIf, self).handle_parse_result(
-            ctx, opts, args)
 
 
 def get_cli_lineage_properties() -> dict:
