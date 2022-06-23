@@ -31,7 +31,7 @@ setup(
         'posthog',
         'ruamel.yaml',
         'alive-progress<=2.3.1'
-        'slack_sdk<4.0',
+        'slack-sdk<4.0',
         'pydantic<2.0'
     ],
     extras_require={

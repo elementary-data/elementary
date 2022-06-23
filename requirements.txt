@@ -19,5 +19,5 @@ beautifulsoup4
 posthog
 sqlfluff
 ruamel.yaml
-slack_sdk
+slack-sdk
 pydantic
