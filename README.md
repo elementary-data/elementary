@@ -15,12 +15,13 @@
 * **Slack alerts**
 * **Data lineage made simple, reliable, and automated**
   
+:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
 
 ### Checkout the [live demo](https://www.elementary-data.com/data-observability-demo)
  
-  
+
 
 ## Quick start
   
@@ -32,7 +33,6 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
   
 ##
 
-:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:
   
 Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
