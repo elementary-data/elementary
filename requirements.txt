@@ -20,3 +20,4 @@ posthog
 sqlfluff
 ruamel.yaml
 slack_sdk
+pydantic

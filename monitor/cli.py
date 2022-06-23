@@ -4,6 +4,7 @@ from os.path import expanduser
 
 from monitor.workflows.monitor_workflow import MonitorWorkflow
 from monitor.workflows.report_workflow import ReportWorkflow, SendReportWorkflow
+from utils.cli_utils import RequiredIf
 
 
 @click.group(invoke_without_command=True)
@@ -23,13 +24,17 @@ from monitor.workflows.report_workflow import ReportWorkflow, SendReportWorkflow
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
+    help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_channel_name"
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
+    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_token"
 )
 @click.option(
     '--config-dir', '-c',
@@ -176,13 +181,17 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (also could be configured once in config.yml)"
+    help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_channel_name"
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)"
+    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
+    cls=RequiredIf,
+    required_if="slack_token"
 )
 @click.option(
     '--profile-target', '-t',

@@ -2,6 +2,8 @@ import os
 from monitor.test_result import TestResult
 from monitor.dbt_runner import DbtRunner
 from config.config import Config
+from clients.slack.slack_client import SlackClient
+from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 from utils.json_utils import try_load_json
@@ -16,6 +18,8 @@ logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
 
 DEFAULT_DAYS_BACK = 7
+YAML_FILE_EXTENSION = ".yml"
+SQL_FILE_EXTENSION = ".sql"
 
 
 class DataMonitoring(object):
@@ -40,7 +44,7 @@ class DataMonitoring(object):
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
-        self.slack_client = SlackClient.initial(token=slack_token, webhook=slack_webhook)
+        self.slack_client = SlackClient.init(token=slack_token, webhook=slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -68,7 +72,9 @@ class DataMonitoring(object):
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
-                test_result_object = TestResult.create_test_result_from_dict(test_result_alert_dict)
+                test_result_object = TestResult.create_test_result_from_dict(
+                    test_result_dict=test_result_alert_dict,
+                )
                 if test_result_object:
                     test_result_alerts.append(test_result_object)
                 else:
@@ -80,11 +86,10 @@ class DataMonitoring(object):
         sent_alerts = []
         alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
-            sent_successfully = alert.send_to_slack(
-                slack_token=self.slack_token,
+            alert_slack_message: SlackMessageSchema = alert.generate_slack_message(is_slack_workflow=self.config.is_slack_workflow)
+            sent_successfully = self.slack_client.send_message(
                 channel_name=self.slack_channel_name,
-                slack_webhook=self.slack_webhook,
-                is_slack_workflow=self.config.is_slack_workflow
+                message=alert_slack_message
             )
             if sent_successfully:
                 sent_alerts.append(alert.id)
@@ -165,13 +170,14 @@ class DataMonitoring(object):
             self.execution_properties['success'] = self.success
             return self.success
     
-    def send_report(self):
+
+    def send_report(self) -> bool:
         elementary_html_file_path = os.path.join(self.config.target_dir, 'elementary.html')
         if os.path.exists(elementary_html_file_path):
             file_uploaded_succesfully = self.slack_client.upload_file(
                 channel_name=self.slack_channel_name,
                 file_path=elementary_html_file_path,
-                message="Elemantary monitor report"
+                message=SlackMessageSchema(text="Elementary monitoring report")
             )
             if not file_uploaded_succesfully:
                 self.success = False
@@ -240,8 +246,11 @@ class DataMonitoring(object):
                 model_unique_id = model_dict.get('unique_id')
                 self._normalize_dbt_model_dict(model_dict)
                 models[model_unique_id] = model_dict
-                self._update_dbt_sidebar(dbt_sidebar, model_unique_id, model_dict.get('normalized_full_path'),
-                                         model_dict.get('package_name'))
+                self._update_dbt_sidebar(
+                    dbt_sidebar=dbt_sidebar,
+                    model_unique_id=model_unique_id,
+                    model_full_path=model_dict.get('normalized_full_path')
+                )
 
         results = self.dbt_runner.run_operation(macro_name='get_sources')
         if results:
@@ -250,22 +259,18 @@ class DataMonitoring(object):
                 source_unique_id = source_dict.get('unique_id')
                 self._normalize_dbt_model_dict(source_dict, is_source=True)
                 models[source_unique_id] = source_dict
-                self._update_dbt_sidebar(dbt_sidebar, source_unique_id, source_dict.get('normalized_full_path'),
-                                         source_dict.get('package_name'))
+                self._update_dbt_sidebar(
+                    dbt_sidebar=dbt_sidebar,
+                    model_unique_id=source_unique_id,
+                    model_full_path=source_dict.get('normalized_full_path')
+                )
         return models, dbt_sidebar
 
     @staticmethod
-    def _update_dbt_sidebar(
-        dbt_sidebar: dict,
-        model_unique_id: str,
-        model_full_path: str,
-        model_package_name: Optional[str] = None
-    ) -> None:
+    def _update_dbt_sidebar(dbt_sidebar: dict, model_unique_id: str, model_full_path: str) -> None:
         if model_unique_id is None or model_full_path is None:
             return
         model_full_path_split = model_full_path.split(os.path.sep)
-        if model_package_name and model_full_path_split:
-            model_full_path_split.insert(0, model_package_name)
         for part in model_full_path_split:
             if part.endswith('.sql'):
                 if 'files' in dbt_sidebar:
@@ -280,12 +285,6 @@ class DataMonitoring(object):
 
     @staticmethod
     def _normalize_dbt_model_dict(model: dict, is_source: bool = False) -> None:
-        model_full_path = model.get('full_path')
-        model_full_path_split = model_full_path.split(os.path.sep)
-        file_name = None
-        if model_full_path and model_full_path_split:
-            file_name = model_full_path_split[-1]
-        model['file_name'] = file_name
         owners = model.get('owners')
         if owners:
             loaded_owners = try_load_json(owners)
@@ -304,13 +303,30 @@ class DataMonitoring(object):
         model['tags'] = tags
         model_name = model.get('name')
         model['model_name'] = model_name
-        model['normalized_full_path'] = model_full_path
+        model['normalized_full_path'] = DataMonitoring._normalize_model_path(
+            model_path=model.get('full_path'),
+            model_package_name=model.get('package_name'),
+            is_source=is_source
+        )
+    
+    @staticmethod
+    def _normalize_model_path(model_path: str, model_package_name: Optional[str] = None, is_source: bool = False) -> str:
+        splited_model_path = model_path.split(os.path.sep)
+        model_file_name = splited_model_path[-1]
+
+        # If source, change models directory into sources and file extension from .yml to .sql
         if is_source:
-            if model_full_path_split[0] == 'models':
-                model_full_path_split[0] = 'sources'
-            if model_full_path_split[-1].endswith('.yml'):
-                model_full_path_split[-1] = model_name + '.sql'
-            model['normalized_full_path'] = os.path.sep.join(model_full_path_split)
+            if splited_model_path[0] == "models":
+                splited_model_path[0] = "sources"
+            if model_file_name.endswith(YAML_FILE_EXTENSION):
+                head, _sep, tail = model_file_name.rpartition(YAML_FILE_EXTENSION)
+                splited_model_path[-1] = head + SQL_FILE_EXTENSION + tail
+        
+        # Add package name to model path
+        if model_package_name:
+            splited_model_path.insert(0, model_package_name)
+        
+        return os.path.sep.join(splited_model_path)
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
