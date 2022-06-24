@@ -7,14 +7,19 @@
 <a href="https://docs.elementary-data.com/"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-brightgreen"/>
 
-## Open source data observability
-  
-* **Data anomalies monitoring as dbt tests**
-* **Data observability UI**
-* **dbt artifacts uploader**
-* **Slack alerts**
-* **Data lineage made simple, reliable, and automated**
-  
+## Data Observability for Analytics Engineers
+
+**Elementary is an open source data observability solution that is integrated with your dbt project.**
+
+Add anomaly detections as dbt tests, and **monitor the results of both Elementary and dbt tests in a single report**. 
+
+See tests results by model, and info for **fast triage**: sample failed rows, relevant queries, anomaly graph and test configuration.
+
+Share the report with your team, and use Slack integration for alerting on incidents. 
+
+
+##
+
 :star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
@@ -37,18 +42,20 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
   
-## Data anomalies monitoring as dbt tests
+## Elementary Features
 
-Elementary delivers **data monitoring and anomaly detection as dbt tests.** 
-  
-Elementary dbt tests are data monitors that collect metrics and metadata over time. 
-On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers. 
-  
-**Elementary data monitors as tests are configured and executed like native tests in your project!**
+* **Data anomalies monitoring as dbt tests**
+
+    Elementary dbt tests are data monitors that collect metrics and metadata over time. 
+    Elementary data monitors as tests are configured and executed like native tests in your project!
+
+* **Data observability UI**
+* **dbt artifacts uploader**
+* **Slack alerts**
+* **Data lineage made simple, reliable, and automated**
 
   
-  
-## Demo & sandbox
+## Demo & Sandbox
 
 Data anomalies monitoring as dbt tests [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).  
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
@@ -63,6 +70,7 @@ For additional information and help, you can use one of these channels:
 * [Roadmap](https://github.com/elementary-data/elementary-lineage/projects/1) \(Vote for features and add your inputs)
 * [Twitter](https://twitter.com/ElementaryData) \(Updates on new releases and stuff)
 
+
 ## **Integrations**
 
 * [x] **Snowflake** ![](static/snowflake-16.png) 
@@ -70,6 +78,11 @@ For additional information and help, you can use one of these channels:
 * [x] **Redshift**  ![](static/redshift-16.png) - Data monitoring
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
+
+
+## **Contributions**
+
+
 
 ## **License**
 
