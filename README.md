@@ -10,7 +10,7 @@
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
 
-Add anomaly detections as dbt tests, and **monitor the results of both Elementary and dbt tests**. 
+**Monitor your dbt tests results** and add **Elementary anomaly detection tests** to your project. 
 
 See tests results in a UI by model, and info for **fast triage**: sample failed rows, relevant queries, anomaly graph and test configuration.
 
