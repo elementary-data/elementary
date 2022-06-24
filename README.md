@@ -2,7 +2,7 @@
 <img alt="Logo" src="static/header_github.png"/ width="1000">
 </p>
 
-<p align="center">Elementary is an open source data observability solution that integrates with your dbt project</p>
+<p align="center">Data observability for analytics engineers</p>
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
@@ -10,11 +10,9 @@
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
 
-## Data Observability for Analytics Engineers
+Add anomaly detections as dbt tests, and **monitor the results of both Elementary and dbt tests**. 
 
-Add anomaly detections as dbt tests, and **monitor the results of both Elementary and dbt tests in a single report**. 
-
-See tests results by model, and info for **fast triage**: sample failed rows, relevant queries, anomaly graph and test configuration.
+See tests results in a UI by model, and info for **fast triage**: sample failed rows, relevant queries, anomaly graph and test configuration.
 
 Share the report with your team, and use Slack integration for alerting on incidents. 
 
@@ -43,7 +41,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
 :orange_circle: **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
 
-:orange_circle: **Data observability UI** - Generate the report for all dbt tests and share with your team. 
+:orange_circle: **Data observability UI** - Generate a report for all dbt tests and share with your team. 
 
 :orange_circle: **dbt artifacts uploader**
 
