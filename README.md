@@ -12,7 +12,7 @@
 
 **Monitor your dbt tests results** and add **Elementary anomaly detection tests** to your dbt project. 
 
-See tests results in a UI by model, and info for **fast triage**: sample failed rows, relevant queries, anomaly graph and test configuration.
+See the test results on top of your dbt models in a UI, with info for **fast triage**: test status, sample of failed rows, test queries, test configuration and anomaly detection metrics and graph.
 
 Share the report with your team, and use Slack integration for alerting on incidents. 
 
@@ -52,7 +52,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 ##
 
   
-Join our [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
+Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
 
   
@@ -85,7 +85,7 @@ Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community
 
 Thank you :orange_heart: Whether it’s a bug fix, new feature, or additional documentation - we greatly appreciate contributions!
 
-Check out our [contributions guide](https://docs.elementary-data.com/project-overview/contributions). 
+Check out the [contributions guide](https://docs.elementary-data.com/project-overview/contributions). 
 
 
 ## **License**
