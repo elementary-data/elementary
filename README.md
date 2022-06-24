@@ -1,8 +1,8 @@
 <p align="center">
-<img alt="Logo" src="static/header_github.png"/ width="1000">
+<img alt="Logo" src="static/header_git.png"/ width="1000">
 </p>
 
-<p align="center">Data observability for analytics engineers</p>
+<p align="center">Open Source Data observability for Analytics Engineers</p>
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
