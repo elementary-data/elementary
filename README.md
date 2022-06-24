@@ -39,15 +39,15 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
   
 ## Elementary Features
 
-:orange_circle: **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
+ <img src="static/elementary_icon.ico" width="16"/>  **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
 
-:orange_circle: **Data observability UI** - Generate a report for all dbt tests and share with your team. 
+ <img src="static/elementary_icon.ico" width="16"/> **Data observability UI** - Generate a report for all dbt tests and share with your team. 
 
-:orange_circle: **dbt artifacts uploader**
+ <img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader**
 
-:orange_circle: **Slack alerts**
+ <img src="static/elementary_icon.ico" width="16"/> **Slack alerts**
 
-:orange_circle: **Data lineage made simple, reliable, and automated**
+ <img src="static/elementary_icon.ico" width="16"/> **Data lineage made simple, reliable, and automated**
 
 ##
 
