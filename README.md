@@ -12,7 +12,7 @@
 
 **Monitor your dbt tests results** and add **Elementary anomaly detection tests** to your dbt project. 
 
-See the test results on top of your dbt models in a UI, with info for **fast triage**: test status, sample of failed rows, test queries, test configuration and anomaly detection metrics and graph.
+See the test results on top of your dbt models in a report, with info for **fast triage**: test status, sample of failed rows, test queries, test configuration and anomaly detection metrics and graph.
 
 Share the report with your team, and use Slack integration for alerting on incidents. 
 
@@ -29,7 +29,7 @@ Share the report with your team, and use Slack integration for alerting on incid
 
 ## Quick start
   
-Install dbt package & CLI -> Configure tests in dbt -> Monitor in Slack and UI  
+Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
 [Quick start: Data monitoring as dbt tests in minutes](https://docs.elementary-data.com/quickstart). 
 
 [Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
@@ -41,7 +41,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
  <img src="static/elementary_icon.ico" width="16"/>  **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
 
- <img src="static/elementary_icon.ico" width="16"/> **Data observability UI** - Generate a report for all dbt tests and share with your team. 
+ <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a report for all dbt tests and share with your team. 
 
  <img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader**
 
@@ -76,7 +76,7 @@ For additional information and help, you can use one of these channels:
 
 * [x] **Snowflake** ![](static/snowflake-16.png) 
 * [x] **BigQuery**  ![](static/bigquery-16.png) 
-* [x] **Redshift**  ![](static/redshift-16.png) - Data monitoring
+* [x] **Redshift**  ![](static/redshift-16.png)
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
 
