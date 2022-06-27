@@ -61,6 +61,9 @@ Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehf
 Data anomalies monitoring as dbt tests [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).  
 Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
 
+Slack alert example:
+
+<img src="static/Slack_alert_elementary.png" width="400"/>
 
 ## Community & Support
 
