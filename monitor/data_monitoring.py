@@ -247,11 +247,12 @@ class DataMonitoring(object):
                 model_unique_id = model_dict.get('unique_id')
                 self._normalize_dbt_model_dict(model_dict)
                 models[model_unique_id] = model_dict
-                self._update_dbt_sidebar(
-                    dbt_sidebar=dbt_sidebar,
-                    model_unique_id=model_unique_id,
-                    model_full_path=model_dict.get('normalized_full_path')
-                )
+                if model_dict.get('package_name') != 'elementary':
+                    self._update_dbt_sidebar(
+                        dbt_sidebar=dbt_sidebar,
+                       model_unique_id=model_unique_id,
+                        model_full_path=model_dict.get('normalized_full_path')
+                    )
 
         results = self.dbt_runner.run_operation(macro_name='get_sources')
         if results:
@@ -260,11 +261,12 @@ class DataMonitoring(object):
                 source_unique_id = source_dict.get('unique_id')
                 self._normalize_dbt_model_dict(source_dict, is_source=True)
                 models[source_unique_id] = source_dict
-                self._update_dbt_sidebar(
-                    dbt_sidebar=dbt_sidebar,
-                    model_unique_id=source_unique_id,
-                    model_full_path=source_dict.get('normalized_full_path')
-                )
+                if source_dict.get('package_name') != 'elementary':
+                    self._update_dbt_sidebar(
+                        dbt_sidebar=dbt_sidebar,
+                        model_unique_id=source_unique_id,
+                        model_full_path=source_dict.get('normalized_full_path')
+                  )
         return models, dbt_sidebar
 
     @staticmethod
