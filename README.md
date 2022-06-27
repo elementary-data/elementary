@@ -23,7 +23,7 @@ Share the report with your team, and use Slack integration for alerting on incid
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
 
-### Checkout the [live demo](https://www.elementary-data.com/data-observability-demo)
+### Checkout the [live demo](https://www.elementary-data.com/elementary-demo-data-observability)
  
 
 
