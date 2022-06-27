@@ -6,12 +6,14 @@ from clients.api.api import APIClient
 from clients.dbt.dbt_runner import DbtRunner
 from monitor.api.models.models import ModelsAPI
 from monitor.api.models.schema import NormalizedModelSchema
+from monitor.api.tests.tests import TestsAPI
 
 
 class SidebarAPI(APIClient):
     def __init__(self, dbt_runner: DbtRunner):
         super().__init__(dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
 
     def get_sidebar(
         self,

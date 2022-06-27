@@ -15,8 +15,8 @@ class ModelsAPI(APIClient):
         models_results = self.dbt_runner.run_operation(macro_name='get_models')
         models = dict()
         if models_results:
-            models_data = [ModelSchema(**model) for model in json.loads(models_results[0])]
-            for model_data in models_data:
+            for model_result in json.loads(models_results[0]):
+                model_data = ModelSchema(**model_result)
                 normalized_model = ModelsAPI._normalize_dbt_model_dict(model_data)
                 model_unique_id = normalized_model.unique_id
                 models[model_unique_id] = normalized_model
@@ -26,8 +26,8 @@ class ModelsAPI(APIClient):
         sources_results = self.dbt_runner.run_operation(macro_name='get_sources')
         sources = dict()
         if sources_results:
-            sources_data = [ModelSchema(**source) for source in json.loads(sources_results[0])]
-            for source_data in sources_data:
+            for source_result in json.loads(sources_results[0]):
+                source_data = ModelSchema(**source_result)
                 normalized_source = self._normalize_dbt_model_dict(source_data, is_source=True)
                 source_unique_id = normalized_source.unique_id
                 sources[source_unique_id] = normalized_source

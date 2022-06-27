@@ -110,7 +110,8 @@ class DbtTestResult(TestResult):
         test_name,
         test_params,
         severity,
-        status
+        status,
+        **kwargs
     ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
         self.test_unique_id = test_unique_id
@@ -246,7 +247,8 @@ class ElementaryTestResult(DbtTestResult):
         test_name,
         test_params,
         severity,
-        status
+        status,
+        **kwargs
     ) -> None:
         super().__init__(
             id,

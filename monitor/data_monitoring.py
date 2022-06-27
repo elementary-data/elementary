@@ -1,9 +1,12 @@
+import json
+import pkg_resources
 import os
+import webbrowser
 
-from yaml import serialize
+
 from monitor.api.models.models import ModelsAPI
-from monitor.api.models.schema import NormalizedModelSchema
 from monitor.api.sidebar.sidebar import SidebarAPI
+from monitor.api.tests.tests import TestsAPI
 from monitor.test_result import TestResult
 from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
@@ -11,12 +14,8 @@ from clients.slack.slack_client import SlackClient
 from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
-from utils.json_utils import try_load_json
-import json
 from alive_progress import alive_it
 from typing import Dict, List, Optional, Tuple
-import pkg_resources
-import webbrowser
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -193,54 +192,16 @@ class DataMonitoring(object):
         return self.success
 
     def _get_test_results_and_totals(self):
-        results = self.dbt_runner.run_operation(macro_name='get_test_results')
-        test_results_api_dict = {}
-        test_result_totals_api_dict = {}
-        if results:
-            test_result_dicts = json.loads(results[0])
-            for test_result_dict in test_result_dicts:
-                days_diff = test_result_dict.pop('days_diff')
-                test_result_object = TestResult.create_test_result_from_dict(test_result_dict)
-                if test_result_object:
-                    model_unique_id = test_result_object.model_unique_id
-                    if model_unique_id in test_results_api_dict:
-                        test_results_api_dict[model_unique_id].append(test_result_object.to_test_result_api_dict())
-                    else:
-                        test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
-
-                    self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
-                                                     test_result_object.status)
-                else:
-                    self.success = False
-
-            self.execution_properties['test_results'] = len(test_result_dicts)
-        return test_results_api_dict, test_result_totals_api_dict
-
-    def _update_test_results_totals(self, totals_dict, model_unique_id, days_diff, status):
-        if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
-                                            '7d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
-                                            '30d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0}}
-        total_keys = []
-        if days_diff < 1:
-            total_keys.append('1d')
-        if days_diff < 7:
-            total_keys.append('7d')
-        if days_diff < 30:
-            total_keys.append('30d')
-
-        if status == 'warn':
-            totals_status = 'warnings'
-        elif status == 'error' or status == 'fail':
-            totals_status = 'errors'
-        elif status == 'pass':
-            totals_status = 'passed'
-        else:
-            totals_status = None
-
-        if totals_status is not None:
-            for key in total_keys:
-                totals_dict[model_unique_id][key][totals_status] += 1
+        tests_api = TestsAPI(dbt_runner=self.dbt_runner)
+        try:
+            tests = tests_api.get_tests_metadata()
+            totals = tests_api.get_total_tests_results(tests["raw_tests"])
+            self.execution_properties['test_results'] = tests["count"]
+            return tests["tests"], totals
+        except Exception as e:
+            logger.error(f"Could not get test results and totals - Error: {e}")
+            self.success = False
+            return dict(), dict()
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
