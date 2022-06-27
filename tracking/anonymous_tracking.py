@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Union
+from typing import Optional, Tuple 
 
 import posthog
 import requests
@@ -40,7 +40,7 @@ class AnonymousTracking(object):
         self.api_key, self.url = self._fetch_api_key_and_url()
 
     @classmethod
-    def _fetch_api_key_and_url(cls) -> (Union[str, None], Union[str, None]):
+    def _fetch_api_key_and_url(cls) -> Tuple[Optional[str], Optional[str]]:
         result = requests.get(url=cls.FETCH_API_KEY_AND_URL)
         if result.status_code != 200:
             return None, None
