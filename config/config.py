@@ -13,11 +13,14 @@ class Config(object):
     WORKFLOWS = 'workflows'
     CONFIG_FILE_NAME = 'config.yml'
 
-    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None) -> None:
+    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None, dbt_vars: str = none) -> None:
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
         self.config_dict = self._load_configuration()
+        self.dbt_vars_dict = None
+        if dbt_vars is not none:
+            self.dbt_vars_dict = ordered_yaml.loads(dbt_vars)
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
@@ -70,3 +73,13 @@ class Config(object):
             return os.getcwd()
         return target_path
 
+    @property
+    def target_dir(self) -> str:
+        target_path = self.config_dict.get('target-path')
+        if not target_path:
+            return os.getcwd()
+        return target_path
+    
+    @property
+    def dbt_vars_dict(self) -> Optional[dict]:
+        return self.dbt_vars_dict

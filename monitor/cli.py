@@ -95,6 +95,12 @@ def get_cli_properties() -> dict:
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--dbt-vars',
+    type=str,
+    default=None,
+    help="Specify raw YAML string of your dbt variables."
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -106,13 +112,14 @@ def monitor(
     profiles_dir,
     update_dbt_package,
     full_refresh_dbt_package,
-    profile_target
+    profile_target,
+    dbt_vars
 ):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
         return
-    config = Config(config_dir, profiles_dir, profile_target)
+    config = Config(config_dir, profiles_dir, profile_target, dbt_vars)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
@@ -123,8 +130,8 @@ def monitor(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        data_monitoring.run(days_back, full_refresh_dbt_package)
-        success = data_monitoring.run(days_back, full_refresh_dbt_package)
+        data_monitoring.run(days_back, full_refresh_dbt_package, vars=config.dbt_vars_dict)
+        success = data_monitoring.run(days_back, full_refresh_dbt_package, vars=config.dbt_vars_dict)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1

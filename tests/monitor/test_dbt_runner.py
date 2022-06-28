@@ -39,10 +39,13 @@ def test_dbt_runner_run(mock_subprocess_run, model, full_refresh):
     project_dir = 'proj_dir'
     profiles_dir = 'prof_dir'
     dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
-    dbt_runner.run(model, full_refresh=full_refresh)
+    dbt_vars_dict = {
+        "key1": 1,
+        "key2": 2,
+    }
+    dbt_runner.run(model, full_refresh=full_refresh, vars=dbt_vars_dict)
     mock_subprocess_run.assert_called()
     if model is not None:
         assert model in mock_subprocess_run.call_args[0][0]
     if full_refresh:
         assert '--full-refresh' in mock_subprocess_run.call_args[0][0]
-
