@@ -106,6 +106,7 @@ class DbtTestResult(TestResult):
         tags,
         test_results_query,
         test_rows_sample,
+        test_runs,
         other,
         test_name,
         test_params,
@@ -138,6 +139,7 @@ class DbtTestResult(TestResult):
         self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
+        self.test_runs = test_runs if test_runs else ''
         self.test_params = test_params
         self.error_message = self.description_display_name(test_results_description, 'No error message')
         self.column_name = column_name if column_name else ''
@@ -171,6 +173,7 @@ class DbtTestResult(TestResult):
                 'column_name': self.column_name,
                 'test_results_query': self.test_results_query,
                 'test_rows_sample': self.test_rows_sample,
+                'test_runs': self.test_runs,
                 'failed_rows_count': self.failed_rows_count
             }
         else:
@@ -203,7 +206,9 @@ class DbtTestResult(TestResult):
             return slack_message
 
     def to_test_result_api_dict(self):
-        return {'test_unique_id': self.test_unique_id,
+        return {
+            'metadata': {
+                'test_unique_id': self.test_unique_id,
                 'database_name': self.database_name,
                 'schema_name': self.schema_name,
                 'table_name': self.table_name,
@@ -218,11 +223,19 @@ class DbtTestResult(TestResult):
                 'test_type': self.test_type,
                 'test_sub_type': self.test_sub_type,
                 'test_query': self.test_results_query,
-                'test_params': self.test_params,
-                'test_results': {'display_name': self.test_display_name + ' - failed results sample',
-                                 'results_sample': self.test_rows_sample,
-                                 'error_message': self.error_message,
-                                 'failed_rows_count': self.failed_rows_count}}
+                'test_params': self.test_params
+            },
+            'test_results': {
+                'display_name': self.test_display_name + ' - failed results sample',
+                'results_sample': self.test_rows_sample,
+                'error_message': self.error_message,
+                'failed_rows_count': self.failed_rows_count
+            },
+            'test_runs': {
+                'display_name': self.test_display_name,
+                'invocations': self.test_runs
+            }
+        }
 
 
 class ElementaryTestResult(DbtTestResult):
@@ -243,6 +256,7 @@ class ElementaryTestResult(DbtTestResult):
         tags,
         test_results_query,
         test_rows_sample,
+        test_runs,
         other,
         test_name,
         test_params,
@@ -266,6 +280,7 @@ class ElementaryTestResult(DbtTestResult):
             tags,
             test_results_query,
             test_rows_sample,
+            test_runs,
             other,
             test_name,
             test_params,
@@ -348,7 +363,9 @@ class ElementaryTestResult(DbtTestResult):
             test_results = {'display_name': self.test_sub_type_display_name.lower(),
                             'result_description': self.test_results_description}
 
-        return {'test_unique_id': self.test_unique_id,
+        return {
+            'metadata': {
+                'test_unique_id': self.test_unique_id,
                 'database_name': self.database_name,
                 'schema_name': self.schema_name,
                 'table_name': self.table_name,
@@ -363,5 +380,11 @@ class ElementaryTestResult(DbtTestResult):
                 'test_type': self.test_type,
                 'test_sub_type': self.test_sub_type,
                 'test_query': self.test_results_query,
-                'test_params': test_params,
-                'test_results': test_results}
+                'test_params': test_params
+            },
+            'test_results': test_results,
+            'test_runs': {
+                'display_name': self.test_sub_type_display_name,
+                'invocations': self.test_runs
+            }
+        }

@@ -12,7 +12,7 @@ SQL_FILE_EXTENSION = ".sql"
 
 class ModelsAPI(APIClient):
     def get_models(self) -> Dict[str, NormalizedModelSchema]:
-        models_results = self.dbt_runner.run_operation(macro_name='get_models')
+        models_results = self.dbt_runner.run_operation(macro_name="get_models")
         models = dict()
         if models_results:
             for model_result in json.loads(models_results[0]):
@@ -23,7 +23,7 @@ class ModelsAPI(APIClient):
         return models
     
     def get_sources(self) -> Dict[str, NormalizedModelSchema]:
-        sources_results = self.dbt_runner.run_operation(macro_name='get_sources')
+        sources_results = self.dbt_runner.run_operation(macro_name="get_sources")
         sources = dict()
         if sources_results:
             for source_result in json.loads(sources_results[0]):
@@ -32,6 +32,17 @@ class ModelsAPI(APIClient):
                 source_unique_id = normalized_source.unique_id
                 sources[source_unique_id] = normalized_source
         return sources
+    
+    def get_covarages(self):
+        covarage_results = self.dbt_runner.run_operation(macro_name="get_covarages")
+        covarages = dict()
+        if covarage_results:
+            for covarage_result in json.loads(covarage_results[0]):
+                covarages[covarage_result["model_unique_id"]] = dict(
+                    table_tests=covarage_result["table_tests"],
+                    column_tests=covarage_result["column_tests"]
+                )
+        return covarages
 
     @staticmethod
     def _normalize_dbt_model_dict(model: ModelSchema, is_source: bool = False) -> NormalizedModelSchema:

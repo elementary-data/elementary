@@ -23,7 +23,8 @@ class RawTestMetadataSchema(BaseModel):
     severity: str
     status: str
     days_diff: float
-    test_rows_sample: list
+    test_rows_sample: Optional[list]
+    test_runs: Optional[list]
 
 
 class TestMetadataSchema(BaseModel):

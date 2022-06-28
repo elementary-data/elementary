@@ -26,7 +26,9 @@ class TestsAPI(APIClient):
             count=len(raw_tests_results)
         )
 
-    def get_metrics(self):
+    def get_metrics(self, raw_tests_data: Optional[List[RawTestMetadataSchema]] = None):
+        # tests: List[RawTestMetadataSchema] = raw_tests_data if raw_tests_data else self.get_tests_metadata().get('raw_tests', [])
+        # tests_metrics = json.loads(self.dbt_runner.run_operation(macro_name='get_tests_metrics', macro_args=dict(tests_dicts=[dict(test) for test in tests])))
         pass
 
     def get_invocations(self):
@@ -51,7 +53,7 @@ class TestsAPI(APIClient):
             'warnings': 0,
             'resolved': 0,
             'passed': 0
-        },
+        }
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = {
                 '1d': {**empty_totals},
