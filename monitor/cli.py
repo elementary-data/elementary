@@ -123,7 +123,6 @@ def monitor(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        data_monitoring.run(days_back, full_refresh_dbt_package)
         success = data_monitoring.run(days_back, full_refresh_dbt_package)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
