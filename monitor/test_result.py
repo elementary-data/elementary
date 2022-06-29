@@ -233,6 +233,13 @@ class DbtTestResult(TestResult):
             },
             'test_runs': {
                 'display_name': self.test_display_name,
+                'fail_rate': len([test_run for test_run in self.test_runs if test_run["status"] != "pass"])/len(self.test_runs) if self.test_runs else 0,
+                'totals': dict(
+                    errors=len([test_run for test_run in self.test_runs if test_run["status"] in ["error", "fail"]]),
+                    warnings=len([test_run for test_run in self.test_runs if test_run["status"] == "warn"]),
+                    passed=len([test_run for test_run in self.test_runs if test_run["status"] == "pass"]),
+                    resolved=0
+                ),
                 'invocations': self.test_runs
             }
         }
@@ -385,6 +392,13 @@ class ElementaryTestResult(DbtTestResult):
             'test_results': test_results,
             'test_runs': {
                 'display_name': self.test_sub_type_display_name,
+                'fail_rate': len([test_run for test_run in self.test_runs if test_run["status"] != "pass"]) / len(self.test_runs) if self.test_runs else 0,
+                'totals': dict(
+                    errors=len([test_run for test_run in self.test_runs if test_run["status"] in ["error", "fail"]]),
+                    warnings=len([test_run for test_run in self.test_runs if test_run["status"] == "warn"]),
+                    passed=len([test_run for test_run in self.test_runs if test_run["status"] == "pass"]),
+                    resolved=0
+                ),
                 'invocations': self.test_runs
             }
         }

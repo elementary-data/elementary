@@ -146,13 +146,14 @@ class DataMonitoring(object):
 
         elementary_output = {}
         elementary_output['creation_time'] = now_utc
-        test_results, test_result_totals = self._get_test_results_and_totals()
+        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals()
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         models_covarages = self._get_dbt_models_covarages()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
         elementary_output['test_results'] = test_results
-        elementary_output['totals'] = test_result_totals
+        elementary_output['test_results_totals'] = test_results_totals
+        elementary_output['test_runs_totals'] = test_runs_totals
         elementary_output['covarages'] = models_covarages
 
         html_index_path = pkg_resources.resource_filename(__name__, "index.html")
@@ -197,13 +198,14 @@ class DataMonitoring(object):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests = tests_api.get_tests_metadata()
-            totals = tests_api.get_total_tests_results(tests["raw_tests"])
+            test_results_totals = tests_api.get_total_tests_results(tests["raw_tests"])
+            test_runs_totals = tests_api.get_total_tests_runs(tests["raw_tests"])
             self.execution_properties['test_results'] = tests["count"]
-            return tests["tests"], totals
+            return tests["tests"], test_results_totals, test_runs_totals
         except Exception as e:
             logger.error(f"Could not get test results and totals - Error: {e}")
             self.success = False
-            return dict(), dict()
+            return dict(), dict(), dict()
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)

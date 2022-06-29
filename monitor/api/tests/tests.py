@@ -26,9 +26,7 @@ class TestsAPI(APIClient):
             count=len(raw_tests_results)
         )
 
-    def get_metrics(self, raw_tests_data: Optional[List[RawTestMetadataSchema]] = None):
-        # tests: List[RawTestMetadataSchema] = raw_tests_data if raw_tests_data else self.get_tests_metadata().get('raw_tests', [])
-        # tests_metrics = json.loads(self.dbt_runner.run_operation(macro_name='get_tests_metrics', macro_args=dict(tests_dicts=[dict(test) for test in tests])))
+    def get_metrics(self):
         pass
 
     def get_invocations(self):
@@ -45,6 +43,56 @@ class TestsAPI(APIClient):
                 status=test.status
             )
         return totals
+    
+    def get_total_tests_runs(self, raw_tests_data: Optional[List[RawTestMetadataSchema]] = None):
+        tests: List[RawTestMetadataSchema] = raw_tests_data if raw_tests_data else self.get_tests_metadata().get('raw_tests', [])
+        totals = dict()
+        for test in tests:
+            self._update_test_runs_totals(
+                totals_dict=totals,
+                test=test
+            )
+        return totals
+    
+    @staticmethod
+    def _update_test_runs_totals(totals_dict: dict, test: RawTestMetadataSchema):
+        empty_totals = {
+            'errors': 0,
+            'warnings': 0,
+            'resolved': 0,
+            'passed': 0
+        }
+        model_unique_id = test.model_unique_id
+        days_diff = test.days_diff
+
+        if model_unique_id not in totals_dict:
+            totals_dict[model_unique_id] = {
+                '1d': {**empty_totals},
+                '7d': {**empty_totals},
+                '30d': {**empty_totals}
+            }
+        total_keys = []
+        if days_diff < 1:
+            total_keys.append('1d')
+        if days_diff < 7:
+            total_keys.append('7d')
+        if days_diff < 30:
+            total_keys.append('30d')
+        
+        for test_run in test.test_runs:
+            run_status = test_run["status"]
+            if run_status == 'warn':
+                totals_status = 'warnings'
+            elif run_status == 'error' or run_status == 'fail':
+                totals_status = 'errors'
+            elif run_status == 'pass':
+                totals_status = 'passed'
+            else:
+                totals_status = None
+
+            if totals_status is not None:
+                for key in total_keys:
+                    totals_dict[model_unique_id][key][totals_status] += 1
 
     @staticmethod
     def _update_test_results_totals(totals_dict, model_unique_id, days_diff, status):
