@@ -1,3 +1,4 @@
+import json
 import pytest
 from unittest import mock
 from monitor.dbt_runner import DbtRunner
@@ -35,17 +36,32 @@ def test_dbt_runner_seed(mock_subprocess_run, command):
     (None, False),
 ])
 @mock.patch('subprocess.run')
-def test_dbt_runner_run(mock_subprocess_run, model, full_refresh):
+def test_dbt_runner_run(mock_subprocess_run, model, full_refresh, dbt_vars):
     project_dir = 'proj_dir'
     profiles_dir = 'prof_dir'
     dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
-    dbt_vars_dict = {
-        "key1": 1,
-        "key2": 2,
-    }
-    dbt_runner.run(model, full_refresh=full_refresh, vars=dbt_vars_dict)
+    dbt_runner.run(model, full_refresh=full_refresh)
     mock_subprocess_run.assert_called()
     if model is not None:
         assert model in mock_subprocess_run.call_args[0][0]
     if full_refresh:
         assert '--full-refresh' in mock_subprocess_run.call_args[0][0]
+
+@pytest.mark.parametrize("dbt_vars", [
+    (None),
+    ({"key1": "x", "key2": "y", "key3": "z"}),
+])
+@mock.patch('subprocess.run')
+def test_dbt_runner_run(mock_subprocess_run, dbt_vars):
+    project_dir = 'proj_dir'
+    profiles_dir = 'prof_dir'
+    expanded_dbt_vars = json.dumps(dbt_vars)
+    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
+    dbt_runner.run(vars=dbt_vars)
+    mock_subprocess_run.assert_called()
+    if dbt_vars is None:
+        assert '--vars' not in mock_subprocess_run.call_args[0][0]
+        assert expanded_dbt_vars not in mock_subprocess_run.call_args[0][0]
+    if dbt_vars is not None:
+        assert '--vars' in mock_subprocess_run.call_args[0][0]
+        assert expanded_dbt_vars in mock_subprocess_run.call_args[0][0]
