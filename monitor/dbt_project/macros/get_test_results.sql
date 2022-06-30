@@ -32,7 +32,6 @@
         {% set test_table_name = elementary.insensitive_get_dict_value(test_result_dict, 'table_name') %}
         {% set test_column_name = elementary.insensitive_get_dict_value(test_result_dict, 'column_name') %}
         {% set test_results_query = elementary.insensitive_get_dict_value(test_result_dict, 'test_results_query') %}
-        {% set test_type = elementary.insensitive_get_dict_value(test_result_dict, 'test_type') %}
         {% set status = elementary.insensitive_get_dict_value(test_result_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}

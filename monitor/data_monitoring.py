@@ -198,6 +198,7 @@ class DataMonitoring(object):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests = tests_api.get_tests_metadata()
+            # metrics = tests_api.get_metrics(tests["raw_tests"])
             test_results_totals = tests_api.get_total_tests_results(tests["raw_tests"])
             test_runs_totals = tests_api.get_total_tests_runs(tests["raw_tests"])
             self.execution_properties['test_results'] = tests["count"]

@@ -26,7 +26,11 @@ class TestsAPI(APIClient):
             count=len(raw_tests_results)
         )
 
-    def get_metrics(self):
+    def get_metrics(self, raw_tests_data: Optional[List[RawTestMetadataSchema]] = None):
+        tests: List[RawTestMetadataSchema] = raw_tests_data if raw_tests_data else self.get_tests_metadata().get('raw_tests', [])
+        tests = [dict(test) for test in tests]
+        metrics = self.dbt_runner.run_operation(macro_name='get_metrics', macro_args=dict(tests=tests))
+        breakpoint()
         pass
 
     def get_invocations(self):
