@@ -162,14 +162,20 @@ def monitor(
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--test-runs-amount', '-tra',
+    type=int,
+    default=30,
+    help='Set the amount of test runs for each test in the "Test Runs" screen'
+)
 @click.pass_context
-def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
+def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target, test_runs_amount):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report()
+        success = data_monitoring.generate_report(test_runs_amount=test_runs_amount)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
