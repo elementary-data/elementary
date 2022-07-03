@@ -252,9 +252,12 @@ class DataMonitoring(object):
         
         return serializeable_models, dbt_sidebar
     
-    def _get_dbt_models_coverages(self):
+    def _get_dbt_models_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        return models_api.get_coverages()
+        coverages = models_api.get_coverages()
+        for model_id, coverage in coverages.items():
+            coverages[model_id] = dict(coverage)
+        return coverages
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
