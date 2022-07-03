@@ -58,17 +58,18 @@ Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehf
   
 ## Demo & Sandbox
 
-Data anomalies monitoring as dbt tests [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).  
-Try out our live lineage [sandbox here](https://www.elementary-data.com/live-demo).
+Data observability report [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).  
 
+Slack alert example:
+
+<img src="static/Slack_alert_elementary.png" width="400"/>
 
 ## Community & Support
 
 For additional information and help, you can use one of these channels:
 
 * [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(Live chat with the team, support, discussions, etc.\)
-* [GitHub issues](https://github.com/elementary-data/elementary-lineage/issues) \(Bug reports, feature requests)
-* [Roadmap](https://github.com/elementary-data/elementary-lineage/projects/1) \(Vote for features and add your inputs)
+* [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
 * [Twitter](https://twitter.com/ElementaryData) \(Updates on new releases and stuff)
 
 
