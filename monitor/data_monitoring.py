@@ -1,4 +1,6 @@
+from collections import defaultdict
 import json
+from importlib_metadata import metadata
 import pkg_resources
 import os
 import webbrowser
@@ -6,6 +8,7 @@ import webbrowser
 
 from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
+from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
 from monitor.api.tests.tests import TestsAPI
 from monitor.test_result import TestResult
 from clients.dbt.dbt_runner import DbtRunner
@@ -15,7 +18,7 @@ from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 from alive_progress import alive_it
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -197,16 +200,42 @@ class DataMonitoring(object):
     def _get_test_results_and_totals(self):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
-            tests = tests_api.get_tests_metadata()
-            # metrics = tests_api.get_metrics(tests["raw_tests"])
-            test_results_totals = tests_api.get_total_tests_results(tests["raw_tests"])
-            test_runs_totals = tests_api.get_total_tests_runs(tests["raw_tests"])
-            self.execution_properties['test_results'] = tests["count"]
-            return tests["tests"], test_results_totals, test_runs_totals
+            tests_metadata = tests_api.get_tests_metadata()
+            metrics = tests_api.get_metrics(tests_metadata=tests_metadata)
+            invocations = tests_api.get_invocations()
+            tests_results = self._create_tests_results(
+                tests_metadata=tests_metadata,
+                metrics=metrics,
+                invocations=invocations
+            )
+            test_results_totals = tests_api.get_total_tests_results(tests_metadata)
+            test_runs_totals = tests_api.get_total_tests_runs(tests_metadata=tests_metadata, tests_invocations=invocations)
+            self.execution_properties['test_results'] = len(tests_metadata)
+            return tests_results, test_results_totals, test_runs_totals
         except Exception as e:
             logger.error(f"Could not get test results and totals - Error: {e}")
             self.success = False
             return dict(), dict(), dict()
+
+    def _create_tests_results(
+        self,
+        tests_metadata: List[TestMetadataSchema],
+        metrics: Dict[TestUniqueIdType, Dict[str, Any]],
+        invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
+    ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
+        tests_results=defaultdict(list)
+        for test in tests_metadata:
+            test_sub_type_unique_id = TestsAPI._get_test_sub_type_unique_id(test=test)
+            metadata = dict(test)
+            test_metrics = metrics[test_sub_type_unique_id]
+            test_invocations = invocations[test_sub_type_unique_id]
+            test_result = TestResult.create_test_result_from_dict({
+                **metadata,
+                "test_rows_sample": test_metrics,
+                "test_runs": [dict(invocation) for invocation in test_invocations] 
+            })
+            tests_results[test.model_unique_id].append(test_result.to_test_result_api_dict())
+        return tests_results
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)

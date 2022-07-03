@@ -24,26 +24,6 @@
     {%- endset -%}
     {% set elementary_test_results_agate = run_query(select_test_results) %}
     {% set test_result_dicts = elementary.agate_to_dicts(elementary_test_results_agate) %}
-    {% set test_result_with_sample_dicts = [] %}
-    {%- for test_result_dict in test_result_dicts -%}
-        {% set test_unique_id = elementary.insensitive_get_dict_value(test_result_dict, 'test_unique_id') %}
-        {% set test_type = elementary.insensitive_get_dict_value(test_result_dict, 'test_type') %}
-        {% set test_sub_type = elementary.insensitive_get_dict_value(test_result_dict, 'test_sub_type') %}
-        {% set test_table_name = elementary.insensitive_get_dict_value(test_result_dict, 'table_name') %}
-        {% set test_column_name = elementary.insensitive_get_dict_value(test_result_dict, 'column_name') %}
-        {% set test_results_query = elementary.insensitive_get_dict_value(test_result_dict, 'test_results_query') %}
-        {% set status = elementary.insensitive_get_dict_value(test_result_dict, 'status') | lower %}
-
-        {% set test_rows_sample = none %}
-        {% set test_runs = none %}
-        {%- if status != 'error'-%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, results_sample_limit) %}
-            {% set test_runs = elementary_internal.get_test_runs(test_unique_id, test_table_name, test_column_name, test_type, test_sub_type) %}
-        {%- endif -%}
-        {% do test_result_dict.update({'test_rows_sample': test_rows_sample}) %}
-        {% do test_result_dict.update({'test_runs': test_runs}) %}
-        {% do test_result_with_sample_dicts.append(test_result_dict) %}
-    {%- endfor -%}
-    {% do elementary.edr_log(tojson(test_result_with_sample_dicts)) %}
+    {% do elementary.edr_log(tojson(test_result_dicts)) %}
 {%- endmacro -%}
 

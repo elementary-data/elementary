@@ -2,10 +2,14 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 
 
-class RawTestMetadataSchema(BaseModel):
+TestUniqueIdType = str
+ModelUniqueIdType = str
+
+
+class TestMetadataSchema(BaseModel):
     id: str
-    model_unique_id: str
-    test_unique_id: str
+    model_unique_id: ModelUniqueIdType
+    test_unique_id: TestUniqueIdType
     detected_at: str
     database_name: str
     schema_name: str
@@ -23,17 +27,10 @@ class RawTestMetadataSchema(BaseModel):
     severity: str
     status: str
     days_diff: float
-    test_rows_sample: Optional[list]
-    test_runs: Optional[list]
-
-
-class TestMetadataSchema(BaseModel):
-    pass
-
-
-class MetricSchema(BaseModel):
-    pass
-
+    
 
 class InvocationSchema(BaseModel):
-    pass
+    affected_rows: Optional[int]
+    time_utc: str
+    id: str
+    status: str
