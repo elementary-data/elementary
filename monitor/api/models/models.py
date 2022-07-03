@@ -3,7 +3,7 @@ import os
 from typing import Dict, Optional
 
 from clients.api.api import APIClient
-from monitor.api.models.schema import ModelSchema, NormalizedModelSchema
+from monitor.api.models.schema import ModelCoverageSchema, ModelSchema, NormalizedModelSchema
 from utils.json_utils import try_load_json
 
 YAML_FILE_EXTENSION = ".yml"
@@ -33,16 +33,16 @@ class ModelsAPI(APIClient):
                 sources[source_unique_id] = normalized_source
         return sources
     
-    def get_covarages(self):
-        covarage_results = self.dbt_runner.run_operation(macro_name="get_covarages")
-        covarages = dict()
-        if covarage_results:
-            for covarage_result in json.loads(covarage_results[0]):
-                covarages[covarage_result["model_unique_id"]] = dict(
-                    table_tests=covarage_result["table_tests"],
-                    column_tests=covarage_result["column_tests"]
+    def get_coverages(self) -> Dict[str, ModelCoverageSchema]:
+        coverage_results = self.dbt_runner.run_operation(macro_name="get_coverages")
+        coverages = dict()
+        if coverage_results:
+            for coverage_result in json.loads(coverage_results[0]):
+                coverages[coverage_result["model_unique_id"]] = ModelCoverageSchema(
+                    table_tests=coverage_result["table_tests"],
+                    column_tests=coverage_result["column_tests"]
                 )
-        return covarages
+        return coverages
 
     @staticmethod
     def _normalize_dbt_model_dict(model: ModelSchema, is_source: bool = False) -> NormalizedModelSchema:

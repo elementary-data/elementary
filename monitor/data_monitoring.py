@@ -150,13 +150,13 @@ class DataMonitoring(object):
         elementary_output['creation_time'] = now_utc
         test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(test_runs_amount)
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
-        models_covarages = self._get_dbt_models_covarages()
+        models_coverages = self._get_dbt_models_coverages()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
         elementary_output['test_results'] = test_results
         elementary_output['test_results_totals'] = test_results_totals
         elementary_output['test_runs_totals'] = test_runs_totals
-        elementary_output['covarages'] = models_covarages
+        elementary_output['coverages'] = models_coverages
 
         html_index_path = pkg_resources.resource_filename(__name__, "index.html")
         with open(html_index_path, 'r') as index_html_file:
@@ -252,9 +252,9 @@ class DataMonitoring(object):
         
         return serializeable_models, dbt_sidebar
     
-    def _get_dbt_models_covarages(self):
+    def _get_dbt_models_coverages(self):
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        return models_api.get_covarages()
+        return models_api.get_coverages()
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}

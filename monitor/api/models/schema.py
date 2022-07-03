@@ -28,3 +28,8 @@ class NormalizedModelSchema(ModelSchema):
     @validator("tags", pre=True, always=True)
     def set_tags(cls, tags):
         return tags or []
+
+
+class ModelCoverageSchema(BaseModel):
+    table_tests: int
+    column_tests: int

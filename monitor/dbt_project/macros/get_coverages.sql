@@ -1,4 +1,4 @@
-{% macro get_covarages() %}
+{% macro get_coverages() %}
     {% set dbt_tests_relation = ref('elementary', 'dbt_tests') %}
     {%- if elementary.relation_exists(dbt_tests_relation) -%}
         {% set get_coverages_query %}
@@ -26,8 +26,8 @@
             from dbt_tests
             group by parent_model_unique_id
         {% endset %}
-        {% set covarage_agate = run_query(get_coverages_query) %}
-        {% set covarage_json = elementary.agate_to_json(covarage_agate) %}
-        {% do elementary.edr_log(covarage_json) %}
+        {% set coverage_agate = run_query(get_coverages_query) %}
+        {% set coverage_json = elementary.agate_to_json(coverage_agate) %}
+        {% do elementary.edr_log(coverage_json) %}
     {%- endif -%}
 {% endmacro %}
