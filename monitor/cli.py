@@ -235,6 +235,12 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target, te
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--test-runs-amount', '-tra',
+    type=int,
+    default=30,
+    help='Set the amount of test runs for each test in the "Test Runs" screen'
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -244,7 +250,8 @@ def send_report(
     slack_webhook,
     slack_token,
     slack_channel_name,
-    profile_target
+    profile_target,
+    test_runs_amount
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
@@ -257,7 +264,7 @@ def send_report(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        generated_report_successfully, elementary_html_path = data_monitoring.generate_report()
+        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(test_runs_amount=test_runs_amount)
         sent_report_successfully = data_monitoring.send_report(elementary_html_path)
         if not (generated_report_successfully and sent_report_successfully):
             return 1
