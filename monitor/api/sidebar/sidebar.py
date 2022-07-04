@@ -21,8 +21,8 @@ class SidebarAPI(APIClient):
         sources: Optional[Dict[str, NormalizedModelSchema]] = None
     ) -> dict:
         sidebar = dict()
-        models = models if models else self.models_api.get_models()
-        sources = sources if sources else self.models_api.get_sources()
+        models = models if models is not None else self.models_api.get_models()
+        sources = sources if sources is not None else self.models_api.get_sources()
         for model in [*models.values(), *sources.values()]:
             SidebarAPI._update_dbt_sidebar(
                 dbt_sidebar=sidebar,
