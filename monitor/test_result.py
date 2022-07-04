@@ -1,6 +1,7 @@
 import json
 import re
 from datetime import datetime
+from typing import Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
