@@ -231,7 +231,7 @@ class DataMonitoring(object):
             test_result = TestResult.create_test_result_from_dict({
                 **metadata,
                 "test_rows_sample": test_metrics,
-                "test_runs": [dict(invocation) for invocation in test_invocations] 
+                "test_runs": json.loads(test_invocations.json())
             })
             tests_results[test.model_unique_id].append(test_result.to_test_result_api_dict())
         return tests_results

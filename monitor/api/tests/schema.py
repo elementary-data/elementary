@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -34,3 +34,17 @@ class InvocationSchema(BaseModel):
     time_utc: str
     id: str
     status: str
+
+
+class TotalsInvocationsSchema(BaseModel):
+    errors: Optional[int] = 0
+    warnings: Optional[int] = 0
+    passed: Optional[int] = 0
+    resolve: Optional[int] = 0
+
+
+class InvocationsSchems(BaseModel):
+    fail_rate: float
+    totals: TotalsInvocationsSchema
+    invocations: List[InvocationSchema]
+    description: str

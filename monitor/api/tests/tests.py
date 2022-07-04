@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 from clients.api.api import APIClient
-from monitor.api.tests.schema import TestMetadataSchema, TestUniqueIdType, InvocationSchema
+from monitor.api.tests.schema import InvocationsSchems, TestMetadataSchema, TestUniqueIdType, InvocationSchema, TotalsInvocationsSchema
 
 
 class TestsAPI(APIClient):
@@ -30,7 +30,7 @@ class TestsAPI(APIClient):
     def get_invocations(
         self,
         invocations_per_test: int = 30
-    ) -> Dict[TestUniqueIdType, List[InvocationSchema]]:
+    ) -> Dict[TestUniqueIdType, InvocationsSchems]:
         tests_invocations = dict()
         raw_invocations = json.loads(self.dbt_runner.run_operation(
             macro_name='get_tests_invocations',
@@ -49,8 +49,44 @@ class TestsAPI(APIClient):
                     status=test_invocations_statuses[index],
                     affected_rows=self._parse_affected_row(affected_rows=test_invocations_affected_rows, index=index)
                 ))
-            tests_invocations[sub_test_unique_id] = test_invocations
+
+            totals = self._get_invocations_totals(test_invocations)
+            tests_invocations[sub_test_unique_id] = InvocationsSchems(
+                fail_rate=len([
+                    invocation 
+                    for invocation 
+                    in test_invocations 
+                    if invocation.status != "pass"
+                ])/len(test_invocations) if test_invocations else 0,
+                totals=totals,
+                invocations=test_invocations,
+                description=self._get_invocations_description(totals)
+            )
         return tests_invocations
+    
+    @staticmethod
+    def _get_invocations_totals(invocations: List[InvocationSchema]) -> TotalsInvocationsSchema:
+        error_runs = len([invocation for invocation in invocations if invocation.status in ["error", "fail"]])
+        warrning_runs = len([invocation for invocation in invocations if invocation.status == "warn"])
+        passed_runs = len([invocation for invocation in invocations if invocation.status == "pass"])
+        return TotalsInvocationsSchema(
+            errors=error_runs,
+            warnings=warrning_runs,
+            passed=passed_runs,
+            resolve=0
+        )
+
+    @staticmethod
+    def _get_invocations_description(invocations_totals: TotalsInvocationsSchema) -> str:
+        all_invocations_count = invocations_totals.errors + invocations_totals.warnings + invocations_totals.passed + invocations_totals.resolve
+        if invocations_totals.errors and invocations_totals.warnings:
+            return f"{invocations_totals.errors} failure and {invocations_totals.warnings} warning out of last {all_invocations_count} test runs"
+        elif invocations_totals.errors:
+            return f"{invocations_totals.errors} failure out of last {all_invocations_count} test runs"
+        elif invocations_totals.warnings:
+            return f"{invocations_totals.warnings} warning out of last {all_invocations_count} test runs"
+        else:
+            return f"All last {all_invocations_count} test runs have passed"
     
     @staticmethod
     def _parse_affected_row(affected_rows: List[str], index: int) -> Optional[int]:
@@ -73,16 +109,16 @@ class TestsAPI(APIClient):
     def get_total_tests_runs(
         self, 
         tests_metadata: Optional[List[TestMetadataSchema]] = None, 
-        tests_invocations: Optional[Dict[TestUniqueIdType, List[InvocationSchema]]] = None,
+        tests_invocations: Optional[Dict[TestUniqueIdType, InvocationsSchems]] = None,
         invocations_per_test: Optional[int] = None,
         days_back: Optional[int] = None,
     ):
         tests: List[TestMetadataSchema] = tests_metadata if tests_metadata is not None else self.get_tests_metadata(days_back=days_back)
-        invocations: Optional[Dict[TestUniqueIdType, List[InvocationSchema]]] = tests_invocations if tests_invocations else self.get_invocations(invocations_per_test=invocations_per_test)
+        invocations: Optional[Dict[TestUniqueIdType, InvocationsSchems]]= tests_invocations if tests_invocations else self.get_invocations(invocations_per_test=invocations_per_test)
         totals = dict()
         for test in tests:
             test_sub_type_unique_id = self._get_test_sub_type_unique_id(test=test)
-            test_invocations = invocations[test_sub_type_unique_id]
+            test_invocations = invocations[test_sub_type_unique_id].invocations
             self._update_test_runs_totals(
                 totals_dict=totals,
                 test=test,
