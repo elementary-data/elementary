@@ -10,16 +10,17 @@ class TestsAPI(APIClient):
     def _get_test_sub_type_unique_id(test: TestMetadataSchema) -> str:
         return f"{test.test_unique_id}.{test.test_type}.{test.test_sub_type if test.test_sub_type else 'None'}.{test.table_name if test.table_name else 'None'}.{test.column_name if test.column_name else 'None'}"
 
-    def get_tests_metadata(self) -> List[TestMetadataSchema]:
-        tests_metadata = json.loads(self.dbt_runner.run_operation(macro_name='get_test_results')[0])
+    def get_tests_metadata(self, days_back: Optional[int] = 7) -> List[TestMetadataSchema]:
+        tests_metadata = json.loads(self.dbt_runner.run_operation(macro_name='get_test_results', macro_args=dict(days_back=days_back))[0])
         return [TestMetadataSchema(**test_metadata) for test_metadata in tests_metadata]
 
     def get_metrics(
         self,
         tests_metadata: Optional[List[TestMetadataSchema]] = None,
+        days_back: Optional[int] = None,
         metrics_sample_limit: int = 5
     ) -> Dict[TestUniqueIdType, Dict[str, Any]]:
-        tests: List[TestMetadataSchema] = tests_metadata if tests_metadata else self.get_tests_metadata()
+        tests: List[TestMetadataSchema] = tests_metadata if tests_metadata is not None else self.get_tests_metadata(days_back=days_back)
         tests = [dict(test) for test in tests]
         return json.loads(self.dbt_runner.run_operation(
             macro_name='get_tests_metrics',
@@ -58,14 +59,13 @@ class TestsAPI(APIClient):
         except Exception:
             return None
 
-    def get_total_tests_results(self, tests_metadata: Optional[List[TestMetadataSchema]] = None):
-        tests: List[TestMetadataSchema] = tests_metadata if tests_metadata else self.get_tests_metadata()
+    def get_total_tests_results(self, tests_metadata: Optional[List[TestMetadataSchema]] = None, days_back: Optional[int] = None):
+        tests: List[TestMetadataSchema] = tests_metadata if tests_metadata is not None else self.get_tests_metadata(days_back=days_back)
         totals = dict()
         for test in tests:
             self._update_test_results_totals(
                 totals_dict=totals,
                 model_unique_id=test.model_unique_id,
-                days_diff=test.days_diff,
                 status=test.status
             )
         return totals
@@ -74,9 +74,10 @@ class TestsAPI(APIClient):
         self, 
         tests_metadata: Optional[List[TestMetadataSchema]] = None, 
         tests_invocations: Optional[Dict[TestUniqueIdType, List[InvocationSchema]]] = None,
-        invocations_per_test: Optional[int] = None
+        invocations_per_test: Optional[int] = None,
+        days_back: Optional[int] = None,
     ):
-        tests: List[TestMetadataSchema] = tests_metadata if tests_metadata else self.get_tests_metadata()
+        tests: List[TestMetadataSchema] = tests_metadata if tests_metadata is not None else self.get_tests_metadata(days_back=days_back)
         invocations: Optional[Dict[TestUniqueIdType, List[InvocationSchema]]] = tests_invocations if tests_invocations else self.get_invocations(invocations_per_test=invocations_per_test)
         totals = dict()
         for test in tests:
@@ -91,28 +92,15 @@ class TestsAPI(APIClient):
     
     @staticmethod
     def _update_test_runs_totals(totals_dict: dict, test: TestMetadataSchema, test_invocations: List[InvocationSchema]):
-        empty_totals = {
-            'errors': 0,
-            'warnings': 0,
-            'resolved': 0,
-            'passed': 0
-        }
         model_unique_id = test.model_unique_id
-        days_diff = test.days_diff
 
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = {
-                '1d': {**empty_totals},
-                '7d': {**empty_totals},
-                '30d': {**empty_totals}
+                'errors': 0,
+                'warnings': 0,
+                'resolved': 0,
+                'passed': 0
             }
-        total_keys = []
-        if days_diff < 1:
-            total_keys.append('1d')
-        if days_diff < 7:
-            total_keys.append('7d')
-        if days_diff < 30:
-            total_keys.append('30d')
         
         for test_invocation in test_invocations:
             invocation_status = test_invocation.status
@@ -126,30 +114,17 @@ class TestsAPI(APIClient):
                 totals_status = None
 
             if totals_status is not None:
-                for key in total_keys:
-                    totals_dict[model_unique_id][key][totals_status] += 1
+                totals_dict[model_unique_id][totals_status] += 1
 
     @staticmethod
-    def _update_test_results_totals(totals_dict, model_unique_id, days_diff, status):
-        empty_totals = {
-            'errors': 0,
-            'warnings': 0,
-            'resolved': 0,
-            'passed': 0
-        }
+    def _update_test_results_totals(totals_dict, model_unique_id, status):
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = {
-                '1d': {**empty_totals},
-                '7d': {**empty_totals},
-                '30d': {**empty_totals}
+                'errors': 0,
+                'warnings': 0,
+                'resolved': 0,
+                'passed': 0
             }
-        total_keys = []
-        if days_diff < 1:
-            total_keys.append('1d')
-        if days_diff < 7:
-            total_keys.append('7d')
-        if days_diff < 30:
-            total_keys.append('30d')
 
         if status == 'warn':
             totals_status = 'warnings'
@@ -161,5 +136,4 @@ class TestsAPI(APIClient):
             totals_status = None
 
         if totals_status is not None:
-            for key in total_keys:
-                totals_dict[model_unique_id][key][totals_status] += 1
+            totals_dict[model_unique_id][totals_status] += 1

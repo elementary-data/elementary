@@ -143,12 +143,12 @@ class DataMonitoring(object):
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self, test_runs_amount: Optional[int] = None) -> Tuple[bool, str]:
+    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None) -> Tuple[bool, str]:
         now_utc = get_now_utc_str()
 
         elementary_output = {}
         elementary_output['creation_time'] = now_utc
-        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(test_runs_amount)
+        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(days_back=days_back, test_runs_amount=test_runs_amount)
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         models_coverages = self._get_dbt_models_coverages()
         elementary_output['models'] = models
@@ -196,10 +196,10 @@ class DataMonitoring(object):
             self.success = False
         return self.success
 
-    def _get_test_results_and_totals(self, test_runs_amount: Optional[int] = None):
+    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
-            tests_metadata = tests_api.get_tests_metadata()
+            tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
             metrics = tests_api.get_metrics(tests_metadata=tests_metadata)
             invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount)
             tests_results = self._create_tests_results(
