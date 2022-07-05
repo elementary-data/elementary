@@ -193,30 +193,30 @@ class DbtTestResult(TestResult):
             slack_message = {"attachments": [{"blocks": []}]}
             self.add_text_section_to_slack_message(slack_message, f"{icon} *dbt test alert*")
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Table:*\n{self.table_full_name}",
-                                                      f"*When:*\n{self.detected_at}"],
+                                                     [f"*Table*\n{self.table_full_name}",
+                                                      f"*When*\n{self.detected_at}"],
                                                      divider=True)
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Status:*\n{self.status}", f"*Test name:*\n{self.test_name}"])
+                                                     [f"*Status*\n{self.status}", f"*Test name*\n{self.test_name}"])
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
+                                                     [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"])
             if self.error_message:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Error message:*\n{self.error_message}",
+                                                       f"*Error message*\n{self.error_message}",
                                                        divider=True)
             if self.column_name:
-                self.add_text_section_to_slack_message(slack_message, f"*Column:*\n{self.column_name}", divider=True)
+                self.add_text_section_to_slack_message(slack_message, f"*Column*\n{self.column_name}", divider=True)
             if self.test_params:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Parameters:*\n`{self.test_params}`",
+                                                       f"*Test Parameters*\n`{self.test_params}`",
                                                        divider=True)
             if self.test_results_query:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Query:*\n```{self.test_results_query}```",
+                                                       f"*Test Query*\n```{self.test_results_query}```",
                                                        divider=True)
             if self.test_rows_sample:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Results Sample:*\n`{self.test_rows_sample}`",
+                                                       f"*Test Results Sample*\n`{self.test_rows_sample}`",
                                                        divider=True)
             return slack_message
 
@@ -327,28 +327,28 @@ class ElementaryTestResult(DbtTestResult):
                 icon = ':warning:'
             self.add_text_section_to_slack_message(slack_message, f"{icon} *{alert_title}*")
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Table:*\n{self.table_full_name}",
-                                                      f"*When:*\n{self.detected_at}"],
+                                                     [f"*Table*\n{self.table_full_name}",
+                                                      f"*When*\n{self.detected_at}"],
                                                      divider=True)
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Test name:*\n{self.test_name}",
+                                                     [f"*Test name*\n{self.test_name}",
                                                       f"*{sub_type_title}:*\n{self.test_sub_type_display_name}"])
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
+                                                     [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"])
             if self.test_results_description:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Description:*\n{self.test_results_description}",
+                                                       f"*Description*\n{self.test_results_description}",
                                                        divider=True)
             column_msgs = []
             if self.column_name:
-                column_msgs.append(f"*Column:*\n{self.column_name}")
+                column_msgs.append(f"*Column*\n{self.column_name}")
             if anomalous_value:
-                column_msgs.append(f"*Anomalous Value:*\n{anomalous_value}")
+                column_msgs.append(f"*Anomalous Value*\n{anomalous_value}")
             if column_msgs:
                 self.add_fields_section_to_slack_message(slack_message, column_msgs, divider=True)
             if self.test_params:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Parameters:*\n`{self.test_params}`",
+                                                       f"*Test Parameters*\n`{self.test_params}`",
                                                        divider=True)
             return slack_message
 
