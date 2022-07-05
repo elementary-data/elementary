@@ -26,7 +26,7 @@ class SlackClient(ABC):
         elif token:
             return SlackWebClient(token=token)
         elif webhook:
-            return SlackWebhook(webhook=webhook)
+            return SlackWebhookClient(webhook=webhook)
 
     @abstractmethod
     def _initial_client(self):
@@ -99,7 +99,7 @@ class SlackWebClient(SlackClient):
             return False
 
 
-class SlackWebhook(SlackClient):
+class SlackWebhookClient(SlackClient):
     def _initial_client(self):
         return WebhookClient(url=self.webhook, default_headers={"Content-type": "application/json"}) 
 

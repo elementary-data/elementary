@@ -1,23 +1,28 @@
 import json
-from pydoc import resolve
-from utils.time import convert_utc_time_to_local_time
 from datetime import datetime
-from utils.json_utils import try_load_json
-from typing import Optional
-from utils.log import get_logger
 import re
+from typing import Optional
+
+from slack_sdk.models.blocks import SectionBlock
+
 from clients.slack.schema import SlackMessageSchema
+from utils.json_utils import try_load_json
+from utils.log import get_logger
+from utils.time import convert_utc_time_to_local_time
 
 logger = get_logger(__name__)
 
 
 class TestResult(object):
+    _LONGEST_MARKDOWN_SUFFIX_LEN = 3
+    _CONTINUATION_SYMBOL = '...'
+
     def __init__(
-        self,
-        id: str,
-        model_unique_id: str,
-        test_unique_id: str,
-        status: str,
+            self,
+            id: str,
+            model_unique_id: str,
+            test_unique_id: str,
+            status: str,
     ) -> None:
         self.id = id
         self.model_unique_id = model_unique_id
@@ -37,18 +42,26 @@ class TestResult(object):
             return None
 
     def to_slack_message(self, slack_workflows: bool = False) -> dict:
-        pass
+        raise NotImplementedError
 
     def to_test_result_api_dict(self) -> dict:
         pass
 
-    @staticmethod
-    def add_fields_section_to_slack_message(slack_message: dict, section_msgs: list, divider: bool = False):
+    @classmethod
+    def format_section_msg(cls, section_msg):
+        if len(section_msg) < SectionBlock.text_max_length:
+            return section_msg
+        return section_msg[
+               :SectionBlock.text_max_length - len(cls._CONTINUATION_SYMBOL) - cls._LONGEST_MARKDOWN_SUFFIX_LEN] + \
+               cls._CONTINUATION_SYMBOL + section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN:]
+
+    @classmethod
+    def add_fields_section_to_slack_message(cls, slack_message: dict, section_msgs: list, divider: bool = False):
         fields = []
         for section_msg in section_msgs:
             fields.append({
-                    "type": "mrkdwn",
-                    "text": section_msg
+                "type": "mrkdwn",
+                "text": cls.format_section_msg(section_msg)
             })
 
         block = []
@@ -57,8 +70,8 @@ class TestResult(object):
         block.append({"type": "section", "fields": fields})
         slack_message['attachments'][0]['blocks'].extend(block)
 
-    @staticmethod
-    def add_text_section_to_slack_message(slack_message: dict, section_msg: str, divider: bool = False):
+    @classmethod
+    def add_text_section_to_slack_message(cls, slack_message: dict, section_msg: str, divider: bool = False):
         block = []
         if divider:
             block.append({"type": "divider"})
@@ -66,15 +79,16 @@ class TestResult(object):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": section_msg
+                "text": cls.format_section_msg(section_msg)
             }
         })
         slack_message['attachments'][0]['blocks'].extend(block)
 
     def generate_slack_message(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        slack_msg = self.to_slack_message()
         return SlackMessageSchema(
-            text=json.dumps(self.to_slack_message()) if is_slack_workflow else None,
-            attachments=self.to_slack_message()["attachments"] if not is_slack_workflow else None
+            text=json.dumps(slack_msg) if is_slack_workflow else None,
+            attachments=slack_msg["attachments"] if not is_slack_workflow else None
         )
 
     @staticmethod
@@ -116,12 +130,14 @@ class DbtTestResult(TestResult):
         **kwargs
     ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
-        self.test_unique_id = test_unique_id
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
         self.table_name = table_name
-        self.table_full_name = '.'.join([database_name, schema_name, table_name]).lower()
+        table_full_name_parts = [database_name, schema_name]
+        if table_name:
+            table_full_name_parts.append(table_name)
+        self.table_full_name = '.'.join(table_full_name_parts).lower()
         self.detected_at = None
         if detected_at:
             detected_at_utc = datetime.fromisoformat(detected_at)
@@ -181,28 +197,30 @@ class DbtTestResult(TestResult):
             slack_message = {"attachments": [{"blocks": []}]}
             self.add_text_section_to_slack_message(slack_message, f"{icon} *dbt test alert*")
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Table:*\n{self.table_full_name}", f"*When:*\n{self.detected_at}"],
+                                                     [f"*Table*\n{self.table_full_name}",
+                                                      f"*When*\n{self.detected_at}"],
                                                      divider=True)
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Status:*\n{self.status}", f"*Test name:*\n{self.test_name}"])
-            self.add_fields_section_to_slack_message(slack_message, [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
+                                                     [f"*Status*\n{self.status}", f"*Test name*\n{self.test_name}"])
+            self.add_fields_section_to_slack_message(slack_message,
+                                                     [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"])
             if self.error_message:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Error message:*\n{self.error_message}",
+                                                       f"*Error message*\n{self.error_message}",
                                                        divider=True)
             if self.column_name:
-                self.add_text_section_to_slack_message(slack_message, f"*Column:*\n{self.column_name}", divider=True)
+                self.add_text_section_to_slack_message(slack_message, f"*Column*\n{self.column_name}", divider=True)
             if self.test_params:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Parameters:*\n`{self.test_params}`",
+                                                       f"*Test Parameters*\n`{self.test_params}`",
                                                        divider=True)
             if self.test_results_query:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Query:*\n```{self.test_results_query}```",
+                                                       f"*Test Query*\n```{self.test_results_query}```",
                                                        divider=True)
             if self.test_rows_sample:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Results Sample:*\n`{self.test_rows_sample}`",
+                                                       f"*Test Results Sample*\n`{self.test_rows_sample}`",
                                                        divider=True)
             return slack_message
 
@@ -326,25 +344,28 @@ class ElementaryTestResult(DbtTestResult):
                 icon = ':warning:'
             self.add_text_section_to_slack_message(slack_message, f"{icon} *{alert_title}*")
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Table:*\n{self.table_full_name}", f"*When:*\n{self.detected_at}"],
+                                                     [f"*Table*\n{self.table_full_name}",
+                                                      f"*When*\n{self.detected_at}"],
                                                      divider=True)
             self.add_fields_section_to_slack_message(slack_message,
-                                                     [f"*Test name:*\n{self.test_name}",
+                                                     [f"*Test name*\n{self.test_name}",
                                                       f"*{sub_type_title}:*\n{self.test_sub_type_display_name}"])
-            self.add_fields_section_to_slack_message(slack_message, [f"*Owners:*\n{self.owners}", f"*Tags:*\n{self.tags}"])
+            self.add_fields_section_to_slack_message(slack_message,
+                                                     [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"])
             if self.test_results_description:
-                self.add_text_section_to_slack_message(slack_message, f"*Description:*\n{self.test_results_description}",
+                self.add_text_section_to_slack_message(slack_message,
+                                                       f"*Description*\n{self.test_results_description}",
                                                        divider=True)
             column_msgs = []
             if self.column_name:
-                column_msgs.append(f"*Column:*\n{self.column_name}")
+                column_msgs.append(f"*Column*\n{self.column_name}")
             if anomalous_value:
-                column_msgs.append(f"*Anomalous Value:*\n{anomalous_value}")
+                column_msgs.append(f"*Anomalous Value*\n{anomalous_value}")
             if column_msgs:
                 self.add_fields_section_to_slack_message(slack_message, column_msgs, divider=True)
             if self.test_params:
                 self.add_text_section_to_slack_message(slack_message,
-                                                       f"*Test Parameters:*\n`{self.test_params}`",
+                                                       f"*Test Parameters*\n`{self.test_params}`",
                                                        divider=True)
             return slack_message
 
