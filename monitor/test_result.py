@@ -148,7 +148,7 @@ class DbtTestResult(TestResult):
         if isinstance(self.tags, list):
             self.tags = ', '.join(self.tags)
         self.test_name = test_name
-        self.test_display_name = self.display_name(test_name)
+        self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
         self.test_sub_type = test_sub_type if test_sub_type else ''
         self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
