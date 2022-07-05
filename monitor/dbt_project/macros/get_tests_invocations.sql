@@ -24,19 +24,19 @@
             table_name,
             column_name,
             SPLIT(
-               {{ dbt_utils.listagg(measure='detected_at', delimiter_text="';;;'", order_by_clause="order by detected_at desc", limit_num=invocations_per_test)}},
+               {{ dbt_utils.listagg(measure='detected_at', delimiter_text="';;;'", order_by_clause="order by detected_at", limit_num=invocations_per_test)}},
                ';;;'
             ) as invocations_times,
             SPLIT(
-              {{ dbt_utils.listagg(measure='affected_rows', delimiter_text="';;;'", order_by_clause="order by detected_at desc", limit_num=invocations_per_test)}},
+              {{ dbt_utils.listagg(measure='affected_rows', delimiter_text="';;;'", order_by_clause="order by detected_at", limit_num=invocations_per_test)}},
               ';;;'
             ) as affected_rows,
             SPLIT(
-              {{ dbt_utils.listagg(measure='test_execution_id', delimiter_text="';;;'", order_by_clause="order by detected_at desc", limit_num=invocations_per_test)}},
+              {{ dbt_utils.listagg(measure='test_execution_id', delimiter_text="';;;'", order_by_clause="order by detected_at", limit_num=invocations_per_test)}},
               ';;;'
             ) as ids,
             SPLIT(
-              {{ dbt_utils.listagg(measure='status', delimiter_text="';;;'", order_by_clause="order by detected_at desc", limit_num=invocations_per_test)}},
+              {{ dbt_utils.listagg(measure='status', delimiter_text="';;;'", order_by_clause="order by detected_at", limit_num=invocations_per_test)}},
               ';;;'
             ) as statuses
         from elementary_test_results_with_affected_rows
