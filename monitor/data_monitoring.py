@@ -1,6 +1,7 @@
 import json
 import os
 import webbrowser
+from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 import pkg_resources
@@ -20,6 +21,12 @@ FILE_DIR = os.path.dirname(__file__)
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
+
+
+@dataclass
+class AlertsQueryResult:
+    alerts: [TestResult]
+    failed_to_parse_dict_alerts: [dict]
 
 
 class DataMonitoring(object):
@@ -67,7 +74,7 @@ class DataMonitoring(object):
                                           macro_args={'alert_ids': alert_ids_chunk},
                                           json_logs=False)
 
-    def _query_alerts(self, days_back: int) -> [list, list]:
+    def _query_alerts(self, days_back: int) -> AlertsQueryResult:
         results = self.dbt_runner.run_operation(macro_name='get_new_alerts', macro_args={'days_back': days_back})
         test_result_alerts = []
         failed_to_parse_alert_dicts = []
@@ -84,7 +91,7 @@ class DataMonitoring(object):
                     failed_to_parse_alert_dicts.append(test_result_alert_dict)
                     self.success = False
 
-        return test_result_alerts, failed_to_parse_alert_dicts
+        return AlertsQueryResult(test_result_alerts, failed_to_parse_alert_dicts)
 
     def _send_to_slack(self, test_result_alerts: List[TestResult]) -> None:
         sent_alerts = []
@@ -143,12 +150,12 @@ class DataMonitoring(object):
                 return
 
     def _send_alerts(self, days_back: int):
-        alerts, failed_to_parse_alert_dicts = self._query_alerts(days_back)
-        alert_count = len(alerts) + len(failed_to_parse_alert_dicts)
+        query_result = self._query_alerts(days_back)
+        alert_count = len(query_result.alerts) + len(query_result.failed_to_parse_dict_alerts)
         self.execution_properties['alert_count'] = alert_count
         if alert_count > 0:
-            self._send_to_slack(alerts)
-            self._send_raw_dicts_to_slack(failed_to_parse_alert_dicts)
+            self._send_to_slack(query_result.alerts)
+            self._send_raw_dicts_to_slack(query_result.failed_to_parse_dict_alerts)
 
     def run(self, days_back: int, dbt_full_refresh: bool = False) -> bool:
 
