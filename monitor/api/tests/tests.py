@@ -52,12 +52,12 @@ class TestsAPI(APIClient):
 
             totals = self._get_invocations_totals(test_invocations)
             tests_invocations[sub_test_unique_id] = InvocationsSchems(
-                fail_rate=len([
+                fail_rate=round(len([
                     invocation 
                     for invocation 
                     in test_invocations 
                     if invocation.status != "pass"
-                ])/len(test_invocations) if test_invocations else 0,
+                ])/len(test_invocations), 2) if test_invocations else 0,
                 totals=totals,
                 invocations=test_invocations,
                 description=self._get_invocations_description(totals)
