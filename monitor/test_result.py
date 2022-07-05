@@ -133,7 +133,10 @@ class DbtTestResult(TestResult):
         self.database_name = database_name
         self.schema_name = schema_name
         self.table_name = table_name
-        self.table_full_name = '.'.join([database_name, schema_name, table_name]).lower()
+        table_full_name_parts = [database_name, schema_name]
+        if table_name:
+            table_full_name_parts.append(table_name)
+        self.table_full_name = '.'.join(table_full_name_parts).lower()
         self.detected_at = None
         if detected_at:
             detected_at_utc = datetime.fromisoformat(detected_at)
