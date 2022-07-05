@@ -8,12 +8,12 @@ ModelUniqueIdType = str
 
 class TestMetadataSchema(BaseModel):
     id: str
-    model_unique_id: ModelUniqueIdType
+    model_unique_id: Optional[ModelUniqueIdType] = None
     test_unique_id: TestUniqueIdType
     detected_at: str
     database_name: str
     schema_name: str
-    table_name: str
+    table_name: Optional[str] = None
     column_name: Optional[str]
     test_type: str
     test_sub_type: str
