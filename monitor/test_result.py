@@ -128,7 +128,6 @@ class DbtTestResult(TestResult):
             status
     ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
-        self.test_unique_id = test_unique_id
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
