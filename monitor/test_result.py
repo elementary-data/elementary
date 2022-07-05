@@ -14,6 +14,8 @@ logger = get_logger(__name__)
 
 
 class TestResult(object):
+    _LONGEST_MARKDOWN_SUFFIX_LEN = 3
+
     def __init__(
             self,
             id: str,
@@ -44,13 +46,20 @@ class TestResult(object):
     def to_test_result_api_dict(self) -> dict:
         pass
 
-    @staticmethod
-    def add_fields_section_to_slack_message(slack_message: dict, section_msgs: list, divider: bool = False):
+    @classmethod
+    def format_section_msg(cls, section_msg):
+        if len(section_msg) < SectionBlock.text_max_length:
+            return section_msg
+        return section_msg[:SectionBlock.text_max_length - cls._LONGEST_MARKDOWN_SUFFIX_LEN] + \
+               section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN:]
+
+    @classmethod
+    def add_fields_section_to_slack_message(cls, slack_message: dict, section_msgs: list, divider: bool = False):
         fields = []
         for section_msg in section_msgs:
             fields.append({
                 "type": "mrkdwn",
-                "text": section_msg[:SectionBlock.text_max_length]
+                "text": cls.format_section_msg(section_msg)
             })
 
         block = []
@@ -59,8 +68,8 @@ class TestResult(object):
         block.append({"type": "section", "fields": fields})
         slack_message['attachments'][0]['blocks'].extend(block)
 
-    @staticmethod
-    def add_text_section_to_slack_message(slack_message: dict, section_msg: str, divider: bool = False):
+    @classmethod
+    def add_text_section_to_slack_message(cls, slack_message: dict, section_msg: str, divider: bool = False):
         block = []
         if divider:
             block.append({"type": "divider"})
@@ -68,7 +77,7 @@ class TestResult(object):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": section_msg[:SectionBlock.text_max_length]
+                "text": cls.format_section_msg(section_msg)
             }
         })
         slack_message['attachments'][0]['blocks'].extend(block)
