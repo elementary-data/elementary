@@ -15,6 +15,7 @@ logger = get_logger(__name__)
 
 class TestResult(object):
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
+    _CONTINUATION_SYMBOL = '...'
 
     def __init__(
             self,
@@ -50,8 +51,9 @@ class TestResult(object):
     def format_section_msg(cls, section_msg):
         if len(section_msg) < SectionBlock.text_max_length:
             return section_msg
-        return section_msg[:SectionBlock.text_max_length - cls._LONGEST_MARKDOWN_SUFFIX_LEN] + \
-               section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN:]
+        return section_msg[
+               :SectionBlock.text_max_length - len(cls._CONTINUATION_SYMBOL) - cls._LONGEST_MARKDOWN_SUFFIX_LEN] + \
+               cls._CONTINUATION_SYMBOL + section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN:]
 
     @classmethod
     def add_fields_section_to_slack_message(cls, slack_message: dict, section_msgs: list, divider: bool = False):
