@@ -30,7 +30,7 @@ Share the report with your team, and use Slack integration for alerting on incid
 ## Quick start
   
 Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
-[Quick start: Data monitoring as dbt tests in minutes](https://docs.elementary-data.com/quickstart). 
+[Quick start: Data monitoring as dbt tests in minutes](https://bit.ly/3IdMjYW). 
 
 [Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
 
