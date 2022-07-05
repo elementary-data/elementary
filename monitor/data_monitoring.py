@@ -90,8 +90,7 @@ class DataMonitoring(object):
         sent_alerts = []
         alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
-            alert_slack_message: SlackMessageSchema = alert.generate_slack_message(
-                is_slack_workflow=self.config.is_slack_workflow)
+            alert_slack_message = alert.generate_slack_message(is_slack_workflow=self.config.is_slack_workflow)
             sent_successfully = self.slack_client.send_message(
                 channel_name=self.slack_channel_name,
                 message=alert_slack_message
@@ -113,9 +112,8 @@ class DataMonitoring(object):
         for alert in alert_dicts:
             alert_id = alert['id']
             full_alert_msg = json.dumps(alert, indent=2)
-            alert_slack_message: SlackMessageSchema = SlackMessageSchema(
-                text=TestResult.format_section_msg(
-                    f":small_red_triangle: We failed to parse the alert. We're working on it. Here's some information.\n```{full_alert_msg}```"))
+            alert_slack_message = SlackMessageSchema(text=TestResult.format_section_msg(
+                f":small_red_triangle: We failed to parse the alert. We're working on it. Here's some information.\n```{full_alert_msg}```"))
             sent_successfully = self.slack_client.send_message(
                 channel_name=self.slack_channel_name,
                 message=alert_slack_message
