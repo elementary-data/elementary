@@ -13,7 +13,10 @@ def get_package_version() -> Optional[str]:
     return None
 
 
-def get_latest_package_version() -> str:
+def get_latest_package_version() -> Optional[str]:
     resp = requests.get('https://pypi.org/pypi/elementary-data/json')
-    resp.raise_for_status()
-    return resp.json()['info']['version']
+    try:
+        resp.raise_for_status()
+        return resp.json()['info']['version']
+    except requests.HTTPError:
+        return None
