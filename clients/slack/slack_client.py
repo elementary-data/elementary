@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
-import logging
 import json
+import logging
+from abc import ABC, abstractmethod
+
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 
@@ -16,28 +17,25 @@ class SlackClient(ABC):
         self.token = token
         self.webhook = webhook
         self.client = self._initial_client()
-    
+
     @staticmethod
     def create_slack_client(token: str = None, webhook: str = None):
-        if not (token or webhook):
-            error_message = "Could not initialize slack client - you must provide either a slack token or a slack webhook! (see documentation on how to configure a slack token / webhook)"
-            logger.error(error_message)
-            raise Exception(error_message)
-        elif token:
+        if token:
             return SlackWebClient(token=token)
         elif webhook:
             return SlackWebhookClient(webhook=webhook)
+        return None
 
     @abstractmethod
     def _initial_client(self):
         raise NotImplementedError
 
     @abstractmethod
-    def send_message(self,**kwargs):
+    def send_message(self, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def upload_file(self,**kwargs):
+    def upload_file(self, **kwargs):
         raise NotImplementedError
 
 
@@ -61,7 +59,7 @@ class SlackWebClient(SlackClient):
         except SlackApiError as e:
             logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
             return False
-    
+
     def upload_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
         channel_id = self._get_channel_id(channel_name)
         in_channel = self._join_channel(channel_id)
@@ -75,21 +73,21 @@ class SlackWebClient(SlackClient):
             )
             return True
         except SlackApiError as e:
-            logger.error(f"Could not upload the file to the channel - {channel_name}. Error: {e}")   
+            logger.error(f"Could not upload the file to the channel - {channel_name}. Error: {e}")
             return False
 
     def _get_channel_id(self, channel_name: str) -> str:
         try:
             channel = [
-                channel 
-                for channel 
+                channel
+                for channel
                 in self.client.conversations_list()["channels"]
                 if channel["name"] == channel_name
             ][0]
             return channel["id"]
         except Exception as e:
             logger.error(f"Could not find the channel - {channel_name}. Error: {e}")
-    
+
     def _join_channel(self, channel_id: str) -> bool:
         try:
             self.client.conversations_join(channel=channel_id)
@@ -101,7 +99,7 @@ class SlackWebClient(SlackClient):
 
 class SlackWebhookClient(SlackClient):
     def _initial_client(self):
-        return WebhookClient(url=self.webhook, default_headers={"Content-type": "application/json"}) 
+        return WebhookClient(url=self.webhook, default_headers={"Content-type": "application/json"})
 
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
         response = self.client.send(
@@ -111,10 +109,11 @@ class SlackWebhookClient(SlackClient):
         )
         if response.status_code == OK_STATUS_CODE:
             return True
-    
+
         else:
             logger.error(f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}")
             return False
 
     def upload_file(self, **kwargs):
-        logger.error(f"Slack webhook does not support file uploads. Please use Slack token instead (see documentation on how to configure a slack token)")
+        logger.error(
+            f"Slack webhook does not support file uploads. Please use Slack token instead (see documentation on how to configure a slack token)")

@@ -139,18 +139,22 @@ class DbtTestResult(TestResult):
             table_full_name_parts.append(table_name)
         self.table_full_name = '.'.join(table_full_name_parts).lower()
         self.detected_at = None
+        self.detected_at_utc = None
         if detected_at:
-            detected_at_utc = datetime.fromisoformat(detected_at)
-            self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
-            self.detected_at = convert_utc_time_to_local_time(detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
-        self.owners = try_load_json(owners) if owners else ''
+            try:
+                detected_at_utc = datetime.fromisoformat(detected_at)
+                self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
+                self.detected_at = convert_utc_time_to_local_time(detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
+            except (ValueError, TypeError):
+                logger.error(f'Failed to parse "detect_at" field.')
+        self.owners = try_load_json(owners) or ''
         if isinstance(self.owners, list):
             self.owners = ', '.join(self.owners)
-        self.tags = try_load_json(tags) if tags else ''
+        self.tags = try_load_json(tags) or ''
         if isinstance(self.tags, list):
             self.tags = ', '.join(self.tags)
         self.test_name = test_name
-        self.test_display_name = self.display_name(test_name)
+        self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
         self.test_sub_type = test_sub_type if test_sub_type else ''
         self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
@@ -369,7 +373,7 @@ class ElementaryTestResult(DbtTestResult):
             return slack_message
 
     def to_test_result_api_dict(self):
-        test_params = try_load_json(self.test_params) if self.test_params else {}
+        test_params = try_load_json(self.test_params) or {}
         test_results = None
         if self.test_type == 'anomaly_detection':
             timestamp_column = test_params.get('timestamp_column')
