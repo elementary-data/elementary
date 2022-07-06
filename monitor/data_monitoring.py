@@ -26,7 +26,7 @@ SQL_FILE_EXTENSION = ".sql"
 @dataclass
 class AlertsQueryResult:
     test_results: List[TestResult]
-    failed_to_parse_dict_alerts: List[dict]
+    failed_to_parse_alert_dicts: List[dict]
 
 
 @dataclass
@@ -83,7 +83,7 @@ class DataMonitoring(object):
     def _query_alerts(self, days_back: int) -> AlertsQueryResult:
         results = self.dbt_runner.run_operation(macro_name='get_new_alerts', macro_args={'days_back': days_back})
         test_result_alerts = []
-        failed_to_parse_dict_alerts = []
+        failed_to_parse_alert_dicts = []
         if results:
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
@@ -92,10 +92,10 @@ class DataMonitoring(object):
                 if test_result:
                     test_result_alerts.append(test_result)
                 else:
-                    failed_to_parse_dict_alerts.append(test_result_alert_dict)
+                    failed_to_parse_alert_dicts.append(test_result_alert_dict)
                     self.success = False
 
-        return AlertsQueryResult(test_result_alerts, failed_to_parse_dict_alerts)
+        return AlertsQueryResult(test_result_alerts, failed_to_parse_alert_dicts)
 
     def _send_alerts_to_slack(self, alerts: List[SlackAlert]) -> None:
         sent_alerts = []
@@ -157,10 +157,10 @@ class DataMonitoring(object):
 
     def _send_alerts(self, days_back: int):
         query_result = self._query_alerts(days_back)
-        alert_count = len(query_result.test_results) + len(query_result.failed_to_parse_dict_alerts)
+        alert_count = len(query_result.test_results) + len(query_result.failed_to_parse_alert_dicts)
         self.execution_properties['alert_count'] = alert_count
         self._send_alerts_to_slack(self._get_slack_alert_from_test_result(query_result.test_results))
-        self._send_alerts_to_slack(self._get_slack_alert_from_dict(query_result.failed_to_parse_dict_alerts))
+        self._send_alerts_to_slack(self._get_slack_alert_from_dict(query_result.failed_to_parse_alert_dicts))
 
     def run(self, days_back: int, dbt_full_refresh: bool = False) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
