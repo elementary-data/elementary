@@ -23,7 +23,7 @@
         from latest_tests_in_the_last_chosen_days
     {%- endset -%}
     {% set elementary_test_results_agate = run_query(select_test_results) %}
-    {% set test_result_dicts = elementary.agate_to_dicts(elementary_test_results_agate) %}
-    {% do elementary.edr_log(tojson(test_result_dicts)) %}
+    {% set test_result_dicts_json = elementary.agate_to_json(elementary_test_results_agate) %}
+    {% do elementary.edr_log(test_result_dicts_json) %}
 {%- endmacro -%}
 

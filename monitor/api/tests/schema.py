@@ -40,10 +40,10 @@ class TotalsInvocationsSchema(BaseModel):
     errors: Optional[int] = 0
     warnings: Optional[int] = 0
     passed: Optional[int] = 0
-    resolve: Optional[int] = 0
+    resolved: Optional[int] = 0
 
 
-class InvocationsSchems(BaseModel):
+class InvocationsSchema(BaseModel):
     fail_rate: float
     totals: TotalsInvocationsSchema
     invocations: List[InvocationSchema]

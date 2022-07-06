@@ -33,8 +33,8 @@ class ModelsAPI(APIClient):
                 sources[source_unique_id] = normalized_source
         return sources
     
-    def get_coverages(self) -> Dict[str, ModelCoverageSchema]:
-        coverage_results = self.dbt_runner.run_operation(macro_name="get_coverages")
+    def get_test_coverages(self) -> Dict[str, ModelCoverageSchema]:
+        coverage_results = self.dbt_runner.run_operation(macro_name="get_dbt_models_test_coverage")
         coverages = dict()
         if coverage_results:
             for coverage_result in json.loads(coverage_results[0]):
@@ -64,7 +64,7 @@ class ModelsAPI(APIClient):
             else:
                 tags = [tags]
         
-        normalized_model = dict(model)
+        normalized_model = json.loads(model.json())
         normalized_model['owners'] = owners
         normalized_model['tags'] = tags
         normalized_model['model_name'] = model_name
@@ -75,8 +75,8 @@ class ModelsAPI(APIClient):
         )
         return NormalizedModelSchema(**normalized_model)
     
-    @staticmethod
-    def _normalize_model_path(model_path: str, model_package_name: Optional[str] = None, is_source: bool = False) -> str:
+    @classmethod
+    def _normalize_model_path(cls, model_path: str, model_package_name: Optional[str] = None, is_source: bool = False) -> str:
         splited_model_path = model_path.split(os.path.sep)
         model_file_name = splited_model_path[-1]
 

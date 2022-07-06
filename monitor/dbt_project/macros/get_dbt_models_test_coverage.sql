@@ -1,4 +1,4 @@
-{% macro get_coverages() %}
+{% macro get_dbt_models_test_coverage() %}
     {% set dbt_tests_relation = ref('elementary', 'dbt_tests') %}
     {%- if elementary.relation_exists(dbt_tests_relation) -%}
         {% set get_coverages_query %}

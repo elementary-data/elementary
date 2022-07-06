@@ -31,8 +31,8 @@ class SidebarAPI(APIClient):
             )
         return sidebar
 
-    @staticmethod
-    def _update_dbt_sidebar(dbt_sidebar: dict, model_unique_id: str, model_full_path: str) -> None:
+    @classmethod
+    def _update_dbt_sidebar(cls, dbt_sidebar: dict, model_unique_id: str, model_full_path: str) -> None:
         if model_unique_id is None or model_full_path is None:
             return
         model_full_path_split = model_full_path.split(os.path.sep)

@@ -150,7 +150,7 @@ class DataMonitoring(object):
         elementary_output['creation_time'] = now_utc
         test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(days_back=days_back, test_runs_amount=test_runs_amount)
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
-        models_coverages = self._get_dbt_models_coverages()
+        models_coverages = self._get_dbt_models_test_coverages()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
         elementary_output['test_results'] = test_results
@@ -200,11 +200,11 @@ class DataMonitoring(object):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
-            metrics = tests_api.get_metrics(tests_metadata=tests_metadata)
-            invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount)
+            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back)
+            invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount, days_back=days_back)
             tests_results = self._create_tests_results(
                 tests_metadata=tests_metadata,
-                metrics=metrics,
+                tests_sample_data=tests_sample_data,
                 invocations=invocations
             )
             test_results_totals = tests_api.get_total_tests_results(tests_metadata)
@@ -219,19 +219,19 @@ class DataMonitoring(object):
     def _create_tests_results(
         self,
         tests_metadata: List[TestMetadataSchema],
-        metrics: Dict[TestUniqueIdType, Dict[str, Any]],
+        tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
         invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
     ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
         tests_results=defaultdict(list)
         for test in tests_metadata:
             test_sub_type_unique_id = TestsAPI._get_test_sub_type_unique_id(test=test)
             metadata = dict(test)
-            test_metrics = metrics[test_sub_type_unique_id]
-            test_invocations = invocations[test_sub_type_unique_id]
+            test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
+            test_invocations = invocations.get(test_sub_type_unique_id)
             test_result = TestResult.create_test_result_from_dict({
                 **metadata,
-                "test_rows_sample": test_metrics,
-                "test_runs": json.loads(test_invocations.json())
+                "test_rows_sample": test_sample_data,
+                "test_runs": json.loads(test_invocations.json()) if test_invocations else {}
             })
             tests_results[test.model_unique_id].append(test_result.to_test_result_api_dict())
         return tests_results
@@ -252,9 +252,9 @@ class DataMonitoring(object):
         
         return serializeable_models, dbt_sidebar
     
-    def _get_dbt_models_coverages(self) -> Dict[str, Dict[str, int]]:
+    def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        coverages = models_api.get_coverages()
+        coverages = models_api.get_test_coverages()
         for model_id, coverage in coverages.items():
             coverages[model_id] = dict(coverage)
         return coverages
