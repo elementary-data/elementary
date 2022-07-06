@@ -15,8 +15,6 @@ yaml = OrderedYaml()
 
 logger = get_logger(__name__)
 
-ERR_MISSING_SLACK_CONN = 'Either a Slack token or webhook is required.'
-
 
 def get_cli_properties() -> dict:
     click_context = click.get_current_context()
@@ -122,7 +120,7 @@ def monitor(
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
         if not slack_token and not slack_webhook:
-            logger.error(ERR_MISSING_SLACK_CONN)
+            logger.error('Either a Slack token or webhook is required.')
             return 1
 
         data_monitoring = DataMonitoring(
@@ -263,23 +261,23 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 )
 @click.pass_context
 def send_report(
-    ctx,
-    days_back,
-    config_dir,
-    profiles_dir,
-    update_dbt_package,
-    slack_webhook,
-    slack_token,
-    slack_channel_name,
-    profile_target,
-    executions_limit
+        ctx,
+        days_back,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        slack_webhook,
+        slack_token,
+        slack_channel_name,
+        profile_target,
+        executions_limit
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
-        if not slack_token and not slack_webhook:
-            logger.error(ERR_MISSING_SLACK_CONN)
+        if not slack_token:
+            logger.error('A Slack token is required to send a report.')
             return 1
 
         data_monitoring = DataMonitoring(
@@ -290,11 +288,11 @@ def send_report(
             slack_channel_name=slack_channel_name
         )
         command_succeeded = False
-        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit)
+        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back,
+                                                                                              test_runs_amount=executions_limit)
         if generated_report_successfully and elementary_html_path:
-            sent_report_successfully = data_monitoring.send_report(elementary_html_path)
-            command_succeeded = True if sent_report_successfully else False        
-        return 1 if command_succeeded else 0
+            command_succeeded = data_monitoring.send_report(elementary_html_path)
+        return 0 if command_succeeded else 1
 
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
