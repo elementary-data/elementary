@@ -1,27 +1,27 @@
+import json
+import os
+import webbrowser
 from collections import defaultdict
 from dataclasses import dataclass
-import json
-import pkg_resources
-import os
 from typing import Any, Dict, List, Optional, Tuple
-import webbrowser
 
+import pkg_resources
+from alive_progress import alive_it
 
+from clients.dbt.dbt_runner import DbtRunner
+from clients.slack.schema import SlackMessageSchema
+from clients.slack.slack_client import SlackClient
+from config.config import Config
 from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
 from monitor.api.tests.tests import TestsAPI
 from monitor.test_result import TestResult
-from clients.dbt.dbt_runner import DbtRunner
-from config.config import Config
-from clients.slack.slack_client import SlackClient
-from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
-from alive_progress import alive_it
 
 logger = get_logger(__name__)
-FILE_DIR = os.path.dirname(__file__)
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
@@ -180,11 +180,13 @@ class DataMonitoring(object):
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None) -> Tuple[bool, str]:
+    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None) -> Tuple[
+        bool, str]:
         now_utc = get_now_utc_str()
         elementary_output = {}
         elementary_output['creation_time'] = now_utc
-        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(days_back=days_back, test_runs_amount=test_runs_amount)
+        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(days_back=days_back,
+                                                                                                test_runs_amount=test_runs_amount)
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         models_coverages = self._get_dbt_models_test_coverages()
         elementary_output['models'] = models
@@ -244,7 +246,8 @@ class DataMonitoring(object):
                 invocations=invocations
             )
             test_results_totals = tests_api.get_total_tests_results(tests_metadata)
-            test_runs_totals = tests_api.get_total_tests_runs(tests_metadata=tests_metadata, tests_invocations=invocations)
+            test_runs_totals = tests_api.get_total_tests_runs(tests_metadata=tests_metadata,
+                                                              tests_invocations=invocations)
             self.execution_properties['test_results'] = len(tests_metadata)
             return tests_results, test_results_totals, test_runs_totals
         except Exception as e:
@@ -253,12 +256,12 @@ class DataMonitoring(object):
             return dict(), dict(), dict()
 
     def _create_tests_results(
-        self,
-        tests_metadata: List[TestMetadataSchema],
-        tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
-        invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
+            self,
+            tests_metadata: List[TestMetadataSchema],
+            tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
+            invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
     ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
-        tests_results=defaultdict(list)
+        tests_results = defaultdict(list)
         for test in tests_metadata:
             test_sub_type_unique_id = TestsAPI._get_test_sub_type_unique_id(test=test)
             metadata = dict(test)
@@ -285,9 +288,9 @@ class DataMonitoring(object):
             serializeable_models[key] = dict(models_and_sources[key])
 
         dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
-        
+
         return serializeable_models, dbt_sidebar
-    
+
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         coverages = models_api.get_test_coverages()
