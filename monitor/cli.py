@@ -1,19 +1,24 @@
-import click
 import os
 from os.path import expanduser
 
-from utils.package import get_package_version
-from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
-from utils.cli_utils import RequiredIf
-from utils.ordered_yaml import OrderedYaml
+import click
+
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
+from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
+from utils.cli_utils import RequiredIf
+from utils.log import get_logger
+from utils.ordered_yaml import OrderedYaml
+from utils.package import get_package_version
 
 yaml = OrderedYaml()
 
+logger = get_logger(__name__)
+
+ERR_MISSING_SLACK_CONN = 'Either a Slack token or webhook is required to send the report.'
+
 
 def get_cli_properties() -> dict:
-
     click_context = click.get_current_context()
     if click_context is None:
         return dict()
@@ -97,16 +102,16 @@ def get_cli_properties() -> dict:
 )
 @click.pass_context
 def monitor(
-    ctx,
-    days_back,
-    slack_webhook,
-    slack_token,
-    slack_channel_name,
-    config_dir,
-    profiles_dir,
-    update_dbt_package,
-    full_refresh_dbt_package,
-    profile_target
+        ctx,
+        days_back,
+        slack_webhook,
+        slack_token,
+        slack_channel_name,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        full_refresh_dbt_package,
+        profile_target
 ):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
@@ -116,6 +121,10 @@ def monitor(
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
+        if not slack_token and not slack_webhook:
+            logger.error(ERR_MISSING_SLACK_CONN)
+            return 1
+
         data_monitoring = DataMonitoring(
             config=config,
             force_update_dbt_package=update_dbt_package,
@@ -230,19 +239,23 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
 )
 @click.pass_context
 def send_report(
-    ctx,
-    config_dir,
-    profiles_dir,
-    update_dbt_package,
-    slack_webhook,
-    slack_token,
-    slack_channel_name,
-    profile_target
+        ctx,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        slack_webhook,
+        slack_token,
+        slack_channel_name,
+        profile_target
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
+        if not slack_token and not slack_webhook:
+            logger.error(ERR_MISSING_SLACK_CONN)
+            return 1
+
         data_monitoring = DataMonitoring(
             config=config,
             force_update_dbt_package=update_dbt_package,
