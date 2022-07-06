@@ -133,8 +133,9 @@ class DataMonitoring(object):
                 alert_dict['id'],
                 SlackMessageSchema(
                     text=TestResult.format_section_msg(
-                        f":small_red_triangle: We failed to parse the alert. "
-                        f"Here's some information.\n"
+                        f":small_red_triangle: Elementary alert "
+                        f"(There was a formatting issue upon sending to Slack,"
+                        f" please share this with the Elementary team.)\n"
                         f"```{json.dumps(alert_dict, indent=2)}```"
                     )
                 )
