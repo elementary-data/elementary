@@ -88,7 +88,7 @@ class DataMonitoring(object):
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
-                test_result = TestResult.create_test_result_from_dict(test_result_dict=test_result_alert_dict)
+                test_result = TestResult.create_test_result_from_dict(test_result_alert_dict)
                 if test_result:
                     test_result_alerts.append(test_result)
                 else:
