@@ -109,7 +109,7 @@ class DataMonitoring(object):
                 sent_alerts.append(alert.id)
             else:
                 logger.error(
-                    f"Could not sent the alert - {alert.id}. Full alert: {json.dumps(dict(alert.message))}")
+                    f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert.message))}")
                 self.success = False
 
         sent_alert_count = len(sent_alerts)
