@@ -52,7 +52,6 @@ class ElementaryCLI(click.MultiCommand):
     def recommend_version_upgrade(self):
         latest_version = package.get_latest_package_version()
         current_version = package.get_package_version()
-        self.epilog = f'{latest_version} : {current_version}'
         if current_version != latest_version:
             self.epilog = click.style(
                 f'You are using Elementary {current_version}, however version {latest_version} is available.\n'
