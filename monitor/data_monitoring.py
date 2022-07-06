@@ -58,8 +58,7 @@ class DataMonitoring(object):
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
         # slack client is optional
-        self.slack_client = SlackClient.create_slack_client(token=self.slack_token, webhook=self.slack_webhook) if (
-                self.slack_token or self.slack_webhook) else None
+        self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.success = True
 
@@ -214,12 +213,12 @@ class DataMonitoring(object):
 
     def send_report(self, elementary_html_path: str) -> bool:
         if os.path.exists(elementary_html_path):
-            file_uploaded_succesfully = self.slack_client.upload_file(
+            file_uploaded_successfully = self.slack_client.upload_file(
                 channel_name=self.slack_channel_name,
                 file_path=elementary_html_path,
                 message=SlackMessageSchema(text="Elementary monitoring report")
             )
-            if not file_uploaded_succesfully:
+            if not file_uploaded_successfully:
                 self.success = False
         else:
             logger.error('Could not send Elementary monitoring report because it does not exist')
