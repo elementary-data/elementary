@@ -74,7 +74,7 @@ class TestsAPI(APIClient):
     @staticmethod
     def _get_invocations_description(invocations_totals: TotalsInvocationsSchema) -> str:
         all_invocations_count = invocations_totals.errors + invocations_totals.warnings + invocations_totals.passed + invocations_totals.resolve
-        return f"There were {invocations_totals.errors or 'no'} failures and {invocations_totals.warnings or 'no'} warnings out of the last {all_invocations_count} test runs."
+        return f"There were {invocations_totals.errors or 'no'} failures and {invocations_totals.warnings or 'no'} warnings on the last {all_invocations_count} test runs."
 
     @staticmethod
     def _parse_affected_row(affected_rows: List[str], index: int) -> Optional[int]:
