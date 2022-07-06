@@ -21,7 +21,7 @@ from utils.log import get_logger
 from utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
-FILE_DIR = os.path.dirname(__file__)
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"

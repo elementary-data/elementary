@@ -1,9 +1,11 @@
-import pytest
 import os
+
+import pytest
+
 from config.config import Config
 from utils.ordered_yaml import OrderedYaml
 
-FILE_DIR = os.path.dirname(__file__)
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CONFIG = {
     'slack': {
@@ -54,5 +56,3 @@ def test_config_get_slack_notification_channel_name(config: Config):
 
 def test_slack_workflows_config_get_workflows(slack_workflows_config):
     assert slack_workflows_config.is_slack_workflow == WORKFLOWS_CONFIG['slack']['workflows']
-
-
