@@ -133,9 +133,8 @@ class DataMonitoring(object):
                 alert_dict['id'],
                 SlackMessageSchema(
                     text=TestResult.format_section_msg(
-                        f":small_red_triangle: Elementary alert "
-                        f"(There was a formatting issue upon sending to Slack,"
-                        f" please share this with the Elementary team.)\n"
+                        f":small_red_triangle: Oops, we failed to format the alert :confused:\n"
+                        f"Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue.\n"
                         f"```{json.dumps(alert_dict, indent=2)}```"
                     )
                 )
