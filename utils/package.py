@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pkg_resources
+import requests
 
 
 def get_package_version() -> Optional[str]:
@@ -10,3 +11,9 @@ def get_package_version() -> Optional[str]:
         pass
 
     return None
+
+
+def get_latest_package_version() -> str:
+    resp = requests.get('https://pypi.org/pypi/elementary-data/json')
+    resp.raise_for_status()
+    return resp.json()['info']['version']
