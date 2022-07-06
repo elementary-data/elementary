@@ -121,12 +121,12 @@ class DbtTestResult(TestResult):
         tags,
         test_results_query,
         test_rows_sample,
-        test_runs,
         other,
         test_name,
         test_params,
         severity,
         status,
+        test_runs = None,
         **kwargs
     ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
@@ -225,6 +225,8 @@ class DbtTestResult(TestResult):
             return slack_message
 
     def to_test_result_api_dict(self):
+        test_runs = {**self.test_runs, 'display_name': self.test_display_name} if self.test_runs else {}
+
         return {
             'metadata': {
                 'test_unique_id': self.test_unique_id,
@@ -250,10 +252,7 @@ class DbtTestResult(TestResult):
                 'error_message': self.error_message,
                 'failed_rows_count': self.failed_rows_count
             },
-            'test_runs': {
-                **self.test_runs,
-                'display_name': self.test_display_name
-            }
+            'test_runs': test_runs
         }
 
 
@@ -275,12 +274,12 @@ class ElementaryTestResult(DbtTestResult):
         tags,
         test_results_query,
         test_rows_sample,
-        test_runs,
         other,
         test_name,
         test_params,
         severity,
         status,
+        test_runs = None,
         **kwargs
     ) -> None:
         super().__init__(
@@ -299,12 +298,12 @@ class ElementaryTestResult(DbtTestResult):
             tags,
             test_results_query,
             test_rows_sample,
-            test_runs,
             other,
             test_name,
             test_params,
             severity,
-            status
+            status,
+            test_runs
         )
         self.test_results_description = self.description_display_name(test_results_description)
 
@@ -384,6 +383,7 @@ class ElementaryTestResult(DbtTestResult):
         elif self.test_type == 'schema_change':
             test_results = {'display_name': self.test_sub_type_display_name.lower(),
                             'result_description': self.test_results_description}
+        test_runs = {**self.test_runs, 'display_name': self.test_sub_type_display_name} if self.test_runs else {}
 
         return {
             'metadata': {
@@ -405,8 +405,5 @@ class ElementaryTestResult(DbtTestResult):
                 'test_params': test_params
             },
             'test_results': test_results,
-            'test_runs': {
-                **self.test_runs,
-                'display_name': self.test_sub_type_display_name
-            }
+            'test_runs': test_runs
         }
