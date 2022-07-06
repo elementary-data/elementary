@@ -1,9 +1,11 @@
 import json
 import sys
 
+ALERT_PREFIX = 'Elementary: '
+
 
 def get_elementary_log_lines(dbt_log: str):
-    return [line for line in dbt_log.splitlines() if 'Elementary' in line]
+    return [line for line in dbt_log.splitlines() if ALERT_PREFIX in line]
 
 
 def get_json_logs(log_lines: [str]):
@@ -19,7 +21,7 @@ def get_json_logs(log_lines: [str]):
 def get_elementary_alerts(elementary_json_logs: [dict]):
     elementary_alerts = []
     for json_log in elementary_json_logs:
-        elementary_alerts.extend(json.loads(''.join(json_log['data']['msg'].split('Elementary: ', 1)[1:])))
+        elementary_alerts.extend(json.loads(''.join(json_log['data']['msg'].split(ALERT_PREFIX, 1)[1:])))
     return elementary_alerts
 
 
