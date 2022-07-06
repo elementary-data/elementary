@@ -15,7 +15,7 @@
         {% set status = elementary.insensitive_get_dict_value(test_result_alert_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}
-        {%- if status != 'error'-%}
+        {%- if (alert_type == 'dbt_test' and status in ['fail', 'warn']) or (alert_type != 'dbt_test' and status != 'error') -%}
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(alert_results_query, alert_type, results_sample_limit) %}
         {%- endif -%}
 
