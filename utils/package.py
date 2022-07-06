@@ -17,6 +17,6 @@ def get_latest_package_version() -> Optional[str]:
     resp = requests.get('https://pypi.org/pypi/elementary-data/json')
     try:
         resp.raise_for_status()
-        return resp.json()['info']['version']
-    except requests.HTTPError:
+        return resp.json().get('info').get('version')
+    except Exception:
         return None

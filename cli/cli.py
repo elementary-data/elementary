@@ -1,4 +1,5 @@
 import os
+import sys
 from os.path import expanduser
 
 import click
@@ -55,7 +56,7 @@ class ElementaryCLI(click.MultiCommand):
         if current_version != latest_version:
             self.epilog = click.style(
                 f'You are using Elementary {current_version}, however version {latest_version} is available.\n'
-                f'Consider upgrading by running: "python -m pip install --upgrade elementary-data"',
+                f'Consider upgrading by running: "{sys.executable} -m pip install --upgrade elementary-data"',
                 fg='yellow'
             )
 
