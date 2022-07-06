@@ -54,12 +54,15 @@ class ElementaryCLI(click.MultiCommand):
     def recommend_version_upgrade(self):
         latest_version = package.get_latest_package_version()
         current_version = package.get_package_version()
-        if version.parse(current_version) < version.parse(latest_version):
-            self.epilog = click.style(
-                f'You are using Elementary {current_version}, however version {latest_version} is available.\n'
-                f'Consider upgrading by running: "{sys.executable} -m pip install --upgrade elementary-data"',
-                fg='yellow'
-            )
+        try:
+            if version.parse(current_version) < version.parse(latest_version):
+                self.epilog = click.style(
+                    f'You are using Elementary {current_version}, however version {latest_version} is available.\n'
+                    f'Consider upgrading by running: "{sys.executable} -m pip install --upgrade elementary-data"',
+                    fg='yellow'
+                )
+        except Exception:
+            pass
 
 
 cli = ElementaryCLI(help='Open source data reliability solution (https://docs.elementary-data.com/)')
