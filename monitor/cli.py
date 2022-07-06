@@ -15,7 +15,7 @@ yaml = OrderedYaml()
 
 logger = get_logger(__name__)
 
-ERR_MISSING_SLACK_CONN = 'Either a Slack token or webhook is required to send the report.'
+ERR_MISSING_SLACK_CONN = 'Either a Slack token or webhook is required.'
 
 
 def get_cli_properties() -> dict:
