@@ -144,6 +144,12 @@ def monitor(
 
 @monitor.command()
 @click.option(
+    '--days-back', '-d',
+    type=int,
+    default=7,
+    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report"
+)
+@click.option(
     '--config-dir', '-c',
     type=str,
     default=os.path.join(expanduser('~'), '.edr'),
@@ -170,14 +176,20 @@ def monitor(
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--executions-limit', '-el',
+    type=int,
+    default=30,
+    help='Set the number of invocations shown for each test in the "Test Runs" report'
+)
 @click.pass_context
-def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
+def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report()
+        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
@@ -188,6 +200,12 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
 
 
 @monitor.command()
+@click.option(
+    '--days-back', '-d',
+    type=int,
+    default=7,
+    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report"
+)
 @click.option(
     '--config-dir', '-c',
     type=str,
@@ -237,16 +255,24 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--executions-limit', '-el',
+    type=int,
+    default=30,
+    help='Set the number of invocations shown for each test in the "Test Runs" report'
+)
 @click.pass_context
 def send_report(
-        ctx,
-        config_dir,
-        profiles_dir,
-        update_dbt_package,
-        slack_webhook,
-        slack_token,
-        slack_channel_name,
-        profile_target
+    ctx,
+    days_back,
+    config_dir,
+    profiles_dir,
+    update_dbt_package,
+    slack_webhook,
+    slack_token,
+    slack_channel_name,
+    profile_target,
+    executions_limit
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
@@ -263,11 +289,13 @@ def send_report(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        generated_report_successfully, elementary_html_path = data_monitoring.generate_report()
-        sent_report_successfully = data_monitoring.send_report(elementary_html_path)
-        if not (generated_report_successfully and sent_report_successfully):
-            return 1
-        return 0
+        command_succeeded = False
+        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit)
+        if generated_report_successfully and elementary_html_path:
+            sent_report_successfully = data_monitoring.send_report(elementary_html_path)
+            command_succeeded = True if sent_report_successfully else False        
+        return 1 if command_succeeded else 0
+
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
         raise

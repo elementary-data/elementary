@@ -1,6 +1,6 @@
 import json
-import re
 from datetime import datetime
+import re
 from typing import Optional
 
 from slack_sdk.models.blocks import SectionBlock
@@ -105,27 +105,29 @@ class TestResult(object):
 
 class DbtTestResult(TestResult):
     def __init__(
-            self,
-            id,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            owners,
-            tags,
-            test_results_query,
-            test_rows_sample,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status
+        self,
+        id,
+        model_unique_id,
+        test_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type,
+        test_sub_type,
+        test_results_description,
+        owners,
+        tags,
+        test_results_query,
+        test_rows_sample,
+        other,
+        test_name,
+        test_params,
+        severity,
+        status,
+        test_runs = None,
+        **kwargs
     ) -> None:
         super().__init__(id, model_unique_id, test_unique_id, status)
         self.test_type = test_type
@@ -158,6 +160,7 @@ class DbtTestResult(TestResult):
         self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
+        self.test_runs = test_runs if test_runs else ''
         self.test_params = test_params
         self.error_message = self.description_display_name(test_results_description, 'No error message')
         self.column_name = column_name if column_name else ''
@@ -191,6 +194,7 @@ class DbtTestResult(TestResult):
                 'column_name': self.column_name,
                 'test_results_query': self.test_results_query,
                 'test_rows_sample': self.test_rows_sample,
+                'test_runs': self.test_runs,
                 'failed_rows_count': self.failed_rows_count
             }
         else:
@@ -225,7 +229,11 @@ class DbtTestResult(TestResult):
             return slack_message
 
     def to_test_result_api_dict(self):
-        return {'test_unique_id': self.test_unique_id,
+        test_runs = {**self.test_runs, 'display_name': self.test_display_name} if self.test_runs else {}
+
+        return {
+            'metadata': {
+                'test_unique_id': self.test_unique_id,
                 'database_name': self.database_name,
                 'schema_name': self.schema_name,
                 'table_name': self.table_name,
@@ -240,36 +248,43 @@ class DbtTestResult(TestResult):
                 'test_type': self.test_type,
                 'test_sub_type': self.test_sub_type,
                 'test_query': self.test_results_query,
-                'test_params': self.test_params,
-                'test_results': {'display_name': self.test_display_name + ' - failed results sample',
-                                 'results_sample': self.test_rows_sample,
-                                 'error_message': self.error_message,
-                                 'failed_rows_count': self.failed_rows_count}}
+                'test_params': self.test_params
+            },
+            'test_results': {
+                'display_name': self.test_display_name + ' - failed results sample',
+                'results_sample': self.test_rows_sample,
+                'error_message': self.error_message,
+                'failed_rows_count': self.failed_rows_count
+            },
+            'test_runs': test_runs
+        }
 
 
 class ElementaryTestResult(DbtTestResult):
     def __init__(
-            self,
-            id,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            owners,
-            tags,
-            test_results_query,
-            test_rows_sample,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status
+        self,
+        id,
+        model_unique_id,
+        test_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type,
+        test_sub_type,
+        test_results_description,
+        owners,
+        tags,
+        test_results_query,
+        test_rows_sample,
+        other,
+        test_name,
+        test_params,
+        severity,
+        status,
+        test_runs = None,
+        **kwargs
     ) -> None:
         super().__init__(
             id,
@@ -291,7 +306,8 @@ class ElementaryTestResult(DbtTestResult):
             test_name,
             test_params,
             severity,
-            status
+            status,
+            test_runs
         )
         self.test_results_description = self.description_display_name(test_results_description)
 
@@ -371,8 +387,11 @@ class ElementaryTestResult(DbtTestResult):
         elif self.test_type == 'schema_change':
             test_results = {'display_name': self.test_sub_type_display_name.lower(),
                             'result_description': self.test_results_description}
+        test_runs = {**self.test_runs, 'display_name': self.test_sub_type_display_name} if self.test_runs else {}
 
-        return {'test_unique_id': self.test_unique_id,
+        return {
+            'metadata': {
+                'test_unique_id': self.test_unique_id,
                 'database_name': self.database_name,
                 'schema_name': self.schema_name,
                 'table_name': self.table_name,
@@ -387,5 +406,8 @@ class ElementaryTestResult(DbtTestResult):
                 'test_type': self.test_type,
                 'test_sub_type': self.test_sub_type,
                 'test_query': self.test_results_query,
-                'test_params': test_params,
-                'test_results': test_results}
+                'test_params': test_params
+            },
+            'test_results': test_results,
+            'test_runs': test_runs
+        }

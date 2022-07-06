@@ -1,20 +1,24 @@
-import json
-import os
-import webbrowser
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Dict, Any
-
+import json
 import pkg_resources
-from alive_progress import alive_it
+import os
+from typing import Any, Dict, List, Optional, Tuple
+import webbrowser
 
-from clients.slack.schema import SlackMessageSchema
-from clients.slack.slack_client import SlackClient
-from config.config import Config
-from monitor.dbt_runner import DbtRunner
+
+from monitor.api.models.models import ModelsAPI
+from monitor.api.sidebar.sidebar import SidebarAPI
+from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
+from monitor.api.tests.tests import TestsAPI
 from monitor.test_result import TestResult
-from utils.json_utils import try_load_json
+from clients.dbt.dbt_runner import DbtRunner
+from config.config import Config
+from clients.slack.slack_client import SlackClient
+from clients.slack.schema import SlackMessageSchema
 from utils.log import get_logger
 from utils.time import get_now_utc_str
+from alive_progress import alive_it
 
 logger = get_logger(__name__)
 FILE_DIR = os.path.dirname(__file__)
@@ -176,16 +180,19 @@ class DataMonitoring(object):
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self) -> Tuple[bool, str]:
+    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None) -> Tuple[bool, str]:
         now_utc = get_now_utc_str()
         elementary_output = {}
         elementary_output['creation_time'] = now_utc
-        test_results, test_result_totals = self._get_test_results_and_totals()
+        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(days_back=days_back, test_runs_amount=test_runs_amount)
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
+        models_coverages = self._get_dbt_models_test_coverages()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
         elementary_output['test_results'] = test_results
-        elementary_output['totals'] = test_result_totals
+        elementary_output['test_results_totals'] = test_results_totals
+        elementary_output['test_runs_totals'] = test_runs_totals
+        elementary_output['coverages'] = models_coverages
 
         html_index_path = pkg_resources.resource_filename(__name__, "index.html")
         with open(html_index_path, 'r') as index_html_file:
@@ -225,148 +232,68 @@ class DataMonitoring(object):
             self.success = False
         return self.success
 
-    def _get_test_results_and_totals(self):
-        results = self.dbt_runner.run_operation(macro_name='get_test_results')
-        test_results_api_dict = {}
-        test_result_totals_api_dict = {}
-        if results:
-            test_result_dicts = json.loads(results[0])
-            for test_result_dict in test_result_dicts:
-                days_diff = test_result_dict.pop('days_diff')
-                test_result_object = TestResult.create_test_result_from_dict(test_result_dict)
-                if test_result_object:
-                    model_unique_id = test_result_object.model_unique_id
-                    if model_unique_id in test_results_api_dict:
-                        test_results_api_dict[model_unique_id].append(test_result_object.to_test_result_api_dict())
-                    else:
-                        test_results_api_dict[model_unique_id] = [test_result_object.to_test_result_api_dict()]
+    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None):
+        tests_api = TestsAPI(dbt_runner=self.dbt_runner)
+        try:
+            tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
+            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back)
+            invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount, days_back=days_back)
+            tests_results = self._create_tests_results(
+                tests_metadata=tests_metadata,
+                tests_sample_data=tests_sample_data,
+                invocations=invocations
+            )
+            test_results_totals = tests_api.get_total_tests_results(tests_metadata)
+            test_runs_totals = tests_api.get_total_tests_runs(tests_metadata=tests_metadata, tests_invocations=invocations)
+            self.execution_properties['test_results'] = len(tests_metadata)
+            return tests_results, test_results_totals, test_runs_totals
+        except Exception as e:
+            logger.error(f"Could not get test results and totals - Error: {e}")
+            self.success = False
+            return dict(), dict(), dict()
 
-                    self._update_test_results_totals(test_result_totals_api_dict, model_unique_id, days_diff,
-                                                     test_result_object.status)
-                else:
-                    self.success = False
+    def _create_tests_results(
+        self,
+        tests_metadata: List[TestMetadataSchema],
+        tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
+        invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
+    ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
+        tests_results=defaultdict(list)
+        for test in tests_metadata:
+            test_sub_type_unique_id = TestsAPI._get_test_sub_type_unique_id(test=test)
+            metadata = dict(test)
+            test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
+            test_invocations = invocations.get(test_sub_type_unique_id)
+            test_result = TestResult.create_test_result_from_dict({
+                **metadata,
+                "test_rows_sample": test_sample_data,
+                "test_runs": json.loads(test_invocations.json()) if test_invocations else {}
+            })
+            tests_results[test.model_unique_id].append(test_result.to_test_result_api_dict())
+        return tests_results
 
-            self.execution_properties['test_results'] = len(test_result_dicts)
-        return test_results_api_dict, test_result_totals_api_dict
+    def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
+        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
 
-    def _update_test_results_totals(self, totals_dict, model_unique_id, days_diff, status):
-        if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = {'1d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
-                                            '7d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0},
-                                            '30d': {'errors': 0, 'warnings': 0, 'resolved': 0, 'passed': 0}}
-        total_keys = []
-        if days_diff < 1:
-            total_keys.append('1d')
-        if days_diff < 7:
-            total_keys.append('7d')
-        if days_diff < 30:
-            total_keys.append('30d')
+        models = models_api.get_models()
+        sources = models_api.get_sources()
 
-        if status == 'warn':
-            totals_status = 'warnings'
-        elif status == 'error' or status == 'fail':
-            totals_status = 'errors'
-        elif status == 'pass':
-            totals_status = 'passed'
-        else:
-            totals_status = None
+        models_and_sources = dict(**models, **sources)
+        serializeable_models = dict()
+        for key in models_and_sources.keys():
+            serializeable_models[key] = dict(models_and_sources[key])
 
-        if totals_status is not None:
-            for key in total_keys:
-                totals_dict[model_unique_id][key][totals_status] += 1
-
-    def _get_dbt_models_and_sidebar(self):
-        models = {}
-        dbt_sidebar = {}
-        results = self.dbt_runner.run_operation(macro_name='get_models')
-        if results:
-            model_dicts = json.loads(results[0])
-            for model_dict in model_dicts:
-                model_unique_id = model_dict.get('unique_id')
-                self._normalize_dbt_model_dict(model_dict)
-                models[model_unique_id] = model_dict
-                self._update_dbt_sidebar(
-                    dbt_sidebar=dbt_sidebar,
-                    model_unique_id=model_unique_id,
-                    model_full_path=model_dict.get('normalized_full_path')
-                )
-
-        results = self.dbt_runner.run_operation(macro_name='get_sources')
-        if results:
-            source_dicts = json.loads(results[0])
-            for source_dict in source_dicts:
-                source_unique_id = source_dict.get('unique_id')
-                self._normalize_dbt_model_dict(source_dict, is_source=True)
-                models[source_unique_id] = source_dict
-                self._update_dbt_sidebar(
-                    dbt_sidebar=dbt_sidebar,
-                    model_unique_id=source_unique_id,
-                    model_full_path=source_dict.get('normalized_full_path')
-                )
-        return models, dbt_sidebar
-
-    @staticmethod
-    def _update_dbt_sidebar(dbt_sidebar: dict, model_unique_id: str, model_full_path: str) -> None:
-        if model_unique_id is None or model_full_path is None:
-            return
-        model_full_path_split = model_full_path.split(os.path.sep)
-        for part in model_full_path_split:
-            if part.endswith('.sql'):
-                if 'files' in dbt_sidebar:
-                    if model_unique_id not in dbt_sidebar['files']:
-                        dbt_sidebar['files'].append(model_unique_id)
-                else:
-                    dbt_sidebar['files'] = [model_unique_id]
-            else:
-                if part not in dbt_sidebar:
-                    dbt_sidebar[part] = {}
-                dbt_sidebar = dbt_sidebar[part]
-
-    @staticmethod
-    def _normalize_dbt_model_dict(model: dict, is_source: bool = False) -> None:
-        owners = model.get('owners')
-        if owners:
-            loaded_owners = try_load_json(owners)
-            if loaded_owners:
-                owners = loaded_owners
-            else:
-                owners = [owners]
-        tags = model.get('tags')
-        if tags:
-            loaded_tags = try_load_json(tags)
-            if loaded_tags:
-                tags = loaded_tags
-            else:
-                tags = [tags]
-        model['owners'] = owners
-        model['tags'] = tags
-        model_name = model.get('name')
-        model['model_name'] = model_name
-        model['normalized_full_path'] = DataMonitoring._normalize_model_path(
-            model_path=model.get('full_path'),
-            model_package_name=model.get('package_name'),
-            is_source=is_source
-        )
-
-    @staticmethod
-    def _normalize_model_path(model_path: str, model_package_name: Optional[str] = None,
-                              is_source: bool = False) -> str:
-        splited_model_path = model_path.split(os.path.sep)
-        model_file_name = splited_model_path[-1]
-
-        # If source, change models directory into sources and file extension from .yml to .sql
-        if is_source:
-            if splited_model_path[0] == "models":
-                splited_model_path[0] = "sources"
-            if model_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail = model_file_name.rpartition(YAML_FILE_EXTENSION)
-                splited_model_path[-1] = head + SQL_FILE_EXTENSION + tail
-
-        # Add package name to model path
-        if model_package_name:
-            splited_model_path.insert(0, model_package_name)
-
-        return os.path.sep.join(splited_model_path)
+        dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
+        
+        return serializeable_models, dbt_sidebar
+    
+    def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
+        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        coverages = models_api.get_test_coverages()
+        for model_id, coverage in coverages.items():
+            coverages[model_id] = dict(coverage)
+        return coverages
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
