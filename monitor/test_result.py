@@ -137,6 +137,7 @@ class DbtTestResult(TestResult):
             table_full_name_parts.append(table_name)
         self.table_full_name = '.'.join(table_full_name_parts).lower()
         self.detected_at = None
+        self.detected_at_utc = None
         if detected_at:
             try:
                 detected_at_utc = datetime.fromisoformat(detected_at)
