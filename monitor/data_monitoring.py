@@ -2,7 +2,7 @@ import json
 import os
 import webbrowser
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 
 import pkg_resources
 from alive_progress import alive_it
@@ -25,8 +25,14 @@ SQL_FILE_EXTENSION = ".sql"
 
 @dataclass
 class AlertsQueryResult:
-    alerts: [TestResult]
-    failed_to_parse_dict_alerts: [dict]
+    test_results: List[TestResult]
+    failed_to_parse_dict_alerts: List[dict]
+
+
+@dataclass
+class SlackAlert:
+    id: str
+    message: SlackMessageSchema
 
 
 class DataMonitoring(object):
@@ -77,36 +83,33 @@ class DataMonitoring(object):
     def _query_alerts(self, days_back: int) -> AlertsQueryResult:
         results = self.dbt_runner.run_operation(macro_name='get_new_alerts', macro_args={'days_back': days_back})
         test_result_alerts = []
-        failed_to_parse_alert_dicts = []
+        failed_to_parse_dict_alerts = []
         if results:
             test_result_alert_dicts = json.loads(results[0])
             self.execution_properties['alert_rows'] = len(test_result_alert_dicts)
             for test_result_alert_dict in test_result_alert_dicts:
-                test_result_object = TestResult.create_test_result_from_dict(
-                    test_result_dict=test_result_alert_dict,
-                )
-                if test_result_object:
-                    test_result_alerts.append(test_result_object)
+                test_result = TestResult.create_test_result_from_dict(test_result_dict=test_result_alert_dict)
+                if test_result:
+                    test_result_alerts.append(test_result)
                 else:
-                    failed_to_parse_alert_dicts.append(test_result_alert_dict)
+                    failed_to_parse_dict_alerts.append(test_result_alert_dict)
                     self.success = False
 
-        return AlertsQueryResult(test_result_alerts, failed_to_parse_alert_dicts)
+        return AlertsQueryResult(test_result_alerts, failed_to_parse_dict_alerts)
 
-    def _send_to_slack(self, test_result_alerts: List[TestResult]) -> None:
+    def _send_alerts_to_slack(self, alerts: List[SlackAlert]) -> None:
         sent_alerts = []
-        alerts_with_progress_bar = alive_it(test_result_alerts, title="Sending alerts")
+        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
-            alert_slack_message = alert.generate_slack_message(is_slack_workflow=self.config.is_slack_workflow)
             sent_successfully = self.slack_client.send_message(
                 channel_name=self.slack_channel_name,
-                message=alert_slack_message
+                message=alert.message
             )
             if sent_successfully:
                 sent_alerts.append(alert.id)
             else:
                 logger.error(
-                    f"Could not sent the alert - {alert.id}. Full alert: {json.dumps(dict(alert_slack_message))}")
+                    f"Could not sent the alert - {alert.id}. Full alert: {json.dumps(dict(alert.message))}")
                 self.success = False
 
         sent_alert_count = len(sent_alerts)
@@ -114,27 +117,30 @@ class DataMonitoring(object):
         if sent_alert_count > 0:
             self._update_sent_alerts(sent_alerts)
 
-    def _send_raw_dicts_to_slack(self, alert_dicts: List[dict]) -> None:
-        sent_alerts = []
-        for alert in alert_dicts:
-            alert_id = alert['id']
-            full_alert_msg = json.dumps(alert, indent=2)
-            alert_slack_message = SlackMessageSchema(text=TestResult.format_section_msg(
-                f":small_red_triangle: We failed to parse the alert. We're working on it. Here's some information.\n```{full_alert_msg}```"))
-            sent_successfully = self.slack_client.send_message(
-                channel_name=self.slack_channel_name,
-                message=alert_slack_message
+    def _get_slack_alert_from_test_result(self, test_results: List[TestResult]):
+        return [
+            SlackAlert(
+                test_result.id,
+                test_result.generate_slack_message(is_slack_workflow=self.config.is_slack_workflow)
             )
-            if sent_successfully:
-                sent_alerts.append(alert_id)
-            else:
-                logger.error(f"Could not sent the alert - {alert_id}. Full alert: {full_alert_msg}")
-                self.success = False
+            for test_result in test_results
+        ]
 
-        sent_alert_count = len(sent_alerts)
-        self.execution_properties['sent_alert_count'] = sent_alert_count
-        if sent_alert_count > 0:
-            self._update_sent_alerts(sent_alerts)
+    @staticmethod
+    def _get_slack_alert_from_dict(alert_dicts: List[Dict[str, Any]]):
+        return [
+            SlackAlert(
+                alert_dict['id'],
+                SlackMessageSchema(
+                    text=TestResult.format_section_msg(
+                        f":small_red_triangle: We failed to parse the alert. "
+                        f"Here's some information.\n"
+                        f"```{json.dumps(alert_dict, indent=2)}```"
+                    )
+                )
+            )
+            for alert_dict in alert_dicts
+        ]
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -151,14 +157,12 @@ class DataMonitoring(object):
 
     def _send_alerts(self, days_back: int):
         query_result = self._query_alerts(days_back)
-        alert_count = len(query_result.alerts) + len(query_result.failed_to_parse_dict_alerts)
+        alert_count = len(query_result.test_results) + len(query_result.failed_to_parse_dict_alerts)
         self.execution_properties['alert_count'] = alert_count
-        if alert_count > 0:
-            self._send_to_slack(query_result.alerts)
-            self._send_raw_dicts_to_slack(query_result.failed_to_parse_dict_alerts)
+        self._send_alerts_to_slack(self._get_slack_alert_from_test_result(query_result.test_results))
+        self._send_alerts_to_slack(self._get_slack_alert_from_dict(query_result.failed_to_parse_dict_alerts))
 
     def run(self, days_back: int, dbt_full_refresh: bool = False) -> bool:
-
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh)
         self.execution_properties['alerts_run_success'] = success
@@ -175,7 +179,6 @@ class DataMonitoring(object):
 
     def generate_report(self) -> Tuple[bool, str]:
         now_utc = get_now_utc_str()
-
         elementary_output = {}
         elementary_output['creation_time'] = now_utc
         test_results, test_result_totals = self._get_test_results_and_totals()
