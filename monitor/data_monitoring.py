@@ -162,12 +162,12 @@ class DataMonitoring(object):
         query_result = self._query_alerts(days_back)
         alert_count = len(query_result.test_results) + len(query_result.failed_to_parse_alert_dicts)
         self.execution_properties['alert_count'] = alert_count
-        total_alerts = [
+        alerts = [
             *self._get_slack_alert_from_test_result(query_result.test_results),
             *self._get_slack_alert_from_dict(query_result.failed_to_parse_alert_dicts)
         ]
-        if total_alerts:
-            self._send_alerts_to_slack(total_alerts)
+        if alerts:
+            self._send_alerts_to_slack(alerts)
 
     def run(self, days_back: int, dbt_full_refresh: bool = False) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
