@@ -69,10 +69,3 @@ class Config(object):
         if not target_path:
             return os.getcwd()
         return target_path
-
-    @property
-    def target_dir(self) -> str:
-        target_path = self.config_dict.get('target-path')
-        if not target_path:
-            return os.getcwd()
-        return target_path
