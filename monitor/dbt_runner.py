@@ -1,5 +1,4 @@
 import json
-import yaml
 import subprocess
 from typing import Optional, Tuple
 
