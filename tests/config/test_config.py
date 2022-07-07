@@ -51,7 +51,7 @@ def test_config_get_slack_token(config: Config):
 
 
 def test_config_get_slack_notification_channel_name(config: Config):
-    assert config.slack_notification_channel_name == CONFIG['slack']['notification_channel_name']
+    assert config.slack_notification_channel_name == CONFIG['slack']['channel_name']
 
 
 def test_slack_workflows_config_get_workflows(slack_workflows_config):
