@@ -23,14 +23,14 @@ Share the report with your team, and use Slack integration for alerting on incid
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
 
-### Checkout the [live demo](https://www.elementary-data.com/elementary-demo-data-observability)
+### Checkout the [live demo](https://bit.ly/3ImsKxS)
  
 
 
 ## Quick start
   
 Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
-[Quick start: Data monitoring as dbt tests in minutes](https://docs.elementary-data.com/quickstart). 
+[Quick start: Data monitoring as dbt tests in minutes](https://bit.ly/3IdMjYW). 
 
 [Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
 
@@ -58,7 +58,7 @@ Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehf
   
 ## Demo & Sandbox
 
-Data observability report [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).  
+Data observability report [sandbox](https://bit.ly/3AtmH8Q) and [demo video](https://www.elementary-data.com/demo).  
 
 Slack alert example:
 
