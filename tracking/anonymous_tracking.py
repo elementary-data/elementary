@@ -1,12 +1,13 @@
 import os
 import uuid
-from typing import Union
+from typing import Optional, Tuple
 
 import posthog
 import requests
 from bs4 import BeautifulSoup
 
 from config.config import Config
+from utils.package import get_package_version
 
 
 class AnonymousTracking(object):
@@ -40,7 +41,7 @@ class AnonymousTracking(object):
         self.api_key, self.url = self._fetch_api_key_and_url()
 
     @classmethod
-    def _fetch_api_key_and_url(cls) -> (Union[str, None], Union[str, None]):
+    def _fetch_api_key_and_url(cls) -> Tuple[Optional[str], Optional[str]]:
         result = requests.get(url=cls.FETCH_API_KEY_AND_URL)
         if result.status_code != 200:
             return None, None
@@ -103,10 +104,15 @@ def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str,
         if anonymous_tracking is None:
             return
 
-        cli_exception_properties = {'exception_properties': {'exception_type': str(type(exc)),
-                                                             'exception_content': str(exc)},
-                                    'module_name': module_name,
-                                    'command': command}
+        cli_exception_properties = {
+            'exception_properties': {
+                'exception_type': str(type(exc)),
+                'exception_content': str(exc)
+            },
+            'module_name': module_name,
+            'command': command,
+            'version': get_package_version()
+        }
         anonymous_tracking.send_event('cli-exception', properties=cli_exception_properties)
     except Exception:
         pass

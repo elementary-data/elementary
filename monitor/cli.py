@@ -1,19 +1,22 @@
-import click
 import os
 from os.path import expanduser
 
-from utils.package import get_package_version
-from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
-from utils.cli_utils import RequiredIf
-from utils.ordered_yaml import OrderedYaml
+import click
+
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
+from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
+from utils.cli_utils import RequiredIf
+from utils.log import get_logger
+from utils.ordered_yaml import OrderedYaml
+from utils.package import get_package_version
 
 yaml = OrderedYaml()
 
+logger = get_logger(__name__)
+
 
 def get_cli_properties() -> dict:
-
     click_context = click.get_current_context()
     if click_context is None:
         return dict()
@@ -95,6 +98,12 @@ def get_cli_properties() -> dict:
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--dbt-vars',
+    type=str,
+    default=None,
+    help="Specify raw YAML string of your dbt variables."
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -106,16 +115,22 @@ def monitor(
     profiles_dir,
     update_dbt_package,
     full_refresh_dbt_package,
-    profile_target
+    profile_target,
+    dbt_vars
 ):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
         return
+    vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
+        if not slack_token and not slack_webhook:
+            logger.error('Either a Slack token or webhook is required.')
+            return 1
+
         data_monitoring = DataMonitoring(
             config=config,
             force_update_dbt_package=update_dbt_package,
@@ -123,7 +138,7 @@ def monitor(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        success = data_monitoring.run(days_back, full_refresh_dbt_package)
+        success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
@@ -134,6 +149,12 @@ def monitor(
 
 
 @monitor.command()
+@click.option(
+    '--days-back', '-d',
+    type=int,
+    default=7,
+    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report"
+)
 @click.option(
     '--config-dir', '-c',
     type=str,
@@ -161,14 +182,20 @@ def monitor(
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--executions-limit', '-el',
+    type=int,
+    default=30,
+    help='Set the number of invocations shown for each test in the "Test Runs" report'
+)
 @click.pass_context
-def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
+def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report()
+        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
@@ -179,6 +206,12 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
 
 
 @monitor.command()
+@click.option(
+    '--days-back', '-d',
+    type=int,
+    default=7,
+    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report"
+)
 @click.option(
     '--config-dir', '-c',
     type=str,
@@ -228,21 +261,33 @@ def report(ctx, config_dir, profiles_dir, update_dbt_package, profile_target):
     default=None,
     help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
+@click.option(
+    '--executions-limit', '-el',
+    type=int,
+    default=30,
+    help='Set the number of invocations shown for each test in the "Test Runs" report'
+)
 @click.pass_context
 def send_report(
-    ctx,
-    config_dir,
-    profiles_dir,
-    update_dbt_package,
-    slack_webhook,
-    slack_token,
-    slack_channel_name,
-    profile_target
+        ctx,
+        days_back,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        slack_webhook,
+        slack_token,
+        slack_channel_name,
+        profile_target,
+        executions_limit
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
+        if not slack_token:
+            logger.error('A Slack token is required to send a report.')
+            return 1
+
         data_monitoring = DataMonitoring(
             config=config,
             force_update_dbt_package=update_dbt_package,
@@ -250,11 +295,13 @@ def send_report(
             slack_token=slack_token,
             slack_channel_name=slack_channel_name
         )
-        generated_report_successfully, elementary_html_path = data_monitoring.generate_report()
-        sent_report_successfully = data_monitoring.send_report(elementary_html_path)
-        if not (generated_report_successfully and sent_report_successfully):
-            return 1
-        return 0
+        command_succeeded = False
+        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back,
+                                                                                              test_runs_amount=executions_limit)
+        if generated_report_successfully and elementary_html_path:
+            command_succeeded = data_monitoring.send_report(elementary_html_path)
+        return 0 if command_succeeded else 1
+
     except Exception as exc:
         track_cli_exception(anonymous_tracking, 'monitor-send-report', exc, ctx.command.name)
         raise

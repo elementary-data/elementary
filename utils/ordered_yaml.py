@@ -16,3 +16,5 @@ class OrderedYaml(object):
         with open(file_path, 'w') as file_obj:
             return self.ordered_yaml.dump(data, file_obj)
 
+    def loads(self, yaml_str: str) -> dict:
+        return self.ordered_yaml.load(yaml_str)

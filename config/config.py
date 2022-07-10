@@ -69,4 +69,3 @@ class Config(object):
         if not target_path:
             return os.getcwd()
         return target_path
-
