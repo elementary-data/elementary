@@ -84,7 +84,7 @@ class DataMonitoring(object):
                                           json_logs=False)
 
     def _query_alerts(self, days_back: int) -> AlertsQueryResult:
-        results = self.dbt_runner.run_operation(macro_name='get_new_alerts', macro_args={'days_back': days_back})
+        results = self.dbt_runner.run_operation(macro_name='get_new_test_alerts', macro_args={'days_back': days_back})
         test_result_alerts = []
         failed_to_parse_alert_dicts = []
         if results:
