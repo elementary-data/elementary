@@ -39,7 +39,7 @@ class SlackAlert:
     message: SlackMessageSchema
 
 
-class DataMonitoring(object):
+class DataMonitoring:
     DBT_PACKAGE_NAME = 'elementary'
     DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
     DBT_PROJECT_MODELS_PATH = os.path.join(FILE_DIR, 'dbt_project', 'models')

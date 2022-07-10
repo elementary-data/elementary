@@ -13,7 +13,7 @@ from utils.time import convert_utc_time_to_local_time
 logger = get_logger(__name__)
 
 
-class TestResult(object):
+class TestResult:
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = '...'
 
