@@ -9,12 +9,15 @@
     {% set new_alerts = [] %}
     {% for model_result_alert_dict in model_result_alert_dicts %}
         {% set status = elementary.insensitive_get_dict_value(model_result_alert_dict, 'status') | lower %}
-        {% set new_alert_dict = {'alert_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_id'),
+        {% set new_alert_dict = {'id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_id'),
                                  'unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
                                  'alias': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alias'),
+                                 'path': elementary.insensitive_get_dict_value(model_result_alert_dict, 'path'),
+                                 'materialization': elementary.insensitive_get_dict_value(model_result_alert_dict, 'materialization'),
                                  'detected_at': elementary.insensitive_get_dict_value(model_result_alert_dict, 'detected_at'),
                                  'database_name': elementary.insensitive_get_dict_value(model_result_alert_dict, 'database_name'),
                                  'schema_name': elementary.insensitive_get_dict_value(model_result_alert_dict, 'schema_name'),
+                                 'full_refresh': elementary.insensitive_get_dict_value(model_result_alert_dict, 'full_refresh'),
                                  'message': elementary.insensitive_get_dict_value(model_result_alert_dict, 'message'),
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
