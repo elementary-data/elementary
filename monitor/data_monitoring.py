@@ -169,7 +169,7 @@ class DataMonitoring(object):
         if alerts:
             self._send_alerts_to_slack(alerts)
 
-    def run(self, days_back: int, dbt_full_refresh: bool = False) -> bool:
+    def run(self, days_back: int, dbt_full_refresh: bool = False, vars: Optional[dict] = None) -> bool:
 
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(models='alerts', full_refresh=dbt_full_refresh, vars=vars)

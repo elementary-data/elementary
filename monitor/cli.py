@@ -122,7 +122,7 @@ def monitor(
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
         return
-    vars = ordered_yaml.loads(dbt_vars) if dbt_vars else None
+    vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
