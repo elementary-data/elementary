@@ -2,12 +2,12 @@ import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union, TypeVar, Generic, Optional, Set
+from typing import List, Union, TypeVar, Generic, Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
 from clients.slack.schema import SlackMessageSchema
-from utils.json_utils import try_load_json
+from utils.json_utils import try_load_json, prettify_json_str_set
 from utils.log import get_logger
 from utils.time import convert_utc_time_to_local_time
 
@@ -153,12 +153,8 @@ class DbtTestAlert(TestAlert):
             except (ValueError, TypeError):
                 logger.error(f'Failed to parse "detect_at" field.')
 
-        owners = try_load_json(owners) or ''
-        if isinstance(owners, list):
-            self.owners = ', '.join(set(owners))
-        tags = try_load_json(tags) or ''
-        if isinstance(tags, list):
-            self.tags = ', '.join(set(tags))
+        self.owners = prettify_json_str_set(owners)
+        self.tags = prettify_json_str_set(tags)
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
@@ -403,12 +399,8 @@ class ModelAlert(Alert):
     TABLE_NAME = 'alerts_models'
 
     def __post_init__(self):
-        owners = try_load_json(self.owners) or ''
-        if isinstance(owners, list):
-            self.owners = ', '.join(set(self.owners))
-        tags = try_load_json(self.tags) or ''
-        if isinstance(tags, list):
-            self.tags = ', '.join(set(self.tags))
+        self.owners = prettify_json_str_set(self.owners)
+        self.tags = prettify_json_str_set(self.tags)
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         icon = ':small_red_triangle:'
