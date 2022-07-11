@@ -12,6 +12,8 @@ from clients.dbt.dbt_runner import DbtRunner
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
 from config.config import Config
+from monitor.api.lineage.lineage import LineageAPI
+from monitor.api.lineage.schema import LineageSchema
 from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
@@ -193,12 +195,14 @@ class DataMonitoring(object):
                                                                                                 test_runs_amount=test_runs_amount)
         models, dbt_sidebar = self._get_dbt_models_and_sidebar()
         models_coverages = self._get_dbt_models_test_coverages()
+        lineage = self._get_lineage()
         elementary_output['models'] = models
         elementary_output['dbt_sidebar'] = dbt_sidebar
         elementary_output['test_results'] = test_results
         elementary_output['test_results_totals'] = test_results_totals
         elementary_output['test_runs_totals'] = test_runs_totals
         elementary_output['coverages'] = models_coverages
+        elementary_output['lineage'] = json.loads(lineage.json())
 
         html_index_path = pkg_resources.resource_filename(__name__, "index.html")
         with open(html_index_path, 'r') as index_html_file:
@@ -237,6 +241,10 @@ class DataMonitoring(object):
             logger.error('Could not send Elementary monitoring report because it does not exist')
             self.success = False
         return self.success
+
+    def _get_lineage(self) -> LineageSchema:
+        lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
+        return lineage_api.get_lineage()
 
     def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
