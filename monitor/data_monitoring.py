@@ -257,7 +257,7 @@ class DataMonitoring:
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
-            tests_results[test.model_unique_id].append(test_result.to_test_result_api_dict())
+            tests_results[test.model_unique_id].append(test_result.to_test_alert_api_dict())
         return tests_results
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:

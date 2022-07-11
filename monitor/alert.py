@@ -84,18 +84,18 @@ class TestAlert(Alert):
 
     TABLE_NAME = 'alerts_tests'
 
-    def to_test_result_api_dict(self) -> dict:
+    def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
 
     @staticmethod
-    def create_test_alert_from_dict(**test_result_dict) -> Optional['TestAlert']:
-        test_type = test_result_dict.get('test_type')
+    def create_test_alert_from_dict(**test_alert_dict) -> Optional['TestAlert']:
+        test_type = test_alert_dict.get('test_type')
         if test_type == 'dbt_test':
-            return DbtTestAlert(**test_result_dict)
-        return ElementaryTestAlert(**test_result_dict)
+            return DbtTestAlert(**test_alert_dict)
+        return ElementaryTestAlert(**test_alert_dict)
 
     @staticmethod
     def display_name(str_value: str) -> str:
@@ -214,7 +214,7 @@ class DbtTestAlert(TestAlert):
                                                 divider=True)
         return SlackMessageSchema(attachments=slack_message['attachments'])
 
-    def to_test_result_api_dict(self):
+    def to_test_alert_api_dict(self):
         test_runs = {**self.test_runs, 'display_name': self.test_display_name} if self.test_runs else {}
 
         return {
@@ -342,21 +342,21 @@ class ElementaryTestAlert(DbtTestAlert):
                                                 divider=True)
         return SlackMessageSchema(attachments=slack_message['attachments'])
 
-    def to_test_result_api_dict(self):
+    def to_test_alert_api_dict(self):
         test_params = try_load_json(self.test_params) or {}
-        test_results = None
+        test_alerts = None
         if self.test_type == 'anomaly_detection':
             timestamp_column = test_params.get('timestamp_column')
             sensitivity = test_params.get('sensitivity')
             test_params = {'timestamp_column': timestamp_column,
                            'anomaly_threshold': sensitivity}
             self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
-            test_results = {'display_name': self.test_sub_type_display_name,
-                            'metrics': self.test_rows_sample,
-                            'result_description': self.test_results_description}
+            test_alerts = {'display_name': self.test_sub_type_display_name,
+                           'metrics': self.test_rows_sample,
+                           'result_description': self.test_results_description}
         elif self.test_type == 'schema_change':
-            test_results = {'display_name': self.test_sub_type_display_name.lower(),
-                            'result_description': self.test_results_description}
+            test_alerts = {'display_name': self.test_sub_type_display_name.lower(),
+                           'result_description': self.test_results_description}
         test_runs = {**self.test_runs, 'display_name': self.test_sub_type_display_name} if self.test_runs else {}
 
         return {
@@ -378,7 +378,7 @@ class ElementaryTestAlert(DbtTestAlert):
                 'test_query': self.test_results_query,
                 'test_params': test_params
             },
-            'test_results': test_results,
+            'test_results': test_alerts,
             'test_runs': test_runs
         }
 
