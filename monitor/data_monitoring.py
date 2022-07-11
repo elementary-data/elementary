@@ -51,7 +51,15 @@ class DataMonitoring:
         # slack client is optional
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
+        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
+
+    def get_elementary_database_and_schema(self):
+        try:
+            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
+            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
+        except Exception:
+            return '<elementary_schema>'
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -94,7 +102,7 @@ class DataMonitoring:
             ModelAlert
         )
 
-    def _query_alert_type(self, run_operation_args: dict, alert_builder: Callable) -> AlertsQueryResult:
+    def _query_alert_type(self, run_operation_args: dict, alert_factory_func: Callable) -> AlertsQueryResult:
         raw_alerts = self.dbt_runner.run_operation(**run_operation_args)
         alerts = []
         malformed_alerts = []
@@ -102,9 +110,16 @@ class DataMonitoring:
             alert_dicts = json.loads(raw_alerts[0])
             for alert_dict in alert_dicts:
                 try:
-                    alerts.append(alert_builder(**alert_dict))
+                    alerts.append(alert_factory_func(
+                        elementary_database_and_schema=self.elementary_database_and_schema,
+                        **alert_dict
+                    ))
                 except Exception:
-                    malformed_alerts.append(MalformedAlert(alert_dict['id'], alert_dict))
+                    malformed_alerts.append(MalformedAlert(
+                        alert_dict['id'],
+                        self.elementary_database_and_schema,
+                        alert_dict,
+                    ))
         if malformed_alerts:
             logger.error('Failed to parse some alerts.')
             self.success = False

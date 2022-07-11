@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 @dataclass
 class Alert:
     id: str
+    elementary_database_and_schema: str
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = '...'
@@ -92,8 +93,7 @@ class TestAlert(Alert):
 
     @staticmethod
     def create_test_alert_from_dict(**test_alert_dict) -> Optional['TestAlert']:
-        test_type = test_alert_dict.get('test_type')
-        if test_type == 'dbt_test':
+        if test_alert_dict.get('test_type') == 'dbt_test':
             return DbtTestAlert(**test_alert_dict)
         return ElementaryTestAlert(**test_alert_dict)
 
@@ -112,6 +112,7 @@ class DbtTestAlert(TestAlert):
     def __init__(
             self,
             id,
+            elementary_database_and_schema,
             model_unique_id,
             test_unique_id,
             detected_at,
@@ -134,7 +135,7 @@ class DbtTestAlert(TestAlert):
             test_runs=None,
             **kwargs
     ) -> None:
-        super().__init__(id, model_unique_id, test_unique_id, status)
+        super().__init__(id, elementary_database_and_schema, model_unique_id, test_unique_id, status)
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
@@ -202,9 +203,13 @@ class DbtTestAlert(TestAlert):
                                                 f'*Test Parameters*\n`{self.test_params}`',
                                                 divider=True)
         if self.test_results_query:
-            self._add_text_section_to_slack_msg(slack_message,
-                                                f'*Test Query*\n```{self.test_results_query}```',
-                                                divider=True)
+            msg = f'*Test Query*\n```{self.test_results_query}```'
+            if len(msg) > SectionBlock.text_max_length:
+                msg = f"*Query for Test's Query*\n" \
+                      f"_The test query was too long, here's a query to get it._\n" \
+                      f"```SELECT test_results_query FROM {self.elementary_database_and_schema}.elementary_test_results WHERE test_execution_id = '{self.id}'```"
+            self._add_text_section_to_slack_msg(slack_message, msg, divider=True)
+
         if self.test_rows_sample:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Test Results Sample*\n`{self.test_rows_sample}`',
@@ -247,6 +252,7 @@ class ElementaryTestAlert(DbtTestAlert):
     def __init__(
             self,
             id,
+            elementary_database_and_schema,
             model_unique_id,
             test_unique_id,
             detected_at,
@@ -271,6 +277,7 @@ class ElementaryTestAlert(DbtTestAlert):
     ) -> None:
         super().__init__(
             id,
+            elementary_database_and_schema,
             model_unique_id,
             test_unique_id,
             detected_at,
