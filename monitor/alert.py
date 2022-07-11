@@ -2,7 +2,7 @@ import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union, TypeVar, Generic, Optional
+from typing import List, Union, TypeVar, Generic, Optional, Set
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -152,12 +152,13 @@ class DbtTestAlert(TestAlert):
                 self.detected_at = convert_utc_time_to_local_time(detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
             except (ValueError, TypeError):
                 logger.error(f'Failed to parse "detect_at" field.')
-        self.owners = try_load_json(owners) or ''
-        if isinstance(self.owners, list):
-            self.owners = ', '.join(self.owners)
-        self.tags = try_load_json(tags) or ''
-        if isinstance(self.tags, list):
-            self.tags = ', '.join(self.tags)
+
+        owners = try_load_json(owners) or ''
+        if isinstance(owners, list):
+            self.owners = ', '.join(set(owners))
+        tags = try_load_json(tags) or ''
+        if isinstance(tags, list):
+            self.tags = ', '.join(set(tags))
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
@@ -395,19 +396,19 @@ class ModelAlert(Alert):
     schema_name: str
     message: str
     full_refresh: bool
-    owners: Union[str, List[str]]
-    tags: Union[str, List[str]]
+    owners: str
+    tags: str
     status: str
 
     TABLE_NAME = 'alerts_models'
 
     def __post_init__(self):
-        self.owners = try_load_json(self.owners) or ''
-        if isinstance(self.owners, list):
-            self.owners = ', '.join(self.owners)
-        self.tags = try_load_json(self.tags) or ''
-        if isinstance(self.tags, list):
-            self.tags = ', '.join(self.tags)
+        owners = try_load_json(self.owners) or ''
+        if isinstance(owners, list):
+            self.owners = ', '.join(set(self.owners))
+        tags = try_load_json(self.tags) or ''
+        if isinstance(tags, list):
+            self.tags = ', '.join(set(self.tags))
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         icon = ':small_red_triangle:'
