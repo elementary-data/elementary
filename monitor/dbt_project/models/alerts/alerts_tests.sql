@@ -10,8 +10,8 @@ with alerts_schema_changes as (
     select * from {{ ref('elementary', 'alerts_schema_changes') }}
 ),
 
-alerts_data_monitoring as (
-    select * from {{ ref('elementary', 'alerts_data_monitoring') }}
+alerts_anomaly_detection as (
+    select * from {{ ref('elementary', 'alerts_anomaly_detection') }}
 ),
 
 alerts_dbt_tests as (
@@ -21,7 +21,7 @@ alerts_dbt_tests as (
 all_alerts as (
      select * from alerts_schema_changes
      union all
-     select * from alerts_data_monitoring
+     select * from alerts_anomaly_detection
      union all
      select * from alerts_dbt_tests
 )
