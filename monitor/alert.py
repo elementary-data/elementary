@@ -389,7 +389,6 @@ class ElementaryTestAlert(DbtTestAlert):
 
 @dataclass
 class ModelAlert(Alert):
-    id: str
     unique_id: str
     alias: str
     path: str

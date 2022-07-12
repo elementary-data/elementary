@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 import webbrowser
@@ -51,15 +52,16 @@ class DataMonitoring:
         # slack client is optional
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
 
-    def get_elementary_database_and_schema(self):
+    @property
+    @functools.lru_cache
+    def elementary_database_and_schema(self):
         try:
             database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
             return '.'.join(json.loads(database_and_schema.replace("'", '"')))
         except Exception:
-            return '<elementary_schema>'
+            return '<elementary_database>.<elementary_schema>'
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)

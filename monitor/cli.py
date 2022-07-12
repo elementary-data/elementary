@@ -191,7 +191,7 @@ def monitor(
 @click.option(
     '--file-path',
     type=str,
-    help="The file path for Elementary's report."
+    help="The file path where Elementary's report will be saved."
 )
 @click.pass_context
 def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path):
