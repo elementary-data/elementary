@@ -269,6 +269,7 @@ class DataMonitoring:
             test_invocations = invocations.get(test_sub_type_unique_id)
             test_result = TestAlert.create_test_alert_from_dict(
                 **metadata,
+                elementary_database_and_schema=self.elementary_database_and_schema,
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
