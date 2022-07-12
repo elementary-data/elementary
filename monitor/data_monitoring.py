@@ -3,7 +3,7 @@ import json
 import os
 import webbrowser
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple, Callable
+from typing import Any, Dict, List, Optional, Tuple
 
 import pkg_resources
 from alive_progress import alive_it
@@ -12,7 +12,8 @@ from clients.dbt.dbt_runner import DbtRunner
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
 from config.config import Config
-from monitor.alert import Alert, AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert
+from monitor.alert import Alert, ModelAlert, Alerts, TestAlert
+from monitor.api.alerts import AlertsAPI
 from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
@@ -83,51 +84,6 @@ class DataMonitoring:
                 json_logs=False
             )
 
-    def _query_alerts(self, days_back: int) -> Alerts:
-        alerts = Alerts(
-            tests=self._query_test_alerts(days_back),
-            models=self._query_model_alerts(days_back),
-        )
-        self.execution_properties['alert_count'] = alerts.count
-        return alerts
-
-    def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
-        logger.info('Querying test alerts.')
-        return self._query_alert_type(
-            {'macro_name': 'get_new_test_alerts', 'macro_args': {'days_back': days_back}},
-            TestAlert.create_test_alert_from_dict
-        )
-
-    def _query_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
-        logger.info('Querying model alerts.')
-        return self._query_alert_type(
-            {'macro_name': 'get_new_model_alerts', 'macro_args': {'days_back': days_back}},
-            ModelAlert
-        )
-
-    def _query_alert_type(self, run_operation_args: dict, alert_factory_func: Callable) -> AlertsQueryResult:
-        raw_alerts = self.dbt_runner.run_operation(**run_operation_args)
-        alerts = []
-        malformed_alerts = []
-        if raw_alerts:
-            alert_dicts = json.loads(raw_alerts[0])
-            for alert_dict in alert_dicts:
-                try:
-                    alerts.append(alert_factory_func(
-                        elementary_database_and_schema=self.elementary_database_and_schema,
-                        **alert_dict
-                    ))
-                except Exception:
-                    malformed_alerts.append(MalformedAlert(
-                        alert_dict['id'],
-                        self.elementary_database_and_schema,
-                        alert_dict,
-                    ))
-        if malformed_alerts:
-            logger.error('Failed to parse some alerts.')
-            self.success = False
-        return AlertsQueryResult(alerts, malformed_alerts)
-
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str) -> List[str]:
         if not alerts:
             return []
@@ -178,7 +134,8 @@ class DataMonitoring:
             self.execution_properties['success'] = self.success
             return self.success
 
-        alerts = self._query_alerts(days_back)
+        alerts = AlertsAPI(self.elementary_database_and_schema).query_alerts(days_back)
+        self.execution_properties['alert_count'] = alerts.count
         self._send_alerts(alerts)
         self.execution_properties['run_end'] = True
         self.execution_properties['success'] = self.success
@@ -297,9 +254,10 @@ class DataMonitoring:
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         coverages = models_api.get_test_coverages()
+        new_coverages = {}
         for model_id, coverage in coverages.items():
-            coverages[model_id] = dict(coverage)
-        return coverages
+            new_coverages[model_id] = dict(coverage)
+        return new_coverages
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
