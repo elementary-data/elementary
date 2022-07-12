@@ -91,11 +91,6 @@ class TestAlert(Alert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
 
-    @staticmethod
-    def create_test_alert_from_dict(**test_alert_dict) -> Optional['TestAlert']:
-        if test_alert_dict.get('test_type') == 'dbt_test':
-            return DbtTestAlert(**test_alert_dict)
-        return ElementaryTestAlert(**test_alert_dict)
 
     @staticmethod
     def display_name(str_value: str) -> str:

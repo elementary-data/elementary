@@ -1,9 +1,11 @@
+import functools
 import json
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Optional
 
 from clients.api.api import APIClient
-from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert
+from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert, DbtTestAlert, \
+    ElementaryTestAlert
 from utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -11,8 +13,6 @@ logger = get_logger(__name__)
 
 @dataclass
 class AlertsAPI(APIClient):
-    elementary_database_and_schema: str
-
     def query(self, days_back: int) -> Alerts:
         alerts = Alerts(
             tests=self._query_test_alerts(days_back),
@@ -24,7 +24,7 @@ class AlertsAPI(APIClient):
         logger.info('Querying test alerts.')
         return self._query_alert_type(
             {'macro_name': 'get_new_test_alerts', 'macro_args': {'days_back': days_back}},
-            TestAlert.create_test_alert_from_dict
+            self.create_test_alert_from_dict
         )
 
     def _query_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
@@ -56,3 +56,19 @@ class AlertsAPI(APIClient):
             logger.error('Failed to parse some alerts.')
             self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
+
+    @property
+    @functools.lru_cache
+    def elementary_database_and_schema(self):
+        try:
+            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
+            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
+        except Exception:
+            logger.error("Failed to parse Elementary's database and schema.")
+            return '<elementary_database>.<elementary_schema>'
+
+    @staticmethod
+    def create_test_alert_from_dict(**test_alert_dict) -> Optional[TestAlert]:
+        if test_alert_dict.get('test_type') == 'dbt_test':
+            return DbtTestAlert(**test_alert_dict)
+        return ElementaryTestAlert(**test_alert_dict)

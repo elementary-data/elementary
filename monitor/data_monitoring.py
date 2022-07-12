@@ -1,4 +1,3 @@
-import functools
 import json
 import os
 import webbrowser
@@ -53,17 +52,8 @@ class DataMonitoring:
         # slack client is optional
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
+        self.alerts_api = AlertsAPI(self.dbt_runner)
         self.success = True
-
-    @property
-    @functools.lru_cache
-    def elementary_database_and_schema(self):
-        try:
-            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
-            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
-        except Exception:
-            logger.error("Failed to parse Elementary's database and schema.")
-            return '<elementary_database>.<elementary_schema>'
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
@@ -134,7 +124,7 @@ class DataMonitoring:
             self.execution_properties['success'] = self.success
             return self.success
 
-        alerts = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema).query(days_back)
+        alerts = self.alerts_api.query(days_back)
         self.execution_properties['alert_count'] = alerts.count
         self._send_alerts(alerts)
         self.execution_properties['run_end'] = True
@@ -226,9 +216,9 @@ class DataMonitoring:
             metadata = dict(test)
             test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
             test_invocations = invocations.get(test_sub_type_unique_id)
-            test_result = TestAlert.create_test_alert_from_dict(
+            test_result = self.alerts_api.create_test_alert_from_dict(
                 **metadata,
-                elementary_database_and_schema=self.elementary_database_and_schema,
+                elementary_database_and_schema=self.alerts_api.elementary_database_and_schema,
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
