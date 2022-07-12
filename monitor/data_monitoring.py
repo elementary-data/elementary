@@ -187,40 +187,39 @@ class DataMonitoring:
                         file_path: Optional[str] = None) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
-        elementary_output = {'creation_time': now_utc}
-        test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
-            days_back=days_back, test_runs_amount=test_runs_amount)
-        models, dbt_sidebar = self._get_dbt_models_and_sidebar()
-        models_coverages = self._get_dbt_models_test_coverages()
-        elementary_output['models'] = models
-        elementary_output['dbt_sidebar'] = dbt_sidebar
-        elementary_output['test_results'] = test_results
-        elementary_output['test_results_totals'] = test_results_totals
-        elementary_output['test_runs_totals'] = test_runs_totals
-        elementary_output['coverages'] = models_coverages
+        html_path = self._get_report_file_path(now_utc, file_path)
+        with open(html_path, 'w') as html_file:
+            output_data = {'creation_time': now_utc}
+            test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
+                days_back=days_back, test_runs_amount=test_runs_amount)
+            models, dbt_sidebar = self._get_dbt_models_and_sidebar()
+            models_coverages = self._get_dbt_models_test_coverages()
+            output_data['models'] = models
+            output_data['dbt_sidebar'] = dbt_sidebar
+            output_data['test_results'] = test_results
+            output_data['test_results_totals'] = test_results_totals
+            output_data['test_runs_totals'] = test_runs_totals
+            output_data['coverages'] = models_coverages
 
-        html_index_path = pkg_resources.resource_filename(__name__, "index.html")
-        with open(html_index_path, 'r') as index_html_file:
-            html_code = index_html_file.read()
-            elementary_output_str = json.dumps(elementary_output)
-            elementary_output_html = f"""
-                    {html_code}
-                    <script>
-                        var elementaryData = {elementary_output_str}
-                    </script>
-                """
-        elementary_html_path = self._get_report_file_path(now_utc, file_path)
-        with open(elementary_html_path, 'w') as elementary_output_html_file:
-            elementary_output_html_file.write(elementary_output_html)
+            template_html_path = pkg_resources.resource_filename(__name__, "index.html")
+            with open(template_html_path, 'r') as template_html_file:
+                template_html_code = template_html_file.read()
+                dumped_output_data = json.dumps(output_data)
+                compiled_output_html = f"""
+                        {template_html_code}
+                        <script>
+                            var elementaryData = {dumped_output_data}
+                        </script>
+                    """
+                html_file.write(compiled_output_html)
         with open(os.path.join(self.config.target_dir, 'elementary_output.json'), 'w') as \
                 elementary_output_json_file:
-            elementary_output_json_file.write(elementary_output_str)
+            elementary_output_json_file.write(dumped_output_data)
 
-            elementary_html_file_path = 'file://' + elementary_html_path
-            webbrowser.open_new_tab(elementary_html_file_path)
-            self.execution_properties['report_end'] = True
-            self.execution_properties['success'] = self.success
-            return self.success, elementary_html_path
+        webbrowser.open_new_tab('file://' + html_path)
+        self.execution_properties['report_end'] = True
+        self.execution_properties['success'] = self.success
+        return self.success, html_path
 
     def send_report(self, elementary_html_path: str) -> bool:
         if os.path.exists(elementary_html_path):
@@ -305,10 +304,12 @@ class DataMonitoring:
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
         return data_monitoring_properties
 
-    def _get_report_file_path(self, generation_time: str, elementary_file_path: Optional[str] = None) -> str:
-        if elementary_file_path:
-            return elementary_file_path
-        return os.path.join(
+    def _get_report_file_path(self, generation_time: str, file_path: Optional[str] = None) -> str:
+        if file_path:
+            if file_path.endswith('.htm') or file_path.endswith('.html'):
+                return os.path.abspath(file_path)
+            raise ValueError('Report file path must end with .html')
+        return os.path.abspath(os.path.join(
             self.config.target_dir,
             f"elementary - {generation_time} utc.html".replace(" ", "_").replace(":", "-")
-        )
+        ))
