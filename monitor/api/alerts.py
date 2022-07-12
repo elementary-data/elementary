@@ -1,10 +1,9 @@
+import functools
 import json
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-import utils.dbt
 from clients.api.api import APIClient
-from config.config import Config
 from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert, DbtTestAlert, \
     ElementaryTestAlert
 from utils.log import get_logger
@@ -14,11 +13,6 @@ logger = get_logger(__name__)
 
 @dataclass
 class AlertsAPI(APIClient):
-    config: Config
-
-    def __post_init__(self):
-        self.elementary_database_and_schema = self._get_elementary_database_and_schema()
-
     def query(self, days_back: int) -> Alerts:
         alerts = Alerts(
             tests=self._query_test_alerts(days_back),
@@ -63,11 +57,12 @@ class AlertsAPI(APIClient):
             self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
 
-    def _get_elementary_database_and_schema(self) -> str:
+    @property
+    @functools.lru_cache
+    def elementary_database_and_schema(self):
         try:
-            elementary_creds, _ = utils.dbt.extract_credentials_and_data_from_profiles(self.config.profiles_dir,
-                                                                                       'elementary')
-            return f'{elementary_creds.database}.{elementary_creds.schema}'
+            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
+            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
