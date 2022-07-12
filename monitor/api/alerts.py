@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Callable, Any
+from typing import Callable
 
 from clients.api.api import APIClient
 from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert
@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 class AlertsAPI(APIClient):
     elementary_database_and_schema: str
 
-    def query_alerts(self, days_back: int) -> Alerts:
+    def query(self, days_back: int) -> Alerts:
         alerts = Alerts(
             tests=self._query_test_alerts(days_back),
             models=self._query_model_alerts(days_back),

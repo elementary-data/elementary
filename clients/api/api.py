@@ -1,10 +1,8 @@
+from dataclasses import dataclass
+
 from clients.dbt.dbt_runner import DbtRunner
 
 
+@dataclass
 class APIClient:
-    def __init__(
-        self,
-        dbt_runner: DbtRunner
-    ) -> None:
-        self.dbt_runner = dbt_runner
-        self.run_sucessfully = True
+    dbt_runner: DbtRunner

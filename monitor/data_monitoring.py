@@ -134,7 +134,7 @@ class DataMonitoring:
             self.execution_properties['success'] = self.success
             return self.success
 
-        alerts = AlertsAPI(self.elementary_database_and_schema).query_alerts(days_back)
+        alerts = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema).query(days_back)
         self.execution_properties['alert_count'] = alerts.count
         self._send_alerts(alerts)
         self.execution_properties['run_end'] = True
