@@ -52,7 +52,7 @@ class DataMonitoring:
         # slack client is optional
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.alerts_api = AlertsAPI(self.dbt_runner)
+        self.alerts_api = AlertsAPI(self.dbt_runner, self.config)
         self.success = True
 
     def _dbt_package_exists(self) -> bool:
