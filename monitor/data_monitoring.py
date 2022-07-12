@@ -181,7 +181,8 @@ class DataMonitoring:
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None) -> Tuple[
+    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
+                        file_path: Optional[str] = None) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
         elementary_output = {'creation_time': now_utc}
@@ -206,13 +207,12 @@ class DataMonitoring:
                         var elementaryData = {elementary_output_str}
                     </script>
                 """
-            elementary_html_file_name = f"elementary - {now_utc} utc.html".replace(" ", "_").replace(":", "-")
-            elementary_html_path = os.path.join(self.config.target_dir, elementary_html_file_name)
-            with open(elementary_html_path, 'w') as elementary_output_html_file:
-                elementary_output_html_file.write(elementary_output_html)
-            with open(os.path.join(self.config.target_dir, 'elementary_output.json'), 'w') as \
-                    elementary_output_json_file:
-                elementary_output_json_file.write(elementary_output_str)
+        elementary_html_path = self._get_report_file_path(now_utc, file_path)
+        with open(elementary_html_path, 'w') as elementary_output_html_file:
+            elementary_output_html_file.write(elementary_output_html)
+        with open(os.path.join(self.config.target_dir, 'elementary_output.json'), 'w') as \
+                elementary_output_json_file:
+            elementary_output_json_file.write(elementary_output_str)
 
             elementary_html_file_path = 'file://' + elementary_html_path
             webbrowser.open_new_tab(elementary_html_file_path)
@@ -302,3 +302,11 @@ class DataMonitoring:
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
         return data_monitoring_properties
+
+    def _get_report_file_path(self, generation_time: str, elementary_file_path: Optional[str] = None) -> str:
+        if elementary_file_path:
+            return elementary_file_path
+        return os.path.join(
+            self.config.target_dir,
+            f"elementary - {generation_time} utc.html".replace(" ", "_").replace(":", "-")
+        )
