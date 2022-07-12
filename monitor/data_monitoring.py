@@ -61,6 +61,7 @@ class DataMonitoring:
             database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
             return '.'.join(json.loads(database_and_schema.replace("'", '"')))
         except Exception:
+            logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
 
     def _dbt_package_exists(self) -> bool:
