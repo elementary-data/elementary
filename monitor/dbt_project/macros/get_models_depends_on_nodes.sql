@@ -1,7 +1,7 @@
 {% macro get_models_depends_on_nodes() %}
     {% set models_depends_on_nodes_query %}
         with dbt_models as (
-            select * from {{ref('elementary', 'dbt_models')}}
+            select * from {{ ref('elementary', 'dbt_models') }}
         )
 
         select

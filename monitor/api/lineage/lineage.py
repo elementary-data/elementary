@@ -18,8 +18,8 @@ class LineageAPI(APIClient):
         for model_depends_on_nodes in models_depends_on_nodes:
             lineage_graph.add_edges_from([(model_depends_on_nodes.unique_id, depends_on_node) for depends_on_node in model_depends_on_nodes.depends_on_nodes])
         return LineageSchema(
-            nodes=[node for node in lineage_graph.nodes],
-            edges=[edge for edge in lineage_graph.edges]
+            nodes=list(lineage_graph.nodes),
+            edges=list(lineage_graph.edges)
         )
     
     def get_dags(self) -> List[LineageSchema]:
@@ -38,8 +38,8 @@ class LineageAPI(APIClient):
             for node in connected_component:
                 dag_graph.add_edges_from(models_to_depends_map[node])
             dags.append(LineageSchema(
-                nodes=[node for node in dag_graph.nodes],
-                edges=[edge for edge in dag_graph.edges]
+                nodes=list(dag_graph.nodes),
+                edges=list(dag_graph.edges)
             ))
         return dags
     
