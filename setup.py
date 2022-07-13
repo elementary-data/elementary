@@ -32,7 +32,8 @@ setup(
         'ruamel.yaml',
         'alive-progress<=2.3.1',
         'slack-sdk<4.0',
-        'pydantic<2.0'
+        'pydantic<2.0',
+        'networkx>=2.3,<3'
     ],
     extras_require={
         'snowflake': ['dbt-snowflake>=0.20,<2.0.0'],
