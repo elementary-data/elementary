@@ -1,32 +1,26 @@
 import json
-from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable
 
+import utils.dbt
 from clients.api.api import APIClient
-from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert, DbtTestAlert, \
-    ElementaryTestAlert
+from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert
 from utils.log import get_logger
 
 logger = get_logger(__name__)
 
 
-@dataclass
 class AlertsAPI(APIClient):
-    def __post_init__(self):
-        self.elementary_database_and_schema = self._get_elementary_database_and_schema()
-
     def query(self, days_back: int) -> Alerts:
-        alerts = Alerts(
+        return Alerts(
             tests=self._query_test_alerts(days_back),
             models=self._query_model_alerts(days_back),
         )
-        return alerts
 
     def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
         logger.info('Querying test alerts.')
         return self._query_alert_type(
             {'macro_name': 'get_new_test_alerts', 'macro_args': {'days_back': days_back}},
-            self.create_test_alert_from_dict
+            TestAlert.create_test_alert_from_dict
         )
 
     def _query_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
@@ -59,16 +53,10 @@ class AlertsAPI(APIClient):
             self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
 
-    def _get_elementary_database_and_schema(self):
+    @property
+    def elementary_database_and_schema(self):
         try:
-            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
-            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
+            return utils.dbt.get_elementary_database_and_schema(self.dbt_runner)
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
-
-    @staticmethod
-    def create_test_alert_from_dict(**test_alert_dict) -> Optional[TestAlert]:
-        if test_alert_dict.get('test_type') == 'dbt_test':
-            return DbtTestAlert(**test_alert_dict)
-        return ElementaryTestAlert(**test_alert_dict)

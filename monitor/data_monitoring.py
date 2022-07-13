@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pkg_resources
 from alive_progress import alive_it
 
+import utils.dbt
 from clients.dbt.dbt_runner import DbtRunner
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
@@ -216,9 +217,9 @@ class DataMonitoring:
             metadata = dict(test)
             test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
             test_invocations = invocations.get(test_sub_type_unique_id)
-            test_result = self.alerts_api.create_test_alert_from_dict(
+            test_result = TestAlert.create_test_alert_from_dict(
                 **metadata,
-                elementary_database_and_schema=self.alerts_api.elementary_database_and_schema,
+                elementary_database_and_schema=utils.dbt.get_elementary_database_and_schema(self.dbt_runner),
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
