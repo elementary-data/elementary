@@ -31,7 +31,7 @@ from all_alerts
 {%- if is_incremental() %}
 {%- set row_count = elementary.get_row_count(this) %}
     {%- if row_count > 0 %}
-        {# We use a backfill of 2 days to prevent race condition when 2 dbt tests + edr monitor runs together #}
+        {# We use a backfill of 2 days to prevent race condition when multiple dbt tests + edr monitor run together #}
         where detected_at > (select {{ elementary.timeadd('day', '-2', 'max(detected_at)') }} from {{ this }})
     {%- endif %}
 {%- endif %}
