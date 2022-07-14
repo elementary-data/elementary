@@ -31,6 +31,7 @@ from all_alerts
 {%- if is_incremental() %}
 {%- set row_count = elementary.get_row_count(this) %}
     {%- if row_count > 0 %}
-        where detected_at > (select max(detected_at) from {{ this }})
+        {% set backfill_detected_at = elementary.timeadd('day', '-2', 'max(detected_at)') %}
+        where detected_at > (select {{ backfill_detected_at }} from {{ this }})
     {%- endif %}
 {%- endif %}
