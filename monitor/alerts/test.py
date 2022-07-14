@@ -31,13 +31,7 @@ class TestAlert(Alert):
 
     @staticmethod
     def display_name(str_value: str) -> str:
-        return ' '.join([word[0].upper() + word[1:] for word in str_value.split('_')])
-
-    @staticmethod
-    def description_display_name(description: str, default_description: str = '') -> str:
-        if description:
-            return description[0].upper() + description[1:]
-        return default_description
+        return str_value.replace('_', ' ').title()
 
     @staticmethod
     def create_test_alert_from_dict(**test_alert_dict) -> Optional['TestAlert']:
@@ -103,7 +97,7 @@ class DbtTestAlert(TestAlert):
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
         self.test_runs = test_runs if test_runs else ''
         self.test_params = test_params
-        self.error_message = self.description_display_name(test_results_description, 'No error message')
+        self.error_message = test_results_description.capitalize() if test_results_description else 'No error message'
         self.column_name = column_name if column_name else ''
         self.severity = severity
 
@@ -237,7 +231,7 @@ class ElementaryTestAlert(DbtTestAlert):
             status,
             test_runs
         )
-        self.test_results_description = self.description_display_name(test_results_description)
+        self.test_results_description = test_results_description.capitalize() if test_results_description else ''
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         anomalous_value = None
