@@ -19,7 +19,7 @@
         from dbt_models 
         union all
         select
-            'asdas' as unique_id,
+            unique_id,
             null as depends_on_nodes,
             'source' as type
         from dbt_sources
