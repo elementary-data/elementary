@@ -25,3 +25,4 @@ pydantic~=1.9.1
 packaging~=21.3
 pytest~=7.1.2
 setuptools~=60.2.0
+jsonschema~=3.2.0
