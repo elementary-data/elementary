@@ -11,7 +11,7 @@
     select {{ elementary.timeadd('day', '-2', 'max(detected_at)') }} from {{ this }}
 {% endset %}
 
-{% set last_alert_time_with_backfill = elementary.result_value(last_alert_time_with_backfill_query) %}
+{% set last_alert_time_with_backfill = "'" ~ elementary.result_value(last_alert_time_with_backfill_query) ~ "'" %}
 
 with alerts_schema_changes as (
     select * from {{ ref('elementary', 'alerts_schema_changes') }}
@@ -39,6 +39,11 @@ from all_alerts
 {%- set row_count = elementary.get_row_count(this) %}
     {%- if row_count > 0 %}
         where detected_at > {{ last_alert_time_with_backfill }}
-        and alert_id not in (select alert_id from {{this}} where detected_at > {{ last_alert_time_with_backfill }} alert_sent = true)
+        and alert_id not in (
+            select alert_id
+            from {{ this }}
+            where detected_at > {{ last_alert_time_with_backfill }}
+            and alert_sent = true
+        )
     {%- endif %}
 {%- endif %}
