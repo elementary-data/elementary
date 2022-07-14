@@ -110,7 +110,7 @@ class DataMonitoring:
             package_downloaded = self.dbt_runner.deps()
             self.execution_properties['package_downloaded'] = package_downloaded
             if not package_downloaded:
-                logger.info('Could not download internal dbt package')
+                logger.error('Could not download internal dbt package')
                 self.success = False
                 return
 
