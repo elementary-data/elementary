@@ -5,7 +5,7 @@ from utils.ordered_yaml import OrderedYaml
 ordered_yaml = OrderedYaml()
 
 
-class Config(object):
+class Config:
     SLACK = 'slack'
     TOKEN = 'token'
     NOTIFICATION_CHANNEL_NAME = 'channel_name'

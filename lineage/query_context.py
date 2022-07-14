@@ -5,7 +5,7 @@ import dateutil.parser
 from utils.time import format_milliseconds
 
 
-class QueryContext(object):
+class QueryContext:
     def __init__(self, queried_database: Optional[str] = None, queried_schema: Optional[str] = None,
                  query_time: Optional[datetime] = None, query_volume: Optional[int] = None,
                  query_type: Optional[str] = None, user_name: Optional[str] = None,

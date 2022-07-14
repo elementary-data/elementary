@@ -60,7 +60,7 @@ GRAPH_VISUALIZATION_OPTIONS = """{
 }"""
 
 
-class LineageGraph(object):
+class LineageGraph:
     UPSTREAM_DIRECTION = 'upstream'
     DOWNSTREAM_DIRECTION = 'downstream'
     BOTH_DIRECTIONS = 'both'

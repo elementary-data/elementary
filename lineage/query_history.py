@@ -10,7 +10,7 @@ import json
 import os
 
 
-class QueryHistory(object):
+class QueryHistory:
 
     INFORMATION_SCHEMA_QUERY_HISTORY = None
     PLATFORM_TYPE = None

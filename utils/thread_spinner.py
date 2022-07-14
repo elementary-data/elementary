@@ -3,7 +3,7 @@ import time
 from threading import Thread
 
 
-class ThreadSpinner(object):
+class ThreadSpinner:
     def __init__(self, title: str) -> None:
         self.stop_spinner = False
         self.thread = Thread(target=self._run_spinner, args=(title,))

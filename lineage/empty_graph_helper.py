@@ -1,4 +1,4 @@
-class EmptyGraphHelper(object):
+class EmptyGraphHelper:
     @staticmethod
     def get_help_message():
         return f"""

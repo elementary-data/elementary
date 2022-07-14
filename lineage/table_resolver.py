@@ -5,7 +5,7 @@ from utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class TableResolver(object):
+class TableResolver:
 
     def __init__(self, database_name: str = None, schema_name: str = None, full_table_names: bool = False,
                  remove_special_char_callback: Callable = None) -> None:
