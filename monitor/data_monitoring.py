@@ -12,7 +12,10 @@ from clients.dbt.dbt_runner import DbtRunner
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
 from config.config import Config
-from monitor.alert import Alert, ModelAlert, Alerts, TestAlert
+from monitor.alerts.alert import Alert
+from monitor.alerts.alerts import Alerts
+from monitor.alerts.model import ModelAlert
+from monitor.alerts.test import TestAlert
 from monitor.api.alerts import AlertsAPI
 from monitor.api.lineage.lineage import LineageAPI
 from monitor.api.lineage.schema import LineageSchema

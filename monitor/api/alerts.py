@@ -3,7 +3,10 @@ from typing import Callable
 
 import utils.dbt
 from clients.api.api import APIClient
-from monitor.alert import AlertsQueryResult, ModelAlert, Alerts, TestAlert, MalformedAlert
+from monitor.alerts.alerts import AlertsQueryResult, Alerts
+from monitor.alerts.malformed import MalformedAlert
+from monitor.alerts.model import ModelAlert
+from monitor.alerts.test import TestAlert
 from utils.log import get_logger
 
 logger = get_logger(__name__)

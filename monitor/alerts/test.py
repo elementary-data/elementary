@@ -2,79 +2,17 @@ import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union, TypeVar, Generic, Optional
+from typing import Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
 from clients.slack.schema import SlackMessageSchema
+from monitor.alerts.alert import Alert
 from utils.json_utils import try_load_json, prettify_json_str_set
 from utils.log import get_logger
 from utils.time import convert_utc_time_to_local_time
 
 logger = get_logger(__name__)
-
-
-@dataclass
-class Alert:
-    id: str
-    elementary_database_and_schema: str
-
-    _LONGEST_MARKDOWN_SUFFIX_LEN = 3
-    _CONTINUATION_SYMBOL = '...'
-
-    def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        raise NotImplementedError
-
-    @classmethod
-    def _format_section_msg(cls, section_msg):
-        if len(section_msg) < SectionBlock.text_max_length:
-            return section_msg
-        return section_msg[
-               :SectionBlock.text_max_length - len(cls._CONTINUATION_SYMBOL) - cls._LONGEST_MARKDOWN_SUFFIX_LEN] + \
-               cls._CONTINUATION_SYMBOL + section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN:]
-
-    @classmethod
-    def _add_fields_section_to_slack_msg(cls, slack_message: dict, section_msgs: list, divider: bool = False):
-        fields = []
-        for section_msg in section_msgs:
-            fields.append({
-                "type": "mrkdwn",
-                "text": cls._format_section_msg(section_msg)
-            })
-
-        block = []
-        if divider:
-            block.append({"type": "divider"})
-        block.append({"type": "section", "fields": fields})
-        slack_message['attachments'][0]['blocks'].extend(block)
-
-    @classmethod
-    def _add_text_section_to_slack_msg(cls, slack_message: dict, section_msg: str, divider: bool = False):
-        block = []
-        if divider:
-            block.append({"type": "divider"})
-        block.append({
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": cls._format_section_msg(section_msg)
-            }
-        })
-        slack_message['attachments'][0]['blocks'].extend(block)
-
-
-@dataclass
-class MalformedAlert(Alert):
-    data: dict
-
-    def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        return SlackMessageSchema(
-            text=self._format_section_msg(
-                f":small_red_triangle: Oops, we failed to format the alert :confused:\n"
-                f"Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue.\n"
-                f"```{json.dumps(self.data, indent=2)}```"
-            )
-        )
 
 
 @dataclass
@@ -385,74 +323,3 @@ class ElementaryTestAlert(DbtTestAlert):
             'test_results': test_alerts,
             'test_runs': test_runs
         }
-
-
-@dataclass
-class ModelAlert(Alert):
-    unique_id: str
-    alias: str
-    path: str
-    materialization: str
-    detected_at: Union[str, datetime]
-    database_name: str
-    schema_name: str
-    message: str
-    full_refresh: bool
-    owners: str
-    tags: str
-    status: str
-
-    TABLE_NAME = 'alerts_models'
-
-    def __post_init__(self):
-        self.owners = prettify_json_str_set(self.owners)
-        self.tags = prettify_json_str_set(self.tags)
-
-    def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        icon = ':small_red_triangle:'
-        if self.status == 'warn':
-            icon = ':warning:'
-        if is_slack_workflow:
-            return SlackMessageSchema(text=json.dumps(self.__dict__))
-        slack_message = {'attachments': [{'blocks': []}]}
-        self._add_text_section_to_slack_msg(slack_message, f'{icon} *dbt model alert*')
-        self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Model*\n{self.alias}',
-                                               f'*When*\n{self.detected_at}'],
-                                              divider=True)
-        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
-        self._add_text_section_to_slack_msg(slack_message, f'*Error Message*\n```{self.message}```')
-        self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Full Refresh*\n{self.full_refresh}', f'*Path*\n{self.path}'],
-                                              divider=True)
-        self._add_fields_section_to_slack_msg(slack_message, [f'*Status*\n{self.status}',
-                                                              f'*Materialization*\n{self.materialization}'])
-        return SlackMessageSchema(attachments=slack_message['attachments'])
-
-
-AlertType = TypeVar('AlertType')
-
-
-@dataclass
-class AlertsQueryResult(Generic[AlertType]):
-    alerts: List[AlertType]
-    malformed_alerts: List[MalformedAlert]
-
-    @property
-    def count(self) -> int:
-        return len(self.alerts) + len(self.malformed_alerts)
-
-    def get_all(self) -> List[Alert]:
-        return self.alerts + self.malformed_alerts
-
-
-@dataclass
-class Alerts:
-    tests: AlertsQueryResult[TestAlert]
-    models: AlertsQueryResult[ModelAlert]
-
-    MODELS_TABLE_NAME = 'alerts_models'
-
-    @property
-    def count(self) -> int:
-        return self.models.count + self.tests.count
