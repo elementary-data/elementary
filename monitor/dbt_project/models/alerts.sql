@@ -6,13 +6,6 @@
   )
 }}
 
-{% set last_alert_time_with_backfill_query %}
-    {# We use a backfill of 2 days to prevent race condition when multiple dbt tests + edr monitor run together #}
-    select {{ elementary.timeadd('day', '-2', 'max(detected_at)') }} from {{ this }}
-{% endset %}
-
-{% set last_alert_time_with_backfill = "'" ~ elementary.result_value(last_alert_time_with_backfill_query) ~ "'" %}
-
 with alerts_schema_changes as (
     select * from {{ ref('elementary', 'alerts_schema_changes') }}
 ),
@@ -36,6 +29,13 @@ all_alerts as (
 select *, false as alert_sent
 from all_alerts
 {%- if is_incremental() %}
+{% set last_alert_time_with_backfill_query %}
+    {# We use a backfill of 2 days to prevent race condition when multiple dbt tests + edr monitor run together #}
+    select {{ elementary.timeadd('day', '-2', 'max(detected_at)') }} from {{ this }}
+{% endset %}
+
+{% set last_alert_time_with_backfill = "'" ~ elementary.result_value(last_alert_time_with_backfill_query) ~ "'" %}
+
 {%- set row_count = elementary.get_row_count(this) %}
     {%- if row_count > 0 %}
         where detected_at > {{ last_alert_time_with_backfill }}
