@@ -1,7 +1,7 @@
 {% macro get_new_model_alerts(days_back, results_sample_limit = 5) %}
-    -- depends_on: {{ ref('alerts_models') }}
+    -- depends_on: {{ ref('elementary', 'alerts_models') }}
     {% set select_new_alerts_query %}
-        SELECT * FROM {{ ref('alerts_models') }}
+        SELECT * FROM {{ ref('elementary', 'alerts_models') }}
         WHERE alert_sent = FALSE and detected_at >= {{ get_alerts_time_limit(days_back) }}
     {% endset %}
     {% set alerts_agate = run_query(select_new_alerts_query) %}
