@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from clients.api.api import APIClient
 from clients.dbt.dbt_runner import DbtRunner
-from monitor.api.lineage.schema import LineageSchema, ModelDependsOnNodesSchema
+from monitor.api.lineage.schema import LineageNodeSchema, LineageSchema, NodeDependsOnNodesSchema
 
 
 class LineageAPI(APIClient):
@@ -14,42 +14,49 @@ class LineageAPI(APIClient):
 
     def get_lineage(self) -> LineageSchema:
         lineage_graph = nx.DiGraph()
-        models_depends_on_nodes = self._get_models_depends_on_nodes()
-        for model_depends_on_nodes in models_depends_on_nodes:
-            lineage_graph.add_edges_from([(model_depends_on_nodes.unique_id, depends_on_node) for depends_on_node in model_depends_on_nodes.depends_on_nodes])
+        nodes_depends_on_nodes = self._get_nodes_depends_on_nodes()
+        for node_depends_on_nodes in nodes_depends_on_nodes:
+            lineage_graph.add_edges_from([(node_depends_on_nodes.unique_id, depends_on_node) for depends_on_node in node_depends_on_nodes.depends_on_nodes])
         return LineageSchema(
-            nodes=list(lineage_graph.nodes),
+            nodes=self._convert_depends_on_node_to_lineage_node(nodes_depends_on_nodes),
             edges=list(lineage_graph.edges)
         )
     
     def get_dags(self) -> List[LineageSchema]:
-        models_to_depends_map = defaultdict(list)
+        nodes_to_depends_map = defaultdict(list)
         lineage_graph = nx.Graph()
 
-        models_depends_on_nodes = self._get_models_depends_on_nodes()
-        for model_depends_on_nodes in models_depends_on_nodes:
-            edges = [(model_depends_on_nodes.unique_id, depends_on_node) for depends_on_node in model_depends_on_nodes.depends_on_nodes]
-            models_to_depends_map[model_depends_on_nodes.unique_id] = edges
+        nodes_depends_on_nodes = self._get_nodes_depends_on_nodes()
+        for node_depends_on_nodes in nodes_depends_on_nodes:
+            edges = [(node_depends_on_nodes.unique_id, depends_on_node) for depends_on_node in node_depends_on_nodes.depends_on_nodes]
+            nodes_to_depends_map[node_depends_on_nodes.unique_id] = edges
             lineage_graph.add_edges_from(edges)
 
         dags = []
         for connected_component in nx.connected_components(lineage_graph):
             dag_graph = nx.DiGraph()
             for node in connected_component:
-                dag_graph.add_edges_from(models_to_depends_map[node])
+                dag_graph.add_edges_from(nodes_to_depends_map[node])
+            graph_nodes = list(dag_graph.nodes)
+            lineage_nodes = [node for node in nodes_depends_on_nodes if node.unique_id in graph_nodes]
             dags.append(LineageSchema(
-                nodes=list(dag_graph.nodes),
+                nodes=self._convert_depends_on_node_to_lineage_node(lineage_nodes),
                 edges=list(dag_graph.edges)
             ))
         return dags
     
-    def _get_models_depends_on_nodes(self) -> List[ModelDependsOnNodesSchema]:
-        models_depends_on_nodes = []
-        models_depends_on_nodes_results = self.dbt_runner.run_operation(macro_name="get_models_depends_on_nodes")
-        if models_depends_on_nodes_results:
-            for model_depends_on_nodes_result in json.loads(models_depends_on_nodes_results[0]):
-                models_depends_on_nodes.append(ModelDependsOnNodesSchema(
-                    unique_id=model_depends_on_nodes_result.get("unique_id"),
-                    depends_on_nodes=json.loads(model_depends_on_nodes_result.get("depends_on_nodes"))
+    def _get_nodes_depends_on_nodes(self) -> List[NodeDependsOnNodesSchema]:
+        nodes_depends_on_nodes = []
+        nodes_depends_on_nodes_results = self.dbt_runner.run_operation(macro_name="get_nodes_depends_on_nodes")
+        if nodes_depends_on_nodes_results:
+            for node_depends_on_nodes_result in json.loads(nodes_depends_on_nodes_results[0]):
+                nodes_depends_on_nodes.append(NodeDependsOnNodesSchema(
+                    unique_id=node_depends_on_nodes_result.get("unique_id"),
+                    depends_on_nodes=json.loads(node_depends_on_nodes_result.get("depends_on_nodes")) if node_depends_on_nodes_result.get("depends_on_nodes") else None,
+                    type=node_depends_on_nodes_result.get("type")
                 ))
-        return models_depends_on_nodes
+        return nodes_depends_on_nodes
+
+    @staticmethod
+    def _convert_depends_on_node_to_lineage_node(nodes_depends_on_nodes: List[NodeDependsOnNodesSchema]) -> List[LineageNodeSchema]:
+        return [LineageNodeSchema(type=node.type, id=node.unique_id) for node in nodes_depends_on_nodes]
