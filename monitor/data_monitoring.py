@@ -238,7 +238,7 @@ class DataMonitoring:
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         coverages = models_api.get_test_coverages()
-        return {model_id: coverage for model_id, coverage in coverages.items()}
+        return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
