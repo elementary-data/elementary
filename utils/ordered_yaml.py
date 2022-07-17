@@ -1,7 +1,7 @@
 from ruamel.yaml import YAML
 
 
-class OrderedYaml(object):
+class OrderedYaml:
 
     def __init__(self) -> None:
         self.ordered_yaml = YAML()

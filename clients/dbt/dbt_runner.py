@@ -7,7 +7,7 @@ from utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class DbtRunner(object):
+class DbtRunner:
     ELEMENTARY_LOG_PREFIX = 'Elementary: '
 
     def __init__(self, project_dir: str, profiles_dir: str, target: Optional[str] = None) -> None:

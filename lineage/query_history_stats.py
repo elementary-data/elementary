@@ -2,7 +2,7 @@ from collections import defaultdict
 from lineage.query_context import QueryContext
 
 
-class QueryHistoryStats(object):
+class QueryHistoryStats:
     def __init__(self):
         self._query_type_stats = defaultdict(lambda: 0)
         self._roles = set()

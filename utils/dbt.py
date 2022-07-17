@@ -1,18 +1,22 @@
+import functools
+import json
 import os
 import os.path
 from pathlib import Path
 from typing import Dict, Any, Union
+
 import dbt.config
-from dbt.context.base import generate_base_context
-from dbt.exceptions import DbtConfigError
-from dbt.adapters.bigquery.connections import BigQueryConnectionManager
 import google.cloud.bigquery
 import google.cloud.exceptions
+import snowflake.connector
+from dbt.adapters.bigquery.connections import BigQueryConnectionManager
+from dbt.context.base import generate_base_context
+from dbt.exceptions import DbtConfigError
 from google.api_core import client_info
+
+from clients.dbt.dbt_runner import DbtRunner
 from exceptions.exceptions import ConfigError
 from utils.log import get_logger
-import snowflake.connector
-
 from utils.ordered_yaml import OrderedYaml
 
 logger = get_logger(__name__)
@@ -105,3 +109,9 @@ def is_dbt_installed() -> bool:
     if os.path.exists(os.path.join(Path.home(), DBT_DEFAULT_DIR)):
         return True
     return False
+
+
+@functools.lru_cache
+def get_elementary_database_and_schema(dbt_runner: DbtRunner):
+    database_and_schema = dbt_runner.run_operation('get_elementary_database_and_schema')[0]
+    return '.'.join(json.loads(database_and_schema.replace("'", '"')))

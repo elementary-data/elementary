@@ -10,7 +10,7 @@ from config.config import Config
 from utils.package import get_package_version
 
 
-class AnonymousTracking(object):
+class AnonymousTracking:
     ANONYMOUS_USER_ID_FILE = '.user_id'
     FETCH_API_KEY_AND_URL = 'https://www.elementary-data.com/telemetry'
 

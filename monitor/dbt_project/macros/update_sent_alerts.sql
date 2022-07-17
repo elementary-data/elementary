@@ -1,8 +1,8 @@
-{% macro update_sent_alerts(alert_ids) %}
-    -- depends_on: {{ ref('alerts') }}
+{% macro update_sent_alerts(alert_ids, table_name) %}
+    -- depends_on: {{ ref(table_name) }}
     {% if alert_ids %}
         {% set update_sent_alerts_query %}
-            UPDATE {{ ref('alerts') }} set alert_sent = TRUE
+            UPDATE {{ ref(table_name) }} set alert_sent = TRUE
             WHERE alert_id IN {{ elementary.strings_list_to_tuple(alert_ids) }} and alert_sent = FALSE and
                 detected_at >= {{ get_alerts_time_limit() }}
         {% endset %}

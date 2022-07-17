@@ -6,7 +6,7 @@ from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
 
 
-class QueryHistoryFactory(object):
+class QueryHistoryFactory:
     @staticmethod
     def create_query_history(config: 'Config', dbs: str) -> QueryHistory:
         if config.platform == 'snowflake':

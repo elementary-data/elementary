@@ -106,17 +106,17 @@ def get_cli_properties() -> dict:
 )
 @click.pass_context
 def monitor(
-    ctx,
-    days_back,
-    slack_webhook,
-    slack_token,
-    slack_channel_name,
-    config_dir,
-    profiles_dir,
-    update_dbt_package,
-    full_refresh_dbt_package,
-    profile_target,
-    dbt_vars
+        ctx,
+        days_back,
+        slack_webhook,
+        slack_token,
+        slack_channel_name,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        full_refresh_dbt_package,
+        profile_target,
+        dbt_vars
 ):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
@@ -180,7 +180,7 @@ def monitor(
     '--profile-target', '-t',
     type=str,
     default=None,
-    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+    help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
 @click.option(
     '--executions-limit', '-el',
@@ -188,14 +188,20 @@ def monitor(
     default=30,
     help='Set the number of invocations shown for each test in the "Test Runs" report'
 )
+@click.option(
+    '--file-path',
+    type=str,
+    help="The file path where Elementary's report will be saved."
+)
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit):
+def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit)
+        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit,
+                                                  file_path=file_path)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
