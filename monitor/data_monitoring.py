@@ -64,22 +64,6 @@ class DataMonitoring:
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
-    @staticmethod
-    def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
-        chunk_list = []
-        for i in range(0, len(items), chunk_size):
-            chunk_list.append(items[i: i + chunk_size])
-        return chunk_list
-
-    def _update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
-        alert_ids_chunks = self._split_list_to_chunks(alert_ids)
-        for alert_ids_chunk in alert_ids_chunks:
-            self.dbt_runner.run_operation(
-                macro_name='update_sent_alerts',
-                macro_args={'alert_ids': alert_ids_chunk, 'table_name': table_name},
-                json_logs=False
-            )
-
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str) -> List[str]:
         if not alerts:
             return []
@@ -97,8 +81,7 @@ class DataMonitoring:
             else:
                 logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}")
                 self.success = False
-        if sent_alert_ids:
-            self._update_sent_alerts(sent_alert_ids, alerts_table_name)
+        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
         return sent_alert_ids
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
@@ -255,10 +238,7 @@ class DataMonitoring:
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         coverages = models_api.get_test_coverages()
-        new_coverages = {}
-        for model_id, coverage in coverages.items():
-            new_coverages[model_id] = dict(coverage)
-        return new_coverages
+        return {model_id: coverage for model_id, coverage in coverages.items()}
 
     def properties(self):
         data_monitoring_properties = {'data_monitoring_properties': self.execution_properties}
