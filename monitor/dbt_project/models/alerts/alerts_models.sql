@@ -14,5 +14,5 @@ with alerts_dbt_models as (
 select *, false as alert_sent from alerts_dbt_models
 
 {%- if is_incremental() %}
-    {{ elementary.get_new_alerts_where_clause(this) }}
+    {{ get_new_alerts_where_clause(this) }}
 {%- endif %}

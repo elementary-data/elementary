@@ -31,5 +31,5 @@ select *, false as alert_sent
 from all_alerts
 
 {%- if is_incremental() %}
-    {{ elementary.get_new_alerts_where_clause(this) }}
+    {{ get_new_alerts_where_clause(this) }}
 {%- endif %}
