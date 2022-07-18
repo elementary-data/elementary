@@ -1,4 +1,4 @@
-{% macro get_new_model_alerts(days_back, results_sample_limit = 5) %}
+{% macro get_new_model_alerts(days_back) %}
     -- depends_on: {{ ref('alerts_models') }}
     {% set select_new_alerts_query %}
         SELECT * FROM {{ ref('alerts_models') }}
@@ -9,6 +9,7 @@
     {% set new_alerts = [] %}
     {% for model_result_alert_dict in model_result_alert_dicts %}
         {% set status = elementary.insensitive_get_dict_value(model_result_alert_dict, 'status') | lower %}
+        {% set meta = fromjson(elementary.insensitive_get_dict_value(model_result_alert_dict, 'meta', '{}')) %}
         {% set new_alert_dict = {'id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_id'),
                                  'unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
                                  'alias': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alias'),
@@ -21,6 +22,7 @@
                                  'message': elementary.insensitive_get_dict_value(model_result_alert_dict, 'message'),
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
+                                 'subscribers': elementary.insensitive_get_dict_value(meta, 'subscribers', []),
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}
