@@ -55,12 +55,12 @@
         {% set subscribers = [] %}
         {% if direct_subscribers is string %}
             {% do subscribers.append(direct_subscribers) %}
-        {% elif direct_subscribers is iterable %}}
+        {% elif direct_subscribers is iterable %}
             {% do subscribers.extend(direct_subscribers) %}
         {% endif %}
         {% if model_subscribers is string %}
             {% do subscribers.append(model_subscribers) %}
-        {% elif model_subscribers is iterable %}}
+        {% elif model_subscribers is iterable %}
             {% do subscribers.extend(model_subscribers) %}
         {% endif %}
         {% set new_alert_dict = {'id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id'),
