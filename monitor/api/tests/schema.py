@@ -20,7 +20,7 @@ class TestMetadataSchema(BaseModel):
     test_results_description: Optional[str]
     owners: Optional[str]
     tags: Optional[str]
-    test_results_query: str
+    test_results_query: Optional[str] = None
     other: Optional[str]
     test_name: str
     test_params: Optional[str]
