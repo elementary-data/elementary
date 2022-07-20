@@ -21,7 +21,7 @@ class TestAlert(Alert):
     test_unique_id: str
     status: str
 
-    TABLE_NAME = 'alerts_tests'
+    TABLE_NAME = 'alerts'
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError

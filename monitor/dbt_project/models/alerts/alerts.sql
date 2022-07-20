@@ -7,7 +7,7 @@
 }}
 
 
-select *, false as alert_sent from {{ ref('elementary', 'error_models') }}
+select *, false as alert_sent from {{ ref('elementary', 'failed_tests') }}
 
 {%- if is_incremental() %}
     where {{ get_new_alerts_where_clause(this) }}

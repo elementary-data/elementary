@@ -10,7 +10,7 @@
     {%- set row_count = elementary.get_row_count(alerts_model_relation) %}
     {%- if row_count > 0 %}
         {% set where_clause %}
-            where detected_at > {{ last_alert_time_with_backfill }}
+            detected_at > {{ last_alert_time_with_backfill }}
             and alert_id not in (
                 select alert_id
                 from {{ alerts_model_relation }}
