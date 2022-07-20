@@ -44,12 +44,11 @@
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, results_sample_limit) %}
         {%- endif -%}
 
-        
-
         {% set meta = fromjson(elementary.insensitive_get_dict_value(test_result_alert_dict, 'meta', '{}')) %}
         {% set model_unique_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_unique_id') %}
         {% set model_meta = fromjson(elementary.insensitive_get_dict_value(nodes_to_meta_map, model_unique_id, '{}')) %}
-        
+        {% set slack_channel = elementary.insensitive_get_dict_value(model_meta, 'channel') %}
+
         {% set direct_subscribers = elementary.insensitive_get_dict_value(meta, 'subscribers', []) %}
         {% set model_subscribers = elementary.insensitive_get_dict_value(model_meta, 'subscribers', []) %}
         {% set subscribers = [] %}
@@ -83,6 +82,7 @@
                                  'test_params': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_params'),
                                  'severity': elementary.insensitive_get_dict_value(test_result_alert_dict, 'severity'),
                                  'subscribers': subscribers,
+                                 'slack_channel': slack_channel,
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}

@@ -65,6 +65,7 @@ class DbtTestAlert(TestAlert):
             severity,
             status,
             subscribers,
+            slack_channel,
             test_runs=None,
             **kwargs
     ) -> None:
@@ -102,6 +103,7 @@ class DbtTestAlert(TestAlert):
         self.column_name = column_name if column_name else ''
         self.severity = severity
         self.subscribers = subscribers
+        self.slack_channel = slack_channel
 
         self.failed_rows_count = -1
         if status != 'pass':
@@ -207,6 +209,7 @@ class ElementaryTestAlert(DbtTestAlert):
             severity,
             status,
             subscribers,
+            slack_channel,
             test_runs=None,
             **kwargs
     ) -> None:
@@ -233,6 +236,7 @@ class ElementaryTestAlert(DbtTestAlert):
             severity,
             status,
             subscribers,
+            slack_channel,
             test_runs
         )
         self.test_results_description = test_results_description.capitalize() if test_results_description else ''

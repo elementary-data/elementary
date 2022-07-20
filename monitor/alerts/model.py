@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union
+from typing import List, Optional, Union
 
 from clients.slack.schema import SlackMessageSchema
 from monitor.alerts.alert import Alert
@@ -23,6 +23,7 @@ class ModelAlert(Alert):
     tags: str
     status: str
     subscribers: List[str]
+    slack_channel: Optional[str]
 
     TABLE_NAME = 'alerts_models'
 

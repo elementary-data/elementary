@@ -10,6 +10,7 @@
     {% for model_result_alert_dict in model_result_alert_dicts %}
         {% set status = elementary.insensitive_get_dict_value(model_result_alert_dict, 'status') | lower %}
         {% set meta = fromjson(elementary.insensitive_get_dict_value(model_result_alert_dict, 'meta', '{}')) %}
+        {% set slack_channel = elementary.insensitive_get_dict_value(meta, 'channel') %}
         {% set direct_subscribers = elementary.insensitive_get_dict_value(meta, 'subscribers', []) %}
         {% set subscribers = [] %}
         {% if direct_subscribers is string %}
@@ -30,6 +31,7 @@
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
                                  'subscribers': subscribers,
+                                 'slack_channel': slack_channel,
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}
