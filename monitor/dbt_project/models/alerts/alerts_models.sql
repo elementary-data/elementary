@@ -8,8 +8,7 @@
 }}
 
 
-{% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
-{% set error_models_relation = adapter.get_relation(elementary_database, elementary_schema, 'error_models') %}
+{% set error_models_relation = adapter.get_relation(this.database, this.schema, 'error_models') %}
 {% if error_models_relation %}
     select *, false as alert_sent from {{ error_models_relation }}
     {% if is_incremental() %}
