@@ -34,7 +34,7 @@ class ModelsAPI(APIClient):
         return sources
     
     def get_exposures(self):
-        exposures_results = self.dbt_runner.run_operation(macro_name="get_sources")
+        exposures_results = self.dbt_runner.run_operation(macro_name="get_exposures")
         exposures = dict()
         if exposures_results:
             for exposure_result in json.loads(exposures_results[0]):
@@ -81,7 +81,7 @@ class ModelsAPI(APIClient):
         normalized_node = json.loads(node.json())
         normalized_node['owners'] = owners
         normalized_node['tags'] = tags
-        normalized_node['node_name'] = node_name
+        normalized_node['model_name'] = node_name
         normalized_node['normalized_full_path'] = ModelsAPI._normalize_node_path(
             node_path=node.full_path,
             node_package_name=node.package_name,

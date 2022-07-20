@@ -290,7 +290,7 @@ def send_report(
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
-        if not slack_token:
+        if not slack_token and not config.slack_token:
             logger.error('A Slack token is required to send a report.')
             return 1
 

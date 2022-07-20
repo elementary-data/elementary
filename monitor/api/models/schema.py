@@ -28,7 +28,7 @@ class ExposureSchema(NodeSchema):
 class NormalizedNodeSchema(BaseModel):
     owners: Optional[List[str]] = []
     tags: Optional[List[str]] = []
-    node_name: str
+    model_name: str
     normalized_full_path: str
 
     @validator("owners", pre=True, always=True)

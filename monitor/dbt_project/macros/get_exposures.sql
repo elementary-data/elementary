@@ -1,4 +1,4 @@
-{% macro get_models() %}
+{% macro get_exposures() %}
     {% set dbt_exposures_relation = ref('elementary', 'dbt_exposures') %}
     {%- if elementary.relation_exists(dbt_exposures_relation) -%}
         --{# TODO: should we group by #}
