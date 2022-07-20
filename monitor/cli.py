@@ -127,7 +127,7 @@ def monitor(
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
-        if not slack_token and not slack_webhook:
+        if not slack_token and not slack_webhook and not config.slack_token and not config.slack_notification_webhook:
             logger.error('Either a Slack token or webhook is required.')
             return 1
 
