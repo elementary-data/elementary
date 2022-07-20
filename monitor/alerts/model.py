@@ -13,6 +13,7 @@ class ModelAlert(Alert):
     unique_id: str
     alias: str
     path: str
+    original_path: str
     materialization: str
     detected_at: Union[str, datetime]
     database_name: str
@@ -64,6 +65,7 @@ class ModelAlert(Alert):
                                                f'*When*\n{self.detected_at}'],
                                               divider=True)
         self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        self._add_fields_section_to_slack_msg(slack_message,
+                                              [f'*Path*\n{self.original_path}', f'*Status*\n{self.status}'])
         self._add_text_section_to_slack_msg(slack_message, f'*Error Message*\n```{self.message}```')
-        self._add_fields_section_to_slack_msg(slack_message, [f'*Path*\n{self.path}', f'*Status*\n{self.status}'])
         return SlackMessageSchema(attachments=slack_message['attachments'])

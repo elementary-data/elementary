@@ -13,6 +13,7 @@
                                  'unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
                                  'alias': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alias'),
                                  'path': elementary.insensitive_get_dict_value(model_result_alert_dict, 'path'),
+                                 'original_path': elementary.insensitive_get_dict_value(model_result_alert_dict, 'original_path'),
                                  'materialization': elementary.insensitive_get_dict_value(model_result_alert_dict, 'materialization'),
                                  'detected_at': elementary.insensitive_get_dict_value(model_result_alert_dict, 'detected_at'),
                                  'database_name': elementary.insensitive_get_dict_value(model_result_alert_dict, 'database_name'),

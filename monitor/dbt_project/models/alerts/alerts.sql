@@ -2,7 +2,8 @@
   config(
     materialized = 'incremental',
     unique_key = 'alert_id',
-    merge_update_columns = ['alert_id']
+    merge_update_columns = ['alert_id'],
+    on_schema_change = 'append_new_columns'
   )
 }}
 
