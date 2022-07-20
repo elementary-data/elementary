@@ -1,33 +1,41 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, validator
 
 
-class NodeSchema(BaseModel):
+class ArtifactSchema(BaseModel):
     name: str
     unique_id: str
     owners: Optional[str]
     tags: Optional[str]
-    package_name: str
+    package_name: Optional[str]
     description: Optional[str]
     full_path: str
 
 
-class ModelSchema(NodeSchema):
+class ModelSchema(ArtifactSchema):
     database_name: str
     schema_name: str
     table_name: str
 
 
-class ExposureSchema(NodeSchema):
-    url: str
-    type: str
-    maturity: str
+class SourceSchema(ArtifactSchema):
+    database_name: str
+    schema_name: str
+    table_name: str
+
+
+class ExposureSchema(ArtifactSchema):
+    url: Optional[str]
+    type: Literal["dashboard", "notebook", "analysis", "ml", "application"]
+    maturity: Optional[Literal["low", "medium", "high"]]
     owner_email: str
 
 
-class NormalizedNodeSchema(BaseModel):
+class NormalizedArtifactSchema(BaseModel):
     owners: Optional[List[str]] = []
     tags: Optional[List[str]] = []
+    # Should be changed to artifact_name.
+    # Currently its model_name to match the CLI UI. 
     model_name: str
     normalized_full_path: str
 
@@ -40,13 +48,18 @@ class NormalizedNodeSchema(BaseModel):
         return tags or []
 
 
-# NormalizedNodeSchema must be first in the inheritance order
-class NormalizedModelSchema(NormalizedNodeSchema, ModelSchema):
+# NormalizedArtifactSchema must be first in the inheritance order
+class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
     pass
 
 
-# NormalizedNodeSchema must be first in the inheritance order
-class NormalizedExposureSchema(NormalizedNodeSchema, ExposureSchema):
+# NormalizedArtifactSchema must be first in the inheritance order
+class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
+    pass
+
+
+# NormalizedArtifactSchema must be first in the inheritance order
+class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
     pass
 
 

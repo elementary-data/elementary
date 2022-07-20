@@ -4,6 +4,8 @@ from pydantic.typing import Literal
 import networkx as nx
 import re
 
+SEED_PATH_PATERN = re.compile(r"^seed\.")
+
 NodeUniqueIdType = str
 NodeType = Literal["model", "source", "exposure"] 
 
@@ -23,8 +25,7 @@ class NodeDependsOnNodesSchema(BaseModel):
     def _format_node_id(cls, node_id: str):
         # Currently we don't save seeds in our artifacts.
         # We remove seeds from the lineage graph (as long as we don't support them).
-        seed_patern = re.compile(r"^seed\.")
-        if re.search(seed_patern, node_id):
+        if re.search(SEED_PATH_PATERN, node_id):
             return None
         return node_id
 

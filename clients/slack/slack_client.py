@@ -110,6 +110,7 @@ class SlackWebClient(SlackClient):
             return channels
         except SlackApiError as e:
             logger.error(f"Elementary app failed to query all Slack public channels. Error: {e}")
+            return []
 
 class SlackWebhookClient(SlackClient):
     def _initial_client(self):
