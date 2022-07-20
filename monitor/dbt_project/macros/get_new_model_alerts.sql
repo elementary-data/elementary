@@ -10,6 +10,13 @@
     {% for model_result_alert_dict in model_result_alert_dicts %}
         {% set status = elementary.insensitive_get_dict_value(model_result_alert_dict, 'status') | lower %}
         {% set meta = fromjson(elementary.insensitive_get_dict_value(model_result_alert_dict, 'meta', '{}')) %}
+        {% set direct_subscribers = elementary.insensitive_get_dict_value(meta, 'subscribers', []) %}
+        {% set subscribers = [] %}
+        {% if direct_subscribers is string %}
+            {% do subscribers.append(direct_subscribers) %}
+        {% elif direct_subscribers is iterable %}
+            {% do subscribers.extend(direct_subscribers) %}
+        {% endif %}
         {% set new_alert_dict = {'id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_id'),
                                  'unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
                                  'alias': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alias'),
@@ -22,7 +29,7 @@
                                  'message': elementary.insensitive_get_dict_value(model_result_alert_dict, 'message'),
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
-                                 'subscribers': elementary.insensitive_get_dict_value(meta, 'subscribers', []),
+                                 'subscribers': subscribers,
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}

@@ -64,6 +64,7 @@ class DbtTestAlert(TestAlert):
             test_params,
             severity,
             status,
+            subscribers,
             test_runs=None,
             **kwargs
     ) -> None:
@@ -100,6 +101,7 @@ class DbtTestAlert(TestAlert):
         self.error_message = test_results_description.capitalize() if test_results_description else 'No error message'
         self.column_name = column_name if column_name else ''
         self.severity = severity
+        self.subscribers = subscribers
 
         self.failed_rows_count = -1
         if status != 'pass':
@@ -123,7 +125,7 @@ class DbtTestAlert(TestAlert):
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Status*\n{self.status}', f'*Test name*\n{self.test_name}'])
         self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+                                              [f'*Owners*\n{self.owners}', f'*Subscribers\n{", ".join(set(self.subscribers))}', f'*Tags*\n{self.tags}'])
         if self.error_message:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Error Message*\n{self.error_message}',
@@ -204,6 +206,7 @@ class ElementaryTestAlert(DbtTestAlert):
             test_params,
             severity,
             status,
+            subscribers,
             test_runs=None,
             **kwargs
     ) -> None:
@@ -229,6 +232,7 @@ class ElementaryTestAlert(DbtTestAlert):
             test_params,
             severity,
             status,
+            subscribers,
             test_runs
         )
         self.test_results_description = test_results_description.capitalize() if test_results_description else ''
@@ -260,7 +264,7 @@ class ElementaryTestAlert(DbtTestAlert):
                                               [f'*Test name*\n{self.test_name}',
                                                f'*{sub_type_title}:*\n{self.test_sub_type_display_name}'])
         self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+                                              [f'*Owners*\n{self.owners}', f'*Subscribers\n{", ".join(set(self.subscribers))}', f'*Tags*\n{self.tags}'])
         if self.test_results_description:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Description*\n{self.test_results_description}',
