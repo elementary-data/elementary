@@ -103,10 +103,10 @@ class ModelsAPI(APIClient):
         splited_node_path = node_path.split(os.path.sep)
         node_file_name = splited_node_path[-1]
 
-        # If not a model, change models directory into the right directory and file extension from .yml to .sql
-        if type != "model":
+        # If source, change models directory into sources and file extension from .yml to .sql
+        if type == "source":
             if splited_node_path[0] == "models":
-                splited_node_path[0] = f"{type}s"
+                splited_node_path[0] = f"sources"
             if node_file_name.endswith(YAML_FILE_EXTENSION):
                 head, _sep, tail =node_file_name.rpartition(YAML_FILE_EXTENSION)
                 splited_node_path[-1] = head + SQL_FILE_EXTENSION + tail
