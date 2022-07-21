@@ -131,7 +131,7 @@ class TestsAPI(APIClient):
         tests: List[TestMetadataSchema] = tests_metadata if tests_metadata is not None else self.get_tests_metadata(
             days_back=days_back)
         invocations: Optional[Dict[
-            TestUniqueIdType, InvocationsSchema]] = tests_invocations if tests_invocations else self.get_invocations(
+            TestUniqueIdType, InvocationsSchema]] = tests_invocations if tests_invocations is not None else self.get_invocations(
             invocations_per_test=invocations_per_test)
         totals = dict()
         for test in tests:

@@ -225,15 +225,17 @@ class DataMonitoring:
 
         models = models_api.get_models()
         sources = models_api.get_sources()
+        exposures = models_api.get_exposures()
 
-        models_and_sources = dict(**models, **sources)
-        serializable_models = dict()
-        for key in models_and_sources.keys():
-            serializable_models[key] = dict(models_and_sources[key])
+        nodes = dict(**models, **sources, **exposures)
+        serializable_nodes = dict()
+        for key in nodes.keys():
+            serializable_nodes[key] = dict(nodes[key])
 
+        # Currently we don't show exposures as part of the sidebar
         dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
 
-        return serializable_models, dbt_sidebar
+        return serializable_nodes, dbt_sidebar
 
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
