@@ -26,13 +26,15 @@ class TestsAPI(APIClient):
     def get_tests_sample_data(
             self,
             days_back: Optional[int] = 7,
-            metrics_sample_limit: int = 5
+            metrics_sample_limit: int = 5,
+            disable_passed_test_metrics: bool = False
     ) -> Dict[TestUniqueIdType, Dict[str, Any]]:
         run_operation_response = self.dbt_runner.run_operation(
             macro_name='get_tests_sample_data',
             macro_args=dict(
                 days_back=days_back,
-                metrics_sample_limit=metrics_sample_limit
+                metrics_sample_limit=metrics_sample_limit,
+                disable_passed_test_metrics=disable_passed_test_metrics
             )
         )
         tests_metrics = json.loads(run_operation_response[0]) if run_operation_response else {}
