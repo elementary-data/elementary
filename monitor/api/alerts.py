@@ -64,13 +64,13 @@ class AlertsAPI(APIClient):
     def _normalize_alert(cls, alert: dict) -> dict:
         try:
             normalized_alert = copy.deepcopy(alert)
-            meta = try_load_json(normalized_alert.get('meta'))
-            meta = meta if meta else {}
+            test_meta = try_load_json(normalized_alert.get('test_meta'))
+            test_meta = test_meta if test_meta else {}
             model_meta = try_load_json(normalized_alert.get('model_meta'))
             model_meta = model_meta if model_meta else {}
 
             subscribers = []
-            direct_subscribers = meta.get('subscribers', [])
+            direct_subscribers = test_meta.get('subscribers', [])
             model_subscribers = model_meta.get('subscribers', [])
             if isinstance(direct_subscribers, list):
                 subscribers.extend(direct_subscribers)
@@ -87,7 +87,7 @@ class AlertsAPI(APIClient):
             normalized_alert['slack_channel'] = slack_channel
             return normalized_alert
         except Exception:
-            logger.error(f"Failed to normalaize the alert '{alert.get('id')}'. Might affect the rest of the flow of the alert")
+            logger.error(f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used")
             return alert
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:

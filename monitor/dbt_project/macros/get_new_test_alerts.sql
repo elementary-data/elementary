@@ -33,7 +33,7 @@
         alerts_with_direct_meta AS (
             SELECT 
                 alerts.*,
-                tests.meta as meta
+                tests.meta as test_meta
             FROM alerts LEFT JOIN tests ON (alerts.test_unique_id = tests.unique_id)
         )
 
@@ -55,7 +55,7 @@
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, results_sample_limit) %}
         {%- endif -%}
 
-        {% set meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'meta') %}
+        {% set test_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_meta') %}
         {% set model_unique_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_unique_id') %}
         {% set model_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_meta') %}
 
@@ -78,7 +78,7 @@
                                  'test_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_name'),
                                  'test_params': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_params'),
                                  'severity': elementary.insensitive_get_dict_value(test_result_alert_dict, 'severity'),
-                                 'meta': meta,
+                                 'test_meta': test_meta,
                                  'model_meta': model_meta,
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
