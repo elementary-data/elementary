@@ -35,7 +35,9 @@ class ModelAlert(Alert):
             return SlackMessageSchema(text=json.dumps(self.__dict__))
         if self.materialization == 'snapshot':
             return self._snapshot_to_slack()
+        return self._model_to_slack()
 
+    def _model_to_slack(self):
         icon = ':small_red_triangle:'
         if self.status == 'warn':
             icon = ':warning:'
