@@ -1,8 +1,7 @@
 import json
 import re
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -15,11 +14,22 @@ from utils.time import convert_utc_time_to_local_time
 logger = get_logger(__name__)
 
 
-@dataclass
 class TestAlert(Alert):
-    model_unique_id: str
-    test_unique_id: str
-    status: str
+    def __init__(
+        self,
+        model_unique_id: str,
+        test_unique_id: str,
+        status: str,
+        id: str,
+        elementary_database_and_schema: str,
+        subscribers: Optional[List[str]] = None,
+        slack_channel: Optional[str] = None,
+        **kwargs
+    ) -> None:
+        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
+        self.model_unique_id = model_unique_id
+        self.test_unique_id = test_unique_id 
+        self.status = status
 
     TABLE_NAME = 'alerts'
 
@@ -64,10 +74,12 @@ class DbtTestAlert(TestAlert):
             test_params,
             severity,
             status,
+            subscribers: Optional[List[str]] = None,
+            slack_channel: Optional[str] = None,
             test_runs=None,
             **kwargs
     ) -> None:
-        super().__init__(id, elementary_database_and_schema, model_unique_id, test_unique_id, status)
+        super().__init__(model_unique_id, test_unique_id, status, id, elementary_database_and_schema, subscribers, slack_channel)
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
@@ -124,9 +136,11 @@ class DbtTestAlert(TestAlert):
                                               [f'*Status*\n{self.status}', f'*Test name*\n{self.test_name}'])
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        if self.subscribers:
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
         if self.error_message:
             self._add_text_section_to_slack_msg(slack_message,
-                                                f'*Error Message*\n{self.error_message}',
+                                                f'*Error Message*\n```{self.error_message}```',
                                                 divider=True)
         if self.column_name:
             self._add_text_section_to_slack_msg(slack_message, f'*Column*\n{self.column_name}', divider=True)
@@ -204,6 +218,8 @@ class ElementaryTestAlert(DbtTestAlert):
             test_params,
             severity,
             status,
+            subscribers: Optional[List[str]] = None,
+            slack_channel: Optional[str] = None,
             test_runs=None,
             **kwargs
     ) -> None:
@@ -229,6 +245,8 @@ class ElementaryTestAlert(DbtTestAlert):
             test_params,
             severity,
             status,
+            subscribers,
+            slack_channel,
             test_runs
         )
         self.test_results_description = test_results_description.capitalize() if test_results_description else ''
@@ -261,6 +279,8 @@ class ElementaryTestAlert(DbtTestAlert):
                                                f'*{sub_type_title}:*\n{self.test_sub_type_display_name}'])
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        if self.subscribers:
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
         if self.test_results_description:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Description*\n{self.test_results_description}',
@@ -286,7 +306,8 @@ class ElementaryTestAlert(DbtTestAlert):
             sensitivity = test_params.get('sensitivity')
             test_params = {'timestamp_column': timestamp_column,
                            'anomaly_threshold': sensitivity}
-            self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
+            if self.test_rows_sample:               
+                self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
             test_alerts = {'display_name': self.test_sub_type_display_name,
                            'metrics': self.test_rows_sample,
                            'result_description': self.test_results_description}

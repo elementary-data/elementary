@@ -73,7 +73,7 @@ class DataMonitoring:
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
             sent_successfully = self.slack_client.send_message(
-                channel_name=self.slack_channel_name,
+                channel_name=alert.slack_channel if alert.slack_channel else self.slack_channel_name,
                 message=alert_msg
             )
             if sent_successfully:
@@ -121,14 +121,15 @@ class DataMonitoring:
         return self.success
 
     def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
-                        file_path: Optional[str] = None) -> Tuple[
+                        file_path: Optional[str] = None, disable_passed_test_metrics: bool = False) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, 'w') as html_file:
             output_data = {'creation_time': now_utc}
             test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
-                days_back=days_back, test_runs_amount=test_runs_amount)
+                days_back=days_back, test_runs_amount=test_runs_amount,
+                disable_passed_test_metrics=disable_passed_test_metrics)
             models, dbt_sidebar = self._get_dbt_models_and_sidebar()
             models_coverages = self._get_dbt_models_test_coverages()
             lineage = self._get_lineage()
@@ -177,11 +178,11 @@ class DataMonitoring:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
         return lineage_api.get_lineage()
 
-    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None):
+    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None, disable_passed_test_metrics: bool = False):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
-            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back)
+            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back, disable_passed_test_metrics=disable_passed_test_metrics)
             invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount, days_back=days_back)
             tests_results = self._create_tests_results(
                 tests_metadata=tests_metadata,
@@ -225,15 +226,17 @@ class DataMonitoring:
 
         models = models_api.get_models()
         sources = models_api.get_sources()
+        exposures = models_api.get_exposures()
 
-        models_and_sources = dict(**models, **sources)
-        serializable_models = dict()
-        for key in models_and_sources.keys():
-            serializable_models[key] = dict(models_and_sources[key])
+        nodes = dict(**models, **sources, **exposures)
+        serializable_nodes = dict()
+        for key in nodes.keys():
+            serializable_nodes[key] = dict(nodes[key])
 
+        # Currently we don't show exposures as part of the sidebar
         dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
 
-        return serializable_models, dbt_sidebar
+        return serializable_nodes, dbt_sidebar
 
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
