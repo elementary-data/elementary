@@ -26,9 +26,9 @@ class SourceSchema(ArtifactSchema):
 
 class ExposureSchema(ArtifactSchema):
     url: Optional[str]
-    type: Literal["dashboard", "notebook", "analysis", "ml", "application"]
+    type: Optional[Literal["dashboard", "notebook", "analysis", "ml", "application"]]
     maturity: Optional[Literal["low", "medium", "high"]]
-    owner_email: str
+    owner_email: Optional[str]
 
 
 class NormalizedArtifactSchema(BaseModel):
