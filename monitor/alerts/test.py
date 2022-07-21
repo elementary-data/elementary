@@ -73,8 +73,8 @@ class DbtTestAlert(TestAlert):
             test_params,
             severity,
             status,
-            subscribers,
-            slack_channel,
+            subscribers: Optional[List[str]] = None,
+            slack_channel: Optional[str] = None,
             test_runs=None,
             **kwargs
     ) -> None:
@@ -217,8 +217,8 @@ class ElementaryTestAlert(DbtTestAlert):
             test_params,
             severity,
             status,
-            subscribers,
-            slack_channel,
+            subscribers: Optional[List[str]] = None,
+            slack_channel: Optional[str] = None,
             test_runs=None,
             **kwargs
     ) -> None:
