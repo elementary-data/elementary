@@ -1,5 +1,4 @@
 import json
-from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Union
 
@@ -8,22 +7,39 @@ from monitor.alerts.alert import Alert
 from utils.json_utils import prettify_json_str_set
 
 
-@dataclass
 class ModelAlert(Alert):
-    unique_id: str
-    alias: str
-    path: str
-    materialization: str
-    detected_at: Union[str, datetime]
-    database_name: str
-    schema_name: str
-    message: str
-    full_refresh: bool
-    owners: str
-    tags: str
-    status: str
-    subscribers: List[str]
-    slack_channel: Optional[str]
+    def __init__(
+        self,
+        id: str,
+        elementary_database_and_schema: str,
+        unique_id: str,
+        alias: str,
+        path: str,
+        materialization: str,
+        detected_at: Union[str, datetime],
+        database_name: str,
+        schema_name: str,
+        message: str,
+        full_refresh: bool,
+        owners: str,
+        tags: str,
+        status: str,
+        subscribers: Optional[List[str]] = None,
+        slack_channel: Optional[str] = None
+    ) -> None:
+        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
+        self.unique_id = unique_id
+        self.alias = alias
+        self.path = path
+        self.materialization = materialization
+        self.detected_at = detected_at
+        self.database_name = database_name
+        self.schema_name = schema_name
+        self.message = message
+        self.full_refresh = full_refresh
+        self.owners = owners
+        self.tags = tags
+        self.status = status
 
     TABLE_NAME = 'alerts_models'
 

@@ -1,8 +1,7 @@
 import json
 import re
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -15,11 +14,21 @@ from utils.time import convert_utc_time_to_local_time
 logger = get_logger(__name__)
 
 
-@dataclass
 class TestAlert(Alert):
-    model_unique_id: str
-    test_unique_id: str
-    status: str
+    def __init__(
+        self,
+        model_unique_id: str,
+        test_unique_id: str,
+        status: str,
+        id: str,
+        elementary_database_and_schema: str,
+        subscribers: Optional[List[str]] = None,
+        slack_channel: Optional[str] = None
+    ) -> None:
+        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
+        self.model_unique_id = model_unique_id
+        self.test_unique_id = test_unique_id 
+        self.status = status
 
     TABLE_NAME = 'alerts_tests'
 
@@ -69,7 +78,7 @@ class DbtTestAlert(TestAlert):
             test_runs=None,
             **kwargs
     ) -> None:
-        super().__init__(id, elementary_database_and_schema, model_unique_id, test_unique_id, status)
+        super().__init__(model_unique_id, test_unique_id, status, id, elementary_database_and_schema, subscribers, slack_channel)
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
@@ -102,8 +111,6 @@ class DbtTestAlert(TestAlert):
         self.error_message = test_results_description.capitalize() if test_results_description else 'No error message'
         self.column_name = column_name if column_name else ''
         self.severity = severity
-        self.subscribers = subscribers
-        self.slack_channel = slack_channel
 
         self.failed_rows_count = -1
         if status != 'pass':

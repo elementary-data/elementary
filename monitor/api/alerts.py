@@ -47,9 +47,10 @@ class AlertsAPI(APIClient):
                     ))
                 except Exception:
                     malformed_alerts.append(MalformedAlert(
-                        alert_dict['id'],
-                        self.elementary_database_and_schema,
-                        alert_dict,
+                        id=alert_dict['id'],
+                        elementary_database_and_schema=self.elementary_database_and_schema,
+                        data=alert_dict,
+                        slack_channel=alert_dict.get('slack_channel')
                     ))
         if malformed_alerts:
             logger.error('Failed to parse some alerts.')
