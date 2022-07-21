@@ -127,7 +127,9 @@ class DbtTestAlert(TestAlert):
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Status*\n{self.status}', f'*Test name*\n{self.test_name}'])
         self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Owners*\n{self.owners}', f'*Subscribers\n{", ".join(set(self.subscribers))}', f'*Tags*\n{self.tags}'])
+                                              [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        if self.subscribers:
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
         if self.error_message:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Error Message*\n{self.error_message}',
@@ -268,7 +270,9 @@ class ElementaryTestAlert(DbtTestAlert):
                                               [f'*Test name*\n{self.test_name}',
                                                f'*{sub_type_title}:*\n{self.test_sub_type_display_name}'])
         self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Owners*\n{self.owners}', f'*Subscribers\n{", ".join(set(self.subscribers))}', f'*Tags*\n{self.tags}'])
+                                              [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        if self.subscribers:
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
         if self.test_results_description:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Description*\n{self.test_results_description}',
