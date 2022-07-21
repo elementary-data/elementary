@@ -121,7 +121,7 @@ class DataMonitoring:
         return self.success
 
     def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
-                        file_path: Optional[str] = None, disable_elementary_passed_tests_sample: bool = False) -> Tuple[
+                        file_path: Optional[str] = None, disable_elementary_passed_tests_samples: bool = False) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -129,7 +129,7 @@ class DataMonitoring:
             output_data = {'creation_time': now_utc}
             test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
                 days_back=days_back, test_runs_amount=test_runs_amount,
-                disable_elementary_passed_tests_sample=disable_elementary_passed_tests_sample)
+                disable_elementary_passed_tests_samples=disable_elementary_passed_tests_samples)
             models, dbt_sidebar = self._get_dbt_models_and_sidebar()
             models_coverages = self._get_dbt_models_test_coverages()
             lineage = self._get_lineage()
@@ -178,11 +178,11 @@ class DataMonitoring:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
         return lineage_api.get_lineage()
 
-    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None, disable_elementary_passed_tests_sample: bool = False):
+    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None, disable_elementary_passed_tests_samples: bool = False):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
-            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back, disable_elementary_passed_tests_sample=disable_elementary_passed_tests_sample)
+            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back, disable_elementary_passed_tests_samples=disable_elementary_passed_tests_samples)
             invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount, days_back=days_back)
             tests_results = self._create_tests_results(
                 tests_metadata=tests_metadata,

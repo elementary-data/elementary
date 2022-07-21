@@ -195,20 +195,20 @@ def monitor(
     help="The file path where Elementary's report will be saved."
 )
 @click.option(
-    '--disable-elemetary-passed-tests-samples',
+    '--disable-elementary-passed-tests-samples',
     type=bool,
     default=False,
     help="If true, elementary won't query sample data for elementary passed tests (can improve report run time)."
 )
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path, disable_elementary_passed_tests_sample):
+def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path, disable_elementary_passed_tests_samples):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
         success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit,
-                                                  file_path=file_path, disable_elementary_passed_tests_sample=disable_elementary_passed_tests_sample)
+                                                  file_path=file_path, disable_elementary_passed_tests_samples=disable_elementary_passed_tests_samples)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
@@ -281,7 +281,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     help='Set the number of invocations shown for each test in the "Test Runs" report'
 )
 @click.option(
-    '--disable-elemetary-passed-tests-samples',
+    '--disable-elementary-passed-tests-samples',
     type=bool,
     default=False,
     help="If true, elementary won't query sample data for elementary passed tests (can improve report run time)."
@@ -298,7 +298,7 @@ def send_report(
         slack_channel_name,
         profile_target,
         executions_limit,
-        disable_elementary_passed_tests_sample
+        disable_elementary_passed_tests_samples
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
@@ -318,7 +318,7 @@ def send_report(
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back,
                                                                                               test_runs_amount=executions_limit,
-                                                                                              disable_elementary_passed_tests_sample=disable_elementary_passed_tests_sample)
+                                                                                              disable_elementary_passed_tests_samples=disable_elementary_passed_tests_samples)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         return 0 if command_succeeded else 1
