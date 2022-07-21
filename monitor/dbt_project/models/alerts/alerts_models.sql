@@ -8,7 +8,7 @@
 }}
 
 
-{% set error_models_relation = adapter.get_relation(this.database, this.schema, 'error_models') %}
+{% set error_models_relation = adapter.get_relation(this.database, this.schema, 'alerts_dbt_models') %}
 {% if error_models_relation %}
     select *, false as alert_sent from {{ error_models_relation }}
     {% if is_incremental() %}
