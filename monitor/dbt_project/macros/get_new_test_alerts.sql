@@ -1,8 +1,46 @@
 {% macro get_new_test_alerts(days_back, results_sample_limit = 5) %}
     -- depends_on: {{ ref('alerts_tests') }}
     {% set select_new_alerts_query %}
-        SELECT * FROM {{ ref('alerts_tests') }}
-        WHERE alert_sent = FALSE and detected_at >= {{ get_alerts_time_limit(days_back) }}
+        WITH alerts AS (
+            SELECT * FROM {{ ref('alerts_tests') }}
+            WHERE alert_sent = FALSE and detected_at >= {{ get_alerts_time_limit(days_back) }}
+        ),
+
+        models AS (
+            SELECT * FROM {{ ref('elementary', 'dbt_models') }}
+        ),
+
+        sources AS (
+            SELECT * FROM {{ ref('elementary', 'dbt_sources') }}
+        ),
+
+        tests AS (
+            SELECT * FROM {{ ref('elementary', 'dbt_tests') }}
+        ),
+
+        artifacts_meta AS (
+            SELECT 
+                unique_id,
+                meta
+            FROM models
+            UNION ALL 
+            SELECT 
+                unique_id,
+                meta
+            FROM sources
+        ),
+
+        alerts_with_direct_meta AS (
+            SELECT 
+                alerts.*,
+                tests.meta as test_meta
+            FROM alerts LEFT JOIN tests ON (alerts.test_unique_id = tests.unique_id)
+        )
+
+        SELECT
+            alerts.*,
+            artifacts_meta.meta as model_meta
+        FROM alerts_with_direct_meta as alerts LEFT JOIN artifacts_meta ON (alerts.model_unique_id = artifacts_meta.unique_id)    
     {% endset %}
     {% set alerts_agate = run_query(select_new_alerts_query) %}
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
@@ -17,8 +55,12 @@
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, results_sample_limit) %}
         {%- endif -%}
 
+        {% set test_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_meta') %}
+        {% set model_unique_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_unique_id') %}
+        {% set model_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_meta') %}
+
         {% set new_alert_dict = {'id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id'),
-                                 'model_unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_unique_id'),
+                                 'model_unique_id': model_unique_id,
                                  'test_unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
                                  'detected_at': elementary.insensitive_get_dict_value(test_result_alert_dict, 'detected_at'),
                                  'database_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'database_name'),
@@ -36,6 +78,8 @@
                                  'test_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_name'),
                                  'test_params': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_params'),
                                  'severity': elementary.insensitive_get_dict_value(test_result_alert_dict, 'severity'),
+                                 'test_meta': test_meta,
+                                 'model_meta': model_meta,
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}

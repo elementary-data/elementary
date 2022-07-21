@@ -73,7 +73,7 @@ class DataMonitoring:
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
             sent_successfully = self.slack_client.send_message(
-                channel_name=self.slack_channel_name,
+                channel_name=alert.slack_channel if alert.slack_channel else self.slack_channel_name,
                 message=alert_msg
             )
             if sent_successfully:
