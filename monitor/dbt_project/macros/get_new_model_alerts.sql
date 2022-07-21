@@ -32,7 +32,7 @@
                                  'message': elementary.insensitive_get_dict_value(model_result_alert_dict, 'message'),
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
-                                 'meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'meta'),
+                                 'model_meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'meta'),
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}

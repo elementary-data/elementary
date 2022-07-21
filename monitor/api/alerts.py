@@ -62,30 +62,33 @@ class AlertsAPI(APIClient):
     
     @classmethod
     def _normalize_alert(cls, alert: dict) -> dict:
-        normalized_alert = copy.deepcopy(alert)
-        meta = try_load_json(normalized_alert.get('meta'))
-        meta = meta if meta else {}
-        model_meta = try_load_json(normalized_alert.get('model_meta'))
-        model_meta = model_meta if model_meta else {}
+        try:
+            normalized_alert = copy.deepcopy(alert)
+            meta = try_load_json(normalized_alert.get('meta'))
+            meta = meta if meta else {}
+            model_meta = try_load_json(normalized_alert.get('model_meta'))
+            model_meta = model_meta if model_meta else {}
 
+            subscribers = []
+            direct_subscribers = meta.get('subscribers', [])
+            model_subscribers = model_meta.get('subscribers', [])
+            if isinstance(direct_subscribers, list):
+                subscribers.extend(direct_subscribers)
+            else:
+                subscribers.append(direct_subscribers)
+            if isinstance(model_subscribers, list):
+                subscribers.extend(model_subscribers)
+            else:
+                subscribers.append(model_subscribers)
 
-        subscribers = []
-        direct_subscribers = meta.get('subscribers', [])
-        model_subscribers = model_meta.get('subscribers', [])
-        if isinstance(direct_subscribers, list):
-            subscribers.extend(direct_subscribers)
-        else:
-            subscribers.append(direct_subscribers)
-        if isinstance(model_subscribers, list):
-            subscribers.extend(model_subscribers)
-        else:
-            subscribers.append(model_subscribers)
-        
-        slack_channel = model_meta.get('channel')
+            slack_channel = model_meta.get('channel')
 
-        normalized_alert['subscribers'] = subscribers
-        normalized_alert['slack_channel'] = slack_channel
-        return normalized_alert
+            normalized_alert['subscribers'] = subscribers
+            normalized_alert['slack_channel'] = slack_channel
+            return normalized_alert
+        except Exception:
+            logger.error(f"Failed to normalaize the alert '{alert.get('id')}'. Might affect the rest of the flow of the alert")
+            return alert
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
