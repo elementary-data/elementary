@@ -14,4 +14,6 @@
     {% if is_incremental() %}
         where {{ get_new_alerts_where_clause(this) }}
     {% endif %}
+{% else %}
+    {{ empty_alerts_models() }}
 {% endif %}
