@@ -14,7 +14,6 @@
                 select alert_id
                 from {{ alerts_model_relation }}
                 where detected_at > '{{ last_alert_time_with_backfill }}'
-                and alert_sent = true
             )
         {% endset %}
         {{ return(where_clause) }}
