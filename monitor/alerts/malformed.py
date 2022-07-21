@@ -12,7 +12,8 @@ class MalformedAlert(Alert):
         elementary_database_and_schema: str,
         data: dict,
         subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None
+        slack_channel: Optional[str] = None,
+        **kwargs
     ) -> None:
         super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
         self.data = data

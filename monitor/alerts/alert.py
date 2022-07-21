@@ -14,7 +14,8 @@ class Alert:
         id: str,
         elementary_database_and_schema: str,
         subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None
+        slack_channel: Optional[str] = None,
+        **kwargs
     ) -> None:
         self.id = id
         self.elementary_database_and_schema = elementary_database_and_schema

@@ -25,7 +25,8 @@ class ModelAlert(Alert):
         tags: str,
         status: str,
         subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None
+        slack_channel: Optional[str] = None,
+        **kwargs
     ) -> None:
         super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
         self.unique_id = unique_id

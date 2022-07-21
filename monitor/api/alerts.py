@@ -1,3 +1,4 @@
+import copy
 import json
 from typing import Callable, List
 
@@ -7,6 +8,7 @@ from monitor.alerts.alerts import AlertsQueryResult, Alerts
 from monitor.alerts.malformed import MalformedAlert
 from monitor.alerts.model import ModelAlert
 from monitor.alerts.test import TestAlert
+from utils.json_utils import try_load_json
 from utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -40,22 +42,50 @@ class AlertsAPI(APIClient):
         if raw_alerts:
             alert_dicts = json.loads(raw_alerts[0])
             for alert_dict in alert_dicts:
+                notmalaized_alert = self._normalize_alert(alert=alert_dict)
                 try:
                     alerts.append(alert_factory_func(
                         elementary_database_and_schema=self.elementary_database_and_schema,
-                        **alert_dict
+                        **notmalaized_alert
                     ))
                 except Exception:
                     malformed_alerts.append(MalformedAlert(
-                        id=alert_dict['id'],
+                        id=notmalaized_alert['id'],
                         elementary_database_and_schema=self.elementary_database_and_schema,
-                        data=alert_dict,
-                        slack_channel=alert_dict.get('slack_channel')
+                        data=notmalaized_alert,
+                        slack_channel=notmalaized_alert.get('slack_channel')
                     ))
         if malformed_alerts:
             logger.error('Failed to parse some alerts.')
             self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
+    
+    @classmethod
+    def _normalize_alert(cls, alert: dict) -> dict:
+        normalized_alert = copy.deepcopy(alert)
+        meta = try_load_json(normalized_alert.get('meta'))
+        meta = meta if meta else {}
+        model_meta = try_load_json(normalized_alert.get('model_meta'))
+        model_meta = model_meta if model_meta else {}
+
+
+        subscribers = []
+        direct_subscribers = meta.get('subscribers', [])
+        model_subscribers = model_meta.get('subscribers', [])
+        if isinstance(direct_subscribers, list):
+            subscribers.extend(direct_subscribers)
+        else:
+            subscribers.append(direct_subscribers)
+        if isinstance(model_subscribers, list):
+            subscribers.extend(model_subscribers)
+        else:
+            subscribers.append(model_subscribers)
+        
+        slack_channel = model_meta.get('channel')
+
+        normalized_alert['subscribers'] = subscribers
+        normalized_alert['slack_channel'] = slack_channel
+        return normalized_alert
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)

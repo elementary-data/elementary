@@ -23,7 +23,8 @@ class TestAlert(Alert):
         id: str,
         elementary_database_and_schema: str,
         subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None
+        slack_channel: Optional[str] = None,
+        **kwargs
     ) -> None:
         super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
         self.model_unique_id = model_unique_id
