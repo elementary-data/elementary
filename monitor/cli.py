@@ -2,7 +2,6 @@ import os
 from os.path import expanduser
 
 import click
-from traitlets import default
 
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
@@ -201,14 +200,16 @@ def monitor(
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
 )
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path, disable_passed_test_metrics):
+def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path,
+           disable_passed_test_metrics):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
         success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit,
-                                                  file_path=file_path, disable_passed_test_metrics=disable_passed_test_metrics)
+                                                  file_path=file_path,
+                                                  disable_passed_test_metrics=disable_passed_test_metrics)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
