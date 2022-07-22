@@ -72,7 +72,6 @@ class ModelAlert(Alert):
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Full Refresh*\n{self.full_refresh}', f'*Path*\n{self.path}'],
                                               divider=True)
-        self._add_text_section_to_slack_msg(slack_message, f'*Error Message*\n```{self.message}```')
         return SlackMessageSchema(attachments=slack_message['attachments'])
 
     def _snapshot_to_slack(self):
