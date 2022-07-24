@@ -59,27 +59,33 @@ class AlertsAPI(APIClient):
             logger.error('Failed to parse some alerts.')
             self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
-    
+
     @classmethod
     def _normalize_alert(cls, alert: dict) -> dict:
         try:
             normalized_alert = copy.deepcopy(alert)
-            test_meta = try_load_json(normalized_alert.get('test_meta'))
-            test_meta = test_meta if test_meta else {}
-            model_meta = try_load_json(normalized_alert.get('model_meta'))
-            model_meta = model_meta if model_meta else {}
+            test_meta = try_load_json(normalized_alert.get('test_meta')) or {}
+            model_meta = try_load_json(normalized_alert.get('model_meta')) or {}
+            snapshot_meta = try_load_json(normalized_alert.get('snapshot_meta')) or {}
 
             subscribers = []
-            direct_subscribers = test_meta.get('subscribers', [])
+            test_subscribers = test_meta.get('subscribers', [])
             model_subscribers = model_meta.get('subscribers', [])
-            if isinstance(direct_subscribers, list):
-                subscribers.extend(direct_subscribers)
+            snapshot_subscribers = snapshot_meta.get('subscribers', [])
+            if isinstance(test_subscribers, list):
+                subscribers.extend(test_subscribers)
             else:
-                subscribers.append(direct_subscribers)
+                subscribers.append(test_subscribers)
+
             if isinstance(model_subscribers, list):
                 subscribers.extend(model_subscribers)
             else:
                 subscribers.append(model_subscribers)
+
+            if isinstance(snapshot_subscribers, list):
+                subscribers.extend(snapshot_subscribers)
+            else:
+                subscribers.append(snapshot_subscribers)
 
             slack_channel = model_meta.get('channel')
 
@@ -87,7 +93,8 @@ class AlertsAPI(APIClient):
             normalized_alert['slack_channel'] = slack_channel
             return normalized_alert
         except Exception:
-            logger.error(f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used")
+            logger.error(
+                f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used")
             return alert
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:

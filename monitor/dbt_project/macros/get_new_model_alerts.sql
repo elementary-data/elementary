@@ -1,19 +1,24 @@
 {% macro get_new_model_alerts(days_back) %}
     -- depends_on: {{ ref('alerts_models') }}
     {% set select_new_alerts_query %}
-        WITH alerts AS (
-            SELECT * FROM {{ ref('alerts_models') }}
-            WHERE alert_sent = FALSE and detected_at >= {{ get_alerts_time_limit(days_back) }}
+        with alerts as (
+            select * from {{ ref('alerts_models') }}
+            where alert_sent = false and detected_at >= {{ get_alerts_time_limit(days_back) }}
         ),
-
-        models AS (
-            SELECT * FROM {{ ref('elementary', 'dbt_models') }}
+        models as (
+            select * from {{ ref('elementary', 'dbt_models') }}
+        ),
+        snapshots as (
+            select * from {{ ref('elementary', 'dbt_snapshots') }}
         )
 
-        SELECT
+        select
             alerts.*,
-            models.meta as meta
-        FROM alerts LEFT JOIN models on (alerts.unique_id = models.unique_id)
+            models.meta as model_meta,
+            snapshots.meta as snapshot_meta
+        from alerts
+        left join models on alerts.unique_id = models.unique_id
+        left join snapshots on alerts.unique_id = snapshots.unique_id
     {% endset %}
     {% set alerts_agate = run_query(select_new_alerts_query) %}
     {% set model_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
@@ -33,7 +38,8 @@
                                  'message': elementary.insensitive_get_dict_value(model_result_alert_dict, 'message'),
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
-                                 'model_meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'meta'),
+                                 'model_meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'model_meta'),
+                                 'snapshot_meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'snapshot_meta'),
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}
