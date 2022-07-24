@@ -1,5 +1,9 @@
 {% macro get_new_model_alerts(days_back) %}
     -- depends_on: {{ ref('alerts_models') }}
+    {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
+    {% set snapshots_relation = adapter.get_relation(elementary_database, elementary_schema, 'dbt_snapshots') %}
+
+
     {% set select_new_alerts_query %}
         with alerts as (
             select * from {{ ref('alerts_models') }}
@@ -7,19 +11,26 @@
         ),
         models as (
             select * from {{ ref('elementary', 'dbt_models') }}
-        ),
-        snapshots as (
-            select * from {{ ref('elementary', 'dbt_snapshots') }}
         )
-
-        select
-            alerts.*,
-            models.meta as model_meta,
-            snapshots.meta as snapshot_meta
-        from alerts
-        left join models on alerts.unique_id = models.unique_id
-        left join snapshots on alerts.unique_id = snapshots.unique_id
+        {% if snapshots_relation %}
+            ,snapshots as (
+                select * from {{ snapshots_relation }}
+            )
+            select
+                alerts.*,
+                COALESCE(models.meta, snapshots.meta) as model_meta
+            from alerts
+            left join models on alerts.unique_id = models.unique_id
+            left join snapshots on alerts.unique_id = snapshots.unique_id
+        {% else %}
+            select
+                alerts.*,
+                models.meta as model_meta
+            from alerts
+            left join models on alerts.unique_id = models.unique_id
+        {% endif %}
     {% endset %}
+
     {% set alerts_agate = run_query(select_new_alerts_query) %}
     {% set model_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set new_alerts = [] %}
@@ -39,7 +50,6 @@
                                  'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags'),
                                  'model_meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'model_meta'),
-                                 'snapshot_meta': elementary.insensitive_get_dict_value(model_result_alert_dict, 'snapshot_meta'),
                                  'status': status} %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}

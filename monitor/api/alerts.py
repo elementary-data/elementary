@@ -66,12 +66,10 @@ class AlertsAPI(APIClient):
             normalized_alert = copy.deepcopy(alert)
             test_meta = try_load_json(normalized_alert.get('test_meta')) or {}
             model_meta = try_load_json(normalized_alert.get('model_meta')) or {}
-            snapshot_meta = try_load_json(normalized_alert.get('snapshot_meta')) or {}
 
             subscribers = []
             test_subscribers = test_meta.get('subscribers', [])
             model_subscribers = model_meta.get('subscribers', [])
-            snapshot_subscribers = snapshot_meta.get('subscribers', [])
             if isinstance(test_subscribers, list):
                 subscribers.extend(test_subscribers)
             else:
@@ -81,11 +79,6 @@ class AlertsAPI(APIClient):
                 subscribers.extend(model_subscribers)
             else:
                 subscribers.append(model_subscribers)
-
-            if isinstance(snapshot_subscribers, list):
-                subscribers.extend(snapshot_subscribers)
-            else:
-                subscribers.append(snapshot_subscribers)
 
             slack_channel = model_meta.get('channel')
 
