@@ -18,5 +18,5 @@
         {% endset %}
         {{ return(where_clause) }}
     {%- endif %}
-    {{ return(false) }}
+    {{ return(true) }}
 {% endmacro %}
