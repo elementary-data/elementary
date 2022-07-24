@@ -30,8 +30,8 @@
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set new_alerts = [] %}
     {% for test_result_alert_dict in test_result_alert_dicts %}
-        {% set test_results_query = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_results_query') %}
-        {% set test_type = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_type') %}
+        {% set test_results_query = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_results_query') %}
+        {% set test_type = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_type') %}
         {% set status = elementary.insensitive_get_dict_value(test_result_alert_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}
@@ -52,8 +52,8 @@
                                  'table_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'table_name'),
                                  'column_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'column_name'),
                                  'test_type': test_type,
-                                 'test_sub_type': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_sub_type'),
-                                 'test_results_description': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_results_description'),
+                                 'test_sub_type': elementary.insensitive_get_dict_value(test_result_alert_dict, 'sub_type'),
+                                 'test_results_description': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_description'),
                                  'owners': elementary.insensitive_get_dict_value(test_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(test_result_alert_dict, 'tags'),
                                  'test_results_query': test_results_query,
