@@ -8,7 +8,7 @@
 }}
 
 {% set anomaly_detection_relation = adapter.get_relation(this.database, this.schema, 'alerts_anomaly_detection') %}
-// Backwards compatibility support for a renamed model.
+{# Backwards compatibility support for a renamed model. #}
 {% set data_monitoring_relation = adapter.get_relation(this.database, this.schema, 'alerts_data_monitoring') %}
 
 with failed_tests as (
