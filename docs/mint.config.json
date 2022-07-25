@@ -1,78 +1,63 @@
 {
-	"sidebar": {
-		"navigation": [
-			{
-				"group": "Getting Started",
-				"pages": [
-                    "introduction",
-                    "quickstart-data-monitoring",
-                    "quickstart-data-lineage"
-                ]
-			},
-            {
-                "group": "Guides",
-                "pages": [
-                    "tests",
-                    "generate-reports",
-                    "slack-alerts"
-                ]
-            },
-            {
-                "group": "Understand Elementary",
-                "pages": [
-                    "overview",
-                    "dbt-package",
-                    "cli-install",
-                    "connection-profile",
-                    "cli-commands",
-                    "cli-advanced",
-                    "report-ui",
-                    "alerts"
-                ]
-            },
-            {
-                "group": "Data Monitoring",
-                "pages": [
-                    "data-and-dbt-tests-report-ui",
-                    "data-anomaly-detection",
-                    "add-data-monitoring-tests",
-                    "test-configuration",
-                    "dbt-artifacts",
-                    "monitoring-in-prod",
-                ]
-            },
-            {
-                "group": "Data Lineage",
-                "pages": [
-                    "edr-lineage",
-                    "lineage-graph",
-                    "query-history",
-                    "data-lineage-use-cases"
-                ]
-            },
-            {
-                "group": "Integrations",
-                "pages": [
-                    "slack",
-                    "snowflake",
-                    "redshift",
-                    "big-query"
-                ]
-            },
-            {
-                "group": "Project Overview",
-                "pages": [
-                    "contributions", "roadmap"
-                ]
-            },
-            {
-                "group": "FAQ & Support",
-                "pages": [
-                    "troubleshooting",
-                    "community-and-support",
-                    "faq"
-                ]
-            }
-		]
-	}
+  "sidebar": {
+    "navigation": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "quickstart-data-monitoring",
+          "quickstart-data-lineage"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": ["tests", "generate-reports", "slack-alerts"]
+      },
+      {
+        "group": "Understand Elementary",
+        "pages": [
+          "overview",
+          "dbt-package",
+          "cli-install",
+          "connection-profile",
+          "cli-commands",
+          "cli-advanced",
+          "report-ui",
+          "alerts"
+        ]
+      },
+      {
+        "group": "Data Monitoring",
+        "pages": [
+          "data-and-dbt-tests-report-ui",
+          "data-anomaly-detection",
+          "add-data-monitoring-tests",
+          "test-configuration",
+          "dbt-artifacts",
+          "monitoring-in-prod"
+        ]
+      },
+      {
+        "group": "Data Lineage",
+        "pages": [
+          "edr-lineage",
+          "lineage-graph",
+          "query-history",
+          "data-lineage-use-cases"
+        ]
+      },
+      {
+        "group": "Integrations",
+        "pages": ["slack", "snowflake", "redshift", "big-query"]
+      },
+      {
+        "group": "Project Overview",
+        "pages": ["contributions", "roadmap"]
+      },
+      {
+        "group": "FAQ & Support",
+        "pages": ["troubleshooting", "community-and-support", "faq"]
+      }
+    ]
+  }
 }
