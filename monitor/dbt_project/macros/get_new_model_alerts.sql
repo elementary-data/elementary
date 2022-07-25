@@ -1,6 +1,6 @@
 {% macro get_new_model_alerts(days_back) %}
     -- depends_on: {{ ref('alerts_models') }}
-    {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
+    {% set elementary_database, elementary_schema = elementary.target_database(), target.schema %}
     {% set snapshots_relation = adapter.get_relation(elementary_database, elementary_schema, 'dbt_snapshots') %}
 
 
