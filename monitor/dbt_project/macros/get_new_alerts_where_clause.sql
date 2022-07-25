@@ -8,15 +8,11 @@
     {% set last_alert_time_with_backfill = elementary.result_value(last_alert_time_with_backfill_query) %}
 
     {%- if last_alert_time_with_backfill %}
-        {% set where_clause %}
-            detected_at > '{{ last_alert_time_with_backfill }}'
+            where detected_at > '{{ last_alert_time_with_backfill }}'
             and alert_id not in (
                 select alert_id
                 from {{ alerts_model_relation }}
                 where detected_at > '{{ last_alert_time_with_backfill }}'
             )
-        {% endset %}
-        {{ return(where_clause) }}
     {%- endif %}
-    {{ return(true) }}
 {% endmacro %}

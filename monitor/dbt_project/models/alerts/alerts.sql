@@ -30,5 +30,5 @@ with failed_tests as (
 select *, false as alert_sent from failed_tests
 
 {%- if is_incremental() %}
-    where {{ get_new_alerts_where_clause(this) }}
+    {{ get_new_alerts_where_clause(this) }}
 {%- endif %}

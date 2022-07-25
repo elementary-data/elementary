@@ -12,7 +12,7 @@
 {% if error_models_relation %}
     select *, false as alert_sent from {{ error_models_relation }}
     {% if is_incremental() %}
-        where {{ get_new_alerts_where_clause(this) }}
+        {{ get_new_alerts_where_clause(this) }}
     {% endif %}
 {% else %}
     {{ empty_alerts_models() }}
