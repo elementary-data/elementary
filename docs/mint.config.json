@@ -1,12 +1,21 @@
 {
+  "theme": {
+    "colors": {
+      "primary": "#FF6B42",
+      "light": "#FE8E08",
+      "dark": "#FF4775",
+      "ultralight": "#F3D7B4",
+      "ultradark": "#E0456C"
+    }
+  },
   "sidebar": {
     "navigation": [
       {
         "group": "Getting Started",
         "pages": [
-          "introduction",
-          "quickstart-data-monitoring",
-          "quickstart-data-lineage"
+          "getting-started/introduction",
+          "getting-started/quickstart-data-monitoring",
+          "getting-started/quickstart-data-lineage"
         ]
       },
       {
