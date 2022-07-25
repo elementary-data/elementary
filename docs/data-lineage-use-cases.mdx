@@ -1,0 +1,27 @@
+---
+title: 'Data lineage use cases'
+---
+
+Data lineage describes the flow of data in systems, and the lineage graph depicts this flow. It describes the dependencies between different phases a dataset goes through in a data stack.
+
+Elementary data lineage can be leveraged for the following use cases:
+
+## Confident changes
+
+When making changes in data collection, transformation or usage, data lineage can be used to make sure the change will not impact existing flows. This is useful for preventing data reliability problems.
+
+## Impact analysis
+
+When there a data reliability issue is detected, the lineage may be used to understand which downstream datasets are impacted.
+
+## Root cause detection
+
+When a problem is detected, the lineage can be used to understand which upstream datasets could be the cause of it. Sometimes the cause is a change in the lineage itself (e.g. table was dropped, name of dataset was changed), and looking at previous versions of the graph could assist in detecting the root cause and the required fix.
+
+## Knowledge sharing
+
+As the data team grows and the data stack evolves, it gets harder to maintain a knowledge base of available datasets, their usage and dependencies. Also, these change frequently, and creating manual documentation, especially a visual one, becomes an impossible mission. An automated up-to-date visual data lineage saves the need to document, and is especially useful for sharing knowledge with team members and introducing it to new team members.
+
+## Data operations
+
+An important aspect of data operations is visibility of how data is being utilized. This enables day-to-day maintenance and governance, and makes significant processes like migrations and performance optimization easier.

@@ -1,0 +1,108 @@
+---
+title: 'edr lineage'
+---
+
+After you successfully [installed Elementary](), [configured a connection profile]() and provided the permissions required to access the [query history](), it's time to create your data lineage graph using the lineage CLI.
+
+```shell
+edr lineage
+```
+
+<img src="img/elementary_demo.gif" alt="Elementary Demo" />
+
+## edr lineage
+
+### Commands
+
+The lineage module has two commands:
+
+```
+# This command generates a lineage graph local file
+
+edr lineage generate
+
+# This command reads the local lineage file and opens a browser visualization
+edr lineage
+```
+
+Note that if a graph file exists localy, edr will always read it by default.
+
+Every time you want to create a new updated graph, use `edr lineage generate`.
+
+### Command examples
+
+```
+# The tool is named edr (Elementary Data Reliability)
+# Creates a lineage graph from queries executed between 2021-09-14 and current time,
+# for the database my_db
+
+edr lineage generate -s 2021-09-14 -dbs my_db
+
+# Opens the graph in browser filtered on my_table downstream direction
+edr lineage -t my_table+
+```
+
+### CLI options
+
+When running the CLI, the following options may / should be used:
+
+- [lineage generate](#edr-lineage-generate) - generate the graph from the query history of the selected dbs.
+
+  - [Timeframe filters](#timeframe-filters) - options for filtering the query history timeframe in lineage generate.
+
+- [Dataset filters](/lineage-graph#options-dataset-filters) - options for filtering the datasets in the graph.
+
+- [Others](/lineage-graph#options-others) - additional execution options (table names, queries export, etc.).
+
+The options for using the CLI, are all available and documented also when using
+
+```
+edr lineage --help
+```
+
+---
+
+## edr lineage generate
+
+**The generate command is used to create a local graph file.**
+
+The graph visualization is generated from this local file. Each time you want a new updated graph, an execution of `edr lineage generate` is required.
+
+**The only required option you must provide for generating lineage is the database name for which you want to create the lineage graph:**
+
+```
+-dbs, --databases <TEXT>
+
+# Usage example
+edr lineage generate -dbs my_db,another_db
+```
+
+### Timeframe filters
+
+The lineage is created from the data warehouse [query history]() and access history, and the timeframe filters are used to define which queries to include in the graph.
+
+The times are relevant to the **timezone in which the data warehouse is configured.**
+
+- **Start date:**
+  The starting time of the timeframe for which query history will be used for the lineage graph.
+
+  - The time is relevant to the timezone in which the data warehouse is configured.
+
+  - If undefined, the default is 7 days ago.
+
+```
+-s, --start-date [%Y-%m-%d|%Y-%m-%d %H:%M:%S]
+```
+
+- **End date:**
+
+  The ending time of the timeframe for which query history will be used for the lineage graph.
+
+  - The time is relevant to the timezone in which the data warehouse is configured.
+
+  - If undefined, the default is the current time.
+
+```
+-e, --end-date [%Y-%m-%d|%Y-%m-%d %H:%M:%S]
+
+```

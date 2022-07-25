@@ -1,0 +1,230 @@
+---
+title: 'CLI Install & Configure'
+---
+
+import { SnippetGroup } from '@/components/SnippetGroup'
+
+We recommend you install Elementary CLI using one of the following methods:
+
+## Install & Configure
+
+### pip
+
+Elementary is a python tool distributed on pypi, and can be installed via `pip`:
+The CLI had two modules: monitor and lineage.
+
+For **data monitoring, slack alerts and UI**, run:
+
+```shell
+pip install elementary-data
+```
+
+For **data lineage**, run:
+
+```shell
+pip install 'elementary-data[lineage]'
+```
+
+Run one of the following commands based on **your data warehouse** (no need to run all):
+
+```shell
+pip install 'elementary-data[snowflake]'
+pip install 'elementary-data[bigquery]'
+pip install 'elementary-data[redshift]'
+```
+
+### Install from source
+
+Install Elementary directly from GitHub source:
+
+```shell
+git clone https://github.com/elementary-data/elementary
+cd elementary
+python setup.py install
+```
+
+### Validate installation
+
+To validate the installation and get usage instructions for the CLI run:
+
+```shell
+edr --help
+```
+
+## CLI configuration
+
+Elementary requires two configuration files:
+
+- `HOME_DIR/.edr/config.yml` - Elementary configuration.
+- `HOME_DIR/.dbt/profiles.yml` - Connection details to the data warehouse, in the format of dbt connection profile named `elementary`.
+
+(These default paths and names may be changed using the [CLI options](/cli-advanced)).
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'config.yml'?</summary>
+
+Create a new directory and yml file under: HOME_DIR/.edr/config.yml
+
+Here is the format of the yml itself:
+
+```yml config.yml
+# alerts destination #
+slack:
+  notification_webhook: <your_slack_webhook_url>
+  # optional #
+  workflows: false
+  
+# optional #
+# Target path for the output files of edr lineage #
+traget-path:
+```
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'profiles.yml'?</summary>
+
+1. By default, the tool will search for the file under HOME_DIR/.dbt. If you wish to create it in a different directory, choose a path that does not sync with any version control system.
+2. Create a new file and name it profiles.yml.
+3. Use a template of the relevant integration to create a connection profile in the file, and save it. 
+
+Note that for edr monitor the connection profile has to have the database and schema of the project where the tests run. If you are using a custom database for Elementary, configure it in the profile.
+
+<SnippetGroup>
+
+```yml Snowflake
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'alerts_data_monitoring' is to find it.         ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary: 
+  outputs:
+    default:
+      type: snowflake
+      account: [account id]
+        
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+      
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]_elementary
+      threads: 4
+      ## OPTIONAL - if you want to create the lineage based on queries from more 
+      ## than the last 7 days or you have 10k or more queries in the history pulled during 
+      ## the requested dates range, add this parameter (NOTE: account_usage requires more permissions, see note below).
+      query_history_source: account_usage
+```
+
+```yml BigQuery
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'alerts_data_monitoring' is to find it.         ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+
+elementary: 
+  outputs:
+    default:  
+      type: bigquery
+      
+      ## Service account auth, other options require other configs ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+      
+      project: [project id]
+      dataset: [dataset name]
+      threads: 4
+      ## Location is mandatory, can be one of US or EU, or a regional location
+      location: [dataset location]
+      priority: interactive
+```
+
+</SnippetGroup>
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt user? you already have profiles.yml</summary>
+
+If you are a dbt user, you already have a `profiles.yml` file that you can use. The default path of the dbt profiles file is `~/.dbt/` directory. 
+
+- For further details, please refer to [dbt's documentation](https://docs.getdbt.com/reference/profiles.yml) about the file.
+- Note: in BigQuery we require 'location' ([details](https://cloud.google.com/bigquery/docs/locations)), and in dbt it is optional.
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">What is a connection profile?</summary>
+
+Elementary requires connection details and credentials to connect to the data warehouse. These are configured in a connection profile using a file named `profiles.yml`.
+
+**We recommend creating a dedicated database, or at least a schema.**
+
+Elementary leverages dbt's [connection profile](https://docs.getdbt.com/dbt-cli/configure-your-profile) format. 
+
+**dbt users**
+Just add a profile with the relevant details, and name it `elementary`.
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Connection profile permissions</summary>
+
+The provided credentials need to have permission to: 
+- Read - Query history, information schema and the tables configured for monitoring.,
+- Write - To the database and schema configured in `elementary` [connection profile](/connection-profile).
+
+The required connection details and permissions for each data warehouse are detailed in the relevant integration documentation under integrations.
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Slack configuration</summary>
+
+Configure Slack by creating an app for Elementary and passing the token/webhook to the CLI as a parameter, or adding the token/webhook to `config.yml`.
+Refer to [this guide](/slack) for detailed instructions.
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Modules configuration</summary>
+
+Modules specific configuration is detailed in the guides for each module.
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Anonymous tracking</summary>
+
+We want to keep building and improving, and for that, we need to understand how users work with Elementary (and data is fun!). For that we added an anonymous tracking of events using [Posthog](https://posthog.com/) (open-source product analytics, highly recommended). 
+
+We only track start, end, platform, number of queries and the size of the graph. No credentials, queries content, table names or anything private (not now and not ever).
+
+By default this completely anonymous tracking is turned on. You can opt-out at any time by adding the following to your `config.yml` file:
+
+```shell
+anonymous_usage_tracking: False
+```
+
+</details>
+
+---
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Have a question?</summary>
+
+We are available on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out for any kind of help!
+
+</details>

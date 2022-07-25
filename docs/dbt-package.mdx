@@ -1,0 +1,37 @@
+---
+title: 'dbt package'
+---
+
+import { TipInfo } from '@/components/Tip';
+
+For the data monitoring and dbt artifacts collection, edr executes a dbt package we developed. 
+The package adds modles, macros, and Elementary monitors as dbt tests to your project.
+
+(Not a dbt user? you can still use Elementary, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) and we will help)
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">What are dbt packages and packages.yml?</summary>
+
+A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on. 
+
+Add packages to your project by creating a 'packages.yml' file under the main project directory (where your 'dbt_project.yml is), and adding the relevant package. After you add a new package, run dbt deps to actually pull it's code to your project. This is also how you update packages. 
+Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/), [dbt_date](https://github.com/calogica/dbt-date/tree/0.5.4/), [codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.5.0/).
+
+</details>
+
+The package contains models, macros, dbt artifacts uploader and data monitors as dbt tests. The impact of the package on `dbt run` is minimal, and most of the processing happens as part of the data monitors as dbt tests, that are executed on `dbt test`.
+
+To start, refer to the [installation guide](/quickstart-data-monitoring#install-the-dbt-package) of the dbt package.
+
+The code of the Elementary dbt package can be found here:
+
+[GitHub - Elementary elementary-data / dbt-data-reliability](https://github.com/elementary-data/dbt-data-reliability)
+
+<img src="img/dbt-dag.png" alt="elementary dbt package lineage graphmo" />
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Have a question❓</summary>
+
+We are available on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out for any kind of help!
+
+</details>

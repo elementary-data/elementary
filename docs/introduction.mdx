@@ -1,0 +1,84 @@
+---
+title: 'Introduction'
+description: 'Elementary is an open-source data observability solution for data & analytics engineers.'
+---
+
+<Example>
+  <div class="dark:bg-slate-200 rounded-md p-4">
+  <img src='img/Logo_V2.png' alt="Elementary Logo" />
+  </div>
+</Example>
+
+Monitor your data warehouse in minutes, and **be the first to know of data issues**. Gain immediate
+**visibility, monitor** your data and operation**, detect** data issues, and understand the **impact
+and root cause.**
+
+- **Data observability UI ([live demo](https://www.elementary-data.com/data-observability-demo))**
+
+  Triage anomalies and dbt tests in a UI that visualizes results and provides all the information you need in a single place.
+
+- **Data anomalies monitoring as dbt tests**
+
+Continuous monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection, configured and executed as dbt tests.
+
+- **dbt artifacts uploader**
+
+Collect dbt artifacts, runs and test results as part of your runs.
+
+- **Slack alerts**
+  Get informative notifications on data issues, schema changes, jobs and tests failures.
+
+- **Data lineage made simple, reliable, and automated**
+  Tracing the actual upstream & downstream dependencies in the data warehouse.
+
+<img src="img/Demo-2-screens.gif" alt="Demo" />
+
+## Quickstart
+
+[Quick start: Data monitoring as abt tests in minutes.](/quickstart-data-monitoring)
+
+[Quick start: Data lineage.](/quickstart-data-lineage)
+
+## Demo
+
+**Data anomalies monitoring as dbt tests -** [sandbox](https://www.elementary-data.com/data-observability-demo) and [demo video](https://www.elementary-data.com/demo).
+
+**Data lineage** - try out our [sandbox here](https://www.elementary-data.com/live-demo).
+
+## How it works?
+
+For the data monitoring and dbt artifacts collection, we developed a [dbt package](/quickstart-data-monitoring#install-the-dbt-package).
+The monitoring configuration is configured in your dbt project, and the monitors are dbt macros and models. All the collected data is saved to an elementary schema in your DWH.
+
+[Elementary CLI](/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
+
+<img src="img/High-level-flow.png" alt="High Level Flow" />
+
+## Data anomalies monitoring as dbt tests
+
+Elementary delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests).**
+Elementary dbt tests are [data monitors](/data-anomaly-detection#tests-and-monitors-types) that collect metrics and metadata over time.
+On each execution, the tests analyze the new data, compare it to historical metrics, and [alert](/slack) on [anomalies](/data-anomaly-detection#anomaly-detection) and outliers.
+**Elementary data monitors as tests are configured and executed like native tests in your project!**
+
+## Community & Support
+
+For additional information and help, you can use one of these channels:
+
+- [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) (live chat with the team, feature requests, community support, discussions, etc.)
+- [GitHub](https://github.com/elementary-data/elementary-lineage/issues) (bug reports, contributions)
+- [Roadmap](https://github.com/elementary-data/elementary-lineage/projects/1) (Vote for features and add your inputs)
+- [Twitter](https://twitter.com/ElementaryData) (updates on new releases and stuff)
+- [Email](mailto:team@elementary-data.com) us (about whatever)
+
+## Integrations
+
+- [x] Snowflake
+- [x] BigQuery
+- [x] Redshift - Data monitoring only
+
+Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [Github](https://github.com/elementary-data/elementary-lineage) issue.
+
+## License
+
+Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary-lineage/blob/master/LICENSE) file for licensing information.
