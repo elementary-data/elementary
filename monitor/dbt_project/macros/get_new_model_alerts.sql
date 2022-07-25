@@ -5,7 +5,7 @@
 
 
     {% set select_new_alerts_query %}
-        with alerts as (
+        with new_alerts as (
             select * from {{ ref('alerts_models') }}
             where alert_sent = false and detected_at >= {{ get_alerts_time_limit(days_back) }}
         ),
@@ -16,19 +16,21 @@
             ,snapshots as (
                 select * from {{ snapshots_relation }}
             )
-            select
-                alerts.*,
-                coalesce(models.meta, snapshots.meta) as model_meta
-            from alerts
-            left join models on alerts.unique_id = models.unique_id
-            left join snapshots on alerts.unique_id = snapshots.unique_id
-        {% else %}
-            select
-                alerts.*,
-                models.meta as model_meta
-            from alerts
-            left join models on alerts.unique_id = models.unique_id
         {% endif %}
+
+        ,artifacts_meta as (
+            select unique_id, meta from models
+            {% if snapshots_relation %}
+                union all
+                select unique_id, meta from {{ snapshots_relation }}
+            {% endif %}
+        )
+        select
+            new_alerts.*,
+            artifacts_meta.meta as model_meta
+        from new_alerts
+        left join models on new_alerts.unique_id = models.unique_id
+        left join artifacts_meta on new_alerts.unique_id = artifacts_meta.unique_id
     {% endset %}
 
     {% set alerts_agate = run_query(select_new_alerts_query) %}
