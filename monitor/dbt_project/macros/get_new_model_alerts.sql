@@ -18,7 +18,7 @@
             )
             select
                 alerts.*,
-                COALESCE(models.meta, snapshots.meta) as model_meta
+                coalesce(models.meta, snapshots.meta) as model_meta
             from alerts
             left join models on alerts.unique_id = models.unique_id
             left join snapshots on alerts.unique_id = snapshots.unique_id
