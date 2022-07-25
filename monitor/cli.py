@@ -106,17 +106,17 @@ def get_cli_properties() -> dict:
 )
 @click.pass_context
 def monitor(
-    ctx,
-    days_back,
-    slack_webhook,
-    slack_token,
-    slack_channel_name,
-    config_dir,
-    profiles_dir,
-    update_dbt_package,
-    full_refresh_dbt_package,
-    profile_target,
-    dbt_vars
+        ctx,
+        days_back,
+        slack_webhook,
+        slack_token,
+        slack_channel_name,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        full_refresh_dbt_package,
+        profile_target,
+        dbt_vars
 ):
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
@@ -127,7 +127,7 @@ def monitor(
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
-        if not slack_token and not slack_webhook:
+        if not slack_token and not slack_webhook and not config.slack_token and not config.slack_notification_webhook:
             logger.error('Either a Slack token or webhook is required.')
             return 1
 
@@ -180,7 +180,7 @@ def monitor(
     '--profile-target', '-t',
     type=str,
     default=None,
-    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+    help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target"
 )
 @click.option(
     '--executions-limit', '-el',
@@ -188,14 +188,28 @@ def monitor(
     default=30,
     help='Set the number of invocations shown for each test in the "Test Runs" report'
 )
+@click.option(
+    '--file-path',
+    type=str,
+    help="The file path where Elementary's report will be saved."
+)
+@click.option(
+    '--disable-passed-test-metrics',
+    type=bool,
+    default=False,
+    help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
+)
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit):
+def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path,
+           disable_passed_test_metrics):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit)
+        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit,
+                                                  file_path=file_path,
+                                                  disable_passed_test_metrics=disable_passed_test_metrics)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
             return 1
@@ -267,6 +281,12 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     default=30,
     help='Set the number of invocations shown for each test in the "Test Runs" report'
 )
+@click.option(
+    '--disable-passed-test-metrics',
+    type=bool,
+    default=False,
+    help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
+)
 @click.pass_context
 def send_report(
         ctx,
@@ -278,13 +298,14 @@ def send_report(
         slack_token,
         slack_channel_name,
         profile_target,
-        executions_limit
+        executions_limit,
+        disable_passed_test_metrics
 ):
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
-        if not slack_token:
+        if not slack_token and not config.slack_token:
             logger.error('A Slack token is required to send a report.')
             return 1
 
@@ -297,7 +318,8 @@ def send_report(
         )
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back,
-                                                                                              test_runs_amount=executions_limit)
+                                                                                              test_runs_amount=executions_limit,
+                                                                                              disable_passed_test_metrics=disable_passed_test_metrics)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         return 0 if command_succeeded else 1

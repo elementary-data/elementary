@@ -7,7 +7,7 @@ from utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class Query(object):
+class Query:
     PLATFORM_TYPE = None
 
     def __init__(self, raw_query_text: str, query_context: QueryContext) -> None:

@@ -1,9 +1,9 @@
 import json
 import os
-from typing import Dict, Optional
+from typing import Dict, Literal, Optional, Union
 
 from clients.api.api import APIClient
-from monitor.api.models.schema import ModelCoverageSchema, ModelSchema, NormalizedModelSchema
+from monitor.api.models.schema import ExposureSchema, ModelCoverageSchema, ModelSchema, NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema, SourceSchema
 from utils.json_utils import try_load_json
 
 YAML_FILE_EXTENSION = ".yml"
@@ -18,22 +18,33 @@ class ModelsAPI(APIClient):
             for model_result in json.loads(models_results[0]):
                 model_data = ModelSchema(**model_result)
                 if model_data.package_name != 'elementary':
-                    normalized_model = ModelsAPI._normalize_dbt_model_dict(model_data)
+                    normalized_model = ModelsAPI._normalize_dbt_artifact_dict(model_data, type="model")
                     model_unique_id = normalized_model.unique_id
                     models[model_unique_id] = normalized_model
         return models
     
-    def get_sources(self) -> Dict[str, NormalizedModelSchema]:
+    def get_sources(self) -> Dict[str, NormalizedSourceSchema]:
         sources_results = self.dbt_runner.run_operation(macro_name="get_sources")
         sources = dict()
         if sources_results:
             for source_result in json.loads(sources_results[0]):
                 source_data = ModelSchema(**source_result)
                 if source_data.package_name != 'elementary':
-                    normalized_source = self._normalize_dbt_model_dict(source_data, is_source=True)
+                    normalized_source = self._normalize_dbt_artifact_dict(source_data, type="source")
                     source_unique_id = normalized_source.unique_id
                     sources[source_unique_id] = normalized_source
         return sources
+    
+    def get_exposures(self) -> Dict[str, NormalizedExposureSchema]:
+        exposures_results = self.dbt_runner.run_operation(macro_name="get_exposures")
+        exposures = dict()
+        if exposures_results:
+            for exposure_result in json.loads(exposures_results[0]):
+                exposure_data = ExposureSchema(**exposure_result)
+                normalized_exposure = self._normalize_dbt_artifact_dict(exposure_data, type="exposure")
+                exposure_unique_id = normalized_exposure.unique_id
+                exposures[exposure_unique_id] = normalized_exposure
+        return exposures
     
     def get_test_coverages(self) -> Dict[str, ModelCoverageSchema]:
         coverage_results = self.dbt_runner.run_operation(macro_name="get_dbt_models_test_coverage")
@@ -47,10 +58,13 @@ class ModelsAPI(APIClient):
         return coverages
 
     @staticmethod
-    def _normalize_dbt_model_dict(model: ModelSchema, is_source: bool = False) -> NormalizedModelSchema:
-        model_name = model.name
+    def _normalize_dbt_artifact_dict(
+        artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
+        type: Literal["model", "source", "exposure"]
+    ) -> Union[NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema]:
+        artifact_name = artifact.name
 
-        owners = model.owners
+        owners = artifact.owners
         if owners:
             loaded_owners = try_load_json(owners)
             if loaded_owners is not None:
@@ -58,7 +72,7 @@ class ModelsAPI(APIClient):
             else:
                 owners = [owners]
 
-        tags = model.tags
+        tags = artifact.tags
         if tags:
             loaded_tags = try_load_json(tags)
             if loaded_tags is not None:
@@ -66,32 +80,43 @@ class ModelsAPI(APIClient):
             else:
                 tags = [tags]
         
-        normalized_model = json.loads(model.json())
-        normalized_model['owners'] = owners
-        normalized_model['tags'] = tags
-        normalized_model['model_name'] = model_name
-        normalized_model['normalized_full_path'] = ModelsAPI._normalize_model_path(
-            model_path=model.full_path,
-            model_package_name=model.package_name,
-            is_source=is_source
+        normalized_artifact = json.loads(artifact.json())
+        normalized_artifact['owners'] = owners
+        normalized_artifact['tags'] = tags
+        normalized_artifact['model_name'] = artifact_name
+        normalized_artifact['normalized_full_path'] = ModelsAPI._normalize_artifact_path(
+            artifact_path=artifact.full_path,
+            artifact_package_name=artifact.package_name,
+            type=type
         )
-        return NormalizedModelSchema(**normalized_model)
+
+        if type == "exposure":
+            return NormalizedExposureSchema(**normalized_artifact)
+        elif type == "model":
+            return NormalizedModelSchema(**normalized_artifact)
+        elif type == "source":
+            return NormalizedSourceSchema(**normalized_artifact)
     
     @classmethod
-    def _normalize_model_path(cls, model_path: str, model_package_name: Optional[str] = None, is_source: bool = False) -> str:
-        splited_model_path = model_path.split(os.path.sep)
-        model_file_name = splited_model_path[-1]
+    def _normalize_artifact_path(
+        cls,
+        artifact_path: str,
+        type: Literal["model", "source", "exposure"],
+        artifact_package_name: Optional[str] = None,
+    ) -> str:
+        splited_artifact_path = artifact_path.split(os.path.sep)
+        artifact_file_name = splited_artifact_path[-1]
 
         # If source, change models directory into sources and file extension from .yml to .sql
-        if is_source:
-            if splited_model_path[0] == "models":
-                splited_model_path[0] = "sources"
-            if model_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail = model_file_name.rpartition(YAML_FILE_EXTENSION)
-                splited_model_path[-1] = head + SQL_FILE_EXTENSION + tail
+        if type == "source":
+            if splited_artifact_path[0] == "models":
+                splited_artifact_path[0] = f"sources"
+            if artifact_file_name.endswith(YAML_FILE_EXTENSION):
+                head, _sep, tail =artifact_file_name.rpartition(YAML_FILE_EXTENSION)
+                splited_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
         
         # Add package name to model path
-        if model_package_name:
-            splited_model_path.insert(0, model_package_name)
+        if artifact_package_name:
+            splited_artifact_path.insert(0, artifact_package_name)
         
-        return os.path.sep.join(splited_model_path)
+        return os.path.sep.join(splited_artifact_path)

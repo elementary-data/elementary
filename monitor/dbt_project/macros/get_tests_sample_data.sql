@@ -1,4 +1,4 @@
-{% macro get_tests_sample_data(days_back = 7, metrics_sample_limit = 5) %}
+{% macro get_tests_sample_data(days_back = 7, metrics_sample_limit = 5, disable_passed_test_metrics = false) %}
     {% set select_test_results %}
         with elemetary_test_results as (
             select * from {{ ref('elementary', 'elementary_test_results') }}
@@ -35,7 +35,11 @@
         {% set status = elementary.insensitive_get_dict_value(test, 'status') | lower %}
 
         {% set test_rows_sample = none %}
-        {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error') -%}
+        {% set elementary_tests_allowlist_status = ['fail', 'warn']  %}
+        {% if not disable_passed_test_metrics %}
+            {% do elementary_tests_allowlist_status.append('pass') %}
+        {% endif %}
+        {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, metrics_sample_limit) %}
         {%- endif -%}
         {% set sub_test_unique_id = get_sub_test_unique_id(
