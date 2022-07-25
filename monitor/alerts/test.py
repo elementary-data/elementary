@@ -31,7 +31,7 @@ class TestAlert(Alert):
         self.test_unique_id = test_unique_id 
         self.status = status
 
-    TABLE_NAME = 'alerts_tests'
+    TABLE_NAME = 'alerts'
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -140,7 +140,7 @@ class DbtTestAlert(TestAlert):
             self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
         if self.error_message:
             self._add_text_section_to_slack_msg(slack_message,
-                                                f'*Error Message*\n{self.error_message}',
+                                                f'*Error Message*\n```{self.error_message}```',
                                                 divider=True)
         if self.column_name:
             self._add_text_section_to_slack_msg(slack_message, f'*Column*\n{self.column_name}', divider=True)

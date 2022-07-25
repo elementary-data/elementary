@@ -1,53 +1,37 @@
 {% macro get_new_test_alerts(days_back, results_sample_limit = 5) %}
-    -- depends_on: {{ ref('alerts_tests') }}
+    -- depends_on: {{ ref('alerts') }}
     {% set select_new_alerts_query %}
-        WITH alerts AS (
-            SELECT * FROM {{ ref('alerts_tests') }}
-            WHERE alert_sent = FALSE and detected_at >= {{ get_alerts_time_limit(days_back) }}
+        with new_alerts as (
+            select * from {{ ref('alerts') }}
+            where alert_sent = false and detected_at >= {{ get_alerts_time_limit(days_back) }}
         ),
-
-        models AS (
-            SELECT * FROM {{ ref('elementary', 'dbt_models') }}
+        models as (
+            select * from {{ ref('elementary', 'dbt_models') }}
         ),
-
-        sources AS (
-            SELECT * FROM {{ ref('elementary', 'dbt_sources') }}
+        sources as (
+            select * from {{ ref('elementary', 'dbt_sources') }}
         ),
-
-        tests AS (
-            SELECT * FROM {{ ref('elementary', 'dbt_tests') }}
+        tests as (
+            select * from {{ ref('elementary', 'dbt_tests') }}
         ),
-
-        artifacts_meta AS (
-            SELECT 
-                unique_id,
-                meta
-            FROM models
-            UNION ALL 
-            SELECT 
-                unique_id,
-                meta
-            FROM sources
-        ),
-
-        alerts_with_direct_meta AS (
-            SELECT 
-                alerts.*,
-                tests.meta as test_meta
-            FROM alerts LEFT JOIN tests ON (alerts.test_unique_id = tests.unique_id)
+        artifacts_meta as (
+            select unique_id, meta from models
+            union all
+            select unique_id, meta from sources
         )
 
-        SELECT
-            alerts.*,
-            artifacts_meta.meta as model_meta
-        FROM alerts_with_direct_meta as alerts LEFT JOIN artifacts_meta ON (alerts.model_unique_id = artifacts_meta.unique_id)    
+        select new_alerts.*, tests.meta as test_meta, artifacts_meta.meta as model_meta
+        from new_alerts
+        left join tests on new_alerts.test_unique_id = tests.unique_id
+        left join artifacts_meta on new_alerts.model_unique_id = artifacts_meta.unique_id
     {% endset %}
+
     {% set alerts_agate = run_query(select_new_alerts_query) %}
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set new_alerts = [] %}
     {% for test_result_alert_dict in test_result_alert_dicts %}
-        {% set test_results_query = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_results_query') %}
-        {% set test_type = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_type') %}
+        {% set test_results_query = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_results_query') %}
+        {% set test_type = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_type') %}
         {% set status = elementary.insensitive_get_dict_value(test_result_alert_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}
@@ -68,8 +52,8 @@
                                  'table_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'table_name'),
                                  'column_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'column_name'),
                                  'test_type': test_type,
-                                 'test_sub_type': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_sub_type'),
-                                 'test_results_description': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_results_description'),
+                                 'test_sub_type': elementary.insensitive_get_dict_value(test_result_alert_dict, 'sub_type'),
+                                 'test_results_description': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_description'),
                                  'owners': elementary.insensitive_get_dict_value(test_result_alert_dict, 'owners'),
                                  'tags': elementary.insensitive_get_dict_value(test_result_alert_dict, 'tags'),
                                  'test_results_query': test_results_query,
