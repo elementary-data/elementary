@@ -1,13 +1,13 @@
 import json
 import re
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.utils.json_utils import try_load_json, prettify_json_str_set
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_time_to_local_time
 
@@ -15,23 +15,17 @@ logger = get_logger(__name__)
 
 
 class TestAlert(Alert):
-    def __init__(
-        self,
-        model_unique_id: str,
-        test_unique_id: str,
-        status: str,
-        id: str,
-        elementary_database_and_schema: str,
-        subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None,
-        **kwargs
-    ) -> None:
-        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
-        self.model_unique_id = model_unique_id
-        self.test_unique_id = test_unique_id 
-        self.status = status
-
     TABLE_NAME = 'alerts'
+
+    def __init__(
+            self,
+            model_unique_id: str,
+            test_unique_id: str,
+            **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self.model_unique_id = model_unique_id
+        self.test_unique_id = test_unique_id
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -53,10 +47,6 @@ class TestAlert(Alert):
 class DbtTestAlert(TestAlert):
     def __init__(
             self,
-            id,
-            elementary_database_and_schema,
-            model_unique_id,
-            test_unique_id,
             detected_at,
             database_name,
             schema_name,
@@ -65,21 +55,16 @@ class DbtTestAlert(TestAlert):
             test_type,
             test_sub_type,
             test_results_description,
-            owners,
-            tags,
             test_results_query,
             test_rows_sample,
             other,
             test_name,
             test_params,
             severity,
-            status,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
             test_runs=None,
             **kwargs
     ) -> None:
-        super().__init__(model_unique_id, test_unique_id, status, id, elementary_database_and_schema, subscribers, slack_channel)
+        super().__init__(**kwargs)
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
@@ -98,23 +83,21 @@ class DbtTestAlert(TestAlert):
             except (ValueError, TypeError):
                 logger.error(f'Failed to parse "detect_at" field.')
 
-        self.owners = prettify_json_str_set(owners)
-        self.tags = prettify_json_str_set(tags)
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
-        self.test_sub_type = test_sub_type if test_sub_type else ''
+        self.test_sub_type = test_sub_type or ''
         self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
-        self.test_rows_sample = test_rows_sample if test_rows_sample else ''
-        self.test_runs = test_runs if test_runs else ''
+        self.test_rows_sample = test_rows_sample or ''
+        self.test_runs = test_runs or ''
         self.test_params = test_params
         self.error_message = test_results_description.capitalize() if test_results_description else 'No error message'
-        self.column_name = column_name if column_name else ''
+        self.column_name = column_name or ''
         self.severity = severity
 
         self.failed_rows_count = -1
-        if status != 'pass':
+        if self.status != 'pass':
             found_rows_number = re.search(r'\d+', self.error_message)
             if found_rows_number:
                 found_rows_number = found_rows_number.group()
@@ -195,60 +178,8 @@ class DbtTestAlert(TestAlert):
 
 
 class ElementaryTestAlert(DbtTestAlert):
-    def __init__(
-            self,
-            id,
-            elementary_database_and_schema,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            owners,
-            tags,
-            test_results_query,
-            test_rows_sample,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
-            test_runs=None,
-            **kwargs
-    ) -> None:
-        super().__init__(
-            id,
-            elementary_database_and_schema,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            owners,
-            tags,
-            test_results_query,
-            test_rows_sample,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status,
-            subscribers,
-            slack_channel,
-            test_runs
-        )
+    def __init__(self, test_results_description, **kwargs):
+        super().__init__(test_results_description=test_results_description, **kwargs)
         self.test_results_description = test_results_description.capitalize() if test_results_description else ''
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
@@ -306,7 +237,7 @@ class ElementaryTestAlert(DbtTestAlert):
             sensitivity = test_params.get('sensitivity')
             test_params = {'timestamp_column': timestamp_column,
                            'anomaly_threshold': sensitivity}
-            if self.test_rows_sample:               
+            if self.test_rows_sample:
                 self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
             test_alerts = {'display_name': self.test_sub_type_display_name,
                            'metrics': self.test_rows_sample,

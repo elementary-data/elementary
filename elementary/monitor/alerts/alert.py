@@ -3,6 +3,7 @@ from typing import List, Optional
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -10,15 +11,21 @@ logger = get_logger(__name__)
 
 class Alert:
     def __init__(
-        self,
-        id: str,
-        elementary_database_and_schema: str,
-        subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None,
-        **kwargs
-    ) -> None:
+            self,
+            id: str,
+            elementary_database_and_schema: str,
+            owners: str,
+            tags: str,
+            status: str,
+            subscribers: Optional[List[str]] = None,
+            slack_channel: Optional[str] = None,
+            **kwargs
+    ):
         self.id = id
         self.elementary_database_and_schema = elementary_database_and_schema
+        self.owners = prettify_json_str_set(owners)
+        self.tags = prettify_json_str_set(tags)
+        self.status = status
         self.subscribers = subscribers
         self.slack_channel = slack_channel
 

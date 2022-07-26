@@ -42,18 +42,18 @@ class AlertsAPI(APIClient):
         if raw_alerts:
             alert_dicts = json.loads(raw_alerts[0])
             for alert_dict in alert_dicts:
-                notmalaized_alert = self._normalize_alert(alert=alert_dict)
+                normalized_alert = self._normalize_alert(alert=alert_dict)
                 try:
                     alerts.append(alert_factory_func(
                         elementary_database_and_schema=self.elementary_database_and_schema,
-                        **notmalaized_alert
+                        **normalized_alert
                     ))
                 except Exception:
                     malformed_alerts.append(MalformedAlert(
-                        id=notmalaized_alert['id'],
+                        id=normalized_alert['id'],
                         elementary_database_and_schema=self.elementary_database_and_schema,
-                        data=notmalaized_alert,
-                        slack_channel=notmalaized_alert.get('slack_channel')
+                        data=normalized_alert,
+                        slack_channel=normalized_alert.get('slack_channel')
                     ))
         if malformed_alerts:
             logger.error('Failed to parse some alerts.')

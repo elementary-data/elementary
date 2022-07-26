@@ -1,17 +1,16 @@
 import json
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import Union
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.utils.json_utils import prettify_json_str_set
 
 
 class ModelAlert(Alert):
+    TABLE_NAME = 'alerts_models'
+
     def __init__(
             self,
-            id: str,
-            elementary_database_and_schema: str,
             unique_id: str,
             alias: str,
             path: str,
@@ -22,14 +21,9 @@ class ModelAlert(Alert):
             schema_name: str,
             message: str,
             full_refresh: bool,
-            owners: str,
-            tags: str,
-            status: str,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
             **kwargs
     ) -> None:
-        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
+        super().__init__(**kwargs)
         self.unique_id = unique_id
         self.alias = alias
         self.path = path
@@ -40,11 +34,6 @@ class ModelAlert(Alert):
         self.schema_name = schema_name
         self.message = message
         self.full_refresh = full_refresh
-        self.owners = prettify_json_str_set(owners)
-        self.tags = prettify_json_str_set(tags)
-        self.status = status
-
-    TABLE_NAME = 'alerts_models'
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         if is_slack_workflow:

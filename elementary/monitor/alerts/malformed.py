@@ -1,23 +1,13 @@
 import json
-from typing import List, Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 
 
 class MalformedAlert(Alert):
-    def __init__(
-        self,
-        id: str,
-        elementary_database_and_schema: str,
-        data: dict,
-        subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None,
-        **kwargs
-    ) -> None:
-        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
+    def __init__(self, data: dict, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.data = data
-
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         return SlackMessageSchema(
