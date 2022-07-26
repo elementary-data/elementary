@@ -21,7 +21,8 @@ from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
-from elementary.monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
+from elementary.monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, \
+    TestUniqueIdType
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_str
@@ -69,19 +70,26 @@ class DataMonitoring:
             return []
 
         sent_alert_ids = []
+        unique_channels = set()
+        unique_tags = set()
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
+            channel = alert.slack_channel if alert.slack_channel else self.slack_channel_name
             sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel if alert.slack_channel else self.slack_channel_name,
+                channel_name=channel,
                 message=alert_msg
             )
             if sent_successfully:
                 sent_alert_ids.append(alert.id)
+                unique_channels.add(channel)
+                unique_tags.update(alert.tags)
             else:
                 logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}")
                 self.success = False
         self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
+        self.execution_properties['channel_count'] = len(unique_channels)
+        self.execution_properties['tag_count'] = len(unique_tags)
         return sent_alert_ids
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
@@ -179,11 +187,13 @@ class DataMonitoring:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
         return lineage_api.get_lineage()
 
-    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None, disable_passed_test_metrics: bool = False):
+    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
+                                     disable_passed_test_metrics: bool = False):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
-            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back, disable_passed_test_metrics=disable_passed_test_metrics)
+            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back,
+                                                                disable_passed_test_metrics=disable_passed_test_metrics)
             invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount, days_back=days_back)
             tests_results = self._create_tests_results(
                 tests_metadata=tests_metadata,
