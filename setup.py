@@ -15,7 +15,7 @@ setup(
     python_requires='>=3.6.2',
     entry_points='''
         [console_scripts]
-        edr=cli.cli:cli
+        edr=elementary.cli.cli:cli
     ''',
     author="Elementary",
     package_data={"": ["header.html", "index.html", "dbt_project/*", "dbt_project/macros/*", "dbt_project/models/*"]},

@@ -1,8 +1,7 @@
 import pytest
 from datetime import date, datetime
 from unittest import mock
-import lineage
-from lineage.snowflake_query_history import SnowflakeQueryHistory
+from elementary.lineage import SnowflakeQueryHistory
 
 
 def expected_params(start_date, end_date=None, dbs=None, dbs_in_like_statement=None):
@@ -45,7 +44,7 @@ def expected_params(start_date, end_date=None, dbs=None, dbs_in_like_statement=N
     (datetime(2025, 9, 15), None, ['db', 'db1'],
      'information_schema', expected_params(datetime(2025, 9, 15, 0, 0, 0)))
 ])
-@mock.patch(f'{lineage.snowflake_query_history.__name__}.date', wraps=date)
+@mock.patch(f'{elementary.lineage.snowflake_query_history.__name__}.date', wraps=date)
 def test_snowflake_query_history_build_history_query(mock_date, start_date, end_date, dbs, query_type,
                                                      expected_bindings):
     mock_date.today.return_value = date(2025, 9, 18)

@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from config.config import Config
-from utils.ordered_yaml import OrderedYaml
+from elementary.config.config import Config
+from elementary.utils.ordered_yaml import OrderedYaml
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 

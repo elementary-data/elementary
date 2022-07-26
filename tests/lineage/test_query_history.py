@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from lineage.query_history import QueryHistory
+from elementary.lineage import QueryHistory
 
 
 @pytest.mark.parametrize("end_date, expected_result", [

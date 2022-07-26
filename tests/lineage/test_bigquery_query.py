@@ -1,7 +1,7 @@
 import pytest
-from lineage.query_context import QueryContext
-from lineage.bigquery_query import BigQueryQuery
-from lineage.table_resolver import TableResolver
+from elementary.lineage import QueryContext
+from elementary.lineage import BigQueryQuery
+from elementary.lineage import TableResolver
 
 
 def create_bigquery_table_colum(project_id, dataset_id, table_id):

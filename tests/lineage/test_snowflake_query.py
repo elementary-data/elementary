@@ -1,7 +1,7 @@
 import pytest
-from lineage.query_context import QueryContext
-from lineage.snowflake_query import SnowflakeQuery
-from lineage.table_resolver import TableResolver
+from elementary.lineage import QueryContext
+from elementary.lineage.snowflake_query import SnowflakeQuery
+from elementary.lineage import TableResolver
 
 
 @pytest.mark.parametrize("query_text, queried_db, queried_sc, expected_source_tables,"

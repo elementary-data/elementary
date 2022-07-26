@@ -1,13 +1,11 @@
 import pytest
 from unittest import mock
-from sqllineage.core import LineageResult, Table
 import networkx as nx
-from sqllineage.models import Schema
 
-from lineage.table_resolver import TableResolver
-from lineage.lineage_graph import LineageGraph
-from lineage.query import Query
-from lineage.query_context import QueryContext
+from elementary.lineage import TableResolver
+from elementary.lineage import LineageGraph
+from elementary.lineage import Query
+from elementary.lineage import QueryContext
 
 
 @pytest.mark.parametrize("sources,targets,edges,show_isolated_nodes", [
