@@ -117,10 +117,10 @@ class DbtTestAlert(TestAlert):
                                               divider=True)
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Status*\n{self.status}', f'*Test name*\n{self.test_name}'])
-        self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{", ".join(self.owners)}',
+                                                              f'*Tags*\n{", ".join(self.tags)}'])
         if self.subscribers:
-            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(self.subscribers)}'])
         if self.error_message:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Error Message*\n```{self.error_message}```',
@@ -208,10 +208,10 @@ class ElementaryTestAlert(DbtTestAlert):
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Test name*\n{self.test_name}',
                                                f'*{sub_type_title}:*\n{self.test_sub_type_display_name}'])
-        self._add_fields_section_to_slack_msg(slack_message,
-                                              [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{", ".join(self.owners)}',
+                                                              f'*Tags*\n{", ".join(self.tags)}'])
         if self.subscribers:
-            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(self.subscribers)}'])
         if self.test_results_description:
             self._add_text_section_to_slack_msg(slack_message,
                                                 f'*Description*\n{self.test_results_description}',

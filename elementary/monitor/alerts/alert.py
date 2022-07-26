@@ -3,7 +3,7 @@ from typing import List, Optional
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.utils.json_utils import prettify_json_str_set
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -23,10 +23,10 @@ class Alert:
     ):
         self.id = id
         self.elementary_database_and_schema = elementary_database_and_schema
-        self.owners = prettify_json_str_set(owners)
-        self.tags = prettify_json_str_set(tags)
+        self.owners = set(try_load_json(owners) or [])
+        self.tags = set(try_load_json(tags) or [])
         self.status = status
-        self.subscribers = subscribers
+        self.subscribers = set(subscribers or [])
         self.slack_channel = slack_channel
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3

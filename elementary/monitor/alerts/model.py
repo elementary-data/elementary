@@ -54,9 +54,10 @@ class ModelAlert(Alert):
                                               divider=True)
         self._add_fields_section_to_slack_msg(slack_message, [f'*Status*\n{self.status}',
                                                               f'*Materialization*\n{self.materialization}'])
-        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{", ".join(self.owners)}',
+                                                              f'*Tags*\n{", ".join(self.tags)}'])
         if self.subscribers:
-            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(self.subscribers)}'])
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Full Refresh*\n{self.full_refresh}', f'*Path*\n{self.path}'],
                                               divider=True)
@@ -73,9 +74,10 @@ class ModelAlert(Alert):
                                               [f'*Snapshot*\n{self.alias}',
                                                f'*When*\n{self.detected_at}'],
                                               divider=True)
-        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
+        self._add_fields_section_to_slack_msg(slack_message, [f'*Owners*\n{", ".join(self.owners)}',
+                                                              f'*Tags*\n{", ".join(self.tags)}'])
         if self.subscribers:
-            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
+            self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(self.subscribers)}'])
         self._add_fields_section_to_slack_msg(slack_message,
                                               [f'*Status*\n{self.status}', f'*Path*\n{self.original_path}'])
         self._add_text_section_to_slack_msg(slack_message, f'*Error Message*\n```{self.message}```')
