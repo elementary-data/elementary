@@ -15,7 +15,7 @@ Elementary tests have three levels of configurations:
 
 Each time you run `dbt test`, elementary data monitors will use this configuration.
 
-To learn how to add these tests, [go here](/add-data-monitoring-tests).
+To learn how to add these tests, [go here](./add-data-monitoring-tests).
 
 ## Understanding data tests configuration
 
@@ -43,7 +43,7 @@ If undefined, _default is null_ (no time buckets).
 
 `sensitivity`:
 
-Threshold for the anomaly sensitivity, the [global default](/add-data-monitoring-tests) is 3. If defined for a test, the test param is used instead of the global one.
+Threshold for the anomaly sensitivity, the [global default](./add-data-monitoring-tests) is 3. If defined for a test, the test param is used instead of the global one.
 A higher number means less sensitivity (less anomalies), and a lower number means more sensitivity (more anomalies).
 
 `backfill_days`:
@@ -63,7 +63,7 @@ Param for the `all_columns_anomalies` test only, which enables to exclude a colu
 
 ## Table timestamp column
 
-Elementary tests use a timestamp column to filter data and divide it into time buckets (read more about [how Elementary tests work](/data-anomaly-detection#how-do-monitors-work-in-elementary-data-tests)).
+Elementary tests use a timestamp column to filter data and divide it into time buckets (read more about [how Elementary tests work](./data-anomaly-detection#how-do-monitors-work-in-elementary-data-tests)).
 
 A timestamp column can be configured in two places:
 
@@ -176,7 +176,7 @@ Elementary has several global vars used for configurations. You can change their
 
 `days_back`: [int]
 
-The maximum timeframe for running [time buckets](/data-anomaly-detection#tests-and-monitors-types) monitors, as well as to calculate a baseline for anomaly detection.
+The maximum timeframe for running [time buckets](./data-anomaly-detection#tests-and-monitors-types) monitors, as well as to calculate a baseline for anomaly detection.
 This limit is applied in three cases: - On the first run of elementary or on full refresh (first run for all tables). - For each new table that is added to the monitoring (first run for table). - On each new metric that is added to the configuration (first run of new metric). - If there was a gap bigger than this limit since the last run.  
 If undefined, _default is 14 days back_.
 
@@ -187,7 +187,7 @@ If undefined, _default is 2 buckets_.
 
 `anomaly_sensitivity`: [int]
 
-This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](/data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies.
+This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](./data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies.
 If undefined, _default threshold is 3_.
 
 `elementary_alerts_ignore_warn`: [bool]

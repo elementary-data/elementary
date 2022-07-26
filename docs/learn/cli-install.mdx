@@ -58,7 +58,7 @@ Elementary requires two configuration files:
 - `HOME_DIR/.edr/config.yml` - Elementary configuration.
 - `HOME_DIR/.dbt/profiles.yml` - Connection details to the data warehouse, in the format of dbt connection profile named `elementary`.
 
-(These default paths and names may be changed using the [CLI options](/cli-advanced)).
+(These default paths and names may be changed using the [CLI options](./cli-advanced)).
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
   <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'config.yml'?</summary>
@@ -184,7 +184,7 @@ Just add a profile with the relevant details, and name it `elementary`.
 The provided credentials need to have permission to:
 
 - Read - Query history, information schema and the tables configured for monitoring.,
-- Write - To the database and schema configured in `elementary` [connection profile](/connection-profile).
+- Write - To the database and schema configured in `elementary` [connection profile](./connection-profile).
 
 The required connection details and permissions for each data warehouse are detailed in the relevant integration documentation under integrations.
 

@@ -31,7 +31,7 @@ After your `dbt run` and `dbt test`, execute the Elementary CLI `edr monitor` co
 The usage flow is as follows:
 
 1. Install the dbt package and related configuration. (Not a dbt user? you can still use Elementary, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) and we will help).
-2. [Configure data monitors as tests](/test-configuration), just like you configure your native dbt tests.
+2. [Configure data monitors as tests](./test-configuration), just like you configure your native dbt tests.
 3. Run `dbt run` as usual (the models in this run have minimal performance impact).
 4. Run `dbt test` as usual, but this time Elementary data monitoring and anomaly detection will run as part of your tests.
 5. [Configure Slack Webhook](../integrations/slack).
@@ -96,7 +96,7 @@ According to the [empirical rule](https://www.statisticshowto.com/probability-an
 - **~99.7%** of values have an absolute **z-score of 3 or less.**
 
 Values with a **standard score of 3 and above are [considered outliers](https://www.ctspedia.org/do/view/CTSpedia/OutLier)**, and this is a recommended threshold for anomaly detection.
-This is the default Elementary uses as well, and it can be changed using the var `anomaly_score_threshold` in the [global configuration](/test-configuration).
+This is the default Elementary uses as well, and it can be changed using the var `anomaly_score_threshold` in the [global configuration](./test-configuration).
 
 You can use the model `anomaly_threshold_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
 
