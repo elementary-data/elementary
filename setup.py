@@ -1,11 +1,17 @@
-from setuptools import setup, find_packages
 import pathlib
+
+from setuptools import setup, find_packages
+
+from elementary.config.config import Config
+from elementary.tracking.anonymous_tracking import AnonymousTracking
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
 README = (HERE / "README.md").read_text()
+
+AnonymousTracking(Config()).init_user_id()
 
 setup(
     name='elementary-data',
