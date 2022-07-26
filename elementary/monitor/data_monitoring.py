@@ -238,6 +238,10 @@ class DataMonitoring:
         sources = models_api.get_sources()
         exposures = models_api.get_exposures()
 
+        self.execution_properties['model_count'] = len(models)
+        self.execution_properties['source_count'] = len(sources)
+        self.execution_properties['exposure_count'] = len(exposures)
+
         nodes = dict(**models, **sources, **exposures)
         serializable_nodes = dict()
         for key in nodes.keys():
