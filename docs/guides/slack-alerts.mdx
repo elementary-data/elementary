@@ -1,14 +1,14 @@
 ---
-title: 'Slack alerts and test reports'
+title: "Slack alerts and test reports"
 ---
 
-import { TipInfo } from '@/components/Tip';
+import { TipInfo } from "@/components/Tip";
 
 ## Get Slack alerts
 
 ### Configure Slack
 
-To get Slack notifications, you will need a [Slack integration](/slack).
+To get Slack notifications, you will need a [Slack integration](../integrations/slack).
 
 #### Option 1 - Slack as CLI parameter
 
@@ -67,7 +67,7 @@ edr monitor
 
 You can use the 'owner' and 'tags' fields in dbt yml files, to decide who should be mentioned in a Slack alert:
 
-<img src="img/slack-alert-format.png" alt="New Slack alert format" />
+<img src="../img/slack-alert-format.png" alt="New Slack alert format" />
 
 ### Continuous alerting
 
@@ -80,32 +80,32 @@ If you need help or wish to consult on this, reach out to us on [Slack](https://
 
 ### Configure Slack
 
-To get Slack notifications, you will need a [Slack integration](/slack).	
+To get Slack notifications, you will need a [Slack integration](../integrations/slack).
 
-#### Option 1 - Slack as CLI parameter	
+#### Option 1 - Slack as CLI parameter
 
-**Token** - Use the Slack token when you execute `edr monitor` using the option `-st, --slack-token` and `-ch, --slack-channel-name`:	
+**Token** - Use the Slack token when you execute `edr monitor` using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
 
-```	
-edr monitor send-report --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>	
-```	
+```
+edr monitor send-report --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
+```
 
-#### Option 2 - Slack integration in config.yml	
+#### Option 2 - Slack integration in config.yml
 
-If you prefer that the CLI reads the Slack integration from a file, copy it into a file called `config.yml`.	
+If you prefer that the CLI reads the Slack integration from a file, copy it into a file called `config.yml`.
 
-Create it here:	
+Create it here:
 
-`HOME_DIR/.edr/config.yml`	
+`HOME_DIR/.edr/config.yml`
 
-Here is the format in the yml itself:	
+Here is the format in the yml itself:
 
-**Token**	
+**Token**
 
-```yml	
-slack:	
-  token: <your_slack_token>	
-  channel_name: <slack_channel_to_post_at>	
+```yml
+slack:
+  token: <your_slack_token>
+  channel_name: <slack_channel_to_post_at>
 ```
 
 ### Execute the CLI

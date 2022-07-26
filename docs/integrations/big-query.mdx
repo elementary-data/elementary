@@ -1,9 +1,9 @@
 ---
-title: 'BigQuery'
-description: 'Snowflake integration details'
+title: "BigQuery"
+description: "Snowflake integration details"
 ---
 
-import { TipInfo } from '@/components/Tip'
+import { TipInfo } from "@/components/Tip";
 
 ## Data anomalies monitoring as dbt tests
 
@@ -15,11 +15,15 @@ Supports Bigquery since version 0.3.4
 
 ### BigQuery query source
 
-The query history in BigQuery is pulled from the [information schema](https://cloud.google.com/bigquery/docs/information-schema-intro), by accessing a view that contains [jobs metadata](https://cloud.google.com/bigquery/docs/information-schema-jobs) by project. 
+The query history in BigQuery is pulled from the [information schema](https://cloud.google.com/bigquery/docs/information-schema-intro), by accessing a view that contains [jobs metadata](https://cloud.google.com/bigquery/docs/information-schema-jobs) by project.
 
-The retention of this view is **180 days**, meaning that queries older than that will not be part of the lineage. 
+The retention of this view is **180 days**, meaning that queries older than that will not be part of the lineage.
 
-<TipInfo>Note that each query source requires different permissions. If these are not granted, Elementary will create partial lineage only based on accessible queries, or will return an error if there is no access at all.</TipInfo>
+<TipInfo>
+  Note that each query source requires different permissions. If these are not
+  granted, Elementary will create partial lineage only based on accessible
+  queries, or will return an error if there is no access at all.
+</TipInfo>
 
 ### BigQuery connection profile
 
@@ -35,16 +39,15 @@ The profiles.yml file to connect to BigQuery should contain a profile in the fol
 ## For edr lineage:                                            ##
 ## Any database and schema will do.                            ##
 
-
-elementary: 
+elementary:
   outputs:
-    default:  
+    default:
       type: bigquery
-      
+
       ## Service account auth, other options require other configs ##
       method: service-account
       keyfile: [full path to your keyfile]
-      
+
       project: [project id]
       dataset: [dataset name]
       threads: 4
@@ -53,7 +56,7 @@ elementary:
       priority: interactive
 ```
 
-We support the same format and connection methods as dbt. Please refer to dbt's documentation of [BigQuery](https://docs.getdbt.com/reference/warehouse-profiles/bigquery-profile) for further details. 
+We support the same format and connection methods as dbt. Please refer to dbt's documentation of [BigQuery](https://docs.getdbt.com/reference/warehouse-profiles/bigquery-profile) for further details.
 
 Note that although in dbt the 'location' parameter is optional, in Elementary lineage it is mandatory. Here are details about [BigQuery locations](https://cloud.google.com/bigquery/docs/locations).
 
@@ -61,7 +64,7 @@ Note that although in dbt the 'location' parameter is optional, in Elementary li
 
 The queries are pulled from the information schema view of [jobs by project](https://cloud.google.com/bigquery/docs/information-schema-jobs).
 
-This requires `bigquery.jobs.listAll` permission for the project, that is available by default only to the `Project Owner` and BigQuery `Admin` roles. 
+This requires `bigquery.jobs.listAll` permission for the project, that is available by default only to the `Project Owner` and BigQuery `Admin` roles.
 
 There are two options for creating an account with the required permissions:
 
@@ -73,6 +76,7 @@ Here is a [guide for creating a service account](https://docs.elementary-data.co
 ## Create BigQuery service account
 
 For Elementary to be able to access the jobs by project in the information schema, there are two options:
+
 1. Create service account with Project Owner or BigQuery Admin role. For this option, skip to create service account.
 2. Recommended: Create service account with lower permissions by creating a custom role. For this option, you need to create the custom role first.
 
@@ -82,15 +86,15 @@ For Elementary to be able to access the jobs by project in the information schem
 
 2. Click on 'CREATE ROLE'
 
-<img src="img/create-role.png" alt="Create role" />
+<img src="../img/create-role.png" alt="Create role" />
 
-3. Give the role a title, description, etc. 
+3. Give the role a title, description, etc.
 
 4. Click on '+ ADD PERMISSIONS'
 
 5. Using the filter, find and add the permissions bigquery.jobs.listall and bigquery.jobs.create, then click 'ADD':
 
-<img src="img/permissions.png" alt="Permissions" />
+<img src="../img/permissions.png" alt="Permissions" />
 
 6. Click 'CREATE' and make sure the new role was created and is now in the roles list.
 
@@ -100,31 +104,31 @@ For Elementary to be able to access the jobs by project in the information schem
 
 2. Click on 'CREATE SERVICE ACCOUNT'
 
-<img src="img/create-service-account.png" alt="Create service account" />
+<img src="../img/create-service-account.png" alt="Create service account" />
 
 3. Fill in the service account name ('elementary') and account description ('Elementary Data') and click 'CREATE AND CONTINUE':
 
-<img src="img/create-continue.png" alt="Create and Continue" />
+<img src="../img/create-continue.png" alt="Create and Continue" />
 
 4. Now we need to configure the relevant permissions for this new service account. As described, at this point there are two options -
-  1. Option 1 - Choose BigQuery Admin or Owner.
-  2. Recommended: Option 2 - Choose the following 3 roles: BigQuery Data Editor + BigQuery User + custom role you created with these instructions: 
+1. Option 1 - Choose BigQuery Admin or Owner.
+1. Recommended: Option 2 - Choose the following 3 roles: BigQuery Data Editor + BigQuery User + custom role you created with these instructions:
 
-<img src="img/roles.png" alt="Roles" />
+<img src="../img/roles.png" alt="Roles" />
 
 5. The last step is optional so skip it if you don't need to manage this service account with another service account, and press done.
 
 6. Press on the dots icon to the right of your screen for your new service account and select 'Manage keys':
 
-<img src="img/dots-icon.png" alt="Manage keys" />
+<img src="../img/dots-icon.png" alt="Manage keys" />
 
 7. Press on 'ADD KEY' and select 'Create new key':
 
-<img src="img/add-key.png" alt="Add Key" />
+<img src="../img/add-key.png" alt="Add Key" />
 
 8. Use the 'JSON' option radio button and press 'CREATE':
 
-<img src="img/json.png" alt="JSON" />
+<img src="../img/json.png" alt="JSON" />
 
 9. This will automatically generate and download a JSON file with your private key information for this service account. This JSON file provides the credentials to programmatically connect and work with your BigQuery environment.
 

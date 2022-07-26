@@ -1,14 +1,14 @@
 ---
-title: 'edr lineage'
+title: "edr lineage"
 ---
 
-After you successfully [installed Elementary](), [configured a connection profile]() and provided the permissions required to access the [query history](), it's time to create your data lineage graph using the lineage CLI.
+After you successfully [installed Elementary](../learn/cli-install#install-and-configure), [configured a connection profile](../learn/cli-install#cli-configuration) and provided the permissions required to access the [query history](), it's time to create your data lineage graph using the lineage CLI.
 
 ```shell
 edr lineage
 ```
 
-<img src="img/elementary_demo.gif" alt="Elementary Demo" />
+<img src="../img/elementary_demo.gif" alt="Elementary Demo" />
 
 ## edr lineage
 
@@ -79,7 +79,7 @@ edr lineage generate -dbs my_db,another_db
 
 ### Timeframe filters
 
-The lineage is created from the data warehouse [query history]() and access history, and the timeframe filters are used to define which queries to include in the graph.
+The lineage is created from the data warehouse [query history](/query-history) and access history, and the timeframe filters are used to define which queries to include in the graph.
 
 The times are relevant to the **timezone in which the data warehouse is configured.**
 

@@ -1,19 +1,21 @@
 ---
-title: 'Add data monitoring tests'
+title: "Add data monitoring tests"
 ---
 
-import { TipInfo } from '@/components/Tip'
-import { SnippetGroup } from '@/components/SnippetGroup'
+import { TipInfo } from "@/components/Tip";
+import { SnippetGroup } from "@/components/SnippetGroup";
 
-After you [install the dbt package](/quickstart-data-monitoring#install-the-dbt-package) and related configuration, you can add Elementary data tests.
+After you [install the dbt package](../getting-started/quickstart-data-monitoring#install-the-dbt-package) and related configuration, you can add Elementary data tests.
 
 ## Data monitors as dbt tests
 
-Elementary is the first solution that delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. Elementary dbt tests are actually data monitors that collect metrics and metadata over time. On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers. 
+Elementary is the first solution that delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. Elementary dbt tests are actually data monitors that collect metrics and metadata over time. On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers.
 These tests are configured and executed like any other tests in your project.
 
-<TipInfo>Elementary tests can only be used with the elementary models, so you must run 
-"dbt run --select elementary" to create the Elementary package models.</TipInfo>
+<TipInfo>
+  Elementary tests can only be used with the elementary models, so you must run
+  "dbt run --select elementary" to create the Elementary package models.
+</TipInfo>
 
 ## Elementary available monitors as tests
 
@@ -22,7 +24,7 @@ These tests are configured and executed like any other tests in your project.
 `elementary.table_anomalies`
 
 Executes table level monitors and anomaly detection. Specific monitors are [detailed here]() and can be configured using the `table_anomalies` key.
-By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.  
+By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
 
 `elementary.all_columns_anomalies`
 
@@ -35,7 +37,7 @@ Executes schema changes monitor that alerts on deleted table, deleted or added c
 ### Column test:
 
 `elementary.column_anomalies`
-Executes column level monitors and anomaly detection. Specific monitors are [detailed here]() and can be configured using the `column_anomalies` key.
+Executes column level monitors and anomaly detection. Specific monitors are [detailed here](/data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
 
 ## How to configure your Elementary tests?
 
@@ -43,9 +45,9 @@ Elementary tests are added to models / sources / columns of your dbt project jus
 
 Elementary tests have three levels of configurations:
 
-1. [Test arguments]() - Test specific arguments.
+1. [Test arguments](/test-configuration#test-arguments) - Test specific arguments.
 2. [Table configuration]() - Configure the timestamp column and details of a monitored table.
-3. [Global vars]() - Optional configuration parameters of the operation.
+3. [Global vars](/test-configuration#data-monitoring-global-vars) - Optional configuration parameters of the operation.
 
 More on data tests configuration [here](/test-configuration).
 
@@ -63,17 +65,16 @@ models:
       elementary:
         timestamp_column: < timestamp column >
     tests:
-        - elementary.table_anomalies:
-            table_anomalies: < specific monitors, all if null >
-            # optional - configure different freshness column than timestamp column
-            freshness_column: < freshness_column >
-        - elementary.all_columns_anomalies:
-            column_anomalies: < specific monitors, all if null >
-        - elementary.schema_changes
-          
-                
+      - elementary.table_anomalies:
+          table_anomalies: < specific monitors, all if null >
+          # optional - configure different freshness column than timestamp column
+          freshness_column: < freshness_column >
+      - elementary.all_columns_anomalies:
+          column_anomalies: < specific monitors, all if null >
+      - elementary.schema_changes
+
   - name: < model name >
-    ## if no timestamp is configured, elementary will monitor without time filtering 
+    ## if no timestamp is configured, elementary will monitor without time filtering
     columns:
       - name: < column name >
         tests:
@@ -109,12 +110,12 @@ models:
             config:
               severity: warn
 
-                
+
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
         elementary.table_anomalies
-          tags: ['elementary'] 
+          tags: ['elementary']
     columns:
       - name: user_id
         tests:
@@ -135,14 +136,13 @@ sources:
   - name: < some name >
     database: < datatbase >
     schema: < schema >
-    tables: 
+    tables:
       - name: < table_name >
-      ## sources don't have config, so elementary config is placed under 'meta'
+        ## sources don't have config, so elementary config is placed under 'meta'
         meta:
           elementary:
             timestamp_column: < source timestamp column >
-        tests:
-            <here you will add elementary monitors as tests>  
+        tests: <here you will add elementary monitors as tests>
 ```
 
 ```yml Sources example
@@ -150,7 +150,7 @@ sources:
   - name: 'my_non_dbt_table'
     database: 'raw_events'
     schema: 'product'
-    tables: 
+    tables:
       - name: 'raw_product_login_events'
       ## sources don't have config, so elementary config is placed under 'meta'
         meta:
@@ -168,12 +168,13 @@ sources:
             tests:
               - elementary.column_anomalies
 ```
+
 </SnippetGroup>
 
 ## What happens on each test?
 
-On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics. 
-At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models. 
+On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
+At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models.
 
 ## What does it mean when a test fails?
 
@@ -183,10 +184,10 @@ When a test fail, it means that an anomaly was detected on this metric and datas
 
 At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models. The relevant models are:
 
-- `alerts_data_monitoring` -  All the detected anomalies are merged to this table.
-- `data_monitoring_metrics` - All the collected metrics are merged to this table.   
-- `metrics_anomaly_score`  - The anomaly score calculated for all the metrics from the last 7 days.
+- `alerts_data_monitoring` - All the detected anomalies are merged to this table.
+- `data_monitoring_metrics` - All the collected metrics are merged to this table.
+- `metrics_anomaly_score` - The anomaly score calculated for all the metrics from the last 7 days.
 
 ## Alerts on detected anomalies (failed tests)
 
-To get Slack notifications, refer to the [Slack integration](/slack).
+To get Slack notifications, refer to the [Slack integration](../integrations/slack).

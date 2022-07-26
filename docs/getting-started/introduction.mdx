@@ -50,15 +50,15 @@ Collect dbt artifacts, runs and test results as part of your runs.
 For the data monitoring and dbt artifacts collection, we developed a [dbt package](/quickstart-data-monitoring#install-the-dbt-package).
 The monitoring configuration is configured in your dbt project, and the monitors are dbt macros and models. All the collected data is saved to an elementary schema in your DWH.
 
-[Elementary CLI](/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
+[Elementary CLI](../learn/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
 
 <img src="../img/High-level-flow.png" alt="High Level Flow" />
 
 ## Data anomalies monitoring as dbt tests
 
 Elementary delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests).**
-Elementary dbt tests are [data monitors](/data-anomaly-detection#tests-and-monitors-types) that collect metrics and metadata over time.
-On each execution, the tests analyze the new data, compare it to historical metrics, and [alert](/slack) on [anomalies](/data-anomaly-detection#anomaly-detection) and outliers.
+Elementary dbt tests are [data monitors](../data-monitoring/data-anomaly-detection#tests-and-monitors-types) that collect metrics and metadata over time.
+On each execution, the tests analyze the new data, compare it to historical metrics, and [alert](../integrations/slack) on [anomalies](../data-monitoring/data-anomaly-detection#anomaly-detection) and outliers.
 **Elementary data monitors as tests are configured and executed like native tests in your project!**
 
 ## Community & Support

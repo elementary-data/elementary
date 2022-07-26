@@ -1,17 +1,17 @@
 ---
-title: 'Quickstart: Data Monitoring'
+title: "Quickstart: Data Monitoring"
 ---
 
-import { TipInfo } from '@/components/Tip'
+import { TipInfo } from "@/components/Tip";
 
 To start using **Elementary data monitors as test dbt tests**, you need to add our package to your dbt project.
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
   <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">What are dbt packages and packages.yml?</summary>
 
-A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on. 
+A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on.
 
-Add packages to your project by creating a 'packages.yml' file under the main project directory (where your 'dbt_project.yml is), and adding the relevant package. After you add a new package, run dbt deps to actually pull it's code to your project. This is also how you update packages. 
+Add packages to your project by creating a 'packages.yml' file under the main project directory (where your 'dbt_project.yml is), and adding the relevant package. After you add a new package, run dbt deps to actually pull it's code to your project. This is also how you update packages.
 Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/), [dbt_date](https://github.com/calogica/dbt-date/tree/0.5.4/), [codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.5.0/).
 
 </details>
@@ -30,7 +30,10 @@ packages:
 ```
 
 ### Add to your `dbt_project.yml`
-<TipInfo>This means Elementary will use `your_schema_elementary` as its schema.</TipInfo>
+
+<TipInfo>
+  This means Elementary will use `your_schema_elementary` as its schema.
+</TipInfo>
 
 ```yml dbt_project.yml
 models:
@@ -38,15 +41,15 @@ models:
   ## when you add a profile for CLI alerts, make sure to configure this schema and db
   ## see docs: https://docs.elementary-data.com/
   elementary:
-    +schema: 'elementary'
+    +schema: "elementary"
 
 on-run-end:
-  - '{{ elementary.upload_dbt_artifacts(results) }}'
+  - "{{ elementary.upload_dbt_artifacts(results) }}"
 ```
 
 <TipInfo>
 
-  **Materialization**: For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that  affect elementary, such as: 
+**Materialization**: For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that affect elementary, such as:
 
 ```
 materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
@@ -57,6 +60,7 @@ Make sure to place the 'elementary' configuration under the models key, and othe
 </TipInfo>
 
 ### Execute dbt command
+
 ```shell Terminal
 dbt run --select elementary
 ```
@@ -65,7 +69,7 @@ This will mostly create empty tables, that will be updated with artifacts, metri
 
 ## dbt artifacts & run results
 
-Once the elementary dbt package has been installed and configured, your test results, your dbt run results and [dbt artifacts](/dbt-artifacts) will be loaded to elementary models.
+Once the elementary dbt package has been installed and configured, your test results, your dbt run results and [dbt artifacts](../data-monitoring/dbt-artifacts) will be loaded to elementary models.
 
 Some models are updated by an on-run-end hook when you run `dbt run / test / build`, and some only when you run the model:
 
@@ -79,9 +83,9 @@ If you see data in these models you completed the package deployment (Congrats!�
 
 ### What's next?
 
-1. [​Add anomaly detection as dbt tests](/tests)📈
-2. [​Install the Elementary CLI](/generate-reports#install-the-elementary-cli) to:
+1. [​Add anomaly detection as dbt tests](../guides/tests)📈
+2. [​Install the Elementary CLI](../guides/generate-reports#install-the-elementary-cli) to:
 
-   - [​Visualize all dbt test results and runs in a report](/generate-reports)✨
+   - [​Visualize all dbt test results and runs in a report](../guides/generate-reports)✨
 
-   - [Send informative Slack alerts](/slack-alerts)📣
+   - [Send informative Slack alerts](../guides/slack-alerts)📣

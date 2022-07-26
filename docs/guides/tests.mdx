@@ -1,8 +1,8 @@
 ---
-title: 'Add Elementary tests'
+title: "Add Elementary tests"
 ---
 
-import { SnippetGroup } from '@/components/SnippetGroup'
+import { SnippetGroup } from "@/components/SnippetGroup";
 
 Before you can start using Elementary monitors as tests, execute `dbt run` with the Elementary package models, which are **required for the tests to work.**
 
@@ -31,7 +31,7 @@ After you install the dbt package in your project, the following tests will be a
 
 `elementary.column_anomalies`
 
-For additional tests configuration and options, refer to [configure monitoring](/test-configuration) and [add monitors as tests](/add-data-monitoring-tests).
+For additional tests configuration and options, refer to [configure monitoring](../data-monitoring/test-configuration) and [add monitors as tests](../data-monitoring/add-data-monitoring-tests).
 
 Add and configure the monitors as tests from within your dbt project:
 
@@ -46,17 +46,16 @@ models:
       elementary:
         timestamp_column: < timestamp column >
     tests:
-        - elementary.table_anomalies:
-            table_anomalies: < specific monitors, all if null >
-            # optional - configure different freshness column than timestamp column
-            freshness_column: < freshness_column >
-        - elementary.all_columns_anomalies:
-            column_anomalies: < specific monitors, all if null >
-        - elementary.schema_changes
-          
-                
+      - elementary.table_anomalies:
+          table_anomalies: < specific monitors, all if null >
+          # optional - configure different freshness column than timestamp column
+          freshness_column: < freshness_column >
+      - elementary.all_columns_anomalies:
+          column_anomalies: < specific monitors, all if null >
+      - elementary.schema_changes
+
   - name: < model name >
-    ## if no timestamp is configured, elementary will monitor without time filtering 
+    ## if no timestamp is configured, elementary will monitor without time filtering
     columns:
       - name: < column name >
         tests:
@@ -92,12 +91,12 @@ models:
             config:
               severity: warn
 
-                
+
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
         elementary.table_anomalies
-          tags: ['elementary'] 
+          tags: ['elementary']
     columns:
       - name: user_id
         tests:
@@ -114,20 +113,17 @@ models:
 ```
 
 ```yml Sources
-
-
 sources:
   - name: < some name >
     database: < datatbase >
     schema: < schema >
-    tables: 
+    tables:
       - name: < table_name >
-      ## sources don't have config, so elementary config is placed under 'meta'
+        ## sources don't have config, so elementary config is placed under 'meta'
         meta:
           elementary:
             timestamp_column: < source timestamp column >
-        tests:
-            <here you will add elementary monitors as tests>  
+        tests: <here you will add elementary monitors as tests>
 ```
 
 ```yml Sources Tests Example
@@ -135,7 +131,7 @@ sources:
   - name: 'my_non_dbt_table'
     database: 'raw_events'
     schema: 'product'
-    tables: 
+    tables:
       - name: 'raw_product_login_events'
       ## sources don't have config, so elementary config is placed under 'meta'
         meta:

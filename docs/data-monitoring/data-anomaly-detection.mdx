@@ -1,0 +1,103 @@
+---
+title: "Data anomaly detection"
+---
+
+(Not a dbt user? you can still use Elementary, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) and we will help).
+
+## Data monitors as dbt tests
+
+Elementary is the first solution that delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. Elementary dbt tests are actually data monitors that collect metrics and metadata over time. On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers.
+These tests are configured and executed like any other tests in your project.
+
+## How to use Elementary to monitor data?
+
+Elementary data monitoring includes a [dbt package](../learn/dbt-package) and CLI.
+The dbt package is added to your project. It includes models, tests, and [dbt artifacts](https://docs.getdbt.com/reference/artifacts/dbt-artifacts) uploader.
+
+After you add the package to your project, you can add Elementary tests to your models and sources configuration.
+
+When you execute `dbt run`, elementary creates models and upload artifacts.
+
+When you execute `dbt test`, elementary data monitors collect metrics according to your configuration, and analyze to detect anomalies. If anomalies are detected - the test will fail/warn.
+
+After your `dbt run` and `dbt test`, execute the Elementary CLI `edr monitor` command. This will aggregate the results, and alert to Slack on new anomalies.
+
+## Install elementary dbt package
+
+[Elementary dbt package](../getting-started/quickstart-data-monitoring#install-the-dbt-package)
+
+## Execution and usage overview
+
+The usage flow is as follows:
+
+1. Install the dbt package and related configuration. (Not a dbt user? you can still use Elementary, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) and we will help).
+2. [Configure data monitors as tests](/test-configuration), just like you configure your native dbt tests.
+3. Run `dbt run` as usual (the models in this run have minimal performance impact).
+4. Run `dbt test` as usual, but this time Elementary data monitoring and anomaly detection will run as part of your tests.
+5. [Configure Slack Webhook](../integrations/slack).
+6. Run `edr monitor` to aggregate the results and get Slack alerts.
+
+---
+
+## Tests and monitors types
+
+### What are data monitors?
+
+Data monitors are SQL queries generators that are executed to collect a specific metric of the data, and track it over time.
+
+### How do monitors work in Elementary data tests?
+
+Monitors have two modes:
+
+#### Time buckets
+
+If a `timestamp_column` is defined for the table, the monitor will collect metrics by timeframe buckets. It is highly recommended to use time buckets on every table that has a time field. This is both for performance reasons, as well as better anomaly detection.
+
+The _default time bucket is 24 hours_.
+
+#### Global
+
+If there is no timestamp column configured, monitors will query on the entire table, in intervals that are at least the duration of the timeframe bucket.
+
+### Available monitors
+
+#### Table level monitors
+
+| Monitor name     |
+| ---------------- |
+| `freshness`      |
+| `row_count`      |
+| `schema_changes` |
+
+| Property             | Column Type |
+| -------------------- | ----------- |
+| `null_count`         | any         |
+| `null_percent`       | any         |
+| `min_length`         | string      |
+| `max_length`         | string      |
+| `average_length`     | string      |
+| `missing_count`      | string      |
+| `missing_percent`    | string      |
+| `min`                | numeric     |
+| `max`                | numeric     |
+| `zero_count`         | numeric     |
+| `zero_percent`       | numeric     |
+| `standard_deviation` | numeric     |
+| `variance`           | numeric     |
+
+## Anomaly detection
+
+Elementary uses "[standard score](https://en.wikipedia.org/wiki/Standard_score)", also known as "Z-score" for anomaly detection. This score represents the number of standard deviations of a value from the average of a set of values.
+
+According to the [empirical rule](https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/empirical-rule-2/), in a standard normal distribution:
+
+- **~68%** of values have an absolute **z-score of 1 or less.**
+- **~95%** of values have an absolute **z-score of 2 or less.**
+- **~99.7%** of values have an absolute **z-score of 3 or less.**
+
+Values with a **standard score of 3 and above are [considered outliers](https://www.ctspedia.org/do/view/CTSpedia/OutLier)**, and this is a recommended threshold for anomaly detection.
+This is the default Elementary uses as well, and it can be changed using the var `anomaly_score_threshold` in the [global configuration](/test-configuration).
+
+You can use the model `anomaly_threshold_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
+
+<img src="../img/z-score.png" alt="Z Score" />

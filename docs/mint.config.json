@@ -20,52 +20,65 @@
       },
       {
         "group": "Guides",
-        "pages": ["tests", "generate-reports", "slack-alerts"]
+        "pages": [
+          "guides/tests",
+          "guides/generate-reports",
+          "guides/slack-alerts"
+        ]
       },
       {
         "group": "Understand Elementary",
         "pages": [
-          "overview",
-          "dbt-package",
-          "cli-install",
-          "connection-profile",
-          "cli-commands",
-          "cli-advanced",
-          "report-ui",
-          "alerts"
+          "learn/overview",
+          "learn/dbt-package",
+          "learn/cli-install",
+          "learn/connection-profile",
+          "learn/cli-commands",
+          "learn/cli-advanced",
+          "learn/report-ui",
+          "learn/alerts"
         ]
       },
       {
         "group": "Data Monitoring",
         "pages": [
-          "data-and-dbt-tests-report-ui",
-          "data-anomaly-detection",
-          "add-data-monitoring-tests",
-          "test-configuration",
-          "dbt-artifacts",
-          "monitoring-in-prod"
+          "data-monitoring/data-and-dbt-tests-report-ui",
+          "data-monitoring/data-anomaly-detection",
+          "data-monitoring/add-data-monitoring-tests",
+          "data-monitoring/test-configuration",
+          "data-monitoring/dbt-artifacts",
+          "data-monitoring/monitoring-in-prod"
         ]
       },
       {
         "group": "Data Lineage",
         "pages": [
-          "edr-lineage",
-          "lineage-graph",
-          "query-history",
-          "data-lineage-use-cases"
+          "data-lineage/edr-lineage",
+          "data-lineage/lineage-graph",
+          "data-lineage/query-history",
+          "data-lineage/data-lineage-use-cases"
         ]
       },
       {
         "group": "Integrations",
-        "pages": ["slack", "snowflake", "redshift", "big-query"]
+        "pages": [
+          "integrations/slack",
+          "integrations/snowflake",
+          "integrations/redshift",
+          "integrations/big-query"
+        ]
       },
       {
         "group": "Project Overview",
-        "pages": ["contributions", "roadmap"]
+        "pages": ["overview/contributions", "overview/roadmap"]
       },
       {
         "group": "FAQ & Support",
-        "pages": ["troubleshooting", "community-and-support", "faq"]
+        "pages": [
+          "support/troubleshooting",
+          "support/community-and-support",
+          "support/faq"
+        ]
       }
     ]
   }
