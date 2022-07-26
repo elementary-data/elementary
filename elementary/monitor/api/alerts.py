@@ -57,7 +57,6 @@ class AlertsAPI(APIClient):
                     ))
         if malformed_alerts:
             logger.error('Failed to parse some alerts.')
-            self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
 
     @classmethod
