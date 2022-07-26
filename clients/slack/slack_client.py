@@ -1,6 +1,7 @@
 import json
 import logging
 from abc import ABC, abstractmethod
+from typing import List
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
@@ -87,7 +88,8 @@ class SlackWebClient(SlackClient):
             ][0]
             return channel["id"]
         except Exception:
-            logger.error(f"Could not find the channel - {channel_name}. Elementary app's available cahnnels: {[channel.get('name') for channel in channels]}")
+            logger.error(
+                f"Could not find the channel - {channel_name}. Elementary app's available cahnnels: {[channel.get('name') for channel in channels]}")
 
     def _join_channel(self, channel_id: str) -> bool:
         try:
@@ -97,7 +99,7 @@ class SlackWebClient(SlackClient):
             logger.error(f"Elementary app failed to join the given channel. Error: {e}")
             return False
 
-    def _get_channels(self) -> list[dict]:
+    def _get_channels(self) -> List[dict]:
         try:
             channels = []
             has_more = True
@@ -111,6 +113,7 @@ class SlackWebClient(SlackClient):
         except SlackApiError as e:
             logger.error(f"Elementary app failed to query all Slack public channels. Error: {e}")
             return []
+
 
 class SlackWebhookClient(SlackClient):
     def _initial_client(self):
