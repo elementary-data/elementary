@@ -52,7 +52,7 @@ class DataMonitoring:
     ) -> None:
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
-        self.execution_properties = {}
+        self.execution_properties = {'sent_alert_count': 0, 'channel_count': 0, 'owner_count': 0, 'subscriber_count': 0}
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
         self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
@@ -70,8 +70,9 @@ class DataMonitoring:
             return []
 
         sent_alert_ids = []
-        unique_channels = set()
-        unique_tags = set()
+        channels = set()
+        owners = set()
+        subscribers = set()
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
@@ -82,14 +83,17 @@ class DataMonitoring:
             )
             if sent_successfully:
                 sent_alert_ids.append(alert.id)
-                unique_channels.add(channel)
-                unique_tags.update(alert.tags)
+                channels.add(channel)
+                owners.update(alert.owners)
+                subscribers.update(alert.subscribers)
             else:
                 logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}")
                 self.success = False
         self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        self.execution_properties['channel_count'] = len(unique_channels)
-        self.execution_properties['tag_count'] = len(unique_tags)
+        self.execution_properties['sent_alert_count'] += len(sent_alert_ids)
+        self.execution_properties['channel_count'] += len(channels)
+        self.execution_properties['owner_count'] += len(owners)
+        self.execution_properties['subscriber_count'] += len(subscribers)
         return sent_alert_ids
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
@@ -108,8 +112,6 @@ class DataMonitoring:
     def _send_alerts(self, alerts: Alerts):
         sent_test_alert_ids = self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
         sent_model_alert_ids = self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        sent_alert_count = len(sent_test_alert_ids) + len(sent_model_alert_ids)
-        self.execution_properties['sent_alert_count'] = sent_alert_count
 
     def run(self, days_back: int, dbt_full_refresh: bool = False, dbt_vars: Optional[dict] = None) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
