@@ -2,8 +2,8 @@ import copy
 import json
 from typing import Callable, List
 
-import utils.dbt
 from clients.api.api import APIClient
+from clients.dbt.dbt_runner import DbtRunner
 from monitor.alerts.alerts import AlertsQueryResult, Alerts
 from monitor.alerts.malformed import MalformedAlert
 from monitor.alerts.model import ModelAlert
@@ -15,6 +15,10 @@ logger = get_logger(__name__)
 
 
 class AlertsAPI(APIClient):
+    def __init__(self, dbt_runner: DbtRunner, elementary_database_and_schema: str):
+        super().__init__(dbt_runner)
+        self.elementary_database_and_schema = elementary_database_and_schema
+
     def query(self, days_back: int) -> Alerts:
         return Alerts(
             tests=self._query_test_alerts(days_back),
@@ -59,23 +63,22 @@ class AlertsAPI(APIClient):
             logger.error('Failed to parse some alerts.')
             self.success = False
         return AlertsQueryResult(alerts, malformed_alerts)
-    
+
     @classmethod
     def _normalize_alert(cls, alert: dict) -> dict:
         try:
             normalized_alert = copy.deepcopy(alert)
-            test_meta = try_load_json(normalized_alert.get('test_meta'))
-            test_meta = test_meta if test_meta else {}
-            model_meta = try_load_json(normalized_alert.get('model_meta'))
-            model_meta = model_meta if model_meta else {}
+            test_meta = try_load_json(normalized_alert.get('test_meta')) or {}
+            model_meta = try_load_json(normalized_alert.get('model_meta')) or {}
 
             subscribers = []
-            direct_subscribers = test_meta.get('subscribers', [])
+            test_subscribers = test_meta.get('subscribers', [])
             model_subscribers = model_meta.get('subscribers', [])
-            if isinstance(direct_subscribers, list):
-                subscribers.extend(direct_subscribers)
+            if isinstance(test_subscribers, list):
+                subscribers.extend(test_subscribers)
             else:
-                subscribers.append(direct_subscribers)
+                subscribers.append(test_subscribers)
+
             if isinstance(model_subscribers, list):
                 subscribers.extend(model_subscribers)
             else:
@@ -87,7 +90,8 @@ class AlertsAPI(APIClient):
             normalized_alert['slack_channel'] = slack_channel
             return normalized_alert
         except Exception:
-            logger.error(f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used")
+            logger.error(
+                f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used")
             return alert
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
@@ -98,14 +102,6 @@ class AlertsAPI(APIClient):
                 macro_args={'alert_ids': alert_ids_chunk, 'table_name': table_name},
                 json_logs=False
             )
-
-    @property
-    def elementary_database_and_schema(self):
-        try:
-            return utils.dbt.get_elementary_database_and_schema(self.dbt_runner)
-        except Exception:
-            logger.error("Failed to parse Elementary's database and schema.")
-            return '<elementary_database>.<elementary_schema>'
 
     @staticmethod
     def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
