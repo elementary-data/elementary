@@ -147,7 +147,7 @@ class DataMonitoring:
             output_data['test_runs_totals'] = test_runs_totals
             output_data['coverages'] = models_coverages
             output_data['lineage'] = lineage.dict()
-            output_data['user_id'] = user_id
+            output_data['report_generator_user_id'] = user_id
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, 'r') as template_html_file:
                 template_html_code = template_html_file.read()
