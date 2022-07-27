@@ -2,8 +2,8 @@ import copy
 import json
 from typing import Callable, List
 
-import utils.dbt
 from clients.api.api import APIClient
+from clients.dbt.dbt_runner import DbtRunner
 from monitor.alerts.alerts import AlertsQueryResult, Alerts
 from monitor.alerts.malformed import MalformedAlert
 from monitor.alerts.model import ModelAlert
@@ -15,6 +15,10 @@ logger = get_logger(__name__)
 
 
 class AlertsAPI(APIClient):
+    def __init__(self, dbt_runner: DbtRunner, elementary_database_and_schema: str):
+        super().__init__(dbt_runner)
+        self.elementary_database_and_schema = elementary_database_and_schema
+
     def query(self, days_back: int) -> Alerts:
         return Alerts(
             tests=self._query_test_alerts(days_back),
@@ -98,14 +102,6 @@ class AlertsAPI(APIClient):
                 macro_args={'alert_ids': alert_ids_chunk, 'table_name': table_name},
                 json_logs=False
             )
-
-    @property
-    def elementary_database_and_schema(self):
-        try:
-            return utils.dbt.get_elementary_database_and_schema(self.dbt_runner)
-        except Exception:
-            logger.error("Failed to parse Elementary's database and schema.")
-            return '<elementary_database>.<elementary_schema>'
 
     @staticmethod
     def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
