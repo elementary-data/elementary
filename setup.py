@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 import pathlib
+
+from setuptools import setup, find_packages
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -10,7 +11,7 @@ README = (HERE / "README.md").read_text()
 setup(
     name='elementary-data',
     description='Data monitoring and lineage',
-    version='0.4.2',
+    version='0.4.6',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
@@ -18,7 +19,8 @@ setup(
         edr=cli.cli:cli
     ''',
     author="Elementary",
-    package_data={"": ["header.html", "index.html", "dbt_project/*", "dbt_project/macros/*", "dbt_project/models/*"]},
+    package_data={"": ["header.html", "index.html", "dbt_project/*", "dbt_project/macros/*", "dbt_project/models/*",
+                       "dbt_project/models/alerts/*"]},
     keyword="data, lineage, data lineage, data warehouse, DWH, observability, data monitoring, data observability, "
             "Snowflake, BigQuery, Redshift, data reliability, analytics engineering",
     long_description=README,
