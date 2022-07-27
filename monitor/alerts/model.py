@@ -39,6 +39,8 @@ class ModelAlert(Alert):
         self.path = path
         self.original_path = original_path
         self.materialization = materialization
+        self.detected_at_utc = None
+        self.detected_at = None
         if detected_at:
             try:
                 detected_at_utc = datetime.fromisoformat(detected_at)
