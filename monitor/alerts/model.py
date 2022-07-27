@@ -5,6 +5,10 @@ from typing import List, Optional, Union
 from clients.slack.schema import SlackMessageSchema
 from monitor.alerts.alert import Alert
 from utils.json_utils import prettify_json_str_set
+from utils.log import get_logger
+from utils.time import convert_utc_time_to_local_time
+
+logger = get_logger(__name__)
 
 
 class ModelAlert(Alert):
@@ -35,7 +39,13 @@ class ModelAlert(Alert):
         self.path = path
         self.original_path = original_path
         self.materialization = materialization
-        self.detected_at = detected_at
+        if detected_at:
+            try:
+                detected_at_utc = datetime.fromisoformat(detected_at)
+                self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
+                self.detected_at = convert_utc_time_to_local_time(detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
+            except (ValueError, TypeError):
+                logger.error(f'Failed to parse "detect_at" field.')
         self.database_name = database_name
         self.schema_name = schema_name
         self.message = message
