@@ -1,9 +1,12 @@
 from config.config import Config
-from lineage.bigquery_query_history import BigQueryQueryHistory
-from utils.dbt import get_bigquery_client, get_snowflake_client
 from exceptions.exceptions import ConfigError
+from lineage.bigquery_query_history import BigQueryQueryHistory
 from lineage.query_history import QueryHistory
 from lineage.snowflake_query_history import SnowflakeQueryHistory
+
+# This requires the installations of both adapters.
+from utils.dbt.bigquery import get_bigquery_client
+from utils.dbt.snowflake import get_snowflake_client
 
 
 class QueryHistoryFactory:

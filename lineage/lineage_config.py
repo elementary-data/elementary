@@ -1,4 +1,4 @@
-from utils.dbt import extract_credentials_and_data_from_profiles
+from utils.dbt.generic import extract_credentials_and_data_from_profiles
 from config.config import Config
 
 

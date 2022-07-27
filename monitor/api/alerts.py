@@ -2,7 +2,7 @@ import copy
 import json
 from typing import Callable, List
 
-import utils.dbt
+import utils.dbt.generic as dbt
 from clients.api.api import APIClient
 from monitor.alerts.alerts import AlertsQueryResult, Alerts
 from monitor.alerts.malformed import MalformedAlert
@@ -102,7 +102,7 @@ class AlertsAPI(APIClient):
     @property
     def elementary_database_and_schema(self):
         try:
-            return utils.dbt.get_elementary_database_and_schema(self.dbt_runner)
+            return dbt.get_elementary_database_and_schema(self.dbt_runner)
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'

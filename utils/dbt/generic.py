@@ -6,13 +6,8 @@ from pathlib import Path
 from typing import Dict, Any, Union
 
 import dbt.config
-import google.cloud.bigquery
-import google.cloud.exceptions
-import snowflake.connector
-from dbt.adapters.bigquery.connections import BigQueryConnectionManager
 from dbt.context.base import generate_base_context
 from dbt.exceptions import DbtConfigError
-from google.api_core import client_info
 
 from clients.dbt.dbt_runner import DbtRunner
 from exceptions.exceptions import ConfigError
@@ -45,42 +40,6 @@ def extract_credentials_and_data_from_profiles(profiles_dir: str, profile_name: 
     except DbtConfigError as exc:
         logger.debug(f"Failed parsing selected profile - {profiles_dir}, {profile_name}, {exc}")
         raise ConfigError(f"Failed parsing selected profile - {profiles_dir}, {profile_name}")
-
-
-def get_bigquery_client(profile_credentials):
-    if profile_credentials.impersonate_service_account:
-        creds = \
-            BigQueryConnectionManager.get_impersonated_bigquery_credentials(profile_credentials)
-    else:
-        creds = BigQueryConnectionManager.get_bigquery_credentials(profile_credentials)
-
-    database = profile_credentials.database
-    location = getattr(profile_credentials, 'location', None)
-
-    info = client_info.ClientInfo(user_agent=f'elementary')
-    return google.cloud.bigquery.Client(
-        database,
-        creds,
-        location=location,
-        client_info=info,
-    )
-
-
-def get_snowflake_client(profile_credentials, server_side_binding=True):
-    if server_side_binding:
-        snowflake.connector.paramstyle = 'numeric'
-    return snowflake.connector.connect(
-        account=profile_credentials.account,
-        user=profile_credentials.user,
-        database=profile_credentials.database,
-        schema=profile_credentials.schema,
-        warehouse=profile_credentials.warehouse,
-        role=profile_credentials.role,
-        autocommit=True,
-        client_session_keep_alive=profile_credentials.client_session_keep_alive,
-        application='elementary',
-        **profile_credentials.auth_args()
-    )
 
 
 def get_profile_name_from_dbt_project(dbt_project_path: str) -> str:

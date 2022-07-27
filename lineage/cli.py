@@ -6,7 +6,7 @@ from lineage.lineage_config import LineageConfig
 from exceptions.exceptions import ConfigError
 from lineage.query_history_factory import QueryHistoryFactory
 from utils.package import get_package_version
-from utils.dbt import is_dbt_installed
+from utils.dbt.generic import is_dbt_installed
 from utils.cli_utils import RequiredIf
 from lineage.empty_graph_helper import EmptyGraphHelper
 from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
