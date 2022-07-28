@@ -1,5 +1,7 @@
+import functools
 import json
 import os
+import os.path
 import webbrowser
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
@@ -7,7 +9,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import pkg_resources
 from alive_progress import alive_it
 
-import utils.dbt
 from clients.dbt.dbt_runner import DbtRunner
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
@@ -58,7 +59,7 @@ class DataMonitoring:
         # slack client is optional
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.alerts_api = AlertsAPI(self.dbt_runner)
+        self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
         self.success = True
 
     def _dbt_package_exists(self) -> bool:
@@ -178,11 +179,13 @@ class DataMonitoring:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
         return lineage_api.get_lineage()
 
-    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None, disable_passed_test_metrics: bool = False):
+    def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
+                                     disable_passed_test_metrics: bool = False):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
-            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back, disable_passed_test_metrics=disable_passed_test_metrics)
+            tests_sample_data = tests_api.get_tests_sample_data(days_back=days_back,
+                                                                disable_passed_test_metrics=disable_passed_test_metrics)
             invocations = tests_api.get_invocations(invocations_per_test=test_runs_amount, days_back=days_back)
             tests_results = self._create_tests_results(
                 tests_metadata=tests_metadata,
@@ -213,7 +216,7 @@ class DataMonitoring:
             test_invocations = invocations.get(test_sub_type_unique_id)
             test_result = TestAlert.create_test_alert_from_dict(
                 **metadata,
-                elementary_database_and_schema=utils.dbt.get_elementary_database_and_schema(self.dbt_runner),
+                elementary_database_and_schema=self.get_elementary_database_and_schema(),
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
@@ -256,3 +259,12 @@ class DataMonitoring:
             self.config.target_dir,
             f"elementary - {generation_time} utc.html".replace(" ", "_").replace(":", "-")
         ))
+
+    @functools.lru_cache
+    def get_elementary_database_and_schema(self):
+        try:
+            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
+            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
+        except Exception:
+            logger.error("Failed to parse Elementary's database and schema.")
+            return '<elementary_database>.<elementary_schema>'

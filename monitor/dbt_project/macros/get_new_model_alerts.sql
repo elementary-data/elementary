@@ -7,7 +7,7 @@
     {% set select_new_alerts_query %}
         with new_alerts as (
             select * from {{ ref('alerts_models') }}
-            where alert_sent = false and detected_at >= {{ get_alerts_time_limit(days_back) }}
+            where alert_sent = false and {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         ),
         models as (
             select * from {{ ref('elementary', 'dbt_models') }}
