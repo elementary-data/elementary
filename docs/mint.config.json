@@ -9,8 +9,8 @@
     "primary": "#FF6B42",
     "light": "#FE8E08",
     "dark": "#FF4775",
-    "ultralight": "#F3D7B4",
-    "ultradark": "#E0456C"
+    "ultraLight": "#F3D7B4",
+    "ultraDark": "#E0456C"
   },
   "topbarCtaButton": {
     "name": "Signup for cloud beta",
