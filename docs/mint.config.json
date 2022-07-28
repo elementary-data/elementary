@@ -1,6 +1,9 @@
 {
   "name:": "Elementary",
-  "logo": "./logo.svg",
+  "logo": {
+    "light": "./logo/light.svg",
+    "dark": "./logo/dark.svg"
+  },
   "favicon": "./elementary_logo_512x512.png",
   "colors": {
     "primary": "#FF6B42",
