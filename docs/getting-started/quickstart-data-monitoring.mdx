@@ -16,7 +16,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </details>
 
-## How to install the dbt package?
+## How to install Elementary dbt package?
 <Example resizeable>
   <div style="position: relative; padding-bottom: 64.98194945848375%; height: 0;">
     <iframe
@@ -30,7 +30,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
   </div>
 </Example>
 
-### 1. Install the dbt package
+### 1. Add elementary to `packages.yml`
 
 Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
 
@@ -42,10 +42,7 @@ packages:
     ## see docs: https://docs.elementary-data.com/
 ```
 
-### 2. Run `dbt deps`
-This will import the package into your project.
-
-### 3. Add to your `dbt_project.yml`
+### 2. Add to your `dbt_project.yml`
 
 <TipInfo>
   This means Elementary will use `your_schema_elementary` as its schema.
@@ -82,8 +79,13 @@ models:
 ```
 </details>
 
+### 3. Import the package
 
-### 4. Execute `dbt run --select elementary`
+```shell Terminal
+dbt deps
+```
+
+### 4. Run to create the package models
 
 ```shell Terminal
 dbt run --select elementary
