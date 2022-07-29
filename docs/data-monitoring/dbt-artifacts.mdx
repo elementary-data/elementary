@@ -1,0 +1,62 @@
+---
+title: "dbt artifacts"
+---
+
+The [Elementary dbt package](../getting-started/quickstart-data-monitoring#install-the-dbt-package) includes uploading and modeling of dbt artifacts.
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">What are dbt artifacts?</summary>
+
+Each dbt invocation generates artifacts, with details about the project resources, configuration and execution. Most are in json format. The artifacts are practically the metadata and logs of the dbt project.
+
+</details>
+
+## How Elementary uploads dbt artifacts?
+
+The Elementary dbt package includes macros that extract specific fields from the artifacts during the execution, and insert to tables. These tables are defined as models of the package.
+Most of the artifacts are uploaded in a [post-hook](https://docs.getdbt.com/reference/resource-configs/pre-hook-post-hook) of the model.
+The [run results](https://docs.getdbt.com/reference/artifacts/run-results-json) are uploaded in an [on-run-end](https://docs.getdbt.com/reference/project-configs/on-run-start-on-run-end) operation, as these are accessible only when the run concludes.
+
+## Which artifacts are uploaded and modeled?
+
+Elementary uploads fields from the run-results, and the graph object (includes data of manifest, catalog and sources).
+
+You can disable or enable the relevant models in the Elementary package if you want to limit the artifacts that are loaded to your data warehouse (under `elementary/models/edr/dbt_artifacts`).
+
+## dbt artifacts models
+
+Elementary loads data from dbt artifacts to models that can be found under `dbt_artifacts` folder of the package.
+
+For `dbt_run_results` data is inserted at the on-run-end, and for the rest of the models it's a post-hook on the model itself.
+
+The dbt artifacts models are:
+
+### dbt_run_results
+
+Run results of models and tests, inserted at the end of each invocation. Each row is the invocation result of a single resource (model, test, etc.), and includes information like execution time start and end, status and affected rows.
+This is an incremental model, new run results are added with each invocation that produces a result object.
+
+### dbt_models
+
+Data about all the models in the project and project packages. Each row contains information about the properties of a single model, including columns like tags, owner, materialization, depends_on, and description.
+Each time the model is executed, the data is replaced with data from the project's current graph.
+
+### dbt_tests
+
+Data about all the tests in the project and project packages. Each row contains information about the properties of a single test, including columns like severity, parent model unique id, tags and owner of the parent model, test params, and the test compiled query.
+Each time the model is executed, the data is replaced with data from the project's current graph.
+
+### dbt_sources
+
+Data about the sources configured in the project and project packages. Each row contains information about the properties of a single source, including columns like tags, owner, freshness configuration, database and schema.
+Each time the model is executed, the data is replaced with data from the project's current graph.
+
+### dbt_exposures
+
+Data about the exposures configured in the project and project packages. Each row contains information about the properties of a single exposure, including columns like tags, owner, url and depends on.
+Each time the model is executed, the data is replaced with data from the project's current graph.
+
+### dbt_metrics
+
+Data about the metrics configured in the project and project packages. Each row contains information about the properties of a single metric, including columns like tags, owner, sql, and depends on.
+Each time the model is executed, the data is replaced with data from the project's current graph.

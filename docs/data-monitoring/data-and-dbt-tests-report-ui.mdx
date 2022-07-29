@@ -1,0 +1,73 @@
+---
+title: "Data & dbt tests report UI"
+---
+
+Elementary has a UI for visualization and exploration of data from the [dbt-package](../overview/contributions#guide-on-contributing-to-the-dbt-package) tables, which includes dbt test results, Elementary anomaly detection results, dbt artifacts, etc.
+
+After installing and configuring the [CLI](../learn/cli-install) and [dbt package](../getting-started/quickstart-data-monitoring#install-the-dbt-package), execute the command:
+
+```shell
+edr monitor report
+```
+
+The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the UI as an HTML file.
+
+<img src="../img/Demo-2-screens.gif" alt="Demo" />
+
+## Report UI Screens
+
+### Test Results
+
+The `Test results` tab shows the latest result for each dbt or Elementary test that was executed in the last 7 days (Can be changed by passing `--days-back` param to the [CLI](../learn/cli-advanced)).
+
+Initially, the report presents all tests, sorted by status (failures on top) and last run time. The grey header on the top of the screen shows the total amount of results of each status.
+
+#### Navigation bar
+
+The navigation bar on left shows a folder structure of your dbt project. On the right of each model/source you can see the amount of each test result for the specific model / source. Choosing a specific model will show the details of the selected model results. The grey header details and status totals also change accordingly.
+
+On the top of the navigation bar, you will find filters to present only tests of the selected result status. The selection filters both the navigation bar and the report.
+
+#### Test results table
+
+Each row in the table represents a single dbt test, or a single Elementary anomaly.
+The rows are expandable, and on expansion show information that can help understand and triage the result:
+
+- For Elementary anomaly tests - Anomaly detection graph, test attributes, query that returns the underlying metrics.
+- For dbt tests - Table with results sample, test params, error message, query that returns all the results.
+- For schema changes tests - detected schema changes.
+
+<img
+  src="../img/data-observability-ui-test-results-screen.gif"
+  alt="Data observability UI Test Result Screen"
+/>
+
+## Test returns
+
+The `Test runs` tab shows the last 30 runs (can be changed by passing `--executions-limit` param to the [CLI](../learn/cli-advanced)) for each dbt or Elementary test that was executed in the last 7 days (can be changed by passing `--days-back` param to the [CLI](../learn/cli-advanced)).
+
+Initially, the report presents all tests, sorted by results (results containing failures on top), fail rate and last run time. The grey header on the top of the screen shows the total amount of runs for each status.
+
+### Navigation bar
+
+The navigation bar on left shows a folder structure of your dbt project. On the right of each model/source you can see the amount of each tests runs for the specific table. Choosing a specific model presents a report of the selected model only. The grey header details and status totals also change accordingly.
+
+On the top of the navigation bar, you will find filters to present only tests of the selected result status. The selection filters both the navigation bar and the report.
+
+### Test runs table
+
+Each row in the table represents a single dbt test, or a single Elementary anomaly.
+The rows are expandable, and on expansion show information about the last runs of the tests:
+
+- Run status
+- Affected rows
+- Time
+
+<img src="../img/Test-Runs-video-demo.gif" alt="Test runs demo" />
+
+## Configure Slack report
+
+The data tests report UI can be sent via Slack when you run `edr monitor send-report`.
+Configure Slack integration by creating an app for Elementary and adding the `Token/Webhook` to the `config.yml`.
+
+Refer to [this guide](../guides/slack-alerts) for detailed instructions.

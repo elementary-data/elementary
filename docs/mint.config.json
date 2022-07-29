@@ -1,0 +1,128 @@
+{
+  "name": "Elementary",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "./elementary_logo_512x512.png",
+  "colors": {
+    "primary": "#FF6B42",
+    "light": "#FE8E08",
+    "dark": "#FF4775",
+    "ultraLight": "#F3D7B4",
+    "ultraDark": "#E0456C"
+  },
+  "topbarCtaButton": {
+    "name": "Signup for cloud beta",
+    "url": "https://www.elementary-data.com/cloud-beta"
+  },
+  "topbarLinks": [
+    {
+      "name": "Blog",
+      "url": "https://www.elementary-data.com/blog"
+    },
+    {
+      "name": "Community",
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Community",
+      "icon": "slack",
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    },
+    {
+      "name": "Demo",
+      "icon": "circle-play",
+      "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
+    },
+    {
+      "name": "Contact Us",
+      "icon": "envelope",
+      "url": "mailto:team@elementary-data.com"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "getting-started/introduction",
+        "getting-started/quickstart-data-monitoring",
+        "getting-started/quickstart-data-lineage"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/tests",
+        "guides/generate-reports",
+        "guides/slack-alerts"
+      ]
+    },
+    {
+      "group": "Understand Elementary",
+      "pages": [
+        "learn/overview",
+        "learn/dbt-package",
+        "learn/cli-install",
+        "learn/connection-profile",
+        "learn/cli-commands",
+        "learn/cli-advanced",
+        "learn/report-ui",
+        "learn/alerts"
+      ]
+    },
+    {
+      "group": "Data Monitoring",
+      "pages": [
+        "data-monitoring/data-and-dbt-tests-report-ui",
+        "data-monitoring/data-anomaly-detection",
+        "data-monitoring/add-data-monitoring-tests",
+        "data-monitoring/test-configuration",
+        "data-monitoring/dbt-artifacts",
+        "data-monitoring/monitoring-in-prod"
+      ]
+    },
+    {
+      "group": "Data Lineage",
+      "pages": [
+        "data-lineage/edr-lineage",
+        "data-lineage/lineage-graph",
+        "data-lineage/query-history",
+        "data-lineage/data-lineage-use-cases"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/slack",
+        "integrations/snowflake",
+        "integrations/redshift",
+        "integrations/big-query"
+      ]
+    },
+    {
+      "group": "Project Overview",
+      "pages": ["overview/contributions", "overview/roadmap"]
+    },
+    {
+      "group": "FAQ & Support",
+      "pages": [
+        "support/troubleshooting",
+        "support/community-and-support",
+        "support/faq"
+      ]
+    }
+  ],
+  "footerSocials": [
+    {
+      "type": "website",
+      "url": "https://www.elementary-data.com/"
+    },
+    {
+      "type": "slack",
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    }
+  ]
+}

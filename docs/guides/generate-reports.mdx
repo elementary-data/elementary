@@ -1,0 +1,161 @@
+---
+title: "Generate reports"
+---
+
+import { SnippetGroup } from "@/components/SnippetGroup";
+
+Elementary has a report for visualization and exploration of data from the dbt-package tables, which includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
+
+<img src="../img/Demo-2-screens.gif" alt="Demo" />
+
+In order to visualize the data from the [dbt-package](../overview/contributions#guide-on-contributing-to-the-dbt-package) tables, you can use the [CLI](../learn/cli-install) to generate the Elementary report.
+
+## Instructions to generate reports
+
+### Install the Elementary CLI
+
+To install the monitor module run:
+
+```
+pip install elementary-data
+```
+
+Run one of the following commands based on your platform (no need to run all):
+
+```
+pip install 'elementary-data[snowflake]'
+pip install 'elementary-data[bigquery]'
+pip install 'elementary-data[redshift]'
+```
+
+Run `edr --help` in order to ensure the installation was successful.
+
+If you're receiving `command not found: edr` please check our [troubleshooting guide](../support/troubleshooting).
+
+### Add connection profile for elementary CLI
+
+In order to connect, elementary needs a profile in a file named `profiles.yml`
+
+- Path: `HOME_DIR/.dbt/profiles.yml`
+
+- Profile name: `elementary`
+
+- Schema name: the default schema elementary uses is `<your_dbt_project_schema>_elementary`
+
+- If you want to change the schema elementary uses, please see [install & configuration](../getting-started/quickstart-data-monitoring#install-the-dbt-package)
+
+<SnippetGroup>
+
+```yml Snowflake
+## SNOWFLAKE ##
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'alerts_data_monitoring' is to find it.         ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary:
+outputs:
+default:
+type: snowflake
+account: [account id]
+
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]_elementary
+      threads: 4
+      ## OPTIONAL - if you want to create the lineage based on queries from more
+      ## than the last 7 days or you have 10k or more queries in the history pulled during
+      ## the requested dates range, add this parameter (NOTE: account_usage requires more permissions, see note below).
+
+```
+
+```yml BigQuery
+## BIGQUERY ##
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'alerts_data_monitoring' is to find it.         ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary:
+  outputs:
+    default:
+      type: bigquery
+
+      ## Service account auth, other options require other configs ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+
+      project: [project id]
+      dataset: [dataset name]
+      threads: 4
+      ## Location is mandatory, can be one of US or EU, or a regional location
+      location: [dataset location]
+      priority: interactive
+```
+
+```yml Redshift
+## REDSHIFT ##
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'alerts_data_monitoring' is to find it.         ##
+##                                                             ##
+
+elementary:
+  outputs:
+    default:
+      type: redshift
+      host: [hostname, like hostname.region.redshift.amazonaws.com]
+
+      ## User/password auth, other options (IAM) require other configs ##
+      user: [username]
+      password: [password]
+
+      dbname: [database name]
+      schema: [schema name]_elementary
+      threads: 4
+      keepalives_idle: 240 # default 240 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
+      ra3_node: true # enables cross-database sources
+```
+
+</SnippetGroup>
+
+### Execute dbt command
+
+```shell
+dbt run --select elementary
+```
+
+Before you can start using Elementary CLI, execute `dbt run` with the [Elementary package](../learn/dbt-package) models, which are **required for Elementary CLI features to work.**
+
+This will create mostly empty tables, that will be updated by the tests executions.
+The fact that the tables are empty means that there will be **minimal to no performance impact** on your dbt runs.
+
+## Generate Tests Report UI
+
+### Execute `edr monitor report` in your shell
+
+After installing and configuring the CLI, execute the command:
+
+```shell
+edr monitor report
+```
+
+The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the report as an HTML file.
