@@ -4,7 +4,7 @@ title: "Quickstart: Data Monitoring"
 
 import { TipInfo } from "@/components/Tip";
 
-To start using **Elementary data monitors as test dbt tests**, you need to add our package to your dbt project.
+To start using Elementary to monitor you dbt tests, executions and data, you need to add our dbt package to your dbt project.
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
   <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">What are dbt packages and packages.yml?</summary>
@@ -16,20 +16,33 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </details>
 
-## Install the dbt package
+## How to install Elementary dbt package?
+<Example resizeable>
+  <div style="position: relative; padding-bottom: 64.98194945848375%; height: 0;">
+    <iframe
+      src="https://www.loom.com/embed/5cf1aaa0708f43a993f8a2945473c7ac"
+      frameborder="0"
+      webkitallowfullscreen
+      mozallowfullscreen
+      allowfullscreen
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+    ></iframe>
+  </div>
+</Example>
 
-### Add the following to your 'packages.yml' file and run the 'dbt deps' command
+### 1. Add elementary to `packages.yml`
+
+Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
 
 ```yml packages.yml
 packages:
   - package: elementary-data/elementary
-    version: 0.4.2
-    ## compatible with Elementary CLI version 0.4.2
-    ## CLI: https://github.com/elementary-data/elementary
+    version: 0.4.7
+    ## compatible with Elementary CLI version 0.4.6
     ## see docs: https://docs.elementary-data.com/
 ```
 
-### Add to your `dbt_project.yml`
+### 2. Add to your `dbt_project.yml`
 
 <TipInfo>
   This means Elementary will use `your_schema_elementary` as its schema.
@@ -38,28 +51,41 @@ packages:
 ```yml dbt_project.yml
 models:
   ## elementary models will be created in the schema '<your_schema>_elementary'
-  ## when you add a profile for CLI alerts, make sure to configure this schema and db
   ## see docs: https://docs.elementary-data.com/
   elementary:
     +schema: "elementary"
-
-on-run-end:
-  - "{{ elementary.upload_dbt_artifacts(results) }}"
 ```
 
-<TipInfo>
 
-**Materialization**: For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that affect elementary, such as:
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200"><TipInfo>Important: Materialization config</TipInfo></summary>
 
-```
+For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that affect elementary, such as:
+
+```yml dbt_project.yml
 materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
 ```
 
 Make sure to place the 'elementary' configuration under the models key, and other configs under your project name.
 
-</TipInfo>
+Example:
+```yml dbt_project.yml
+models:
+  my_project:
+    materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
+  
+  elementary:
+    +schema: "elementary"
+```
+</details>
 
-### Execute dbt command
+### 3. Import the package
+
+```shell Terminal
+dbt deps
+```
+
+### 4. Run to create the package models
 
 ```shell Terminal
 dbt run --select elementary
@@ -67,23 +93,15 @@ dbt run --select elementary
 
 This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt executions.
 
-## dbt artifacts & run results
+## What happens now?
 
-Once the elementary dbt package has been installed and configured, your test results, your dbt run results and [dbt artifacts](../data-monitoring/dbt-artifacts) will be loaded to elementary models.
-
-Some models are updated by an on-run-end hook when you run `dbt run / test / build`, and some only when you run the model:
-
-- **On run end:**
-  - **elementary_test_results** - Results of all dbt tests (including elementary and other packages, such as dbt_expectations and dbt_utils).
-  - **dbt_run_results** - Results of all dbt executions.
-- **`dbt run` that includes elementary models:**
-  - **dbt_models, dbt_tests, dbt_sources, dbt_exposures, dbt_metrics** - Metadata and configuration. It is recommended to run these models when you make changes in your projects.
+Once the elementary dbt package has been installed and configured, your test results, run results and [dbt artifacts](../data-monitoring/dbt-artifacts) will be loaded to elementary schema tables.
 
 If you see data in these models you completed the package deployment (Congrats!🎉)
 
 ### What's next?
 
-1. [​Add anomaly detection as dbt tests](../guides/tests)📈
+1. [​Add data anomaly detection dbt tests](../guides/tests)📈
 2. [​Install the Elementary CLI](../guides/generate-reports#install-the-elementary-cli) to:
 
    - [​Visualize all dbt test results and runs in a report](../guides/generate-reports)✨
