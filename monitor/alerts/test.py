@@ -16,19 +16,19 @@ logger = get_logger(__name__)
 
 class TestAlert(Alert):
     def __init__(
-        self,
-        model_unique_id: str,
-        test_unique_id: str,
-        status: str,
-        id: str,
-        elementary_database_and_schema: str,
-        subscribers: Optional[List[str]] = None,
-        slack_channel: Optional[str] = None,
-        **kwargs
+            self,
+            model_unique_id: str,
+            test_unique_id: str,
+            status: str,
+            id: str,
+            elementary_database_and_schema: str,
+            subscribers: Optional[List[str]] = None,
+            slack_channel: Optional[str] = None,
+            **kwargs
     ) -> None:
         super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
         self.model_unique_id = model_unique_id
-        self.test_unique_id = test_unique_id 
+        self.test_unique_id = test_unique_id
         self.status = status
 
     TABLE_NAME = 'alerts'
@@ -79,7 +79,8 @@ class DbtTestAlert(TestAlert):
             test_runs=None,
             **kwargs
     ) -> None:
-        super().__init__(model_unique_id, test_unique_id, status, id, elementary_database_and_schema, subscribers, slack_channel)
+        super().__init__(model_unique_id, test_unique_id, status, id, elementary_database_and_schema, subscribers,
+                         slack_channel)
         self.test_type = test_type
         self.database_name = database_name
         self.schema_name = schema_name
@@ -109,12 +110,12 @@ class DbtTestAlert(TestAlert):
         self.test_rows_sample = test_rows_sample if test_rows_sample else ''
         self.test_runs = test_runs if test_runs else ''
         self.test_params = test_params
-        self.error_message = test_results_description.capitalize() if test_results_description else 'No error message'
+        self.error_message = test_results_description.capitalize() if test_results_description else ''
         self.column_name = column_name if column_name else ''
         self.severity = severity
 
         self.failed_rows_count = -1
-        if status != 'pass':
+        if status != 'pass' and self.error_message:
             found_rows_number = re.search(r'\d+', self.error_message)
             if found_rows_number:
                 found_rows_number = found_rows_number.group()
@@ -306,7 +307,7 @@ class ElementaryTestAlert(DbtTestAlert):
             sensitivity = test_params.get('sensitivity')
             test_params = {'timestamp_column': timestamp_column,
                            'anomaly_threshold': sensitivity}
-            if self.test_rows_sample:               
+            if self.test_rows_sample:
                 self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
             test_alerts = {'display_name': self.test_sub_type_display_name,
                            'metrics': self.test_rows_sample,
