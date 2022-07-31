@@ -56,7 +56,7 @@
       "group": "Guides",
       "pages": [
         "guides/tests",
-        "guides/generate-reports",
+        "guides/generate-report",
         "guides/slack-alerts"
       ]
     },
