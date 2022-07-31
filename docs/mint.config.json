@@ -47,30 +47,30 @@
     {
       "group": "Getting Started",
       "pages": [
-        "getting-started/introduction",
-        "getting-started/quickstart-data-monitoring",
-        "getting-started/quickstart-data-lineage"
+        "index",
+        "quickstart",
+        "quickstart-data-lineage"
       ]
     },
     {
       "group": "Guides",
       "pages": [
-        "guides/tests",
-        "guides/generate-report",
-        "guides/slack-alerts"
+        "quickstart/add-elementary-tests",
+        "quickstart/generate-report-ui",
+        "quickstart/send-slack-alerts"
       ]
     },
     {
       "group": "Understand Elementary",
       "pages": [
-        "learn/overview",
-        "learn/dbt-package",
-        "learn/cli-install",
-        "learn/connection-profile",
-        "learn/cli-commands",
-        "learn/cli-advanced",
-        "learn/report-ui",
-        "learn/alerts"
+        "understand-elementary/elementary-overview",
+        "understand-elementary/dbt-package",
+        "understand-elementary/cli-install",
+        "understand-elementary/connection-profile",
+        "understand-elementary/cli-commands",
+        "understand-elementary/cli-advanced",
+        "understand-elementary/elementary-report-ui",
+        "understand-elementary/elementary-alerts"
       ]
     },
     {
@@ -79,9 +79,9 @@
         "data-monitoring/data-and-dbt-tests-report-ui",
         "data-monitoring/data-anomaly-detection",
         "data-monitoring/add-data-monitoring-tests",
-        "data-monitoring/test-configuration",
+        "data-monitoring/elementary-tests-configuration",
         "data-monitoring/dbt-artifacts",
-        "data-monitoring/monitoring-in-prod"
+        "data-monitoring/monitoring-in-production"
       ]
     },
     {
@@ -89,8 +89,8 @@
       "pages": [
         "data-lineage/edr-lineage",
         "data-lineage/lineage-graph",
-        "data-lineage/query-history",
-        "data-lineage/data-lineage-use-cases"
+        "data-lineage/query-history-1",
+        "data-lineage/use-cases"
       ]
     },
     {
@@ -99,19 +99,19 @@
         "integrations/slack",
         "integrations/snowflake",
         "integrations/redshift",
-        "integrations/big-query"
+        "integrations/bigquery"
       ]
     },
     {
       "group": "Project Overview",
-      "pages": ["overview/contributions", "overview/roadmap"]
+      "pages": ["project-overview/contributions", "project-overview/roadmap"]
     },
     {
       "group": "FAQ & Support",
       "pages": [
-        "support/troubleshooting",
-        "support/community-and-support",
-        "support/faq"
+        "general/troubleshooting",
+        "general/community-and-support",
+        "general/faq"
       ]
     }
   ],
