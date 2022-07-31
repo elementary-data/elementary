@@ -5,7 +5,7 @@ title: "Add data monitoring tests"
 import { TipInfo } from "@/components/Tip";
 import { SnippetGroup } from "@/components/SnippetGroup";
 
-After you [install the dbt package](../getting-started/quickstart-data-monitoring#install-the-dbt-package) and related configuration, you can add Elementary data tests.
+After you [install the dbt package](../quickstart#install-the-dbt-package) and related configuration, you can add Elementary data tests.
 
 ## Data monitors as dbt tests
 
@@ -23,12 +23,12 @@ These tests are configured and executed like any other tests in your project.
 
 `elementary.table_anomalies`
 
-Executes table level monitors and anomaly detection. Specific monitors are [detailed here]() and can be configured using the `table_anomalies` key.
+Executes table level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
 By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
 
 `elementary.all_columns_anomalies`
 
-Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here]() and can be configured using the `all_columns_anomalies` key.
+Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
 
 `elementary.schema_changes`
 
@@ -45,9 +45,9 @@ Elementary tests are added to models / sources / columns of your dbt project jus
 
 Elementary tests have three levels of configurations:
 
-1. [Test arguments](./test-configuration#test-arguments) - Test specific arguments.
-2. [Table configuration]() - Configure the timestamp column and details of a monitored table.
-3. [Global vars](./test-configuration#data-monitoring-global-vars) - Optional configuration parameters of the operation.
+1. [Test arguments](./elementary-tests-configuration#test-arguments) - Test specific arguments.
+2. Table configuration - Configure the timestamp column and details of a monitored table.
+3. [Global vars](./elementary-tests-configuration#data-monitoring-global-vars) - Optional configuration parameters of the operation.
 
 More on data tests configuration [here](./test-configuration).
 

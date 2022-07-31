@@ -8,7 +8,7 @@ Elementary has a report for visualization and exploration of data from the dbt-p
 
 <img src="https://res.cloudinary.com/mintlify/image/upload/v1659306763/elementary/Demo-2-screens_iuh0ek.gif" alt="Demo" />
 
-In order to visualize the data from the [dbt-package](../overview/contributions#guide-on-contributing-to-the-dbt-package) tables, you can use the [CLI](../learn/cli-install) to generate the Elementary report.
+In order to visualize the data from the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, you can use the [CLI](../understand-elementary/cli-install) to generate the Elementary report.
 
 ## Instructions to generate reports
 
@@ -30,7 +30,7 @@ pip install 'elementary-data[redshift]'
 
 Run `edr --help` in order to ensure the installation was successful.
 
-If you're receiving `command not found: edr` please check our [troubleshooting guide](../support/troubleshooting).
+If you're receiving `command not found: edr` please check our [troubleshooting guide](../general/troubleshooting).
 
 ### Add connection profile for elementary CLI
 
@@ -42,7 +42,7 @@ In order to connect, elementary needs a profile in a file named `profiles.yml`
 
 - Schema name: the default schema elementary uses is `<your_dbt_project_schema>_elementary`
 
-- If you want to change the schema elementary uses, please see [install & configuration](../getting-started/quickstart-data-monitoring#install-the-dbt-package)
+- If you want to change the schema elementary uses, please see [install & configuration](../quickstart#install-the-dbt-package)
 
 <SnippetGroup>
 
@@ -143,7 +143,7 @@ elementary:
 dbt run --select elementary
 ```
 
-Before you can start using Elementary CLI, execute `dbt run` with the [Elementary package](../learn/dbt-package) models, which are **required for Elementary CLI features to work.**
+Before you can start using Elementary CLI, execute `dbt run` with the [Elementary package](../understand-elementary/dbt-package) models, which are **required for Elementary CLI features to work.**
 
 This will create mostly empty tables, that will be updated by the tests executions.
 The fact that the tables are empty means that there will be **minimal to no performance impact** on your dbt runs.

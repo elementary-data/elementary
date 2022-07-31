@@ -12,10 +12,10 @@ If you get an empty report, there are several steps to understand what went wron
 
 - **Check that dbt package version is the latest**
 
-- Refer to the [dbt package installation guide](../getting-started/quickstart-data-monitoring#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- Refer to the [dbt package installation guide](../quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
 
 - **Check if the table `elementary_test_results` exists and has data**
-- If the table does not exist - refer to the [dbt package installation guide](../getting-started/quickstart-data-monitoring#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- If the table does not exist - refer to the [dbt package installation guide](../quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
 - If the table exists but has no data - Did you execute `dbt test` since deploying the package and creating the models?
 - If yes, make sure the table was created as an incremental table (not a regular table or view).
 - If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
@@ -146,7 +146,7 @@ A partial lineage graph may be created because of the following reasons:
 
 1. The selected timeframe does not include relevant queries, refer to the integrations
 2. Credentials provided in the profile are not permitted to read the full query history. The required permissions are detailed in the page of each integration
-3. Some query types used are [not supported](../data-lineage/query-history#unsupported-query-types), you can notify us on a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues) and we will include these in our next release
+3. Some query types used are [not supported](../data-lineage/query-history-1#unsupported-query-types), you can notify us on a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues) and we will include these in our next release
 
 </details>
 

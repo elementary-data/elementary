@@ -4,7 +4,7 @@ title: "Slack"
 
 import { TipInfo } from "@/components/Tip";
 
-For Slack alerts, you first need to install [Elementary CLI](../learn/cli-install), [configure](../learn/cli-install#cli-configuration) a connection profile for it, and create a config file for the Slack integration.
+For Slack alerts, you first need to install [Elementary CLI](../understand-elementary/cli-install), [configure](../understand-elementary/cli-install#cli-configuration) a connection profile for it, and create a config file for the Slack integration.
 
 <TipInfo>
   Note that the connection profile has to have the database and schema of the
@@ -44,7 +44,7 @@ At the "OAuth & Permissions" page, press on "Install to Workspace" in order to g
 
 ## 4. Use Elementary CLI with your Slack token
 
-Use the token when you execute `edr monitor` (or other [Elementary CLI commands](../learn/cli-commands) that support slack integration) using the options `-st, --slack-token` and `-ch, --slack-channel-name`:
+Use the token when you execute `edr monitor` (or other [Elementary CLI commands](../understand-elementary/cli-commands) that support slack integration) using the options `-st, --slack-token` and `-ch, --slack-channel-name`:
 
 ```
 edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
@@ -82,7 +82,7 @@ Select the channel that the notifications will be posted to:
 
 ## 3. Add the Webhook to 'config.yml'
 
-Use the webhook URL when you execute `edr monitor` (or other [Elementary CLI commands](../learn/cli-commands) that support the Slack integration) using the option `-s, --slack-webhook`:
+Use the webhook URL when you execute `edr monitor` (or other [Elementary CLI commands](../understand-elementary/cli-commands) that support the Slack integration) using the option `-s, --slack-webhook`:
 
 ```
 edr monitor --slack-webhook <your_slack_webhook_url>
