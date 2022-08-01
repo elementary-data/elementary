@@ -1,13 +1,12 @@
 import os
 import sys
-from os.path import expanduser
 
 import click
 from packaging import version
 from pyfiglet import Figlet
 
 from config.config import Config
-from tracking.anonymous_tracking import AnonymousTracking, track_cli_help
+from tracking.anonymous_tracking import AnonymousTracking
 from utils import package
 
 f = Figlet(font='slant')
@@ -41,8 +40,7 @@ class ElementaryCLI(click.MultiCommand):
         try:
             config = Config()
             self.recommend_version_upgrade()
-            anonymous_tracking = AnonymousTracking(config)
-            track_cli_help(anonymous_tracking)
+            AnonymousTracking(config).track_cli_help()
         except Exception:
             pass
         self.format_usage(ctx, formatter)
