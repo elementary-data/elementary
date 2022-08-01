@@ -13,7 +13,6 @@ from lineage.query_history_factory import QueryHistoryFactory
 from tracking.anonymous_tracking import AnonymousTracking
 from utils.cli_utils import RequiredIf
 from utils.dbt import is_dbt_installed
-from utils.package import get_package_version
 
 
 def get_cli_lineage_properties() -> dict:
@@ -33,8 +32,7 @@ def get_cli_lineage_properties() -> dict:
             'open_browser': params.get('open_browser'),
             'full_table_names': params.get('full_table_names'),
             'command': click_context.command.name,
-            'dbt_installed': is_dbt_installed(),
-            'version': get_package_version()}
+            'dbt_installed': is_dbt_installed()}
 
 
 def get_cli_lineage_generate_properties() -> dict:
@@ -61,8 +59,7 @@ def get_cli_lineage_generate_properties() -> dict:
     return {'start_date': start_date_str,
             'end_date': end_date_str,
             'limited_dbs': limited_dbs,
-            'dbt_installed': is_dbt_installed(),
-            'version': get_package_version()}
+            'dbt_installed': is_dbt_installed()}
 
 
 @click.group(invoke_without_command=True)

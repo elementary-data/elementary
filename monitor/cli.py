@@ -6,7 +6,6 @@ from tracking.anonymous_tracking import AnonymousTracking
 from utils.cli_utils import RequiredIf
 from utils.log import get_logger
 from utils.ordered_yaml import OrderedYaml
-from utils.package import get_package_version
 
 yaml = OrderedYaml()
 
@@ -28,8 +27,7 @@ def get_cli_properties() -> dict:
 
     return {'reload_monitoring_configuration': reload_monitoring_configuration,
             'update_dbt_package': update_dbt_package,
-            'full_refresh_dbt_package': full_refresh_dbt_package,
-            'version': get_package_version()}
+            'full_refresh_dbt_package': full_refresh_dbt_package}
 
 
 @click.group(invoke_without_command=True)

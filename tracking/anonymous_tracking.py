@@ -1,4 +1,5 @@
 import logging
+import platform
 import uuid
 from pathlib import Path
 from typing import Optional, Tuple
@@ -7,6 +8,8 @@ import posthog
 import requests
 from bs4 import BeautifulSoup
 
+import tracking.env
+import utils.package
 from config.config import Config
 from utils.package import get_package_version
 
@@ -28,7 +31,7 @@ class AnonymousTracking:
 
     def init(self):
         self.anonymous_user_id = self.init_user_id()
-        self.api_key, self.url = self._fetch_api_key_and_url()
+        posthog.api_key, posthog.host = self._fetch_api_key_and_url()
 
     def init_user_id(self):
         legacy_user_id_path = Path().joinpath(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
@@ -68,22 +71,23 @@ class AnonymousTracking:
         if self.do_not_track:
             return
 
-        if self.api_key is None or self.url is None or self.anonymous_user_id is None:
-            return
-
         if properties is None:
             properties = dict()
 
         properties['run_id'] = self.run_id
-
-        posthog.api_key = self.api_key
-        posthog.host = self.url
         posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
 
     def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
         try:
+            user_props = {
+                'os': platform.system(),
+                'is_docker': tracking.env.is_docker(),
+                'is_airflow': tracking.env.is_airflow(),
+                'python_version': platform.python_version(),
+                'elementary_version': utils.package.get_package_version()
+            }
             props = {'cli_properties': cli_properties, 'module_name': module_name, 'command': command}
-            self.send_event('cli-start', properties=props)
+            self.send_event('cli-start', properties={**user_props, **props})
         except Exception:
             pass
 
