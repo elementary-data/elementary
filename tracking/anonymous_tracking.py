@@ -94,7 +94,7 @@ class AnonymousTracking:
                 'warehouse_id': self.warehouse_id,
             }
             props = {'cli_properties': cli_properties, 'module_name': module_name, 'command': command}
-            self.send_event('cli-start', properties={**user_props, **props})
+            self.send_event('cli-start', properties={'user': user_props, **props})
         except Exception:
             pass
 
