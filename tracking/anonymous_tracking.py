@@ -1,5 +1,5 @@
-import os
 import uuid
+from pathlib import Path
 from typing import Optional, Tuple
 
 import posthog
@@ -24,21 +24,26 @@ class AnonymousTracking:
         self.init()
 
     def init(self):
-        legacy_anonymous_user_id_file_name = os.path.join(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
-        anonymous_user_id_file_name = os.path.join(self.config.config_dir, self.ANONYMOUS_USER_ID_FILE)
-        # First check legacy file path
-        if os.path.exists(legacy_anonymous_user_id_file_name):
-            with open(legacy_anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
-                self.anonymous_user_id = anonymous_user_id_file.read()
-        elif os.path.exists(anonymous_user_id_file_name):
-            with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
-                self.anonymous_user_id = anonymous_user_id_file.read()
-        else:
-            self.anonymous_user_id = str(uuid.uuid4())
-            with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
-                anonymous_user_id_file.write(self.anonymous_user_id)
-
+        self.anonymous_user_id = self.init_user_id()
         self.api_key, self.url = self._fetch_api_key_and_url()
+
+    def init_user_id(self):
+        legacy_user_id_path = Path().joinpath(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
+        user_id_path = Path().joinpath(self.config.config_dir, self.ANONYMOUS_USER_ID_FILE)
+        # First check legacy file path
+        try:
+            return legacy_user_id_path.read_text()
+        except FileNotFoundError:
+            pass
+
+        try:
+            return user_id_path.read_text()
+        except FileNotFoundError:
+            pass
+
+        user_id = str(uuid.uuid4())
+        user_id_path.write_text(user_id)
+        return user_id
 
     @classmethod
     def _fetch_api_key_and_url(cls) -> Tuple[Optional[str], Optional[str]]:

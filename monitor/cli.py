@@ -1,6 +1,3 @@
-import os
-from os.path import expanduser
-
 import click
 
 from config.config import Config
@@ -67,14 +64,14 @@ def get_cli_properties() -> dict:
 @click.option(
     '--config-dir', '-c',
     type=str,
-    default=os.path.join(expanduser('~'), '.edr'),
+    default=Config.DEFAULT_CONFIG_DIR,
     help="Global settings for edr are configured in a config.yml file in this directory "
          "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
 )
 @click.option(
     '--profiles-dir', '-p',
     type=str,
-    default=os.path.join(expanduser('~'), '.dbt'),
+    default=Config.DEFAULT_PROFILES_DIR,
     help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
          "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
 )
@@ -158,14 +155,14 @@ def monitor(
 @click.option(
     '--config-dir', '-c',
     type=str,
-    default=os.path.join(expanduser('~'), '.edr'),
+    default=Config.DEFAULT_CONFIG_DIR,
     help="Global settings for edr are configured in a config.yml file in this directory "
          "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
 )
 @click.option(
     '--profiles-dir', '-p',
     type=str,
-    default=os.path.join(expanduser('~'), '.dbt'),
+    default=Config.DEFAULT_PROFILES_DIR,
     help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
          "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
 )
@@ -229,14 +226,14 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 @click.option(
     '--config-dir', '-c',
     type=str,
-    default=os.path.join(expanduser('~'), '.edr'),
+    default=Config.DEFAULT_CONFIG_DIR,
     help="Global settings for edr are configured in a config.yml file in this directory "
          "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
 )
 @click.option(
     '--profiles-dir', '-p',
     type=str,
-    default=os.path.join(expanduser('~'), '.dbt'),
+    default=Config.DEFAULT_PROFILES_DIR,
     help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
          "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
 )

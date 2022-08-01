@@ -39,8 +39,7 @@ class ElementaryCLI(click.MultiCommand):
 
     def format_help(self, ctx, formatter):
         try:
-            config = Config(config_dir=os.path.join(expanduser('~'), '.edr'),
-                            profiles_dir=os.path.join(expanduser('~'), '.dbt'))
+            config = Config()
             self.recommend_version_upgrade()
             anonymous_tracking = AnonymousTracking(config)
             track_cli_help(anonymous_tracking)
