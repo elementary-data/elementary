@@ -19,8 +19,7 @@ setup(
         edr=cli.cli:cli
     ''',
     author="Elementary",
-    package_data={"": ["header.html", "index.html", "dbt_project/*", "dbt_project/macros/*", "dbt_project/models/*",
-                       "dbt_project/models/alerts/*"]},
+    include_package_data=True,
     keyword="data, lineage, data lineage, data warehouse, DWH, observability, data monitoring, data observability, "
             "Snowflake, BigQuery, Redshift, data reliability, analytics engineering",
     long_description=README,
