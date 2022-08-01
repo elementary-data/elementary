@@ -1,16 +1,15 @@
 import os
-import sys
 
 import click
-from packaging import version
 from pyfiglet import Figlet
 
+import cli.upgrade
 from config.config import Config
 from tracking.anonymous_tracking import AnonymousTracking
-from utils import package
 
 f = Figlet(font='slant')
 print(f.renderText('Elementary'))
+cli.upgrade.recommend_version_upgrade()
 
 root_folder = os.path.join(os.path.dirname(__file__), '..')
 modules = ['lineage', 'monitor']
@@ -39,7 +38,6 @@ class ElementaryCLI(click.MultiCommand):
     def format_help(self, ctx, formatter):
         try:
             config = Config()
-            self.recommend_version_upgrade()
             AnonymousTracking(config).track_cli_help()
         except Exception:
             pass
@@ -47,19 +45,6 @@ class ElementaryCLI(click.MultiCommand):
         self.format_help_text(ctx, formatter)
         self.format_options(ctx, formatter)
         self.format_epilog(ctx, formatter)
-
-    def recommend_version_upgrade(self):
-        latest_version = package.get_latest_package_version()
-        current_version = package.get_package_version()
-        try:
-            if version.parse(current_version) < version.parse(latest_version):
-                self.epilog = click.style(
-                    f'You are using Elementary {current_version}, however version {latest_version} is available.\n'
-                    f'Consider upgrading by running: "{sys.executable} -m pip install --upgrade elementary-data"',
-                    fg='yellow'
-                )
-        except Exception:
-            pass
 
 
 cli = ElementaryCLI(help='Open source data reliability solution (https://docs.elementary-data.com/)')
