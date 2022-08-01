@@ -24,6 +24,7 @@ from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
 from monitor.api.tests.tests import TestsAPI
+from tracking.anonymous_tracking import AnonymousTracking
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 
@@ -122,7 +123,8 @@ class DataMonitoring:
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self, user_id: str, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
+    def generate_report(self, tracking: AnonymousTracking, days_back: Optional[int] = None,
+                        test_runs_amount: Optional[int] = None,
                         file_path: Optional[str] = None, disable_passed_test_metrics: bool = False) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
@@ -142,7 +144,8 @@ class DataMonitoring:
             output_data['test_runs_totals'] = test_runs_totals
             output_data['coverages'] = models_coverages
             output_data['lineage'] = lineage.dict()
-            output_data['report_generator_user_id'] = user_id
+            output_data['report_generator_user_id'] = tracking.anonymous_user_id
+            output_data['posthog_api_key'] = tracking.api_key
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, 'r') as template_html_file:
                 template_html_code = template_html_file.read()

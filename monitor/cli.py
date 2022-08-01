@@ -202,7 +202,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     anonymous_tracking.track_cli_start('monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report(user_id=anonymous_tracking.anonymous_user_id, days_back=days_back,
+        success = data_monitoring.generate_report(tracking=anonymous_tracking, days_back=days_back,
                                                   test_runs_amount=executions_limit, file_path=file_path,
                                                   disable_passed_test_metrics=disable_passed_test_metrics)
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
@@ -313,7 +313,7 @@ def send_report(
         )
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
-            user_id=anonymous_tracking.anonymous_user_id, days_back=days_back, test_runs_amount=executions_limit,
+            tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
             disable_passed_test_metrics=disable_passed_test_metrics)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path)

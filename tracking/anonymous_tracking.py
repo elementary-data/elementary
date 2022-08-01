@@ -31,7 +31,8 @@ class AnonymousTracking:
 
     def init(self):
         self.anonymous_user_id = self.init_user_id()
-        posthog.api_key, posthog.host = self._fetch_api_key_and_url()
+        self.api_key, self.url = self._fetch_api_key_and_url()
+        posthog.api_key, posthog.host = self.api_key, self.url
 
     def init_user_id(self):
         legacy_user_id_path = Path().joinpath(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
