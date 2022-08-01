@@ -24,24 +24,18 @@ from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
 from monitor.api.tests.tests import TestsAPI
+from monitor.paths import DBT_PROJECT_PATH, DBT_PROJECT_PACKAGES_PATH, DBT_PROJECT_MODULES_PATH
 from tracking.anonymous_tracking import AnonymousTracking
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
-FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
 
 
 class DataMonitoring:
-    DBT_PACKAGE_NAME = 'elementary'
-    DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
-    DBT_PROJECT_MODELS_PATH = os.path.join(FILE_DIR, 'dbt_project', 'models')
-    # Compatibility for previous dbt versions
-    DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
-    DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
     def __init__(
             self,
@@ -52,7 +46,7 @@ class DataMonitoring:
             slack_channel_name: Optional[str] = None
     ) -> None:
         self.config = config
-        self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
+        self.dbt_runner = DbtRunner(DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
         self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
         self.slack_token = slack_token or self.config.slack_token
@@ -63,9 +57,6 @@ class DataMonitoring:
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
         self.sent_alert_ids = set()
         self.success = True
-
-    def _dbt_package_exists(self) -> bool:
-        return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
@@ -146,6 +137,7 @@ class DataMonitoring:
             output_data['lineage'] = lineage.dict()
             output_data['report_generator_user_id'] = tracking.anonymous_user_id
             output_data['posthog_api_key'] = tracking.api_key
+            output_data['warehouse_id'] = tracking.warehouse_id
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, 'r') as template_html_file:
                 template_html_code = template_html_file.read()
@@ -277,3 +269,7 @@ class DataMonitoring:
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
+
+    @staticmethod
+    def _dbt_package_exists() -> bool:
+        return os.path.exists(DBT_PROJECT_PACKAGES_PATH) or os.path.exists(DBT_PROJECT_MODULES_PATH)
