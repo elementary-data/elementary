@@ -204,8 +204,8 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     track_cli_start(anonymous_tracking, 'monitor-report', get_cli_properties(), ctx.command.name)
     try:
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report(days_back=days_back, test_runs_amount=executions_limit,
-                                                  file_path=file_path,
+        success = data_monitoring.generate_report(user_id=anonymous_tracking.anonymous_user_id, days_back=days_back,
+                                                  test_runs_amount=executions_limit, file_path=file_path,
                                                   disable_passed_test_metrics=disable_passed_test_metrics)
         track_cli_end(anonymous_tracking, 'monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
@@ -314,9 +314,9 @@ def send_report(
             slack_channel_name=slack_channel_name
         )
         command_succeeded = False
-        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back,
-                                                                                              test_runs_amount=executions_limit,
-                                                                                              disable_passed_test_metrics=disable_passed_test_metrics)
+        generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
+            user_id=anonymous_tracking.anonymous_user_id, days_back=days_back, test_runs_amount=executions_limit,
+            disable_passed_test_metrics=disable_passed_test_metrics)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         return 0 if command_succeeded else 1
