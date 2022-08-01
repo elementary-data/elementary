@@ -3,6 +3,7 @@ title: "Generate report"
 ---
 
 import { SnippetGroup } from "@/components/SnippetGroup";
+import InstallCLI from "snippets/install_cli.mdx";
 
 Elementary has a report for visualization and exploration of data from the dbt-package tables, which includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
 
@@ -12,25 +13,7 @@ In order to visualize the data from the [dbt-package](../overview/contributions#
 
 ## Instructions to generate reports
 
-### Install the Elementary CLI
-
-To install the monitor module run:
-
-```
-pip install elementary-data
-```
-
-Run one of the following commands based on your platform (no need to run all):
-
-```
-pip install 'elementary-data[snowflake]'
-pip install 'elementary-data[bigquery]'
-pip install 'elementary-data[redshift]'
-```
-
-Run `edr --help` in order to ensure the installation was successful.
-
-If you're receiving `command not found: edr` please check our [troubleshooting guide](../support/troubleshooting).
+< InstallCLI />
 
 ### Add connection profile for elementary CLI
 
