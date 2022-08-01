@@ -8,7 +8,7 @@ from config.config import Config
 from tracking.anonymous_tracking import AnonymousTracking
 
 f = Figlet(font='slant')
-print(f.renderText('Elementary'))
+click.echo(f.renderText('Elementary'))
 cli.upgrade.recommend_version_upgrade()
 
 root_folder = os.path.join(os.path.dirname(__file__), '..')
