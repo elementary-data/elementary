@@ -47,7 +47,7 @@
     {
       "group": "Getting Started",
       "pages": [
-        "index",
+        "introduction",
         "quickstart",
         "quickstart-data-lineage"
       ]
