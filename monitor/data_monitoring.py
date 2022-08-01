@@ -60,14 +60,15 @@ class DataMonitoring:
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
+        self.sent_alert_ids = set()
         self.success = True
 
     def _dbt_package_exists(self) -> bool:
         return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
 
-    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str) -> List[str]:
+    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
-            return []
+            return
 
         sent_alert_ids = []
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
@@ -83,7 +84,7 @@ class DataMonitoring:
                 logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}")
                 self.success = False
         self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        return sent_alert_ids
+        self.sent_alert_ids.update(sent_alert_ids)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -99,10 +100,9 @@ class DataMonitoring:
                 return
 
     def _send_alerts(self, alerts: Alerts):
-        sent_test_alert_ids = self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
-        sent_model_alert_ids = self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        sent_alert_count = len(sent_test_alert_ids) + len(sent_model_alert_ids)
-        self.execution_properties['sent_alert_count'] = sent_alert_count
+        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
+        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
+        self.execution_properties['sent_alert_count'] = len(self.sent_alert_ids)
 
     def run(self, days_back: int, dbt_full_refresh: bool = False, dbt_vars: Optional[dict] = None) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
@@ -116,6 +116,7 @@ class DataMonitoring:
 
         alerts = self.alerts_api.query(days_back)
         self.execution_properties['alert_count'] = alerts.count
+        self.execution_properties['malformed_alert_count'] = alerts.malformed_count
         self._send_alerts(alerts)
         self.execution_properties['run_end'] = True
         self.execution_properties['success'] = self.success
@@ -231,6 +232,10 @@ class DataMonitoring:
         models = models_api.get_models()
         sources = models_api.get_sources()
         exposures = models_api.get_exposures()
+
+        self.execution_properties['model_count'] = len(models)
+        self.execution_properties['source_count'] = len(sources)
+        self.execution_properties['exposure_count'] = len(exposures)
 
         nodes = dict(**models, **sources, **exposures)
         serializable_nodes = dict()

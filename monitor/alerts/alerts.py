@@ -31,3 +31,7 @@ class Alerts:
     @property
     def count(self) -> int:
         return self.models.count + self.tests.count
+
+    @property
+    def malformed_count(self):
+        return len(self.models.malformed_alerts) + len(self.models.malformed_alerts)
