@@ -264,7 +264,8 @@ class DataMonitoring:
     @functools.lru_cache
     def get_elementary_database_and_schema(self):
         try:
-            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
+            database_and_schema = self.dbt_runner.run_operation(
+                'get_elementary_database_and_schema', should_log=False)[0]
             return '.'.join(json.loads(database_and_schema.replace("'", '"')))
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")

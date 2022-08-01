@@ -129,7 +129,7 @@ class AnonymousTracking:
     def _fetch_warehouse_id(self):
         try:
             dbt_runner = DbtRunner(monitor.paths.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
-            adapter_unique_id = dbt_runner.run_operation('get_adapter_unique_id')[0]
+            adapter_unique_id = dbt_runner.run_operation('get_adapter_unique_id', should_log=False)[0]
             warehouse_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
             return warehouse_id
         except Exception:
