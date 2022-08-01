@@ -1,3 +1,4 @@
+import logging
 import uuid
 from pathlib import Path
 from typing import Optional, Tuple
@@ -8,6 +9,8 @@ from bs4 import BeautifulSoup
 
 from config.config import Config
 from utils.package import get_package_version
+
+logging.getLogger('posthog').disabled = True
 
 
 class AnonymousTracking:
