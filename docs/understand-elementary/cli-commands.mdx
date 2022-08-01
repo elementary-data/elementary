@@ -1,0 +1,45 @@
+---
+title: "CLI Commands"
+---
+
+## Data monitoring commands
+
+Read from the test results table and send new [alerts to Slack](./elementary-alerts):
+
+```shell
+edr monitor
+```
+
+Read from the test results table and generate the [Elementary UI](./elementary-report-ui):
+
+```shell
+edr monitor report
+```
+
+Read from the test results table and generate the [Elementary UI](./elementary-report-ui) and send it via Slack:
+
+```shell
+edr monitor send-report
+```
+
+## Data lineage commands
+
+For generating a data lineage graph
+
+```
+edr lineage generate
+```
+
+For visualizing data lineage graph in browser:
+
+```
+edr lineage
+```
+
+## Using Elementary CLI
+
+With any of the CLI commands, you can use the --help flag and get instructions and available [advanced options](./cli-advanced):
+
+```shell
+edr --help
+```

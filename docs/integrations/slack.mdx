@@ -4,7 +4,7 @@ title: "Slack"
 
 import { TipInfo } from "@/components/Tip";
 
-For Slack alerts, you first need to install [Elementary CLI](../learn/cli-install), [configure](../learn/cli-install#cli-configuration) a connection profile for it, and create a config file for the Slack integration.
+For Slack alerts, you first need to install [Elementary CLI](../understand-elementary/cli-install), [configure](../understand-elementary/cli-install#cli-configuration) a connection profile for it, and create a config file for the Slack integration.
 
 <TipInfo>
   Note that the connection profile has to have the database and schema of the
@@ -22,7 +22,7 @@ There are 2 integration options:
 Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
 Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
 
-<img src="../img/slack-app.png" alt="Slack app" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png" alt="Slack app" />
 
 ## 2. Create a Slack token
 
@@ -34,17 +34,17 @@ Go to the "OAauth & Permissions" page for your newly-created app, and add the fo
 - `files:write` - Upload, edit, and delete files as \<app\>
 - `users:read` - View people in a workspace
 
-<img src="../img/slack-scopes.png" alt="Slack scopes" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304884/elementary/slack-scopes_u5vnbj.png" alt="Slack scopes" />
 
 ## 3. Install app at your Workspace
 
 At the "OAuth & Permissions" page, press on "Install to Workspace" in order to generate Slack token:
 
-<img src="../img/slack-oauth.png" alt="Slack OAuth" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-oauth_g6p5jj.png" alt="Slack OAuth" />
 
 ## 4. Use Elementary CLI with your Slack token
 
-Use the token when you execute `edr monitor` (or other [Elementary CLI commands](../learn/cli-commands) that support slack integration) using the options `-st, --slack-token` and `-ch, --slack-channel-name`:
+Use the token when you execute `edr monitor` (or other [Elementary CLI commands](../understand-elementary/cli-commands) that support slack integration) using the options `-st, --slack-token` and `-ch, --slack-channel-name`:
 
 ```
 edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
@@ -68,21 +68,21 @@ slack:
 Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
 Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
 
-<img src="../img/slack-app.png" alt="Slack app" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png" alt="Slack app" />
 
 ## 2. Create a webhook
 
 Go to the 'Incoming Webhooks' page for your newly-created app and toggle 'Activate Incoming Webhooks' to turn it on. Then click on 'Add New Webhook to Workspace':
 
-<img src="../img/slack-webhook.png" alt="Slack webhook" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/slack-webhook_gwjkte.png" alt="Slack webhook" />
 
 Select the channel that the notifications will be posted to:
 
-<img src="../img/slack-channel.png" alt="Slack channel" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-channel_snyrwb.png" alt="Slack channel" />
 
 ## 3. Add the Webhook to 'config.yml'
 
-Use the webhook URL when you execute `edr monitor` (or other [Elementary CLI commands](../learn/cli-commands) that support the Slack integration) using the option `-s, --slack-webhook`:
+Use the webhook URL when you execute `edr monitor` (or other [Elementary CLI commands](../understand-elementary/cli-commands) that support the Slack integration) using the option `-s, --slack-webhook`:
 
 ```
 edr monitor --slack-webhook <your_slack_webhook_url>
@@ -198,8 +198,8 @@ The alert format is:
 
 To change the display of the Elementary slack app, scroll down on the Slack app basic information page to the 'Display Information' section:
 
-<img src="../img/slack-display.png" alt="Slack display" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-display_utxkcu.png" alt="Slack display" />
 
 Here is the Elementary icon for your use:
 
-<img src="../img/elementary_logo_512x512.png" alt="Elementary logo" />
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png" alt="Elementary logo" />

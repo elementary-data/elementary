@@ -1,0 +1,117 @@
+---
+title: "Slack alerts and test reports"
+---
+
+import { TipInfo } from "@/components/Tip";
+
+## Get Slack alerts
+
+### Configure Slack
+
+To get Slack notifications, you will need a [Slack integration](../integrations/slack).
+
+#### Option 1 - Slack as CLI parameter
+
+1. **Token** - Use the Slack token when you execute `edr monitor` using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
+
+```
+edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
+```
+
+2. **Webhook** - Use the webhook URL when you execute `edr monitor` using the option `-s, --slack-webhook`:
+
+```
+edr monitor --slack-webhook <your_slack_webhook_url>
+```
+
+#### Option 2 - Slack integration in config.yml
+
+If you prefer that the CLI reads the Slack integration from a file, copy it into a file called `config.yml`.
+
+Create it here:
+
+`HOME_DIR/.edr/config.yml`
+
+Here is the format in the yml itself:
+
+**Token**
+
+```yml
+slack:
+  token: <your_slack_token>
+  channel_name: <slack_channel_to_post_at>
+```
+
+**Webhook**
+
+```yml
+slack:
+  notification_webhook: <your_slack_webhook_url>
+  # optional #
+  workflows: false
+```
+
+Now you can execute the CLI, to get alerts.
+
+### Execute the CLI
+
+Make sure to run the following command after your dbt runs and tests:
+
+```
+edr monitor
+```
+
+---
+
+### Tag users and channels
+
+You can use the 'owner' and 'tags' fields in dbt yml files, to decide who should be mentioned in a Slack alert:
+
+<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png" alt="New Slack alert format" />
+
+### Continuous alerting
+
+In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after your dbt job ends to monitor the latest data updates).
+If you need help or wish to consult on this, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).
+
+---
+
+## Send tests report to Slack
+
+### Configure Slack
+
+To get Slack notifications, you will need a [Slack integration](../integrations/slack).
+
+#### Option 1 - Slack as CLI parameter
+
+**Token** - Use the Slack token when you execute `edr monitor` using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
+
+```
+edr monitor send-report --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
+```
+
+#### Option 2 - Slack integration in config.yml
+
+If you prefer that the CLI reads the Slack integration from a file, copy it into a file called `config.yml`.
+
+Create it here:
+
+`HOME_DIR/.edr/config.yml`
+
+Here is the format in the yml itself:
+
+**Token**
+
+```yml
+slack:
+  token: <your_slack_token>
+  channel_name: <slack_channel_to_post_at>
+```
+
+### Execute the CLI
+
+Make sure to run the following command after your dbt runs and tests:
+
+```
+edr monitor send-report
+```
