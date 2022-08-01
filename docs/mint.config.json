@@ -76,12 +76,12 @@
     {
       "group": "Data Monitoring",
       "pages": [
-        "data-monitoring/data-and-dbt-tests-report-ui",
-        "data-monitoring/data-anomaly-detection",
-        "data-monitoring/add-data-monitoring-tests",
-        "data-monitoring/elementary-tests-configuration",
-        "data-monitoring/dbt-artifacts",
-        "data-monitoring/monitoring-in-production"
+        "guides/data-and-dbt-tests-report-ui",
+        "guides/data-anomaly-detection",
+        "guides/add-data-monitoring-tests",
+        "guides/elementary-tests-configuration",
+        "guides/dbt-artifacts",
+        "guides/monitoring-in-production"
       ]
     },
     {
