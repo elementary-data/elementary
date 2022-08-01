@@ -16,4 +16,4 @@ pip install 'elementary-data[redshift]'
 
 Run `edr --help` in order to ensure the installation was successful.
 
-If you're receiving `command not found: edr` please check our [troubleshooting guide](../support/troubleshooting).
+If you're receiving `command not found: edr` please check our [troubleshooting guide](../general/troubleshooting).
