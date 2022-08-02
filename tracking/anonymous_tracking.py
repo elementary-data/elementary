@@ -1,6 +1,5 @@
 import hashlib
 import logging
-import platform
 import uuid
 from pathlib import Path
 from typing import Optional, Tuple
@@ -10,8 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import monitor.paths
-import tracking.env
-import utils.package
+import tracking.user
 from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
 from utils.package import get_package_version
@@ -25,7 +23,7 @@ class AnonymousTracking:
 
     def __init__(self, config: Config) -> None:
         self.anonymous_user_id = None
-        self.warehouse_id = None
+        self.hashed_adapter_unique_id = None
         self.api_key = None
         self.url = None
         self.config = config
@@ -35,7 +33,7 @@ class AnonymousTracking:
 
     def init(self):
         self.anonymous_user_id = self.init_user_id()
-        self.warehouse_id = self._fetch_warehouse_id()
+        self.hashed_adapter_unique_id = self._get_hashed_adapter_unique_id()
         self.api_key, self.url = self._fetch_api_key_and_url()
         posthog.api_key, posthog.host = self.api_key, self.url
 
@@ -81,18 +79,12 @@ class AnonymousTracking:
             properties = dict()
 
         properties['run_id'] = self.run_id
-        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
+        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties,
+                        groups={'warehouse': self.hashed_adapter_unique_id})
 
     def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
         try:
-            user_props = {
-                'os': platform.system(),
-                'is_docker': tracking.env.is_docker(),
-                'is_airflow': tracking.env.is_airflow(),
-                'python_version': platform.python_version(),
-                'elementary_version': utils.package.get_package_version(),
-                'warehouse_id': self.warehouse_id,
-            }
+            user_props = tracking.user.get_props()
             props = {'cli_properties': cli_properties, 'module_name': module_name, 'command': command}
             self.send_event('cli-start', properties={'user': user_props, **props})
         except Exception:
@@ -126,11 +118,11 @@ class AnonymousTracking:
         except Exception:
             pass
 
-    def _fetch_warehouse_id(self):
+    def _get_hashed_adapter_unique_id(self):
         try:
             dbt_runner = DbtRunner(monitor.paths.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
             adapter_unique_id = dbt_runner.run_operation('get_adapter_unique_id', should_log=False)[0]
-            warehouse_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
-            return warehouse_id
+            hashed_adapter_unique_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
+            return hashed_adapter_unique_id
         except Exception:
             return None

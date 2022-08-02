@@ -1,8 +1,11 @@
 import os
+import platform
 from pathlib import Path
 
+import utils.package
 
-def is_docker():
+
+def _is_docker():
     cgroup_path = Path('/proc/self/cgroup')
     return (
             Path('/.dockerenv').exists()
@@ -11,5 +14,15 @@ def is_docker():
     )
 
 
-def is_airflow():
+def _is_airflow():
     return "AIRFLOW_CONFIG" in os.environ or "AIRFLOW_HOME" in os.environ
+
+
+def get_props():
+    return {
+        'os': platform.system(),
+        'is_docker': _is_docker(),
+        'is_airflow': _is_airflow(),
+        'python_version': platform.python_version(),
+        'elementary_version': utils.package.get_package_version(),
+    }
