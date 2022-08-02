@@ -16,10 +16,11 @@ class DbtRunner:
         self.target = target
 
     def _run_command(
-        self,
-        command_args: list,
-        json_logs: bool = False,
-        vars: Optional[dict] = None
+            self,
+            command_args: list,
+            json_logs: bool = False,
+            vars: Optional[dict] = None,
+            should_log: bool = True
     ) -> Tuple[bool, str]:
         dbt_command = ['dbt']
         capture_output = False
@@ -34,7 +35,8 @@ class DbtRunner:
         if vars:
             json_vars = json.dumps(vars)
             dbt_command.extend(['--vars', json_vars])
-        logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
+        if should_log:
+            logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=capture_output)
         output = None
         if capture_output:
@@ -60,18 +62,20 @@ class DbtRunner:
         return success
 
     def run_operation(
-        self,
-        macro_name: str,
-        json_logs: bool = True,
-        macro_args: Optional[dict] = None,
-        log_errors: bool = False,
-        vars: Optional[dict] = None
+            self,
+            macro_name: str,
+            json_logs: bool = True,
+            macro_args: Optional[dict] = None,
+            log_errors: bool = False,
+            vars: Optional[dict] = None,
+            should_log: bool = True,
     ) -> list:
         command_args = ['run-operation', macro_name]
         if macro_args:
             json_args = json.dumps(macro_args)
             command_args.extend(['--args', json_args])
-        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars)
+        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars,
+                                                    should_log=should_log)
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
@@ -90,11 +94,11 @@ class DbtRunner:
         return run_operation_results
 
     def run(
-        self,
-        models: Optional[str] = None,
-        select: Optional[str] = None,
-        full_refresh: bool = False,
-        vars: Optional[dict] = None,
+            self,
+            models: Optional[str] = None,
+            select: Optional[str] = None,
+            full_refresh: bool = False,
+            vars: Optional[dict] = None,
     ) -> bool:
         command_args = ['run']
         if full_refresh:
@@ -107,9 +111,9 @@ class DbtRunner:
         return success
 
     def test(
-        self,
-        select: Optional[str] = None,
-        vars: Optional[dict] = None
+            self,
+            select: Optional[str] = None,
+            vars: Optional[dict] = None
     ) -> bool:
         command_args = ['test']
         if select:

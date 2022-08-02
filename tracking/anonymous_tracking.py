@@ -1,13 +1,20 @@
-import os
+import hashlib
+import logging
 import uuid
+from pathlib import Path
 from typing import Optional, Tuple
 
 import posthog
 import requests
 from bs4 import BeautifulSoup
 
+import monitor.paths
+import tracking.user
+from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
 from utils.package import get_package_version
+
+logging.getLogger('posthog').disabled = True
 
 
 class AnonymousTracking:
@@ -16,6 +23,7 @@ class AnonymousTracking:
 
     def __init__(self, config: Config) -> None:
         self.anonymous_user_id = None
+        self.hashed_adapter_unique_id = None
         self.api_key = None
         self.url = None
         self.config = config
@@ -24,21 +32,28 @@ class AnonymousTracking:
         self.init()
 
     def init(self):
-        legacy_anonymous_user_id_file_name = os.path.join(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
-        anonymous_user_id_file_name = os.path.join(self.config.config_dir, self.ANONYMOUS_USER_ID_FILE)
-        # First check legacy file path
-        if os.path.exists(legacy_anonymous_user_id_file_name):
-            with open(legacy_anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
-                self.anonymous_user_id = anonymous_user_id_file.read()
-        elif os.path.exists(anonymous_user_id_file_name):
-            with open(anonymous_user_id_file_name, 'r') as anonymous_user_id_file:
-                self.anonymous_user_id = anonymous_user_id_file.read()
-        else:
-            self.anonymous_user_id = str(uuid.uuid4())
-            with open(anonymous_user_id_file_name, 'w') as anonymous_user_id_file:
-                anonymous_user_id_file.write(self.anonymous_user_id)
-
+        self.anonymous_user_id = self.init_user_id()
+        self.hashed_adapter_unique_id = self._get_hashed_adapter_unique_id()
         self.api_key, self.url = self._fetch_api_key_and_url()
+        posthog.api_key, posthog.host = self.api_key, self.url
+
+    def init_user_id(self):
+        legacy_user_id_path = Path().joinpath(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
+        user_id_path = Path().joinpath(self.config.config_dir, self.ANONYMOUS_USER_ID_FILE)
+        # First check legacy file path
+        try:
+            return legacy_user_id_path.read_text()
+        except FileNotFoundError:
+            pass
+
+        try:
+            return user_id_path.read_text()
+        except FileNotFoundError:
+            pass
+
+        user_id = str(uuid.uuid4())
+        user_id_path.write_text(user_id)
+        return user_id
 
     @classmethod
     def _fetch_api_key_and_url(cls) -> Tuple[Optional[str], Optional[str]]:
@@ -60,66 +75,54 @@ class AnonymousTracking:
         if self.do_not_track:
             return
 
-        if self.api_key is None or self.url is None or self.anonymous_user_id is None:
-            return
-
         if properties is None:
             properties = dict()
 
         properties['run_id'] = self.run_id
+        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties,
+                        groups={'warehouse': self.hashed_adapter_unique_id})
 
-        posthog.api_key = self.api_key
-        posthog.host = self.url
-        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties)
+    def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
+        try:
+            user_props = tracking.user.get_props()
+            props = {'cli_properties': cli_properties, 'module_name': module_name, 'command': command}
+            self.send_event('cli-start', properties={'user': user_props, **props})
+        except Exception:
+            pass
 
+    def track_cli_end(self, module_name: str, execution_properties: dict, command: str = None):
+        try:
+            props = {'execution_properties': execution_properties, 'module_name': module_name, 'command': command}
+            self.send_event('cli-end', properties=props)
+        except Exception:
+            pass
 
-def track_cli_start(anonymous_tracking: AnonymousTracking, module_name: str, cli_properties: dict,
-                    command: str = None) -> None:
-    try:
-        cli_start_properties = {'cli_properties': cli_properties,
-                                'module_name': module_name,
-                                'command': command}
-        anonymous_tracking.send_event('cli-start', properties=cli_start_properties)
-    except Exception:
-        pass
+    def track_cli_exception(self, module_name: str, exc: Exception, command: str = None) -> None:
+        try:
+            props = {
+                'exception_properties': {
+                    'exception_type': str(type(exc)),
+                    'exception_content': str(exc)
+                },
+                'module_name': module_name,
+                'command': command,
+                'version': get_package_version()
+            }
+            self.send_event('cli-exception', properties=props)
+        except Exception:
+            pass
 
+    def track_cli_help(self):
+        try:
+            self.send_event('cli-help')
+        except Exception:
+            pass
 
-def track_cli_end(anonymous_tracking: AnonymousTracking, module_name: str, execution_properties: dict,
-                  command: str = None) -> None:
-    try:
-        if anonymous_tracking is None:
-            return
-
-        cli_end_properties = {'execution_properties': execution_properties,
-                              'module_name': module_name,
-                              'command': command}
-        anonymous_tracking.send_event('cli-end', properties=cli_end_properties)
-    except Exception:
-        pass
-
-
-def track_cli_exception(anonymous_tracking: AnonymousTracking, module_name: str, exc: Exception,
-                        command: str = None) -> None:
-    try:
-        if anonymous_tracking is None:
-            return
-
-        cli_exception_properties = {
-            'exception_properties': {
-                'exception_type': str(type(exc)),
-                'exception_content': str(exc)
-            },
-            'module_name': module_name,
-            'command': command,
-            'version': get_package_version()
-        }
-        anonymous_tracking.send_event('cli-exception', properties=cli_exception_properties)
-    except Exception:
-        pass
-
-
-def track_cli_help(anonymous_tracking: AnonymousTracking):
-    try:
-        anonymous_tracking.send_event('cli-help')
-    except Exception:
-        pass
+    def _get_hashed_adapter_unique_id(self):
+        try:
+            dbt_runner = DbtRunner(monitor.paths.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
+            adapter_unique_id = dbt_runner.run_operation('get_adapter_unique_id', should_log=False)[0]
+            hashed_adapter_unique_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
+            return hashed_adapter_unique_id
+        except Exception:
+            return None
