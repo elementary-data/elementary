@@ -206,7 +206,7 @@ class DataMonitoring:
             tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
             invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
     ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
-        used_elementary_test_count = {}
+        elementary_test_count = {}
         tests_results = defaultdict(list)
         for test in tests_metadata:
             test_sub_type_unique_id = TestsAPI.get_test_sub_type_unique_id(**dict(test))
@@ -220,10 +220,9 @@ class DataMonitoring:
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
             if isinstance(test_result, ElementaryTestAlert):
-                used_elementary_test_count[test_result.test_name] = \
-                    used_elementary_test_count.get(test_result.test_name, 0) + 1
+                elementary_test_count[test_result.test_name] = elementary_test_count.get(test_result.test_name, 0) + 1
             tests_results[test.model_unique_id].append(test_result.to_test_alert_api_dict())
-        self.execution_properties['used_elementary_test_count'] = used_elementary_test_count
+        self.execution_properties['elementary_test_count'] = elementary_test_count
         return tests_results
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
