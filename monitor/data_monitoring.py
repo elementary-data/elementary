@@ -192,7 +192,7 @@ class DataMonitoring:
             test_results_totals = tests_api.get_total_tests_results(tests_metadata)
             test_runs_totals = tests_api.get_total_tests_runs(tests_metadata=tests_metadata,
                                                               tests_invocations=invocations)
-            self.execution_properties['test_results'] = len(tests_metadata)
+            self.execution_properties['test_result_count'] = len(tests_metadata)
             return tests_results, test_results_totals, test_runs_totals
         except Exception as e:
             logger.error(f"Could not get test results and totals - Error: {e}")
