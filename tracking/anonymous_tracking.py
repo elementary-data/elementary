@@ -2,11 +2,8 @@ import hashlib
 import logging
 import uuid
 from pathlib import Path
-from typing import Optional, Tuple
 
 import posthog
-import requests
-from bs4 import BeautifulSoup
 
 import monitor.paths
 import tracking.user
@@ -19,13 +16,12 @@ logging.getLogger('posthog').disabled = True
 
 class AnonymousTracking:
     ANONYMOUS_USER_ID_FILE = '.user_id'
-    FETCH_API_KEY_AND_URL = 'https://www.elementary-data.com/telemetry'
+    POSTHOG_API_KEY = 'phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg'
+    POSTHOG_HOST = 'https://app.posthog.com'
 
     def __init__(self, config: Config) -> None:
         self.anonymous_user_id = None
         self.hashed_adapter_unique_id = None
-        self.api_key = None
-        self.url = None
         self.config = config
         self.do_not_track = config.anonymous_tracking_enabled is False
         self.run_id = str(uuid.uuid4())
@@ -34,8 +30,7 @@ class AnonymousTracking:
     def init(self):
         self.anonymous_user_id = self.init_anonymous_user_id()
         self.hashed_adapter_unique_id = self._get_hashed_adapter_unique_id()
-        self.api_key, self.url = self._fetch_api_key_and_url()
-        posthog.api_key, posthog.host = self.api_key, self.url
+        posthog.api_key, posthog.host = self.POSTHOG_API_KEY, self.POSTHOG_HOST
 
     def init_anonymous_user_id(self):
         legacy_user_id_path = Path().joinpath(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
@@ -55,22 +50,6 @@ class AnonymousTracking:
         except OSError:
             pass
         return user_id
-
-    @classmethod
-    def _fetch_api_key_and_url(cls) -> Tuple[Optional[str], Optional[str]]:
-        result = requests.get(url=cls.FETCH_API_KEY_AND_URL)
-        if result.status_code != 200:
-            return None, None
-        soup = BeautifulSoup(result.content, 'html.parser')
-        h5_tag = soup.find('h5')
-        if h5_tag is None:
-            return None, None
-
-        api_key_and_url = h5_tag.text.split('\n')
-        if len(api_key_and_url) != 2:
-            return None, None
-
-        return api_key_and_url[0], api_key_and_url[1]
 
     def send_event(self, name: str, properties: dict = None) -> None:
         if self.do_not_track:
