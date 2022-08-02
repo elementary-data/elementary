@@ -92,7 +92,8 @@ class DbtTestAlert(TestAlert):
         self.test_rows_sample = test_rows_sample or ''
         self.test_runs = test_runs or ''
         self.test_params = test_params
-        self.error_message = test_results_description.capitalize() if test_results_description else ''
+        self.test_results_description = test_results_description.capitalize() if test_results_description else ''
+        self.error_message = self.test_results_description
         self.column_name = column_name or ''
         self.severity = severity
 
