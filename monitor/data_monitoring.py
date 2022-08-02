@@ -107,6 +107,7 @@ class DataMonitoring:
             return self.success
 
         alerts = self.alerts_api.query(days_back)
+        self.execution_properties['has_subscribers'] = any(alert.subscribers for alert in alerts.get_all())
         self.execution_properties['alert_count'] = alerts.count
         self.execution_properties['malformed_alert_count'] = alerts.malformed_count
         self._send_alerts(alerts)

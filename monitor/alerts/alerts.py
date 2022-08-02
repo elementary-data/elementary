@@ -35,3 +35,6 @@ class Alerts:
     @property
     def malformed_count(self):
         return len(self.models.malformed_alerts) + len(self.models.malformed_alerts)
+
+    def get_all(self) -> List[Alert]:
+        return self.models.get_all() + self.tests.get_all()
