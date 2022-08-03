@@ -123,21 +123,15 @@ def monitor(
     if ctx.invoked_subcommand is not None:
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
-    config = Config(config_dir, profiles_dir, profile_target)
+    config = Config(config_dir, profiles_dir, profile_target, slack_webhook, slack_token, slack_channel_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
-        if not slack_token and not slack_webhook and not config.slack_token and not config.slack_notification_webhook:
+        if not config.has_slack:
             logger.error('Either a Slack token or webhook is required.')
             return 1
 
-        data_monitoring = DataMonitoring(
-            config=config,
-            force_update_dbt_package=update_dbt_package,
-            slack_webhook=slack_webhook,
-            slack_token=slack_token,
-            slack_channel_name=slack_channel_name
-        )
+        data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         track_cli_end(anonymous_tracking, 'monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
@@ -248,12 +242,6 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
          "see documentation to learn more)."
 )
 @click.option(
-    '--slack-webhook', '-s',
-    type=str,
-    default=None,
-    help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
-)
-@click.option(
     '--slack-token', '-st',
     type=str,
     default=None,
@@ -287,6 +275,36 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
 )
+@click.option(
+    '--aws-profile-name',
+    type=bool,
+    default=None,
+    help="AWS profile name for AWS",
+)
+@click.option(
+    '--aws-access-key-id',
+    type=bool,
+    default=None,
+    help="The access key id for AWS"
+)
+@click.option(
+    '--aws-secret-access-key',
+    type=bool,
+    default=None,
+    help="The secret access key for AWS"
+)
+@click.option(
+    '--aws-session-token',
+    type=bool,
+    default=None,
+    help="The session token for AWS"
+)
+@click.option(
+    '--s3-bucket-name',
+    type=bool,
+    default=None,
+    help="The name of the S3 bucket to upload the report to"
+)
 @click.pass_context
 def send_report(
         ctx,
@@ -294,28 +312,28 @@ def send_report(
         config_dir,
         profiles_dir,
         update_dbt_package,
-        slack_webhook,
         slack_token,
         slack_channel_name,
         profile_target,
         executions_limit,
-        disable_passed_test_metrics
+        disable_passed_test_metrics,
+        aws_profile_name,
+        aws_access_key_id,
+        aws_secret_access_key,
+        aws_session_token,
+        s3_bucket_name
 ):
-    config = Config(config_dir, profiles_dir, profile_target)
+    config = Config(config_dir, profiles_dir, profile_target, slack_token, slack_channel_name, aws_profile_name,
+                    aws_access_key_id, aws_secret_access_key, aws_session_token, s3_bucket_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
+    slack_provided = any([config.slack_token, config.slack_token]) and config.slack_channel_name
     try:
-        if not slack_token and not config.slack_token:
-            logger.error('A Slack token is required to send a report.')
+        if not slack_provided and not config.has_aws:
+            logger.error('You must provide a platform to send the report to (Slack / AWS).')
             return 1
 
-        data_monitoring = DataMonitoring(
-            config=config,
-            force_update_dbt_package=update_dbt_package,
-            slack_webhook=slack_webhook,
-            slack_token=slack_token,
-            slack_channel_name=slack_channel_name
-        )
+        data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(days_back=days_back,
                                                                                               test_runs_amount=executions_limit,

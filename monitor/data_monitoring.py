@@ -6,10 +6,12 @@ import webbrowser
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
+import botocore.exceptions
 import pkg_resources
 from alive_progress import alive_it
 
 from clients.dbt.dbt_runner import DbtRunner
+from clients.s3.client import get_s3_client
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
 from config.config import Config
@@ -42,22 +44,13 @@ class DataMonitoring:
     DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
     DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(
-            self,
-            config: Config,
-            force_update_dbt_package: bool = False,
-            slack_webhook: Optional[str] = None,
-            slack_token: Optional[str] = None,
-            slack_channel_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, config: Config, force_update_dbt_package: bool = False):
         self.config = config
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
-        self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
-        self.slack_token = slack_token or self.config.slack_token
-        self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
         # slack client is optional
-        self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
+        self.slack_client = SlackClient.create_slack_client(self.config.slack_token, self.config.slack_webhook)
+        self.s3_client = get_s3_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
         self.success = True
@@ -74,7 +67,7 @@ class DataMonitoring:
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
             sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel if alert.slack_channel else self.slack_channel_name,
+                channel_name=alert.slack_channel if alert.slack_channel else self.config.slack_channel_name,
                 message=alert_msg
             )
             if sent_successfully:
@@ -163,15 +156,25 @@ class DataMonitoring:
 
     def send_report(self, elementary_html_path: str) -> bool:
         if os.path.exists(elementary_html_path):
-            file_uploaded_successfully = self.slack_client.upload_file(
-                channel_name=self.slack_channel_name,
-                file_path=elementary_html_path,
-                message=SlackMessageSchema(text="Elementary monitoring report")
-            )
-            if not file_uploaded_successfully:
-                self.success = False
+            if self.slack_client:
+                self.execution_properties['sent_via_slack'] = True
+                file_uploaded_successfully = self.slack_client.upload_file(
+                    channel_name=self.config.slack_channel_name,
+                    file_path=elementary_html_path,
+                    message=SlackMessageSchema(text="Elementary monitoring report")
+                )
+                if not file_uploaded_successfully:
+                    logger.error('Failed to send report to Slack.')
+                    self.success = False
+            if self.s3_client:
+                self.execution_properties['sent_via_s3'] = True
+                try:
+                    self.s3_client.upload_file(elementary_html_path, self.config.s3_bucket_name)
+                except botocore.exceptions.ClientError:
+                    logger.error('Failed to upload report to S3.')
+                    self.success = False
         else:
-            logger.error('Could not send Elementary monitoring report because it does not exist')
+            logger.error('Could not send Elementary monitoring report because it does not exist.')
             self.success = False
         return self.success
 
