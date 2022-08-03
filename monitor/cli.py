@@ -53,16 +53,12 @@ def get_cli_properties() -> dict:
     type=str,
     default=None,
     help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
-    cls=RequiredIf,
-    required_if="slack_channel_name"
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
     help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
-    cls=RequiredIf,
-    required_if="slack_token"
 )
 @click.option(
     '--config-dir', '-c',
@@ -247,16 +243,12 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     type=str,
     default=None,
     help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
-    cls=RequiredIf,
-    required_if="slack_channel_name"
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
     help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
-    cls=RequiredIf,
-    required_if="slack_token"
 )
 @click.option(
     '--profile-target', '-t',
