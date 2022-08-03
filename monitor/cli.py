@@ -279,7 +279,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 @click.option(
     '--aws-profile-name',
     type=str,
-    default=None,
+    default='default',
     help="AWS profile name for AWS",
 )
 @click.option(
@@ -293,12 +293,6 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     type=str,
     default=None,
     help="The secret access key for AWS"
-)
-@click.option(
-    '--aws-session-token',
-    type=str,
-    default=None,
-    help="The session token for AWS"
 )
 @click.option(
     '--s3-bucket-name',
@@ -321,13 +315,12 @@ def send_report(
         aws_profile_name,
         aws_access_key_id,
         aws_secret_access_key,
-        aws_session_token,
         s3_bucket_name
 ):
     config = Config(config_dir, profiles_dir, profile_target, slack_token=slack_token,
                     slack_channel_name=slack_channel_name, aws_profile_name=aws_profile_name,
                     aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
-                    aws_session_token=aws_session_token, s3_bucket_name=s3_bucket_name)
+                    s3_bucket_name=s3_bucket_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     slack_provided = any([config.slack_token, config.slack_token]) and config.slack_channel_name
