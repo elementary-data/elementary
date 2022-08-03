@@ -2,8 +2,6 @@ import os
 
 from utils.ordered_yaml import OrderedYaml
 
-ordered_yaml = OrderedYaml()
-
 
 class Config:
     _SLACK = 'slack'
@@ -40,7 +38,7 @@ class Config:
         config_file_path = os.path.join(self.config_dir, self._CONFIG_FILE_NAME)
         if not os.path.exists(config_file_path):
             return {}
-        return ordered_yaml.load(config_file_path)
+        return OrderedYaml().load(config_file_path)
 
     @property
     def has_slack(self) -> bool:
@@ -48,5 +46,6 @@ class Config:
 
     @property
     def has_aws(self) -> bool:
-        return self.aws_profile_name or all(
-            [self.aws_access_key_id, self.aws_secret_access_key, self.aws_session_token])
+        return self.s3_bucket_name and (
+                self.aws_profile_name or all([self.aws_access_key_id, self.aws_secret_access_key])
+        )

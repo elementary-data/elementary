@@ -123,7 +123,8 @@ def monitor(
     if ctx.invoked_subcommand is not None:
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
-    config = Config(config_dir, profiles_dir, profile_target, slack_webhook, slack_token, slack_channel_name)
+    config = Config(config_dir, profiles_dir, profile_target, slack_webhook=slack_webhook, slack_token=slack_token,
+                    slack_channel_name=slack_channel_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
@@ -277,31 +278,31 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 )
 @click.option(
     '--aws-profile-name',
-    type=bool,
+    type=str,
     default=None,
     help="AWS profile name for AWS",
 )
 @click.option(
     '--aws-access-key-id',
-    type=bool,
+    type=str,
     default=None,
     help="The access key id for AWS"
 )
 @click.option(
     '--aws-secret-access-key',
-    type=bool,
+    type=str,
     default=None,
     help="The secret access key for AWS"
 )
 @click.option(
     '--aws-session-token',
-    type=bool,
+    type=str,
     default=None,
     help="The session token for AWS"
 )
 @click.option(
     '--s3-bucket-name',
-    type=bool,
+    type=str,
     default=None,
     help="The name of the S3 bucket to upload the report to"
 )
@@ -323,8 +324,10 @@ def send_report(
         aws_session_token,
         s3_bucket_name
 ):
-    config = Config(config_dir, profiles_dir, profile_target, slack_token, slack_channel_name, aws_profile_name,
-                    aws_access_key_id, aws_secret_access_key, aws_session_token, s3_bucket_name)
+    config = Config(config_dir, profiles_dir, profile_target, slack_token=slack_token,
+                    slack_channel_name=slack_channel_name, aws_profile_name=aws_profile_name,
+                    aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
+                    aws_session_token=aws_session_token, s3_bucket_name=s3_bucket_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
     slack_provided = any([config.slack_token, config.slack_token]) and config.slack_channel_name

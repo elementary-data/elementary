@@ -169,7 +169,8 @@ class DataMonitoring:
             if self.s3_client:
                 self.execution_properties['sent_via_s3'] = True
                 try:
-                    self.s3_client.upload_file(elementary_html_path, self.config.s3_bucket_name)
+                    self.s3_client.upload_file(elementary_html_path, self.config.s3_bucket_name,
+                                               os.path.basename(elementary_html_path))
                 except botocore.exceptions.ClientError:
                     logger.error('Failed to upload report to S3.')
                     self.success = False
