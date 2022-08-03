@@ -48,8 +48,7 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart",
-        "quickstart-data-lineage"
+        "quickstart"
       ]
     },
     {
@@ -85,15 +84,6 @@
       ]
     },
     {
-      "group": "Data Lineage",
-      "pages": [
-        "data-lineage/edr-lineage",
-        "data-lineage/lineage-graph",
-        "data-lineage/query-history-1",
-        "data-lineage/use-cases"
-      ]
-    },
-    {
       "group": "Integrations",
       "pages": [
         "integrations/slack",
@@ -101,10 +91,6 @@
         "integrations/redshift",
         "integrations/bigquery"
       ]
-    },
-    {
-      "group": "Project Overview",
-      "pages": ["project-overview/contributions", "project-overview/roadmap"]
     },
     {
       "group": "FAQ & Support",
