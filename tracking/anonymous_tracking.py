@@ -6,7 +6,7 @@ from pathlib import Path
 import posthog
 
 import monitor.paths
-import tracking.user
+import tracking.env
 from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
 from utils.package import get_package_version
@@ -67,9 +67,9 @@ class AnonymousTracking:
 
     def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
         try:
-            user_props = tracking.user.get_props()
+            env_props = tracking.env.get_props()
             props = {'cli_properties': cli_properties, 'module_name': module_name, 'command': command}
-            self.send_event('cli-start', properties={'user': user_props, **props})
+            self.send_event('cli-start', properties={'env': env_props, **props})
         except Exception:
             pass
 
