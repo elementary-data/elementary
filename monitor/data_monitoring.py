@@ -7,10 +7,12 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 import botocore.exceptions
+import google
 import pkg_resources
 from alive_progress import alive_it
 
 from clients.dbt.dbt_runner import DbtRunner
+from clients.gcs.client import get_gcs_client
 from clients.s3.client import get_s3_client
 from clients.slack.schema import SlackMessageSchema
 from clients.slack.slack_client import SlackClient
@@ -49,8 +51,9 @@ class DataMonitoring:
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
         # slack client is optional
-        self.slack_client = SlackClient.create_slack_client(self.config.slack_token, self.config.slack_webhook)
+        self.slack_client = SlackClient.create_slack_client(self.config)
         self.s3_client = get_s3_client(self.config)
+        self.gcs_client = get_gcs_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
         self.success = True
@@ -173,6 +176,15 @@ class DataMonitoring:
                                                os.path.basename(elementary_html_path))
                 except botocore.exceptions.ClientError:
                     logger.error('Failed to upload report to S3.')
+                    self.success = False
+            if self.gcs_client:
+                self.execution_properties['sent_via_gcs'] = True
+                try:
+                    bucket = self.gcs_client.get_bucket(self.config.gcs_bucket_name)
+                    blob = bucket.blob(os.path.basename(elementary_html_path))
+                    blob.upload_from_filename(elementary_html_path)
+                except google.cloud.exceptions.GoogleCloudError:
+                    logger.error('Failed to upload report to GCS.')
                     self.success = False
         else:
             logger.error('Could not send Elementary monitoring report because it does not exist.')

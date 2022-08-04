@@ -7,6 +7,7 @@ from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 
 from clients.slack.schema import SlackMessageSchema
+from config.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,9 @@ class SlackClient(ABC):
         self.client = self._initial_client()
 
     @staticmethod
-    def create_slack_client(token: str = None, webhook: str = None):
+    def create_slack_client(config: Config):
+        if not config.has_slack:
+            return None
         if token:
             return SlackWebClient(token=token)
         elif webhook:

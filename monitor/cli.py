@@ -6,7 +6,6 @@ import click
 from config.config import Config
 from monitor.data_monitoring import DataMonitoring
 from tracking.anonymous_tracking import AnonymousTracking, track_cli_start, track_cli_exception, track_cli_end
-from utils.cli_utils import RequiredIf
 from utils.log import get_logger
 from utils.ordered_yaml import OrderedYaml
 from utils.package import get_package_version
@@ -125,7 +124,7 @@ def monitor(
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
         if not config.has_slack:
-            logger.error('Either a Slack token or webhook is required.')
+            logger.error('Either a Slack token and channel or a webhook is required.')
             return 1
 
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
@@ -292,6 +291,18 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     default=None,
     help="The name of the S3 bucket to upload the report to"
 )
+@click.option(
+    '--google-service-account-path',
+    type=str,
+    default=None,
+    help="The path to the Google service account json file"
+)
+@click.option(
+    '--gcs-bucket-name',
+    type=str,
+    default=None,
+    help="The name of the GCS bucket to upload the report to"
+)
 @click.pass_context
 def send_report(
         ctx,
@@ -307,18 +318,20 @@ def send_report(
         aws_profile_name,
         aws_access_key_id,
         aws_secret_access_key,
-        s3_bucket_name
+        s3_bucket_name,
+        google_service_account_path,
+        gcs_bucket_name
 ):
     config = Config(config_dir, profiles_dir, profile_target, slack_token=slack_token,
                     slack_channel_name=slack_channel_name, aws_profile_name=aws_profile_name,
                     aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
-                    s3_bucket_name=s3_bucket_name)
+                    s3_bucket_name=s3_bucket_name, google_service_account_path=google_service_account_path,
+                    gcs_bucket_name=gcs_bucket_name)
     anonymous_tracking = AnonymousTracking(config)
     track_cli_start(anonymous_tracking, 'monitor-send-report', get_cli_properties(), ctx.command.name)
-    slack_provided = any([config.slack_token, config.slack_token]) and config.slack_channel_name
     try:
-        if not slack_provided and not config.has_aws:
-            logger.error('You must provide a platform to send the report to (Slack / AWS).')
+        if not config.has_notification_platform:
+            logger.error('You must provide a platform to send the report to (Slack / AWS / GCS).')
             return 1
 
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
