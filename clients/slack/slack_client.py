@@ -24,11 +24,10 @@ class SlackClient(ABC):
     def create_slack_client(config: Config):
         if not config.has_slack:
             return None
-        if token:
-            return SlackWebClient(token=token)
-        elif webhook:
-            return SlackWebhookClient(webhook=webhook)
-        return None
+        if config.slack_token:
+            return SlackWebClient(token=config.slack_token)
+        elif config.slack_webhook:
+            return SlackWebhookClient(webhook=config.slack_webhook)
 
     @abstractmethod
     def _initial_client(self):
