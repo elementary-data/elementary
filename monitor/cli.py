@@ -124,7 +124,7 @@ def monitor(
     track_cli_start(anonymous_tracking, 'monitor', get_cli_properties(), ctx.command.name)
     try:
         if not config.has_slack:
-            logger.error('Either a Slack token and channel or a webhook is required.')
+            logger.error('Either a Slack token and a channel or a Slack webhook is required.')
             return 1
 
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
