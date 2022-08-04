@@ -55,7 +55,7 @@ class DataMonitoring:
         self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
-        self.sent_alert_ids = set()
+        self.sent_alert_count = 0
         self.success = True
 
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
@@ -76,7 +76,7 @@ class DataMonitoring:
                 logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}")
                 self.success = False
         self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        self.sent_alert_ids.update(sent_alert_ids)
+        self.sent_alert_count += len(sent_alert_ids)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -94,7 +94,7 @@ class DataMonitoring:
     def _send_alerts(self, alerts: Alerts):
         self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
         self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        self.execution_properties['sent_alert_count'] = len(self.sent_alert_ids)
+        self.execution_properties['sent_alert_count'] = self.sent_alert_count
 
     def run(self, days_back: int, dbt_full_refresh: bool = False, dbt_vars: Optional[dict] = None) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
