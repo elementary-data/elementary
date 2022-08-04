@@ -55,7 +55,7 @@ class Config:
     @property
     def has_aws(self) -> bool:
         return self.s3_bucket_name and (
-                self.aws_profile_name or all([self.aws_access_key_id, self.aws_secret_access_key])
+                self.aws_profile_name or (self.aws_access_key_id and self.aws_secret_access_key)
         )
 
     @property
