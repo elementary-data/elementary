@@ -1,0 +1,190 @@
+---
+title: "Add data monitoring tests"
+---
+
+After you [install the dbt package](../quickstart#install-the-dbt-package) and related configuration, you can add Elementary data tests.
+
+## Data monitors as dbt tests
+
+Elementary is the first solution that delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. Elementary dbt tests are actually data monitors that collect metrics and metadata over time. On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers.
+These tests are configured and executed like any other tests in your project.
+
+<TipInfo>
+  Elementary tests can only be used with the elementary models, so you must run
+  "dbt run --select elementary" to create the Elementary package models.
+</TipInfo>
+
+## Elementary available monitors as tests
+
+### Table (model / source) tests:
+
+`elementary.table_anomalies`
+
+Executes table level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
+By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
+
+`elementary.all_columns_anomalies`
+
+Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
+
+`elementary.schema_changes`
+
+Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
+
+### Column test:
+
+`elementary.column_anomalies`
+Executes column level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
+
+## How to configure your Elementary tests?
+
+Elementary tests are added to models / sources / columns of your dbt project just like the native dbt tests. You can configure specific monitors under the relevant keys (otherwise all relevant monitors will run).
+
+Elementary tests have three levels of configurations:
+
+1. [Test arguments](./elementary-tests-configuration#test-arguments) - Test specific arguments.
+2. Table configuration - Configure the timestamp column and details of a monitored table.
+3. [Global vars](./elementary-tests-configuration#data-monitoring-global-vars) - Optional configuration parameters of the operation.
+
+More on data tests configuration [here](./test-configuration).
+
+We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
+If you wish to only be warned on anomalies, configure the severity of the tests to warn.
+
+<SnippetGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    tests:
+      - elementary.table_anomalies:
+          table_anomalies: < specific monitors, all if null >
+          # optional - configure different freshness column than timestamp column
+          freshness_column: < freshness_column >
+      - elementary.all_columns_anomalies:
+          column_anomalies: < specific monitors, all if null >
+      - elementary.schema_changes
+
+  - name: < model name >
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies: < specific monitors, all if null >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+        - elementary.table_anomalies:
+            table_anomalies:
+              - row_count
+              - freshness
+            # optional - use tags to run elementary tests on a dedicated run
+            tags: ['elementary']
+            config:
+            # optional - change severity
+              severity: warn
+        - elementary.all_columns_anomalies:
+            tags: ['elementary']
+            # optional - change global sensitivity
+            sensitivity: 3.5
+            timestamp_column: 'updated_at'
+        - elementary.schema_changes:
+            tags: ['elementary']
+            config:
+              severity: warn
+
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+        elementary.table_anomalies
+          tags: ['elementary']
+    columns:
+      - name: user_id
+        tests:
+          - elementary.column_anomalies:
+              tags: ['elementary']
+              timestamp_column: 'updated_at'
+      - name: user_name
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - missing_count
+                - min_length
+              tags: ['elementary']
+```
+
+```yml Sources
+sources:
+  - name: < some name >
+    database: < datatbase >
+    schema: < schema >
+    tables:
+      - name: < table_name >
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: < source timestamp column >
+        tests: <here you will add elementary monitors as tests>
+```
+
+```yml Sources example
+sources:
+  - name: 'my_non_dbt_table'
+    database: 'raw_events'
+    schema: 'product'
+    tables:
+      - name: 'raw_product_login_events'
+      ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: 'loaded_at'
+        tests:
+          - elementary.table_anomalies
+          - elementary.all_columns_anomalies:
+              column_anomalies:
+                - null_count
+                - missing_count
+                - zero_count
+         columns:
+          - name: user_id
+            tests:
+              - elementary.column_anomalies
+```
+
+</SnippetGroup>
+
+## What happens on each test?
+
+On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
+At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models.
+
+## What does it mean when a test fails?
+
+When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection](./data-anomaly-detection#anomaly-detection).
+
+## Where are Elementary tests results stored?
+
+At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models. The relevant models are:
+
+- `alerts_data_monitoring` - All the detected anomalies are merged to this table.
+- `data_monitoring_metrics` - All the collected metrics are merged to this table.
+- `metrics_anomaly_score` - The anomaly score calculated for all the metrics from the last 7 days.
+
+## Alerts on detected anomalies (failed tests)
+
+To get Slack notifications, refer to the [Slack integration](../integrations/slack).

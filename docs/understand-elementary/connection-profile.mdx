@@ -1,0 +1,123 @@
+---
+title: "Connection Profile"
+---
+
+In order to connect to your data warehouse, Elementary requires connection details and credentials. These are provided to the tool using a file named `profiles.yml`.
+
+The details provided in the connection profile will be the credentials that Elementary will use, and the details of the database and schema that will be used for outputs (e.g. alerts, configuration tables).
+
+**We recommend creating a dedicated database, or at least a schema.**
+
+## dbt users
+
+**Just add a profile with the relevant credentials, and name it elementary.**
+
+If you use [dbt](https://www.getdbt.com/), you don't even need to create the file, you already have it. In general, we support the same profiles format as dbt for our supported integrations, with the exception that in BigQuery we require 'location', and in dbt it is optional.
+
+## Required permissions
+
+The provided credentials need to have permission to:
+
+- Read - query history, information schema and the tables configured for monitoring.,
+- Write - to the database and schema configured in Elementary connection profile.
+
+If the credentials provided will not have access to the entire query history, a partial lineage graph will be generated based on the available queries (can be exported using the export query history option).
+
+The required connection details and permissions for each data warehouse are detailed in the relevant integration documentation under integrations.
+
+## Connection profile template
+
+<SnippetGroup>
+
+```yml Snowflake
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'elementary_test_results' is to find it.        ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary:
+  outputs:
+    default:
+      type: snowflake
+      account: [account id]
+
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]
+      threads: 4
+      ## OPTIONAL - if you want to create the lineage based on queries from more
+      ## than the last 7 days or you have 10k or more queries in the history pulled during
+      ## the requested dates range, add this parameter (NOTE: account_usage requires more permissions, see note below).
+      query_history_source: account_usage
+```
+
+```yml BigQuery
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'elementary_test_results' is to find it.        ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary:
+  outputs:
+    default:
+      type: bigquery
+
+      ## Service account auth, other options require other configs ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+
+      project: [project id]
+      dataset: [dataset name]
+      threads: 4
+      ## Location is mandatory, can be one of US or EU, or a regional location
+      location: [dataset location]
+      priority: interactive
+```
+
+```yml Redshift
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'elementary_test_results' is to find it.        ##
+##                                                             ##
+
+elementary:
+  outputs:
+    default:
+      type: redshift
+      host: [hostname, like hostname.region.redshift.amazonaws.com]
+
+      ## User/password auth, other options (IAM) require other configs ##
+      user: [username]
+      password: [password]
+
+      dbname: [database name]
+      schema: [schema name]
+      threads: 4
+      keepalives_idle: 240 # default 240 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      sslmode:
+        [
+          optional,
+          set the sslmode used to connect to the database (in case this parameter is set,
+          will look for ca in ~/.postgresql/root.crt),
+        ]
+      ra3_node: true # enables cross-database sources
+```
+
+</SnippetGroup>
