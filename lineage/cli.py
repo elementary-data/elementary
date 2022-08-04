@@ -1,6 +1,5 @@
 import os
-from datetime import datetime
-from datetime import timedelta, date
+from datetime import datetime, timedelta, date
 from os.path import expanduser
 
 import click
