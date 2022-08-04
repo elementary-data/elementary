@@ -21,7 +21,7 @@ class AnonymousTracking:
 
     def __init__(self, config: Config) -> None:
         self.anonymous_user_id = None
-        self.hashed_adapter_unique_id = None
+        self.anonymous_warehouse_id = None
         self.config = config
         self.do_not_track = config.anonymous_tracking_enabled is False
         self.run_id = str(uuid.uuid4())
@@ -29,7 +29,7 @@ class AnonymousTracking:
 
     def init(self):
         self.anonymous_user_id = self.init_anonymous_user_id()
-        self.hashed_adapter_unique_id = self._get_hashed_adapter_unique_id()
+        self.anonymous_warehouse_id = self._get_anonymous_warehouse_id()
         posthog.api_key, posthog.host = self.POSTHOG_API_KEY, self.POSTHOG_HOST
 
     def init_anonymous_user_id(self):
@@ -60,7 +60,7 @@ class AnonymousTracking:
 
         properties['run_id'] = self.run_id
         posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties,
-                        groups={'warehouse': self.hashed_adapter_unique_id})
+                        groups={'warehouse': self.anonymous_warehouse_id})
 
     def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
         try:
@@ -98,11 +98,11 @@ class AnonymousTracking:
         except Exception:
             pass
 
-    def _get_hashed_adapter_unique_id(self):
+    def _get_anonymous_warehouse_id(self):
         try:
             dbt_runner = DbtRunner(monitor.paths.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
             adapter_unique_id = dbt_runner.run_operation('get_adapter_unique_id', should_log=False)[0]
-            hashed_adapter_unique_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
-            return hashed_adapter_unique_id
+            anonymous_warehouse_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
+            return anonymous_warehouse_id
         except Exception:
             return None

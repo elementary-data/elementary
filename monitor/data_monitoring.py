@@ -138,7 +138,7 @@ class DataMonitoring:
             output_data['lineage'] = lineage.dict()
             output_data['report_generator_user_id'] = tracking.anonymous_user_id
             output_data['posthog_api_key'] = tracking.POSTHOG_API_KEY
-            output_data['warehouse_id'] = tracking.hashed_adapter_unique_id
+            output_data['warehouse_id'] = tracking.anonymous_warehouse_id
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, 'r') as template_html_file:
                 template_html_code = template_html_file.read()
