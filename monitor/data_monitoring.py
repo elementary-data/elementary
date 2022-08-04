@@ -160,29 +160,32 @@ class DataMonitoring:
     def send_report(self, elementary_html_path: str) -> bool:
         if os.path.exists(elementary_html_path):
             if self.slack_client:
-                self.execution_properties['sent_via_slack'] = True
+                self.execution_properties['send_to_slack'] = True
                 file_uploaded_successfully = self.slack_client.upload_file(
                     channel_name=self.config.slack_channel_name,
                     file_path=elementary_html_path,
                     message=SlackMessageSchema(text="Elementary monitoring report")
                 )
+                logger.info('Sent report to slack.')
                 if not file_uploaded_successfully:
                     logger.error('Failed to send report to Slack.')
                     self.success = False
             if self.s3_client:
-                self.execution_properties['sent_via_s3'] = True
+                self.execution_properties['send_to_s3'] = True
                 try:
                     self.s3_client.upload_file(elementary_html_path, self.config.s3_bucket_name,
                                                os.path.basename(elementary_html_path))
+                    logger.info('Sent report to S3.')
                 except botocore.exceptions.ClientError:
                     logger.error('Failed to upload report to S3.')
                     self.success = False
             if self.gcs_client:
-                self.execution_properties['sent_via_gcs'] = True
+                self.execution_properties['send_to_gcs'] = True
                 try:
                     bucket = self.gcs_client.get_bucket(self.config.gcs_bucket_name)
                     blob = bucket.blob(os.path.basename(elementary_html_path))
                     blob.upload_from_filename(elementary_html_path)
+                    logger.info('Sent report to GCS.')
                 except google.cloud.exceptions.GoogleCloudError:
                     logger.error('Failed to upload report to GCS.')
                     self.success = False
