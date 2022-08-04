@@ -28,9 +28,12 @@ class AnonymousTracking:
         self.init()
 
     def init(self):
-        self.anonymous_user_id = self.init_anonymous_user_id()
-        self.anonymous_warehouse_id = self._get_anonymous_warehouse_id()
-        posthog.api_key, posthog.host = self.POSTHOG_API_KEY, self.POSTHOG_HOST
+        try:
+            self.anonymous_user_id = self.init_anonymous_user_id()
+            self.anonymous_warehouse_id = self._get_anonymous_warehouse_id()
+            posthog.api_key, posthog.host = self.POSTHOG_API_KEY, self.POSTHOG_HOST
+        except Exception:
+            pass
 
     def init_anonymous_user_id(self):
         legacy_user_id_path = Path().joinpath(self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE)
