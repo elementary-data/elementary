@@ -2,8 +2,6 @@
 title: "Quickstart: Data Monitoring"
 ---
 
-import { TipInfo } from "@/components/Tip";
-
 To start using Elementary to monitor you dbt tests, executions and data, you need to add our dbt package to your dbt project.
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
@@ -17,6 +15,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 </details>
 
 ## How to install Elementary dbt package?
+
 <Example resizeable>
   <div style="position: relative; padding-bottom: 64.98194945848375%; height: 0;">
     <iframe
@@ -56,7 +55,6 @@ models:
     +schema: "elementary"
 ```
 
-
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800"> <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200"><TipInfo>Important: Materialization config</TipInfo></summary>
 
 For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that affect elementary, such as:
@@ -68,14 +66,16 @@ materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
 Make sure to place the 'elementary' configuration under the models key, and other configs under your project name.
 
 Example:
+
 ```yml dbt_project.yml
 models:
   my_project:
     materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
-  
+
   elementary:
     +schema: "elementary"
 ```
+
 </details>
 
 ### 3. Import the package
