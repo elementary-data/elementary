@@ -36,6 +36,7 @@ FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
+_REPORT_CONTENT_TYPE = 'text/html'
 
 
 class DataMonitoring:
@@ -118,7 +119,8 @@ class DataMonitoring:
         return self.success
 
     def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
-                        file_path: Optional[str] = None, disable_passed_test_metrics: bool = False) -> Tuple[
+                        file_path: Optional[str] = None, disable_passed_test_metrics: bool = False,
+                        should_open_browser: bool = True) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -152,47 +154,66 @@ class DataMonitoring:
                 elementary_output_json_file:
             elementary_output_json_file.write(dumped_output_data)
 
-        webbrowser.open_new_tab('file://' + html_path)
+        if should_open_browser:
+            webbrowser.open_new_tab('file://' + html_path)
         self.execution_properties['report_end'] = True
         self.execution_properties['success'] = self.success
         return self.success, html_path
 
-    def send_report(self, elementary_html_path: str) -> bool:
-        if os.path.exists(elementary_html_path):
-            if self.slack_client:
-                self.execution_properties['send_to_slack'] = True
-                file_uploaded_successfully = self.slack_client.upload_file(
-                    channel_name=self.config.slack_channel_name,
-                    file_path=elementary_html_path,
-                    message=SlackMessageSchema(text="Elementary monitoring report")
-                )
-                logger.info('Sent report to slack.')
-                if not file_uploaded_successfully:
-                    logger.error('Failed to send report to Slack.')
-                    self.success = False
-            if self.s3_client:
-                self.execution_properties['send_to_s3'] = True
-                try:
-                    self.s3_client.upload_file(elementary_html_path, self.config.s3_bucket_name,
-                                               os.path.basename(elementary_html_path))
-                    logger.info('Sent report to S3.')
-                except botocore.exceptions.ClientError:
-                    logger.error('Failed to upload report to S3.')
-                    self.success = False
-            if self.gcs_client:
-                self.execution_properties['send_to_gcs'] = True
-                try:
-                    bucket = self.gcs_client.get_bucket(self.config.gcs_bucket_name)
-                    blob = bucket.blob(os.path.basename(elementary_html_path))
-                    blob.upload_from_filename(elementary_html_path)
-                    logger.info('Sent report to GCS.')
-                except google.cloud.exceptions.GoogleCloudError:
-                    logger.error('Failed to upload report to GCS.')
-                    self.success = False
-        else:
-            logger.error('Could not send Elementary monitoring report because it does not exist.')
-            self.success = False
+    def send_report(self, html_path: str) -> bool:
+        if self.slack_client:
+            self.execution_properties['send_to_slack'] = True
+            file_uploaded_successfully = self.slack_client.upload_file(
+                channel_name=self.config.slack_channel_name,
+                file_path=html_path,
+                message=SlackMessageSchema(text="Elementary monitoring report")
+            )
+            logger.info('Sent report to Slack.')
+            if not file_uploaded_successfully:
+                logger.error('Failed to send report to Slack.')
+                self.success = False
         return self.success
+
+    def upload_report(self, html_path: str):
+        if self.s3_client:
+            self._upload_report_to_s3(html_path)
+        if self.gcs_client:
+            self._upload_report_to_gcs(html_path)
+        return self.success
+
+    def _upload_report_to_s3(self, html_path: str):
+        report_filename = os.path.basename(html_path)
+        self.execution_properties['send_to_s3'] = True
+        try:
+            self.s3_client.upload_file(html_path, self.config.s3_bucket_name, report_filename,
+                                       ExtraArgs={'ContentType': _REPORT_CONTENT_TYPE}
+                                       )
+            logger.info('Uploaded report to S3.')
+            if self.config.update_bucket_website:
+                self.s3_client.put_bucket_website(
+                    Bucket=self.config.s3_bucket_name,
+                    WebsiteConfiguration={'IndexDocument': {'Suffix': report_filename}}
+                )
+                logger.info("Updated S3 bucket's website.")
+        except botocore.exceptions.ClientError:
+            logger.error('Failed to upload report to S3.')
+            self.success = False
+
+    def _upload_report_to_gcs(self, html_path: str):
+        report_filename = os.path.basename(html_path)
+        self.execution_properties['send_to_gcs'] = True
+        try:
+            bucket = self.gcs_client.get_bucket(self.config.gcs_bucket_name)
+            blob = bucket.blob(report_filename)
+            blob.upload_from_filename(html_path, content_type=_REPORT_CONTENT_TYPE)
+            bucket.copy_blob(blob, bucket, 'index.html')
+            logger.info('Uploaded report to GCS.')
+            if self.config.update_bucket_website:
+                bucket.configure_website(report_filename)
+                logger.info("Updated GCS bucket's website.")
+        except google.cloud.exceptions.GoogleCloudError:
+            logger.error('Failed to upload report to GCS.')
+            self.success = False
 
     def _get_lineage(self) -> LineageSchema:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)

@@ -9,16 +9,19 @@ class Config:
     _GOOGLE = 'google'
     _CONFIG_FILE_NAME = 'config.yml'
 
-    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None, slack_webhook: str = None,
-                 slack_token: str = None, slack_channel_name: str = None, aws_profile_name: str = None,
-                 aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
-                 google_service_account_path: str = None, gcs_bucket_name: str = None):
+    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None,
+                 update_bucket_website: bool = None, slack_webhook: str = None, slack_token: str = None,
+                 slack_channel_name: str = None, aws_profile_name: str = None, aws_access_key_id: str = None,
+                 aws_secret_access_key: str = None, s3_bucket_name: str = None, google_service_account_path: str = None,
+                 gcs_bucket_name: str = None):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
         config = self._load_configuration()
 
         self.target_dir = config.get('target-path') or os.getcwd()
+
+        self.update_bucket_website = update_bucket_website or config.get('update_bucket_website', True)
 
         self.slack_webhook = slack_webhook or config.get(self._SLACK, {}).get('notification_webhook')
         self.slack_token = slack_token or config.get(self._SLACK, {}).get('token')
@@ -45,8 +48,8 @@ class Config:
         return OrderedYaml().load(config_file_path)
 
     @property
-    def has_notification_platform(self):
-        return self.has_slack or self.has_aws or self.has_gcs
+    def has_upload_platform(self):
+        return self.has_aws or self.has_gcs
 
     @property
     def has_slack(self) -> bool:
