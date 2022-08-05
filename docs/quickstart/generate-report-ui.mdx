@@ -5,31 +5,26 @@ title: "Generate report"
 import InstallCLI from "../snippets/install-cli.mdx";
 import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
 
-Elementary has a report for visualization and exploration of data from the dbt-package tables, which includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
+Elementary data observability report can be used for visualization and exploration of data from the dbt-package tables. That includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
   alt="Demo"
 />
 
-In order to visualize the data from the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, you can use the [CLI](../understand-elementary/cli-install) to generate the Elementary report.
+import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
 
-## Instructions to generate reports
+Before you can start using the report, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
+This is **required for the tests to work.**
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt package installation</summary>
+    <InstallDbtPackage />
+</details>
 
 <InstallCLI />
 
 <AddConnectionProfile />
-
-### Execute dbt command
-
-```shell
-dbt run --select elementary
-```
-
-Before you can start using Elementary CLI, execute `dbt run` with the [Elementary package](../understand-elementary/dbt-package) models, which are **required for Elementary CLI features to work.**
-
-This will create mostly empty tables, that will be updated by the tests executions.
-The fact that the tables are empty means that there will be **minimal to no performance impact** on your dbt runs.
 
 ## Generate Tests Report UI
 

@@ -54,9 +54,9 @@
     {
       "group": "Guides",
       "pages": [
-        "quickstart/add-elementary-tests",
         "quickstart/generate-report-ui",
-        "quickstart/send-slack-alerts"
+        "quickstart/send-slack-alerts",
+        "quickstart/add-elementary-tests"
       ]
     },
     {
