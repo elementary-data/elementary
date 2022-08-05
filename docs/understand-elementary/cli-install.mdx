@@ -1,42 +1,20 @@
 ---
 title: "CLI Install & Configure"
 ---
+import InstallCLI from "../snippets/install-cli.mdx";
+import AddConnectionProfile from "../snippets/install-cli.mdx";
 
 We recommend you install Elementary CLI using one of the following methods:
 
-## Install & Configure
+<InstallCLI />
 
-### pip
 
-Elementary is a python tool distributed on pypi, and can be installed via `pip`:
-The CLI had two modules: monitor and lineage.
-
-For **data monitoring, slack alerts and UI**, run:
-
-```shell
-pip install elementary-data
-```
-
-For **data lineage**, run:
-
-```shell
-pip install 'elementary-data[lineage]'
-```
-
-Run one of the following commands based on **your data warehouse** (no need to run all):
-
-```shell
-pip install 'elementary-data[snowflake]'
-pip install 'elementary-data[bigquery]'
-pip install 'elementary-data[redshift]'
-```
-
-### Install from source
+## Install from source
 
 Install Elementary directly from GitHub source:
 
 ```shell
-git clone https://github.com/elementary-data/elementary
+git clone https://github.com/elementary-data/elementary/releases/latest
 cd elementary
 python setup.py install
 ```
@@ -51,109 +29,23 @@ edr --help
 
 ## CLI configuration
 
-Elementary requires two configuration files:
+Elementary CLI requires a connection profile to connect to DWH. Additional configuration is made on `config.yml`:
 
-- `HOME_DIR/.edr/config.yml` - Elementary configuration.
-- `HOME_DIR/.dbt/profiles.yml` - Connection details to the data warehouse, in the format of dbt connection profile named `elementary`.
+- **Required:** `HOME_DIR/.dbt/profiles.yml` - Connection details to the data warehouse, in the format of dbt connection profile named `elementary`.
+- **Optional:** `HOME_DIR/.edr/config.yml` - Elementary configuration.
 
 (These default paths and names may be changed using the [CLI options](./cli-advanced)).
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'config.yml'?</summary>
-
-Create a new directory and yml file under: HOME_DIR/.edr/config.yml
-
-Here is the format of the yml itself:
-
-```yml config.yml
-# alerts destination #
-slack:
-  notification_webhook: <your_slack_webhook_url>
-  # optional #
-  workflows: false
-
-# optional #
-# Target path for the output files of edr lineage #
-traget-path:
-```
-
-</details>
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
   <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'profiles.yml'?</summary>
 
-1. By default, the tool will search for the file under HOME_DIR/.dbt. If you wish to create it in a different directory, choose a path that does not sync with any version control system.
-2. Create a new file and name it profiles.yml.
-3. Use a template of the relevant integration to create a connection profile in the file, and save it.
-
-Note that for edr monitor the connection profile has to have the database and schema of the project where the tests run. If you are using a custom database for Elementary, configure it in the profile.
-
-<SnippetGroup>
-
-```yml Snowflake
-## By default, edr expects the profile name 'elementary'.      ##
-##                                                             ##
-## For edr monitor:                                            ##
-## The database and schema of edr models.                      ##
-## Check where 'alerts_data_monitoring' is to find it.         ##
-##                                                             ##
-## For edr lineage:                                            ##
-## Any database and schema will do.                            ##
-
-elementary:
-  outputs:
-    default:
-      type: snowflake
-      account: [account id]
-
-      ## User/password auth, other options (Keypair/SSO) require other configs ##
-      user: [username]
-      password: [password]
-
-      role: [user role]
-      database: [database name]
-      warehouse: [warehouse name]
-      schema: [schema name]_elementary
-      threads: 4
-      ## OPTIONAL - if you want to create the lineage based on queries from more
-      ## than the last 7 days or you have 10k or more queries in the history pulled during
-      ## the requested dates range, add this parameter (NOTE: account_usage requires more permissions, see note below).
-      query_history_source: account_usage
-```
-
-```yml BigQuery
-## By default, edr expects the profile name 'elementary'.      ##
-##                                                             ##
-## For edr monitor:                                            ##
-## The database and schema of edr models.                      ##
-## Check where 'alerts_data_monitoring' is to find it.         ##
-##                                                             ##
-## For edr lineage:                                            ##
-## Any database and schema will do.                            ##
-
-elementary:
-  outputs:
-    default:
-      type: bigquery
-
-      ## Service account auth, other options require other configs ##
-      method: service-account
-      keyfile: [full path to your keyfile]
-
-      project: [project id]
-      dataset: [dataset name]
-      threads: 4
-      ## Location is mandatory, can be one of US or EU, or a regional location
-      location: [dataset location]
-      priority: interactive
-```
-
-</SnippetGroup>
+<AddConnectionProfile />
 
 </details>
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt user? you already have profiles.yml</summary>
+  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt-core user? You already have profiles.yml</summary>
 
 If you are a dbt user, you already have a `profiles.yml` file that you can use. The default path of the dbt profiles file is `~/.dbt/` directory.
 
@@ -171,7 +63,7 @@ Elementary requires connection details and credentials to connect to the data wa
 
 Elementary leverages dbt's [connection profile](https://docs.getdbt.com/dbt-cli/configure-your-profile) format.
 
-**dbt users**
+**dbt-core users**
 Just add a profile with the relevant details, and name it `elementary`.
 
 </details>
@@ -184,22 +76,26 @@ The provided credentials need to have permission to:
 - Read - Query history, information schema and the tables configured for monitoring.,
 - Write - To the database and schema configured in `elementary` [connection profile](./connection-profile).
 
-The required connection details and permissions for each data warehouse are detailed in the relevant integration documentation under integrations.
-
 </details>
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Slack configuration</summary>
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'config.yml'?</summary>
 
-Configure Slack by creating an app for Elementary and passing the token/webhook to the CLI as a parameter, or adding the token/webhook to `config.yml`.
-Refer to [this guide](../integrations/slack) for detailed instructions.
+Create a new directory and yml file under: HOME_DIR/.edr/config.yml
 
-</details>
+Here is the format of the yml itself:
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Modules configuration</summary>
+```yml config.yml
+# alerts destination #
+slack:
+notification_webhook: <your_slack_webhook_url>
+# optional #
+workflows: false
 
-Modules specific configuration is detailed in the guides for each module.
+# optional #
+# Target path for the output files of edr lineage #
+traget-path:
+```
 
 </details>
 

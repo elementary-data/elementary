@@ -65,9 +65,7 @@
         "understand-elementary/elementary-overview",
         "understand-elementary/dbt-package",
         "understand-elementary/cli-install",
-        "understand-elementary/connection-profile",
         "understand-elementary/cli-commands",
-        "understand-elementary/cli-advanced",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
       ]

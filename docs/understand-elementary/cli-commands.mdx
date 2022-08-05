@@ -1,6 +1,15 @@
 ---
-title: "CLI Commands"
+title: "CLI Commands and Usage"
 ---
+
+With any of the CLI commands, you can use the --help flag and get instructions and available [advanced options](./cli-advanced):
+
+```shell
+edr --help
+```
+
+
+## CLI commands
 
 Read from the test results table and send new [alerts to Slack](./elementary-alerts):
 
@@ -20,10 +29,57 @@ Read from the test results table and generate the [Elementary UI](./elementary-r
 edr monitor send-report
 ```
 
-## Using Elementary CLI
+## CLI Advanced Options
 
-With any of the CLI commands, you can use the --help flag and get instructions and available [advanced options](./cli-advanced):
+If you wish, here are the options for providing paths and names that are different than default:
+
+- **Profile directory path:**
+The path of the directory in which your `profiles.yml` file is located. Default is `HOME_DIR/.dbt`
+- This option must be configured together with profile name.
 
 ```shell
-edr --help
+-d, --profiles-dir <PATH>
+```
+
+- **Configuration directory path:**
+The path of the directory in which your `config.yml` file is located. Default is `HOME_DIR/.edr`
+
+```shell
+-c, --config-dir <PATH>
+```
+
+- **Profile target:**
+Choose a specific target in case you have multiple targets for Elementary
+
+```shell
+-t, --profile-target <target_name>
+```
+
+- **Slack webhook URL:**
+Pass the webhook URL of your Slack channel to edr as a parameter.
+
+```shell
+-s, --slack-webhook <slack_webhook_url>
+```
+
+- **Slack token**
+Pass the Slack token and the Slack channel to edr as parameters.
+
+```shell
+-st, --slack-token <slack_token>
+-ch, --slack-channel-name <slack_channel_name_to_send_the_file_to>
+```
+
+- **Full refresh dbt package models:**
+Force running a full refresh of all incremental models in the edr dbt package.
+
+```shell
+ -f, --full-refresh-dbt-package BOOLEAN
+```
+
+- **Days back:**
+Set a limit to how far back Elementary should collect dbt and Elementary results while generating alerts/report.
+
+```shell
+-d, --days-back INTIGER
 ```
