@@ -16,17 +16,17 @@ Each time you run `dbt test`, elementary data monitors will use this configurati
 To learn how to add these tests, [go here](./add-data-monitoring-tests).
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Understanding data tests configuration priorities</summary>
-    The configuration of Elementary monitors is dbt native, meaning we follow the format and priorities of `dbt configuration`.
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Data tests configuration priorities</summary>
+The configuration of Elementary monitors is dbt native, meaning we follow the format and priorities of `dbt configuration`.
 
-    You can configure elementary tests to monitor dbt models and dbt sources.
-    Tables that are not part of the dbt project can also be monitored, just add these as sources to the project (no need to refer from any model).
+You can configure elementary tests to monitor dbt models and dbt sources.
+Tables that are not part of the dbt project can also be monitored, just add these as sources to the project (no need to refer from any model).
 
-    For dbt models and sources, elementary searches and prioritizes configuration in the following order:
+For dbt models and sources, elementary searches and prioritizes configuration in the following order:
 
-    1. Test arguments.
-    2. Model `config` (timestamp_column only).
-    3. Global vars in `dbt_project.yml`.
+1. Test arguments.
+2. Model `config` (timestamp_column only).
+3. Global vars in `dbt_project.yml`.
 
 </details>
 
@@ -35,7 +35,7 @@ To learn how to add these tests, [go here](./add-data-monitoring-tests).
 ## Test arguments
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">`timestamp_column`: [column name]</summary>
+    <summary>`timestamp_column`: [column name]</summary>
     It is recommended to configure a timestamp column (if there is one). The best column for this will have an 'updated at' timestamp for each row (date type also works).
     Elementary will use this column to filter the table when running monitors.
     If undefined, _default is null_ (no time buckets).
