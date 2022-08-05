@@ -11,7 +11,9 @@ This is **required for the tests to work.**
     <InstallDbtPackage />
 </details>
 
-## Add and configure the monitors as tests from within your dbt project:
+## Add anomaly detection tests
+
+Elementary dbt tests are actually data monitors that collect metrics and metadata over time. On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers. These tests are configured and executed like any other tests in your project.
 
 After you install the dbt package in your project, the following tests will be available for you to use just like native dbt tests:
 
@@ -29,7 +31,7 @@ After you install the dbt package in your project, the following tests will be a
 
 For additional tests configuration and options, refer to [configure monitoring](../guides/elementary-tests-configuration) and [add monitors as tests](../guides/add-data-monitoring-tests).
 
-Add and configure the monitors as tests from within your dbt project:
+Add and configure the tests from within your dbt project:
 
 <SnippetGroup>
 

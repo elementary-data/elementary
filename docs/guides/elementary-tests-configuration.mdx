@@ -15,68 +15,66 @@ Each time you run `dbt test`, elementary data monitors will use this configurati
 
 To learn how to add these tests, [go here](./add-data-monitoring-tests).
 
-## Understanding data tests configuration
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Understanding data tests configuration priorities</summary>
+    The configuration of Elementary monitors is dbt native, meaning we follow the format and priorities of `dbt configuration`.
 
-The configuration of Elementary monitors is dbt native, meaning we follow the format and priorities of `dbt configuration`.
+    You can configure elementary tests to monitor dbt models and dbt sources.
+    Tables that are not part of the dbt project can also be monitored, just add these as sources to the project (no need to refer from any model).
 
-You can configure elementary tests to monitor dbt models and dbt sources.
-Tables that are not part of the dbt project can also be monitored, just add these as sources to the project (no need to refer from any model).
+    For dbt models and sources, elementary searches and prioritizes configuration in the following order:
 
-For dbt models and sources, elementary searches and prioritizes configuration in the following order:
+    1. Test arguments.
+    2. Model `config` (timestamp_column only).
+    3. Global vars in `dbt_project.yml`.
 
-1. Test arguments.
-2. Model `config` (timestamp_column only).
-3. Global vars in `dbt_project.yml`.
+</details>
 
 ---
 
 ## Test arguments
 
-`timestamp_column`: [column name]
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">`timestamp_column`: [column name]</summary>
+    It is recommended to configure a timestamp column (if there is one). The best column for this will have an 'updated at' timestamp for each row (date type also works).
+    Elementary will use this column to filter the table when running monitors.
+    If undefined, _default is null_ (no time buckets).
+    (`timestamp_column` can be defined for the whole table as well).
+</details>
 
-It is recommended to configure a timestamp column (if there is one). The best column for this will have an 'updated at' timestamp for each row (date type also works).
-Elementary will use this column to filter the table when running monitors.
-If undefined, _default is null_ (no time buckets).  
-(`timestamp_column` can be defined for the whole table as well).
-
-`sensitivity`:
+`sensitivity`: [int]
 
 Threshold for the anomaly sensitivity, the [global default](./add-data-monitoring-tests) is 3. If defined for a test, the test param is used instead of the global one.
 A higher number means less sensitivity (less anomalies), and a lower number means more sensitivity (more anomalies).
 
-`backfill_days`:
+`backfill_days`: [int]
 
 The minimal amount of buckets for running time buckets monitors. If these buckets were already calculated, Elementary will overwrite them. The reason behind it is to monitor recent backfills of data, if there were any.
 This configuration should be changed according to your data delays.
 If undefined, _default is 2 buckets_.
 
-`exclude_regexp`:
+`exclude_regexp`: [regex]
 
 Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on regular expression match. Example usage: `exlude_regexp: '.*SDC$'`
 
-`exclude_prefix`:
+`exclude_prefix`: [string]
+
 Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on prefix match. Example usage: `exlude_prefix: 'dbt_'`
 
 ---
 
-## Table timestamp column
+## Table configuration
 
-Elementary tests use a timestamp column to filter data and divide it into time buckets (read more about [how Elementary tests work](./data-anomaly-detection#how-do-monitors-work-in-elementary-data-tests)).
+Elementary tests `timestamp_column` can be configured for a model / source.
+This will apply to any test defined on the table that has no `timestamp_column` param.
 
-A timestamp column can be configured in two places:
-
-1. [Test param](#test-arguments) - Will apply to the test in which it is configured.
-2. Table configuration - Will apply to any test defined on the table that has no `timestamp_column` param.
-
-To configure a timestamp column for a monitored table, under a model config key, add a key named elementary, and configure:
-
-**timestamp_column**: [column name]
+`timestamp_column`: [column name]
 
 It is recommended to configure a timestamp column (if there is one). The best column for this will have an 'updated at' timestamp for each row (date type also works).
 Elementary will use this column to filter the table when running monitors.
 If undefined, _default is null_ (no time buckets).
 
-### Configure timestamp_column for dbt models
+**Example configuration:**
 
 <SnippetGroup>
 
@@ -115,16 +113,6 @@ models:
       - elementary.table_anomalies:
           tags: ["elementary"]
 ```
-
-</SnippetGroup>
-
-### Configure timestamp_column for non-dbt tables / dbt sources
-
-Any table/view in the data warehouse that is not a dbt model can be monitored as a dbt source (even if it is not used by models in the project).
-Note that sources don't have a 'config' key, so the configuration for elementary is under the 'meta' key.
-As these tables are not part of your project, you will need to detail the database and schema name:
-
-<SnippetGroup>
 
 ```yml sources_properties.yml
 sources:
@@ -188,11 +176,6 @@ If undefined, _default is 2 buckets_.
 This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](./data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies).
 If undefined, _default threshold is 3_.
 
-`elementary_alerts_ignore_warn`: [bool]
-
-This flag determines if elementary should alert on tests warnings or failures and errors only.
-If undefined, _default flag is false_.
-
 ```yml dbt_project.yml
 # optional #
 # Global vars for data monitoring#
@@ -200,13 +183,4 @@ vars:
   days_back: 14 # maximum timeframe for collecting metrics and analyzing anomalies
   anomaly_score_threshold: 3 # sensitivity of anomaly detection
   backfill_days: 2 # days to backfill on each run, adjust to your data delays
-  elementary_alerts_ignore_warn: true # ignorning tests warning (alerting only failures and errors)
 ```
-
----
-
-## Configure Slack alerts
-
-Alerts on changes detected can be sent via Slack when you run `edr monitor`.
-
-Configure Slack integration by creating an app for Elementary and adding the `Token/Webhook` to `config.yml`. Refer to [this guide](../integrations/slack) for detailed instructions.
