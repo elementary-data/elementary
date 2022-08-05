@@ -3,17 +3,11 @@ title: "Test configuration"
 ---
 
 The data tests configuration is defined in `.yml` files in your dbt project.
-You can change and adjust the configuration anytime, and the elementary on-run-end macro will upload the most recent version on every `dbt run` you execute.
-
 Elementary tests have three levels of configurations:
 
 1. [Test arguments](#test-arguments) - Test specific arguments.
 2. [Table configuration](#configure-timestamp-column-for-dbt-models) - Configure the timestamp column and details of a monitored table.
 3. [Global vars](#data-monitoring-global-vars) - Optional configuration parameters of the operation.
-
-Each time you run `dbt test`, elementary data monitors will use this configuration.
-
-To learn how to add these tests, [go here](./add-data-monitoring-tests).
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
     <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Data tests configuration priorities</summary>
@@ -35,17 +29,29 @@ For dbt models and sources, elementary searches and prioritizes configuration in
 ## Test arguments
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary>`timestamp_column`: [column name]</summary>
-    It is recommended to configure a timestamp column (if there is one). The best column for this will have an 'updated at' timestamp for each row (date type also works).
-    Elementary will use this column to filter the table when running monitors.
-    If undefined, _default is null_ (no time buckets).
-    (`timestamp_column` can be defined for the whole table as well).
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">timestamp_column</summary>
+
+`timestamp_column`: [column_name]
+
+It is recommended to configure a timestamp column (if there is one).
+The best column for this will have an 'updated at' timestamp for each row (date type also works).
+Elementary will use this column to filter the table when running monitors.
+( `timestamp_column` can be defined for the whole table as well).
+
+If undefined, default is null (no time buckets).
+
 </details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">sensitivity</summary>
 
 `sensitivity`: [int]
 
 Threshold for the anomaly sensitivity, the [global default](./add-data-monitoring-tests) is 3. If defined for a test, the test param is used instead of the global one.
 A higher number means less sensitivity (less anomalies), and a lower number means more sensitivity (more anomalies).
+
+</details>
+
 
 `backfill_days`: [int]
 
