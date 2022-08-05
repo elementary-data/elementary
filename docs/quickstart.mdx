@@ -1,3 +1,5 @@
+import InstallDbtPackage from "/snippets/install-dbt-package.mdx";
+
 ---
 title: "Quickstart: Data Monitoring"
 ---
@@ -14,91 +16,15 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </details>
 
-## How to install Elementary dbt package?
+<InstallDbtPackage />
 
-<Example resizeable>
-  <div style="position: relative; padding-bottom: 64.98194945848375%; height: 0;">
-    <iframe
-      src="https://www.loom.com/embed/5cf1aaa0708f43a993f8a2945473c7ac"
-      frameborder="0"
-      webkitallowfullscreen
-      mozallowfullscreen
-      allowfullscreen
-      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
-    ></iframe>
-  </div>
-</Example>
-
-### 1. Add elementary to `packages.yml`
-
-Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
-
-```yml packages.yml
-packages:
-  - package: elementary-data/elementary
-    version: 0.4.7
-    ## compatible with Elementary CLI version 0.4.6
-    ## see docs: https://docs.elementary-data.com/
-```
-
-### 2. Add to your `dbt_project.yml`
-
-<TipInfo>
-  This means Elementary will use `your_schema_elementary` as its schema.
-</TipInfo>
-
-```yml dbt_project.yml
-models:
-  ## elementary models will be created in the schema '<your_schema>_elementary'
-  ## see docs: https://docs.elementary-data.com/
-  elementary:
-    +schema: "elementary"
-```
-
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800"> <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200"><TipInfo>Important: Materialization config</TipInfo></summary>
-
-For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that affect elementary, such as:
-
-```yml dbt_project.yml
-materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
-```
-
-Make sure to place the 'elementary' configuration under the models key, and other configs under your project name.
-
-Example:
-
-```yml dbt_project.yml
-models:
-  my_project:
-    materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
-
-  elementary:
-    +schema: "elementary"
-```
-
-</details>
-
-### 3. Import the package
-
-```shell Terminal
-dbt deps
-```
-
-### 4. Run to create the package models
-
-```shell Terminal
-dbt run --select elementary
-```
-
-This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt executions.
-
-## What happens now?
+### What happens now?
 
 Once the elementary dbt package has been installed and configured, your test results, run results and [dbt artifacts](./guides/dbt-artifacts) will be loaded to elementary schema tables.
 
 If you see data in these models you completed the package deployment (Congrats!🎉).
 
-### What's next?
+## What's next?
 
 1. [​Add data anomaly detection dbt tests](./quickstart/add-elementary-tests)📈
 2. [​Install the Elementary CLI](./quickstart/generate-report-ui#install-the-elementary-cli) to:

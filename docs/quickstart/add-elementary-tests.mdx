@@ -1,17 +1,15 @@
 ---
 title: "Add anomaly detection tests"
 ---
+import InstallDbtPackage from "/snippets/install-dbt-package.mdx";
 
-Before you can start using Elementary monitors as tests, execute `dbt run` with the Elementary package models, which are **required for the tests to work.**
+Before you can start using Elementary anomaly detection dbt tests, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
+This is **required for the tests to work.**
 
-## Run the following command
-
-```shell
-dbt run --select elementary
-```
-
-This will mostly create empty tables, that will be updated by the tests executions.
-The fact that the tables are empty means that there will be **minimal to no performance impact** on your dbt runs.
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt package installation</summary>
+    <InstallDbtPackage />
+</details>
 
 ## Add and configure the monitors as tests from within your dbt project:
 
@@ -157,6 +155,8 @@ At the end of the `dbt test` run, all results and collected metrics are merged i
 
 - **data_monitoring_metrics** - All metrics collected by elementary tests.
 
-- **alert_data_monitoring** - Anomalies detected by elementary anomaly detection tests.
+- **alerts_anomaly_detection** - Anomalies detected by elementary anomaly detection tests.
 
-- **alert_schema_changes** - Schema changes detected by elementary schema changes test.
+- **alerts_schema_changes** - Schema changes detected by elementary schema changes test.
+
+## What's next?
