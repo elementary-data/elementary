@@ -2,25 +2,25 @@
 title: "Slack"
 ---
 
-import SetupSlackIntegration from "../snippets/stup-slack-integration.mdx";
+import SetupSlackIntegration from "../snippets/setup-slack-integration.mdx";
 
 Elementary Slack integration includes sending [Slack alerts](../understand-elementary/elementary-alerts) on failures in dbt tests and models, and the option to distribute the [data observability report](../understand-elementary/elementary-report-ui) as a message attachment.
 
 ## Token vs Webhook
+
 There are two integration options: Token or Webhook.
 Both methods let you receive alerts from Elementary, but there are several features that are only supported in one of the two.
 Below is features support comparison table, to help you select the integration method.
 
 <TipInfo>
-    If possible, Token is the preferred way. It allows more flexibility and
-    supports more features than Webhook.
+  If possible, Token is the preferred way. It allows more flexibility and
+  supports more features than Webhook.
 </TipInfo>
 
 | Slack integration | Elementary alerts | Elementary tests report | Multiple channels | Slack workflows |
 | ----------------- | ----------------- | ----------------------- | ----------------- | --------------- |
-| Token             | ✅                | ✅                      | ✅               | ❌              |
-| Webhook           | ✅                | ❌                      | ❌               | ✅              |
-
+| Token             | ✅                | ✅                      | ✅                | ❌              |
+| Webhook           | ✅                | ❌                      | ❌                | ✅              |
 
 ## Slack integration setup
 
@@ -54,4 +54,3 @@ The alert format is:
 ```
 
 ---
-
