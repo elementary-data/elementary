@@ -2,7 +2,14 @@
 title: "Alerts"
 ---
 
-Elementary has a Slack integration to send alerts about failures in dbt tests or Elementary anomaly detection tests.
+Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models runs and snapshots runs.
+
+The alerts include information for fast triage.
+Also, you can add configuration for each test / model in your `.yml` files:
+- Custom channels - distribute alerts based on their context
+- Owners - tag the owner of the model
+- Subscribers - let users subscribe to models and tests they care about
+- dbt Tags - add custom context to the alert
 
 In order to send Slack alerts after you deploy the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) and configure tests, use the [CLI](./cli-install) and the [Slack](../integrations/slack) integration.
 
