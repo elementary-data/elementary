@@ -38,9 +38,9 @@
       "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
     },
     {
-      "name": "Contact Us",
-      "icon": "envelope",
-      "url": "mailto:team@elementary-data.com"
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/elementary-data/elementary"
     }
   ],
   "navigation": [
