@@ -86,7 +86,7 @@ Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community
 
 Thank you :orange_heart: Whether it’s a bug fix, new feature, or additional documentation - we greatly appreciate contributions!
 
-Check out the [contributions guide](https://docs.elementary-data.com/project-overview/contributions). 
+Check out the [contributions guide](https://docs.elementary-data.com/project-overview/contributions) and [open issues](https://github.com/elementary-data/elementary/issues). 
 
 
 ## **License**
