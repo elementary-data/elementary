@@ -18,7 +18,9 @@ This is **required for the tests to work.**
 
 <details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
     <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt package installation</summary>
+
 <InstallDbtPackage />
+
 </details>
 
 <InstallCLI />
@@ -36,3 +38,15 @@ edr monitor report
 ```
 
 The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the report as an HTML file.
+
+---
+
+## Send Report to Slack
+
+You can distribute the report by sending it to Slack.
+
+After you [setup a Slack app and token](../integrations/slack#slack-integration-setup) you can run the command:
+
+```
+edr monitor send-report
+```

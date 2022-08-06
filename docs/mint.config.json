@@ -56,7 +56,9 @@
       "pages": [
         "quickstart/generate-report-ui",
         "quickstart/send-slack-alerts",
-        "quickstart/add-elementary-tests"
+        "quickstart/add-elementary-tests",
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands"
       ]
     },
     {
@@ -64,19 +66,17 @@
       "pages": [
         "understand-elementary/elementary-overview",
         "understand-elementary/dbt-package",
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands",
+        "guides/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
-        "understand-elementary/elementary-alerts"
+        "understand-elementary/elementary-alerts",
       ]
     },
     {
-      "group": "Data Monitoring",
+      "group": "Data Anomaly Detection Tests",
       "pages": [
         "guides/data-anomaly-detection",
         "guides/add-data-monitoring-tests",
         "guides/elementary-tests-configuration",
-        "guides/dbt-artifacts",
         "guides/monitoring-in-production"
       ]
     },
