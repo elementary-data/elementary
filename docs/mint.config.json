@@ -46,10 +46,7 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "quickstart"
-      ]
+      "pages": ["introduction", "quickstart"]
     },
     {
       "group": "Guides",
@@ -68,7 +65,7 @@
         "understand-elementary/dbt-package",
         "guides/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
-        "understand-elementary/elementary-alerts",
+        "understand-elementary/elementary-alerts"
       ]
     },
     {
