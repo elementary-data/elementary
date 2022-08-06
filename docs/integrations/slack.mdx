@@ -2,184 +2,29 @@
 title: "Slack"
 ---
 
-For Slack alerts, you first need to install [Elementary CLI](../understand-elementary/cli-install), [configure](../understand-elementary/cli-install#cli-configuration) a connection profile for it, and create a config file for the Slack integration.
+import SetupSlackIntegration from "../snippets/stup-slack-integration.mdx";
 
-<TipInfo>
-  Note that the connection profile has to have the database and schema of the
-  project where the tests run. If you are using a custom database for
-  Elementary, configure it in the profile.
-</TipInfo>
-
-There are 2 integration options:
-
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Slack Token</summary>
-
-## 1. Create a Slack app
-
-Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
-Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png"
-  alt="Slack app"
-/>
-
-## 2. Create a Slack token
-
-Go to the "OAauth & Permissions" page for your newly-created app, and add the following scopes under "Bot Token Scopes":
-
-- `channels:join` - Join public channels in a workspace
-- `channels:read` - View basic information about public channels in a workspace
-- `chat:write` - Send messages as \<app\>
-- `files:write` - Upload, edit, and delete files as \<app\>
-- `users:read` - View people in a workspace
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304884/elementary/slack-scopes_u5vnbj.png"
-  alt="Slack scopes"
-/>
-
-## 3. Install app at your Workspace
-
-At the "OAuth & Permissions" page, press on "Install to Workspace" in order to generate Slack token:
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-oauth_g6p5jj.png"
-  alt="Slack OAuth"
-/>
-
-## 4. Use Elementary CLI with your Slack token
-
-Use the token when you execute `edr monitor` (or other [Elementary CLI commands](../understand-elementary/cli-commands) that support slack integration) using the options `-st, --slack-token` and `-ch, --slack-channel-name`:
-
-```
-edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
-```
-
-If you prefer that the CLI reads the token and channel from a file, copy it into the `config.yml` like this:
-
-```
-slack:
-  token: <your_slack_token>
-  channel_name: <slack_channel_to_post_at>
-```
-
-</details>
-
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Slack Webhook</summary>
-
-## 1. Create a Slack app
-
-Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
-Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png"
-  alt="Slack app"
-/>
-
-## 2. Create a webhook
-
-Go to the 'Incoming Webhooks' page for your newly-created app and toggle 'Activate Incoming Webhooks' to turn it on. Then click on 'Add New Webhook to Workspace':
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/slack-webhook_gwjkte.png"
-  alt="Slack webhook"
-/>
-
-Select the channel that the notifications will be posted to:
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-channel_snyrwb.png"
-  alt="Slack channel"
-/>
-
-## 3. Add the Webhook to 'config.yml'
-
-Use the webhook URL when you execute `edr monitor` (or other [Elementary CLI commands](../understand-elementary/cli-commands) that support the Slack integration) using the option `-s, --slack-webhook`:
-
-```
-edr monitor --slack-webhook <your_slack_webhook_url>
-```
-
-If you prefer that the CLI reads the webhook URL from a file, copy it into the `config.yml` like this:
-
-```
-slack:
-  notification_webhook: <your_slack_webhook_url>
-  # optional #
-  workflows: false
-```
-
-If you are using [Slack Workflows](https://slack.com/features/workflow-automation), change the flag accordingly and refer to [Slack workflows](#slack-workflows).
-
-</details>
+Elementary Slack integration includes sending [Slack alerts](../understand-elementary/elementary-alerts) on failures in dbt tests and models, and the option to distribute the [data observability report](../understand-elementary/elementary-report-ui) as a message attachment.
 
 ## Token vs Webhook
+There are two integration options: Token or Webhook.
+Both methods let you receive alerts from Elementary, but there are several features that are only supported in one of the two.
+Below is features support comparison table, to help you select the integration method.
 
 <TipInfo>
-  If possible, Token is the preferred way. It allows more flexibility and
-  supports more features than Webhook.
+    If possible, Token is the preferred way. It allows more flexibility and
+    supports more features than Webhook.
 </TipInfo>
 
-Both methods let you receive alerts from Elementary, but there are several features that only one of the 2 support.
+| Slack integration | Elementary alerts | Elementary tests report | Multiple channels | Slack workflows |
+| ----------------- | ----------------- | ----------------------- | ----------------- | --------------- |
+| Token             | ✅                | ✅                      | ✅               | ❌              |
+| Webhook           | ✅                | ❌                      | ❌               | ✅              |
 
-| Slack integration | Elementary alerts | Elementary tests report | Slack workflows |
-| ----------------- | ----------------- | ----------------------- | --------------- |
-| Token             | ✅                | ✅                      | ❌              |
-| Webhook           | ✅                | ❌                      | ✅              |
 
-## Disable alerts on warnings
+## Slack integration setup
 
-If you wish to alert only on failures and errors of your tests (without warnings), you can disable the warnings by adding `elementary_alerts_ignore_warn` to your `dbt_project.yml`:
-
-```yml dbt_project.yml
-models:
-  ## elementary models will be created in the schema '<your_schema>_elementary'
-  ## when you add a profile for CLI alerts, make sure to configure this schema and db
-  ## see docs: https://docs.elementary-data.com/
-  elementary:
-    +schema: "elementary"
-
-on-run-end:
-  - "{{ elementary.upload_dbt_artifacts(results) }}"
-
-vars:
-  elementary_alerts_ignore_warn: true
-```
-
----
-
-## Tag users & groups
-
-Elementary enriches alerts with dbt model owners and tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)) when sending Slack alerts.
-
-If you want to tag a model owner in a Slack alert -
-
-- Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack)
-- For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, simply add the email prefix (with lower case) 'jessica.jones' as follows to your model schema.yml / properties.yml
-
-```
-models:
-    - name: my_model_name
-      meta:
-        owner: "@jessica.jones"
-```
-
-If you want to tag a group or a channel in a slack alert -
-
-- Add it as model tag and use '#' as the prefix of the channel name
-- For example, to tag the marketing team's data ops channel add the following to your model schema.yml / properties.yml
-
-```
-models:
-    - name: my_model_name
-      meta:
-        owner: "@jessica.jones"
-        tags: ["#marketing-data-ops"]
-```
+<SetupSlackIntegration />
 
 ---
 
@@ -210,18 +55,3 @@ The alert format is:
 
 ---
 
-## Slack app display
-
-To change the display of the Elementary slack app, scroll down on the Slack app basic information page to the 'Display Information' section:
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-display_utxkcu.png"
-  alt="Slack display"
-/>
-
-Here is the Elementary icon for your use:
-
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png"
-  alt="Elementary logo"
-/>
