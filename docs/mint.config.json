@@ -73,7 +73,6 @@
     {
       "group": "Data Monitoring",
       "pages": [
-        "guides/data-and-dbt-tests-report-ui",
         "guides/data-anomaly-detection",
         "guides/add-data-monitoring-tests",
         "guides/elementary-tests-configuration",
@@ -91,8 +90,9 @@
       ]
     },
     {
-      "group": "FAQ & Support",
+      "group": "Community & Support",
       "pages": [
+        "general/contributions",
         "general/troubleshooting",
         "general/community-and-support",
         "general/faq"
