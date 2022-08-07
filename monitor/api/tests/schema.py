@@ -11,7 +11,7 @@ class TestMetadataSchema(BaseModel):
     model_unique_id: Optional[ModelUniqueIdType] = None
     test_unique_id: TestUniqueIdType
     detected_at: str
-    database_name: str
+    database_name: str = None
     schema_name: str
     table_name: Optional[str] = None
     column_name: Optional[str]
