@@ -1,9 +1,35 @@
+from os import path
+
+import google
 from google.cloud import storage
 
 from config.config import Config
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
-def get_gcs_client(config: Config):
-    if not config.has_gcs:
-        return None
-    return storage.Client.from_service_account_json(config.google_service_account_path)
+class GCSClient:
+    def __init__(self, config: Config):
+        self.config = config
+        self.client = storage.Client.from_service_account_json(config.google_service_account_path)
+
+    @classmethod
+    def create_client(cls, config: Config) -> 'GCSClient':
+        return cls(config) if config.has_gcs else None
+
+    def upload_report(self, html_path: str) -> bool:
+        report_filename = path.basename(html_path)
+        try:
+            bucket = self.client.get_bucket(self.config.gcs_bucket_name)
+            blob = bucket.blob(report_filename)
+            blob.upload_from_filename(html_path, content_type='text/html')
+            bucket.copy_blob(blob, bucket, 'index.html')
+            logger.info('Uploaded report to GCS.')
+            if self.config.update_bucket_website:
+                bucket.configure_website(report_filename)
+                logger.info("Updated GCS bucket's website.")
+        except google.cloud.exceptions.GoogleCloudError:
+            logger.error('Failed to upload report to GCS.')
+            return False
+        return True

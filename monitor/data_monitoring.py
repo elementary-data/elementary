@@ -6,16 +6,14 @@ import webbrowser
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
-import botocore.exceptions
-import google
 import pkg_resources
 from alive_progress import alive_it
 
 from clients.dbt.dbt_runner import DbtRunner
-from clients.gcs.client import get_gcs_client
-from clients.s3.client import get_s3_client
+from clients.gcs.client import GCSClient
+from clients.s3.client import S3Client
+from clients.slack.client import SlackClient
 from clients.slack.schema import SlackMessageSchema
-from clients.slack.slack_client import SlackClient
 from config.config import Config
 from monitor.alerts.alert import Alert
 from monitor.alerts.alerts import Alerts
@@ -36,7 +34,6 @@ FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
-_REPORT_CONTENT_TYPE = 'text/html'
 
 
 class DataMonitoring:
@@ -52,9 +49,9 @@ class DataMonitoring:
         self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
         # slack client is optional
-        self.slack_client = SlackClient.create_slack_client(self.config)
-        self.s3_client = get_s3_client(self.config)
-        self.gcs_client = get_gcs_client(self.config)
+        self.slack_client = SlackClient.create_client(self.config)
+        self.s3_client = S3Client.create_client(self.config)
+        self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
         self.success = True
@@ -176,44 +173,20 @@ class DataMonitoring:
 
     def upload_report(self, html_path: str):
         if self.s3_client:
-            self._upload_report_to_s3(html_path)
+            self.execution_properties['upload_to_s3'] = True
+            upload_succeded = self.s3_client.upload_report(html_path)
+            self.execution_properties['uploaded_to_s3_successfully'] = upload_succeded
+            if not upload_succeded:
+                self.success = False
+
         if self.gcs_client:
-            self._upload_report_to_gcs(html_path)
+            self.execution_properties['upload_to_gcs'] = True
+            upload_succeded = self.gcs_client.upload_report(html_path)
+            self.execution_properties['uploaded_to_gcs_successfully'] = upload_succeded
+            if not upload_succeded:
+                self.success = False
+
         return self.success
-
-    def _upload_report_to_s3(self, html_path: str):
-        report_filename = os.path.basename(html_path)
-        self.execution_properties['send_to_s3'] = True
-        try:
-            self.s3_client.upload_file(html_path, self.config.s3_bucket_name, report_filename,
-                                       ExtraArgs={'ContentType': _REPORT_CONTENT_TYPE}
-                                       )
-            logger.info('Uploaded report to S3.')
-            if self.config.update_bucket_website:
-                self.s3_client.put_bucket_website(
-                    Bucket=self.config.s3_bucket_name,
-                    WebsiteConfiguration={'IndexDocument': {'Suffix': report_filename}}
-                )
-                logger.info("Updated S3 bucket's website.")
-        except botocore.exceptions.ClientError:
-            logger.error('Failed to upload report to S3.')
-            self.success = False
-
-    def _upload_report_to_gcs(self, html_path: str):
-        report_filename = os.path.basename(html_path)
-        self.execution_properties['send_to_gcs'] = True
-        try:
-            bucket = self.gcs_client.get_bucket(self.config.gcs_bucket_name)
-            blob = bucket.blob(report_filename)
-            blob.upload_from_filename(html_path, content_type=_REPORT_CONTENT_TYPE)
-            bucket.copy_blob(blob, bucket, 'index.html')
-            logger.info('Uploaded report to GCS.')
-            if self.config.update_bucket_website:
-                bucket.configure_website(report_filename)
-                logger.info("Updated GCS bucket's website.")
-        except google.cloud.exceptions.GoogleCloudError:
-            logger.error('Failed to upload report to GCS.')
-            self.success = False
 
     def _get_lineage(self) -> LineageSchema:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)

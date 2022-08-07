@@ -21,7 +21,7 @@ class SlackClient(ABC):
         self.client = self._initial_client()
 
     @staticmethod
-    def create_slack_client(config: Config):
+    def create_client(config: Config):
         if not config.has_slack:
             return None
         if config.slack_token:
