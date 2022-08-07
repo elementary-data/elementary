@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Generic
 from typing import TypeVar
@@ -5,7 +6,7 @@ from typing import TypeVar
 from monitor.alerts.alert import Alert
 from monitor.alerts.malformed import MalformedAlert
 from monitor.alerts.model import ModelAlert
-from monitor.alerts.test import TestAlert
+from monitor.alerts.test import TestAlert, ElementaryTestAlert
 
 AlertType = TypeVar('AlertType')
 
@@ -38,3 +39,11 @@ class Alerts:
 
     def get_all(self) -> List[Alert]:
         return self.models.get_all() + self.tests.get_all()
+
+    @property
+    def elementary_test_count(self):
+        elementary_test_count = defaultdict(int)
+        for test_result in self.tests.alerts:
+            if isinstance(test_result, ElementaryTestAlert):
+                elementary_test_count[test_result.test_name] += 1
+        return elementary_test_count
