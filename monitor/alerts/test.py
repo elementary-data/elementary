@@ -1,6 +1,5 @@
 import json
 import re
-from datetime import datetime
 from typing import Optional
 
 from slack_sdk.models.blocks import SectionBlock
@@ -9,7 +8,6 @@ from clients.slack.schema import SlackMessageSchema
 from monitor.alerts.alert import Alert
 from utils.json_utils import try_load_json
 from utils.log import get_logger
-from utils.time import convert_utc_time_to_local_time
 
 logger = get_logger(__name__)
 
@@ -47,9 +45,6 @@ class TestAlert(Alert):
 class DbtTestAlert(TestAlert):
     def __init__(
             self,
-            detected_at,
-            database_name,
-            schema_name,
             table_name,
             column_name,
             test_type,
@@ -66,23 +61,11 @@ class DbtTestAlert(TestAlert):
     ) -> None:
         super().__init__(**kwargs)
         self.test_type = test_type
-        self.database_name = database_name
-        self.schema_name = schema_name
         self.table_name = table_name
-        table_full_name_parts = [database_name, schema_name]
+        table_full_name_parts = [self.database_name, self.schema_name]
         if table_name:
             table_full_name_parts.append(table_name)
         self.table_full_name = '.'.join(table_full_name_parts).lower()
-        self.detected_at = None
-        self.detected_at_utc = None
-        if detected_at:
-            try:
-                detected_at_utc = datetime.fromisoformat(detected_at)
-                self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
-                self.detected_at = convert_utc_time_to_local_time(detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
-            except (ValueError, TypeError):
-                logger.error(f'Failed to parse "detect_at" field.')
-
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
