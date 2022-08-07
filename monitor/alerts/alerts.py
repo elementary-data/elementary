@@ -40,8 +40,7 @@ class Alerts:
     def get_all(self) -> List[Alert]:
         return self.models.get_all() + self.tests.get_all()
 
-    @property
-    def elementary_test_count(self):
+    def get_elementary_test_count(self):
         elementary_test_count = defaultdict(int)
         for test_result in self.tests.alerts:
             if isinstance(test_result, ElementaryTestAlert):
