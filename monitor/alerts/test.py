@@ -85,9 +85,7 @@ class DbtTestAlert(TestAlert):
         self.database_name = database_name
         self.schema_name = schema_name
         self.table_name = table_name
-        table_full_name_parts = [database_name, schema_name]
-        if table_name:
-            table_full_name_parts.append(table_name)
+        table_full_name_parts = [name for name in [database_name, schema_name, table_name] if name]
         self.table_full_name = '.'.join(table_full_name_parts).lower()
         self.detected_at = None
         self.detected_at_utc = None
