@@ -1,16 +1,16 @@
-import { Example } from '@/components/Example';
+import { Example } from "@/components/Example";
 
 ## How to install Elementary dbt package?
 
 <Example>
-    <iframe
-        src="https://www.loom.com/embed/5cf1aaa0708f43a993f8a2945473c7ac"
-        frameborder="0"
-        webkitallowfullscreen
-        mozallowfullscreen
-        allowfullscreen
-        class="w-full h-64"
-    ></iframe>
+  <iframe
+    src="https://www.loom.com/embed/5cf1aaa0708f43a993f8a2945473c7ac"
+    frameborder="0"
+    webkitallowfullscreen
+    mozallowfullscreen
+    allowfullscreen
+    class="w-full h-64"
+  ></iframe>
 </Example>
 
 ### 1. Add elementary to `packages.yml`
@@ -39,7 +39,8 @@ models:
     +schema: "elementary"
 ```
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800"> <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200"><TipInfo>Important: Materialization config</TipInfo></summary>
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+<summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Important: Materialization config</summary>
 
 For elementary to work, it needs to create some of the models as incremental tables. Make sure that there are no global materialization configurations that affect elementary, such as:
 

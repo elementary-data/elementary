@@ -1,20 +1,22 @@
 ---
 title: "Slack alerts"
 ---
-import SetupSlackIntegration from "../snippets/stup-slack-integration.mdx";
+
+import SetupSlackIntegration from "../snippets/setup-slack-integration.mdx";
 
 Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models runs and snapshots runs.
 
 The alerts include information for fast triage.
 Also, you can add configuration for each test / model in your `.yml` files:
+
 - Custom channels - distribute alerts based on their context
 - Owners - tag the owner of the model
 - Subscribers - let users subscribe to models and tests they care about
 - dbt Tags - add custom context to the alert
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
-    alt="New Slack alert format"
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
+  alt="New Slack alert format"
 />
 
 ## Setup Slack Integration
@@ -40,16 +42,17 @@ You can choose to disable alert types by adding a var to your `dbt_project.yml`.
 vars:
   # Alerts configuration vars   #
   # All set to false by default #
-    elementary:
-      disable_model_alerts: false
-      disable_test_alerts: false
-      disable_warn_alerts: false
+  elementary:
+    disable_model_alerts: false
+    disable_test_alerts: false
+    disable_warn_alerts: false
 ```
 
 ## Customize alerts: owners, tags and subscribers
 
 Elementary enriches alerts with dbt model/source/snapshot owners and tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
 Also, you can use two custom Elementary fields:
+
 - Subscribers: to tag additional users except the owner in an alert.
 - Channel: to send the alert to additional Slack channel (only available for Slack token).
 
@@ -61,18 +64,18 @@ If you want to tag a model owner in a slack alert:
 
 ```yml properties.yml
 models:
-    - name: my_model_name
-      meta:
-        owner: "@jessica.jones"
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
 ```
 
 It is possible to tag multiple owners as well:
 
 ```yml properties.yml
 models:
-    - name: my_model_name
-      meta:
-        owner: ["@jessica.jones", "@joe.joseph"]
+  - name: my_model_name
+    meta:
+      owner: ["@jessica.jones", "@joe.joseph"]
 ```
 
 </details>
@@ -81,16 +84,16 @@ models:
     <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Tags</summary>
 
 if you want to tag a group or a channel in a slack alert:
+
 - Add it as model tag and use '#' as the prefix of the channel name.
 - For example, to tag the marketing team's data ops channel add the following to your `model schema.yml` / `properties.yml`.
 
-
 ```yml properties.yml
 models:
-    - name: my_model_name
-      meta:
-        owner: "@jessica.jones"
-        tags: ["#marketing-data-ops"]
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
+      tags: ["#marketing-data-ops"]
 ```
 
 </details>
@@ -103,24 +106,24 @@ If you want to tag users on a model / test / snapshot failure alert:
 
 ```yml properties.yml
 models:
-    - name: my_model_name
-      meta:
-        subscribers: "@jessica.jones"
-      columns:
-        - name: column_name
-          tests:
-            - unique:
-                meta:
-                  subscribers: "@luke.cage"
+  - name: my_model_name
+    meta:
+      subscribers: "@jessica.jones"
+    columns:
+      - name: column_name
+        tests:
+          - unique:
+              meta:
+                subscribers: "@luke.cage"
 ```
 
 It is possible to tag multiple subscribers as well:
 
 ```yml properties.yml
 models:
-    - name: my_model_name
-      meta:
-        subscribers: ["@jessica.jones", "@luke.cage"]
+  - name: my_model_name
+    meta:
+      subscribers: ["@jessica.jones", "@luke.cage"]
 ```
 
 </details>
@@ -135,19 +138,21 @@ If you configure a custom slack channel for a model, all the test alerts that be
 For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops channel.
 
 To set it up, simply add the relevant channel to your models in the properties.yml (can be done also for sources and snapshots).
+
 ```yml properties.yml
 models:
-    - name: marketing_leads
-      meta:
-        channel: marketing_data_ops
+  - name: marketing_leads
+    meta:
+      channel: marketing_data_ops
 ```
 
 If your models are in folders by department / team, another useful option is to configure the channel in your `dbt_project.yml` file.
+
 ```yml dbt_project.yml
-    models:
-      marketing_bi:
-        +meta:
-          +channel: marketing_data_ops
+models:
+  marketing_bi:
+    +meta:
+      +channel: marketing_data_ops
 ```
 
 </details>
@@ -156,4 +161,3 @@ If your models are in folders by department / team, another useful option is to 
 
 In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after your dbt job ends to monitor the latest data updates).
 If you need help or wish to consult on this, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).
-

@@ -38,18 +38,15 @@
       "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
     },
     {
-      "name": "Contact Us",
-      "icon": "envelope",
-      "url": "mailto:team@elementary-data.com"
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/elementary-data/elementary"
     }
   ],
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "quickstart"
-      ]
+      "pages": ["introduction", "quickstart"]
     },
     {
       "group": "Guides",
@@ -68,7 +65,7 @@
         "understand-elementary/dbt-package",
         "guides/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
-        "understand-elementary/elementary-alerts",
+        "understand-elementary/elementary-alerts"
       ]
     },
     {
