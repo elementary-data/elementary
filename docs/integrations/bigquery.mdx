@@ -9,33 +9,15 @@ Supports Bigquery since version 0.3.4
 
 ---
 
-## Lineage
-
-### BigQuery query source
-
-The query history in BigQuery is pulled from the [information schema](https://cloud.google.com/bigquery/docs/information-schema-intro), by accessing a view that contains [jobs metadata](https://cloud.google.com/bigquery/docs/information-schema-jobs) by project.
-
-The retention of this view is **180 days**, meaning that queries older than that will not be part of the lineage.
-
-<TipInfo>
-  Note that each query source requires different permissions. If these are not
-  granted, Elementary will create partial lineage only based on accessible
-  queries, or will return an error if there is no access at all.
-</TipInfo>
-
 ### BigQuery connection profile
 
 The profiles.yml file to connect to BigQuery should contain a profile in the following format:
 
 ```yml BigQuery
+## BIGQUERY ##
 ## By default, edr expects the profile name 'elementary'.      ##
-##                                                             ##
-## For edr monitor:                                            ##
-## The database and schema of edr models.                      ##
+## Configure the database and schema of elementary models.     ##
 ## Check where 'elementary_test_results' is to find it.        ##
-##                                                             ##
-## For edr lineage:                                            ##
-## Any database and schema will do.                            ##
 
 elementary:
   outputs:
@@ -49,7 +31,6 @@ elementary:
       project: [project id]
       dataset: [dataset name]
       threads: 4
-      ## Location is mandatory, can be one of US or EU, or a regional location
       location: [dataset location]
       priority: interactive
 ```
@@ -57,19 +38,6 @@ elementary:
 We support the same format and connection methods as dbt. Please refer to dbt's documentation of [BigQuery](https://docs.getdbt.com/reference/warehouse-profiles/bigquery-profile) for further details.
 
 Note that although in dbt the 'location' parameter is optional, in Elementary lineage it is mandatory. Here are details about [BigQuery locations](https://cloud.google.com/bigquery/docs/locations).
-
-### Data lineage BigQuery permissions
-
-The queries are pulled from the information schema view of [jobs by project](https://cloud.google.com/bigquery/docs/information-schema-jobs).
-
-This requires `bigquery.jobs.listAll` permission for the project, that is available by default only to the `Project Owner` and BigQuery `Admin` roles.
-
-There are two options for creating an account with the required permissions:
-
-1. Create an account and grant it Project Owner or BigQuery Admin role.
-2. Recommended: create an account and grant it BigQuery Data Editor + BigQuery User + custom role that has bigquery.jobs.listAll permission.
-
-Here is a [guide for creating a service account](https://docs.elementary-data.com/integrations/bigquery/create-bigquery-service-account) for both options.
 
 ## Create BigQuery service account
 
