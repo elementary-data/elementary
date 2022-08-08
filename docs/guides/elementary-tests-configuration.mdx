@@ -29,6 +29,8 @@ For dbt models and sources, elementary searches and prioritizes configuration in
 
 Test specific configurations, configured in the yml for each test (like dbt `severity`, `limit`, etc).
 
+<AccordionGroup>
+
 <Accordion title="timestamp_column">
 `timestamp_column`: [column_name]
 
@@ -72,6 +74,8 @@ Param for the `all_columns_anomalies` test only, which enables to exclude a colu
 Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on prefix match. Example usage: `exlude_prefix: 'dbt_'`
 
 </Accordion>
+
+</AccordionGroup>
 
 ---
 
@@ -178,6 +182,8 @@ tests:
 Elementary has several global vars used for tests configurations.
 You can change their defaults by adding them with a new value in your `dbt_project.yml` under the vars key.
 
+<AccordionGroup>
+
 <Accordion title="days_back">
 `days_back`: [int]
 
@@ -202,6 +208,8 @@ This threshold determines the sensitivity level for anomaly detection. Elementar
 If undefined, _default threshold is 3_.
 
 </Accordion>
+
+</AccordionGroup>
 
 ```yml dbt_project.yml
 # optional #
