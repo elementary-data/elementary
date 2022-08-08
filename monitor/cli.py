@@ -34,25 +34,25 @@ def get_cli_properties() -> dict:
     '--days-back', '-d',
     type=int,
     default=7,
-    help="Set a limit to how far back edr should look for new alerts"
+    help="Set a limit to how far back edr should look for new alerts."
 )
 @click.option(
     '--slack-webhook', '-s',
     type=str,
     default=None,
-    help="A slack webhook URL for sending alerts to a specific channel (also could be configured once in config.yml)"
+    help="A slack webhook URL for sending alerts to a specific channel (configurable in config.yml)."
 )
 @click.option(
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
+    help="A slack token for sending alerts over slack (configurable in config.yml).",
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
+    help="The slack channel which all alerts will be sent to (configurable in config.yml).",
 )
 @click.option(
     '--config-dir', '-c',
@@ -86,7 +86,7 @@ def get_cli_properties() -> dict:
     '--profile-target', '-t',
     type=str,
     default=None,
-    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target."
 )
 @click.option(
     '--dbt-vars',
@@ -108,6 +108,10 @@ def monitor(
         profile_target,
         dbt_vars
 ):
+    """
+    Monitor your warehouse and send alerts to Slack.
+    """
+
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
@@ -138,7 +142,7 @@ def monitor(
     '--days-back', '-d',
     type=int,
     default=7,
-    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report"
+    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report."
 )
 @click.option(
     '--config-dir', '-c',
@@ -165,13 +169,13 @@ def monitor(
     '--profile-target', '-t',
     type=str,
     default=None,
-    help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+    help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target."
 )
 @click.option(
     '--executions-limit', '-el',
     type=int,
     default=30,
-    help='Set the number of invocations shown for each test in the "Test Runs" report'
+    help='Set the number of invocations shown for each test in the "Test Runs" report.'
 )
 @click.option(
     '--file-path',
@@ -187,6 +191,9 @@ def monitor(
 @click.pass_context
 def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path,
            disable_passed_test_metrics):
+    """
+    Generate a local report of your warehouse.
+    """
     config = Config(config_dir, profiles_dir, profile_target)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-report', get_cli_properties(), ctx.command.name)
@@ -209,7 +216,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--days-back', '-d',
     type=int,
     default=7,
-    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report"
+    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report."
 )
 @click.option(
     '--config-dir', '-c',
@@ -236,13 +243,13 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--profile-target', '-t',
     type=str,
     default=None,
-    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target"
+    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target."
 )
 @click.option(
     '--executions-limit', '-el',
     type=int,
     default=30,
-    help='Set the number of invocations shown for each test in the "Test Runs" report'
+    help='Set the number of invocations shown for each test in the "Test Runs" report.'
 )
 @click.option(
     '--disable-passed-test-metrics',
@@ -254,19 +261,19 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (also could be configured once in config.yml)",
+    help="A slack token for sending alerts over slack (configurable in config.yml).",
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (also could be configured once in config.yml)",
+    help="The slack channel which all alerts will be sent to (configurable in config.yml).",
 )
 @click.option(
     '--update-bucket-website',
     type=bool,
     default=True,
-    help="Update the bucket's static website with the latest report"
+    help="Update the bucket's static website with the latest report."
 )
 @click.option(
     '--aws-profile-name',
@@ -290,7 +297,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--s3-bucket-name',
     type=str,
     default=None,
-    help="The name of the S3 bucket to upload the report to"
+    help="The name of the S3 bucket to upload the report to."
 )
 @click.option(
     '--google-service-account-path',
@@ -324,6 +331,12 @@ def send_report(
         google_service_account_path,
         gcs_bucket_name
 ):
+    """
+    Send the report to an external platform.
+    The current options are Slack, AWS S3, and Google Cloud Storage.
+    Each specified platform will be sent a report.
+    """
+
     config = Config(config_dir, profiles_dir, profile_target, slack_token=slack_token,
                     slack_channel_name=slack_channel_name, update_bucket_website=update_bucket_website,
                     aws_profile_name=aws_profile_name, aws_access_key_id=aws_access_key_id,
