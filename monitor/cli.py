@@ -40,19 +40,19 @@ def get_cli_properties() -> dict:
     '--slack-webhook', '-s',
     type=str,
     default=None,
-    help="A slack webhook URL for sending alerts to a specific channel (configurable in config.yml)."
+    help="A slack webhook URL for sending alerts to a specific channel."
 )
 @click.option(
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (configurable in config.yml).",
+    help="A slack token for sending alerts over slack.",
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (configurable in config.yml).",
+    help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
     '--config-dir', '-c',
@@ -261,13 +261,13 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--slack-token', '-st',
     type=str,
     default=None,
-    help="A slack token for sending alerts over slack (configurable in config.yml).",
+    help="A slack token for sending alerts over slack.",
 )
 @click.option(
     '--slack-channel-name', '-ch',
     type=str,
     default=None,
-    help="The slack channel which all alerts will be sent to (configurable in config.yml).",
+    help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
     '--update-bucket-website',
