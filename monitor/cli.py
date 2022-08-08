@@ -263,7 +263,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 @click.option(
     '--update-bucket-website',
     type=bool,
-    default=True,
+    default=False,
     help="Update the bucket's static website with the latest report."
 )
 @click.option(
