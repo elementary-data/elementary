@@ -2,17 +2,11 @@ import pathlib
 
 from setuptools import setup, find_packages
 
-from config.config import Config
-from tracking.anonymous_tracking import AnonymousTracking
-
 # The directory containing this file.
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file.
 README = (HERE / "README.md").read_text()
-
-# Conditionally creates a user id if tracking is allowed.
-AnonymousTracking(Config()).init_anonymous_user_id()
 
 setup(
     name='elementary-data',
@@ -87,3 +81,12 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
 )
+
+try:
+    from config.config import Config
+    from tracking.anonymous_tracking import AnonymousTracking
+
+    # Conditionally creates a user id if tracking is allowed.
+    AnonymousTracking(Config()).init_anonymous_user_id()
+except Exception:
+    pass
