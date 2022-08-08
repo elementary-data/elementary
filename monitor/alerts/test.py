@@ -62,9 +62,7 @@ class DbtTestAlert(TestAlert):
         super().__init__(**kwargs)
         self.test_type = test_type
         self.table_name = table_name
-        table_full_name_parts = [self.database_name, self.schema_name]
-        if table_name:
-            table_full_name_parts.append(table_name)
+        table_full_name_parts = [name for name in [self.database_name, self.schema_name, table_name] if name]
         self.table_full_name = '.'.join(table_full_name_parts).lower()
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ''
