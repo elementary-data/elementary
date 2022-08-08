@@ -20,6 +20,7 @@ class AnonymousTracking:
     POSTHOG_HOST = 'https://app.posthog.com'
 
     def __init__(self, config: Config) -> None:
+        self.env_props = None
         self.anonymous_user_id = None
         self.anonymous_warehouse_id = None
         self.config = config
@@ -29,6 +30,7 @@ class AnonymousTracking:
 
     def init(self):
         try:
+            self.env_props = tracking.env.get_props()
             self.anonymous_user_id = self.init_anonymous_user_id()
             self.anonymous_warehouse_id = self._get_anonymous_warehouse_id()
             posthog.api_key, posthog.host = self.POSTHOG_API_KEY, self.POSTHOG_HOST
@@ -62,14 +64,13 @@ class AnonymousTracking:
             properties = dict()
 
         properties['run_id'] = self.run_id
-        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties=properties,
+        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties={'env': self.env_props, **properties},
                         groups={'warehouse': self.anonymous_warehouse_id})
 
     def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
         try:
-            env_props = tracking.env.get_props()
             props = {'cli_properties': cli_properties, 'module_name': module_name, 'command': command}
-            self.send_event('cli-start', properties={'env': env_props, **props})
+            self.send_event('cli-start', properties=props)
         except Exception:
             pass
 
