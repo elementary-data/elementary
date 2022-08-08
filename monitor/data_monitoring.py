@@ -10,8 +10,9 @@ import pkg_resources
 from alive_progress import alive_it
 
 from clients.dbt.dbt_runner import DbtRunner
-from clients.slack.schema import SlackMessageSchema
-from clients.slack.slack_client import SlackClient
+from clients.gcs.client import GCSClient
+from clients.s3.client import S3Client
+from clients.slack.client import SlackClient
 from config.config import Config
 from monitor.alerts.alert import Alert
 from monitor.alerts.alerts import Alerts
@@ -37,22 +38,14 @@ SQL_FILE_EXTENSION = ".sql"
 
 class DataMonitoring:
 
-    def __init__(
-            self,
-            config: Config,
-            force_update_dbt_package: bool = False,
-            slack_webhook: Optional[str] = None,
-            slack_token: Optional[str] = None,
-            slack_channel_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, config: Config, force_update_dbt_package: bool = False):
         self.config = config
         self.dbt_runner = DbtRunner(DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
-        self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
-        self.slack_token = slack_token or self.config.slack_token
-        self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
         # slack client is optional
-        self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
+        self.slack_client = SlackClient.create_client(self.config)
+        self.s3_client = S3Client.create_client(self.config)
+        self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
         self.sent_alert_count = 0
@@ -67,7 +60,7 @@ class DataMonitoring:
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
             sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel if alert.slack_channel else self.slack_channel_name,
+                channel_name=alert.slack_channel if alert.slack_channel else self.config.slack_channel_name,
                 message=alert_msg
             )
             if sent_successfully:
@@ -120,8 +113,8 @@ class DataMonitoring:
         return self.success
 
     def generate_report(self, tracking: AnonymousTracking, days_back: Optional[int] = None,
-                        test_runs_amount: Optional[int] = None,
-                        file_path: Optional[str] = None, disable_passed_test_metrics: bool = False) -> Tuple[
+                        test_runs_amount: Optional[int] = None, file_path: Optional[str] = None,
+                        disable_passed_test_metrics: bool = False, should_open_browser: bool = True) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -160,23 +153,32 @@ class DataMonitoring:
                 elementary_output_json_file:
             elementary_output_json_file.write(dumped_output_data)
 
-        webbrowser.open_new_tab('file://' + html_path)
+        if should_open_browser:
+            webbrowser.open_new_tab('file://' + html_path)
         self.execution_properties['report_end'] = True
         self.execution_properties['success'] = self.success
         return self.success, html_path
 
-    def send_report(self, elementary_html_path: str) -> bool:
-        if os.path.exists(elementary_html_path):
-            file_uploaded_successfully = self.slack_client.upload_file(
-                channel_name=self.slack_channel_name,
-                file_path=elementary_html_path,
-                message=SlackMessageSchema(text="Elementary monitoring report")
-            )
-            if not file_uploaded_successfully:
+    def send_report(self, html_path: str) -> bool:
+        if self.slack_client:
+            send_succeded = self.slack_client.send_report(self.config.slack_channel_name, html_path)
+            self.execution_properties['sent_to_slack_successfully'] = send_succeded
+            if not send_succeded:
                 self.success = False
-        else:
-            logger.error('Could not send Elementary monitoring report because it does not exist')
-            self.success = False
+
+        if self.s3_client:
+            send_succeded = self.s3_client.send_report(html_path)
+            self.execution_properties['sent_to_s3_successfully'] = send_succeded
+            if not send_succeded:
+                self.success = False
+
+        if self.gcs_client:
+            send_succeded = self.gcs_client.send_report(html_path)
+            self.execution_properties['sent_to_gcs_successfully'] = send_succeded
+            if not send_succeded:
+                self.success = False
+
+        self.execution_properties['success'] = self.success
         return self.success
 
     def _get_lineage(self) -> LineageSchema:

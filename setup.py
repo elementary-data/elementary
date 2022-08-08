@@ -31,6 +31,8 @@ setup(
         'requests<3.0.0',
         'beautifulsoup4',
         'posthog',
+        'boto3',
+        'google-cloud-storage',
         'ruamel.yaml',
         'alive-progress<=2.3.1',
         'slack-sdk<4.0',

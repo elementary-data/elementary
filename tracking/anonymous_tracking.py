@@ -64,7 +64,8 @@ class AnonymousTracking:
             properties = dict()
 
         properties['run_id'] = self.run_id
-        posthog.capture(distinct_id=self.anonymous_user_id, event=name, properties={'env': self.env_props, **properties},
+        posthog.capture(distinct_id=self.anonymous_user_id, event=name,
+                        properties={'env': self.env_props, **properties},
                         groups={'warehouse': self.anonymous_warehouse_id})
 
     def track_cli_start(self, module_name: str, cli_properties: dict, command: str = None):
