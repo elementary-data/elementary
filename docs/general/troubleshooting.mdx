@@ -3,9 +3,7 @@ title: "Troubleshooting"
 description: "This section is aimed at collecting common issues users have to provide quick debug solutions."
 ---
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">I run `edr monitor report` and get an empty report</summary>
-
+<Accordion title="I run `edr monitor report` and get an empty report">
 If you get an empty report, there are several steps to understand what went wrong and try and fix it.
 
 **1. Validate elementary dbt package is deployed and working:**
@@ -46,11 +44,9 @@ If you get an empty report, there are several steps to understand what went wron
   You can find the full path of the package location using
   `pip show elementary-data`.
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Error: `cannot insert into a view`</summary>
-
+<Accordion title="Error: `cannot insert into a view`">
 Elementary dbt package includes macros that run insert commands to some of the models.
 This error means that these models were materialized as views, and not as tables.
 The reason for the error is probably a configuration on your `dbt_project.yml` file, under the key `materialization`.
@@ -74,11 +70,9 @@ models:
       materialization: <some_config>
 ```
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Error: `command not found: edr` on macOS</summary>
-
+<Accordion title="Error: `command not found: edr` on macOS">
 In Python on macOS, when you _globally_ install a package that has executables, such as Elementary's `edr`, it places the executable in a location that is **not** under the **default** `PATH` which is the environment variable that is used for executable lookups. Here's an example of the warning you might receive upon running `python3 -m pip install elementary-data`.
 
 ```shell
@@ -119,11 +113,9 @@ export PATH=$PATH:$HOME/Library/Python/3.8/bin
 
 3. Use Python's [virtual environment](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Error: `command not found: edr` on Windows</summary>
-
+<Accordion title="Error: `command not found: edr` on Windows">
 If you got a message `Successfully installed elementary-data` but get a `command not found` error, it is probably because of a missing path in your environment variables.
 
 Look for a warning in your terminal saying:
@@ -137,25 +129,21 @@ set PATH='%PATH%;<path from error message>'
 
 After that restart your CMD and try `edr` again.
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Data lineage graph is partial</summary>
-
+<Accordion title="Data lineage graph is partial">
 A partial lineage graph may be created because of the following reasons:
 
 1. The selected timeframe does not include relevant queries, refer to the integrations
 2. Credentials provided in the profile are not permitted to read the full query history. The required permissions are detailed in the page of each integration
 3. Some query types used are [not supported](../data-lineage/query-history-1#unsupported-query-types), you can notify us on a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues) and we will include these in our next release
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">My problem is not listed here</summary>
-
+<Accordion title="My problem is not listed here">
 If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
 
-</details>
+</Accordion>
 
 ## Other issues?
 

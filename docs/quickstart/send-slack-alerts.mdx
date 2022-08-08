@@ -153,8 +153,7 @@ Also, you can use two custom Elementary fields:
 - Subscribers: to tag additional users except the owner in an alert.
 - Channel: to send the alert to additional Slack channel (only available for Slack token).
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Owners</summary>
+<Accordion title="Owners">
 If you want to tag a model owner in a slack alert:
 - Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack)
 - For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, simply add the email prefix (with lower case) jessica.jones as follows to your model schema.yml / properties.yml
@@ -175,11 +174,9 @@ models:
       owner: ["@jessica.jones", "@joe.joseph"]
 ```
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Tags</summary>
-
+<Accordion title="Tags">
 if you want to tag a group or a channel in a slack alert:
 
 - Add it as model tag and use '#' as the prefix of the channel name.
@@ -193,10 +190,9 @@ models:
       tags: ["#marketing-data-ops"]
 ```
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Subscribers</summary>
+<Accordion title="Subscribers">
 If you want to tag users on a model / test / snapshot failure alert:
 - Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack) For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, use "@jessica.jones".
 - Add 'subscribers' under a meta field to your properties.yml file.
@@ -223,11 +219,9 @@ models:
       subscribers: ["@jessica.jones", "@luke.cage"]
 ```
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Custom Slack channel</summary>
-
+<Accordion title="Custom Slack channel">
 By default Elementary uses the Slack channel that was configured in the Slack integration.
 Elementary supports configuring custom slack channels that are configured on your models / sources and snapshots.
 If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel as well.
@@ -252,7 +246,7 @@ models:
       +channel: marketing_data_ops
 ```
 
-</details>
+</Accordion>
 
 ## Continuous alerting
 

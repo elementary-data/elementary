@@ -1,6 +1,7 @@
 ---
 title: "CLI Install & Configure"
 ---
+
 import InstallCLI from "../snippets/install-cli.mdx";
 
 We recommend you install Elementary CLI using one of the following methods:
@@ -34,10 +35,7 @@ Elementary CLI requires a connection profile to connect to DWH. Additional confi
 
 (These default paths and names may be changed using the [CLI options](./cli-advanced)).
 
-
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'profiles.yml'?</summary>
-
+<Accordion title="How to create 'profiles.yml'?">
 ## Add connection profile for elementary CLI
 
 In order to connect, elementary needs a profile in a file named `profiles.yml`
@@ -122,21 +120,17 @@ elementary:
 
 </SnippetGroup>
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt-core user? You already have profiles.yml</summary>
-
+<Accordion title="dbt-core user? You already have profiles.yml">
 If you are a dbt user, you already have a `profiles.yml` file that you can use. The default path of the dbt profiles file is `~/.dbt/` directory.
 
 - For further details, please refer to [dbt's documentation](https://docs.getdbt.com/reference/profiles.yml) about the file.
 - Note: in BigQuery we require 'location' ([details](https://cloud.google.com/bigquery/docs/locations)), and in dbt it is optional.
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">What is a connection profile?</summary>
-
+<Accordion title="What is a connection profile?">
 Elementary requires connection details and credentials to connect to the data warehouse. These are configured in a connection profile using a file named `profiles.yml`.
 
 **We recommend creating a dedicated database, or at least a schema.**
@@ -146,21 +140,17 @@ Elementary leverages dbt's [connection profile](https://docs.getdbt.com/dbt-cli/
 **dbt-core users**
 Just add a profile with the relevant details, and name it `elementary`.
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Connection profile permissions</summary>
-
+<Accordion title="Connection profile permissions">
 The provided credentials need to have permission to:
 
 - Read - Query history, information schema and the tables configured for monitoring.,
 - Write - To the database and schema configured in `elementary` [connection profile](./connection-profile).
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">How to create 'config.yml'?</summary>
-
+<Accordion title="How to create 'config.yml'?">
 Create a new directory and yml file under: HOME_DIR/.edr/config.yml
 
 Here is the format of the yml itself:
@@ -177,11 +167,9 @@ workflows: false
 traget-path:
 ```
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Anonymous tracking</summary>
-
+<Accordion title="Anonymous tracking">
 We want to keep building and improving, and for that, we need to understand how users work with Elementary (and data is fun!). For that we added an anonymous tracking of events using [Posthog](https://posthog.com/) (open-source product analytics, highly recommended).
 
 We only track start, end, platform, number of queries and the size of the graph. No credentials, queries content, table names or anything private (not now and not ever).
@@ -192,13 +180,11 @@ By default this completely anonymous tracking is turned on. You can opt-out at a
 anonymous_usage_tracking: False
 ```
 
-</details>
+</Accordion>
 
 ---
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Have a question?</summary>
-
+<Accordion title="Have a question?">
 We are available on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out for any kind of help!
 
-</details>
+</Accordion>

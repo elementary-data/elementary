@@ -1,16 +1,14 @@
 First create a Slack app:
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Create a Slack App</summary>
-
+<Accordion title="Create a Slack App">
 ## 1. Create a Slack app
 
 Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
 Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png"
-    alt="Slack app"
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png"
+  alt="Slack app"
 />
 
 ## 2. Optional - Slack app display
@@ -18,27 +16,28 @@ Call it "[Elementary](#slack-app-display)" and connect it to the workspace of yo
 To change the display of the Elementary slack app, scroll down on the Slack app basic information page to the 'Display Information' section:
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-display_utxkcu.png"
-    alt="Slack display"
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-display_utxkcu.png"
+  alt="Slack display"
 />
 
 Here is the Elementary icon for your use (click to download):
 
-<a href="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png" download>
-<img
+<a
+  href="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png"
+  download
+>
+  <img
     src="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png"
     alt="Elementary logo"
     width="200"
-/>
+  />
 </a>
 
-</details>
+</Accordion>
 
 Based on the method you selected, create a [token or webhook](../integrations/slack#token-vs-webhook):
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Create Slack Token</summary>
-
+<Accordion title="Create Slack Token">
 ## 1. Create a Slack token
 
 Go to the "OAauth & Permissions" page for your newly-created app, and add the following scopes under "Bot Token Scopes":
@@ -63,11 +62,9 @@ At the "OAuth & Permissions" page, press on "Install to Workspace" in order to g
   alt="Slack OAuth"
 />
 
-</details>
+</Accordion>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-  <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Create Slack Webhook</summary>
-
+<Accordion title="Create Slack Token">
 ## Create a webhook
 
 Go to the 'Incoming Webhooks' page for your newly-created app and toggle 'Activate Incoming Webhooks' to turn it on. Then click on 'Add New Webhook to Workspace':
@@ -84,45 +81,50 @@ Select the channel that the notifications will be posted to:
   alt="Slack channel"
 />
 
-</details>
+</Accordion>
 
 Lastly, pass the token / webhook to the CLI as a param or in the `config.yml` file:
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Slack config as CLI params</summary>
-
+<Accordion title="Slack config as CLI params">
 ## Token:
+
 Use the Slack token when you execute edr monitor using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
+
 ```shell
 edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
 ```
 
 ## Webhook:
+
 Use the webhook URL when you execute edr monitor using the option `-s, --slack-webhook`:
+
 ```shell
 edr monitor --slack-webhook <your_slack_webhook_url>
 ```
-</details>
 
-<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
-    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Slack config as in config.yml</summary>
+</Accordion>
+
+<Accordion title="Slack config as in config.yml">
 The CLI reads the Slack integration from a file, copy it into a file called config.yml.
 Create it here: `HOME_DIR/.edr/config.yml`
 
 Here is the format in the yml itself:
 
 ## Token:
+
 ```yml config.yml
 slack:
-    token: <your_slack_token>
-    channel_name: <slack_channel_to_post_at>
+  token: <your_slack_token>
+  channel_name: <slack_channel_to_post_at>
 ```
 
 ## Webhook:
+
 ```yml config.yml
 slack:
-    notification_webhook: <your_slack_webhook_url>
-    # optional #
-    workflows: false
+  notification_webhook: <your_slack_webhook_url>
+  # optional #
+  workflows: false
 ```
-</details>
+
+</Accordion>
