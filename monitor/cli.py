@@ -213,6 +213,60 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 
 @monitor.command()
 @click.option(
+    '--slack-token', '-st',
+    type=str,
+    default=None,
+    help="A slack token for sending alerts over slack.",
+)
+@click.option(
+    '--slack-channel-name', '-ch',
+    type=str,
+    default=None,
+    help="The slack channel which all alerts will be sent to.",
+)
+@click.option(
+    '--aws-profile-name',
+    type=str,
+    default='default',
+    help="AWS profile name",
+)
+@click.option(
+    '--aws-access-key-id',
+    type=str,
+    default=None,
+    help="The access key ID for AWS"
+)
+@click.option(
+    '--aws-secret-access-key',
+    type=str,
+    default=None,
+    help="The secret access key for AWS"
+)
+@click.option(
+    '--s3-bucket-name',
+    type=str,
+    default=None,
+    help="The name of the S3 bucket to upload the report to."
+)
+@click.option(
+    '--google-service-account-path',
+    type=str,
+    default=None,
+    help="The path to the Google service account json file"
+)
+@click.option(
+    '--gcs-bucket-name',
+    type=str,
+    default=None,
+    help="The name of the GCS bucket to upload the report to."
+)
+@click.option(
+    '--update-bucket-website',
+    type=bool,
+    default=True,
+    help="Update the bucket's static website with the latest report."
+)
+@click.option(
     '--days-back', '-d',
     type=int,
     default=7,
@@ -256,60 +310,6 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     type=bool,
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
-)
-@click.option(
-    '--slack-token', '-st',
-    type=str,
-    default=None,
-    help="A slack token for sending alerts over slack.",
-)
-@click.option(
-    '--slack-channel-name', '-ch',
-    type=str,
-    default=None,
-    help="The slack channel which all alerts will be sent to.",
-)
-@click.option(
-    '--update-bucket-website',
-    type=bool,
-    default=True,
-    help="Update the bucket's static website with the latest report."
-)
-@click.option(
-    '--aws-profile-name',
-    type=str,
-    default='default',
-    help="AWS profile name for AWS",
-)
-@click.option(
-    '--aws-access-key-id',
-    type=str,
-    default=None,
-    help="The access key id for AWS"
-)
-@click.option(
-    '--aws-secret-access-key',
-    type=str,
-    default=None,
-    help="The secret access key for AWS"
-)
-@click.option(
-    '--s3-bucket-name',
-    type=str,
-    default=None,
-    help="The name of the S3 bucket to upload the report to."
-)
-@click.option(
-    '--google-service-account-path',
-    type=str,
-    default=None,
-    help="The path to the Google service account json file"
-)
-@click.option(
-    '--gcs-bucket-name',
-    type=str,
-    default=None,
-    help="The name of the GCS bucket to upload the report to"
 )
 @click.pass_context
 def send_report(
