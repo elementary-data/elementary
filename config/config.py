@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from utils.ordered_yaml import OrderedYaml
 
@@ -9,11 +10,14 @@ class Config:
     _GOOGLE = 'google'
     _CONFIG_FILE_NAME = 'config.yml'
 
-    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None,
-                 update_bucket_website: bool = None, slack_webhook: str = None, slack_token: str = None,
-                 slack_channel_name: str = None, aws_profile_name: str = None, aws_access_key_id: str = None,
-                 aws_secret_access_key: str = None, s3_bucket_name: str = None, google_service_account_path: str = None,
-                 gcs_bucket_name: str = None):
+    DEFAULT_CONFIG_DIR = Path.home() / '.edr'
+    DEFAULT_PROFILES_DIR = Path.home() / '.dbt'
+
+    def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
+                 profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
+                 slack_token: str = None, slack_channel_name: str = None, aws_profile_name: str = None,
+                 aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
+                 google_service_account_path: str = None, gcs_bucket_name: str = None):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
@@ -48,7 +52,7 @@ class Config:
         return OrderedYaml().load(config_file_path)
 
     @property
-    def has_file_upload_platform(self):
+    def has_send_report_platform(self):
         return (self.slack_token and self.slack_channel_name) or self.has_aws or self.has_gcs
 
     @property

@@ -38,25 +38,24 @@
       "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
     },
     {
-      "name": "Contact Us",
-      "icon": "envelope",
-      "url": "mailto:team@elementary-data.com"
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/elementary-data/elementary"
     }
   ],
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "quickstart"
-      ]
+      "pages": ["introduction", "quickstart"]
     },
     {
       "group": "Guides",
       "pages": [
-        "quickstart/add-elementary-tests",
         "quickstart/generate-report-ui",
-        "quickstart/send-slack-alerts"
+        "quickstart/send-slack-alerts",
+        "quickstart/add-elementary-tests",
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands"
       ]
     },
     {
@@ -64,22 +63,17 @@
       "pages": [
         "understand-elementary/elementary-overview",
         "understand-elementary/dbt-package",
-        "understand-elementary/cli-install",
-        "understand-elementary/connection-profile",
-        "understand-elementary/cli-commands",
-        "understand-elementary/cli-advanced",
+        "guides/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
       ]
     },
     {
-      "group": "Data Monitoring",
+      "group": "Data Anomaly Detection Tests",
       "pages": [
-        "guides/data-and-dbt-tests-report-ui",
         "guides/data-anomaly-detection",
         "guides/add-data-monitoring-tests",
         "guides/elementary-tests-configuration",
-        "guides/dbt-artifacts",
         "guides/monitoring-in-production"
       ]
     },
@@ -93,8 +87,9 @@
       ]
     },
     {
-      "group": "FAQ & Support",
+      "group": "Community & Support",
       "pages": [
+        "general/contributions",
         "general/troubleshooting",
         "general/community-and-support",
         "general/faq"

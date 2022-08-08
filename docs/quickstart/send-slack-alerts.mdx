@@ -1,57 +1,126 @@
 ---
-title: "Slack alerts and test reports"
+title: "Send Slack alerts"
 ---
 
-## Get Slack alerts
+import SetupSlackIntegration from "../snippets/setup-slack-integration.mdx";
+import InstallCLI from "../snippets/install-cli.mdx";
 
-### Configure Slack
+Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models runs and snapshots runs.
 
-To get Slack notifications, you will need a [Slack integration](../integrations/slack).
+The alerts include information for fast triage.
+Also, you can add configuration for each test / model in your `.yml` files:
 
-#### Option 1 - Slack as CLI parameter
+- Custom channels - distribute alerts based on their context
+- Owners - tag the owner of the model
+- Subscribers - let users subscribe to models and tests they care about
+- dbt Tags - add custom context to the alert
 
-1. **Token** - Use the Slack token when you execute `edr monitor` using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
+  alt="New Slack alert format"
+/>
+
+Before you can start sending alerts, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
+This is **required for the tests to work.**
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">dbt package installation</summary>
+
+<InstallDbtPackage />
+
+</details>
+
+<InstallCLI />
+
+## Add connection profile for elementary CLI
+
+In order to connect, elementary needs a profile in a file named `profiles.yml`
+
+- Path: `HOME_DIR/.dbt/profiles.yml`
+- Profile name: `elementary`
+- Schema name: The schema of elementary models, default is `<your_dbt_project_schema>_elementary`
+
+<SnippetGroup>
+
+```yml Snowflake
+## SNOWFLAKE ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+outputs:
+default:
+type: snowflake
+account: [account id]
+
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]_elementary
+      threads: 4
 
 ```
-edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
+
+```yml BigQuery
+## BIGQUERY ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: bigquery
+
+      ## Service account auth, other options require other configs ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+
+      project: [project id]
+      dataset: [dataset name]
+      threads: 4
+      location: [dataset location]
+      priority: interactive
 ```
 
-2. **Webhook** - Use the webhook URL when you execute `edr monitor` using the option `-s, --slack-webhook`:
+```yml Redshift
+## REDSHIFT ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
 
-```
-edr monitor --slack-webhook <your_slack_webhook_url>
-```
+elementary:
+  outputs:
+    default:
+      type: redshift
+      host: [hostname, like hostname.region.redshift.amazonaws.com]
 
-#### Option 2 - Slack integration in config.yml
+      ## User/password auth, other options (IAM) require other configs ##
+      user: [username]
+      password: [password]
 
-If you prefer that the CLI reads the Slack integration from a file, copy it into a file called `config.yml`.
-
-Create it here:
-
-`HOME_DIR/.edr/config.yml`
-
-Here is the format in the yml itself:
-
-**Token**
-
-```yml
-slack:
-  token: <your_slack_token>
-  channel_name: <slack_channel_to_post_at>
-```
-
-**Webhook**
-
-```yml
-slack:
-  notification_webhook: <your_slack_webhook_url>
-  # optional #
-  workflows: false
+      dbname: [database name]
+      schema: [schema name]_elementary
+      threads: 4
+      keepalives_idle: 240 # default 240 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
+      ra3_node: true # enables cross-database sources
 ```
 
-Now you can execute the CLI, to get alerts.
+</SnippetGroup>
 
-### Execute the CLI
+## Setup Slack Integration
+
+<SetupSlackIntegration />
+
+## Execute the CLI
 
 Make sure to run the following command after your dbt runs and tests:
 
@@ -61,58 +130,131 @@ edr monitor
 
 ---
 
-### Tag users and channels
+## Alert types configuration
 
-You can use the 'owner' and 'tags' fields in dbt yml files, to decide who should be mentioned in a Slack alert:
+By default, the alerts that are sent are failed tests, errored models and errored snapshots.
+You can choose to disable alert types by adding a var to your `dbt_project.yml`.
 
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
-  alt="New Slack alert format"
-/>
+```yml dbt_project.yml
+vars:
+  # Alerts configuration vars   #
+  # All set to false by default #
+  elementary:
+    disable_model_alerts: false
+    disable_test_alerts: false
+    disable_warn_alerts: false
+```
 
-### Continuous alerting
+## Customize alerts: owners, tags and subscribers
+
+Elementary enriches alerts with dbt model/source/snapshot owners and tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
+Also, you can use two custom Elementary fields:
+
+- Subscribers: to tag additional users except the owner in an alert.
+- Channel: to send the alert to additional Slack channel (only available for Slack token).
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Owners</summary>
+If you want to tag a model owner in a slack alert:
+- Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack)
+- For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, simply add the email prefix (with lower case) jessica.jones as follows to your model schema.yml / properties.yml
+
+```yml properties.yml
+models:
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
+```
+
+It is possible to tag multiple owners as well:
+
+```yml properties.yml
+models:
+  - name: my_model_name
+    meta:
+      owner: ["@jessica.jones", "@joe.joseph"]
+```
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Tags</summary>
+
+if you want to tag a group or a channel in a slack alert:
+
+- Add it as model tag and use '#' as the prefix of the channel name.
+- For example, to tag the marketing team's data ops channel add the following to your `model schema.yml` / `properties.yml`.
+
+```yml properties.yml
+models:
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
+      tags: ["#marketing-data-ops"]
+```
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Subscribers</summary>
+If you want to tag users on a model / test / snapshot failure alert:
+- Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack) For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, use "@jessica.jones".
+- Add 'subscribers' under a meta field to your properties.yml file.
+
+```yml properties.yml
+models:
+  - name: my_model_name
+    meta:
+      subscribers: "@jessica.jones"
+    columns:
+      - name: column_name
+        tests:
+          - unique:
+              meta:
+                subscribers: "@luke.cage"
+```
+
+It is possible to tag multiple subscribers as well:
+
+```yml properties.yml
+models:
+  - name: my_model_name
+    meta:
+      subscribers: ["@jessica.jones", "@luke.cage"]
+```
+
+</details>
+
+<details className="-mt-0 mb-6 rounded-xl border px-6 py-3 prose prose-slate open:pb-5 dark:prose-dark dark:border-slate-800">
+    <summary className="font-medium cursor-default select-none text-slate-900 dark:text-slate-200">Custom Slack channel</summary>
+
+By default Elementary uses the Slack channel that was configured in the Slack integration.
+Elementary supports configuring custom slack channels that are configured on your models / sources and snapshots.
+If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel as well.
+
+For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops channel.
+
+To set it up, simply add the relevant channel to your models in the properties.yml (can be done also for sources and snapshots).
+
+```yml properties.yml
+models:
+  - name: marketing_leads
+    meta:
+      channel: marketing_data_ops
+```
+
+If your models are in folders by department / team, another useful option is to configure the channel in your `dbt_project.yml` file.
+
+```yml dbt_project.yml
+models:
+  marketing_bi:
+    +meta:
+      +channel: marketing_data_ops
+```
+
+</details>
+
+## Continuous alerting
 
 In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after your dbt job ends to monitor the latest data updates).
 If you need help or wish to consult on this, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).
-
----
-
-## Send tests report to Slack
-
-### Configure Slack
-
-To get Slack notifications, you will need a [Slack integration](../integrations/slack).
-
-#### Option 1 - Slack as CLI parameter
-
-**Token** - Use the Slack token when you execute `edr monitor` using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
-
-```
-edr monitor send-report --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
-```
-
-#### Option 2 - Slack integration in config.yml
-
-If you prefer that the CLI reads the Slack integration from a file, copy it into a file called `config.yml`.
-
-Create it here:
-
-`HOME_DIR/.edr/config.yml`
-
-Here is the format in the yml itself:
-
-**Token**
-
-```yml
-slack:
-  token: <your_slack_token>
-  channel_name: <slack_channel_to_post_at>
-```
-
-### Execute the CLI
-
-Make sure to run the following command after your dbt runs and tests:
-
-```
-edr monitor send-report
-```
