@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 from typing import Union
+
 from utils.ordered_yaml import OrderedYaml
 
 ordered_yaml = OrderedYaml()
@@ -13,7 +15,11 @@ class Config:
     WORKFLOWS = 'workflows'
     CONFIG_FILE_NAME = 'config.yml'
 
-    def __init__(self, config_dir: str, profiles_dir: str, profile_target: str = None) -> None:
+    DEFAULT_CONFIG_DIR = Path.home() / '.edr'
+    DEFAULT_PROFILES_DIR = Path.home() / '.dbt'
+
+    def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
+                 profile_target: str = None) -> None:
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
@@ -32,7 +38,7 @@ class Config:
     @property
     def anonymous_tracking_enabled(self) -> bool:
         return self.config_dict.get('anonymous_usage_tracking', True)
-    
+
     @property
     def slack_token(self) -> Union[str, None]:
         slack_config = self.config_dict.get(self.SLACK)
@@ -46,7 +52,7 @@ class Config:
         if slack_config is not None:
             return slack_config.get(self.NOTIFICATION_CHANNEL_NAME)
         return None
-    
+
     @property
     def slack_notification_webhook(self) -> Union[str, None]:
         slack_config = self.config_dict.get(self.SLACK)
