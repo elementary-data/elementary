@@ -48,8 +48,8 @@ class Config:
         return OrderedYaml().load(config_file_path)
 
     @property
-    def has_upload_platform(self):
-        return self.has_aws or self.has_gcs
+    def has_file_upload_platform(self):
+        return (self.slack_token and self.slack_channel_name) or self.has_aws or self.has_gcs
 
     @property
     def has_slack(self) -> bool:

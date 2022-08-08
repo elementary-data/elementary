@@ -18,7 +18,7 @@ class GCSClient:
     def create_client(cls, config: Config) -> 'GCSClient':
         return cls(config) if config.has_gcs else None
 
-    def upload_report(self, html_path: str) -> bool:
+    def send_report(self, html_path: str) -> bool:
         report_filename = path.basename(html_path)
         try:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)

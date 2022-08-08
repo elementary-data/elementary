@@ -13,7 +13,6 @@ from clients.dbt.dbt_runner import DbtRunner
 from clients.gcs.client import GCSClient
 from clients.s3.client import S3Client
 from clients.slack.client import SlackClient
-from clients.slack.schema import SlackMessageSchema
 from config.config import Config
 from monitor.alerts.alert import Alert
 from monitor.alerts.alerts import Alerts
@@ -159,33 +158,24 @@ class DataMonitoring:
 
     def send_report(self, html_path: str) -> bool:
         if self.slack_client:
-            self.execution_properties['send_to_slack'] = True
-            file_uploaded_successfully = self.slack_client.upload_file(
-                channel_name=self.config.slack_channel_name,
-                file_path=html_path,
-                message=SlackMessageSchema(text="Elementary monitoring report")
-            )
-            logger.info('Sent report to Slack.')
-            if not file_uploaded_successfully:
-                logger.error('Failed to send report to Slack.')
+            send_succeded = self.slack_client.send_report(self.config.slack_channel_name, html_path)
+            self.execution_properties['sent_to_slack_successfully'] = send_succeded
+            if not send_succeded:
                 self.success = False
-        return self.success
 
-    def upload_report(self, html_path: str):
         if self.s3_client:
-            self.execution_properties['upload_to_s3'] = True
-            upload_succeded = self.s3_client.upload_report(html_path)
-            self.execution_properties['uploaded_to_s3_successfully'] = upload_succeded
-            if not upload_succeded:
+            send_succeded = self.s3_client.send_report(html_path)
+            self.execution_properties['sent_to_s3_successfully'] = send_succeded
+            if not send_succeded:
                 self.success = False
 
         if self.gcs_client:
-            self.execution_properties['upload_to_gcs'] = True
-            upload_succeded = self.gcs_client.upload_report(html_path)
-            self.execution_properties['uploaded_to_gcs_successfully'] = upload_succeded
-            if not upload_succeded:
+            send_succeded = self.gcs_client.send_report(html_path)
+            self.execution_properties['sent_to_gcs_successfully'] = send_succeded
+            if not send_succeded:
                 self.success = False
 
+        self.execution_properties['success'] = self.success
         return self.success
 
     def _get_lineage(self) -> LineageSchema:
