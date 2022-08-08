@@ -1,4 +1,5 @@
 from os import path
+from typing import Optional
 
 import boto3
 import botocore.exceptions
@@ -18,7 +19,7 @@ class S3Client:
         self.client = aws_session.client('s3')
 
     @classmethod
-    def create_client(cls, config: Config) -> 'S3Client':
+    def create_client(cls, config: Config) -> Optional['S3Client']:
         return cls(config) if config.has_aws else None
 
     def send_report(self, html_path: str) -> bool:

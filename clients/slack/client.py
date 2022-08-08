@@ -1,6 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from typing import List
+from typing import Optional
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
@@ -21,7 +22,7 @@ class SlackClient(ABC):
         self.client = self._initial_client()
 
     @staticmethod
-    def create_client(config: Config):
+    def create_client(config: Config) -> Optional['SlackClient']:
         if not config.has_slack:
             return None
         if config.slack_token:
@@ -38,11 +39,11 @@ class SlackClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def send_file(self, **kwargs):
+    def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def send_report(self, **kwargs):
+    def send_report(self, channel_name: str, report_file_path: str):
         raise NotImplementedError
 
 
@@ -149,7 +150,3 @@ class SlackWebhookClient(SlackClient):
         else:
             logger.error(f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}")
             return False
-
-    def send_file(self, **kwargs):
-        logger.error(
-            f"Slack webhook does not support file uploads. Please use Slack token instead (see documentation on how to configure a slack token)")

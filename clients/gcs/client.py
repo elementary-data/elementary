@@ -1,4 +1,5 @@
 from os import path
+from typing import Optional
 
 import google
 from google.cloud import storage
@@ -15,7 +16,7 @@ class GCSClient:
         self.client = storage.Client.from_service_account_json(config.google_service_account_path)
 
     @classmethod
-    def create_client(cls, config: Config) -> 'GCSClient':
+    def create_client(cls, config: Config) -> Optional['GCSClient']:
         return cls(config) if config.has_gcs else None
 
     def send_report(self, html_path: str) -> bool:
