@@ -1,14 +1,16 @@
 import json
-import logging
 from abc import ABC, abstractmethod
 from typing import List
+from typing import Optional
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 
 from clients.slack.schema import SlackMessageSchema
+from config.config import Config
+from utils.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 OK_STATUS_CODE = 200
 
@@ -20,12 +22,13 @@ class SlackClient(ABC):
         self.client = self._initial_client()
 
     @staticmethod
-    def create_slack_client(token: str = None, webhook: str = None):
-        if token:
-            return SlackWebClient(token=token)
-        elif webhook:
-            return SlackWebhookClient(webhook=webhook)
-        return None
+    def create_client(config: Config) -> Optional['SlackClient']:
+        if not config.has_slack:
+            return None
+        if config.slack_token:
+            return SlackWebClient(token=config.slack_token)
+        elif config.slack_webhook:
+            return SlackWebhookClient(webhook=config.slack_webhook)
 
     @abstractmethod
     def _initial_client(self):
@@ -36,7 +39,11 @@ class SlackClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def upload_file(self, **kwargs):
+    def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def send_report(self, channel_name: str, report_file_path: str):
         raise NotImplementedError
 
 
@@ -61,7 +68,7 @@ class SlackWebClient(SlackClient):
             logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
             return False
 
-    def upload_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
+    def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
         channel_id = self._get_channel_id(channel_name)
         in_channel = self._join_channel(channel_id)
         if not (channel_id and in_channel):
@@ -76,6 +83,18 @@ class SlackWebClient(SlackClient):
         except SlackApiError as e:
             logger.error(f"Could not upload the file to the channel - {channel_name}. Error: {e}")
             return False
+
+    def send_report(self, channel_name: str, report_file_path: str):
+        send_succeed = self.send_file(
+            channel_name=channel_name,
+            file_path=report_file_path,
+            message=SlackMessageSchema(text="Elementary monitoring report")
+        )
+        if send_succeed:
+            logger.info('Sent report to Slack.')
+        else:
+            logger.error('Failed to send report to Slack.')
+        return send_succeed
 
     def _get_channel_id(self, channel_name: str) -> str:
         try:
@@ -131,7 +150,3 @@ class SlackWebhookClient(SlackClient):
         else:
             logger.error(f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}")
             return False
-
-    def upload_file(self, **kwargs):
-        logger.error(
-            f"Slack webhook does not support file uploads. Please use Slack token instead (see documentation on how to configure a slack token)")
