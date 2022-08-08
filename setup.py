@@ -81,12 +81,3 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
 )
-
-try:
-    from config.config import Config
-    from tracking.anonymous_tracking import AnonymousTracking
-
-    # Conditionally creates a user id if tracking is allowed.
-    AnonymousTracking(Config()).init_anonymous_user_id()
-except Exception:
-    pass
