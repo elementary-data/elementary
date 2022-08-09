@@ -11,6 +11,15 @@ Full support.
 
 ### Snowflake connection profile
 
+After installing Elementary's dbt package upon running `dbt deps`,
+you can generate Elementary's profile for usage with `edr` by running the following command within your project:
+
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+Fill in the missing fields and afterwards add the profile to your `profiles.yml`.
+
 ```yml Snowflake
 ## SNOWFLAKE ##
 ## By default, edr expects the profile name 'elementary'.      ##
@@ -35,9 +44,12 @@ account: [account id]
 
 ```
 
-We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile) for further details.
-
+We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
+dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile) for
+further details.
 
 ### Have a question?
 
-We are available on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out for any kind of help!
+We are available
+on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out
+for any kind of help!

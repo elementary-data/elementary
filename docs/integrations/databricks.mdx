@@ -1,0 +1,34 @@
+---
+title: 'Databricks'
+---
+
+## Partial Support
+
+Currently, Elementary only supports Dbt artifacts on Databricks.
+
+
+## Databricks connection profile
+
+After installing Elementary's dbt package upon running `dbt deps`,
+you can generate Elementary's profile for usage with `edr` by running the following command within your project:
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+Fill in the missing fields and afterwards add the profile to your `profiles.yml`.
+
+The `profiles.yml` file to connect to Databricks should contain a profile in the following format:
+
+```yml Redshift
+## DATABRICKS ##
+## By default, edr expects the profile name 'elementary'.      ##
+
+elementary:
+  outputs:
+    default:
+      type: databricks
+      host: [hostname, like <ID>.cloud.databricks.com]
+      http_path: [like /sql/1.0/endpoints/<ID>]
+      token : [token]
+      threads: [number of threads like 8]
+```
