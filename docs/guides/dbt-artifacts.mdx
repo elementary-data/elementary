@@ -12,9 +12,15 @@ Each dbt invocation generates artifacts, with details about the project resource
 ## How Elementary uploads dbt artifacts?
 
 The Elementary dbt package includes macros that extract specific fields from the artifacts during the execution, and insert to tables. These tables are defined as models of the package.
-Most of the artifacts are uploaded in a [post-hook](https://docs.getdbt.com/reference/resource-configs/pre-hook-post-hook) of the model.
-The [run results](https://docs.getdbt.com/reference/artifacts/run-results-json) are uploaded in an [on-run-end](https://docs.getdbt.com/reference/project-configs/on-run-start-on-run-end) operation, as these are accessible only when the run concludes.
 
+Some artifacts are updated by an [on-run-end](https://docs.getdbt.com/reference/project-configs/on-run-start-on-run-end) hook when you run `dbt run / test / build`, and some only when you run the models:
+
+- **On run end:**
+    - `elementary_test_results` - Results of all dbt tests (including elementary and other packages, such as dbt_expectations and dbt_utils).
+    - `dbt_run_results` - Results of all dbt executions.
+- **`dbt run` that includes elementary models:**
+    - `dbt_models`, `dbt_tests`, `dbt_sources`, `dbt_exposures`, `dbt_metrics` - Metadata and configuration. It is recommended to run these models when you make changes in your projects.
+    
 ## Which artifacts are uploaded and modeled?
 
 Elementary uploads fields from the run-results, and the graph object (includes data of manifest, catalog and sources).
