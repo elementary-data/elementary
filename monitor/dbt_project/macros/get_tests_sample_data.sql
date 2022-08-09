@@ -53,7 +53,7 @@
                 {% set anomalous = [] %}
                 {% for sample in test_rows_sample %}
                     {% set anomalous_sample = {
-                        'date': sample['end_time'],
+                        'end_time': sample['end_time'],
                         'row_count': sample['value'],
                         'average_row_count': sample['average'],
                         'min_row_count': sample['min_value'],
