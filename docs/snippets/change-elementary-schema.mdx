@@ -1,10 +1,8 @@
-import { Accordion } from "@/components/Accordion";
-
 <Accordion title="Can I change Elementary schema?">
 The short answer is yes.
 We recommend that Elementary models will have their own schema, but it is not mandatory. 
 You can change the schema name by using dbt [custom schema configuration](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/using-custom-schemas) on your `dbt_project.yml`.
-In short, the default dbt `generate_schema_name` macro concatenate the value provided in `schema` configuration key to the target schema, as in: `<target_schema>_<custom_schema>`.
+In short, the default dbt `generate_schema_name` macro concatenate the value provided in `schema` configuration key to the target schema, as in: `target_schema_custom_schema`.
 
 If you want a different behaviour, like configuring a full name for the Elementary schema, you can override the default `generate_schema_name` macro with your logic.
 Before you do that, make sure that there isn't already a macro named `generate_schema_name.sql` in your project.
@@ -38,11 +36,12 @@ If it exists, that would be the schema name. If not - the original dbt logic wou
 ```
 
 If you implement this macro and want to name the Elementary schema `elementary_data_observability`:
+
 ```yml dbt_project.yml
 models:
   elementary:
     +meta:
-      custom_schema: 'elementary_data_observability'  
+      custom_schema: "elementary_data_observability"
 ```
 
 </Accordion>
