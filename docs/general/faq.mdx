@@ -18,7 +18,7 @@ Here is a macro you can use that would search for a config under `meta` named `s
 If it exists, that would be the schema name. If not - the original dbt logic would be followed:
 
 ```sql generate_schema_name.sql
-{% macro generate_schema_name(custom_schema_name, node) -%}
+{% macro generate_schema_name(custom_schema_suffix, node) -%}
 
     {%- set default_schema = target.schema -%}
     {% set config_meta = node.config.get('meta') %}
@@ -29,13 +29,13 @@ If it exists, that would be the schema name. If not - the original dbt logic wou
             {{ return(schema_name) }}
         {% endif %}
 
-    {%- elif custom_schema_name is none -%}
+    {%- elif custom_schema_suffix is none -%}
 
         {{ default_schema }}
 
     {%- else -%}
 
-        {{ default_schema }}_{{ custom_schema_name | trim }}
+        {{ default_schema }}_{{ custom_schema_suffix | trim }}
 
     {%- endif -%}
 
@@ -48,7 +48,7 @@ If you implement this macro and want to name the Elementary schema `elementary_d
 models:
   elementary:
     +meta:
-      custom_schema: "elementary_data_observability"
+      schema_name: "elementary_data_observability"
 ```
 
 </Accordion>
