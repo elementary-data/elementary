@@ -32,6 +32,7 @@
         {% set test_unique_id = elementary.insensitive_get_dict_value(test, 'test_unique_id') %}
         {% set test_results_query = elementary.insensitive_get_dict_value(test, 'test_results_query') %}
         {% set test_type = elementary.insensitive_get_dict_value(test, 'test_type') %}
+        {% set test_sub_type = elementary.insensitive_get_dict_value(test, 'test_sub_type') %}
         {% set status = elementary.insensitive_get_dict_value(test, 'status') | lower %}
 
         {% set test_rows_sample = none %}
@@ -40,12 +41,40 @@
             {% do elementary_tests_allowlist_status.append('pass') %}
         {% endif %}
         {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, metrics_sample_limit) %}
+            {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
+            {# Currently we show only the anomalous for all of the dimensions. #}
+            {% if test_sub_type == 'dimension' %}
+                {% set dimension_test_result_query %}
+                    select *
+                    from ({{test_results_query}})
+                    where is_anomalous
+                {% endset %}
+                {% set test_rows_sample = elementary_internal.get_test_rows_sample(dimension_test_result_query, test_type, metrics_sample_limit) %}
+                {% set anomalous = [] %}
+                {% for sample in test_rows_sample %}
+                    {% set anomalous_sample = {
+                        'date': sample['end_time'],
+                        'row_count': sample['value'],
+                        'average_row_count': sample['average'],
+                        'min_row_count': sample['min_value'],
+                        'max_row_count': sample['max_value'],
+                    } %}
+                    {% set dimensions = sample['dimension'].split('; ') %}
+                    {% set diemsions_values = sample['dimension_value'].split('; ') %}
+                    {% for index in range(dimensions | length) %}
+                        {% do anomalous_sample.update({dimensions[index]: diemsions_values[index]}) %}
+                    {% endfor %}
+                    {% do anomalous.append(anomalous_sample) %}
+                {% endfor %}
+                {% set test_rows_sample = anomalous %}
+            {% else %}
+                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, metrics_sample_limit) %}
+            {% endif %}
         {%- endif -%}
         {% set sub_test_unique_id = get_sub_test_unique_id(
             model_unique_id=elementary.insensitive_get_dict_value(test, 'model_unique_id'),
             test_unique_id=elementary.insensitive_get_dict_value(test, 'test_unique_id'),
-            test_sub_type=elementary.insensitive_get_dict_value(test, 'test_sub_type'),
+            test_sub_type=test_sub_type,
             column_name=elementary.insensitive_get_dict_value(test, 'column_name'),
         ) %}
         {% do tests_metrics.update({sub_test_unique_id: test_rows_sample}) %}
