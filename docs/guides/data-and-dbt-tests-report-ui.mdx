@@ -1,5 +1,5 @@
 ---
-title: "Data & dbt tests report UI"
+title: 'Data & dbt tests report UI'
 ---
 
 Elementary has a UI for visualization and exploration of data from the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, which includes dbt test results, Elementary anomaly detection results, dbt artifacts, etc.
@@ -12,7 +12,10 @@ edr monitor report
 
 The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the UI as an HTML file.
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif" alt="Demo" />
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
+  alt="Demo"
+/>
 
 ## Report UI Screens
 
@@ -63,11 +66,13 @@ The rows are expandable, and on expansion show information about the last runs o
 - Affected rows
 - Time
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/Test-Runs-video-demo_ubxssd.gif" alt="Test runs demo" />
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/Test-Runs-video-demo_ubxssd.gif"
+  alt="Test runs demo"
+/>
 
-## Configure Slack report
+## Exporting the report
 
-The data tests report UI can be sent via Slack when you run `edr monitor send-report`.
-Configure Slack integration by creating an app for Elementary and adding the `Token/Webhook` to the `config.yml`.
+The data tests report UI can be sent via Slack, Amazon S3, or Google Cloud Storage when you run `edr monitor send-report`.
 
-Refer to [this guide](../quickstart/send-slack-alerts) for detailed instructions.
+Refer to [this guide](../quickstart/send-report-ui) for detailed instructions.
