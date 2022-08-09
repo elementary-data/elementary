@@ -3,54 +3,25 @@ title: "Snowflake"
 description: "Snowflake integration details"
 ---
 
-## Data anomalies monitoring as dbt tests
+## Data monitoring
 
-Full support
+Full support.
 
 ---
 
-## Lineage
-
-### Snowflake query source
-
-There are two main methods to pull query history in Snowflake, one is using the information schema query history and the other is using the account usage. The following table describes the differences between the sources:
-
-| Query history source | Information schema | Account usage                                                          |
-| -------------------- | ------------------ | ---------------------------------------------------------------------- |
-| Time limit           | Up to 7 days       | Up to 1 year                                                           |
-| Queries limit        | 10,000             | None                                                                   |
-| Delay                | None               | Up to 45 minutes                                                       |
-| Permmisions          | Monitor warehouse  | Access to shared 'Snowflake' database (default only for account admin) |
-
-Pulling the query history from the information schema is our default. There is no delay and new queries will be shown in the lineage graph right away.
-
-To generate a lineage graph that is based on queries the account usage, use the query_history_source parameter in the connection profile, as you can see in the example below, and type 'account_usage' as its value.
-
-<TipInfo>
-  Note that each query source requires different permissions. If these are not
-  granted, Elementary will create partial lineage only based on accessible
-  queries, or will return an error if there is no access at all.
-</TipInfo>
-
 ### Snowflake connection profile
 
-The profiles.yml file to connect to Snowflake should contain a profile in the following format:
-
 ```yml Snowflake
+## SNOWFLAKE ##
 ## By default, edr expects the profile name 'elementary'.      ##
-##                                                             ##
-## For edr monitor:                                            ##
-## The database and schema of edr models.                      ##
+## Configure the database and schema of elementary models.     ##
 ## Check where 'elementary_test_results' is to find it.        ##
-##                                                             ##
-## For edr lineage:                                            ##
-## Any database and schema will do.                            ##
 
 elementary:
-  outputs:
-    default:
-      type: snowflake
-      account: [account id]
+outputs:
+default:
+type: snowflake
+account: [account id]
 
       ## User/password auth, other options (Keypair/SSO) require other configs ##
       user: [username]
@@ -59,48 +30,13 @@ elementary:
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
-      schema: [schema name]
+      schema: [schema name]_elementary
       threads: 4
-      ## OPTIONAL - if you want to create the lineage based on queries from more
-      ## than the last 7 days or you have 10k or more queries in the history pulled during
-      ## the requested dates range, add this parameter (NOTE: account_usage requires more permissions, see note below).
-      query_history_source: account_usage
+
 ```
 
 We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile) for further details.
 
-### Data lineage Snowflake permissions
-
-The queries are pulled by default from the information schema, and you can use the 'query_history_source' parameter in the connection profile to change it to the account admin.
-
-Each source requires different permissions:
-
-**Information schema permissions:**
-
-In order to create a lineage graph that includes the tables that are updated and created by all the users and services in Snowflake, the role of the user in the connection profile needs to have the right privileges.
-
-For full lineage of up to 7 days back (depends on tier), the role of the user should have monitor privilege to the warehouse.
-The following [command in Snowflake](https://docs.snowflake.com/en/sql-reference/sql/grant-privilege.html) grants this role:
-
-```shell
-grant monitor on warehouse <warehouse> to role <your_role>;
-```
-
-Note that granting monitor privilege on a warehouse does not provide access to all the data, just to the executed queries (without the results).
-
-**Account usage permissions:**
-
-For full lineage of up to a year back, the role of the user should have permission to the 'snowflake' database, here is the relevant command for Snowflake:
-
-```
-use role accountadmin;
-## Grant the role privileges to the snowflake database
-## Note that this will not grant full ACCOUNTADMIN privileges
-grant imported privileges on database snowflake to role <your_role>;
-
-## Validate that it worked:
-select * from snowflake.account_usage.databases LIMIT 5;
-```
 
 ### Have a question?
 

@@ -8,9 +8,7 @@ def get_package_version() -> Optional[str]:
     try:
         return pkg_resources.get_distribution('elementary-data').version
     except Exception:
-        pass
-
-    return None
+        return None
 
 
 def get_latest_package_version() -> Optional[str]:

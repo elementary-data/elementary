@@ -1,37 +1,29 @@
 import json
 import re
-from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from slack_sdk.models.blocks import SectionBlock
 
 from clients.slack.schema import SlackMessageSchema
 from monitor.alerts.alert import Alert
-from utils.json_utils import try_load_json, prettify_json_str_set
+from utils.json_utils import try_load_json
 from utils.log import get_logger
-from utils.time import convert_utc_time_to_local_time
 
 logger = get_logger(__name__)
 
 
 class TestAlert(Alert):
+    TABLE_NAME = 'alerts'
+
     def __init__(
             self,
             model_unique_id: str,
             test_unique_id: str,
-            status: str,
-            id: str,
-            elementary_database_and_schema: str,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
             **kwargs
     ) -> None:
-        super().__init__(id, elementary_database_and_schema, subscribers, slack_channel)
+        super().__init__(**kwargs)
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
-        self.status = status
-
-    TABLE_NAME = 'alerts'
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -53,69 +45,41 @@ class TestAlert(Alert):
 class DbtTestAlert(TestAlert):
     def __init__(
             self,
-            id,
-            elementary_database_and_schema,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
             table_name,
             column_name,
             test_type,
             test_sub_type,
             test_results_description,
-            owners,
-            tags,
             test_results_query,
             test_rows_sample,
             other,
             test_name,
             test_params,
             severity,
-            status,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
             test_runs=None,
             **kwargs
     ) -> None:
-        super().__init__(model_unique_id, test_unique_id, status, id, elementary_database_and_schema, subscribers,
-                         slack_channel)
+        super().__init__(**kwargs)
         self.test_type = test_type
-        self.database_name = database_name
-        self.schema_name = schema_name
         self.table_name = table_name
-        table_full_name_parts = [database_name, schema_name]
-        if table_name:
-            table_full_name_parts.append(table_name)
+        table_full_name_parts = [name for name in [self.database_name, self.schema_name, table_name] if name]
         self.table_full_name = '.'.join(table_full_name_parts).lower()
-        self.detected_at = None
-        self.detected_at_utc = None
-        if detected_at:
-            try:
-                detected_at_utc = datetime.fromisoformat(detected_at)
-                self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
-                self.detected_at = convert_utc_time_to_local_time(detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
-            except (ValueError, TypeError):
-                logger.error(f'Failed to parse "detect_at" field.')
-
-        self.owners = prettify_json_str_set(owners)
-        self.tags = prettify_json_str_set(tags)
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ''
         self.other = other
-        self.test_sub_type = test_sub_type if test_sub_type else ''
+        self.test_sub_type = test_sub_type or ''
         self.test_sub_type_display_name = self.display_name(test_sub_type) if test_sub_type else ''
         self.test_results_query = test_results_query.strip() if test_results_query else ''
-        self.test_rows_sample = test_rows_sample if test_rows_sample else ''
-        self.test_runs = test_runs if test_runs else ''
+        self.test_rows_sample = test_rows_sample or ''
+        self.test_runs = test_runs or ''
         self.test_params = test_params
-        self.error_message = test_results_description.capitalize() if test_results_description else ''
-        self.column_name = column_name if column_name else ''
+        self.test_results_description = test_results_description.capitalize() if test_results_description else ''
+        self.error_message = self.test_results_description
+        self.column_name = column_name or ''
         self.severity = severity
 
         self.failed_rows_count = -1
-        if status != 'pass' and self.error_message:
+        if self.status != 'pass' and self.error_message:
             found_rows_number = re.search(r'\d+', self.error_message)
             if found_rows_number:
                 found_rows_number = found_rows_number.group()
@@ -196,61 +160,6 @@ class DbtTestAlert(TestAlert):
 
 
 class ElementaryTestAlert(DbtTestAlert):
-    def __init__(
-            self,
-            id,
-            elementary_database_and_schema,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            owners,
-            tags,
-            test_results_query,
-            test_rows_sample,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
-            test_runs=None,
-            **kwargs
-    ) -> None:
-        super().__init__(
-            id,
-            elementary_database_and_schema,
-            model_unique_id,
-            test_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            owners,
-            tags,
-            test_results_query,
-            test_rows_sample,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status,
-            subscribers,
-            slack_channel,
-            test_runs
-        )
-        self.test_results_description = test_results_description.capitalize() if test_results_description else ''
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         anomalous_value = None
@@ -282,9 +191,8 @@ class ElementaryTestAlert(DbtTestAlert):
                                               [f'*Owners*\n{self.owners}', f'*Tags*\n{self.tags}'])
         if self.subscribers:
             self._add_fields_section_to_slack_msg(slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}'])
-        if self.test_results_description:
-            self._add_text_section_to_slack_msg(slack_message,
-                                                f'*Description*\n{self.test_results_description}',
+        if self.error_message:
+            self._add_text_section_to_slack_msg(slack_message, f'*Error Message*\n```{self.error_message}```',
                                                 divider=True)
         column_msgs = []
         if self.column_name:

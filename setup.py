@@ -2,10 +2,10 @@ import pathlib
 
 from setuptools import setup, find_packages
 
-# The directory containing this file
+# The directory containing this file.
 HERE = pathlib.Path(__file__).parent
 
-# The text of the README file
+# The text of the README file.
 README = (HERE / "README.md").read_text()
 
 setup(
@@ -31,6 +31,8 @@ setup(
         'requests<3.0.0',
         'beautifulsoup4',
         'posthog',
+        'boto3',
+        'google-cloud-storage',
         'ruamel.yaml',
         'alive-progress<=2.3.1',
         'slack-sdk<4.0',
@@ -42,6 +44,7 @@ setup(
         'bigquery': ['dbt-bigquery>=0.20,<2.0.0'],
         'redshift': ['dbt-redshift>=0.20,<2.0.0'],
         'postgres': ['dbt-postgres>=0.20,<2.0.0'],
+        'databricks': ['dbt-databricks>=0.20,<2.0.0'],
         'lineage': ['snowflake-connector-python[secure-local-storage]>=2.4.1,<2.8.0',
                     'click>=8,<9',
                     'requests>=2.7,<3.0.0',

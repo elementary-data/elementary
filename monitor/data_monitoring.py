@@ -10,13 +10,14 @@ import pkg_resources
 from alive_progress import alive_it
 
 from clients.dbt.dbt_runner import DbtRunner
-from clients.slack.schema import SlackMessageSchema
-from clients.slack.slack_client import SlackClient
+from clients.gcs.client import GCSClient
+from clients.s3.client import S3Client
+from clients.slack.client import SlackClient
 from config.config import Config
 from monitor.alerts.alert import Alert
 from monitor.alerts.alerts import Alerts
 from monitor.alerts.model import ModelAlert
-from monitor.alerts.test import TestAlert
+from monitor.alerts.test import TestAlert, ElementaryTestAlert
 from monitor.api.alerts import AlertsAPI
 from monitor.api.lineage.lineage import LineageAPI
 from monitor.api.lineage.schema import LineageSchema
@@ -24,57 +25,42 @@ from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
 from monitor.api.tests.tests import TestsAPI
+from monitor.paths import DBT_PROJECT_PATH, DBT_PROJECT_PACKAGES_PATH, DBT_PROJECT_MODULES_PATH
+from tracking.anonymous_tracking import AnonymousTracking
 from utils.log import get_logger
 from utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
-FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
 
 
 class DataMonitoring:
-    DBT_PACKAGE_NAME = 'elementary'
-    DBT_PROJECT_PATH = os.path.join(FILE_DIR, 'dbt_project')
-    DBT_PROJECT_MODELS_PATH = os.path.join(FILE_DIR, 'dbt_project', 'models')
-    # Compatibility for previous dbt versions
-    DBT_PROJECT_MODULES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_modules', DBT_PACKAGE_NAME)
-    DBT_PROJECT_PACKAGES_PATH = os.path.join(DBT_PROJECT_PATH, 'dbt_packages', DBT_PACKAGE_NAME)
 
-    def __init__(
-            self,
-            config: Config,
-            force_update_dbt_package: bool = False,
-            slack_webhook: Optional[str] = None,
-            slack_token: Optional[str] = None,
-            slack_channel_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, config: Config, force_update_dbt_package: bool = False):
         self.config = config
-        self.dbt_runner = DbtRunner(self.DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
+        self.dbt_runner = DbtRunner(DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
-        self.slack_webhook = slack_webhook or self.config.slack_notification_webhook
-        self.slack_token = slack_token or self.config.slack_token
-        self.slack_channel_name = slack_channel_name or self.config.slack_notification_channel_name
         # slack client is optional
-        self.slack_client = SlackClient.create_slack_client(self.slack_token, self.slack_webhook)
+        self.slack_client = SlackClient.create_client(self.config)
+        self.s3_client = S3Client.create_client(self.config)
+        self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
+        self.sent_alert_count = 0
         self.success = True
 
-    def _dbt_package_exists(self) -> bool:
-        return os.path.exists(self.DBT_PROJECT_PACKAGES_PATH) or os.path.exists(self.DBT_PROJECT_MODULES_PATH)
-
-    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str) -> List[str]:
+    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
-            return []
+            return
 
         sent_alert_ids = []
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
             alert_msg = alert.to_slack()
             sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel if alert.slack_channel else self.slack_channel_name,
+                channel_name=alert.slack_channel if alert.slack_channel else self.config.slack_channel_name,
                 message=alert_msg
             )
             if sent_successfully:
@@ -83,7 +69,7 @@ class DataMonitoring:
                 logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}")
                 self.success = False
         self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        return sent_alert_ids
+        self.sent_alert_count += len(sent_alert_ids)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = self._dbt_package_exists()
@@ -99,10 +85,9 @@ class DataMonitoring:
                 return
 
     def _send_alerts(self, alerts: Alerts):
-        sent_test_alert_ids = self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
-        sent_model_alert_ids = self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        sent_alert_count = len(sent_test_alert_ids) + len(sent_model_alert_ids)
-        self.execution_properties['sent_alert_count'] = sent_alert_count
+        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
+        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
+        self.execution_properties['sent_alert_count'] = self.sent_alert_count
 
     def run(self, days_back: int, dbt_full_refresh: bool = False, dbt_vars: Optional[dict] = None) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
@@ -115,14 +100,21 @@ class DataMonitoring:
             return self.success
 
         alerts = self.alerts_api.query(days_back)
+        self.execution_properties['elementary_test_count'] = alerts.get_elementary_test_count()
         self.execution_properties['alert_count'] = alerts.count
+        malformed_alert_count = alerts.malformed_count
+        if malformed_alert_count > 0:
+            self.success = False
+        self.execution_properties['malformed_alert_count'] = malformed_alert_count
+        self.execution_properties['has_subscribers'] = any(alert.subscribers for alert in alerts.get_all())
         self._send_alerts(alerts)
         self.execution_properties['run_end'] = True
         self.execution_properties['success'] = self.success
         return self.success
 
-    def generate_report(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
-                        file_path: Optional[str] = None, disable_passed_test_metrics: bool = False) -> Tuple[
+    def generate_report(self, tracking: AnonymousTracking, days_back: Optional[int] = None,
+                        test_runs_amount: Optional[int] = None, file_path: Optional[str] = None,
+                        disable_passed_test_metrics: bool = False, should_open_browser: bool = True) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -141,6 +133,11 @@ class DataMonitoring:
             output_data['test_runs_totals'] = test_runs_totals
             output_data['coverages'] = models_coverages
             output_data['lineage'] = lineage.dict()
+            output_data['tracking'] = {
+                'posthog_api_key': tracking.POSTHOG_API_KEY,
+                'report_generator_anonymous_user_id': tracking.anonymous_user_id,
+                'anonymous_warehouse_id': tracking.anonymous_warehouse_id
+            }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, 'r') as template_html_file:
                 template_html_code = template_html_file.read()
@@ -156,23 +153,32 @@ class DataMonitoring:
                 elementary_output_json_file:
             elementary_output_json_file.write(dumped_output_data)
 
-        webbrowser.open_new_tab('file://' + html_path)
+        if should_open_browser:
+            webbrowser.open_new_tab('file://' + html_path)
         self.execution_properties['report_end'] = True
         self.execution_properties['success'] = self.success
         return self.success, html_path
 
-    def send_report(self, elementary_html_path: str) -> bool:
-        if os.path.exists(elementary_html_path):
-            file_uploaded_successfully = self.slack_client.upload_file(
-                channel_name=self.slack_channel_name,
-                file_path=elementary_html_path,
-                message=SlackMessageSchema(text="Elementary monitoring report")
-            )
-            if not file_uploaded_successfully:
+    def send_report(self, html_path: str) -> bool:
+        if self.slack_client:
+            send_succeded = self.slack_client.send_report(self.config.slack_channel_name, html_path)
+            self.execution_properties['sent_to_slack_successfully'] = send_succeded
+            if not send_succeded:
                 self.success = False
-        else:
-            logger.error('Could not send Elementary monitoring report because it does not exist')
-            self.success = False
+
+        if self.s3_client:
+            send_succeded = self.s3_client.send_report(html_path)
+            self.execution_properties['sent_to_s3_successfully'] = send_succeded
+            if not send_succeded:
+                self.success = False
+
+        if self.gcs_client:
+            send_succeded = self.gcs_client.send_report(html_path)
+            self.execution_properties['sent_to_gcs_successfully'] = send_succeded
+            if not send_succeded:
+                self.success = False
+
+        self.execution_properties['success'] = self.success
         return self.success
 
     def _get_lineage(self) -> LineageSchema:
@@ -195,7 +201,7 @@ class DataMonitoring:
             test_results_totals = tests_api.get_total_tests_results(tests_metadata)
             test_runs_totals = tests_api.get_total_tests_runs(tests_metadata=tests_metadata,
                                                               tests_invocations=invocations)
-            self.execution_properties['test_results'] = len(tests_metadata)
+            self.execution_properties['test_result_count'] = len(tests_metadata)
             return tests_results, test_results_totals, test_runs_totals
         except Exception as e:
             logger.error(f"Could not get test results and totals - Error: {e}")
@@ -208,6 +214,7 @@ class DataMonitoring:
             tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
             invocations: Dict[TestUniqueIdType, List[InvocationSchema]]
     ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
+        elementary_test_count = defaultdict(int)
         tests_results = defaultdict(list)
         for test in tests_metadata:
             test_sub_type_unique_id = TestsAPI.get_test_sub_type_unique_id(**dict(test))
@@ -220,7 +227,10 @@ class DataMonitoring:
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
+            if isinstance(test_result, ElementaryTestAlert):
+                elementary_test_count[test_result.test_name] += 1
             tests_results[test.model_unique_id].append(test_result.to_test_alert_api_dict())
+        self.execution_properties['elementary_test_count'] = elementary_test_count
         return tests_results
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
@@ -230,6 +240,10 @@ class DataMonitoring:
         models = models_api.get_models()
         sources = models_api.get_sources()
         exposures = models_api.get_exposures()
+
+        self.execution_properties['model_count'] = len(models)
+        self.execution_properties['source_count'] = len(sources)
+        self.execution_properties['exposure_count'] = len(exposures)
 
         nodes = dict(**models, **sources, **exposures)
         serializable_nodes = dict()
@@ -263,8 +277,11 @@ class DataMonitoring:
     @functools.lru_cache
     def get_elementary_database_and_schema(self):
         try:
-            database_and_schema = self.dbt_runner.run_operation('get_elementary_database_and_schema')[0]
-            return '.'.join(json.loads(database_and_schema.replace("'", '"')))
+            return self.dbt_runner.run_operation('get_elementary_database_and_schema', should_log=False)[0]
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
+
+    @staticmethod
+    def _dbt_package_exists() -> bool:
+        return os.path.exists(DBT_PROJECT_PACKAGES_PATH) or os.path.exists(DBT_PROJECT_MODULES_PATH)

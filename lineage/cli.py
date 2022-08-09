@@ -1,22 +1,20 @@
-import click
 import os
+from datetime import datetime, timedelta, date
 from os.path import expanduser
 
-from lineage.lineage_config import LineageConfig
+import click
+
 from exceptions.exceptions import ConfigError
-from lineage.query_history_factory import QueryHistoryFactory
-from utils.package import get_package_version
-from utils.dbt import is_dbt_installed
-from utils.cli_utils import RequiredIf
 from lineage.empty_graph_helper import EmptyGraphHelper
-from tracking.anonymous_tracking import track_cli_start, track_cli_end, track_cli_exception, AnonymousTracking
-from datetime import timedelta, date
+from lineage.lineage_config import LineageConfig
 from lineage.lineage_graph import LineageGraph
-from datetime import datetime
+from lineage.query_history_factory import QueryHistoryFactory
+from tracking.anonymous_tracking import AnonymousTracking
+from utils.cli_utils import RequiredIf
+from utils.dbt import is_dbt_installed
 
 
 def get_cli_lineage_properties() -> dict:
-
     click_context = click.get_current_context()
     if click_context is None:
         return dict()
@@ -33,12 +31,10 @@ def get_cli_lineage_properties() -> dict:
             'open_browser': params.get('open_browser'),
             'full_table_names': params.get('full_table_names'),
             'command': click_context.command.name,
-            'dbt_installed': is_dbt_installed(),
-            'version': get_package_version()}
+            'dbt_installed': is_dbt_installed()}
 
 
 def get_cli_lineage_generate_properties() -> dict:
-
     click_context = click.get_current_context()
     if click_context is None:
         return dict()
@@ -62,8 +58,7 @@ def get_cli_lineage_generate_properties() -> dict:
     return {'start_date': start_date_str,
             'end_date': end_date_str,
             'limited_dbs': limited_dbs,
-            'dbt_installed': is_dbt_installed(),
-            'version': get_package_version()}
+            'dbt_installed': is_dbt_installed()}
 
 
 @click.group(invoke_without_command=True)
@@ -142,7 +137,7 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
 
     config = LineageConfig(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_properties(), ctx.command.name)
+    anonymous_tracking.track_cli_start('lineage', get_cli_lineage_properties(), ctx.command.name)
     execution_properties = dict()
 
     try:
@@ -162,9 +157,9 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
             print(EmptyGraphHelper.get_help_message())
 
         execution_properties.update(lineage_graph.properties())
-        track_cli_end(anonymous_tracking, 'lineage', execution_properties, ctx.command.name)
+        anonymous_tracking.track_cli_end('lineage', execution_properties, ctx.command.name)
     except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'lineage', exc, ctx.command.name)
+        anonymous_tracking.track_cli_exception('lineage', exc, ctx.command.name)
         raise
 
 
@@ -222,7 +217,7 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
              profiles_dir: str, profile_name: str):
     config = LineageConfig(config_dir, profiles_dir, profile_name)
     anonymous_tracking = AnonymousTracking(config)
-    track_cli_start(anonymous_tracking, 'lineage', get_cli_lineage_generate_properties(), ctx.command.name)
+    anonymous_tracking.track_cli_start('lineage', get_cli_lineage_generate_properties(), ctx.command.name)
 
     try:
         query_history_extractor = QueryHistoryFactory.create_query_history(config, databases)
@@ -235,9 +230,9 @@ def generate(ctx, start_date: datetime, end_date: datetime, databases: str, conf
         execution_properties = query_history_extractor.properties()
         execution_properties.update(lineage_graph.properties())
 
-        track_cli_end(anonymous_tracking, 'lineage', execution_properties, ctx.command.name)
+        anonymous_tracking.track_cli_end('lineage', execution_properties, ctx.command.name)
     except Exception as exc:
-        track_cli_exception(anonymous_tracking, 'lineage', exc, ctx.command.name)
+        anonymous_tracking.track_cli_exception('lineage', exc, ctx.command.name)
         raise
 
 
