@@ -14,10 +14,9 @@ edr monitor report
 The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the UI as an HTML file.
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
-    alt="Demo"
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
+  alt="Demo"
 />
-
 
 ## Report Screens
 
@@ -43,8 +42,8 @@ The rows are expandable, and on expansion show information that can help underst
 - For schema changes tests - detected schema changes.
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/data-observability-ui-test-results-screen_vgk121.gif"
-    alt="Data observability UI Test Result Screen"
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/data-observability-ui-test-results-screen_vgk121.gif"
+  alt="Data observability UI Test Result Screen"
 />
 
 ## Test runs
@@ -70,7 +69,14 @@ The rows are expandable, and on expansion show information about the last runs o
 
 ## Data lineage navigation bar
 
-<span class="line"> When selecting a dbt model/source in the navigation bar, a lineage icon will appear next to the selected dbt model/source: <img src="../pics/lineage_icon.png" width="18"/>. </span>
+<div class="inline">
+
+When selecting a dbt model/source in the navigation bar, a lineage icon will appear next to the
+selected dbt model/source:
+
+<img class="m-0 float-right" src="../pics/lineage_icon.png" width="18" />
+
+</div>
 
 Pressing on the lineage icon will toggle the navigation bar into a lineage navigation bar mode.
 
@@ -79,6 +85,6 @@ The lineage navigation bar lets you inspect upstream and downstream failures bas
 This is useful when trying to find the root cause of a test failure or when trying to understand what is the impact of a test failure, for example on an exposure or a dashboard in the data stack.
 
 <img
-    src="../pics/elementary-data-lineage-gif.gif"
-    alt="Data lineage navigation bar"
+  src="../pics/elementary-data-lineage-gif.gif"
+  alt="Data lineage navigation bar"
 />
