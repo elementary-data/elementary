@@ -63,7 +63,7 @@
       "pages": [
         "understand-elementary/elementary-overview",
         "understand-elementary/dbt-package",
-        "guides/dbt-artifacts",
+        "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
       ]
