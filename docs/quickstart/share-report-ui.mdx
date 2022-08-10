@@ -1,12 +1,9 @@
 ---
-title: "Send observability report"
+title: "Share data observability report"
 ---
 
-import InstallCLI from "../snippets/install-cli.mdx";
-import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
-
-Distribute the report by sending it to external platforms using the command `edr monitor send-report`.  
-Each specified platform in the command will be sent a report.  
+Distribute the report by sending it to external platforms using the command `edr monitor send-report`.
+You can specify more than one platform in the command, and the report will be sent to all.
 All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
 ## Slack
@@ -102,3 +99,8 @@ google:
   gcs_bucket_name: [ GCS bucket name ]
 update_bucket_website: [ true | false ]
 ```
+
+## Missing platform?
+
+Want to share the report with a different method or consult on deployment? Reach out to us
+on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).

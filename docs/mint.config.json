@@ -52,6 +52,7 @@
       "group": "Guides",
       "pages": [
         "quickstart/generate-report-ui",
+        "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
         "quickstart/add-elementary-tests",
         "understand-elementary/cli-install",
