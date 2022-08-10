@@ -51,7 +51,7 @@ account: [account id]
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
-      schema: [schema name]_elementary
+      schema: [schema name]  # elementary dataset, usually [schema name]_elementary
       threads: 4
 
 ```
@@ -72,7 +72,7 @@ elementary:
       keyfile: [full path to your keyfile]
 
       project: [project id]
-      dataset: [dataset name]
+      dataset: [dataset name]  # elementary dataset, usually [dataset name]_elementary
       threads: 4
       location: [dataset location]
       priority: interactive
@@ -95,7 +95,7 @@ elementary:
       password: [password]
 
       dbname: [database name]
-      schema: [schema name]_elementary
+      schema: [schema name]  # elementary dataset, usually [schema name]_elementary
       threads: 4
       keepalives_idle: 240 # default 240 seconds
       connect_timeout: 10 # default 10 seconds
