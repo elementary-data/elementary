@@ -62,7 +62,7 @@
       "group": "Understand Elementary",
       "pages": [
         "understand-elementary/elementary-overview",
-        "understand-elementary/dbt-package",
+        "guides/modules-overview/dbt-package",
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
