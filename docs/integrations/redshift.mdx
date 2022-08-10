@@ -15,7 +15,9 @@ you can generate Elementary's profile for usage with `edr` by running the follow
 dbt run-operation elementary.generate_elementary_cli_profile
 ```
 
-Fill in the missing fields and afterwards add the profile to your `profiles.yml`.
+The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
+[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile#authentication-methods)
+in the output and copy it to `~/.dbt/profiles.yml`.
 
 The `profiles.yml` file to connect to Redshift should contain a profile in the following format:
 
