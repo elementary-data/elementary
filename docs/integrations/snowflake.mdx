@@ -1,7 +1,8 @@
 ---
-title: "Snowflake"
-description: "Snowflake integration details"
+title: 'Snowflake'
 ---
+
+import GenerateElementaryCLIProfile from "../snippets/generate-elementary-cli-profile.mdx";
 
 ## Data monitoring
 
@@ -11,16 +12,7 @@ Full support.
 
 ### Snowflake connection profile
 
-After installing Elementary's dbt package upon running `dbt deps`,
-you can generate Elementary's profile for usage with `edr` by running the following command within your project:
-
-```shell
-dbt run-operation elementary.generate_elementary_cli_profile
-```
-
-The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
-[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile#authentication-methods)
-in the output and copy it to `~/.dbt/profiles.yml`.
+<GenerateElementaryCLIProfile profileDocsLink="https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile#authentication-methods" />
 
 ```yml Snowflake
 ## SNOWFLAKE ##
