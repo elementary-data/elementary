@@ -53,12 +53,11 @@
                 {% set anomalous = [] %}
                 {% set headers = [{'id': 'elementary_end_time', 'display_name': 'timestamp', 'type': 'date'}] %}
                 {% for sample in test_rows_sample %}
+                    {% set min_value = sample['min_value'] | round(1) %}
                     {% set anomalous_sample = {
                         'elementary_end_time': sample['end_time'],
                         'elementary_row_count': sample['value'],
-                        'elementary_average_row_count': sample['average'] | round(1),
-                        'elementary_min_row_count': sample['min_value'] | round(1),
-                        'elementary_max_row_count': sample['max_value'] | round(1),
+                        'elementary_average_row_count': sample['average'] | round(1)
                     } %}
                     {% set dimensions = sample['dimension'].split('; ') %}
                     {% set diemsions_values = sample['dimension_value'].split('; ') %}
@@ -71,9 +70,7 @@
                         {% endfor %}
                         {% do headers.extend([
                             {'id': 'elementary_row_count', 'display_name': 'row count', 'type': 'int'},
-                            {'id': 'elementary_average_row_count', 'display_name': 'average row count', 'type': 'int'},
-                            {'id': 'elementary_min_row_count', 'display_name': 'min row count', 'type': 'int'},
-                            {'id': 'elementary_max_row_count', 'display_name': 'max row count', 'type': 'int'}
+                            {'id': 'elementary_average_row_count', 'display_name': 'average row count', 'type': 'int'}
                         ]) %}
                     {% endif %}
                     {% do anomalous.append(anomalous_sample) %}
