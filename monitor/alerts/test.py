@@ -215,7 +215,7 @@ class ElementaryTestAlert(DbtTestAlert):
             sensitivity = test_params.get('sensitivity')
             test_params = {'timestamp_column': timestamp_column,
                            'anomaly_threshold': sensitivity}
-            if self.test_rows_sample:
+            if self.test_rows_sample and self.test_sub_type != 'dimension':
                 self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
             test_alerts = {'display_name': self.test_sub_type_display_name,
                            'metrics': self.test_rows_sample,

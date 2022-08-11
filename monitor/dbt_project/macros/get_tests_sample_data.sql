@@ -51,6 +51,7 @@
                 {% endset %}
                 {% set test_rows_sample = elementary_internal.get_test_rows_sample(dimension_test_result_query, test_type, metrics_sample_limit) %}
                 {% set anomalous = [] %}
+                {% set headers = [{'id': 'end_time', 'display _name': 'timestamp', 'type': 'date'}] %}
                 {% for sample in test_rows_sample %}
                     {% set anomalous_sample = {
                         'end_time': sample['end_time'],
@@ -64,9 +65,23 @@
                     {% for index in range(dimensions | length) %}
                         {% do anomalous_sample.update({dimensions[index]: diemsions_values[index]}) %}
                     {% endfor %}
+                    {% if loop.last %}
+                        {% for index in range(dimensions | length) %}
+                            {% do headers.append({'id': dimensions[index], 'display_name': dimensions[index], 'type': 'str'},) %}
+                        {% endfor %}
+                        {% do headers.extend([
+                            {'id': 'row_count', 'display_name': 'row count', 'type': 'int'},
+                            {'id': 'average_row_count', 'display_name': 'average row count', 'type': 'int'},
+                            {'id': 'min_row_count', 'display_name': 'min row count', 'type': 'int'},
+                            {'id': 'max_row_count', 'display_name': 'max row count', 'type': 'int'}
+                        ]) %}
+                    {% endif %}
                     {% do anomalous.append(anomalous_sample) %}
                 {% endfor %}
-                {% set test_rows_sample = anomalous %}
+                {% set test_rows_sample = {
+                    'headers': headers,
+                    'test_rows_sample': anomalous
+                } %}
             {% else %}
                 {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, metrics_sample_limit) %}
             {% endif %}
