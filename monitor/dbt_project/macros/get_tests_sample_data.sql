@@ -51,7 +51,7 @@
                 {% endset %}
                 {% set test_rows_sample = elementary_internal.get_test_rows_sample(dimension_test_result_query, test_type, metrics_sample_limit) %}
                 {% set anomalous = [] %}
-                {% set headers = [{'id': 'end_time', 'display _name': 'timestamp', 'type': 'date'}] %}
+                {% set headers = [{'id': 'end_time', 'display_name': 'timestamp', 'type': 'date'}] %}
                 {% for sample in test_rows_sample %}
                     {% set anomalous_sample = {
                         'end_time': sample['end_time'],
