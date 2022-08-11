@@ -18,11 +18,16 @@ def _is_airflow():
     return "AIRFLOW_CONFIG" in os.environ or "AIRFLOW_HOME" in os.environ
 
 
+def _is_github_actions():
+    return 'GITHUB_ACTIONS' in os.environ
+
+
 def get_props():
     return {
         'os': platform.system(),
         'is_docker': _is_docker(),
         'is_airflow': _is_airflow(),
+        'is_github_actions': _is_github_actions(),
         'python_version': platform.python_version(),
         'elementary_version': utils.package.get_package_version(),
     }

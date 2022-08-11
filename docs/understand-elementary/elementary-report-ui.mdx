@@ -56,7 +56,7 @@ src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/dat
 alt="Data observability UI Test Result Screen"
 />
 
-## Test returns
+## Test runs
 
 The `Test runs` tab shows the last 30 runs (can be changed by passing `--executions-limit` param to
 the [CLI](../understand-elementary/cli-advanced)) for each dbt or Elementary test that was executed in the last 7 days (
@@ -83,7 +83,28 @@ The rows are expandable, and on expansion show information about the last runs o
 - Affected rows
 - Time
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/Test-Runs-video-demo_ubxssd.gif" alt="Test runs demo" />
+## Data lineage navigation bar
+
+<div class="inline">
+
+When selecting a dbt model/source in the navigation bar, a lineage icon will appear next to the
+selected dbt model/source:
+
+<img class="m-0 float-right" src="../pics/lineage_icon.png" width="18" />
+
+</div>
+
+Pressing on the lineage icon will toggle the navigation bar into a lineage navigation bar mode.
+
+The lineage navigation bar lets you inspect upstream and downstream failures based on the selected model/source lineage!
+
+This is useful when trying to find the root cause of a test failure or when trying to understand what is the impact of a
+test failure, for example on an exposure or a dashboard in the data stack.
+
+<img
+src="../pics/elementary-data-lineage-gif.gif"
+alt="Data lineage navigation bar"
+/>
 
 ## Configure report sharing
 

@@ -1,12 +1,12 @@
 ---
-title: "Generate observability report"
+title: "Generate Observability Report"
 ---
 
 import InstallCLI from "../snippets/install-cli.mdx";
 import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
 import ShareReport from "../snippets/share-report.mdx";
 
-Elementary data observability report can be used for visualization and exploration of data from the dbt-package tables. That includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
+Elementary [data observability report](../understand-elementary/elementary-report-ui) can be used for visualization and exploration of data from the dbt-package tables. That includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
@@ -52,7 +52,7 @@ account: [account id]
       role: [user role]
       database: [database name]
       warehouse: [warehouse name]
-      schema: [schema name]_elementary
+      schema: [schema name]  # elementary dataset, usually [schema name]_elementary
       threads: 4
 
 ```
@@ -73,7 +73,7 @@ elementary:
       keyfile: [full path to your keyfile]
 
       project: [project id]
-      dataset: [dataset name]
+      dataset: [dataset name]  # elementary dataset, usually [dataset name]_elementary
       threads: 4
       location: [dataset location]
       priority: interactive
@@ -96,7 +96,7 @@ elementary:
       password: [password]
 
       dbname: [database name]
-      schema: [schema name]_elementary
+      schema: [schema name]  # elementary dataset, usually [schema name]_elementary
       threads: 4
       keepalives_idle: 240 # default 240 seconds
       connect_timeout: 10 # default 10 seconds

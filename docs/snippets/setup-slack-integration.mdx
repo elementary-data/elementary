@@ -1,6 +1,9 @@
+import { Accordion } from "@/components/Accordion";
+
 First create a Slack app:
 
 <Accordion title="Create a Slack App">
+
 ## 1. Create a Slack app
 
 Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
@@ -38,6 +41,7 @@ Here is the Elementary icon for your use (click to download):
 Based on the method you selected, create a [token or webhook](../integrations/slack#token-vs-webhook):
 
 <Accordion title="Create Slack Token">
+
 ## 1. Create a Slack token
 
 Go to the "OAauth & Permissions" page for your newly-created app, and add the following scopes under "Bot Token Scopes":
@@ -65,6 +69,7 @@ At the "OAuth & Permissions" page, press on "Install to Workspace" in order to g
 </Accordion>
 
 <Accordion title="Create Slack Token">
+
 ## Create a webhook
 
 Go to the 'Incoming Webhooks' page for your newly-created app and toggle 'Activate Incoming Webhooks' to turn it on. Then click on 'Add New Webhook to Workspace':
@@ -86,6 +91,7 @@ Select the channel that the notifications will be posted to:
 Lastly, pass the token / webhook to the CLI as a param or in the `config.yml` file:
 
 <Accordion title="Slack config as CLI params">
+
 ## Token:
 
 Use the Slack token when you execute edr monitor using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
@@ -105,6 +111,7 @@ edr monitor --slack-webhook <your_slack_webhook_url>
 </Accordion>
 
 <Accordion title="Slack config as in config.yml">
+
 The CLI reads the Slack integration from a file, copy it into a file called config.yml.
 Create it here: `HOME_DIR/.edr/config.yml`
 
