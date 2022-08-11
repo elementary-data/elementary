@@ -45,19 +45,23 @@
             {# Currently we show only the anomalous for all of the dimensions. #}
             {% if test_sub_type == 'dimension' %}
                 {% set dimension_test_result_query %}
+                    with all_test_results as (
+                        select *
+                        from ({{test_results_query}})
+                    )
+
                     select *
-                    from ({{test_results_query}})
-                    where is_anomalous
+                    from all_test_results
+                    where is_anomalous = TRUE
                 {% endset %}
                 {% set test_rows_sample = elementary_internal.get_test_rows_sample(dimension_test_result_query, test_type, metrics_sample_limit) %}
                 {% set anomalous = [] %}
-                {% set headers = [{'id': 'elementary_end_time', 'display_name': 'timestamp', 'type': 'date'}] %}
+                {% set headers = [{'id': 'anomalous_value_timestamp', 'display_name': 'timestamp', 'type': 'date'}] %}
                 {% for sample in test_rows_sample %}
-                    {% set min_value = sample['min_value'] | round(1) %}
                     {% set anomalous_sample = {
-                        'elementary_end_time': sample['end_time'],
-                        'elementary_row_count': sample['value'],
-                        'elementary_average_row_count': sample['average'] | round(1)
+                        'anomalous_value_timestamp': sample['end_time'],
+                        'anomalous_value_row_count': sample['value'],
+                        'anomalous_value_average_row_count': sample['average'] | round(1)
                     } %}
                     {% set dimensions = sample['dimension'].split('; ') %}
                     {% set diemsions_values = sample['dimension_value'].split('; ') %}
@@ -69,8 +73,8 @@
                             {% do headers.append({'id': dimensions[index], 'display_name': dimensions[index], 'type': 'str'},) %}
                         {% endfor %}
                         {% do headers.extend([
-                            {'id': 'elementary_row_count', 'display_name': 'row count', 'type': 'int'},
-                            {'id': 'elementary_average_row_count', 'display_name': 'average row count', 'type': 'int'}
+                            {'id': 'anomalous_value_row_count', 'display_name': 'row count', 'type': 'int'},
+                            {'id': 'anomalous_value_average_row_count', 'display_name': 'average row count', 'type': 'int'}
                         ]) %}
                     {% endif %}
                     {% do anomalous.append(anomalous_sample) %}
