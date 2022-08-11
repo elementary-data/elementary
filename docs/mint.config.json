@@ -46,7 +46,10 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "quickstart"]
+      "pages": [
+        "introduction",
+        "quickstart"
+      ]
     },
     {
       "group": "Guides",
@@ -82,8 +85,9 @@
       "pages": [
         "integrations/slack",
         "integrations/snowflake",
+        "integrations/bigquery",
         "integrations/redshift",
-        "integrations/bigquery"
+        "integrations/databricks"
       ]
     },
     {

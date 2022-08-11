@@ -2,13 +2,17 @@
 title: 'Redshift'
 ---
 
+import GenerateElementaryCLIProfile from "../snippets/generate-elementary-cli-profile.mdx";
+
 ## Data anomalies monitoring as dbt tests
 
 Full support since version 0.4.0.
 
 ## Redshift connection profile
 
-The profiles.yml file to connect to Snowflake should contain a profile in the following format:
+<GenerateElementaryCLIProfile profileDocsLink="https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile#authentication-methods" />
+
+The `profiles.yml` file to connect to Redshift should contain a profile in the following format:
 
 ```yml Redshift
 ## REDSHIFT ##
@@ -36,4 +40,6 @@ elementary:
       ra3_node: true # enables cross-database sources
 ```
 
-We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to dbt's documentation of [Redshift profile](https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile) for further details.
+We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
+dbt's documentation of [Redshift profile](https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile) for
+further details.

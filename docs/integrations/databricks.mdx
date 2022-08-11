@@ -1,0 +1,35 @@
+---
+title: 'Databricks'
+---
+
+import GenerateElementaryCLIProfile from "../snippets/generate-elementary-cli-profile.mdx";
+
+## Partial Support
+
+Currently, Elementary Databricks integration is partial, and supports:
+
+1. Installing the dbt package to upload dbt artifacts, test results and run results.
+2. Data observability report generation.
+3. Slack alerts on failures in models and tests.
+
+Elementary anomaly detection tests are **not supported yet**.
+
+## Databricks connection profile
+
+<GenerateElementaryCLIProfile profileDocsLink="https://docs.getdbt.com/reference/warehouse-profiles/databricks-profile#set-up-a-databricks-target" />
+
+The `profiles.yml` file to connect to Databricks should contain a profile in the following format:
+
+```yml Redshift
+## DATABRICKS ##
+## By default, edr expects the profile name 'elementary'.      ##
+
+elementary:
+  outputs:
+    default:
+      type: databricks
+      host: [hostname, like <ID>.cloud.databricks.com]
+      http_path: [like /sql/1.0/endpoints/<ID>]
+      token : [token]
+      threads: [number of threads like 8]
+```

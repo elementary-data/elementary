@@ -1,7 +1,8 @@
 ---
-title: "Snowflake"
-description: "Snowflake integration details"
+title: 'Snowflake'
 ---
+
+import GenerateElementaryCLIProfile from "../snippets/generate-elementary-cli-profile.mdx";
 
 ## Data monitoring
 
@@ -10,6 +11,8 @@ Full support.
 ---
 
 ### Snowflake connection profile
+
+<GenerateElementaryCLIProfile profileDocsLink="https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile#authentication-methods" />
 
 ```yml Snowflake
 ## SNOWFLAKE ##
@@ -35,9 +38,12 @@ account: [account id]
 
 ```
 
-We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile) for further details.
-
+We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
+dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile) for
+further details.
 
 ### Have a question?
 
-We are available on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out for any kind of help!
+We are available
+on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out
+for any kind of help!
