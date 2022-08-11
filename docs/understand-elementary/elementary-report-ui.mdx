@@ -2,36 +2,45 @@
 title: "Data Observability Report"
 ---
 
-Elementary has a UI for visualization and exploration of data from the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, which includes dbt test results, Elementary anomaly detection results, dbt artifacts, etc.
+Elementary has a UI for visualization and exploration of data from
+the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, which includes dbt
+test results, Elementary anomaly detection results, dbt artifacts, etc.
 
-In order to visualize the data from the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, use the [CLI](./cli-install) you can generate the Elementary UI.
+In order to visualize the data from
+the [dbt-package](../project-overview/contributions#guide-on-contributing-to-the-dbt-package) tables, use
+the [CLI](./cli-install) you can generate the Elementary UI.
 After installing and configuring the CLI, execute the command:
 
 ```shell
 edr monitor report
 ```
 
-The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the UI as an HTML file.
+The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and
+generate the UI as an HTML file.
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
-    alt="Demo"
+src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
+alt="Demo"
 />
-
 
 ## Report Screens
 
 ### Test Results
 
-The `Test results` tab shows the latest result for each dbt or Elementary test that was executed in the last 7 days (Can be changed by passing `--days-back` param to the [CLI](../understand-elementary/cli-advanced)).
+The `Test results` tab shows the latest result for each dbt or Elementary test that was executed in the last 7 days (Can
+be changed by passing `--days-back` param to the [CLI](../understand-elementary/cli-advanced)).
 
-Initially, the report presents all tests, sorted by status (failures on top) and last run time. The grey header on the top of the screen shows the total amount of results of each status.
+Initially, the report presents all tests, sorted by status (failures on top) and last run time. The grey header on the
+top of the screen shows the total amount of results of each status.
 
 #### Navigation bar
 
-The navigation bar on left shows a folder structure of your dbt project. On the right of each model/source you can see the amount of each test result for the specific model / source. Choosing a specific model will show the details of the selected model results. The grey header details and status totals also change accordingly.
+The navigation bar on left shows a folder structure of your dbt project. On the right of each model/source you can see
+the amount of each test result for the specific model / source. Choosing a specific model will show the details of the
+selected model results. The grey header details and status totals also change accordingly.
 
-On the top of the navigation bar, you will find filters to present only tests of the selected result status. The selection filters both the navigation bar and the report.
+On the top of the navigation bar, you will find filters to present only tests of the selected result status. The
+selection filters both the navigation bar and the report.
 
 #### Test results table
 
@@ -43,21 +52,27 @@ The rows are expandable, and on expansion show information that can help underst
 - For schema changes tests - detected schema changes.
 
 <img
-    src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/data-observability-ui-test-results-screen_vgk121.gif"
-    alt="Data observability UI Test Result Screen"
+src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/data-observability-ui-test-results-screen_vgk121.gif"
+alt="Data observability UI Test Result Screen"
 />
 
 ## Test runs
 
-The `Test runs` tab shows the last 30 runs (can be changed by passing `--executions-limit` param to the [CLI](../understand-elementary/cli-advanced)) for each dbt or Elementary test that was executed in the last 7 days (can be changed by passing `--days-back` param to the [CLI](../understand-elementary/cli-advanced)).
+The `Test runs` tab shows the last 30 runs (can be changed by passing `--executions-limit` param to
+the [CLI](../understand-elementary/cli-advanced)) for each dbt or Elementary test that was executed in the last 7 days (
+can be changed by passing `--days-back` param to the [CLI](../understand-elementary/cli-advanced)).
 
-Initially, the report presents all tests, sorted by results (results containing failures on top), fail rate and last run time. The grey header on the top of the screen shows the total amount of runs for each status.
+Initially, the report presents all tests, sorted by results (results containing failures on top), fail rate and last run
+time. The grey header on the top of the screen shows the total amount of runs for each status.
 
 ### Navigation bar
 
-The navigation bar on left shows a folder structure of your dbt project. On the right of each model/source you can see the amount of each tests runs for the specific table. Choosing a specific model presents a report of the selected model only. The grey header details and status totals also change accordingly.
+The navigation bar on left shows a folder structure of your dbt project. On the right of each model/source you can see
+the amount of each tests runs for the specific table. Choosing a specific model presents a report of the selected model
+only. The grey header details and status totals also change accordingly.
 
-On the top of the navigation bar, you will find filters to present only tests of the selected result status. The selection filters both the navigation bar and the report.
+On the top of the navigation bar, you will find filters to present only tests of the selected result status. The
+selection filters both the navigation bar and the report.
 
 ### Test runs table
 
@@ -70,18 +85,30 @@ The rows are expandable, and on expansion show information about the last runs o
 
 ## Data lineage navigation bar
 
-<span class="line">
- When selecting a dbt model/source in the navigation bar, a lineage icon will appear next to the selected dbt model/source: 
-<img src="../pics/lineage_icon.png" width="18"/>.
- </span>
+<div class="inline">
+
+When selecting a dbt model/source in the navigation bar, a lineage icon will appear next to the
+selected dbt model/source:
+
+<img class="m-0 float-right" src="../pics/lineage_icon.png" width="18" />
+
+</div>
 
 Pressing on the lineage icon will toggle the navigation bar into a lineage navigation bar mode.
 
 The lineage navigation bar lets you inspect upstream and downstream failures based on the selected model/source lineage!
 
-This is useful when trying to find the root cause of a test failure or when trying to understand what is the impact of a test failure, for example on an exposure or a dashboard in the data stack.
+This is useful when trying to find the root cause of a test failure or when trying to understand what is the impact of a
+test failure, for example on an exposure or a dashboard in the data stack.
 
 <img
-    src="../pics/elementary-data-lineage-gif.gif"
-    alt="Data lineage navigation bar"
+src="../pics/elementary-data-lineage-gif.gif"
+alt="Data lineage navigation bar"
 />
+
+## Configure report sharing
+
+The data tests report UI can be sent via Slack, Google Cloud Storage, or Amazon S3 when you
+run `edr monitor send-report`.
+
+Refer to [this guide](../quickstart/send-report-ui) for detailed instructions.

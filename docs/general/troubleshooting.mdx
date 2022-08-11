@@ -3,9 +3,8 @@ title: "Troubleshooting"
 description: "This section is aimed at collecting common issues users have to provide quick debug solutions."
 ---
 
-<AccordionGroup>
-
 <Accordion title="I run `edr monitor report` and get an empty report">
+  
 If you get an empty report, there are several steps to understand what went wrong and try and fix it.
 
 **1. Validate elementary dbt package is deployed and working:**
@@ -38,7 +37,7 @@ If you get an empty report, there are several steps to understand what went wron
 - **Check that the connection profile exists in the right path and format**
 - **Check that the connection profile points to the elementary package schema**
 
-** 4. Still not working? Collect the following logs and reach our to the elementary team at [#support](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) on Slack**
+**4. Still not working? Collect the following logs and reach our to the elementary team at [#support](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) on Slack**
 
 - **edr.log** - Created on the execution folder of the CLI.
 - **dbt.log** - Created under the package location at
@@ -49,6 +48,7 @@ If you get an empty report, there are several steps to understand what went wron
 </Accordion>
 
 <Accordion title="Error: `cannot insert into a view`">
+  
 Elementary dbt package includes macros that run insert commands to some of the models.
 This error means that these models were materialized as views, and not as tables.
 The reason for the error is probably a configuration on your `dbt_project.yml` file, under the key `materialization`.
@@ -75,6 +75,7 @@ models:
 </Accordion>
 
 <Accordion title="Error: `command not found: edr` on macOS">
+  
 In Python on macOS, when you _globally_ install a package that has executables, such as Elementary's `edr`, it places the executable in a location that is **not** under the **default** `PATH` which is the environment variable that is used for executable lookups. Here's an example of the warning you might receive upon running `python3 -m pip install elementary-data`.
 
 ```shell
@@ -118,6 +119,7 @@ export PATH=$PATH:$HOME/Library/Python/3.8/bin
 </Accordion>
 
 <Accordion title="Error: `command not found: edr` on Windows">
+  
 If you got a message `Successfully installed elementary-data` but get a `command not found` error, it is probably because of a missing path in your environment variables.
 
 Look for a warning in your terminal saying:
@@ -134,6 +136,7 @@ After that restart your CMD and try `edr` again.
 </Accordion>
 
 <Accordion title="Data lineage graph is partial">
+  
 A partial lineage graph may be created because of the following reasons:
 
 1. The selected timeframe does not include relevant queries, refer to the integrations
@@ -143,11 +146,11 @@ A partial lineage graph may be created because of the following reasons:
 </Accordion>
 
 <Accordion title="My problem is not listed here">
+  
 If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
 
 </Accordion>
-
-</AccordionGroup>
+  
 
 ## Other issues?
 
