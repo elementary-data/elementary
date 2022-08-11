@@ -198,7 +198,7 @@ class ElementaryTestAlert(DbtTestAlert):
         if self.column_name:
             column_msgs.append(f'*Column*\n{self.column_name}')
         if anomalous_value:
-            column_msgs.append(f'*Anomalous Value*\n{anomalous_value}')
+            column_msgs.append(f'*Anomalous Values*\n{anomalous_value}')
         if column_msgs:
             self._add_fields_section_to_slack_msg(slack_message, column_msgs, divider=True)
         if self.test_params:

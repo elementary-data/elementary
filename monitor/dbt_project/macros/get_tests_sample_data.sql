@@ -56,9 +56,9 @@
                     {% set anomalous_sample = {
                         'end_time': sample['end_time'],
                         'row_count': sample['value'],
-                        'average_row_count': sample['average'],
-                        'min_row_count': sample['min_value'],
-                        'max_row_count': sample['max_value'],
+                        'average_row_count': sample['average'] | round(1),
+                        'min_row_count': sample['min_value'] | round(1),
+                        'max_row_count': sample['max_value'] | round(1),
                     } %}
                     {% set dimensions = sample['dimension'].split('; ') %}
                     {% set diemsions_values = sample['dimension_value'].split('; ') %}
