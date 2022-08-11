@@ -19,7 +19,7 @@ Share the report with your team, and use Slack integration for alerting on incid
 
 ##
 
-:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
+:star: Support us with a <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
 
@@ -31,8 +31,6 @@ Share the report with your team, and use Slack integration for alerting on incid
   
 Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
 [Quick start: Data monitoring as dbt tests in minutes](https://bit.ly/3IdMjYW). 
-
-[Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
 
 Our full documentation is [available here](https://docs.elementary-data.com/). 
   
@@ -58,7 +56,7 @@ Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehf
   
 ## Demo & Sandbox
 
-Data observability report [sandbox](https://bit.ly/3IAp9wf) and [demo video](https://www.elementary-data.com/demo).  
+Data observability report [sandbox](https://bit.ly/3IAp9wf).  
 
 Slack alert example:
 
