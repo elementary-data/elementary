@@ -198,7 +198,7 @@ class ElementaryTestAlert(DbtTestAlert):
         if self.column_name:
             column_msgs.append(f'*Column*\n{self.column_name}')
         if anomalous_value:
-            column_msgs.append(f'*Anomalous Value*\n{anomalous_value}')
+            column_msgs.append(f'*Anomalous Values*\n{anomalous_value}')
         if column_msgs:
             self._add_fields_section_to_slack_msg(slack_message, column_msgs, divider=True)
         if self.test_params:
@@ -215,7 +215,7 @@ class ElementaryTestAlert(DbtTestAlert):
             sensitivity = test_params.get('sensitivity')
             test_params = {'timestamp_column': timestamp_column,
                            'anomaly_threshold': sensitivity}
-            if self.test_rows_sample:
+            if self.test_rows_sample and self.test_sub_type != 'dimension':
                 self.test_rows_sample.sort(key=lambda metric: metric.get('end_time'))
             test_alerts = {'display_name': self.test_sub_type_display_name,
                            'metrics': self.test_rows_sample,
