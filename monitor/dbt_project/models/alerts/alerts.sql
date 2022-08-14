@@ -10,11 +10,15 @@
 {% set anomaly_detection_relation = adapter.get_relation(this.database, this.schema, 'alerts_anomaly_detection') %}
 {# Backwards compatibility support for a renamed model. #}
 {% set data_monitoring_relation = adapter.get_relation(this.database, this.schema, 'alerts_data_monitoring') %}
+{% set schema_changes_relation = adapter.get_relation(this.database, this.schema, 'alerts_schema_changes') %}
 
 with failed_tests as (
-     select * from {{ ref('elementary', 'alerts_schema_changes') }}
-     union all
      select * from {{ ref('elementary', 'alerts_dbt_tests') }}
+
+    {% if schema_changes_relation %}
+        union all
+        select * from {{ schema_changes_relation }}
+    {% endif %}
 
     {% if anomaly_detection_relation %}
         union all
