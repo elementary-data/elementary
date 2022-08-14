@@ -227,7 +227,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 @click.option(
     '--aws-profile-name',
     type=str,
-    default='default',
+    default=None,
     help="AWS profile name",
 )
 @click.option(
