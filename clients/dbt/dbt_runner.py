@@ -38,9 +38,14 @@ class DbtRunner:
         if should_log:
             logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
         result = subprocess.run(dbt_command, check=False, capture_output=capture_output)
-        output = result.stdout.decode('utf-8')
-        logger.debug(f'Output: {output}')
-        return result.returncode == 0, output
+        output = None
+        if capture_output:
+            output = result.stdout.decode('utf-8')
+            logger.debug(f'Output: {output}')
+        if result.returncode != 0:
+            return False, output
+
+        return True, output
 
     def deps(self) -> bool:
         success, _ = self._run_command(['deps'])
