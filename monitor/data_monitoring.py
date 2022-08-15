@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pkg_resources
 from alive_progress import alive_it
 
+import monitor.dbt_project
 from clients.dbt.dbt_runner import DbtRunner
 from clients.gcs.client import GCSClient
 from clients.s3.client import S3Client
@@ -25,7 +26,6 @@ from monitor.api.models.models import ModelsAPI
 from monitor.api.sidebar.sidebar import SidebarAPI
 from monitor.api.tests.schema import InvocationSchema, ModelUniqueIdType, TestMetadataSchema, TestUniqueIdType
 from monitor.api.tests.tests import TestsAPI
-from monitor.paths import DBT_PROJECT_PATH, DBT_PROJECT_PACKAGES_PATH, DBT_PROJECT_MODULES_PATH
 from tracking.anonymous_tracking import AnonymousTracking
 from utils.log import get_logger
 from utils.time import get_now_utc_str
@@ -40,7 +40,7 @@ class DataMonitoring:
 
     def __init__(self, config: Config, force_update_dbt_package: bool = False):
         self.config = config
-        self.dbt_runner = DbtRunner(DBT_PROJECT_PATH, self.config.profiles_dir, self.config.profile_target)
+        self.dbt_runner = DbtRunner(monitor.dbt_project.PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
         # slack client is optional
         self.slack_client = SlackClient.create_client(self.config)
@@ -72,7 +72,7 @@ class DataMonitoring:
         self.sent_alert_count += len(sent_alert_ids)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_exists = self._dbt_package_exists()
+        internal_dbt_package_exists = monitor.dbt_project.dbt_package_exists()
         self.execution_properties['dbt_package_exists'] = internal_dbt_package_exists
         self.execution_properties['force_update_dbt_packages'] = force_update_dbt_packages
         if not internal_dbt_package_exists or force_update_dbt_packages:
@@ -281,7 +281,3 @@ class DataMonitoring:
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
-
-    @staticmethod
-    def _dbt_package_exists() -> bool:
-        return os.path.exists(DBT_PROJECT_PACKAGES_PATH) or os.path.exists(DBT_PROJECT_MODULES_PATH)
