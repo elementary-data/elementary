@@ -2,6 +2,7 @@
 title: "Generate observability report"
 ---
 
+import SnowflakeProfile from "../snippets/profiles/snowflake-profile.mdx";
 import InstallCLI from "../snippets/install-cli.mdx";
 import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
 import ShareReport from "../snippets/share-report.mdx";
@@ -33,29 +34,7 @@ In order to connect, elementary needs a profile in a file named `profiles.yml`
 
 <SnippetGroup>
 
-```yml Snowflake
-## SNOWFLAKE ##
-## By default, edr expects the profile name 'elementary'.      ##
-## Configure the database and schema of elementary models.     ##
-## Check where 'elementary_test_results' is to find it.        ##
-
-elementary:
-outputs:
-default:
-type: snowflake
-account: [account id]
-
-      ## User/password auth, other options (Keypair/SSO) require other configs ##
-      user: [username]
-      password: [password]
-
-      role: [user role]
-      database: [database name]
-      warehouse: [warehouse name]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      threads: 4
-
-```
+<SnowflakeProfile />
 
 ```yml BigQuery
 ## BIGQUERY ##
