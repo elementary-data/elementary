@@ -14,14 +14,6 @@ pip install 'elementary-data[bigquery]'
 pip install 'elementary-data[redshift]'
 ```
 
-Generate Elementary's profile for usage with `edr` by running the following command within your Dbt project:
-
-```shell
-dbt run-operation elementary.generate_elementary_cli_profile
-```
-
-Fill in the missing fields and afterwards add the profile to your `profiles.yml`.
-
 Run `edr --help` in order to ensure the installation was successful.
 
 If you're receiving `command not found: edr` please check our [troubleshooting guide](../general/troubleshooting).
