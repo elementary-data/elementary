@@ -1,5 +1,8 @@
 import { SnippetGroup } from "@/components/SnippetGroup";
-import SnowflakeProfile from "./snippets/profiles/snowflake-profile.mdx";
+import SnowflakeProfile from "./profiles/snowflake-profile.mdx";
+import BigqueryProfile from "./profiles/bigquery-profile.mdx";
+import RedshiftProfile from "./profiles/redshift-profile.mdx";
+import DatabricksProfile from "./profiles/databricks-profile.mdx";
 
 ### Add connection profile for elementary CLI
 
@@ -13,52 +16,10 @@ In order to connect, elementary needs a profile in a file named `profiles.yml`
 
 <SnowflakeProfile />
 
-```yml BigQuery
-## BIGQUERY ##
-## By default, edr expects the profile name 'elementary'.      ##
-## Configure the database and schema of elementary models.     ##
-## Check where 'elementary_test_results' is to find it.        ##
+<BigqueryProfile />
 
-elementary:
-  outputs:
-    default:
-      type: bigquery
+<RedshiftProfile />
 
-      ## Service account auth, other options require other configs ##
-      method: service-account
-      keyfile: [full path to your keyfile]
-
-      project: [project id]
-      dataset: [dataset name]
-      threads: 4
-      location: [dataset location]
-      priority: interactive
-```
-
-```yml Redshift
-## REDSHIFT ##
-## By default, edr expects the profile name 'elementary'.      ##
-## Configure the database and schema of elementary models.     ##
-## Check where 'elementary_test_results' is to find it.        ##
-
-elementary:
-  outputs:
-    default:
-      type: redshift
-      host: [hostname, like hostname.region.redshift.amazonaws.com]
-
-      ## User/password auth, other options (IAM) require other configs ##
-      user: [username]
-      password: [password]
-
-      dbname: [database name]
-      schema: [schema name]_elementary
-      threads: 4
-      keepalives_idle: 240 # default 240 seconds
-      connect_timeout: 10 # default 10 seconds
-      # search_path: public # optional, not recommended
-      sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
-      ra3_node: true # enables cross-database sources
-```
+<DatabricksProfile />
 
 </SnippetGroup>
