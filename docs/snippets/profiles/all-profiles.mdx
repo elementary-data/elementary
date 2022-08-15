@@ -1,0 +1,95 @@
+import { SnippetGroup } from "@/components/SnippetGroup";
+
+<SnippetGroup>
+
+```yml Snowflake
+## SNOWFLAKE ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+outputs:
+default:
+type: snowflake
+account: [account id]
+
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]_elementary
+      threads: 4
+
+```
+
+```yml BigQuery
+## BIGQUERY ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: bigquery
+
+      ## Service account auth, other options require other configs ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+
+      project: [project id]
+      dataset: [dataset name]  # elementary dataset, usually [dataset name]_elementary
+      threads: 4
+      location: [dataset location]
+      priority: interactive
+```
+
+```yml Redshift
+## REDSHIFT ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: redshift
+      host: [hostname, like hostname.region.redshift.amazonaws.com]
+
+      ## User/password auth, other options (IAM) require other configs ##
+      user: [username]
+      password: [password]
+
+      dbname: [database name]
+      schema: [schema name]  # elementary schema, usually [schema name]_elementary
+      threads: 4
+      keepalives_idle: 240 # default 240 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
+      ra3_node: true # enables cross-database sources
+```
+
+```yml Databricks
+## DATABRICKS ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: databricks
+      host: [hostname, like <ID>.cloud.databricks.com]
+      http_path: [like /sql/1.0/endpoints/<ID>]
+      schema: [schema name]  # elementary schema, usually [schema name]_elementary
+      token : [token]
+      threads: [number of threads like 8]
+
+```
+
+</SnippetGroup>
