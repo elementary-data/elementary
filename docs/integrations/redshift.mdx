@@ -10,7 +10,16 @@ Full support since version 0.4.0.
 
 ## Redshift connection profile
 
-<GenerateElementaryCLIProfile profileDocsLink="https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile#authentication-methods" />
+After installing Elementary's dbt package upon running `dbt deps`,
+you can generate Elementary's profile for usage with `edr` by running the following command within your project:
+
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
+[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile#authentication-methods)
+in the output and copy it to `~/.dbt/profiles.yml`.
 
 The `profiles.yml` file to connect to Redshift should contain a profile in the following format:
 
