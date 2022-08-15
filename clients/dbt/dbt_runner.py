@@ -1,6 +1,6 @@
 import json
 import subprocess
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from utils.log import get_logger
 
@@ -17,16 +17,16 @@ class DbtRunner:
 
     def _run_command(
             self,
-            command_args: list,
+            command_args: List[str],
             json_logs: bool = False,
             vars: Optional[dict] = None,
-            should_log: bool = True
+            quiet: bool = False
     ) -> Tuple[bool, str]:
         dbt_command = ['dbt']
-        capture_output = False
+        json_output = False
         if json_logs:
             dbt_command.extend(['--log-format', 'json'])
-            capture_output = True
+            json_output = True
         dbt_command.extend(command_args)
         dbt_command.extend(['--project-dir', self.project_dir])
         dbt_command.extend(['--profiles-dir', self.profiles_dir])
@@ -35,11 +35,11 @@ class DbtRunner:
         if vars:
             json_vars = json.dumps(vars)
             dbt_command.extend(['--vars', json_vars])
-        if should_log:
+        if not quiet:
             logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
-        result = subprocess.run(dbt_command, check=False, capture_output=capture_output)
+        result = subprocess.run(dbt_command, check=False, capture_output=(json_output or quiet))
         output = None
-        if capture_output:
+        if json_output:
             output = result.stdout.decode('utf-8')
             logger.debug(f'Output: {output}')
         if result.returncode != 0:
@@ -47,8 +47,8 @@ class DbtRunner:
 
         return True, output
 
-    def deps(self) -> bool:
-        success, _ = self._run_command(['deps'])
+    def deps(self, quiet: bool = False) -> bool:
+        success, _ = self._run_command(command_args=['deps'], quiet=quiet)
         return success
 
     def seed(self, select: Optional[str] = None) -> bool:
@@ -69,14 +69,13 @@ class DbtRunner:
             macro_args: Optional[dict] = None,
             log_errors: bool = False,
             vars: Optional[dict] = None,
-            should_log: bool = True,
+            quiet: bool = False
     ) -> list:
         command_args = ['run-operation', macro_name]
         if macro_args:
             json_args = json.dumps(macro_args)
             command_args.extend(['--args', json_args])
-        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars,
-                                                    should_log=should_log)
+        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars, quiet=quiet)
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
@@ -100,6 +99,7 @@ class DbtRunner:
             select: Optional[str] = None,
             full_refresh: bool = False,
             vars: Optional[dict] = None,
+            quiet: bool = False
     ) -> bool:
         command_args = ['run']
         if full_refresh:
@@ -108,16 +108,17 @@ class DbtRunner:
             command_args.extend(['-m', models])
         if select:
             command_args.extend(['-s', select])
-        success, _ = self._run_command(command_args=command_args, vars=vars)
+        success, _ = self._run_command(command_args=command_args, vars=vars, quiet=quiet)
         return success
 
     def test(
             self,
             select: Optional[str] = None,
-            vars: Optional[dict] = None
+            vars: Optional[dict] = None,
+            quiet: bool = False
     ) -> bool:
         command_args = ['test']
         if select:
             command_args.extend(['-s', select])
-        success, _ = self._run_command(command_args=command_args, vars=vars)
+        success, _ = self._run_command(command_args=command_args, vars=vars, quiet=quiet)
         return success

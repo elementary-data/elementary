@@ -277,7 +277,7 @@ class DataMonitoring:
     @functools.lru_cache
     def get_elementary_database_and_schema(self):
         try:
-            return self.dbt_runner.run_operation('get_elementary_database_and_schema', should_log=False)[0]
+            return self.dbt_runner.run_operation('get_elementary_database_and_schema', quiet=True)[0]
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return '<elementary_database>.<elementary_schema>'
