@@ -57,9 +57,7 @@
         "quickstart/generate-report-ui",
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
-        "quickstart/add-elementary-tests",
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands"
+        "guides/add-elementary-tests"
       ]
     },
     {
@@ -73,10 +71,16 @@
       ]
     },
     {
+      "group": "Deployment",
+      "pages": [
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands"
+      ]
+    },
+    {
       "group": "Data Anomaly Detection Tests",
       "pages": [
         "guides/data-anomaly-detection",
-        "guides/add-data-monitoring-tests",
         "guides/elementary-tests-configuration",
         "guides/monitoring-in-production"
       ]
