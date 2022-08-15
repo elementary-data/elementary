@@ -2,6 +2,7 @@
 title: "Generate observability report"
 ---
 
+import SnowflakeProfile from "../snippets/profiles/snowflake-profile.mdx";
 import InstallCLI from "../snippets/install-cli.mdx";
 import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
 import ShareReport from "../snippets/share-report.mdx";
@@ -14,7 +15,7 @@ Elementary [data observability report](../understand-elementary/elementary-repor
 />
 
 Before you can start using the report, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
-This is **required for the report to work.**
+This is **required for the tests to work.**
 
 <Accordion title="dbt package installation">
 <InstallDbtPackage />
@@ -33,29 +34,7 @@ In order to connect, elementary needs a profile in a file named `profiles.yml`
 
 <SnippetGroup>
 
-```yml Snowflake
-## SNOWFLAKE ##
-## By default, edr expects the profile name 'elementary'.      ##
-## Configure the database and schema of elementary models.     ##
-## Check where 'elementary_test_results' is to find it.        ##
-
-elementary:
-  outputs:
-    default:
-      type: snowflake
-      account: [account id]
-
-      ## User/password auth, other options (Keypair/SSO) require other configs ##
-      user: [username]
-      password: [password]
-
-      role: [user role]
-      database: [database name]
-      warehouse: [warehouse name]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      threads: 4
-
-```
+<SnowflakeProfile />
 
 ```yml BigQuery
 ## BIGQUERY ##
@@ -103,23 +82,6 @@ elementary:
       # search_path: public # optional, not recommended
       sslmode: [optional, set the sslmode used to connect to the database (in case this parameter is set, will look for ca in ~/.postgresql/root.crt)]
       ra3_node: true # enables cross-database sources
-```
-
-```yml Databricks
-## DATABRICKS ##
-## By default, edr expects the profile name 'elementary'.      ##
-## Configure the database and schema of elementary models.     ##
-## Check where 'elementary_test_results' is to find it.        ##
-
-elementary:
-  outputs:
-    default:
-      type: databricks
-      host: [hostname, like <ID>.cloud.databricks.com]
-      http_path: [like /sql/1.0/endpoints/<ID>]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      token : [token]
-      threads: [number of threads like 8]
 ```
 
 </SnippetGroup>
