@@ -39,8 +39,8 @@ class ElementaryCLI(click.MultiCommand):
         try:
             config = Config()
             AnonymousTracking(config).track_cli_help()
-        except Exception:
-            pass
+        except Exception as e:
+            raise e
         self.format_usage(ctx, formatter)
         self.format_help_text(ctx, formatter)
         self.format_options(ctx, formatter)

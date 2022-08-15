@@ -103,6 +103,6 @@ def get_target_database_name(profiles_dir: str, dbt_project_path: str) -> Union[
 
 
 def is_dbt_installed() -> bool:
-    if os.path.exists(os.path.join(Path.home(), DBT_DEFAULT_DIR)):
+    if os.path.exists(os.path.join(str(Path.home()), DBT_DEFAULT_DIR)):
         return True
     return False

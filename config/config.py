@@ -10,8 +10,8 @@ class Config:
     _GOOGLE = 'google'
     _CONFIG_FILE_NAME = 'config.yml'
 
-    DEFAULT_CONFIG_DIR = Path.home() / '.edr'
-    DEFAULT_PROFILES_DIR = Path.home() / '.dbt'
+    DEFAULT_CONFIG_DIR = str(Path.home() / '.edr')
+    DEFAULT_PROFILES_DIR = str(Path.home() / '.dbt')
 
     def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
                  profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
