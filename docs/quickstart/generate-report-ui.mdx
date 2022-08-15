@@ -4,6 +4,7 @@ title: "Generate Observability Report"
 
 import InstallCLI from "../snippets/install-cli.mdx";
 import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
+import ShareReport from "../snippets/share-report.mdx";
 
 Elementary [data observability report](../understand-elementary/elementary-report-ui) can be used for visualization and exploration of data from the dbt-package tables. That includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
 
@@ -120,12 +121,4 @@ The command will use the provided connection profile to access the data warehous
 
 ---
 
-## Send Report to Slack
-
-You can distribute the report by sending it to Slack.
-
-After you [setup a Slack app and token](../integrations/slack#slack-integration-setup) you can run the command:
-
-```
-edr monitor send-report
-```
+<ShareReport />

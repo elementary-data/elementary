@@ -46,12 +46,16 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "quickstart"]
+      "pages": [
+        "introduction",
+        "quickstart"
+      ]
     },
     {
       "group": "Guides",
       "pages": [
         "quickstart/generate-report-ui",
+        "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
         "quickstart/add-elementary-tests",
         "understand-elementary/cli-install",
@@ -82,8 +86,9 @@
       "pages": [
         "integrations/slack",
         "integrations/snowflake",
+        "integrations/bigquery",
         "integrations/redshift",
-        "integrations/bigquery"
+        "integrations/databricks"
       ]
     },
     {
