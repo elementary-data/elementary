@@ -105,6 +105,22 @@ elementary:
       ra3_node: true # enables cross-database sources
 ```
 
+```yml Databricks
+## DATABRICKS ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: databricks
+      host: [hostname, like <ID>.cloud.databricks.com]
+      http_path: [like /sql/1.0/endpoints/<ID>]
+      token : [token]
+      threads: [number of threads like 8]
+```
+
 </SnippetGroup>
 
 ## Generate Tests Report UI
