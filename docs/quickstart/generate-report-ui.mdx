@@ -14,7 +14,7 @@ Elementary [data observability report](../understand-elementary/elementary-repor
 />
 
 Before you can start using the report, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
-This is **required for the tests to work.**
+This is **required for the report to work.**
 
 <Accordion title="dbt package installation">
 <InstallDbtPackage />
@@ -40,10 +40,10 @@ In order to connect, elementary needs a profile in a file named `profiles.yml`
 ## Check where 'elementary_test_results' is to find it.        ##
 
 elementary:
-outputs:
-default:
-type: snowflake
-account: [account id]
+  outputs:
+    default:
+      type: snowflake
+      account: [account id]
 
       ## User/password auth, other options (Keypair/SSO) require other configs ##
       user: [username]
