@@ -54,7 +54,7 @@ class SlackWebClient(SlackClient):
         try:
             self.client.chat_postMessage(
                 channel=channel_name,
-                text=message.text,
+                text=message.text or 'Elementary Data',
                 blocks=json.dumps(message.blocks) if message.blocks else None,
                 attachments=json.dumps(message.attachments) if message.attachments else None
             )
