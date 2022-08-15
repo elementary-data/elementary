@@ -9,12 +9,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import pkg_resources
 from alive_progress import alive_it
 
-import monitor.dbt_project
 from clients.dbt.dbt_runner import DbtRunner
 from clients.gcs.client import GCSClient
 from clients.s3.client import S3Client
 from clients.slack.client import SlackClient
 from config.config import Config
+from monitor import dbt_project_utils
 from monitor.alerts.alert import Alert
 from monitor.alerts.alerts import Alerts
 from monitor.alerts.model import ModelAlert
@@ -40,7 +40,7 @@ class DataMonitoring:
 
     def __init__(self, config: Config, force_update_dbt_package: bool = False):
         self.config = config
-        self.dbt_runner = DbtRunner(monitor.dbt_project.PATH, self.config.profiles_dir, self.config.profile_target)
+        self.dbt_runner = DbtRunner(dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
         # slack client is optional
         self.slack_client = SlackClient.create_client(self.config)
@@ -72,7 +72,7 @@ class DataMonitoring:
         self.sent_alert_count += len(sent_alert_ids)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_exists = monitor.dbt_project.dbt_package_exists()
+        internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()
         self.execution_properties['dbt_package_exists'] = internal_dbt_package_exists
         self.execution_properties['force_update_dbt_packages'] = force_update_dbt_packages
         if not internal_dbt_package_exists or force_update_dbt_packages:

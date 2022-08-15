@@ -5,10 +5,10 @@ from pathlib import Path
 
 import posthog
 
-import monitor.dbt_project
 import tracking.env
 from clients.dbt.dbt_runner import DbtRunner
 from config.config import Config
+from monitor import dbt_project_utils
 from utils.package import get_package_version
 
 logging.getLogger('posthog').disabled = True
@@ -105,8 +105,8 @@ class AnonymousTracking:
 
     def _get_anonymous_warehouse_id(self):
         try:
-            dbt_runner = DbtRunner(monitor.dbt_project.PATH, self.config.profiles_dir, self.config.profile_target)
-            if not monitor.dbt_project.dbt_package_exists():
+            dbt_runner = DbtRunner(dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target)
+            if not dbt_project_utils.dbt_package_exists():
                 dbt_runner.deps()
             adapter_unique_id = dbt_runner.run_operation('get_adapter_unique_id', should_log=False)[0]
             anonymous_warehouse_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
