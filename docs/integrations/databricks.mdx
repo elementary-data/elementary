@@ -27,7 +27,7 @@ in the output and copy it to `~/.dbt/profiles.yml`.
 
 The `profiles.yml` file to connect to Databricks should contain a profile in the following format:
 
-```yml Redshift
+```yml Databricks
 ## DATABRICKS ##
 ## By default, edr expects the profile name 'elementary'.      ##
 
@@ -37,6 +37,7 @@ elementary:
       type: databricks
       host: [hostname, like <ID>.cloud.databricks.com]
       http_path: [like /sql/1.0/endpoints/<ID>]
+      schema: [schema name]  # elementary schema, usually [schema name]_elementary
       token : [token]
       threads: [number of threads like 8]
 ```
