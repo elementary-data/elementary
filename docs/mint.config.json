@@ -57,9 +57,7 @@
         "quickstart/generate-report-ui",
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
-        "guides/add-elementary-tests",
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands"
+        "guides/add-elementary-tests"
       ]
     },
     {
@@ -70,6 +68,13 @@
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
+      ]
+    },
+    {
+      "group": "Deployment",
+      "pages": [
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands"
       ]
     },
     {
