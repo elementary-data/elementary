@@ -75,8 +75,9 @@ models:
 
 `elementary.dimension_anomalies`
 
-Executes dimension values anomaly detection.
-It monitors the frequency of field values (row count for groups based on given columns/expressions) and can be configured using the `dimensions` and `where_expression` keys.
+This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
+It is best to configure it on low-cardinality fields. 
+The test counts rows grouped by given columns/expressions, and can be configured using the `dimensions` and `where_expression` keys.
 
 <SnippetGroup>
 
