@@ -18,15 +18,15 @@ These tests are configured and executed like any other tests in your project.
 
 ### Table (model / source) tests:
 
-<AccordionGroup>
-
 <Accordion title="elementary.table_anomalies">
+
 `elementary.table_anomalies`
 
 Executes table level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
 By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
 
 <SnippetGroup>
+
 ```yml Models
 version: 2
 
@@ -72,12 +72,14 @@ models:
 </Accordion>
 
 <Accordion title="elementary.dimension_anomalies">
+
 `elementary.dimension_anomalies`
 
 Executes dimension values anomaly detection.
 It monitors the frequency of field values (row count for groups based on given columns/expressions) and can be configured using the `dimensions` and `where_expression` keys.
 
 <SnippetGroup>
+
 ```yml Models
 version: 2
 
@@ -126,11 +128,13 @@ models:
 </Accordion>
 
 <Accordion title="elementary.all_columns_anomalies">
+
 `elementary.all_columns_anomalies`
 
 Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
 
 <SnippetGroup>
+
 ```yml Models
 version: 2
 
@@ -163,11 +167,13 @@ models:
 </Accordion>
 
 <Accordion title="elementary.schema_changes">
+
 `elementary.schema_changes`
 
 Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
 
 <SnippetGroup>
+
 ```yml Models
 version: 2
 
@@ -209,6 +215,7 @@ models:
 Executes column level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
 
 <SnippetGroup>
+
 ```yml Models
 version: 2
 
@@ -271,7 +278,7 @@ models:
 </SnippetGroup>
 
 </Accordion>
-</AccordionGroup>
+
 
 ## How to configure your Elementary tests?
 
