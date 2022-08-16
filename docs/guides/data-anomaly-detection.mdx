@@ -69,6 +69,8 @@ If there is no timestamp column configured, monitors will query on the entire ta
 | `row_count`      |
 | `schema_changes` |
 
+#### Column level monitors
+
 | Property             | Column Type |
 | -------------------- | ----------- |
 | `null_count`         | any         |
@@ -85,6 +87,10 @@ If there is no timestamp column configured, monitors will query on the entire ta
 | `standard_deviation` | numeric     |
 | `variance`           | numeric     |
 
+#### Dimension monitors
+
+Dimension monitors the frequency of field values (row count for groups based on given columns/expressions).
+
 ## Anomaly detection
 
 Elementary uses "[standard score](https://en.wikipedia.org/wiki/Standard_score)", also known as "Z-score" for anomaly detection. This score represents the number of standard deviations of a value from the average of a set of values.
@@ -100,4 +106,7 @@ This is the default Elementary uses as well, and it can be changed using the var
 
 You can use the model `anomaly_threshold_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/z-score_so2djq.png" alt="Z Score" />
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/z-score_so2djq.png"
+  alt="Z Score"
+/>

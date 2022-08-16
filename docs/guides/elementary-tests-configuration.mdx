@@ -101,74 +101,74 @@ If undefined, default is null (no time buckets).
 version: 2
 
 models:
-- name: <model_name>
-config:
-elementary:
-timestamp_column: < model timestamp column >
-tests: < here you will add elementary monitors as tests >
+  - name: <model_name>
+    config:
+      elementary:
+        timestamp_column: < model timestamp column >
+    tests: < here you will add elementary monitors as tests >
 
-- name: <your model with no timestamp>
-## if no timestamp is configured, elementary will monitor without time filtering
-tests: <here you will add elementary monitors as tests>
+  - name: <your model with no timestamp>
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests: <here you will add elementary monitors as tests>
 ```
 
 ```yml Example
 version: 2
 
 models:
-- name: login_events
-config:
-elementary:
-timestamp_column: updated_at
-tests:
-- elementary.table_anomalies:
-tags: ["elementary"]
-- elementary.all_columns_anomalies:
-tags: ["elementary"]
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: updated_at
+    tests:
+      - elementary.table_anomalies:
+          tags: ["elementary"]
+      - elementary.all_columns_anomalies:
+          tags: ["elementary"]
 
-- name: users
-## if no timestamp is configured, elementary will monitor without time filtering
-tests:
-- elementary.table_anomalies:
-tags: ["elementary"]
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.table_anomalies:
+          tags: ["elementary"]
 ```
 
 ```yml sources_properties.yml
 sources:
   - name: < some name >
-database: < datatbase >
-schema: < schema >
-tables:
-  - name: < table_name >
-## sources don't have config, so elementary config is placed under 'meta'
-meta:
-elementary:
-timestamp_column: < source timestamp column >
-tests: <here you will add elementary monitors as tests>
+    database: < datatbase >
+    schema: < schema >
+    tables:
+      - name: < table_name >
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: < source timestamp column >
+        tests: <here you will add elementary monitors as tests>
 ```
 
 ```yml Example
 sources:
-- name: 'my_non_dbt_table'
-database: 'raw_events'
-schema: 'product'
-tables:
-- name: 'raw_product_login_events'
-## sources don't have config, so elementary config is placed under 'meta'
-meta:
-elementary:
-timestamp_column: 'loaded_at'
-tests:
-- elementary.table_anomalies
-- elementary.all_columns_anomalies:
-column_anomalies:
-- null_count
-- missing_count
-- zero_count
-columns:
-- name: user_id
-tests:
-- elementary.column_anomalies
+  - name: "my_non_dbt_table"
+    database: "raw_events"
+    schema: "product"
+    tables:
+      - name: "raw_product_login_events"
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: "loaded_at"
+        tests:
+          - elementary.table_anomalies
+          - elementary.all_columns_anomalies:
+              column_anomalies:
+                - null_count
+                - missing_count
+                - zero_count
+        columns:
+          - name: user_id
+            tests:
+              - elementary.column_anomalies
 ```
 
 </SnippetGroup>

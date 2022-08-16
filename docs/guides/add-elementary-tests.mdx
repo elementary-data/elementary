@@ -18,23 +18,260 @@ These tests are configured and executed like any other tests in your project.
 
 ### Table (model / source) tests:
 
+<AccordionGroup>
+
+<Accordion title="elementary.table_anomalies">
 `elementary.table_anomalies`
 
 Executes table level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
 By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
 
+<SnippetGroup>
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    tests:
+      - elementary.table_anomalies:
+          table_anomalies: < specific monitors, all if null >
+          # optional - configure different freshness column than timestamp column
+          freshness_column: < freshness_column >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.table_anomalies:
+          table_anomalies:
+            - row_count
+            - freshness
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.table_anomalies
+          tags: ['elementary']
+```
+</SnippetGroup>
+
+</Accordion>
+
+<Accordion title="elementary.dimension_anomalies">
+`elementary.dimension_anomalies`
+
+Executes dimension values anomaly detection.
+It monitors the frequency of field values (row count for groups based on given columns/expressions) and can be configured using the `dimensions` and `where_expression` keys.
+
+<SnippetGroup>
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions: < columns or sql expressions of columns >
+          # optional - configure a where a expression to accurate the dimension monitoring
+          where_expression: < sql expression >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions:
+            - event_type
+            - country_name
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions:
+            - event_type
+          tags: ['elementary']
+```
+</SnippetGroup>
+
+</Accordion>
+
+<Accordion title="elementary.all_columns_anomalies">
 `elementary.all_columns_anomalies`
 
 Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
 
+<SnippetGroup>
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    tests:
+      - elementary.all_columns_anomalies:
+          column_anomalies: < specific monitors, all if null >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.all_columns_anomalies:
+          tags: ['elementary']
+          # optional - change global sensitivity
+          sensitivity: 3.5
+```
+</SnippetGroup>
+
+</Accordion>
+
+<Accordion title="elementary.schema_changes">
 `elementary.schema_changes`
 
 Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
 
+<SnippetGroup>
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    tests:
+      - elementary.schema_changes
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.schema_changes:
+          tags: ['elementary']
+          config:
+            severity: warn
+```
+</SnippetGroup>
+
+</Accordion>
+</AccordionGroup>
+
 ### Column test:
 
+<AccordionGroup>
+<Accordion title="elementary.column_anomalies">
+
 `elementary.column_anomalies`
+
 Executes column level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
+
+<SnippetGroup>
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+     columns:
+      - name: < column name >
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies: < specific monitors, all if null >
+
+  - name: < model name >
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies: < specific monitors, all if null >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    columns:
+      - name: user_name
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - missing_count
+                - min_length
+              tags: ['elementary']
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+        elementary.table_anomalies
+          tags: ['elementary']
+    columns:
+      - name: user_id
+        tests:
+          - elementary.column_anomalies:
+              tags: ['elementary']
+              timestamp_column: 'updated_at'
+      - name: user_name
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - missing_count
+                - min_length
+              tags: ['elementary']
+```
+</SnippetGroup>
+
+</Accordion>
+</AccordionGroup>
 
 ## How to configure your Elementary tests?
 
@@ -69,6 +306,10 @@ models:
       - elementary.all_columns_anomalies:
           column_anomalies: < specific monitors, all if null >
       - elementary.schema_changes
+      - elementary.dimension_anomalies:
+          dimensions: < columns or sql expressions of columns >
+          # optional - configure a where a expression to accurate the dimension monitoring
+          where_expression: < sql expression >
 
   - name: < model name >
     ## if no timestamp is configured, elementary will monitor without time filtering
@@ -106,7 +347,16 @@ models:
             tags: ['elementary']
             config:
               severity: warn
-
+        - elementary.dimension_anomalies:
+            dimensions:
+              - event_type
+              - country_name
+            where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+            # optional - use tags to run elementary tests on a dedicated run
+            tags: ['elementary']
+            config:
+            # optional - change severity
+              severity: warn
 
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
@@ -155,6 +405,9 @@ sources:
             timestamp_column: 'loaded_at'
         tests:
           - elementary.table_anomalies
+          - elementary.dimension_anomalies:
+              dimensions:
+                - event_type
           - elementary.all_columns_anomalies:
               column_anomalies:
                 - null_count
