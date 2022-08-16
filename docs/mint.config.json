@@ -74,7 +74,8 @@
       "group": "Deployment",
       "pages": [
         "understand-elementary/cli-install",
-        "understand-elementary/cli-commands"
+        "understand-elementary/cli-commands",
+        "integrations/github-actions"
       ]
     },
     {
