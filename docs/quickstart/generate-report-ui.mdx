@@ -2,7 +2,7 @@
 title: "Generate observability report"
 ---
 
-import AllProfiles from "../snippets/profiles/all-profiles.mdx";
+import AddConnectionProfile from "../snippets/profiles/add-connection-profile.mdx";
 import InstallCLI from "../snippets/install-cli.mdx";
 import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
 import ShareReport from "../snippets/share-report.mdx";
@@ -14,25 +14,27 @@ Elementary [data observability report](../understand-elementary/elementary-repor
   alt="Demo"
 />
 
-Before you can start using the report, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
-This is **required for the tests to work.**
+Before you can start using the report, make sure to install the dbt package, configure a profile and install the CLI. 
+This is **required for the report to work.**
 
 <Accordion title="dbt package installation">
+
 <InstallDbtPackage />
 
 </Accordion>
 
+<Accordion title="Configure Elementary profile">
+
+<AddConnectionProfile />
+
+</Accordion>
+
+<Accordion title="Install CLI">
+
 <InstallCLI />
 
-## Add connection profile for elementary CLI
+</Accordion>
 
-In order to connect, elementary needs a profile in a file named `profiles.yml`
-
-- Path: `HOME_DIR/.dbt/profiles.yml`
-- Profile name: `elementary`
-- Schema name: The schema of elementary models, default is `<your_dbt_project_schema>_elementary`
-
-<AllProfiles />
 
 ## Generate Tests Report UI
 
