@@ -1,7 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import List
-from typing import Optional
+from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
@@ -52,30 +51,36 @@ class SlackWebClient(SlackClient):
         return WebClient(token=self.token)
 
     def send_message(self, channel_name: str, message: SlackMessageSchema, **kwargs) -> bool:
-        channel_id = self._get_channel_id(channel_name)
-        in_channel = self._join_channel(channel_id)
-        if not (channel_id and in_channel):
-            return False
         try:
             self.client.chat_postMessage(
-                channel=channel_id,
+                channel=channel_name,
                 text=message.text,
                 blocks=json.dumps(message.blocks) if message.blocks else None,
                 attachments=json.dumps(message.attachments) if message.attachments else None
             )
             return True
-        except SlackApiError as e:
+        except SlackApiError as err:
+            err_type = err.response.data['error']
+            if err_type == 'not_in_channel':
+                logger.info('Elementary app is not in the channel. Attempting to join.')
+                channel_id = self._get_channel_id(channel_name)
+                if not channel_id:
+                    return False
+                joined_successfully = self._join_channel(channel_id=channel_id)
+                if not joined_successfully:
+                    return False
+                self.send_message(channel_name=channel_name, message=message)
+            elif err_type == 'channel_not_found':
+                logger.error(
+                    f'Channel {channel_name} was not found by the Elementary app. Please add the app to the channel.')
+                return False
             logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
             return False
 
     def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
-        channel_id = self._get_channel_id(channel_name)
-        in_channel = self._join_channel(channel_id)
-        if not (channel_id and in_channel):
-            return False
         try:
             self.client.files_upload(
-                channels=channel_id,
+                channels=channel_name,
                 initial_comment=message.text,
                 file=file_path
             )
@@ -84,9 +89,9 @@ class SlackWebClient(SlackClient):
             logger.error(f"Could not upload the file to the channel - {channel_name}. Error: {e}")
             return False
 
-    def send_report(self, channel_name: str, report_file_path: str):
+    def send_report(self, channel: str, report_file_path: str):
         send_succeed = self.send_file(
-            channel_name=channel_name,
+            channel_name=channel,
             file_path=report_file_path,
             message=SlackMessageSchema(text="Elementary monitoring report")
         )
@@ -96,19 +101,20 @@ class SlackWebClient(SlackClient):
             logger.error('Failed to send report to Slack.')
         return send_succeed
 
-    def _get_channel_id(self, channel_name: str) -> str:
+    def _get_channel_id(self, channel_name: str) -> Optional[str]:
         try:
-            channels = self._get_channels()
-            channel = [
-                channel
-                for channel
-                in channels
-                if channel["name"] == channel_name
-            ][0]
-            return channel["id"]
+            available_channels = self._get_channels()
+            available_channel_names = []
+            for available_channel in available_channels:
+                available_channel_name = available_channel['name']
+                available_channel_names.append(available_channel_name)
+                if available_channel_name == channel_name:
+                    return available_channel['id']
+            logger.error(f'Channel {channel_name} not found. Available channels: {available_channel_names}')
+            return None
         except Exception:
-            logger.error(
-                f"Could not find the channel - {channel_name}. Elementary app's available cahnnels: {[channel.get('name') for channel in channels]}")
+            logger.error(f'Elementary app failed to query Slack channels.')
+            return None
 
     def _join_channel(self, channel_id: str) -> bool:
         try:
@@ -124,7 +130,8 @@ class SlackWebClient(SlackClient):
             has_more = True
             cursor = None
             while has_more:
-                response = self.client.conversations_list(cursor=cursor)
+                response = self.client.conversations_list(cursor=cursor, types='public_channel,private_channel',
+                                                          exclude_archived=True)
                 channels.extend(response["channels"])
                 cursor = response.get("response_metadata", {}).get("next_cursor")
                 has_more = True if cursor else False
