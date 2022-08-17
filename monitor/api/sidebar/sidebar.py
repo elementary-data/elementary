@@ -1,4 +1,3 @@
-import copy
 import os
 from typing import Dict, Optional
 
@@ -7,6 +6,8 @@ from clients.dbt.dbt_runner import DbtRunner
 from monitor.api.models.models import ModelsAPI
 from monitor.api.models.schema import NormalizedModelSchema
 from monitor.api.tests.tests import TestsAPI
+
+SIDEBAR_FILES_KEYWORD = '__files__'
 
 
 class SidebarAPI(APIClient):
@@ -38,11 +39,11 @@ class SidebarAPI(APIClient):
         model_full_path_split = model_full_path.split(os.path.sep)
         for part in model_full_path_split:
             if part.endswith('.sql'):
-                if 'files' in dbt_sidebar:
-                    if model_unique_id not in dbt_sidebar['files']:
-                        dbt_sidebar['files'].append(model_unique_id)
+                if SIDEBAR_FILES_KEYWORD in dbt_sidebar:
+                    if model_unique_id not in dbt_sidebar[SIDEBAR_FILES_KEYWORD]:
+                        dbt_sidebar[SIDEBAR_FILES_KEYWORD].append(model_unique_id)
                 else:
-                    dbt_sidebar['files'] = [model_unique_id]
+                    dbt_sidebar[SIDEBAR_FILES_KEYWORD] = [model_unique_id]
             else:
                 if part not in dbt_sidebar:
                     dbt_sidebar[part] = {}
