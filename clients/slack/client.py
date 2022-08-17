@@ -103,11 +103,13 @@ class SlackWebClient(SlackClient):
 
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
         try:
-            channels = self._get_channels()
-            for channel in channels:
-                if channel['name'] == channel_name:
-                    return channel['id']
-            available_channel_names = [channel['name'] for channel in channels]
+            available_channels = self._get_channels()
+            available_channel_names = []
+            for available_channel in available_channels:
+                available_channel_name = available_channel['name']
+                available_channel_names.append(available_channel_name)
+                if available_channel_name == channel_name:
+                    return available_channel['id']
             logger.error(f'Channel {channel_name} not found. Available channels: {available_channel_names}')
             return None
         except Exception:
