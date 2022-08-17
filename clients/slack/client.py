@@ -72,7 +72,7 @@ class SlackWebClient(SlackClient):
                 self.send_message(channel_name=channel_name, message=message)
             elif err_type == 'channel_not_found':
                 logger.error(
-                    f'Channel was {channel_name} not found by the Elementary app. Please add the app to the channel.')
+                    f'Channel {channel_name} was not found by the Elementary app. Please add the app to the channel.')
                 return False
             logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
             return False
