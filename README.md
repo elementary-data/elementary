@@ -85,9 +85,9 @@ Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community
 
 Thank you :orange_heart: Whether it’s a bug fix, new feature, or additional documentation - we greatly appreciate contributions!
 
-Check out the [contributions guide](https://docs.elementary-data.com/project-overview/contributions) and [open issues](https://github.com/elementary-data/elementary/issues). 
+Check out the [contributions guide](https://docs.elementary-data.com/general/contributions) and [open issues](https://github.com/elementary-data/elementary/issues). 
 
 
 ## **License**
 
-Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary-lineage/blob/master/LICENSE) file for licensing information.
+Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary/blob/master/LICENSE) file for licensing information.
