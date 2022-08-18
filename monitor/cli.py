@@ -124,14 +124,13 @@ def monitor(
     try:
         if not config.has_slack:
             logger.error('Either a Slack token and a channel or a Slack webhook is required.')
-            return 1
+            ctx.exit(1)
 
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         anonymous_tracking.track_cli_end('monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
-            return 1
-        return 0
+            ctx.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor', exc, ctx.command.name)
         raise
@@ -204,8 +203,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
                                                   disable_passed_test_metrics=disable_passed_test_metrics)
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
-            return 1
-        return 0
+            ctx.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-report', exc, ctx.command.name)
         raise
@@ -347,7 +345,7 @@ def send_report(
     try:
         if not config.has_send_report_platform:
             logger.error('You must provide a platform to upload the report to (Slack token / S3 / GCS).')
-            return 1
+            ctx.exit(1)
 
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
@@ -357,7 +355,8 @@ def send_report(
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
-        return 0 if command_succeeded else 1
+        if not command_succeeded:
+            ctx.exit(1)
 
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-send-report', exc, ctx.command.name)
