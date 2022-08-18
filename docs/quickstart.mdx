@@ -102,6 +102,16 @@ elementary:
 
 </Accordion>
 
+### 5. Run tests
+
+```shell Terminal
+dbt test
+```
+
+Running your tests will populate Elementary's models with the relevant information that is needed to monitor your data.
+You can also choose to run only some of your tests, but keep in mind that only tests that ran _after_ Elementary was installed will be monitored.
+
+
 ### What happens now?
 
 Once the elementary dbt package has been installed and configured, your test results, run results and [dbt artifacts](./dbt/dbt-artifacts) will be loaded to elementary schema tables.
