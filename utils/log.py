@@ -1,5 +1,6 @@
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 
 from utils.env_vars import is_debug_mode_on
 
@@ -15,7 +16,7 @@ def get_console_handler():
 
 
 def get_file_handler():
-    file_handler = logging.FileHandler(LOG_FILE)
+    file_handler = RotatingFileHandler(LOG_FILE, maxBytes=50 * 1024 * 1024, backupCount=3)
     file_handler.setFormatter(FORMATTER)
     file_handler.setLevel(logging.DEBUG)
     return file_handler
