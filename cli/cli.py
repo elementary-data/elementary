@@ -35,7 +35,7 @@ class ElementaryCLI(click.MultiCommand):
                 code = compile(f.read(), fn, 'exec')
                 eval(code, ns, ns)
         except Exception:
-            logger.debug(f'Failed to load the "{name}" module.', exc_info=True)
+            logger.debug(f'Unable to load the "{name}" module.', exc_info=True)
             return None
         return ns[name]
 
