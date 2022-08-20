@@ -134,7 +134,7 @@ class DataMonitoring:
             output_data['coverages'] = models_coverages
             output_data['lineage'] = lineage.dict()
             output_data['tracking'] = {
-                'posthog_api_key': tracking.POSTHOG_API_KEY,
+                'posthog_api_key': tracking.POSTHOG_PROJECT_API_KEY,
                 'report_generator_anonymous_user_id': tracking.anonymous_user_id,
                 'anonymous_warehouse_id': tracking.anonymous_warehouse_id
             }
