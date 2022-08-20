@@ -1,0 +1,30 @@
+name: Test
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v3
+        with:
+          path: elementary
+
+      - name: Checkout dbt package
+        uses: actions/checkout@v3
+        with:
+          repository: elementary-data/dbt-data-reliability
+          path: dbt-data-reliability
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - run: pip install '$GITHUB_WORKSPACE/elementary[snowflake]'
+      - run: python $GITHUB_WORKSPACE/dbt-data-reliability/integration_tests/run_e2e_tests.py
