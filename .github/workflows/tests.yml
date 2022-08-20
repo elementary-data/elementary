@@ -42,7 +42,7 @@ jobs:
         run: edr monitor report --file-path ci_report.html
 
       - name: Upload report artifact
-      - uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: report
           path: ci_report.html
