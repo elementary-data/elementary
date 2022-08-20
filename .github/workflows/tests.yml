@@ -26,5 +26,5 @@ jobs:
         with:
           python-version: '3.10'
 
-      - run: pip install '$GITHUB_WORKSPACE/elementary[snowflake]'
-      - run: python $GITHUB_WORKSPACE/dbt-data-reliability/integration_tests/run_e2e_tests.py
+      - run: pip install './elementary[snowflake]'
+      - run: python ./dbt-data-reliability/integration_tests/run_e2e_tests.py
