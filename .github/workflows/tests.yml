@@ -11,6 +11,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Write dbt profiles
+        run: echo "${{ secrets.PROFILES_YML }}" > ~/.dbt/profiles.yml
+
       - name: Checkout Elementary
         uses: actions/checkout@v3
         with:
@@ -26,5 +29,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - run: pip install './elementary[snowflake]'
-      - run: python ./dbt-data-reliability/integration_tests/run_e2e_tests.py
+      - name: Install Elementary
+        run: pip install './elementary[snowflake]'
+
+      - name: Run E2E tests
+        run: python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t snowflake
+
+      - name: Run monitor
+        run: edr monitor
+
+      - name: Run report
+        run: edr monitor report --file-path ci_report.html
+
+      - name: Upload report artifact
+      - uses: actions/upload-artifact@v3
+        with:
+          name: report
+          path: ci_report.html
+
+      - name: Write Google service account
+        run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" > /tmp/google_service_account.json
+
+      - name: Run send report
+        run: edr monitor send-report --slack-token ${{ secrets.SLACK_TOKEN }} --slack-channel-name ${{ secrets.SLACK_CHANNEL_NAME }} --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name ${{ secrets.S3_BUCKET_NAME }} --google-service-account-path /tmp/google_service_account.json --gcs-bucket-name ${{ secrets.GCS_BUCKET_NAME }} --update-bucket-website true
