@@ -49,7 +49,7 @@ class Config:
         config_file_path = os.path.join(self.config_dir, self._CONFIG_FILE_NAME)
         if not os.path.exists(config_file_path):
             return {}
-        return OrderedYaml().load(config_file_path)
+        return OrderedYaml().load(config_file_path) or {}
 
     @property
     def has_send_report_platform(self):
