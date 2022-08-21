@@ -36,7 +36,7 @@ jobs:
         run: python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t snowflake
 
       - name: Run monitor
-        run: edr monitor
+        run: edr monitor --slack-webhook ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Run report
         run: edr monitor report --file-path ci_report.html
