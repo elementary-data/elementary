@@ -1,4 +1,4 @@
-name: Test Warehouse
+name: Test Warehouse Platform
 on:
   workflow_call:
     inputs:
@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     concurrency:
-      group: tests
+      group: tests-${{ github.workflow.inputs.warehouse-type }}
       cancel-in-progress: true
     steps:
       - name: Write dbt profiles

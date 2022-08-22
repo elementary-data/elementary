@@ -1,4 +1,4 @@
-name: Test All Warehouses
+name: Test All Warehouse Platforms
 on:
   push:
     branches: [ "master" ]
@@ -8,8 +8,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-snowflake:
+  snowflake:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: snowflake
+    secrets: inherit
+
+  bigquery:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: bigquery
+    secrets: inherit
+
+  redshift:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: redshift
+    secrets: inherit
+
+  databricks:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: redshift
     secrets: inherit
