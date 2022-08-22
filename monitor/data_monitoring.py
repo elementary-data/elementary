@@ -136,7 +136,7 @@ class DataMonitoring:
             output_data['tracking'] = {
                 'posthog_api_key': tracking.POSTHOG_PROJECT_API_KEY,
                 'report_generator_anonymous_user_id': tracking.anonymous_user_id,
-                'anonymous_warehouse_id': tracking.anonymous_warehouse_id
+                'anonymous_warehouse_id': tracking.anonymous_warehouse.id if tracking.anonymous_warehouse else None
             }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, 'r') as template_html_file:
