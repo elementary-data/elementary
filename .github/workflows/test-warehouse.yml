@@ -1,4 +1,4 @@
-name: Test Warehouse Platform
+name: Test warehouse platform
 on:
   workflow_call:
     inputs:

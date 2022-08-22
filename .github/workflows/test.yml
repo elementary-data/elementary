@@ -1,4 +1,4 @@
-name: Test All Warehouse Platforms
+name: Test all warehouse platforms
 on:
   push:
     branches: [ "master" ]
@@ -29,5 +29,5 @@ jobs:
   databricks:
     uses: ./.github/workflows/test-warehouse.yml
     with:
-      warehouse-type: redshift
+      warehouse-type: databricks
     secrets: inherit
