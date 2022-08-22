@@ -10,6 +10,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: e2e-tests
+      cancel-in-progress: true
     steps:
       - name: Write dbt profiles
         run: |
