@@ -109,7 +109,7 @@ def monitor(
         dbt_vars
 ):
     """
-    Monitor your warehouse and send alerts to Slack.
+    Monitor your warehouse.
     """
 
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
