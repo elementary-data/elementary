@@ -3,8 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       warehouse-type:
-        type: string
+        type: choice
         required: true
+        options:
+          - snowflake
+          - bigquery
+          - redshift
+          - databricks
 
   workflow_call:
     inputs:
@@ -21,7 +26,7 @@ jobs:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d > ~/.dbt/profiles.yml
+          echo "${{ secrets.CI_PROFILES_YML }}" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
         uses: actions/checkout@v3
