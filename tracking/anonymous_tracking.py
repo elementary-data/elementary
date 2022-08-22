@@ -73,11 +73,9 @@ class AnonymousTracking:
             if properties is None:
                 properties = dict()
 
-            properties['run_id'] = self.run_id
-
             posthog.capture(
                 distinct_id=self.anonymous_user_id, event=name,
-                properties={'env': self._env_props, **properties},
+                properties={'run_id': self.run_id, 'env': self._env_props, **properties},
                 groups={'warehouse': self.anonymous_warehouse.id if self.anonymous_warehouse else None}
             )
         except Exception:
