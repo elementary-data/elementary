@@ -1,6 +1,6 @@
-import { SnippetGroup } from "@/components/SnippetGroup";
+import { CodeGroup } from "@/components/CodeGroup";
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Snowflake
 ## SNOWFLAKE ##
@@ -42,7 +42,7 @@ elementary:
       keyfile: [full path to your keyfile]
 
       project: [project id]
-      dataset: [dataset name]  # elementary dataset, usually [dataset name]_elementary
+      dataset: [dataset name] # elementary dataset, usually [dataset name]_elementary
       threads: 4
       location: [dataset location]
       priority: interactive
@@ -65,7 +65,7 @@ elementary:
       password: [password]
 
       dbname: [database name]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
       threads: 4
       keepalives_idle: 240 # default 240 seconds
       connect_timeout: 10 # default 10 seconds
@@ -86,10 +86,9 @@ elementary:
       type: databricks
       host: [hostname, like <ID>.cloud.databricks.com]
       http_path: [like /sql/1.0/endpoints/<ID>]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      token : [token]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      token: [token]
       threads: [number of threads like 8]
-
 ```
 
-</SnippetGroup>
+</CodeGroup>
