@@ -53,7 +53,7 @@ jobs:
       #     path: ci_report.html
 
       - name: Write GCS keyfile
-        run: echo "${{ secrets.GCS_KEYFILE }}" > /tmp/gcs_keyfile.json
+        run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
         run: >
