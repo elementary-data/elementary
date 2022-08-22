@@ -1,6 +1,11 @@
 name: Test warehouse platform
 on:
   workflow_dispatch:
+    inputs:
+      warehouse-type:
+        type: string
+        required: true
+
   workflow_call:
     inputs:
       warehouse-type:
