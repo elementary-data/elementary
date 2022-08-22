@@ -47,10 +47,10 @@ jobs:
       - name: Install Elementary
         run: pip install './elementary[${{ inputs.warehouse-type }}]'
 
-      # - name: Run E2E tests
-      #   run: |
-      #     dbt deps --project-dir ./dbt-data-reliability/integration_tests
-      #     python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
+      - name: Run E2E tests
+        run: |
+          dbt deps --project-dir ./dbt-data-reliability/integration_tests
+          python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
 
       - name: Run monitor
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
