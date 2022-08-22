@@ -35,22 +35,22 @@ jobs:
       - name: Install Elementary
         run: pip install './elementary[snowflake]'
 
-      # - name: Run E2E tests
-      #   run: |
-      #     dbt deps --project-dir ./dbt-data-reliability/integration_tests
-      #     python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t snowflake
+      - name: Run E2E tests
+        run: |
+          dbt deps --project-dir ./dbt-data-reliability/integration_tests
+          python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t snowflake
 
-      # - name: Run monitor
-      #   run: edr monitor --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
+      - name: Run monitor
+        run: edr monitor --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
-      # - name: Run report
-      #   run: edr monitor report --file-path ci_report.html
+      - name: Run report
+        run: edr monitor report --file-path ci_report.html
 
-      # - name: Upload report artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: report
-      #     path: ci_report.html
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: report
+          path: ci_report.html
 
       - name: Write GCS keyfile
         run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
