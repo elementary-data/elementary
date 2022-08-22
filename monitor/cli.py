@@ -304,6 +304,11 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     help='Set the number of invocations shown for each test in the "Test Runs" report.'
 )
 @click.option(
+    '--file-name',
+    type=str,
+    help="The report's file name, this is how it will be stored in the bucket."
+)
+@click.option(
     '--disable-passed-test-metrics',
     type=bool,
     default=False,
@@ -320,6 +325,7 @@ def send_report(
         slack_channel_name,
         profile_target,
         executions_limit,
+        file_name,
         disable_passed_test_metrics,
         update_bucket_website,
         aws_profile_name,
@@ -351,7 +357,7 @@ def send_report(
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
-            disable_passed_test_metrics=disable_passed_test_metrics, should_open_browser=False)
+            disable_passed_test_metrics=disable_passed_test_metrics, file_path=file_name, should_open_browser=False)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)

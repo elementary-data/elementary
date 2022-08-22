@@ -25,10 +25,9 @@ class GCSClient:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)
             blob = bucket.blob(report_filename)
             blob.upload_from_filename(html_path, content_type='text/html')
-            bucket.copy_blob(blob, bucket, 'index.html')
             logger.info('Uploaded report to GCS.')
             if self.config.update_bucket_website:
-                bucket.configure_website(report_filename)
+                bucket.copy_blob(blob, bucket, 'index.html')
                 logger.info("Updated GCS bucket's website.")
         except google.cloud.exceptions.GoogleCloudError:
             logger.error('Failed to upload report to GCS.')
