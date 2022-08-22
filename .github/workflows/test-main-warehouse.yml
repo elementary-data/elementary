@@ -1,0 +1,14 @@
+name: Test main warehouse platform
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: snowflake
+    secrets: inherit
