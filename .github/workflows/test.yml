@@ -35,10 +35,10 @@ jobs:
       - name: Install Elementary
         run: pip install './elementary[snowflake]'
 
-      - name: Run E2E tests
-        run: |
-          dbt deps --project-dir ./dbt-data-reliability/integration_tests
-          python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t snowflake
+      # - name: Run E2E tests
+      #   run: |
+      #     dbt deps --project-dir ./dbt-data-reliability/integration_tests
+      #     python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t snowflake
 
       - name: Run monitor
         run: edr monitor --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
@@ -56,8 +56,9 @@ jobs:
         run: echo "${{ secrets.GCS_KEYFILE }}" > /tmp/gcs_keyfile.json
 
       - name: Run send report
-        run: edr monitor send-report \
-          --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops \
-          --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts \
-          --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts \
+        run: >
+          edr monitor send-report
+          --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
+          --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
+          --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
