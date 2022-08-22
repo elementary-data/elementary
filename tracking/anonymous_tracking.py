@@ -39,10 +39,10 @@ class AnonymousTracking:
 
     def init(self):
         try:
+            posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
             self._env_props = tracking.env.get_props()
             self.anonymous_user_id = self._get_anonymous_user_id()
             self.anonymous_warehouse = self._get_anonymous_warehouse()
-            posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
         except Exception:
             pass
 
@@ -75,21 +75,11 @@ class AnonymousTracking:
 
             properties['run_id'] = self.run_id
 
-            if self.anonymous_warehouse.id:
-                posthog.capture(
-                    distinct_id=self.anonymous_user_id, event=name,
-                    properties={'env': self._env_props, **properties},
-                    groups={'warehouse': self.anonymous_warehouse.id}
-                )
-                posthog.group_identify('warehouse', self.anonymous_warehouse.id, {
-                    'id': self.anonymous_warehouse.id,
-                    'type': self.anonymous_warehouse.type
-                })
-            else:
-                posthog.capture(
-                    distinct_id=self.anonymous_user_id, event=name,
-                    properties={'env': self._env_props, **properties}
-                )
+            posthog.capture(
+                distinct_id=self.anonymous_user_id, event=name,
+                properties={'env': self._env_props, **properties},
+                groups={'warehouse': self.anonymous_warehouse.id if self.anonymous_warehouse else None}
+            )
         except Exception:
             pass
 
@@ -127,6 +117,10 @@ class AnonymousTracking:
             adapter_type, adapter_unique_id = json.loads(
                 dbt_runner.run_operation('get_adapter_type_and_unique_id', quiet=True)[0])
             anonymous_warehouse_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
+            posthog.group_identify('warehouse', self.anonymous_warehouse.id, {
+                'id': anonymous_warehouse_id,
+                'type': adapter_type
+            })
             return AnonymousWarehouse(id=anonymous_warehouse_id, type=adapter_type)
         except Exception:
             return None
