@@ -74,7 +74,7 @@ class SlackWebClient(SlackClient):
                 logger.error(
                     f'Channel {channel_name} was not found by the Elementary app. Please add the app to the channel.')
                 return False
-            logger.error(f"Could not post message to channel - {channel_name}. Error: {e}")
+            logger.error(f"Could not post message to channel - {channel_name}. Error: {err}")
             return False
 
     def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
