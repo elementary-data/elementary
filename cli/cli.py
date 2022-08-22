@@ -6,6 +6,7 @@ from pyfiglet import Figlet
 import cli.upgrade
 from config.config import Config
 from tracking.anonymous_tracking import AnonymousTracking
+from utils.log import get_logger
 
 f = Figlet(font='slant')
 click.echo(f.renderText('Elementary'))
@@ -13,6 +14,8 @@ cli.upgrade.recommend_version_upgrade()
 
 root_folder = os.path.join(os.path.dirname(__file__), '..')
 modules = ['lineage', 'monitor']
+
+logger = get_logger(__name__)
 
 
 class ElementaryCLI(click.MultiCommand):
@@ -32,6 +35,7 @@ class ElementaryCLI(click.MultiCommand):
                 code = compile(f.read(), fn, 'exec')
                 eval(code, ns, ns)
         except Exception:
+            logger.debug(f'Unable to load the "{name}" module.', exc_info=True)
             return None
         return ns[name]
 
