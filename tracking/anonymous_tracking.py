@@ -117,7 +117,7 @@ class AnonymousTracking:
             adapter_type, adapter_unique_id = json.loads(
                 dbt_runner.run_operation('get_adapter_type_and_unique_id', quiet=True)[0])
             anonymous_warehouse_id = hashlib.sha256(adapter_unique_id.encode('utf-8')).hexdigest()
-            posthog.group_identify('warehouse', self.anonymous_warehouse.id, {
+            posthog.group_identify('warehouse', anonymous_warehouse_id, {
                 'id': anonymous_warehouse_id,
                 'type': adapter_type
             })
