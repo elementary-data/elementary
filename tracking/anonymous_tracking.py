@@ -16,8 +16,7 @@ logging.getLogger('posthog').disabled = True
 
 class AnonymousTracking:
     ANONYMOUS_USER_ID_FILE = '.user_id'
-    POSTHOG_API_KEY = 'phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg'
-    POSTHOG_HOST = 'https://app.posthog.com'
+    POSTHOG_PROJECT_API_KEY = 'phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg'
 
     def __init__(self, config: Config) -> None:
         self.env_props = None
@@ -33,7 +32,7 @@ class AnonymousTracking:
             self.env_props = tracking.env.get_props()
             self.anonymous_user_id = self.init_anonymous_user_id()
             self.anonymous_warehouse_id = self._get_anonymous_warehouse_id()
-            posthog.api_key, posthog.host = self.POSTHOG_API_KEY, self.POSTHOG_HOST
+            posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
         except Exception:
             pass
 
