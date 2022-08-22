@@ -3,6 +3,7 @@ import logging
 import uuid
 from pathlib import Path
 
+import click.exceptions
 import posthog
 
 import tracking.env
@@ -82,6 +83,8 @@ class AnonymousTracking:
             pass
 
     def track_cli_exception(self, module_name: str, exc: Exception, command: str = None) -> None:
+        if isinstance(exc, click.exceptions.Exit):
+            return
         try:
             props = {
                 'exception_properties': {
