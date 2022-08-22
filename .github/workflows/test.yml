@@ -9,8 +9,7 @@ on:
 
 jobs:
   test-snowflake:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ./.github/actions/test-platform
-        with:
-          warehouse-type: snowflake
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: snowflake
+    secrets: inherit
