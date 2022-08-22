@@ -2,12 +2,12 @@ import hashlib
 import json
 import logging
 import uuid
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 import click.exceptions
 import posthog
+from pydantic import BaseModel
 
 import tracking.env
 from clients.dbt.dbt_runner import DbtRunner
@@ -18,8 +18,7 @@ from utils.package import get_package_version
 logging.getLogger('posthog').disabled = True
 
 
-@dataclass
-class AnonymousWarehouse:
+class AnonymousWarehouse(BaseModel):
     id: str
     type: str
 
