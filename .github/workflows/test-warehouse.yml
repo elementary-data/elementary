@@ -55,6 +55,12 @@ jobs:
       - name: Install Elementary
         run: pip install './elementary[${{ inputs.warehouse-type }}]'
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: elementary/build
+
       - name: Run E2E tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
