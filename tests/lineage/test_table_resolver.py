@@ -1,7 +1,7 @@
 import pytest
 from sqllineage.models import Table, Schema
 
-from lineage.table_resolver import TableResolver
+from elementary.lineage.table_resolver import TableResolver
 
 
 @pytest.mark.parametrize("table_name_in_query_text, db_name_in_history_table, schema_name_in_history_table, "
