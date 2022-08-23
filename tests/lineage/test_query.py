@@ -1,6 +1,6 @@
 import pytest
-from lineage.query import Query
-from lineage.query_context import QueryContext
+from elementary.lineage.query import Query
+from elementary.lineage.query_context import QueryContext
 from sqllineage.core import LineageResult, Table
 
 
