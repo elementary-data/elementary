@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Optional, Union
 
 from elementary.clients.api.api import APIClient
 from elementary.monitor.api.models.schema import ExposureSchema, ModelCoverageSchema, ModelSchema, NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema, SourceSchema
@@ -58,7 +58,7 @@ class ModelsAPI(APIClient):
     @staticmethod
     def _normalize_dbt_artifact_dict(
         artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
-        type: Literal["model", "source", "exposure"]
+        type: str
     ) -> Union[NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema]:
         artifact_name = artifact.name
 
@@ -99,7 +99,7 @@ class ModelsAPI(APIClient):
     def _normalize_artifact_path(
         cls,
         artifact_path: str,
-        type: Literal["model", "source", "exposure"],
+        type: str,
         artifact_package_name: Optional[str] = None,
     ) -> str:
         splited_artifact_path = artifact_path.split(os.path.sep)
