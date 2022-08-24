@@ -27,7 +27,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     concurrency:
-      group: tests-${{ inputs.warehouse-type }}
+      group: tests-${{ inputs.warehouse-type }}-${{ github.ref_name }}
     steps:
       - name: Write dbt profiles
         run: |
