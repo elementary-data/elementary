@@ -1,4 +1,3 @@
-import functools
 import json
 import os
 import os.path
@@ -48,7 +47,8 @@ class DataMonitoring:
         self.s3_client = S3Client.create_client(self.config)
         self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.alerts_api = AlertsAPI(self.dbt_runner, self.get_elementary_database_and_schema())
+        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
+        self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema)
         self.sent_alert_count = 0
         self.success = True
 
@@ -224,7 +224,7 @@ class DataMonitoring:
             test_invocations = invocations.get(test_sub_type_unique_id)
             test_result = TestAlert.create_test_alert_from_dict(
                 **metadata,
-                elementary_database_and_schema=self.get_elementary_database_and_schema(),
+                elementary_database_and_schema=self.elementary_database_and_schema,
                 test_rows_sample=test_sample_data,
                 test_runs=json.loads(test_invocations.json()) if test_invocations else {}
             )
@@ -275,7 +275,6 @@ class DataMonitoring:
             f"elementary - {generation_time} utc.html".replace(" ", "_").replace(":", "-")
         ))
 
-    @functools.lru_cache
     def get_elementary_database_and_schema(self):
         try:
             return self.dbt_runner.run_operation('get_elementary_database_and_schema', quiet=True)[0]
