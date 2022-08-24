@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from elementary.exceptions.exceptions import ConfigError
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
@@ -17,7 +18,8 @@ class Config:
                  profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
                  slack_token: str = None, slack_channel_name: str = None, aws_profile_name: str = None,
                  aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
-                 google_service_account_path: str = None, gcs_bucket_name: str = None):
+                 google_service_account_path: str = None, gcs_bucket_name: str = None,
+                 should_validate_profile: bool = True):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
@@ -42,6 +44,9 @@ class Config:
         self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get('gcs_bucket_name')
 
         self.anonymous_tracking_enabled = config.get('anonymous_usage_tracking', True)
+
+        if should_validate_profile:
+            self.validate_elementary_profile()
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
@@ -68,3 +73,15 @@ class Config:
     @property
     def has_gcs(self):
         return self.gcs_bucket_name and self.google_service_account_path
+
+    def validate_elementary_profile(self):
+        profiles_path = os.path.join(self.profiles_dir, 'profiles.yml')
+        try:
+            profiles_yml = OrderedYaml().load(profiles_path)
+            if 'elementary' not in profiles_yml:
+                raise ConfigError(
+                    'Unable to find "elementary" profile. '
+                    'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
+                )
+        except FileNotFoundError:
+            raise ConfigError(f'Could not find "profiles.yml" at "{self.profiles_dir}"')
