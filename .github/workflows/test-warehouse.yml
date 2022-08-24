@@ -70,20 +70,20 @@ jobs:
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
       - name: Run report
-        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path ci_report.html
+        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report.html
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
-          name: report
-          path: ci_report.html
+          name: report_${{ inputs.warehouse-type }}_${{ github.ref }}.html
+          path: report.html
 
       - name: Write GCS keyfile
         run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
         run: >
-          edr monitor send-report -t ${{ inputs.warehouse-type }}
+          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ github.ref }}.html
           --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
