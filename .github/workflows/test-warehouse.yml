@@ -62,6 +62,8 @@ jobs:
           path: elementary/build
 
       - name: Run E2E tests
+        env:
+          CUSTOM_SCHEMA: ${{ github.ref_name }}
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
