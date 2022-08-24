@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Optional
 from pydantic import BaseModel, validator
 
 
@@ -26,8 +26,8 @@ class SourceSchema(ArtifactSchema):
 
 class ExposureSchema(ArtifactSchema):
     url: Optional[str]
-    type: Optional[Literal["dashboard", "notebook", "analysis", "ml", "application"]]
-    maturity: Optional[Literal["low", "medium", "high"]]
+    type: Optional[str]
+    maturity: Optional[str]
     owner_email: Optional[str]
 
 
