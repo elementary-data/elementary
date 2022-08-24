@@ -29,6 +29,7 @@ from elementary.monitor.api.tests.schema import InvocationSchema, ModelUniqueIdT
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
+from elementary.utils.ordered_yaml import OrderedYaml
 from elementary.utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
@@ -40,20 +41,32 @@ SQL_FILE_EXTENSION = ".sql"
 class DataMonitoring:
 
     def __init__(self, config: Config, force_update_dbt_package: bool = False):
+        self.execution_properties = {}
         self.config = config
         self.dbt_runner = DbtRunner(dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target)
-        self.execution_properties = {}
-        # slack client is optional
-        self.slack_client = SlackClient.create_client(self.config)
-        self.s3_client = S3Client.create_client(self.config)
-        self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
-        if not self.elementary_database_and_schema:
+
+        elementary_profile = self.get_elementary_profile()
+        if not elementary_profile:
             sys.exit(
                 'Unable to find "elementary" profile. '
                 'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
             )
+
+        if 'target' not in elementary_profile and not self.config.profile_target:
+            sys.exit('Please provide --profile-target or add a "target" to the "elementary" profile.')
+
+        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
+        if not self.elementary_database_and_schema:
+            sys.exit(
+                'Unable to find Elementary models. '
+                'Please refer for guidance - https://docs.elementary-data.com/quickstart'
+            )
+
+        # slack client is optional
+        self.slack_client = SlackClient.create_client(self.config)
+        self.s3_client = S3Client.create_client(self.config)
+        self.gcs_client = GCSClient.create_client(self.config)
         self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema)
         self.sent_alert_count = 0
         self.success = True
@@ -286,3 +299,7 @@ class DataMonitoring:
             return self.dbt_runner.run_operation('get_elementary_database_and_schema', quiet=True)[0]
         except Exception:
             return None
+
+    def get_elementary_profile(self) -> Dict:
+        profiles_yml = OrderedYaml().load(os.path.join(self.config.profiles_dir, 'profiles.yml'))
+        return profiles_yml.get('elementary')
