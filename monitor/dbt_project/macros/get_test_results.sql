@@ -6,10 +6,10 @@
 
         tests_in_last_chosen_days as (
             select *,
-                  {{ dbt_utils.datediff(elementary.cast_as_timestamp('detected_at'), dbt_utils.current_timestamp(), 'day') }} as days_diff,
+                  {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
                   row_number() over (partition by model_unique_id, test_unique_id, column_name, test_sub_type order by detected_at desc) as row_number
                 from elemetary_test_results
-                where {{ dbt_utils.datediff(elementary.cast_as_timestamp('detected_at'), dbt_utils.current_timestamp(), 'day') }} < {{ days_back }}
+                where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         ),
 
         latest_tests_in_the_last_chosen_days as (
