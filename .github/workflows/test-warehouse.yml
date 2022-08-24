@@ -75,7 +75,7 @@ jobs:
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
-          name: report_${{ inputs.warehouse-type }}_${{ github.ref }}.html
+          name: report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
           path: report.html
 
       - name: Write GCS keyfile
@@ -83,7 +83,7 @@ jobs:
 
       - name: Run send report
         run: >
-          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ github.ref }}.html
+          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
           --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
