@@ -1,6 +1,22 @@
 name: Test warehouse platform
 on:
   workflow_dispatch:
+    inputs:
+      warehouse-type:
+        type: choice
+        required: true
+        options:
+          - snowflake
+          - bigquery
+          - redshift
+          - databricks
+      elementary-ref:
+        type: string
+        required: false
+      dbt-data-reliability-ref:
+        type: string
+        required: false
+
   workflow_call:
     inputs:
       warehouse-type:
@@ -16,18 +32,20 @@ jobs:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          echo "${{ secrets.CI_PROFILES_YML }}" > ~/.dbt/profiles.yml
+          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
         uses: actions/checkout@v3
         with:
           path: elementary
+          ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
         uses: actions/checkout@v3
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
+          ref: ${{ inputs.dbt-data-reliability-ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -37,10 +55,16 @@ jobs:
       - name: Install Elementary
         run: pip install './elementary[${{ inputs.warehouse-type }}]'
 
-      # - name: Run E2E tests
-      #   run: |
-      #     dbt deps --project-dir ./dbt-data-reliability/integration_tests
-      #     python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: elementary/build
+
+      - name: Run E2E tests
+        run: |
+          dbt deps --project-dir ./dbt-data-reliability/integration_tests
+          python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
 
       - name: Run monitor
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}

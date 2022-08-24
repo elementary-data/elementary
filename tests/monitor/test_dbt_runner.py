@@ -1,7 +1,7 @@
 import json
 import pytest
 from unittest import mock
-from clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.dbt_runner import DbtRunner
 
 
 @pytest.mark.parametrize("command", [

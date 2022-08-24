@@ -1,0 +1,16 @@
+import { Accordion } from "@/components/Accordion";
+
+<Accordion title="What schemas Elementary adds? What is '__tests' schema?">
+
+We recommend configuring a dedicated schema for the Elementary models.
+
+Also, Elementary creates a schema to store temp tables with results of elementary anomaly detection tests.
+As some users have hundreds of Elementary tests, we didn't want tons of small tables to be created in the Elementary schema.
+These results are later merged to the incremental tables in the main elementary schema.
+
+The schemas structure would be:
+- Your schemas
+- Elementary models schema - The schema name is configured under your `dbt_project.yml`.  
+- Elementary temp test results schema - The Elementary schema name with `__test` suffix.
+
+</Accordion>

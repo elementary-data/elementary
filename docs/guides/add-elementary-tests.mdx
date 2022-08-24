@@ -25,7 +25,7 @@ These tests are configured and executed like any other tests in your project.
 Executes table level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
 By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Models
 version: 2
@@ -67,7 +67,8 @@ models:
       - elementary.table_anomalies
           tags: ['elementary']
 ```
-</SnippetGroup>
+
+</CodeGroup>
 
 </Accordion>
 
@@ -76,10 +77,10 @@ models:
 `elementary.dimension_anomalies`
 
 This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
-It is best to configure it on low-cardinality fields. 
+It is best to configure it on low-cardinality fields.
 The test counts rows grouped by given columns/expressions, and can be configured using the `dimensions` and `where_expression` keys.
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Models
 version: 2
@@ -103,7 +104,7 @@ models:
   - name: login_events
     config:
       elementary:
-        timestamp_column: 'loaded_at'
+        timestamp_column: "loaded_at"
     tests:
       - elementary.dimension_anomalies:
           dimensions:
@@ -111,9 +112,9 @@ models:
             - country_name
           where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
           # optional - use tags to run elementary tests on a dedicated run
-          tags: ['elementary']
+          tags: ["elementary"]
           config:
-          # optional - change severity
+            # optional - change severity
             severity: warn
 
   - name: users
@@ -122,9 +123,10 @@ models:
       - elementary.dimension_anomalies:
           dimensions:
             - event_type
-          tags: ['elementary']
+          tags: ["elementary"]
 ```
-</SnippetGroup>
+
+</CodeGroup>
 
 </Accordion>
 
@@ -134,7 +136,7 @@ models:
 
 Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Models
 version: 2
@@ -156,14 +158,15 @@ models:
   - name: login_events
     config:
       elementary:
-        timestamp_column: 'loaded_at'
+        timestamp_column: "loaded_at"
     tests:
       - elementary.all_columns_anomalies:
-          tags: ['elementary']
+          tags: ["elementary"]
           # optional - change global sensitivity
           sensitivity: 3.5
 ```
-</SnippetGroup>
+
+</CodeGroup>
 
 </Accordion>
 
@@ -173,7 +176,7 @@ models:
 
 Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Models
 version: 2
@@ -194,17 +197,17 @@ models:
   - name: login_events
     config:
       elementary:
-        timestamp_column: 'loaded_at'
+        timestamp_column: "loaded_at"
     tests:
       - elementary.schema_changes:
-          tags: ['elementary']
+          tags: ["elementary"]
           config:
             severity: warn
 ```
-</SnippetGroup>
+
+</CodeGroup>
 
 </Accordion>
-
 
 ### Column test:
 
@@ -214,7 +217,7 @@ models:
 
 Executes column level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Models
 version: 2
@@ -275,10 +278,10 @@ models:
                 - min_length
               tags: ['elementary']
 ```
-</SnippetGroup>
+
+</CodeGroup>
 
 </Accordion>
-
 
 ## How to configure your Elementary tests?
 
@@ -295,7 +298,7 @@ More on data tests configuration [here](./elementary-tests-configuration).
 We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
 If you wish to only be warned on anomalies, configure the severity of the tests to warn.
 
-<SnippetGroup>
+<CodeGroup>
 
 ```yml Models
 version: 2
@@ -426,7 +429,7 @@ sources:
               - elementary.column_anomalies
 ```
 
-</SnippetGroup>
+</CodeGroup>
 
 ## What happens on each test?
 
