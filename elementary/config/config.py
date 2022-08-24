@@ -4,6 +4,8 @@ from pathlib import Path
 from elementary.exceptions.exceptions import ConfigError
 from elementary.utils.ordered_yaml import OrderedYaml
 
+_QUICKSTART_CLI_ERR_MSG = 'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
+
 
 class Config:
     _SLACK = 'slack'
@@ -79,9 +81,6 @@ class Config:
         try:
             profiles_yml = OrderedYaml().load(profiles_path)
             if 'elementary' not in profiles_yml:
-                raise ConfigError(
-                    'Unable to find "elementary" profile. '
-                    'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
-                )
+                raise ConfigError(f'Unable to find "elementary" profile. {_QUICKSTART_CLI_ERR_MSG}')
         except FileNotFoundError:
-            raise ConfigError(f'Could not find "profiles.yml" at "{self.profiles_dir}"')
+            raise ConfigError(f'Could not find "profiles.yml" at "{self.profiles_dir}". {_QUICKSTART_CLI_ERR_MSG}')
