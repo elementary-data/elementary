@@ -275,7 +275,7 @@ class DataMonitoring:
             f"elementary - {generation_time} utc.html".replace(" ", "_").replace(":", "-")
         ))
 
-    @functools.lru_cache
+    @functools.lru_cache()
     def get_elementary_database_and_schema(self):
         try:
             return self.dbt_runner.run_operation('get_elementary_database_and_schema', quiet=True)[0]
