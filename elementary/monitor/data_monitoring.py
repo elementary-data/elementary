@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+import sys
 import webbrowser
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
@@ -48,6 +49,11 @@ class DataMonitoring:
         self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
+        if not self.elementary_database_and_schema:
+            sys.exit(
+                'Unable to find "elementary" profile. '
+                'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
+            )
         self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema)
         self.sent_alert_count = 0
         self.success = True
@@ -279,5 +285,4 @@ class DataMonitoring:
         try:
             return self.dbt_runner.run_operation('get_elementary_database_and_schema', quiet=True)[0]
         except Exception:
-            logger.error("Failed to parse Elementary's database and schema.")
-            return '<elementary_database>.<elementary_schema>'
+            return None
