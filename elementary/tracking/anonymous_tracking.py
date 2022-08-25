@@ -5,7 +5,6 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-import click.exceptions
 import posthog
 from pydantic import BaseModel
 
@@ -90,10 +89,7 @@ class AnonymousTracking:
 
     def track_cli_exception(self, module_name: str, exc: Exception, command: str = None) -> None:
         props = {
-            'exception_properties': {
-                'exception_type': str(type(exc)),
-                'exception_content': str(exc)
-            },
+            'exception_type': str(type(exc)),
             'module_name': module_name,
             'command': command,
             'version': get_package_version()
