@@ -89,8 +89,6 @@ class AnonymousTracking:
         self.send_event('cli-end', properties=props)
 
     def track_cli_exception(self, module_name: str, exc: Exception, command: str = None) -> None:
-        if isinstance(exc, click.exceptions.Exit):
-            return
         props = {
             'exception_properties': {
                 'exception_type': str(type(exc)),

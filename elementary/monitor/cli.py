@@ -1,3 +1,4 @@
+import sys
 import click
 
 from elementary.config.config import Config
@@ -127,7 +128,7 @@ def monitor(
         success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         anonymous_tracking.track_cli_end('monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
-            ctx.exit(1)
+            sys.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor', exc, ctx.command.name)
         raise
@@ -201,7 +202,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
                                                   disable_passed_test_metrics=disable_passed_test_metrics)
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
-            ctx.exit(1)
+            sys.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-report', exc, ctx.command.name)
         raise
@@ -357,7 +358,7 @@ def send_report(
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
         if not command_succeeded:
-            ctx.exit(1)
+            sys.exit(1)
 
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-send-report', exc, ctx.command.name)
