@@ -60,7 +60,7 @@ jobs:
           python-version: '3.7.5'
 
       - name: Install dbt
-        if: inputs.dbt-version != ''
+        if: inputs.dbt-version
         run: pip install dbt-core==${{ inputs.dbt-version }}
 
       - name: Install Elementary
