@@ -68,6 +68,9 @@ jobs:
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
 
+      - name: Run help
+        run: edr --help
+
       - name: Run monitor
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
