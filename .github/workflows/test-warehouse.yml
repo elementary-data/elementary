@@ -39,7 +39,8 @@ jobs:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/${{ github.head_ref }}/g" > ~/.dbt/profiles.yml
+          UNDERSCORED_REF_NAME=$(echo "${{ github.head_ref }}" | sed 's/-/_/g')
+          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
         uses: actions/checkout@v3
