@@ -2,6 +2,7 @@ import json
 import subprocess
 from typing import List, Optional, Tuple
 
+from elementary.exceptions.exceptions import DbtCommandError
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -10,10 +11,12 @@ logger = get_logger(__name__)
 class DbtRunner:
     ELEMENTARY_LOG_PREFIX = 'Elementary: '
 
-    def __init__(self, project_dir: str, profiles_dir: str, target: Optional[str] = None) -> None:
+    def __init__(self, project_dir: str, profiles_dir: str, target: Optional[str] = None,
+                 raise_on_failure=True) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
+        self.raise_on_failure = raise_on_failure
 
     def _run_command(
             self,
@@ -21,7 +24,6 @@ class DbtRunner:
             json_logs: bool = False,
             vars: Optional[dict] = None,
             quiet: bool = False,
-            check: bool = True
     ) -> Tuple[bool, str]:
         dbt_command = ['dbt']
         json_output = False
@@ -38,7 +40,10 @@ class DbtRunner:
             dbt_command.extend(['--vars', json_vars])
         if not quiet:
             logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
-        result = subprocess.run(dbt_command, check=check, capture_output=(json_output or quiet))
+        try:
+            result = subprocess.run(dbt_command, check=self.raise_on_failure, capture_output=(json_output or quiet))
+        except subprocess.CalledProcessError as err:
+            raise DbtCommandError(err)
         output = None
         if json_output:
             output = result.stdout.decode('utf-8')
@@ -76,7 +81,8 @@ class DbtRunner:
         if macro_args:
             json_args = json.dumps(macro_args)
             command_args.extend(['--args', json_args])
-        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars, quiet=quiet)
+        success, command_output = self._run_command(command_args=command_args, json_logs=json_logs, vars=vars,
+                                                    quiet=quiet)
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
