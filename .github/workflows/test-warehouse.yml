@@ -78,13 +78,13 @@ jobs:
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
       - name: Run report
-        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report.html
+        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
-          path: report.html
+          path: report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
 
       - name: Write GCS keyfile
         run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
