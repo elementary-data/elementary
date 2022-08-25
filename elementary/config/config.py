@@ -72,7 +72,19 @@ class Config:
     def has_gcs(self):
         return self.gcs_bucket_name and self.google_service_account_path
 
-    def validate_elementary_profile(self):
+    def validate_monitor(self):
+        self._validate_elementary_profile()
+        if not self.has_slack:
+            raise ConfigError('Either a Slack token and a channel or a Slack webhook is required.')
+
+    def validate_report(self):
+        self._validate_elementary_profile()
+
+    def validate_send_report(self):
+        if not self.has_send_report_platform:
+            raise ConfigError('You must provide a platform to upload the report to (Slack token / S3 / GCS).')
+
+    def _validate_elementary_profile(self):
         profiles_path = os.path.join(self.profiles_dir, 'profiles.yml')
         try:
             profiles_yml = OrderedYaml().load(profiles_path)
