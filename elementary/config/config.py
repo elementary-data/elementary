@@ -81,6 +81,7 @@ class Config:
         self._validate_elementary_profile()
 
     def validate_send_report(self):
+        self._validate_elementary_profile()
         if not self.has_send_report_platform:
             raise ConfigError('You must provide a platform to upload the report to (Slack token / S3 / GCS).')
 
