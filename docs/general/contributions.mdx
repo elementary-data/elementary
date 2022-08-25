@@ -1,0 +1,92 @@
+---
+title: 'Contribution guide'
+---
+
+Thank you for taking the time to contribute 🧡
+
+Whether it’s a bug fix, new feature, or additional documentation - we greatly appreciate contributions!
+
+Elementary code is separated into two repositories:
+
+- [Elementary main repo](https://github.com/elementary-data/elementary)
+
+- [dbt package repo](https://github.com/elementary-data/dbt-data-reliability)
+
+To contribute, choose an existing issue on the [main repo](https://github.com/elementary-data/elementary), or open your own new issue.
+Opening an issue about a bug or feature request is already a valuable contribution.
+
+On the issue, we can discuss a design and make suggestions on implementation.
+
+Not sure where to start?
+
+That's ok, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) and we will help!
+
+**No time? No worries**
+
+If you don't have time to contribute, there are other easy ways to help and show your appreciation:
+
+- Star the project on Github
+
+- Tweet about it
+
+- Mention in your blog
+
+- Tell your friends/colleagues
+
+Thank you again, we value your support!
+
+## Contributing to the dbt package
+
+### How to test my code?
+
+There is a dbt project inside the dbt package repository that is called [integration_tests](https://github.com/elementary-data/dbt-data-reliability/tree/master/integration_tests). Inside of it there are two python files that are responsible for unit tests and e2e tests.
+
+#### Tests Requirements
+
+- Both unit tests and end-to-end tests run dbt behind the scene so you need to have a dbt profile named 'elementary' with a target named 'snowflake', 'bigquery' or 'redshift' based on your existing platform (when we deploy a new version we run it against all platforms but to get your PR merged you only need to run it against one platform, the platform you already have in your organization).
+
+- Both unit-tests and end-to-end tests require Elementary's CLI code installed on your local machine, to install it simply run:
+
+```
+pip install elementary-data
+```
+
+### Unit tests
+
+- If you write a macro and you want to test it you can simply add a test file for this macro inside 'integration_tests/macros/unit_tests' (see test_split_list_to_chunks as an example). This unit test macro should start with 'test' (similar to python)
+
+- Run the 'run_unit_tests.py' python script with a target flag '-t' and the relevant platform you have in place (snowflake, bigquery, redshift).
+
+- You can also use the flag '-f' to select your new test file and avoid running all the existing unit-tests (although it's a good practice to run it at least once you are satisfied with your changes)
+
+Usage example:
+
+```
+python ./run_unit_tests.py -f test_insensitive_get_dict_value -t snowflake
+```
+
+### End-to-end tests
+
+- To run the end-to-end tests take a look at run_e2e_tests.py. It basically receives a target (snowflake / bigquery / redshift) and a test type (table / column / etc.).
+
+- The e2e tests generate fake data with built-in issues inside, load it into staging tables using the dbt seed command, run the models inside the integration_tests dbt project and finally validate the results in the output tables using validation macros.
+
+- The end-to-end test types are:
+
+  - table - this e2e type validates that table anomalies are monitored as expected
+
+  - column - this e2e type validates that column anomalies are monitored as expected
+
+  - schema - this e2e type validates that schema changes are monitored as expected
+
+  - regular - this e2e type validates that regular dbt tests are being captured and alerts will be sent for them in Elementary
+
+  - artifacts - this e2e type validates that the dbt artifacts are parsed and uploaded successfully to the data warehouse
+
+  - all (default) - validates all e2e types
+
+Usage example:
+
+```
+python ./run_e2e_tests.py -t snowflake -e table
+```

@@ -1,0 +1,106 @@
+---
+title: "Share observability report"
+---
+
+Distribute the report by sending it to external platforms using the command `edr monitor send-report`.
+You can specify more than one platform in the command, and the report will be sent to all.
+All arguments can be passed either as CLI arguments or in the `config.yml` file.
+
+## Slack
+
+After you [setup a Slack app and token](../integrations/slack#slack-integration-setup) you can run the command:
+
+```shell
+edr monitor send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+A report will be sent to your Slack channel.
+
+### Configuration
+
+If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
+
+```yml
+slack:
+  token: [ Slack token ]
+  channel_name: [ Slack channel ]
+```
+
+## Amazon S3
+
+The prerequisites are to
+have [AWS access keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html) and
+an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html).
+
+If you already have
+a [`~/.aws/credentials`](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-where)
+file, you can run the command and provide only the profile name and the bucket's name:
+
+```shell
+edr monitor send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME>
+```
+
+Alternatively, you can pass the access key ID and secret access key:
+
+```shell
+edr monitor send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SECRET_ACCESS_KEY> --s3-bucket-name <BUCKET_NAME>
+```
+
+### Hosting the report as a website
+
+You can host the report as the bucket's website so that you can browse to it with a constant URL
+like `https://<Elementary-Report-Bucket>.s3-website.<Region>.amazonaws.com`.
+In order to do that, you'll need to complete **steps 1-4** on
+the [configure a website on the bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html)
+guide.
+After you've completed it, pass `--update-bucket-website true` to `send-report` in order to update the main page of
+the bucket's website.
+
+### Configuration
+
+If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
+
+```yml
+aws:
+  profile_name: [ AWS profile name ]
+  s3_bucket_name: [ S3 bucket name ]
+update_bucket_website: [ true | false ]
+```
+
+## Google Cloud Storage (GCS)
+
+The prerequisites are to have
+a [Google service account file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and
+a [GCS bucket](https://cloud.google.com/storage/docs/creating-buckets).
+Once you have it, you can send the report to your GCS bucket by running the command:
+
+```shell
+edr monitor send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
+```
+
+### Hosting the report as a website
+
+You can host the report as the bucket's website so that you can browse to it with a constant URL
+like `https://storage.googleapis.com/<Elementary-Report-Bucket>/index.html`.
+Here's [an example](https://storage.googleapis.com/elementary_static/elementary_demo.html).
+In order to do that, pass `--update-bucket-website true` to `send-report` in order to update the `index.html` file in
+the bucket.
+
+_Note_: You might want to [limit or grant access](https://cloud.google.com/storage/docs/access-control) to your reports
+bucket to certain users.
+
+### Configuration
+
+If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
+
+```yml
+google:
+  service_account_path: [ Google service account path ]
+  gcs_bucket_name: [ GCS bucket name ]
+update_bucket_website: [ true | false ]
+```
+
+## Missing something?
+
+Want to share the report with a different method or consult on deployment? Reach out to us
+on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).

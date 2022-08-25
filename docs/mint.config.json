@@ -1,0 +1,120 @@
+{
+  "name": "Elementary",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "./elementary_logo_512x512.png",
+  "colors": {
+    "primary": "#FF6B42",
+    "light": "#FE8E08",
+    "dark": "#FF4775",
+    "ultraLight": "#F3D7B4",
+    "ultraDark": "#E0456C"
+  },
+  "topbarCtaButton": {
+    "name": "Signup for cloud beta",
+    "url": "https://www.elementary-data.com/cloud-beta"
+  },
+  "topbarLinks": [
+    {
+      "name": "Blog",
+      "url": "https://www.elementary-data.com/blog"
+    },
+    {
+      "name": "Support",
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Community",
+      "icon": "slack",
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    },
+    {
+      "name": "Demo",
+      "icon": "circle-play",
+      "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
+    },
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/elementary-data/elementary"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "quickstart-cli"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "quickstart/generate-report-ui",
+        "quickstart/share-report-ui",
+        "quickstart/send-slack-alerts",
+        "guides/add-elementary-tests"
+      ]
+    },
+    {
+      "group": "Understand Elementary",
+      "pages": [
+        "understand-elementary/elementary-overview",
+        "guides/modules-overview/dbt-package",
+        "dbt/dbt-artifacts",
+        "understand-elementary/elementary-report-ui",
+        "understand-elementary/elementary-alerts"
+      ]
+    },
+    {
+      "group": "Deployment",
+      "pages": [
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands",
+        "integrations/github-actions"
+      ]
+    },
+    {
+      "group": "Data Anomaly Detection Tests",
+      "pages": [
+        "guides/data-anomaly-detection",
+        "guides/elementary-tests-configuration",
+        "guides/monitoring-in-production"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/slack",
+        "integrations/snowflake",
+        "integrations/bigquery",
+        "integrations/redshift",
+        "integrations/databricks"
+      ]
+    },
+    {
+      "group": "Community & Support",
+      "pages": [
+        "general/contributions",
+        "general/troubleshooting",
+        "general/community-and-support",
+        "general/faq"
+      ]
+    }
+  ],
+  "footerSocials": [
+    {
+      "type": "website",
+      "url": "https://www.elementary-data.com/"
+    },
+    {
+      "type": "slack",
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    }
+  ]
+}

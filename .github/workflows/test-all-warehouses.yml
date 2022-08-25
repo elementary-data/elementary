@@ -1,0 +1,30 @@
+name: Test all warehouse platforms
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  snowflake:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: snowflake
+    secrets: inherit
+
+  bigquery:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: bigquery
+    secrets: inherit
+
+  redshift:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: redshift
+    secrets: inherit
+
+  databricks:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: databricks
+    secrets: inherit

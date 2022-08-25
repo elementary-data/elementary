@@ -1,0 +1,140 @@
+---
+title: "Quickstart: Data lineage"
+---
+
+## Install and configure
+
+Start by downloading and installing elementary-data CLI.
+
+To install the lineage module, run:
+
+```
+pip install 'elementary-data[lineage]'
+```
+
+Run one of the following commands based on your platform (no need to run all):
+
+```
+pip install 'elementary-data[snowflake]'
+pip install 'elementary-data[bigquery]'
+pip install 'elementary-data[redshift]'
+```
+
+```
+# The tool is named edr (Elementary Data Reliability),
+# run it to validate the installation:
+edr --help
+```
+
+We recommend using pip, for other installation options refer to the [download and install guide](./understand-elementary/cli-install#install-and-configure).
+
+## Connection profile
+
+In order to connect, elementary needs a profile in a file named `profiles.yml`, (if you use dbt, you already have it).
+
+- Path: `HOME_DIR/.dbt/profiles.yml`
+
+- Profile name: `elementary`
+
+Here is an example for Snowflake and BigQuery profiles:
+
+<CodeGroup>
+
+```yml Snowflake
+## SNOWFLAKE ##
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'elementary_test_results' is to find it.        ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary:
+  outputs:
+    default:
+      type: snowflake
+      account: [account id]
+
+      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      user: [username]
+      password: [password]
+
+      role: [user role]
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]
+      threads: 4
+      ## OPTIONAL - if you want to create the lineage based on queries from more
+      ## than the last 7 days or you have 10k or more queries in the history pulled during
+      ## the requested dates range, add this parameter (NOTE: account_usage requires more permissions, see note below).
+      query_history_source: account_usage
+```
+
+```yml BigQuery
+## BIGQUERY ##
+## By default, edr expects the profile name 'elementary'.      ##
+##                                                             ##
+## For edr monitor:                                            ##
+## The database and schema of edr models.                      ##
+## Check where 'elementary_test_results' is to find it.        ##
+##                                                             ##
+## For edr lineage:                                            ##
+## Any database and schema will do.                            ##
+
+elementary:
+  outputs:
+    default:
+      type: bigquery
+
+      ## Service account auth, other options require other configs ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+
+      project: [project id]
+      dataset: [dataset name]
+      threads: 4
+      ## Location is mandatory, can be one of US or EU, or a regional location
+      location: [dataset location]
+      priority: interactive
+```
+
+</CodeGroup>
+
+For further information and other authentication options, refer to the [connection profile guide](./understand-elementary/cli-install#cli-configuration).
+
+**Note**: The credentials provided in the profiles file need to have the relevant permissions in order for Elementary to work.
+
+For details, please refer to:
+
+- [Snowflake required permissions](./integrations/snowflake)
+- [BigQuery required permissions](./integrations/bigquery)
+
+## Data lineage
+
+### Generate lineage file
+
+Generate a lineage graph from query logs of the databases db1, db2
+
+```shell
+edr lineage generate -dbs db1,db2
+```
+
+### Visualize lineage graph
+
+Visualize the lineage graph created in the previous command (cached in a local file)
+
+```shell
+edr lineage -o true
+```
+
+### Further options
+
+For details about the CLI operation go to the usage guide, here is a usage example:
+
+All the options for the CLI operation are also available by simply running:
+
+```shell
+edr lineage --help
+```
