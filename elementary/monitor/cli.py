@@ -1,3 +1,4 @@
+import sys
 import click
 
 from elementary.config.config import Config
@@ -122,15 +123,12 @@ def monitor(
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor', get_cli_properties(), ctx.command.name)
     try:
-        if not config.has_slack:
-            logger.error('Either a Slack token and a channel or a Slack webhook is required.')
-            ctx.exit(1)
-
+        config.validate_monitor()
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         anonymous_tracking.track_cli_end('monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
-            ctx.exit(1)
+            sys.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor', exc, ctx.command.name)
         raise
@@ -197,13 +195,14 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-report', get_cli_properties(), ctx.command.name)
     try:
+        config.validate_report()
         data_monitoring = DataMonitoring(config, update_dbt_package)
         success = data_monitoring.generate_report(tracking=anonymous_tracking, days_back=days_back,
                                                   test_runs_amount=executions_limit, file_path=file_path,
                                                   disable_passed_test_metrics=disable_passed_test_metrics)
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
         if not success:
-            ctx.exit(1)
+            sys.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-report', exc, ctx.command.name)
         raise
@@ -349,10 +348,7 @@ def send_report(
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
-        if not config.has_send_report_platform:
-            logger.error('You must provide a platform to upload the report to (Slack token / S3 / GCS).')
-            ctx.exit(1)
-
+        config.validate_send_report()
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
@@ -362,7 +358,7 @@ def send_report(
             command_succeeded = data_monitoring.send_report(elementary_html_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
         if not command_succeeded:
-            ctx.exit(1)
+            sys.exit(1)
 
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-send-report', exc, ctx.command.name)

@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
 
+from elementary.exceptions.exceptions import ConfigError
 from elementary.utils.ordered_yaml import OrderedYaml
+
+_QUICKSTART_CLI_ERR_MSG = 'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
 
 
 class Config:
@@ -68,3 +71,25 @@ class Config:
     @property
     def has_gcs(self):
         return self.gcs_bucket_name and self.google_service_account_path
+
+    def validate_monitor(self):
+        self._validate_elementary_profile()
+        if not self.has_slack:
+            raise ConfigError('Either a Slack token and a channel or a Slack webhook is required.')
+
+    def validate_report(self):
+        self._validate_elementary_profile()
+
+    def validate_send_report(self):
+        self._validate_elementary_profile()
+        if not self.has_send_report_platform:
+            raise ConfigError('You must provide a platform to upload the report to (Slack token / S3 / GCS).')
+
+    def _validate_elementary_profile(self):
+        profiles_path = os.path.join(self.profiles_dir, 'profiles.yml')
+        try:
+            profiles_yml = OrderedYaml().load(profiles_path)
+            if 'elementary' not in profiles_yml:
+                raise ConfigError(f'Unable to find "elementary" profile. {_QUICKSTART_CLI_ERR_MSG}')
+        except FileNotFoundError:
+            raise ConfigError(f'Could not find "profiles.yml" at "{self.profiles_dir}". {_QUICKSTART_CLI_ERR_MSG}')
