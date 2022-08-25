@@ -126,6 +126,7 @@ def monitor(
             logger.error('Either a Slack token and a channel or a Slack webhook is required.')
             ctx.exit(1)
 
+        config.validate_elementary_profile()
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         anonymous_tracking.track_cli_end('monitor', data_monitoring.properties(), ctx.command.name)
@@ -197,6 +198,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-report', get_cli_properties(), ctx.command.name)
     try:
+        config.validate_elementary_profile()
         data_monitoring = DataMonitoring(config, update_dbt_package)
         success = data_monitoring.generate_report(tracking=anonymous_tracking, days_back=days_back,
                                                   test_runs_amount=executions_limit, file_path=file_path,
@@ -353,6 +355,7 @@ def send_report(
             logger.error('You must provide a platform to upload the report to (Slack token / S3 / GCS).')
             ctx.exit(1)
 
+        config.validate_elementary_profile()
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
