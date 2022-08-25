@@ -34,12 +34,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     concurrency:
-      group: tests-${{ inputs.warehouse-type }}-${{ github.ref_name }}
+      group: tests-${{ inputs.warehouse-type }}-${{ github.head_ref }}
     steps:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/${{ github.ref_name }}/g" > ~/.dbt/profiles.yml
+          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/${{ github.head_ref }}/g" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
         uses: actions/checkout@v3
@@ -84,20 +84,20 @@ jobs:
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
       - name: Run report
-        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
+        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report_${{ inputs.warehouse-type }}_${{ github.head_ref }}.html
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
-          name: report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
-          path: report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
+          name: report_${{ inputs.warehouse-type }}_${{ github.head_ref }}.html
+          path: report_${{ inputs.warehouse-type }}_${{ github.head_ref }}.html
 
       - name: Write GCS keyfile
         run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
         run: >
-          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ github.ref_name }}.html
+          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ github.head_ref }}.html
           --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
