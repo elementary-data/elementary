@@ -59,12 +59,12 @@ jobs:
         with:
           python-version: '3.7.5'
 
+      - name: Install Elementary
+        run: pip install './elementary[${{ inputs.warehouse-type }}]'
+
       - name: Install dbt
         if: inputs.dbt-version
         run: pip install dbt-core==${{ inputs.dbt-version }}
-
-      - name: Install Elementary
-        run: pip install './elementary[${{ inputs.warehouse-type }}]'
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
