@@ -2,15 +2,19 @@
 title: "FAQ"
 description: "This section is aimed at collecting common questions users have to provide documented answers."
 ---
+##
 
-import ChangeElementarySchema from "../snippets/change-elementary-schema.mdx";
+**Question:** Hi, i am trying to test my models with days_back 45 days, but it is not picking up this value, and defaults to 14 days even though i have declared it on the dbt_project.yml level. I am sure I am missing a step here.
 
-<ChangeElementarySchema />
+**Answer:** I think there are actually 3 steps to solve that.
+1.full refresh of the model 'data_monitoring_metrics' by running ``` dbt run --select data_monitoring_metrics --full-refresh```
+2.running the elementary tests again
+3.run the CLI with days back param: ```edr monitor report --days-back 45```
+##
 
-<Accordion title="My question is not listed here">
+**Question:** Ah ok will try that. So the variable defined in dbt project yml will recalculate the anomalies from 45 days till date, but in order to show up on the CLI, i also need to add that --days_back 45 ?
 
-Ask us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) in #support channel, we are very responsive!
-  
-You could also open a [GitHub issue](https://github.com/elementary-data/elementary/issues/new), label it under `documentation`, and we could add the missing question (and answer) to the docs. 
-
-</Accordion>
+**Answer:** exactly :)
+I totally understand that we didn't document that well enough.
+Will think of how to be more informative there!
+##
