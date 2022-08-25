@@ -5,6 +5,7 @@ on:
       warehouse-type:
         type: choice
         required: true
+        description: The type of the warehouse platform.
         options:
           - snowflake
           - bigquery
@@ -13,9 +14,11 @@ on:
       elementary-ref:
         type: string
         required: false
+        description: The branch or tag ref to checkout for the 'elementary' repository.
       dbt-data-reliability-ref:
         type: string
         required: false
+        description: The branch or tag ref to checkout for the 'dbt-data-reliability' repository.
 
   workflow_call:
     inputs:
