@@ -5,7 +5,7 @@ on:
       warehouse-type:
         type: choice
         required: true
-        description: The type of the warehouse platform.
+        description: Type of the warehouse platform.
         options:
           - snowflake
           - bigquery
@@ -14,11 +14,15 @@ on:
       elementary-ref:
         type: string
         required: false
-        description: The branch or tag ref to checkout for the 'elementary' repository.
+        description: Branch or tag ref to checkout for the 'elementary' repository.
       dbt-data-reliability-ref:
         type: string
         required: false
-        description: The branch or tag ref to checkout for the 'dbt-data-reliability' repository.
+        description: Branch or tag ref to checkout for the 'dbt-data-reliability' repository.
+      dbt-version:
+        type: string
+        required: false
+        description: dbt's version to test with.
 
   workflow_call:
     inputs:
@@ -54,6 +58,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.7.5'
+
+      - name: Install dbt
+        if: inputs.dbt-version != ''
+        run: pip install dbt-core==${{ inputs.dbt-version }}
 
       - name: Install Elementary
         run: pip install './elementary[${{ inputs.warehouse-type }}]'
