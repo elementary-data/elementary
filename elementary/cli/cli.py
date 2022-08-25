@@ -42,7 +42,7 @@ class ElementaryCLI(click.MultiCommand):
     def format_help(self, ctx, formatter):
         try:
             click.echo('Loading dependencies (this might take a few seconds)')
-            AnonymousTracking(Config()).track_cli_help()
+            AnonymousTracking(config=Config()).track_cli_help()
         except Exception:
             pass
         self.format_usage(ctx, formatter)
