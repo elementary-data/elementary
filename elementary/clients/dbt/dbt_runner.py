@@ -20,7 +20,8 @@ class DbtRunner:
             command_args: List[str],
             json_logs: bool = False,
             vars: Optional[dict] = None,
-            quiet: bool = False
+            quiet: bool = False,
+            check: bool = True
     ) -> Tuple[bool, str]:
         dbt_command = ['dbt']
         json_output = False
@@ -37,7 +38,7 @@ class DbtRunner:
             dbt_command.extend(['--vars', json_vars])
         if not quiet:
             logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
-        result = subprocess.run(dbt_command, check=False, capture_output=(json_output or quiet))
+        result = subprocess.run(dbt_command, check=check, capture_output=(json_output or quiet))
         output = None
         if json_output:
             output = result.stdout.decode('utf-8')
