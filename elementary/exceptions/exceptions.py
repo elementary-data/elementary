@@ -41,4 +41,4 @@ class DbtCommandError(Error):
     """Exception raised while executing a dbt command"""
 
     def __init__(self, err: subprocess.CalledProcessError):
-        super().__init__(f'dbt command failed. command: {err.cmd}, output: {err.output}, error: {err.stderr}')
+        super().__init__(f'Failed to run dbt command - {err.cmd}')

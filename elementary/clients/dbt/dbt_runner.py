@@ -43,6 +43,7 @@ class DbtRunner:
         try:
             result = subprocess.run(dbt_command, check=self.raise_on_failure, capture_output=(json_output or quiet))
         except subprocess.CalledProcessError as err:
+            logger.debug(f'Failed to run dbt command - cmd: {err.cmd}, output: {err.output}, err: {err.stderr}')
             raise DbtCommandError(err)
         output = None
         if json_output:
