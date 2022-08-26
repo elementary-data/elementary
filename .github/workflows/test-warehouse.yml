@@ -64,7 +64,7 @@ jobs:
           python-version: '3.7.5'
 
       - name: Install Elementary
-        run: pip install "$GITHUB_WORKSPACE/elementary[${{ inputs.warehouse-type }}]"
+        run: pip install "./elementary[${{ inputs.warehouse-type }}]"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
@@ -114,3 +114,10 @@ jobs:
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
+
+      - name: Upload edr log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: edr.log
+          path: edr.log
