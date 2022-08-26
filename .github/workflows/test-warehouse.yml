@@ -42,7 +42,7 @@ jobs:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed 's/-/_/g')
+          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
           echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
@@ -64,7 +64,7 @@ jobs:
           python-version: '3.7.5'
 
       - name: Install Elementary
-        run: pip install '$GITHUB_WORKSPACE/elementary[${{ inputs.warehouse-type }}]'
+        run: pip install "$GITHUB_WORKSPACE/elementary[${{ inputs.warehouse-type }}]"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
