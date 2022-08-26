@@ -42,7 +42,7 @@ jobs:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "$BRANCH_NAME" | sed 's/-/_/g')
+          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed 's/-/_/g')
           echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
@@ -88,20 +88,20 @@ jobs:
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
       - name: Run report
-        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report_${{ inputs.warehouse-type }}_$BRANCH_NAME.html
+        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
-          name: report_${{ inputs.warehouse-type }}_$BRANCH_NAME.html
-          path: report_${{ inputs.warehouse-type }}_$BRANCH_NAME.html
+          name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          path: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Write GCS keyfile
         run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
         run: >
-          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_$BRANCH_NAME.html
+          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
           --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
