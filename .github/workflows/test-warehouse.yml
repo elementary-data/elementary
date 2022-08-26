@@ -64,7 +64,7 @@ jobs:
           python-version: '3.7.5'
 
       - name: Install Elementary
-        run: pip install './elementary[${{ inputs.warehouse-type }}]'
+        run: pip install '$GITHUB_WORKSPACE/elementary[${{ inputs.warehouse-type }}]'
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
@@ -78,11 +78,11 @@ jobs:
 
       - name: Install dbt package
         run: |
-          DBT_PROJECT_PATH="elementary/elementary/monitor/dbt_project"
+          DBT_PROJECT_PATH="$GITHUB_WORKSPACE/elementary/elementary/monitor/dbt_project"
           DBT_PACKAGES_PATH="$DBT_PROJECT_PATH/dbt_packages"
           dbt deps --project-dir $DBT_PROJECT_PATH
           rm -rf $DBT_PACKAGES_PATH/elementary
-          ln -vs $PWD/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
+          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
 
       - name: Run E2E tests
         run: |
