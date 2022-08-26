@@ -23,6 +23,11 @@ on:
         type: string
         required: false
         description: dbt's version to test with
+      should-run-tests:
+        type: boolean
+        required: false
+        default: true
+        description: Whether to run E2E tests
 
   workflow_call:
     inputs:
@@ -42,7 +47,7 @@ jobs:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed 's/-/_/g')
+          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
           echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
@@ -64,11 +69,7 @@ jobs:
           python-version: '3.7.5'
 
       - name: Install Elementary
-        run: pip install './elementary[${{ inputs.warehouse-type }}]'
-
-      - name: Install dbt
-        if: inputs.dbt-version
-        run: pip install dbt-core==${{ inputs.dbt-version }}
+        run: pip install "./elementary[${{ inputs.warehouse-type }}]"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
@@ -76,7 +77,20 @@ jobs:
           name: build
           path: elementary/build
 
+      - name: Install dbt
+        if: inputs.dbt-version
+        run: pip install dbt-core==${{ inputs.dbt-version }}
+
+      - name: Install dbt package
+        run: |
+          DBT_PROJECT_PATH="$GITHUB_WORKSPACE/elementary/elementary/monitor/dbt_project"
+          DBT_PACKAGES_PATH="$DBT_PROJECT_PATH/dbt_packages"
+          dbt deps --project-dir $DBT_PROJECT_PATH
+          rm -rf $DBT_PACKAGES_PATH/elementary
+          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
+
       - name: Run E2E tests
+        if: inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
@@ -106,3 +120,10 @@ jobs:
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
+
+      - name: Upload edr log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: edr.log
+          path: edr.log
