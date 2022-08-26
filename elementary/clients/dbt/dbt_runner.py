@@ -23,7 +23,7 @@ class DbtRunner:
             command_args: List[str],
             json_logs: bool = False,
             vars: Optional[dict] = None,
-            quiet: bool = False,
+            quiet: bool = False
     ) -> Tuple[bool, str]:
         dbt_command = ['dbt']
         json_output = False
