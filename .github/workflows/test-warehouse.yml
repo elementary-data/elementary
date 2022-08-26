@@ -37,7 +37,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     concurrency:
-      group: tests-${{ inputs.warehouse-type }}-$BRANCH_NAME
+      group: tests-${{ inputs.warehouse-type }}-${{ env.BRANCH_NAME }}
     steps:
       - name: Write dbt profiles
         run: |
