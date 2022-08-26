@@ -81,7 +81,8 @@ jobs:
           DBT_PROJECT_PATH="elementary/elementary/monitor/dbt_project"
           DBT_PACKAGES_PATH="$DBT_PROJECT_PATH/dbt_packages"
           dbt deps --project-dir $DBT_PROJECT_PATH
-          ln -s $PWD/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
+          rm -vrf $DBT_PACKAGES_PATH/elementary
+          ln -vs $PWD/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
 
       - name: Run E2E tests
         run: |
