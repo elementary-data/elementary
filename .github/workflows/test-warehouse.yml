@@ -5,11 +5,29 @@ on:
       warehouse-type:
         type: choice
         required: true
+        description: Type of warehouse platform
         options:
           - snowflake
           - bigquery
           - redshift
           - databricks
+      elementary-ref:
+        type: string
+        required: false
+        description: Branch or tag to checkout for 'elementary' repository
+      dbt-data-reliability-ref:
+        type: string
+        required: false
+        description: Branch or tag to checkout for 'dbt-data-reliability' repository
+      dbt-version:
+        type: string
+        required: false
+        description: dbt's version to test with
+      should-run-tests:
+        type: boolean
+        required: false
+        default: true
+        description: Whether to run E2E tests
 
   workflow_call:
     inputs:
@@ -17,60 +35,95 @@ on:
         type: string
         required: true
 
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
     concurrency:
-      group: tests-${{ inputs.warehouse-type }}
+      group: tests-${{ inputs.warehouse-type }}-${{ github.head_ref || github.ref_name }}
     steps:
       - name: Write dbt profiles
         run: |
           mkdir -p ~/.dbt
-          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d > ~/.dbt/profiles.yml
+          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
+          echo "${{ secrets.CI_PROFILES_YML }}" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Checkout Elementary
         uses: actions/checkout@v3
         with:
           path: elementary
+          ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
         uses: actions/checkout@v3
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
+          ref: ${{ inputs.dbt-data-reliability-ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.7.5'
 
       - name: Install Elementary
-        run: pip install './elementary[${{ inputs.warehouse-type }}]'
+        run: pip install "./elementary[${{ inputs.warehouse-type }}]"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: elementary/build
+
+      - name: Install dbt
+        if: inputs.dbt-version
+        run: pip install dbt-core==${{ inputs.dbt-version }}
+
+      - name: Install dbt package
+        run: |
+          DBT_PROJECT_PATH="$GITHUB_WORKSPACE/elementary/elementary/monitor/dbt_project"
+          DBT_PACKAGES_PATH="$DBT_PROJECT_PATH/dbt_packages"
+          dbt deps --project-dir $DBT_PROJECT_PATH
+          rm -rf $DBT_PACKAGES_PATH/elementary
+          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
 
       - name: Run E2E tests
+        if: inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
+
+      - name: Run help
+        run: edr --help
 
       - name: Run monitor
         run: edr monitor -t ${{ inputs.warehouse-type }} --slack-webhook ${{ secrets.CI_SLACK_WEBHOOK }}
 
       - name: Run report
-        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path ci_report.html
+        run: edr monitor report -t ${{ inputs.warehouse-type }} --file-path report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
-          name: report
-          path: ci_report.html
+          name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          path: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Write GCS keyfile
         run: echo "${{ secrets.GCS_KEYFILE }}" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
         run: >
-          edr monitor send-report -t ${{ inputs.warehouse-type }}
+          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
           --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
+
+      - name: Upload edr log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: edr.log
+          path: edr.log
