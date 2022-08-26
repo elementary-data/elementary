@@ -46,11 +46,7 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "quickstart-cli"
-      ]
+      "pages": ["introduction", "quickstart", "quickstart-cli"]
     },
     {
       "group": "Guides",
@@ -107,14 +103,8 @@
       ]
     }
   ],
-  "footerSocials": [
-    {
-      "type": "website",
-      "url": "https://www.elementary-data.com/"
-    },
-    {
-      "type": "slack",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
-    }
-  ]
+  "footerSocials": {
+    "website": "https://www.elementary-data.com",
+    "slack": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+  }
 }
