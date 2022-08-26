@@ -58,7 +58,6 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
-
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
