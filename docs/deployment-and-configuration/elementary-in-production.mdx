@@ -38,7 +38,7 @@ For sending alerts or generating a report, there are two options:
 
 To make sure your project data is updated, we recommend running the elementary dbt artifacts models **on each PR merge** to your dbt production project:  
 ```shell
-dbt run --select dbt_models dbt_tests dbt_sources dbt_snapshots dbt_metrics dbt_exposures
+dbt run --select edr.dbt_artifacts
 ```
 
 ## Ways to run Elementary in production
