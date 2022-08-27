@@ -80,8 +80,7 @@
       "group": "Data Anomaly Detection Tests",
       "pages": [
         "guides/data-anomaly-detection",
-        "guides/elementary-tests-configuration",
-        "guides/monitoring-in-production"
+        "guides/elementary-tests-configuration"
       ]
     },
     {

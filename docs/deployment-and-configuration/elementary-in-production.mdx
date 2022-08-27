@@ -15,28 +15,28 @@ You can choose any system that allows you to orchestrate a CLI execution, as lon
 
 Your deployment of Elementary has two parts:
 
-*Part 1 - Elementary package in your production dbt project*
+**Part 1 - Elementary package in your production dbt project**
 
 In your dbt jobs, after you deploy the Elementary dbt package: 
-1. Run and test tesults - Collected by default as part of your runs.
-2. Elementary tests - Make sure your dbt test runs include elementary tests. 
-3. Update dbt artifacts - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models. 
+1. **Run and test tesults** - Collected by default as part of your runs.
+2. **Elementary tests** - Make sure your dbt test runs include elementary tests. 
+3. **Update dbt artifacts** - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models. 
 
 
-*Part 2 - Elementary CLI*
+**Part 2 - Elementary CLI**
 
 On an orchestration system of your choice, run the CLI to:
-1. Send Slack alerts - Use the `edr monitor` command and Slack integration.
-2. Generate a report - Use the `edr monitor report` or `edr monitor send-report` that has built in support for sending the report to Slack / GCS / S3.
+1. **Send Slack alerts** - Use the `edr monitor` command and Slack integration.
+2. **Generate a report** - Use the `edr monitor report` or `edr monitor send-report` that has built in support for sending the report to Slack / GCS / S3.
 
 ## When to run Elementary?
 
 For sending alerts or generating a report, there are two options:
 
-1. Run Elementary CLI after each relevant dbt job (`dbt test` / `dbt build` / `dbt run`).
-2. Run Elementary CLI periodically in a frequency that fits your dbt job executions.
+**1. Run Elementary CLI after each relevant dbt job** (`dbt test` / `dbt build` / `dbt run`).
+**2. Run Elementary CLI periodically** in a frequency that fits your dbt job executions.
 
-To make sure your project data is updated, we recommend running the elementary dbt artifacts models on each PR merge to your dbt production project:  
+To make sure your project data is updated, we recommend running the elementary dbt artifacts models **on each PR merge** to your dbt production project:  
 ```shell
 dbt run --select dbt_models dbt_tests dbt_sources dbt_snapshots dbt_metrics dbt_exposures
 ```
@@ -56,6 +56,6 @@ Some options include:
 
 ## Need help?
 
-If you have any questions or want to consult on production deployment, we would love to help!  
+If you want to consult on production deployment, we would love to help!  
 Please reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), we could talk there or schedule a deployment video call. 
 
