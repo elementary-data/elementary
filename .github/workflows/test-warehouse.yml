@@ -91,7 +91,7 @@ jobs:
           ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PKGS_PATH/elementary
 
       - name: Run E2E tests
-        if: inputs.should-run-tests
+        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
