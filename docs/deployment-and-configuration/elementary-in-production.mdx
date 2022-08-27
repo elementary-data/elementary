@@ -6,10 +6,10 @@ Running Elementary in production means to include the dbt package in your produc
 and setting up automation to run the CLI on a schedule.
 
 You can choose any system that allows you to orchestrate a CLI execution, as long as it can meet the following requirements:
-- Full installation of Elementary CLI and dependencies (including dependencies from dbt packages hub). 
+- Full installation of Elementary CLI and dependencies. 
 - Network access to the data warehouse.
-- Access to a `profiles.yml` file with connection details under `elementary` profile name.
-- The connection details of the profile need to have read and write permissions to the Elementary schema.  
+- Access to a `profiles.yml` file with `elementary` profile name.
+- Read and write permissions to the Elementary schema.  
 
 ## Elementary production deployment and jobs 
 
