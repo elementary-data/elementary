@@ -23,6 +23,11 @@ on:
         type: string
         required: false
         description: dbt's version to test with
+      should-run-tests:
+        type: boolean
+        required: false
+        default: true
+        description: Whether to run E2E tests
 
   workflow_call:
     inputs:
@@ -64,7 +69,7 @@ jobs:
           python-version: '3.7.5'
 
       - name: Install Elementary
-        run: pip install "$GITHUB_WORKSPACE/elementary[${{ inputs.warehouse-type }}]"
+        run: pip install "./elementary[${{ inputs.warehouse-type }}]"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
@@ -78,13 +83,15 @@ jobs:
 
       - name: Install dbt package
         run: |
-          DBT_PROJECT_PATH="$GITHUB_WORKSPACE/elementary/elementary/monitor/dbt_project"
-          DBT_PACKAGES_PATH="$DBT_PROJECT_PATH/dbt_packages"
+          ELEMENTARY_PKG_LOCATION=$(pip show elementary-data | grep -i location | awk '{print $2}')
+          DBT_PROJECT_PATH="$ELEMENTARY_PKG_LOCATION/elementary/monitor/dbt_project"
+          DBT_PKGS_PATH="$DBT_PROJECT_PATH/dbt_packages"
           dbt deps --project-dir $DBT_PROJECT_PATH
-          rm -rf $DBT_PACKAGES_PATH/elementary
-          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
+          rm -rf $DBT_PKGS_PATH/elementary
+          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PKGS_PATH/elementary
 
       - name: Run E2E tests
+        if: inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
@@ -114,3 +121,10 @@ jobs:
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
+
+      - name: Upload edr log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: edr.log
+          path: edr.log
