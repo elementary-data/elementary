@@ -40,6 +40,8 @@ class DbtRunner:
             dbt_command.extend(['--vars', json_vars])
         if not quiet:
             logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
+        else:
+            logger.debug(f"Running {' '.join(dbt_command)}")
         try:
             result = subprocess.run(dbt_command, check=self.raise_on_failure, capture_output=(json_output or quiet))
         except subprocess.CalledProcessError as err:
