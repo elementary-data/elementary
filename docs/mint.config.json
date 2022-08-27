@@ -58,6 +58,15 @@
       ]
     },
     {
+      "group": "Deployment and Configuration",
+      "pages": [
+        "deployment-and-configuration/elementary-in-production",
+        "deployment-and-configuration/github-actions",
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands"
+      ]
+    },
+    {
       "group": "Understand Elementary",
       "pages": [
         "understand-elementary/elementary-overview",
@@ -65,15 +74,6 @@
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
-      ]
-    },
-    {
-      "group": "Deployment",
-      "pages": [
-        "deployment-and-configuration/elementary-in-production",
-        "deployment-and-configuration/github-actions",
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands"
       ]
     },
     {
