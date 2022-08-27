@@ -1,0 +1,61 @@
+---
+title: "Elementary in production"
+---
+
+Running Elementary in production means to include the dbt package in your production dbt project, 
+and setting up automation to run the CLI on a schedule.
+
+You can choose any system that allows you to orchestrate a CLI execution, as long as it can meet the following requirements:
+- Full installation of Elementary CLI and dependencies (including dependencies from dbt packages hub). 
+- Network access to the data warehouse.
+- Access to a `profiles.yml` file with connection details under `elementary` profile name.
+- The connection details of the profile need to have read and write permissions to the Elementary schema.  
+
+## Elementary production deployment and jobs 
+
+Your deployment of Elementary has two parts:
+
+*Part 1 - Elementary package in your production dbt project*
+
+In your dbt jobs, after you deploy the Elementary dbt package: 
+1. Run and test tesults - Collected by default as part of your runs.
+2. Elementary tests - Make sure your dbt test runs include elementary tests. 
+3. Update dbt artifacts - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models. 
+
+
+*Part 2 - Elementary CLI*
+
+On an orchestration system of your choice, run the CLI to:
+1. Send Slack alerts - Use the `edr monitor` command and Slack integration.
+2. Generate a report - Use the `edr monitor report` or `edr monitor send-report` that has built in support for sending the report to Slack / GCS / S3.
+
+## When to run Elementary?
+
+For sending alerts or generating a report, there are two options:
+
+1. Run Elementary CLI after each relevant dbt job (`dbt test` / `dbt build` / `dbt run`).
+2. Run Elementary CLI periodically in a frequency that fits your dbt job executions.
+
+To make sure your project data is updated, we recommend running the elementary dbt artifacts models on each PR merge to your dbt production project:  
+```shell
+dbt run --select dbt_models dbt_tests dbt_sources dbt_snapshots dbt_metrics dbt_exposures
+```
+
+## Ways to run Elementary in production
+
+If your organization is using dbt-core, it would probably be a good choice to orchestrate Elementary using the same system that orchestrates dbt.
+
+Any automation server / orchestration tool supports running a CLI tool like Elementary.
+
+Some options include: 
+
+1. GitHub Actions - Checkout the [Elementary GitHub Action workflow](https://github.com/elementary-data/run-elementary-action) we created.
+2. Airflow
+3. Prefect
+5. Using cron
+
+## Need help?
+
+If you have any questions or want to consult on production deployment, we would love to help!  
+Please reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), we could talk there or schedule a deployment video call. 
+

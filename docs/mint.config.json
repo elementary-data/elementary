@@ -70,9 +70,10 @@
     {
       "group": "Deployment",
       "pages": [
+        "deployment-and-configuration/elementary-in-production",
+        "deployment-and-configuration/github-actions",
         "understand-elementary/cli-install",
-        "understand-elementary/cli-commands",
-        "integrations/github-actions"
+        "understand-elementary/cli-commands"
       ]
     },
     {
@@ -96,10 +97,10 @@
     {
       "group": "Community & Support",
       "pages": [
-        "general/contributions",
         "general/troubleshooting",
-        "general/community-and-support",
-        "general/faq"
+        "general/faq",
+        "general/contributions",
+        "general/community-and-support"
       ]
     }
   ],
