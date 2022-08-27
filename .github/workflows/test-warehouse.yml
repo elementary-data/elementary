@@ -83,14 +83,15 @@ jobs:
 
       - name: Install dbt package
         run: |
-          DBT_PROJECT_PATH="$GITHUB_WORKSPACE/elementary/elementary/monitor/dbt_project"
-          DBT_PACKAGES_PATH="$DBT_PROJECT_PATH/dbt_packages"
+          ELEMENTARY_PKG_LOCATION=$(pip show elementary-data | grep -i location | awk '{print $2}')
+          DBT_PROJECT_PATH="$ELEMENTARY_PKG_LOCATION/elementary/monitor/dbt_project"
+          DBT_PKGS_PATH="$DBT_PROJECT_PATH/dbt_packages"
           dbt deps --project-dir $DBT_PROJECT_PATH
-          rm -rf $DBT_PACKAGES_PATH/elementary
-          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PACKAGES_PATH/elementary
+          rm -rf $DBT_PKGS_PATH/elementary
+          ln -vs $GITHUB_WORKSPACE/dbt-data-reliability $DBT_PKGS_PATH/elementary
 
       - name: Run E2E tests
-        if: inputs.should-run-tests
+        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t ${{ inputs.warehouse-type }}
