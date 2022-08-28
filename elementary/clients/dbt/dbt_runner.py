@@ -79,18 +79,22 @@ class DbtRunner:
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
+        # breakpoint()
         if json_logs:
             json_messages = command_output.splitlines()
             for json_message in json_messages:
-                log_message_dict = json.loads(json_message)
-                log_message_data_dict = log_message_dict.get('data')
-                if log_message_data_dict is not None:
-                    if log_errors and log_message_dict['level'] == 'error':
-                        logger.error(log_message_data_dict)
-                        continue
-                    log_message = log_message_data_dict.get('msg')
-                    if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
-                        run_operation_results.append(log_message.replace(self.ELEMENTARY_LOG_PREFIX, ''))
+                try:
+                    log_message_dict = json.loads(json_message)
+                    log_message_data_dict = log_message_dict.get('data')
+                    if log_message_data_dict is not None:
+                        if log_errors and log_message_dict['level'] == 'error':
+                            logger.error(log_message_data_dict)
+                            continue
+                        log_message = log_message_data_dict.get('msg')
+                        if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
+                            run_operation_results.append(log_message.replace(self.ELEMENTARY_LOG_PREFIX, ''))
+                except Exception:
+                    logger.debug(f'Unable to parse run-operation log message: {json_message}', exc_info=True)
         return run_operation_results
 
     def run(
