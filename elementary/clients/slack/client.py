@@ -60,21 +60,8 @@ class SlackWebClient(SlackClient):
             )
             return True
         except SlackApiError as err:
-            err_type = err.response.data['error']
-            if err_type == 'not_in_channel':
-                logger.info('Elementary app is not in the channel. Attempting to join.')
-                channel_id = self._get_channel_id(channel_name)
-                if not channel_id:
-                    return False
-                joined_successfully = self._join_channel(channel_id=channel_id)
-                if not joined_successfully:
-                    return False
-                self.send_message(channel_name=channel_name, message=message)
-            elif err_type == 'channel_not_found':
-                logger.error(
-                    f'Channel {channel_name} was not found by the Elementary app. Please add the app to the channel.')
-                return False
-            logger.error(f"Could not post message to channel - {channel_name}. Error: {err}")
+            if self._handle_send_err(err, channel_name):
+                return self.send_message(channel_name, message)
             return False
 
     def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
@@ -85,8 +72,9 @@ class SlackWebClient(SlackClient):
                 file=file_path
             )
             return True
-        except SlackApiError as e:
-            logger.error(f"Could not upload the file to the channel - {channel_name}. Error: {e}")
+        except SlackApiError as err:
+            if self._handle_send_err(err, channel_name):
+                return self.send_file(channel_name, file_path, message)
             return False
 
     def send_report(self, channel: str, report_file_path: str):
@@ -139,6 +127,21 @@ class SlackWebClient(SlackClient):
         except SlackApiError as e:
             logger.error(f"Elementary app failed to query all Slack public channels. Error: {e}")
             return []
+
+    def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
+        err_type = err.response.data['error']
+        if err_type == 'not_in_channel':
+            logger.info('Elementary app is not in the channel. Attempting to join.')
+            channel_id = self._get_channel_id(channel_name)
+            if not channel_id:
+                return False
+            return self._join_channel(channel_id=channel_id)
+        elif err_type == 'channel_not_found':
+            logger.error(
+                f'Channel {channel_name} was not found by the Elementary app. Please add the app to the channel.')
+            return False
+        logger.error(f"Failed to send a message to channel - {channel_name}. Error: {err}")
+        return False
 
 
 class SlackWebhookClient(SlackClient):
