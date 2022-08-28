@@ -135,13 +135,21 @@ After that restart your CMD and try `edr` again.
 
 </Accordion>
 
-<Accordion title="Data lineage graph is partial">
-  
-A partial lineage graph may be created because of the following reasons:
+<Accordion title="Error: No such command 'monitor'">
 
-1. The selected timeframe does not include relevant queries, refer to the integrations
-2. Credentials provided in the profile are not permitted to read the full query history. The required permissions are detailed in the page of each integration
-3. Some query types used are [not supported](../data-lineage/query-history-1#unsupported-query-types), you can notify us on a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues) and we will include these in our next release
+This means the installation was not completed successfully. This is usually a Python dependencies issue.
+
+Please try installing again on a clean virtual env:
+```shell
+pip install virtualenv
+python3 -m venv virtualenv_elementary
+source virtualenv_elementary/bin/activate
+python3 -m ensurepip --upgrade
+python3 -m pip install --upgrade pip
+python3 -m pip install elementary-data
+python3 -m pip install elementary-data[<adapter>]
+```
+
 
 </Accordion>
 
