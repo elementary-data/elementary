@@ -1,4 +1,5 @@
 import json
+from json import JSONDecodeError
 import subprocess
 from typing import List, Optional, Tuple
 
@@ -92,7 +93,7 @@ class DbtRunner:
                         log_message = log_message_data_dict.get('msg')
                         if log_message is not None and log_message.startswith(self.ELEMENTARY_LOG_PREFIX):
                             run_operation_results.append(log_message.replace(self.ELEMENTARY_LOG_PREFIX, ''))
-                except Exception:
+                except JSONDecodeError:
                     logger.debug(f'Unable to parse run-operation log message: {json_message}', exc_info=True)
         return run_operation_results
 
