@@ -79,7 +79,6 @@ class DbtRunner:
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
-        # breakpoint()
         if json_logs:
             json_messages = command_output.splitlines()
             for json_message in json_messages:
