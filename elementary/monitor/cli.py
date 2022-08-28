@@ -1,4 +1,5 @@
 import sys
+
 import click
 
 from elementary.config.config import Config
@@ -10,6 +11,43 @@ from elementary.utils.ordered_yaml import OrderedYaml
 yaml = OrderedYaml()
 
 logger = get_logger(__name__)
+
+
+# Displayed in reverse order in --help.
+def common_options(func):
+    func = click.option(
+        '--update-dbt-package', '-u',
+        type=bool,
+        default=False,
+        help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
+             "see documentation to learn more)."
+    )(func)
+    func = click.option(
+        '--days-back', '-d',
+        type=int,
+        default=7,
+        help="Set a limit to how far back should edr collect data."
+    )(func)
+    func = click.option(
+        '--config-dir', '-c',
+        type=str,
+        default=Config.DEFAULT_CONFIG_DIR,
+        help="Global settings for edr are configured in a config.yml file in this directory " "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default)."
+    )(func)
+    func = click.option(
+        '--profile-target', '-t',
+        type=str,
+        default=None,
+        help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target."
+    )(func)
+    func = click.option(
+        '--profiles-dir', '-p',
+        type=str,
+        default=Config.DEFAULT_PROFILES_DIR,
+        help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
+             "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
+    )(func)
+    return func
 
 
 def get_cli_properties() -> dict:
@@ -31,12 +69,7 @@ def get_cli_properties() -> dict:
 
 
 @click.group(invoke_without_command=True)
-@click.option(
-    '--days-back', '-d',
-    type=int,
-    default=7,
-    help="Set a limit to how far back edr should look for new alerts."
-)
+@common_options
 @click.option(
     '--slack-webhook', '-s',
     type=str,
@@ -56,38 +89,11 @@ def get_cli_properties() -> dict:
     help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
-    '--config-dir', '-c',
-    type=str,
-    default=Config.DEFAULT_CONFIG_DIR,
-    help="Global settings for edr are configured in a config.yml file in this directory "
-         "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
-)
-@click.option(
-    '--profiles-dir', '-p',
-    type=str,
-    default=Config.DEFAULT_PROFILES_DIR,
-    help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-         "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
-)
-@click.option(
-    '--update-dbt-package', '-u',
-    type=bool,
-    default=False,
-    help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
-         "see documentation to learn more)."
-)
-@click.option(
     '--full-refresh-dbt-package', '-f',
     type=bool,
     default=False,
     help="Force running a full refresh of all incremental models in the edr dbt package (usually this is not needed, "
          "see documentation to learn more)."
-)
-@click.option(
-    '--profile-target', '-t',
-    type=str,
-    default=None,
-    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target."
 )
 @click.option(
     '--dbt-vars',
@@ -135,39 +141,7 @@ def monitor(
 
 
 @monitor.command()
-@click.option(
-    '--days-back', '-d',
-    type=int,
-    default=7,
-    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report."
-)
-@click.option(
-    '--config-dir', '-c',
-    type=str,
-    default=Config.DEFAULT_CONFIG_DIR,
-    help="Global settings for edr are configured in a config.yml file in this directory "
-         "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
-)
-@click.option(
-    '--profiles-dir', '-p',
-    type=str,
-    default=Config.DEFAULT_PROFILES_DIR,
-    help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-         "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
-)
-@click.option(
-    '--update-dbt-package', '-u',
-    type=bool,
-    default=False,
-    help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
-         "see documentation to learn more)."
-)
-@click.option(
-    '--profile-target', '-t',
-    type=str,
-    default=None,
-    help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target."
-)
+@common_options
 @click.option(
     '--executions-limit', '-el',
     type=int,
@@ -209,6 +183,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 
 
 @monitor.command()
+@common_options
 @click.option(
     '--slack-token', '-st',
     type=str,
@@ -262,39 +237,6 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     type=bool,
     default=False,
     help="Update the bucket's static website with the latest report."
-)
-@click.option(
-    '--days-back', '-d',
-    type=int,
-    default=7,
-    help="Set a limit to how far back Elementary should collect dbt and Elementary results while generating the report."
-)
-@click.option(
-    '--config-dir', '-c',
-    type=str,
-    default=Config.DEFAULT_CONFIG_DIR,
-    help="Global settings for edr are configured in a config.yml file in this directory "
-         "(if your config dir is HOME_DIR/.edr, no need to provide this parameter as we use it as default)."
-)
-@click.option(
-    '--profiles-dir', '-p',
-    type=str,
-    default=Config.DEFAULT_PROFILES_DIR,
-    help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-         "(if your profiles dir is HOME_DIR/.dbt, no need to provide this parameter as we use it as default).",
-)
-@click.option(
-    '--update-dbt-package', '-u',
-    type=bool,
-    default=False,
-    help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
-         "see documentation to learn more)."
-)
-@click.option(
-    '--profile-target', '-t',
-    type=str,
-    default=None,
-    help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target."
 )
 @click.option(
     '--executions-limit', '-el',
