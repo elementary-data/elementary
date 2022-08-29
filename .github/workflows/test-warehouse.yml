@@ -83,7 +83,9 @@ jobs:
 
       - name: Install dbt
         if: inputs.dbt-version
-        run: pip install dbt-core==${{ inputs.dbt-version }}
+        run: |
+          pip install dbt-core==${{ inputs.dbt-version }}
+          pip install dbt-${{ inputs.warehouse-type }}==${{ inputs.dbt-version }}
 
       - name: Install dbt package
         run: |
