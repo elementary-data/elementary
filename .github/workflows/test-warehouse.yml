@@ -34,6 +34,10 @@ on:
       warehouse-type:
         type: string
         required: true
+      should-run-tests:
+        type: boolean
+        required: true
+        default: true
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
