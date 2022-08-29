@@ -3,12 +3,6 @@ on:
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
-    inputs:
-      should-run-tests:
-        type: boolean
-        required: false
-        default: true
-        description: Whether to run E2E tests
 
 jobs:
   snowflake:
