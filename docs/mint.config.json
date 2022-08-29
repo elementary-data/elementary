@@ -86,6 +86,7 @@
     {
       "group": "Integrations",
       "pages": [
+        "integrations/dbt",
         "integrations/slack",
         "integrations/snowflake",
         "integrations/bigquery",
