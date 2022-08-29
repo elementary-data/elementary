@@ -12,4 +12,10 @@ The schemas structure would be:
 - Elementary models schema - The schema name is configured under your `dbt_project.yml`.
 - Elementary temp test results schema - The Elementary schema name with `__test` suffix.
 
+You may change the suffix of the tests schema using a var:
+```yml dbt_project.yml
+vars:
+  tests_schema_name: '_test_results'
+```
+
 </Accordion>

@@ -209,13 +209,27 @@ If undefined, _default threshold is 3_.
 
 </Accordion>
 
+</Accordion>
+
+<Accordion title="tests_schema_name">
+`tests_schema_name`: [string]
+
+Suffix for elementary tests temp results schema.
+
+Elementary creates a schema to store temp tables with results of elementary anomaly detection tests.
+As some users have hundreds of Elementary tests, we didn't want tons of small tables to be created in the Elementary schema.
+These results are later merged to the incremental tables in the main elementary schema.
+
+</Accordion>
+
 </AccordionGroup>
 
 ```yml dbt_project.yml
 # optional #
 # Global vars for data monitoring#
 vars:
-  days_back: 14 # maximum timeframe for collecting metrics and analyzing anomalies
-  anomaly_sensitivity: 3 # sensitivity of anomaly detection
-  backfill_days: 2 # days to backfill on each run, adjust to your data delays
+  days_back: 14   # maximum timeframe for collecting metrics and analyzing anomalies
+  anomaly_sensitivity: 3   # sensitivity of anomaly detection
+  backfill_days: 2   # days to backfill on each run, adjust to your data delays
+  tests_schema_name: '__tests'  # suffix for elementary tests temp results schema  
 ```

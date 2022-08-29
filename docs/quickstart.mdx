@@ -74,6 +74,19 @@ dbt run --select elementary
 
 This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt executions.
 
+
+### 5. Run tests
+
+```shell Terminal
+dbt test
+```
+
+You can also run only some tests.
+Only tests you run after the installation will show up in the UI.
+
+After you ran your tests, we recommend that you ensure that the results were loaded to `elementary_test_results` table.
+
+
 <ChangeElementarySchema />
 
 <Accordion title="Important: Materialization config">
@@ -91,27 +104,17 @@ Example:
 
 ```yml dbt_project.yml
 models:
-my_project:
-materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
+  my_project:
+    materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
 
-elementary:
-+schema: "elementary"
+  elementary:
+    +schema: "elementary"
 ```
 
 **If you change materialization settings, make sure to run `dbt run -s elementary --full-refresh`.**
 
 </Accordion>
 
-### 5. Run tests
-
-```shell Terminal
-dbt test
-```
-
-Running your tests will populate Elementary's models with the relevant information that is needed to monitor your data.
-You can also choose to run only some of your tests, but keep in mind that only tests that ran _after_ Elementary was installed will be monitored.
-
-After you ran your tests, we recommend that you ensure that the results were uploaded to the `elementary_test_results` table.
 
 ### What happens now?
 

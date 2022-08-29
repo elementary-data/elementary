@@ -4,6 +4,8 @@ title: "CLI install & configure"
 
 import InstallCLI from "../snippets/install-cli.mdx";
 import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
+import ConnectionProfile from "../snippets/faq/question-connection-profile.mdx";
+import ProfilePermissions from "../snippets/faq/question-profile-permissions.mdx";
 
 We recommend you install Elementary CLI using one of the following methods:
 
@@ -50,29 +52,9 @@ If you are a dbt user, you already have a `profiles.yml` file that you can use. 
 
 </Accordion>
 
-<Accordion title="What is a connection profile?">
+<ConnectionProfile />
 
-Elementary requires connection details and credentials to connect to the data warehouse. 
-
-These are configured in a connection profile using a file named `profiles.yml`.
-
-**We recommend creating a dedicated database, or at least a schema.**
-
-Elementary leverages dbt's [connection profile](https://docs.getdbt.com/dbt-cli/configure-your-profile) format.
-
-**dbt-core users**
-Just add a profile with the relevant details, and name it `elementary`.
-
-</Accordion>
-
-<Accordion title="Connection profile permissions">
-
-The provided credentials need to have permission to:
-
-- Read - Information schema and the tables configured for monitoring.,
-- Write - To the database and schema configured in `elementary` profile.
-
-</Accordion>
+<ProfilePermissions />
 
 <Accordion title="How to create 'config.yml'?">
 
