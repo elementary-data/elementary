@@ -1,3 +1,4 @@
+import os
 import sys
 
 import click
@@ -291,13 +292,16 @@ def send_report(
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
         config.validate_send_report()
+        # If file name contains a folders (is a path),
+        # we want to make sure that we create the report localy without the folders of the full path.
+        local_file_path = os.path.basename(file_name) if file_name else None
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
-            disable_passed_test_metrics=disable_passed_test_metrics, file_path=file_name, should_open_browser=False)
+            disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path, should_open_browser=False)
         if generated_report_successfully and elementary_html_path:
-            command_succeeded = data_monitoring.send_report(elementary_html_path)
+            command_succeeded = data_monitoring.send_report(elementary_html_path, host_file_path=file_name)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
         if not command_succeeded:
             sys.exit(1)
