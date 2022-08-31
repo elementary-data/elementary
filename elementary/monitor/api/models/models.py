@@ -27,7 +27,7 @@ class ModelsAPI(APIClient):
         sources = dict()
         if sources_results:
             for source_result in json.loads(sources_results[0]):
-                source_data = ModelSchema(**source_result)
+                source_data = SourceSchema(**source_result)
                 normalized_source = self._normalize_dbt_artifact_dict(source_data, type="source")
                 source_unique_id = normalized_source.unique_id
                 sources[source_unique_id] = normalized_source
