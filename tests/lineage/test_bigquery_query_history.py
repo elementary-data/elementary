@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 from google.cloud import bigquery
-from lineage.bigquery_query_history import BigQueryQueryHistory
+from elementary.lineage.bigquery_query_history import BigQueryQueryHistory
 
 
 @pytest.mark.parametrize("start_date, end_date, database_name, location", [

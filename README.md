@@ -6,7 +6,7 @@
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
-<a href="https://docs.elementary-data.com/"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
+<a href="https://docs.elementary-data.com/quickstart"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
 
@@ -19,7 +19,7 @@ Share the report with your team, and use Slack integration for alerting on incid
 
 ##
 
-:star: Support us with a <a href="https://github.com/elementary-data/elementary-lineage/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
+:star: Support us with a <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
 
 <img alt="UI" src="static/ui_for_git.png" width="800">
 
@@ -31,8 +31,6 @@ Share the report with your team, and use Slack integration for alerting on incid
   
 Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
 [Quick start: Data monitoring as dbt tests in minutes](https://bit.ly/3IdMjYW). 
-
-[Quick start: Data lineage](https://docs.elementary-data.com/quickstart-data-lineage/install-and-configure). 
 
 Our full documentation is [available here](https://docs.elementary-data.com/). 
   
@@ -58,7 +56,7 @@ Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehf
   
 ## Demo & Sandbox
 
-Data observability report [sandbox](https://bit.ly/3IAp9wf) and [demo video](https://www.elementary-data.com/demo).  
+Data observability report [sandbox](https://bit.ly/3IAp9wf).  
 
 Slack alert example:
 
@@ -78,6 +76,7 @@ For additional information and help, you can use one of these channels:
 * [x] **Snowflake** ![](static/snowflake-16.png) 
 * [x] **BigQuery**  ![](static/bigquery-16.png) 
 * [x] **Redshift**  ![](static/redshift-16.png)
+* [x] **Databricks**  ![](static/databricks-16.png)
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
 
@@ -86,9 +85,9 @@ Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community
 
 Thank you :orange_heart: Whether it’s a bug fix, new feature, or additional documentation - we greatly appreciate contributions!
 
-Check out the [contributions guide](https://docs.elementary-data.com/project-overview/contributions). 
+Check out the [contributions guide](https://docs.elementary-data.com/general/contributions) and [open issues](https://github.com/elementary-data/elementary/issues). 
 
 
 ## **License**
 
-Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary-lineage/blob/master/LICENSE) file for licensing information.
+Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary/blob/master/LICENSE) file for licensing information.

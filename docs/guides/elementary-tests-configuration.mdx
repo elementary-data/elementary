@@ -1,0 +1,233 @@
+---
+title: "Tests configuration"
+---
+
+The data tests configuration is defined in `.yml` files in your dbt project.
+Elementary tests have three levels of configurations:
+
+1. [Test arguments](#test-arguments) - Test specific arguments.
+2. [Table configuration](#configure-timestamp-column-for-dbt-models) - Configure the timestamp column and details of a monitored table.
+3. [Global vars](#data-monitoring-global-vars) - Optional configuration parameters of the operation.
+
+<Accordion title="Data tests configuration priorities">
+The configuration of Elementary monitors is dbt native, meaning we follow the format and priorities of `dbt configuration`.
+
+You can configure elementary tests to monitor dbt models and dbt sources.
+Tables that are not part of the dbt project can also be monitored, just add these as sources to the project (no need to refer from any model).
+
+For dbt models and sources, elementary searches and prioritizes configuration in the following order:
+
+1. Test arguments.
+2. Model `config` (timestamp_column only).
+3. Global vars in `dbt_project.yml`.
+
+</Accordion>
+
+---
+
+## Test arguments
+
+Test specific configurations, configured in the yml for each test (like dbt `severity`, `limit`, etc).
+
+<AccordionGroup>
+
+<Accordion title="timestamp_column">
+`timestamp_column`: [column_name]
+
+It is recommended to configure a timestamp column (if there is one).
+The best column for this will have an 'updated at' timestamp for each row (date type also works).
+Elementary will use this column to filter the table when running monitors.
+( `timestamp_column` can be defined for the whole table as well).
+
+If undefined, default is null (no time buckets).
+
+</Accordion>
+
+<Accordion title="sensitivity">
+`sensitivity`: [int]
+
+Threshold for the anomaly sensitivity, the [global default](../guides/add-elementary-tests) is 3. If defined for a test, the test param is used instead of the global one.
+A higher number means less sensitivity (less anomalies), and a lower number means more sensitivity (more anomalies).
+
+</Accordion>
+
+<Accordion title="backfill_days">
+`backfill_days`: [int]
+
+The minimal amount of buckets for running time buckets monitors. If these buckets were already calculated, Elementary will overwrite them. The reason behind it is to monitor recent backfills of data, if there were any.
+This configuration should be changed according to your data delays.
+
+If undefined, default is 2 buckets.
+
+</Accordion>
+
+<Accordion title="exclude_regexp">
+`exclude_regexp`: [regex]
+
+Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on regular expression match. Example usage: `exlude_regexp: '.*SDC$'`
+
+</Accordion>
+
+<Accordion title="exclude_prefix">
+`exclude_prefix`: [string]
+
+Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on prefix match. Example usage: `exlude_prefix: 'dbt_'`
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+## Table configuration
+
+Elementary tests `timestamp_column` can be configured for a model / source.
+This will apply to any test defined on the table that has no `timestamp_column` param.
+
+<Accordion title="timestamp_column">
+`timestamp_column`: [column_name]
+
+It is recommended to configure a timestamp column (if there is one).
+The best column for this will have an 'updated at' timestamp for each row (date type also works).
+Elementary will use this column to filter the table when running monitors.
+
+If undefined, default is null (no time buckets).
+
+**Example configuration:**
+
+<CodeGroup>
+
+```yml properties.yml
+version: 2
+
+models:
+  - name: <model_name>
+    config:
+      elementary:
+        timestamp_column: < model timestamp column >
+    tests: < here you will add elementary monitors as tests >
+
+  - name: <your model with no timestamp>
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests: <here you will add elementary monitors as tests>
+```
+
+```yml Example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: updated_at
+    tests:
+      - elementary.table_anomalies:
+          tags: ["elementary"]
+      - elementary.all_columns_anomalies:
+          tags: ["elementary"]
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.table_anomalies:
+          tags: ["elementary"]
+```
+
+```yml sources_properties.yml
+sources:
+  - name: < some name >
+    database: < datatbase >
+    schema: < schema >
+    tables:
+      - name: < table_name >
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: < source timestamp column >
+        tests: <here you will add elementary monitors as tests>
+```
+
+```yml Example
+sources:
+  - name: "my_non_dbt_table"
+    database: "raw_events"
+    schema: "product"
+    tables:
+      - name: "raw_product_login_events"
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: "loaded_at"
+        tests:
+          - elementary.table_anomalies
+          - elementary.all_columns_anomalies:
+              column_anomalies:
+                - null_count
+                - missing_count
+                - zero_count
+        columns:
+          - name: user_id
+            tests:
+              - elementary.column_anomalies
+```
+
+</CodeGroup>
+
+</Accordion>
+
+---
+
+## Data monitoring global vars
+
+Elementary has several global vars used for tests configurations.
+You can change their defaults by adding them with a new value in your `dbt_project.yml` under the vars key.
+
+<AccordionGroup>
+
+<Accordion title="days_back">
+`days_back`: [int]
+
+The maximum timeframe for running [time buckets](./data-anomaly-detection#tests-and-monitors-types) monitors, as well as to calculate a baseline for anomaly detection.
+This limit is applied in three cases: - On the first run of elementary or on full refresh (first run for all tables). - For each new table that is added to the monitoring (first run for table). - On each new metric that is added to the configuration (first run of new metric). - If there was a gap bigger than this limit since the last run.
+If undefined, _default is 14 days back_.
+
+</Accordion>
+
+<Accordion title="backfill_days">
+`backfill_days`: [int]
+
+The minimal amount of buckets for running time buckets monitors. If these buckets were already calculated, Elementary will overwrite them. The reason behind it is to monitor recent backfills of data, if there were any. This configuration should be changed according to your data delays.
+If undefined, _default is 2 buckets_.
+
+</Accordion>
+
+<Accordion title="anomaly_sensitivity">
+`anomaly_sensitivity`: [int]
+
+This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](./data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies).
+If undefined, _default threshold is 3_.
+
+</Accordion>
+
+<Accordion title="tests_schema_name">
+`tests_schema_name`: [string]
+
+Suffix for elementary tests temp results schema.
+
+Elementary creates a schema to store temp tables with results of elementary anomaly detection tests.
+As some users have hundreds of Elementary tests, we didn't want tons of small tables to be created in the Elementary schema.
+These results are later merged to the incremental tables in the main elementary schema.
+
+</Accordion>
+
+</AccordionGroup>
+
+```yml dbt_project.yml
+# optional #
+# Global vars for data monitoring#
+vars:
+  days_back: 14   # maximum timeframe for collecting metrics and analyzing anomalies
+  anomaly_sensitivity: 3   # sensitivity of anomaly detection
+  backfill_days: 2   # days to backfill on each run, adjust to your data delays
+  tests_schema_name: '__tests'  # suffix for elementary tests temp results schema  
+```

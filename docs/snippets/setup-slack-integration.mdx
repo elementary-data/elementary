@@ -1,0 +1,135 @@
+First create a Slack app:
+
+<Accordion title="Create a Slack App">
+
+## 1. Create a Slack app
+
+Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
+Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png"
+  alt="Slack app"
+/>
+
+## 2. Optional - Slack app display
+
+To change the display of the Elementary slack app, scroll down on the Slack app basic information page to the 'Display Information' section:
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-display_utxkcu.png"
+  alt="Slack display"
+/>
+
+Here is the Elementary icon for your use (click to download):
+
+<a
+  href="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png"
+  download
+>
+  <img
+    src="https://res.cloudinary.com/mintlify/image/upload/v1659304888/elementary/elementary_logo_512x512_iu1u4k.png"
+    alt="Elementary logo"
+    width="200"
+  />
+</a>
+
+</Accordion>
+
+Based on the method you selected, create a [token or webhook](../integrations/slack#token-vs-webhook):
+
+<Accordion title="Create Slack Token">
+
+## 1. Create a Slack token
+
+Go to the "OAauth & Permissions" page for your newly-created app, and add the following scopes under "Bot Token Scopes":
+
+- `channels:join` - Join public channels in a workspace
+- `channels:read` - View basic information about public channels in a workspace
+- `chat:write` - Send messages as \<app\>
+- `files:write` - Upload, edit, and delete files as \<app\>
+- `users:read` - View people in a workspace
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304884/elementary/slack-scopes_u5vnbj.png"
+  alt="Slack scopes"
+/>
+
+## 2. Install app at your Workspace
+
+At the "OAuth & Permissions" page, press on "Install to Workspace" in order to generate Slack token:
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-oauth_g6p5jj.png"
+  alt="Slack OAuth"
+/>
+
+</Accordion>
+
+<Accordion title="Create Slack Webhook">
+
+## Create a webhook
+
+Go to the 'Incoming Webhooks' page for your newly-created app and toggle 'Activate Incoming Webhooks' to turn it on. Then click on 'Add New Webhook to Workspace':
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/slack-webhook_gwjkte.png"
+  alt="Slack webhook"
+/>
+
+Select the channel that the notifications will be posted to:
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-channel_snyrwb.png"
+  alt="Slack channel"
+/>
+
+</Accordion>
+
+Lastly, pass the token / webhook to the CLI as a param or in the `config.yml` file:
+
+<Accordion title="Slack config as CLI params">
+
+## Token:
+
+Use the Slack token when you execute edr monitor using the option `-st, --slack-token` and `-ch, --slack-channel-name`:
+
+```shell
+edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
+```
+
+## Webhook:
+
+Use the webhook URL when you execute edr monitor using the option `-s, --slack-webhook`:
+
+```shell
+edr monitor --slack-webhook <your_slack_webhook_url>
+```
+
+</Accordion>
+
+<Accordion title="Slack config as in config.yml">
+
+The CLI reads the Slack integration from a file, copy it into a file called config.yml.
+Create it here: `HOME_DIR/.edr/config.yml`
+
+Here is the format in the yml itself:
+
+## Token:
+
+```yml config.yml
+slack:
+  token: <your_slack_token>
+  channel_name: <slack_channel_to_post_at>
+```
+
+## Webhook:
+
+```yml config.yml
+slack:
+  notification_webhook: <your_slack_webhook_url>
+  # optional #
+  workflows: false
+```
+
+</Accordion>
