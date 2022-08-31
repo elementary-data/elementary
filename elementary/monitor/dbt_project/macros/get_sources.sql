@@ -16,11 +16,10 @@
                   package_name,
                   description,
                   original_path as full_path
-                from {{ dbt_sources_relation }}
+                from ({{ dbt_sources_query() }})
               )
 
             select * from dbt_artifacts_sources
-            where package_name != 'elementary'
         {% endset %}
         {% set sources_agate = run_query(get_sources_query) %}
         {% set sources_json = elementary.agate_to_json(sources_agate) %}
