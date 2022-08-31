@@ -1,0 +1,13 @@
+
+```yml dbt_project.yml
+on-run-end:
+  - "{{ print_results(results) }}"
+```
+
+
+```sql print_results.sql
+{% macro print_results(results_object) %}
+    {%- do log(results_object, True) -%}
+{% endmacro %}
+```
+
