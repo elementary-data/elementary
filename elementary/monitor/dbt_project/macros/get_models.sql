@@ -20,6 +20,7 @@
               )
 
              select * from dbt_artifacts_models
+             where package_name != 'elementary'
         {% endset %}
         {% set models_agate = run_query(get_models_query) %}
         {% set models_json = elementary.agate_to_json(models_agate) %}

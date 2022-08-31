@@ -17,10 +17,9 @@ class ModelsAPI(APIClient):
         if models_results:
             for model_result in json.loads(models_results[0]):
                 model_data = ModelSchema(**model_result)
-                if model_data.package_name != 'elementary':
-                    normalized_model = ModelsAPI._normalize_dbt_artifact_dict(model_data, type="model")
-                    model_unique_id = normalized_model.unique_id
-                    models[model_unique_id] = normalized_model
+                normalized_model = ModelsAPI._normalize_dbt_artifact_dict(model_data, type="model")
+                model_unique_id = normalized_model.unique_id
+                models[model_unique_id] = normalized_model
         return models
     
     def get_sources(self) -> Dict[str, NormalizedSourceSchema]:
@@ -29,10 +28,9 @@ class ModelsAPI(APIClient):
         if sources_results:
             for source_result in json.loads(sources_results[0]):
                 source_data = ModelSchema(**source_result)
-                if source_data.package_name != 'elementary':
-                    normalized_source = self._normalize_dbt_artifact_dict(source_data, type="source")
-                    source_unique_id = normalized_source.unique_id
-                    sources[source_unique_id] = normalized_source
+                normalized_source = self._normalize_dbt_artifact_dict(source_data, type="source")
+                source_unique_id = normalized_source.unique_id
+                sources[source_unique_id] = normalized_source
         return sources
     
     def get_exposures(self) -> Dict[str, NormalizedExposureSchema]:

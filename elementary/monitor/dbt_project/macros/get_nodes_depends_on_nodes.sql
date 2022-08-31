@@ -2,10 +2,12 @@
     {% set models_depends_on_nodes_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}
+            where package_name != 'elementary'
         ),
 
         dbt_sources as (
             select * from {{ ref('elementary', 'dbt_sources') }}
+            where package_name != 'elementary'
         ),
 
         dbt_exposures as (
