@@ -101,6 +101,12 @@ def get_cli_properties() -> dict:
     default=None,
     help="Specify raw YAML string of your dbt variables."
 )
+@click.option(
+    '--test',
+    type=str,
+    default=None,
+    help="Specify raw YAML string of your dbt variables."
+)
 @click.pass_context
 def monitor(
         ctx,
@@ -113,7 +119,8 @@ def monitor(
         update_dbt_package,
         full_refresh_dbt_package,
         profile_target,
-        dbt_vars
+        dbt_vars,
+        test
 ):
     """
     Monitor your warehouse.
@@ -130,7 +137,8 @@ def monitor(
     anonymous_tracking.track_cli_start('monitor', get_cli_properties(), ctx.command.name)
     try:
         config.validate_monitor()
-        data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
+        data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package,
+                                         send_test_message_on_success=test)
         success = data_monitoring.run(days_back, full_refresh_dbt_package, dbt_vars=vars)
         anonymous_tracking.track_cli_end('monitor', data_monitoring.properties(), ctx.command.name)
         if not success:
