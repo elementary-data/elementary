@@ -162,9 +162,9 @@ class SlackWebhookClient(SlackClient):
             return False
 
     def send_file(self, **kwargs):
-        logger.error(
-            f"Slack webhook does not support sending files. Please use Slack token instead (see documentation on how to configure a slack token)")
+        logger.error("Slack webhook does not support sending files."
+                     "Please use Slack token instead (see documentation on how to configure a slack token)")
 
     def send_report(self, **kwargs):
-        logger.error(
-            f"Slack webhook does not support sending reports. Please use Slack token instead (see documentation on how to configure a slack token)")
+        logger.error("Slack webhook does not support sending reports."
+                     "Please use Slack token instead (see documentation on how to configure a slack token)")
