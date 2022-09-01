@@ -3,6 +3,7 @@ import os
 import os.path
 import webbrowser
 from collections import defaultdict
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import pkg_resources
@@ -38,7 +39,8 @@ SQL_FILE_EXTENSION = ".sql"
 
 class DataMonitoring:
 
-    def __init__(self, config: Config, force_update_dbt_package: bool = False):
+    def __init__(self, config: Config, force_update_dbt_package: bool = False,
+                 send_test_message_on_success: bool = False):
         self.config = config
         self.dbt_runner = DbtRunner(dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target)
         self.execution_properties = {}
@@ -51,6 +53,7 @@ class DataMonitoring:
         self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema)
         self.sent_alert_count = 0
         self.success = True
+        self.send_test_message_on_success = send_test_message_on_success
 
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
@@ -85,6 +88,12 @@ class DataMonitoring:
                 self.success = False
                 return
 
+    def _send_test_message(self):
+        self.slack_client.send_message(
+            channel_name=self.config.slack_channel_name,
+            message=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        )
+
     def _send_alerts(self, alerts: Alerts):
         self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
         self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
@@ -109,6 +118,8 @@ class DataMonitoring:
         self.execution_properties['malformed_alert_count'] = malformed_alert_count
         self.execution_properties['has_subscribers'] = any(alert.subscribers for alert in alerts.get_all())
         self._send_alerts(alerts)
+        if self.send_test_message_on_success and alerts.count == 0:
+            self._send_test_message()
         self.execution_properties['run_end'] = True
         self.execution_properties['success'] = self.success
         return self.success
