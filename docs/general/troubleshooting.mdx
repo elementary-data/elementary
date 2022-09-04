@@ -153,6 +153,21 @@ python3 -m pip install elementary-data[<adapter>]
 
 </Accordion>
 
+<Accordion title="I changed `days back` but the results are the same">
+
+Elementary tests have a var named `days_back`.
+If you change it after executing elementary tests, you will need to run a full refresh to the metrics collected. This will make the next tests collect data for the new `days_back` timeframe.
+The steps are:
+
+1. Change var `days_back` in your `dbt_project.yml`.
+2. Full refresh of the model 'data_monitoring_metrics' by running ``` dbt run --select data_monitoring_metrics --full-refresh```.
+3. Running the elementary tests again.
+
+If you want the Elementary UI to show data for a longer period of time, use the days-back option of the CLI:
+```edr monitor report --days-back 45```
+
+</Accordion>
+
 <Accordion title="My problem is not listed here">
   
 If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
