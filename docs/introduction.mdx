@@ -1,8 +1,11 @@
-<Example>
+<Frame>
   <div class="dark:bg-slate-200 rounded-md p-4">
-    <img src="https://res.cloudinary.com/mintlify/image/upload/v1659304877/elementary/Logo_V2_chbdpu.png" alt="Elementary Logo" />
+    <img
+      src="https://res.cloudinary.com/mintlify/image/upload/v1659304877/elementary/Logo_V2_chbdpu.png"
+      alt="Elementary Logo"
+    />
   </div>
-</Example>
+</Frame>
 
 ## What is Elementary?
 
@@ -13,28 +16,30 @@ visibility, detect data issues, send actionable alerts, and understand the impac
 
 ## Key features
 
-- **Data observability report ([live demo](https://storage.googleapis.com/elementary_static/elementary_demo.html))** 
- 
+- **Data observability report ([live demo](https://storage.googleapis.com/elementary_static/elementary_demo.html))**
+
   Triage anomalies and dbt tests in a UI that visualizes results and provides all the information you need in a single place.
 
-- **Data anomaly detection as dbt tests** 
+- **Data anomaly detection as dbt tests**
 
   Monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection. Elementary data monitors are configured and executed like native tests in dbt your project!
 
-- **dbt artifacts and run results** 
- 
+- **dbt artifacts and run results**
+
   Uploading and modeling of dbt artifacts, run and test results to tables as part of your runs.
 
-- **Slack alerts** 
+- **Slack alerts**
 
   Get informative notifications on data issues, schema changes, models and tests failures.
 
-- **Data lineage** 
+- **Data lineage**
 
   Inspect upstream and downstream dependencies to understand impact and root cause of data issues.
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif" alt="Demo" />
-
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
+  alt="Demo"
+/>
 
 ## How it works?
 
@@ -43,8 +48,10 @@ The monitoring configuration is configured in your dbt project, and the monitors
 
 [Elementary CLI](./understand-elementary/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/High-level-flow_d21jfj.png" alt="High Level Flow" />
-
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/High-level-flow_d21jfj.png"
+  alt="High Level Flow"
+/>
 
 ## Community & Support
 
@@ -62,14 +69,14 @@ Check out the [contributions guide](./general/contributions).
 
 ## Integrations
 
-- [x] dbt
-- [x] Slack
+- dbt Core (1.0.0 and above)
+- dbt Cloud
+- Slack
 
 Data warehouses:
-- [x] Snowflake
-- [x] BigQuery
-- [x] Redshift
-- [x] Databricks - Beta support
-
+- Snowflake 
+- BigQuery
+- Redshift
+- Databricks - Beta support
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [Github](https://github.com/elementary-data/elementary) issue.

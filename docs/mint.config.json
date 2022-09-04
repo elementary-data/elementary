@@ -46,11 +46,7 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "quickstart-cli"
-      ]
+      "pages": ["introduction", "quickstart", "quickstart-cli"]
     },
     {
       "group": "Guides",
@@ -59,6 +55,15 @@
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
         "guides/add-elementary-tests"
+      ]
+    },
+    {
+      "group": "Deployment and Configuration",
+      "pages": [
+        "deployment-and-configuration/elementary-in-production",
+        "deployment-and-configuration/github-actions",
+        "understand-elementary/cli-install",
+        "understand-elementary/cli-commands"
       ]
     },
     {
@@ -72,24 +77,16 @@
       ]
     },
     {
-      "group": "Deployment",
-      "pages": [
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands",
-        "integrations/github-actions"
-      ]
-    },
-    {
       "group": "Data Anomaly Detection Tests",
       "pages": [
         "guides/data-anomaly-detection",
-        "guides/elementary-tests-configuration",
-        "guides/monitoring-in-production"
+        "guides/elementary-tests-configuration"
       ]
     },
     {
       "group": "Integrations",
       "pages": [
+        "integrations/dbt",
         "integrations/slack",
         "integrations/snowflake",
         "integrations/bigquery",
@@ -100,21 +97,15 @@
     {
       "group": "Community & Support",
       "pages": [
-        "general/contributions",
         "general/troubleshooting",
-        "general/community-and-support",
-        "general/faq"
+        "general/faq",
+        "general/contributions",
+        "general/community-and-support"
       ]
     }
   ],
-  "footerSocials": [
-    {
-      "type": "website",
-      "url": "https://www.elementary-data.com/"
-    },
-    {
-      "type": "slack",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
-    }
-  ]
+  "footerSocials": {
+    "website": "https://www.elementary-data.com",
+    "slack": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+  }
 }

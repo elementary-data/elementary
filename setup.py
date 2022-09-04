@@ -11,12 +11,12 @@ README = (HERE / "README.md").read_text()
 setup(
     name='elementary-data',
     description='Data monitoring and lineage',
-    version='0.4.8',
+    version='0.4.10',
     packages=find_packages(),
     python_requires='>=3.6.2',
     entry_points='''
         [console_scripts]
-        edr=cli.cli:cli
+        edr=elementary.cli.cli:cli
     ''',
     author="Elementary",
     package_data={"": ["header.html", "index.html", "dbt_project/*", "dbt_project/macros/*", "dbt_project/models/*",
@@ -35,7 +35,7 @@ setup(
         'google-cloud-storage<3.0.0',
         'ruamel.yaml<1.0.0',
         'alive-progress<=2.3.1',
-        'slack-sdk<4.0',
+        'slack-sdk<3.18.0',
         'pydantic<2.0',
         'networkx>=2.3,<3'
     ],
