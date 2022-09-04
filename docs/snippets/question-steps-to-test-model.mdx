@@ -1,0 +1,11 @@
+<Accordion title="Hi, i am trying to test my models with days_back 45 days, but it is not picking up this value, and defaults to 14 days even though i have declared it on the dbt_project.yml level.
+ I am sure I am missing a step here.">
+
+I think there are actually 3 steps to solve that.
+
+1. full refresh of the model 'data_monitoring_metrics' by running `dbt run --select data_monitoring_metrics --full-refresh`
+2. running the elementary tests again
+3. run the CLI with days back param: `edr monitor report --days-back 45`
+
+
+</Accordion>
