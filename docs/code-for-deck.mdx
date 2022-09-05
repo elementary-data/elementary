@@ -6,11 +6,46 @@ on-run-end:
 
 
 ```sql print_results.sql
-{% macro print_results(results_object) %}
-    {%- do log(results_object, True) -%}
+{% macro print_results(results) %}
+    {%- do print(results) -%}
 {% endmacro %}
 ```
 
+
+```sql 
+{%- set my_variable = "I am Or's variable" %}
+{{ my_variable }}
+```
+
+```shell 
+I am Or's variable
+```
+
+```sql 
+{{ run_started_at }}
+```
+
+```shell 
+2022-09-05 11:15:27.777666+00:00
+```
+
+
+```sql 
+{{ target.type }}
+```
+
+```shell 
+Snowflake
+```
+
+
+```sql 
+{{ ref('my_model') }}
+```
+
+```shell 
+database_name.schema_name.my_model
+```
 
 ```sql dbt_run_results.sql
 {{
