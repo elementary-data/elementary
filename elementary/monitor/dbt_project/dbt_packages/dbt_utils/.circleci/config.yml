@@ -1,0 +1,94 @@
+
+version: 2.1
+
+jobs:
+  
+  integration-postgres:
+    docker:
+      - image: cimg/python:3.9
+      - image: cimg/postgres:9.6
+        environment:
+          POSTGRES_USER: root
+    environment:
+      POSTGRES_TEST_HOST: localhost
+      POSTGRES_TEST_USER: root
+      POSTGRES_TEST_PASS: ''
+      POSTGRES_TEST_PORT: 5432
+      POSTGRES_TEST_DBNAME: circle_test
+
+    steps:
+      - checkout
+      - run: pip install --pre dbt-postgres -r dev-requirements.txt
+      - run:
+          name: "Run Functional Tests - Postgres"
+          command: ./run_functional_test.sh postgres
+      - run:
+          name: "Run OG Tests - Postgres"
+          command: ./run_test.sh postgres
+      - store_artifacts:
+          path: ./logs
+
+  integration-redshift:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run: pip install --pre dbt-redshift -r dev-requirements.txt
+      - run:
+          name: "Run Functional Tests - Redshift"
+          command: ./run_functional_test.sh redshift
+      - run:
+          name: "Run OG Tests - Redshift"
+          command: ./run_test.sh redshift
+      - store_artifacts:
+          path: ./logs
+
+  integration-snowflake:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run: pip install --pre dbt-snowflake -r dev-requirements.txt
+      - run:
+          name: "Run Functional Tests - Snowflake"
+          command: ./run_functional_test.sh snowflake
+      - run:
+          name: "Run OG Tests - Snowflake"
+          command: ./run_test.sh snowflake
+      - store_artifacts:
+          path: ./logs          
+  
+  integration-bigquery:
+    environment:
+      BIGQUERY_SERVICE_KEY_PATH: "/home/circleci/bigquery-service-key.json"
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run: pip install --pre dbt-bigquery -r dev-requirements.txt
+      - run:
+          name: "Set up credentials"
+          command: echo $BIGQUERY_SERVICE_ACCOUNT_JSON > ${HOME}/bigquery-service-key.json
+      - run:
+          name: "Run Functional Tests - BigQuery"
+          command: ./run_functional_test.sh bigquery
+      - run:
+          name: "Run OG Tests - BigQuery"
+          command: ./run_test.sh bigquery
+      - store_artifacts:
+          path: ./logs
+
+workflows:
+  version: 2
+  test-all:
+    jobs:
+      - integration-postgres
+      - integration-redshift:
+          requires:
+            - integration-postgres
+      - integration-snowflake:
+          requires:
+            - integration-postgres
+      - integration-bigquery:
+          requires:
+            - integration-postgres

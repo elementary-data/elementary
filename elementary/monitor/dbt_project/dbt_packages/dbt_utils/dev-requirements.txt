@@ -1,0 +1,3 @@
+pytest
+pytest-dotenv
+dbt-tests-adapter

@@ -1,0 +1,2 @@
+array_as_string,element,result_as_string
+"[1,2,3]",4,"[1,2,3,4]"

@@ -1,0 +1,2 @@
+array_1_as_string,array_2_as_string,result_as_string
+"[1,2,3]","[4,5,6]","[1,2,3,4,5,6]"

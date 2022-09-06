@@ -1,0 +1,10 @@
+group_col,string_text,order_col
+1,a,1
+1,b,2
+1,c,3
+2,a,2
+2,1,1
+2,p,3
+3,g,1
+3,g,2
+3,g,3
