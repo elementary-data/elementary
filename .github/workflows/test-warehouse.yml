@@ -36,7 +36,7 @@ on:
         required: true
       should-run-tests:
         type: boolean
-        required: true
+        required: false
         default: true
 
 env:
