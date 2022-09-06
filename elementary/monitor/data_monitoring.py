@@ -174,7 +174,7 @@ class DataMonitoring:
                 self.success = False
 
         if self.gcs_client:
-            send_succeded = self.gcs_client.send_report(html_path)
+            send_succeded = self.gcs_client.send_report(html_path, bucket_file_path=host_file_path)
             self.execution_properties['sent_to_gcs_successfully'] = send_succeded
             if not send_succeded:
                 self.success = False
