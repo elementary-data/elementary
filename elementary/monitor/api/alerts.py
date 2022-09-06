@@ -81,7 +81,9 @@ class AlertsAPI(APIClient):
             else:
                 subscribers.append(model_subscribers)
 
-            slack_channel = model_meta.get('channel')
+            model_slack_channel = model_meta.get('channel')
+            test_slack_channel = test_meta.get('channel')
+            slack_channel = test_slack_channel or model_slack_channel
 
             normalized_alert['subscribers'] = subscribers
             normalized_alert['slack_channel'] = slack_channel
