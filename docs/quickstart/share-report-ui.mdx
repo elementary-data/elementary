@@ -14,7 +14,7 @@ After you [setup a Slack app and token](../integrations/slack#slack-integration-
 edr monitor send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 ```
 
-You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr` command.
+You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr monitor send-report` command.
 The report will be sent to your Slack channel under the provided name:
 
 - Make sure the report name you provided has a suffix of `.html`.
@@ -49,11 +49,10 @@ Alternatively, you can pass the access key ID and secret access key:
 edr monitor send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SECRET_ACCESS_KEY> --s3-bucket-name <BUCKET_NAME>
 ```
 
-You can control the name of the report by providing `--bucket-file-path <REPORT_NAME>` to the `edr` command.
-The report will be uploaded to your bucket under the provided name:
+You can control the name of the report by providing `--bucket-file-path <REPORT_NAME>` to the `edr monitor send-report` command.
+The report will be uploaded to your bucket under the provided path:
 
-- Make sure the report name you provided has a suffix of `.html`.
-- If you wish to upload the report into a folder in your bucket, you should add the folder name to the provided report name: `folder/report_name.html`
+- Make sure the bucket file path ends with a suffix of `.html`.
 
 ### Hosting the report as a website
 
@@ -88,11 +87,10 @@ Once you have it, you can send the report to your GCS bucket by running the comm
 edr monitor send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
 ```
 
-You can control the name of the report by providing `--bucket-file-path <REPORT_NAME>` to the `edr` command.
-The report will be uploaded to your bucket under the provided name:
+You can control the name of the report by providing `--bucket-file-path <REPORT_NAME>` to the `edr monitor send-report` command.
+The report will be uploaded to your bucket under the provided path:
 
-- Make sure the report name you provided has a suffix of `.html`.
-- If you wish to upload the report into a folder in your bucket, you should add the folder name to the provided report name: `folder/report_name.html`
+- Make sure the bucket file path ends with a suffix of `.html`.
 
 ### Hosting the report as a website
 

@@ -300,8 +300,8 @@ def send_report(
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
         config.validate_send_report()
-        # If file name contains a folders (is a path),
-        # we want to make sure that we create the report localy without the folders of the full path.
+        # bucket-file-path determines the path of the report in the bucket.
+        # If this path contains folders we extract the report file name to first save the report locally
         local_file_path = os.path.basename(bucket_file_path) if bucket_file_path else slack_file_name
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False

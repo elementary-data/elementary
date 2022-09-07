@@ -1,9 +1,9 @@
-from os import path
 from typing import Optional
 
 import google
 from google.cloud import storage
 
+from elementary.clients.utils.bucket_path import basename, dirname, join_path
 from elementary.config.config import Config
 from elementary.utils.log import get_logger
 
