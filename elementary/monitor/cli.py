@@ -5,6 +5,7 @@ import click
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring import DataMonitoring
 from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 from elementary.utils.ordered_yaml import OrderedYaml
 
@@ -205,6 +206,12 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
+    '--slack-file-name',
+    type=str,
+    default=None,
+    help="The report's file name, this is how it will be sent to slack."
+)
+@click.option(
     '--aws-profile-name',
     type=str,
     default=None,
@@ -253,9 +260,10 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     help='Set the number of invocations shown for each test in the "Test Runs" report.'
 )
 @click.option(
-    '--file-name',
+    '--bucket-file-path',
     type=str,
-    help="The report's file name, this is how it will be stored in the bucket."
+    default=None,
+    help="The report's file name, this is where it will be stored in the bucket (may contain folders)."
 )
 @click.option(
     '--disable-passed-test-metrics',
@@ -272,9 +280,10 @@ def send_report(
         update_dbt_package,
         slack_token,
         slack_channel_name,
+        slack_file_name,
         profile_target,
         executions_limit,
-        file_name,
+        bucket_file_path,
         disable_passed_test_metrics,
         update_bucket_website,
         aws_profile_name,
@@ -299,13 +308,16 @@ def send_report(
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
         config.validate_send_report()
+        # bucket-file-path determines the path of the report in the bucket.
+        # If this path contains folders we extract the report file name to first save the report locally
+        local_file_path = bucket_path.basename(bucket_file_path) if bucket_file_path else slack_file_name
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
-            disable_passed_test_metrics=disable_passed_test_metrics, file_path=file_name, should_open_browser=False)
+            disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path, should_open_browser=False)
         if generated_report_successfully and elementary_html_path:
-            command_succeeded = data_monitoring.send_report(elementary_html_path)
+            command_succeeded = data_monitoring.send_report(elementary_html_path, remote_file_path=bucket_file_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
         if not command_succeeded:
             sys.exit(1)
