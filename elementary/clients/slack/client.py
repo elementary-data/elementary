@@ -5,6 +5,7 @@ from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
+from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
@@ -20,6 +21,7 @@ class SlackClient(ABC):
         self.token = token
         self.webhook = webhook
         self.client = self._initial_client()
+        self._initial_retry_handlers()
 
     @staticmethod
     def create_client(config: Config) -> Optional['SlackClient']:
@@ -33,6 +35,10 @@ class SlackClient(ABC):
     @abstractmethod
     def _initial_client(self):
         raise NotImplementedError
+
+    def _initial_retry_handlers(self):
+        rate_limit_handler = RateLimitErrorRetryHandler(max_retry_count=5)
+        self.client.retry_handlers.append(rate_limit_handler)
 
     @abstractmethod
     def send_message(self, **kwargs):
@@ -131,12 +137,7 @@ class SlackWebClient(SlackClient):
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
         err_type = err.response.data['error']
-        if err_type == 'ratelimited':
-            rate_limit_waiting_time = int(err.response.headers.get('Retry-After', 0))
-            logger.info(f'Got rate limit from Slack. Therefore waiting for {rate_limit_waiting_time} seconds')
-            time.sleep(rate_limit_waiting_time)
-            return True
-        elif err_type == 'not_in_channel':
+        if err_type == 'not_in_channel':
             logger.info('Elementary app is not in the channel. Attempting to join.')
             channel_id = self._get_channel_id(channel_name)
             if not channel_id:
