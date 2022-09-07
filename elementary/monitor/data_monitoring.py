@@ -171,21 +171,21 @@ class DataMonitoring:
         self.execution_properties['success'] = self.success
         return self.success, html_path
 
-    def send_report(self, html_path: str) -> bool:
+    def send_report(self, local_html_path: str, remote_file_path: Optional[str] = None) -> bool:
         if self.slack_client:
-            send_succeded = self.slack_client.send_report(self.config.slack_channel_name, html_path)
+            send_succeded = self.slack_client.send_report(self.config.slack_channel_name, local_html_path)
             self.execution_properties['sent_to_slack_successfully'] = send_succeded
             if not send_succeded:
                 self.success = False
 
         if self.s3_client:
-            send_succeded = self.s3_client.send_report(html_path)
+            send_succeded = self.s3_client.send_report(local_html_path, remote_bucket_file_path=remote_file_path)
             self.execution_properties['sent_to_s3_successfully'] = send_succeded
             if not send_succeded:
                 self.success = False
 
         if self.gcs_client:
-            send_succeded = self.gcs_client.send_report(html_path)
+            send_succeded = self.gcs_client.send_report(local_html_path, remote_bucket_file_path=remote_file_path)
             self.execution_properties['sent_to_gcs_successfully'] = send_succeded
             if not send_succeded:
                 self.success = False
