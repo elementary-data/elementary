@@ -155,6 +155,7 @@ models:
 By default Elementary uses the Slack channel that was configured in the Slack integration.
 Elementary supports configuring custom slack channels that are configured on your models / sources / tests and snapshots.
 If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel.
+If you configure a custom slack channel for both a model and a test, the test channel overrides the model channel.
 
 For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops channel.
 
@@ -188,8 +189,6 @@ models:
               meta:
                 channel_name: marketing_data_ops
 ```
-
-In case a channel is defined both on model level and test level, the test channel overrides the model channel.
 
 </Accordion>
 

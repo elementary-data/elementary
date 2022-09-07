@@ -132,7 +132,8 @@ class SlackWebClient(SlackClient):
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
         err_type = err.response.data['error']
         if err_type == 'ratelimited':
-            rate_limit_waiting_time = int(err.response.headers['Retry-After'])
+            rate_limit_waiting_time = int(err.response.headers.get('Retry-After', 0))
+            logger.info(f'Got rate limit from Slack. Therefore waiting for {rate_limit_waiting_time} seconds')
             time.sleep(rate_limit_waiting_time)
             return True
         elif err_type == 'not_in_channel':
