@@ -122,8 +122,8 @@ jobs:
 
       - name: Run send report
         run: >
-          edr monitor send-report -t ${{ inputs.warehouse-type }} --file-name report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops
+          edr monitor send-report -t ${{ inputs.warehouse-type }} --slack-file-name report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          --slack-token ${{ secrets.CI_SLACK_TOKEN }} --slack-channel-name data-ops --bucket-file-path ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
           --aws-access-key-id ${{ secrets.AWS_ACCESS_KEY_ID }} --aws-secret-access-key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
