@@ -5,7 +5,7 @@ import click
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring import DataMonitoring
 from elementary.tracking.anonymous_tracking import AnonymousTracking
-from elementary.utils.bucket_path import basename
+from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 from elementary.utils.ordered_yaml import OrderedYaml
 
@@ -302,7 +302,7 @@ def send_report(
         config.validate_send_report()
         # bucket-file-path determines the path of the report in the bucket.
         # If this path contains folders we extract the report file name to first save the report locally
-        local_file_path = basename(bucket_file_path) if bucket_file_path else slack_file_name
+        local_file_path = bucket_path.basename(bucket_file_path) if bucket_file_path else slack_file_name
         data_monitoring = DataMonitoring(config=config, force_update_dbt_package=update_dbt_package)
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(

@@ -13,7 +13,4 @@ def basename(bucket_path: str) -> str:
 
 
 def join_path(path_parts: list) -> str:
-    if len(path_parts) == 1:
-        return path_parts[1]
-    else:
-        return BUCKET_PATH_SEP.join(path_parts)
+    return BUCKET_PATH_SEP.join(path_parts)

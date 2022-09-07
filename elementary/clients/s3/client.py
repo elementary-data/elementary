@@ -1,10 +1,11 @@
+from os import path
 from typing import Optional
 
 import boto3
 import botocore.exceptions
 
-from elementary.utils.bucket_path import basename
 from elementary.config.config import Config
+from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -23,7 +24,7 @@ class S3Client:
         return cls(config) if config.has_aws else None
 
     def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
-        report_filename = basename(local_html_file_path)
+        report_filename = path.basename(local_html_file_path)
         bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
         try:
             self.client.upload_file(local_html_file_path, self.config.s3_bucket_name, bucket_report_path,
@@ -33,7 +34,7 @@ class S3Client:
                 self.client.put_bucket_website(
                     Bucket=self.config.s3_bucket_name,
                     # We use report_filename because a path can not be an IndexDocument Suffix.
-                    WebsiteConfiguration={'IndexDocument': {'Suffix': report_filename}}
+                    WebsiteConfiguration={'IndexDocument': {'Suffix': bucket_path.path(bucket_report_path)}}
                 )
                 logger.info("Updated S3 bucket's website.")
         except botocore.exceptions.ClientError:
