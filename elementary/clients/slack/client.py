@@ -1,5 +1,6 @@
 import json
 from abc import ABC, abstractmethod
+import time
 from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
@@ -52,6 +53,9 @@ class SlackWebClient(SlackClient):
 
     def send_message(self, channel_name: str, message: SlackMessageSchema, **kwargs) -> bool:
         try:
+            # Slack has a rate limit of 1 post per second.
+            # The SDK does not reaise an error/retusn status code properly so we have to handle it by waiting.
+            time.sleep(1.1)
             self.client.chat_postMessage(
                 channel=channel_name,
                 text=message.text,
@@ -130,7 +134,11 @@ class SlackWebClient(SlackClient):
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
         err_type = err.response.data['error']
-        if err_type == 'not_in_channel':
+        if err_type == 'ratelimited':
+            rate_limit_waiting_time = int(err.response.headers['Retry-After'])
+            time.sleep(rate_limit_waiting_time)
+            return True
+        elif err_type == 'not_in_channel':
             logger.info('Elementary app is not in the channel. Attempting to join.')
             channel_id = self._get_channel_id(channel_name)
             if not channel_id:
