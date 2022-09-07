@@ -3,7 +3,7 @@ from typing import Optional
 import google
 from google.cloud import storage
 
-from elementary.clients.utils.bucket_path import basename, dirname, join_path
+from elementary.utils.bucket_path import basename, dirname, join_path
 from elementary.config.config import Config
 from elementary.utils.log import get_logger
 
@@ -20,7 +20,7 @@ class GCSClient:
         return cls(config) if config.has_gcs else None
 
     def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
-        report_filename = path.basename(local_html_file_path)
+        report_filename = basename(local_html_file_path)
         bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
         try:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)
@@ -28,11 +28,11 @@ class GCSClient:
             blob.upload_from_filename(local_html_file_path, content_type='text/html')
             logger.info('Uploaded report to GCS.')  
             if self.config.update_bucket_website:
-                bucket_report_filder_path = path.dirname(bucket_report_path)
+                bucket_report_filder_path = dirname(bucket_report_path)
                 bucket.copy_blob(
                     blob=blob,
                     destination_bucket=bucket,
-                    new_name='/'.join([bucket_report_filder_path, 'index.html']) if bucket_report_filder_path else 'index.html'
+                    new_name=join_path([bucket_report_filder_path, 'index.html']) if bucket_report_filder_path else 'index.html'
                 )
                 logger.info("Updated GCS bucket's website.")
         except google.cloud.exceptions.GoogleCloudError:

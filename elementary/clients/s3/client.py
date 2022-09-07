@@ -3,7 +3,7 @@ from typing import Optional
 import boto3
 import botocore.exceptions
 
-from elementary.clients.utils.bucket_path import basename
+from elementary.utils.bucket_path import basename
 from elementary.config.config import Config
 from elementary.utils.log import get_logger
 
