@@ -23,7 +23,7 @@ class S3Client:
         return cls(config) if config.has_aws else None
 
     def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
-        report_filename = bucket_path.basename(local_html_file_path)
+        report_filename = bucket_path.basename(remote_bucket_file_path)
         bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
         try:
             self.client.upload_file(local_html_file_path, self.config.s3_bucket_name, bucket_report_path,

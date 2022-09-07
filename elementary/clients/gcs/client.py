@@ -1,4 +1,3 @@
-from os import path
 from typing import Optional
 
 import google
@@ -21,7 +20,7 @@ class GCSClient:
         return cls(config) if config.has_gcs else None
 
     def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
-        report_filename = path.basename(local_html_file_path)
+        report_filename = bucket_path.basename(remote_bucket_file_path)
         bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
         try:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)
