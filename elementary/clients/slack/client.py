@@ -53,9 +53,6 @@ class SlackWebClient(SlackClient):
 
     def send_message(self, channel_name: str, message: SlackMessageSchema, **kwargs) -> bool:
         try:
-            # Slack has a rate limit of 1 post per second.
-            # The SDK does not reaise an error/retusn status code properly so we have to handle it by waiting.
-            time.sleep(1.1)
             self.client.chat_postMessage(
                 channel=channel_name,
                 text=message.text,
