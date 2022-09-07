@@ -1,9 +1,11 @@
 import json
 from abc import ABC, abstractmethod
+import time
 from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
+from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
@@ -19,6 +21,7 @@ class SlackClient(ABC):
         self.token = token
         self.webhook = webhook
         self.client = self._initial_client()
+        self._initial_retry_handlers()
 
     @staticmethod
     def create_client(config: Config) -> Optional['SlackClient']:
@@ -32,6 +35,10 @@ class SlackClient(ABC):
     @abstractmethod
     def _initial_client(self):
         raise NotImplementedError
+
+    def _initial_retry_handlers(self):
+        rate_limit_handler = RateLimitErrorRetryHandler(max_retry_count=5)
+        self.client.retry_handlers.append(rate_limit_handler)
 
     @abstractmethod
     def send_message(self, **kwargs):
