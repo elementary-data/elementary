@@ -301,7 +301,7 @@ def send_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
             disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path, should_open_browser=False)
         if generated_report_successfully and elementary_html_path:
-            command_succeeded = data_monitoring.send_report(elementary_html_path, host_file_path=file_name)
+            command_succeeded = data_monitoring.send_report(elementary_html_path, remote_file_path=file_name)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
         if not command_succeeded:
             sys.exit(1)

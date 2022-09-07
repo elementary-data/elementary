@@ -22,13 +22,11 @@ class S3Client:
     def create_client(cls, config: Config) -> Optional['S3Client']:
         return cls(config) if config.has_aws else None
 
-    # html_path is the local path where the report generated at.
-    # bucket_file_path is where we want to upload the report to at the bucket - support folders!
-    def send_report(self, html_path: str, bucket_file_path: Optional[str] = None) -> bool:
-        report_filename = path.basename(html_path)
-        bucket_report_path = bucket_file_path if bucket_file_path else report_filename
+    def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
+        report_filename = path.basename(local_html_file_path)
+        bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
         try:
-            self.client.upload_file(html_path, self.config.s3_bucket_name, bucket_report_path,
+            self.client.upload_file(local_html_file_path, self.config.s3_bucket_name, bucket_report_path,
                                     ExtraArgs={'ContentType': 'text/html'})
             logger.info('Uploaded report to S3.')
             if self.config.update_bucket_website:
