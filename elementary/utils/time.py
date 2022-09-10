@@ -6,9 +6,12 @@ MILLISECONDS_IN_MIN = (1000 * 60)
 MILLISECONDS_IN_HOUR = (1000 * 60 * 60)
 
 
-def convert_utc_time_to_local_time(utc_time: 'datetime') -> 'datetime':
+def convert_utc_time_to_local_time(user_tz: str , utc_time: 'datetime') -> 'datetime':    
     from_zone = tz.tzutc()
-    to_zone = tz.tzlocal()
+    if(user_tz is not None):
+        to_zone = tz.gettz(user_tz)
+    else:
+        to_zone = tz.tzlocal()
     utc_time = utc_time.replace(tzinfo=from_zone)
     return utc_time.astimezone(to_zone)
 
