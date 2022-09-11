@@ -95,5 +95,5 @@ class Config:
             raise NoProfilesFileError(self.profiles_dir)
 
     def validate_timezone(self):
-      if not tz.gettz(self.slack_timezone):
+      if self.slack_timezone and not tz.gettz(self.slack_timezone):
          raise InvalidArgumentsError('Please provide a valid timezone. list of available timezoned can be found here: <http://.......> ')
