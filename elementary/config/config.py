@@ -17,7 +17,7 @@ class Config:
 
     def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
                  profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
-                 slack_token: str = None, slack_channel_name: str = None, slack_timezone: str = None, aws_profile_name: str = None,
+                 slack_token: str = None, slack_channel_name: str = None, timezone: str = None, aws_profile_name: str = None,
                  aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
                  google_service_account_path: str = None, gcs_bucket_name: str = None):
         self.config_dir = config_dir
@@ -28,11 +28,11 @@ class Config:
         self.target_dir = config.get('target-path') or os.getcwd()
 
         self.update_bucket_website = update_bucket_website or config.get('update_bucket_website', False)
+        self.timezone = timezone or config.get('timezone', False)
 
         self.slack_webhook = slack_webhook or config.get(self._SLACK, {}).get('notification_webhook')
         self.slack_token = slack_token or config.get(self._SLACK, {}).get('token')
         self.slack_channel_name = slack_channel_name or config.get(self._SLACK, {}).get('channel_name')
-        self.slack_timezone = slack_timezone or config.get(self._SLACK, {}.get('timezone'))
         self.is_slack_workflow = config.get(self._SLACK, {}).get('workflows', False)
 
         self.aws_profile_name = aws_profile_name or config.get(self._AWS, {}).get('profile_name')
@@ -95,5 +95,5 @@ class Config:
             raise NoProfilesFileError(self.profiles_dir)
 
     def validate_timezone(self):
-      if self.slack_timezone and not tz.gettz(self.slack_timezone):
+      if self.timezone and not tz.gettz(self.timezone):
          raise InvalidArgumentsError('An invalid timezone was provided to Slack alerts.')

@@ -6,7 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
-from elementary.utils.time import convert_utc_time_to_local_time
+from elementary.utils.time import convert_utc_time_to_timezone
 
 logger = get_logger(__name__)
 
@@ -24,18 +24,18 @@ class Alert:
             status: str = None,
             subscribers: Optional[List[str]] = None,
             slack_channel: Optional[str] = None,
-            slack_timezone: Optional[str] = None,
+            timezone: Optional[str] = None,
             **kwargs
     ):
         self.id = id
         self.elementary_database_and_schema = elementary_database_and_schema
         self.detected_at_utc = None
         self.detected_at = None
-        self.slack_timezone = slack_timezone
+        self.timezone = timezone
         try:
             detected_at_utc = datetime.fromisoformat(detected_at)
             self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
-            self.detected_at = convert_utc_time_to_local_time(slack_timezone, detected_at_utc).strftime('%Y-%m-%d %H:%M:%S')
+            self.detected_at = convert_utc_time_to_timezone(utc_time=detected_at_utc, timezone=timezone).strftime('%Y-%m-%d %H:%M:%S')
         except Exception:
             logger.error(f'Failed to parse "detect_at" field.')
         self.database_name = database_name
