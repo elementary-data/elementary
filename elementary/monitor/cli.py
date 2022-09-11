@@ -90,6 +90,12 @@ def get_cli_properties() -> dict:
     help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
+    '--timezone', '-tz',
+    type=str,
+    default=None,
+    help="The timezone of which all timestamps will be converted to. (default is user local timezone)",
+)
+@click.option(
     '--full-refresh-dbt-package', '-f',
     type=bool,
     default=False,
@@ -115,7 +121,7 @@ def monitor(
         slack_webhook,
         slack_token,
         slack_channel_name,
-		  slack_timezone,
+		  timezone,
         config_dir,
         profiles_dir,
         update_dbt_package,
@@ -134,7 +140,7 @@ def monitor(
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(config_dir, profiles_dir, profile_target, slack_webhook=slack_webhook, slack_token=slack_token,
-                    slack_channel_name=slack_channel_name, slack_timezone=slack_timezone)
+                    slack_channel_name=slack_channel_name, timezone=timezone)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor', get_cli_properties(), ctx.command.name)
     try:
@@ -205,12 +211,6 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     type=str,
     default=None,
     help="The slack channel which all alerts will be sent to.",
-)
-@click.option(
-    '--slack-timezone', '-tz',
-    type=str,
-    default=None,
-    help="The timezone of which all timestamps will be converted to. (default is user local timezone)",
 )
 @click.option(
     '--slack-file-name',
@@ -287,7 +287,6 @@ def send_report(
         update_dbt_package,
         slack_token,
         slack_channel_name,
-		  slack_timezone,
         slack_file_name,
         profile_target,
         executions_limit,
@@ -308,7 +307,7 @@ def send_report(
     """
 
     config = Config(config_dir, profiles_dir, profile_target, slack_token=slack_token,
-                    slack_channel_name=slack_channel_name, slack_timezone=slack_timezone, update_bucket_website=update_bucket_website,
+                    slack_channel_name=slack_channel_name, update_bucket_website=update_bucket_website,
                     aws_profile_name=aws_profile_name, aws_access_key_id=aws_access_key_id,
                     aws_secret_access_key=aws_secret_access_key, s3_bucket_name=s3_bucket_name,
                     google_service_account_path=google_service_account_path, gcs_bucket_name=gcs_bucket_name)
