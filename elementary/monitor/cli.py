@@ -121,7 +121,7 @@ def monitor(
         slack_webhook,
         slack_token,
         slack_channel_name,
-		  timezone,
+		timezone,
         config_dir,
         profiles_dir,
         update_dbt_package,

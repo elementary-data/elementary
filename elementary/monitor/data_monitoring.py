@@ -109,7 +109,7 @@ class DataMonitoring:
             self.execution_properties['success'] = self.success
             return self.success
 
-        alerts = self.alerts_api.query(days_back)
+        alerts = self.alerts_api.query(days_back, timezone=self.config.timezone)
         self.execution_properties['elementary_test_count'] = alerts.get_elementary_test_count()
         self.execution_properties['alert_count'] = alerts.count
         malformed_alert_count = alerts.malformed_count
