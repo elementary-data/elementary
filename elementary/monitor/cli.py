@@ -287,7 +287,7 @@ def send_report(
         update_dbt_package,
         slack_token,
         slack_channel_name,
-		  slack_timezone,
+        slack_timezone,
         slack_file_name,
         profile_target,
         executions_limit,
