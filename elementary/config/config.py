@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from dateutil.zoneinfo import getzoneinfofile_stream, ZoneInfoFile
+from dateutil import tz
 
 from elementary.exceptions.exceptions import NoElementaryProfileError, NoProfilesFileError, InvalidArgumentsError
 from elementary.utils.ordered_yaml import OrderedYaml
@@ -95,6 +95,5 @@ class Config:
             raise NoProfilesFileError(self.profiles_dir)
 
     def validate_timezone(self):
-      if self.slack_timezone is not None:
-        if self.slack_timezone not in ZoneInfoFile(getzoneinfofile_stream()).zones.keys():
-            print('Please provide a valid timezone. list of available timezoned can be found here: <http://.......> ')
+      if not tz.gettz(self.slack_timezone):
+         raise InvalidArgumentsError('Please provide a valid timezone. list of available timezoned can be found here: <http://.......> ')
