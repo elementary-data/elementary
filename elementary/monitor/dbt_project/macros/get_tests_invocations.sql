@@ -1,14 +1,14 @@
 {%- macro get_tests_invocations(invocations_per_test = 30, days_back = 7) -%}
     {% set tests_invocations = {} %}
     {% set tests_invocations_query %}
-        with elemetary_test_results as (
-            select * from {{ ref('elementary', 'elementary_test_results') }}
+        with test_results as (
+            select * from {{ ref('elementary', 'current_tests_run_results') }}
         ),
 
         test_results_in_last_chosen_days as (
             select *,
                 row_number() over (partition by model_unique_id, test_unique_id, test_sub_type, column_name order by detected_at desc) as row_number
-            from elemetary_test_results
+            from test_results
             where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         )
 
