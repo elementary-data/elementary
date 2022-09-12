@@ -28,7 +28,7 @@ class Config:
         self.target_dir = config.get('target-path') or os.getcwd()
 
         self.update_bucket_website = update_bucket_website or config.get('update_bucket_website', False)
-        self.timezone = timezone or config.get('timezone', False)
+        self.timezone = timezone or config.get('timezone')
 
         self.slack_webhook = slack_webhook or config.get(self._SLACK, {}).get('notification_webhook')
         self.slack_token = slack_token or config.get(self._SLACK, {}).get('token')
