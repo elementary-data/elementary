@@ -12,7 +12,7 @@ class DbtRunner:
     ELEMENTARY_LOG_PREFIX = 'Elementary: '
 
     def __init__(self, project_dir: str, profiles_dir: str, target: Optional[str] = None,
-                 raise_on_failure=True) -> None:
+                 raise_on_failure: bool = True) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
