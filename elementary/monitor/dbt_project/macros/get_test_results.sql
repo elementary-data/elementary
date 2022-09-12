@@ -1,7 +1,7 @@
 {%- macro get_test_results(days_back = 7, results_sample_limit = 5) -%}
     {% set select_test_results %}
         with test_results as (
-            select * from {{ ref('elementary', 'test_results') }}
+            select * from {{ ref('elementary', 'current_tests_run_results') }}
         ),
 
         tests_in_last_chosen_days as (
@@ -18,7 +18,7 @@
 
         select id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
                column_name, test_type, test_sub_type, test_results_description, owners, tags,
-               test_results_query, other, test_name, test_params, severity, status, days_diff
+               test_results_query, other, test_name, test_params, severity, status, test_first_seen_at, days_diff
 
         from latest_tests_in_the_last_chosen_days
     {%- endset -%}

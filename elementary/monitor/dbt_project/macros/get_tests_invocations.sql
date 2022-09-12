@@ -2,7 +2,7 @@
     {% set tests_invocations = {} %}
     {% set tests_invocations_query %}
         with test_results as (
-            select * from {{ ref('elementary', 'test_results') }}
+            select * from {{ ref('elementary', 'current_tests_run_results') }}
         ),
 
         test_results_in_last_chosen_days as (
