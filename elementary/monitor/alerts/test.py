@@ -19,11 +19,13 @@ class TestAlert(Alert):
             self,
             model_unique_id: str,
             test_unique_id: str,
+            test_created_at: Optional[str] = None,
             **kwargs
     ) -> None:
         super().__init__(**kwargs)
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
+        self.test_created_at = test_created_at
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -147,7 +149,8 @@ class DbtTestAlert(TestAlert):
                 'test_type': self.test_type,
                 'test_sub_type': self.test_sub_type,
                 'test_query': self.test_results_query,
-                'test_params': self.test_params
+                'test_params': self.test_params,
+                'test_created_at': self.test_created_at
             },
             'test_results': {
                 'display_name': self.test_display_name + ' - failed results sample',
@@ -242,7 +245,8 @@ class ElementaryTestAlert(DbtTestAlert):
                 'test_type': self.test_type,
                 'test_sub_type': self.test_sub_type,
                 'test_query': self.test_results_query,
-                'test_params': test_params
+                'test_params': test_params,
+                'test_created_at': self.test_created_at
             },
             'test_results': test_alerts,
             'test_runs': test_runs
