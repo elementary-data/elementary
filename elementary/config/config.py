@@ -96,4 +96,4 @@ class Config:
 
     def validate_timezone(self):
       if self.timezone and not tz.gettz(self.timezone):
-         raise InvalidArgumentsError('An invalid timezone was provided to Slack alerts.')
+         raise InvalidArgumentsError('An invalid timezone was provided.')
