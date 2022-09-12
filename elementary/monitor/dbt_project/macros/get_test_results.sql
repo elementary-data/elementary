@@ -16,10 +16,28 @@
             select * from tests_in_last_chosen_days where row_number = 1
         )
 
-        select id, model_unique_id, test_unique_id, detected_at, database_name, schema_name, table_name,
-               column_name, test_type, test_sub_type, test_results_description, owners, tags,
-               test_results_query, other, test_name, test_params, severity, status, test_first_seen_at, days_diff
-
+        select 
+            id,
+            model_unique_id,
+            test_unique_id,
+            detected_at,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            test_type,
+            test_sub_type,
+            test_results_description,
+            owners,
+            tags,
+            test_results_query,
+            other,
+            test_name,
+            test_params,
+            severity,
+            status,
+            test_first_seen_at as test_created_at,
+            days_diff
         from latest_tests_in_the_last_chosen_days
     {%- endset -%}
     {% set test_results_agate = run_query(select_test_results) %}
