@@ -1,3 +1,5 @@
+import subprocess
+
 _QUICKSTART_CLI_ERR_MSG = 'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
 
 
@@ -33,3 +35,10 @@ class SerializationError(Error):
 
 class InvalidAlertType(Error):
     """Exception raised for unknown alert types in alerts table"""
+
+
+class DbtCommandError(Error):
+    """Exception raised while executing a dbt command"""
+
+    def __init__(self, err: subprocess.CalledProcessError):
+        super().__init__(f'Failed to run dbt command - {err.cmd}')
