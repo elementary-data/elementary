@@ -74,6 +74,7 @@ class Config:
 
     def validate_monitor(self):
         self._validate_elementary_profile()
+        self.validate_timezone()
         if not self.has_slack:
             raise InvalidArgumentsError('Either a Slack token and a channel or a Slack webhook is required.')
 
