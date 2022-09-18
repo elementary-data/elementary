@@ -2,8 +2,12 @@
 title: "dbt package"
 ---
 
+import Schemas from "../../snippets/faq/question-schemas.mdx";
+
 For the data monitoring and dbt artifacts collection, edr executes a dbt package we developed.
 The package adds modles, macros, and Elementary monitors as dbt tests to your project.
+
+The package contains models, macros, dbt artifacts uploader and data monitors as dbt tests. The impact of the package on `dbt run` is minimal, and most of the processing happens as part of the data monitors as dbt tests, that are executed on `dbt test`.
 
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on.
@@ -13,13 +17,9 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </Accordion>
 
-The package contains models, macros, dbt artifacts uploader and data monitors as dbt tests. The impact of the package on `dbt run` is minimal, and most of the processing happens as part of the data monitors as dbt tests, that are executed on `dbt test`.
-
 To start, refer to the [installation guide](../../quickstart#how-to-install-elementary-dbt-package) of the dbt package.
 
-The code of the Elementary dbt package can be found here:
-
-[GitHub - Elementary elementary-data / dbt-data-reliability](https://github.com/elementary-data/dbt-data-reliability)
+The code of the Elementary dbt package can be found here: [https://github.com/elementary-data/dbt-data-reliability](https://github.com/elementary-data/dbt-data-reliability)
 
 
 # Elementary dbt package schemas
@@ -28,6 +28,7 @@ The Elementary dbt package stores data in 2 schemas:
 - Elementary models schema
 - Elementary temp tests results schema
 
+<Schemas />
 
 # Elementary dbt package models
 
