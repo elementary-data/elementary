@@ -88,8 +88,8 @@
     elementary_test_results_with_elementary_unique_id as (
         select
             case 
-                when (test_alias = test_node_name and test_alias is not null and column_name is not null and test_name is not null) then column_name || '.' || test_alias || '.' || test_name
-                when (test_alias = test_node_name and test_alias is not null and test_name is not null) then test_alias || '.' || test_name
+                when (test_alias = test_name and test_alias is not null and column_name is not null and test_short_name is not null) then column_name || '.' || test_alias || '.' || test_short_name
+                when (test_alias = test_name and test_alias is not null and test_short_name is not null) then test_alias || '.' || test_short_name
                 else test_unique_id
             end as elementary_unique_id,
             id,
@@ -113,7 +113,7 @@
             test_params,
             severity,
             status,
-            test_node_name,
+            test_short_name,
             test_alias
         from elementary_test_results
     ),
@@ -145,7 +145,7 @@
             results.test_params,
             results.severity,
             results.status,
-            results.test_node_name,
+            results.test_short_name,
             results.test_alias
         from elementary_test_results_with_elementary_unique_id results
         join dbt_tests_with_same_name_count counter on results.elementary_unique_id = counter.elementary_unique_id
@@ -177,11 +177,15 @@
         test_results.tags,
         test_results.test_results_query,
         test_results.other,
-        test_results.test_name,
+        case
+            when (test_results.test_alias = test_results.test_name and test_results.test_alias is not null) then test_results.test_alias
+            when test_results.test_short_name is not null then test_results.test_short_name
+            else test_results.test_name
+        end as test_name,
         test_results.test_params,
         test_results.severity,
         test_results.status,
-        test_results.test_node_name,
+        test_results.test_short_name,
         test_results.test_alias,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results_with_final_unique_id test_results
