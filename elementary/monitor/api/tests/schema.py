@@ -26,7 +26,7 @@ class TestMetadataSchema(BaseModel):
     test_params: Optional[str]
     severity: str
     status: str
-    test_created_at: str
+    test_created_at: Optional[str]
     days_diff: float
     
 
