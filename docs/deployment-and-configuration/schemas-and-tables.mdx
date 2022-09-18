@@ -118,10 +118,21 @@ The view filters alerts according to configuration.
 ### schema_columns_snapshot
 *Incremental model*
 
+Stores the schema details for tables that are monitored with elementary schema changes test.
+In order to compare current schema to previous state, we must store the previous state.
+The data is from a view that queries the data warehouse information schema.
+
 ### filtered_information_schema_columns
 *View*
+
+Queries the columns view from the information schema of the schemas in the project.
+This view is generated using an adapter specific macro, as information schema is different between platforms.
+This is a view to make the work with the information schema more convinient.
 
 ### filtered_information_schema_tables
 *View*
 
+Queries the tables and schemas views from the information schema of the schemas in the project.
+This view is generated using an adapter specific macro, as information schema is different between platforms.
+This is a view to make the work with the information schema more convinient.
 
