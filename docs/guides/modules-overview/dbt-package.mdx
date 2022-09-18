@@ -2,10 +2,10 @@
 title: "dbt package"
 ---
 
+import Schemas from "../snippets/faq/question-schemas.mdx";
+
 For the data monitoring and dbt artifacts collection, edr executes a dbt package we developed.
 The package adds modles, macros, and Elementary monitors as dbt tests to your project.
-
-(Not a dbt user? you can still use Elementary, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) and we will help)
 
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on.
@@ -23,7 +23,166 @@ The code of the Elementary dbt package can be found here:
 
 [GitHub - Elementary elementary-data / dbt-data-reliability](https://github.com/elementary-data/dbt-data-reliability)
 
-<Accordion title="Have a question❓">
-We are available on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), reach out for any kind of help!
 
-</Accordion>
+# Elementary dbt package schemas
+
+The Elementary dbt package stores data in 2 schemas:
+- Elementary models schema
+- Elementary temp tests results schema
+
+<Schemas />
+
+# Elementary dbt package models
+
+## Run results
+
+### dbt_run_results
+*Incremental model*
+
+Run results of dbt invocations, inserted at the end of each invocation.
+Each row is the invocation result of a single resource (model, test, snapshot, etc).
+New data is loaded to this model on an on-run-end hook named `elementary.upload_run_results` from each invocation that produces a result object.
+
+### model_run_results
+*View*
+
+Run results of dbt models, enriched with models metadata.
+Each row is the result of a single model.
+This is a view that joins data from `dbt_run_results` and `dbt_models`.
+
+### snapshot_run_results
+*View*
+
+Run results of dbt snapshots, enriched with snapshots metadata.
+Each row is the result of a single snapshot.
+This is a view that joins data from `dbt_run_results` and `dbt_snapshots`.
+
+### elementary_test_results
+*Incremental model*
+
+Run results of all dbt tests, with fields and metadata needed to produce the [Elementary report](../understand-elementary/elementary-report-ui).
+Each row is the result of a single test, including native dbt tests, packages tests and elementary tests.
+New data is loaded to this model on an on-run-end hook named `elementary.handle_tests_results`.
+
+
+## dbt artifacts
+
+The dbt artifacts models are created as empty tables, and a post-hook macro inserts data from the dbt graph object to the table.
+**Each time the model is executed, the data is replaced with the project’s current graph.**
+It is recommended to execute these models every time a change is merged to the project.
+
+### dbt_models
+*Table*
+
+Metadata about all the models in the project and project packages.
+Each row contains information about the properties of a single model, including columns like tags, owner, materialization, depends_on, and description.
+
+### dbt_tests
+*Table*
+
+Metadata about all the tests in the project and project packages.
+Each row contains information about the properties of a single test, including columns like severity, parent model unique id, tags and owner of the parent model, test params, and the test compiled query.
+
+### dbt_sources
+*Table*
+
+Metadata about the sources configured in the project and project packages.
+Each row contains information about the properties of a single source, including columns like tags, owner, freshness configuration, database and schema.
+
+### dbt_exposures
+*Table*
+
+Metadata about the exposures configured in the project and project packages.
+Each row contains information about the properties of a single exposure, including columns like tags, owner, url and depends on.
+
+### dbt_metrics
+*Table*
+
+Metadata about the metrics configured in the project and project packages.
+Each row contains information about the properties of a single metric, including columns like tags, owner, sql, and depends on.
+
+### dbt_snapshots
+*Table*
+
+Metadata about all the snapshots in the project and project packages.
+Each row contains information about the properties of a single snapshot, including columns like tags, owner, depends_on, and description.
+
+
+## Alerts views
+
+### alerts_dbt_models
+*View*
+
+A view that is used by the Elementary CLI to generate models alerts, including all the fields the alert will include such as owner, tags, error message, etc.
+It joins data about models and snapshots run results, and filters alerts according to configuration.
+
+### alerts_dbt_tests
+*View*
+
+A view that is used by the Elementary CLI to generate dbt tests alerts, including all the fields the alert will include such as owner, tags, error message, etc.
+This view includes data about all dbt tests except elementary tests.
+It filters alerts according to configuration.
+
+### alerts_anomaly_detection
+*View*
+
+A view that is used by the Elementary CLI to generate alerts on data anomalies detected using the elementary anomaly detection tests.
+The view filters alerts according to configuration.
+
+### alerts_schema_changes
+*View*
+
+A view that is used by the Elementary CLI to generate alerts on schema changes detected using elementary tests.
+The view filters alerts according to configuration.
+
+## Anomaly detection
+
+### data_monitoring_metrics
+*Incremental model*
+
+Elementary anomaly detection tests monitor metrics such as volume, freshness and data quality metrics.
+This incremental table is used to store the metrics over time.
+On each anomaly detection test, the test queries this table for historical metrics, and compares to the latest values.
+The table is updated with new metrics on the on-run-end named `handle_test_results` that is executed at the end of dbt test invocations.
+
+### metrics_anomaly_score
+*View*
+
+This is a view on `data_monitoring_metrics` that runs the same query the anomaly detection tests run to calculate anomaly scores.
+The purpose of this view is to provide visibility to the results of anomaly detection tests.
+
+### anomaly_threshold_sensitivity
+*View*
+
+This is a view on `metrics_anomaly_score` that calculates if values of metrics from the latest runs would have been considered anomalies in different anomaly scores.
+This can help you decide if there is a need to adjust the `anomaly_score_threshold`.
+
+### monitors_runs
+*View*
+
+This is a view on `data_monitoring_metrics` that is used to determine when a specific anomaly detection test was last executed.
+Each anomaly detection test queries this view to decide on a start time for collecting metrics.
+
+
+## Schema changes
+
+### schema_columns_snapshot
+*Incremental model*
+
+Stores the schema details for tables that are monitored with elementary schema changes test.
+In order to compare current schema to previous state, we must store the previous state.
+The data is from a view that queries the data warehouse information schema.
+
+### filtered_information_schema_columns
+*View*
+
+Queries the columns view from the information schema of the schemas in the project.
+This view is generated using an adapter specific macro, as information schema is different between platforms.
+This is a view to make the work with the information schema more convenient.
+
+### filtered_information_schema_tables
+*View*
+
+Queries the tables and schemas views from the information schema of the schemas in the project.
+This view is generated using an adapter specific macro, as information schema is different between platforms.
+This is a view to make the work with the information schema more convenient.
