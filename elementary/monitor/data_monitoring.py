@@ -137,6 +137,7 @@ class DataMonitoring:
                 disable_passed_test_metrics=disable_passed_test_metrics)
             models, dbt_sidebar = self._get_dbt_models_and_sidebar()
             models_coverages = self._get_dbt_models_test_coverages()
+            models_runs = self._get_models_runs(days_back=days_back)
             lineage = self._get_lineage()
             output_data['models'] = models
             output_data['dbt_sidebar'] = dbt_sidebar
@@ -144,6 +145,7 @@ class DataMonitoring:
             output_data['test_results_totals'] = test_results_totals
             output_data['test_runs_totals'] = test_runs_totals
             output_data['coverages'] = models_coverages
+            output_data['model_runs'] = models_runs
             output_data['lineage'] = lineage.dict()
             output_data['tracking'] = {
                 'posthog_api_key': tracking.POSTHOG_PROJECT_API_KEY,
@@ -244,6 +246,11 @@ class DataMonitoring:
             tests_results[test.model_unique_id].append(test_result.to_test_alert_api_dict())
         self.execution_properties['elementary_test_count'] = elementary_test_count
         return tests_results
+    
+    def _get_models_runs(self, days_back: Optional[int] = None):
+        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        models_runs = models_api.get_aggregated_models_runs(days_back=days_back)
+        return [model_runs.dict() for model_runs in models_runs]
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)

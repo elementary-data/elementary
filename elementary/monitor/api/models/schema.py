@@ -2,6 +2,9 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 
 
+ModelUniqueIdType = str
+
+
 class ArtifactSchema(BaseModel):
     name: str
     unique_id: str
@@ -66,3 +69,33 @@ class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
 class ModelCoverageSchema(BaseModel):
     table_tests: int
     column_tests: int
+
+
+class ModelRunSchema(BaseModel):
+    id: str
+    time_utc: str
+    status: str
+    full_refresh: bool
+
+
+class TotalsModelRunsSchema(BaseModel):
+    errors: Optional[int] = 0
+    success: Optional[int] = 0
+
+
+class ModelRunsSchema(BaseModel):
+    totals: TotalsModelRunsSchema
+    runs: List[ModelRunSchema] 
+
+
+class AggregatedModelRunsSchema(BaseModel):
+    unique_id: str
+    name: str
+    status: str
+    last_exec_time: str
+    compiled_sql: str
+    median_exec_time: float
+    exec_time_change_rate: float
+    generated_at: str
+    totals: TotalsModelRunsSchema
+    runs: List[ModelRunSchema]
