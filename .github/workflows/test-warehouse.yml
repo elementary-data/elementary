@@ -80,6 +80,7 @@ jobs:
           unzip spark-driver.zip
           sudo dpkg -i *.deb
           sudo apt-get -f install
+          sudo dpkg -i *.deb
 
       - name: Install Elementary
         run: pip install "./elementary[${{ inputs.warehouse-type }}]"
