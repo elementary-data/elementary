@@ -78,7 +78,7 @@ jobs:
         run: |
           curl -o spark-driver.zip https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.6.26/SimbaSparkODBC-2.6.26.1045-Debian-64bit.zip
           unzip spark-driver.zip
-          apt-get install unixodbc unixodbc-dev
+          sudo apt-get install unixodbc unixodbc-dev
           sudo dpkg -i *.deb
 
       - name: Install Elementary
