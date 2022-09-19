@@ -28,3 +28,9 @@ jobs:
     with:
       warehouse-type: databricks
     secrets: inherit
+
+  spark:
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: spark
+    secrets: inherit
