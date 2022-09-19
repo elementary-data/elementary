@@ -72,6 +72,13 @@ jobs:
         with:
           python-version: '3.7.5'
 
+      - name: Install Databricks driver
+        if: inputs.warehouse-type == 'spark'
+        run: |
+          curl -o spark-driver.zip https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.6.26/SimbaSparkODBC-2.6.26.1045-Debian-64bit.zip
+          unzip spark-driver.zip
+          dpkg -i *.deb
+
       - name: Install Elementary
         run: pip install "./elementary[${{ inputs.warehouse-type }}]"
 
