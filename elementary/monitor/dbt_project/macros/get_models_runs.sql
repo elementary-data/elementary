@@ -9,7 +9,9 @@
         ),
 
         current_models_runs_results as (
-            select run_results.*
+            select
+                run_results.*,
+                models.materialization
             from dbt_run_results run_results
             join models on run_results.unique_id = models.unique_id
             where resource_type = 'model'
@@ -23,6 +25,7 @@
             status,
             execution_time,
             full_refresh,
+            materialization,
             compiled_sql,
             generated_at
         from current_models_runs_results

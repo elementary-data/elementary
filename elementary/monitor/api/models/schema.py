@@ -76,6 +76,7 @@ class ModelRunSchema(BaseModel):
     time_utc: str
     status: str
     full_refresh: bool
+    materialization: str
 
 
 class TotalsModelRunsSchema(BaseModel):

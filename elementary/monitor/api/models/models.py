@@ -63,7 +63,8 @@ class ModelsAPI(APIClient):
                         id=model_run['invocation_id'],
                         time_utc=model_run['generated_at'],
                         status=model_run['status'],
-                        full_refresh=model_run['full_refresh']
+                        full_refresh=model_run['full_refresh'],
+                        materialization=model_run['materialization']
                     )
                 )
             except Exception:
