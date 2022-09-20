@@ -35,7 +35,6 @@
             test_params,
             severity,
             status,
-            test_created_at,
             days_diff
         from latest_tests_in_the_last_chosen_days
     {%- endset -%}
