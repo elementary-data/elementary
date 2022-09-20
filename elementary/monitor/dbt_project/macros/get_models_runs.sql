@@ -23,10 +23,9 @@
             invocation_id,
             name,
             status,
-            execution_time,
+            round(execution_time, 3) as execution_time,
             full_refresh,
             materialization,
-            round(execution_time, 3) as execution_time,
             compiled_sql,
             generated_at
         from current_models_runs_results
