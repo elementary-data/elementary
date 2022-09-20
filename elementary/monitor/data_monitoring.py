@@ -50,7 +50,7 @@ class DataMonitoring:
         self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
-        self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema)
+        self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema, self.config)
         self.sent_alert_count = 0
         self.success = True
         self.send_test_message_on_success = send_test_message_on_success
@@ -109,7 +109,7 @@ class DataMonitoring:
             self.execution_properties['success'] = self.success
             return self.success
 
-        alerts = self.alerts_api.query(days_back, timezone=self.config.timezone)
+        alerts = self.alerts_api.query(days_back)
         self.execution_properties['elementary_test_count'] = alerts.get_elementary_test_count()
         self.execution_properties['alert_count'] = alerts.count
         malformed_alert_count = alerts.malformed_count

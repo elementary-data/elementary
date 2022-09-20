@@ -15,33 +15,32 @@ logger = get_logger(__name__)
 
 
 class AlertsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner, elementary_database_and_schema: str):
+    def __init__(self, dbt_runner: DbtRunner, elementary_database_and_schema: str, config):
         super().__init__(dbt_runner)
         self.elementary_database_and_schema = elementary_database_and_schema
+        self.config = config
 
-    def query(self, days_back: int, timezone: Optional[str] = None) -> Alerts:
+    def query(self, days_back: int) -> Alerts:
         return Alerts(
-            tests=self._query_test_alerts(days_back, timezone),
-            models=self._query_model_alerts(days_back, timezone),
+            tests=self._query_test_alerts(days_back),
+            models=self._query_model_alerts(days_back),
         )
 
-    def _query_test_alerts(self, days_back: int, timezone: Optional[str] = None) -> AlertsQueryResult[TestAlert]:
+    def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
         logger.info('Querying test alerts.')
         return self._query_alert_type(
             {'macro_name': 'get_new_test_alerts', 'macro_args': {'days_back': days_back}},
-            TestAlert.create_test_alert_from_dict,
-            timezone
+            TestAlert.create_test_alert_from_dict
         )
 
-    def _query_model_alerts(self, days_back: int, timezone: Optional[str] = None) -> AlertsQueryResult[ModelAlert]:
+    def _query_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
         logger.info('Querying model alerts.')
         return self._query_alert_type(
             {'macro_name': 'get_new_model_alerts', 'macro_args': {'days_back': days_back}},
-            ModelAlert,
-            timezone
+            ModelAlert
         )
 
-    def _query_alert_type(self, run_operation_args: dict, alert_factory_func: Callable, timezone: Optional[str] = None) -> AlertsQueryResult:
+    def _query_alert_type(self, run_operation_args: dict, alert_factory_func: Callable) -> AlertsQueryResult:
         raw_alerts = self.dbt_runner.run_operation(**run_operation_args)
         alerts = []
         malformed_alerts = []
@@ -52,7 +51,7 @@ class AlertsAPI(APIClient):
                 try:
                     alerts.append(alert_factory_func(
                         elementary_database_and_schema=self.elementary_database_and_schema,
-                        timezone=timezone,
+                        timezone=self.config.timezone,
                         **notmalaized_alert
                     ))
                 except Exception:
