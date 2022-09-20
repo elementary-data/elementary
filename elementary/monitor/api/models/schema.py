@@ -77,6 +77,7 @@ class ModelRunSchema(BaseModel):
     status: str
     full_refresh: bool
     materialization: str
+    execution_time: float
 
 
 class TotalsModelRunsSchema(BaseModel):
