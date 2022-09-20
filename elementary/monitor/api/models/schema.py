@@ -2,9 +2,6 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, validator
 
 
-ModelUniqueIdType = str
-
-
 class ArtifactSchema(BaseModel):
     name: str
     unique_id: str
@@ -86,11 +83,6 @@ class TotalsModelRunsSchema(BaseModel):
 
 
 class ModelRunsSchema(BaseModel):
-    totals: TotalsModelRunsSchema
-    runs: List[ModelRunSchema] 
-
-
-class AggregatedModelRunsSchema(BaseModel):
     unique_id: str
     # schema is a saved name, so we use alias
     schema_name: str = Field(alias='schema')
@@ -100,6 +92,5 @@ class AggregatedModelRunsSchema(BaseModel):
     compiled_sql: str
     median_exec_time: float
     exec_time_change_rate: float
-    generated_at: str
     totals: TotalsModelRunsSchema
-    runs: List[ModelRunSchema]
+    runs: List[ModelRunSchema] 

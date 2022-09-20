@@ -252,7 +252,7 @@ class DataMonitoring:
     
     def _get_models_runs(self, days_back: Optional[int] = None):
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        models_runs = models_api.get_aggregated_models_runs(days_back=days_back)
+        models_runs = models_api.get_models_runs(days_back=days_back)
         return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:

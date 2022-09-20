@@ -1,34 +1,22 @@
 {%- macro get_models_runs(days_back = 7) -%}
     {% set models_runs_query %}
-        with models as (
-            select * from {{ ref('elementary', 'dbt_models') }}
-        ),
-
-        dbt_run_results as (
-            select * from {{ ref('elementary', 'dbt_run_results') }}
-        ),
-
-        current_models_runs_results as (
-            select
-                run_results.*,
-                models.materialization
-            from dbt_run_results run_results
-            join models on run_results.unique_id = models.unique_id
-            where resource_type = 'model'
-            and {{ elementary.datediff(elementary.cast_as_timestamp('run_results.generated_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
+        with model_runs as (
+            select * from {{ ref('elementary', 'model_run_results') }}
         )
 
         select
             unique_id, 
             invocation_id,
             name,
+            schema_name as schema,
             status,
             round(execution_time, 3) as execution_time,
             full_refresh,
             materialization,
             compiled_sql,
             generated_at
-        from current_models_runs_results
+        from model_runs
+        where {{ elementary.datediff(elementary.cast_as_timestamp('generated_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         order by generated_at
     {% endset %}
     {% set models_runs_agate = run_query(models_runs_query) %}

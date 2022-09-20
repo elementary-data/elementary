@@ -1,17 +1,16 @@
 from collections import defaultdict
 import json
 import os
+import statistics
 from typing import Dict, List, Optional, Union
 
 from elementary.clients.api.api import APIClient
 from elementary.monitor.api.models.schema import (
-    AggregatedModelRunsSchema,
     ExposureSchema,
     ModelCoverageSchema,
     ModelRunSchema,
     ModelRunsSchema,
     ModelSchema,
-    ModelUniqueIdType,
     NormalizedExposureSchema,
     NormalizedModelSchema,
     NormalizedSourceSchema,
@@ -28,64 +27,53 @@ SQL_FILE_EXTENSION = ".sql"
 
 
 class ModelsAPI(APIClient):
-    def get_aggregated_models_runs(self, days_back: Optional[int] = 7) -> List[AggregatedModelRunsSchema]:
-        run_operation_response = self.dbt_runner.run_operation(macro_name='get_aggregated_models_runs',
-                                                               macro_args=dict(days_back=days_back))
-        aggregated_models_runs = json.loads(run_operation_response[0]) if run_operation_response else []
-        models_runs = self.get_models_runs(days_back=days_back)
-        aggregated_models_runs_with_totals = []
-        for aggregated_model_runs in aggregated_models_runs:
-            try:
-                model_runs = models_runs[aggregated_model_runs['unique_id']]
-                aggregated_models_runs_with_totals.append(
-                    AggregatedModelRunsSchema(
-                        **aggregated_model_runs,
-                        totals=model_runs.totals,
-                        runs=model_runs.runs
-                    )
-                )
-            
-            except Exception:
-                logger.error(
-                    f"Could not parse model ({aggregated_models_runs_with_totals.get('unique_id')}) - continue to the next model")
-                continue
-        return aggregated_models_runs_with_totals
-
-    def get_models_runs(self, days_back: Optional[int] = 7) -> Dict[ModelUniqueIdType, ModelRunsSchema]:
+    def get_models_runs(self, days_back: Optional[int] = 7) -> List[ModelRunsSchema]:
         run_operation_response = self.dbt_runner.run_operation(macro_name='get_models_runs',
                                                                macro_args=dict(days_back=days_back))
-        model_runs_dicts = json.loads(run_operation_response[0]) if run_operation_response else []
-        grouped_models_runs = defaultdict(list)
-        for model_run in model_runs_dicts:
-            try:
-                grouped_models_runs[model_run['unique_id']].append(
-                    ModelRunSchema(
-                        id=model_run['invocation_id'],
-                        time_utc=model_run['generated_at'],
-                        status=model_run['status'],
-                        full_refresh=model_run['full_refresh'],
-                        materialization=model_run['materialization'],
-                        execution_time=model_run['execution_time']
-                    )
-                )
-            except Exception:
-                logger.error(
-                    f"Could not parse model ({model_run.get('unique_id')}) run ({model_run.get('invocation_id')}) - continue to the next model run")
-                continue
+        model_run_dicts = json.loads(run_operation_response[0]) if run_operation_response else []
         
-        models_runs = dict()
-        for model_unique_id, model_runs in grouped_models_runs.items():
+        models_runs = defaultdict(list)
+        for model_run in model_run_dicts:
+            models_runs[model_run['unique_id']].append(model_run)
+        
+        aggregated_models_runs = []
+        for model_unique_id, model_runs in models_runs.items():
             totals = self._get_model_runs_totals(model_runs)
-            models_runs[model_unique_id] = ModelRunsSchema(
-                totals=totals,
-                runs=model_runs,
+            runs = [
+                ModelRunSchema(
+                    id=model_run['invocation_id'],
+                    time_utc=model_run['generated_at'],
+                    status=model_run['status'],
+                    full_refresh=model_run['full_refresh'],
+                    materialization=model_run['materialization'],
+                    execution_time=model_run['execution_time']
+                )
+                for model_run
+                in model_runs
+            ]
+            median_execution_time = statistics.median([model_run['execution_time'] for model_run in model_runs])
+            last_model_run = sorted(model_runs, key=lambda run: run['generated_at'])[-1]
+            execution_time_change_rate = (last_model_run['execution_time'] / median_execution_time - 1) * 100
+            aggregated_models_runs.append(
+                ModelRunsSchema(
+                    unique_id=model_unique_id,
+                    schema=last_model_run['schema'],
+                    name=last_model_run['name'],
+                    status=last_model_run['status'],
+                    last_exec_time=last_model_run['execution_time'],
+                    compiled_sql=last_model_run['compiled_sql'],
+                    median_exec_time=median_execution_time,
+                    exec_time_change_rate=execution_time_change_rate,
+                    totals=totals,
+                    runs=runs
+                )
             )
-        return models_runs
+        return aggregated_models_runs
 
     @staticmethod
-    def _get_model_runs_totals(runs: List[ModelRunSchema]) -> TotalsModelRunsSchema:
-        error_runs = len([run for run in runs if run.status in ["error", "fail"]])
-        seccuss_runs = len([run for run in runs if run.status == "success"])
+    def _get_model_runs_totals(runs: List[dict]) -> TotalsModelRunsSchema:
+        error_runs = len([run for run in runs if run['status'] in ["error", "fail"]])
+        seccuss_runs = len([run for run in runs if run['status'] == "success"])
         return TotalsModelRunsSchema(
             errors=error_runs,
             success=seccuss_runs
