@@ -9,7 +9,10 @@
         ),
 
         current_models_runs_results as (
-            select run_results.*
+            select 
+                run_results.*,
+                models.schema_name,
+                models.materialization
             from dbt_run_results run_results
             join models on run_results.unique_id = models.unique_id
             where resource_type = 'model'
@@ -27,6 +30,7 @@
 
         select 
             unique_id,
+            schema_name as schema,
             name,
             status,
             round(execution_time, 3) as last_exec_time,

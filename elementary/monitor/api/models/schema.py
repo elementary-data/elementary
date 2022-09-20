@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 
 ModelUniqueIdType = str
@@ -91,6 +91,8 @@ class ModelRunsSchema(BaseModel):
 
 class AggregatedModelRunsSchema(BaseModel):
     unique_id: str
+    # schema is a saved name, so we use alias
+    schema_name: str = Field(alias='schema')
     name: str
     status: str
     last_exec_time: str
