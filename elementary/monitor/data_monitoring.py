@@ -131,7 +131,10 @@ class DataMonitoring:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, 'w') as html_file:
-            output_data = {'creation_time': now_utc}
+            output_data = {
+                'creation_time': now_utc,
+                'days_back': days_back
+            }
             test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
                 days_back=days_back, test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics)
