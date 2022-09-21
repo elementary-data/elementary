@@ -10,6 +10,7 @@ class ArtifactSchema(BaseModel):
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
+    type: str
 
 
 class ModelSchema(ArtifactSchema):
