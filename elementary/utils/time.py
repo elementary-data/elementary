@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil import tz
-from typing import Optional
 
 MILLISECONDS_IN_SEC = 1000
 MILLISECONDS_IN_MIN = (1000 * 60)
@@ -21,7 +20,7 @@ def get_now_utc_str(format: str = TIME_FORMAT) -> str:
 
 
 def get_now_utc_iso_format() -> str:
-    return datetime.utcnow().isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def format_milliseconds(duration: int) -> str:
