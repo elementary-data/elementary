@@ -10,7 +10,7 @@
             name,
             schema_name as schema,
             status,
-            round(execution_time, 3) as execution_time,
+            round(execution_time, 1) as execution_time,
             full_refresh,
             materialization,
             compiled_sql,
