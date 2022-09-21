@@ -74,7 +74,7 @@ class Config:
 
     def validate_monitor(self):
         self._validate_elementary_profile()
-        self.validate_timezone()
+        self._validate_timezone()
         if not self.has_slack:
             raise InvalidArgumentsError('Either a Slack token and a channel or a Slack webhook is required.')
 
@@ -95,6 +95,6 @@ class Config:
         except FileNotFoundError:
             raise NoProfilesFileError(self.profiles_dir)
 
-    def validate_timezone(self):
+    def _validate_timezone(self):
       if self.timezone and not tz.gettz(self.timezone):
          raise InvalidArgumentsError('An invalid timezone was provided.')

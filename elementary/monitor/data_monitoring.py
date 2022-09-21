@@ -50,7 +50,7 @@ class DataMonitoring:
         self.gcs_client = GCSClient.create_client(self.config)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
-        self.alerts_api = AlertsAPI(self.dbt_runner, self.elementary_database_and_schema, self.config)
+        self.alerts_api = AlertsAPI(self.dbt_runner, self.config, self.elementary_database_and_schema)
         self.sent_alert_count = 0
         self.success = True
         self.send_test_message_on_success = send_test_message_on_success
