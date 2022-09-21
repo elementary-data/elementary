@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from dateutil import tz
 
 from elementary.exceptions.exceptions import NoElementaryProfileError, NoProfilesFileError, InvalidArgumentsError
 from elementary.utils.ordered_yaml import OrderedYaml
@@ -16,7 +17,7 @@ class Config:
 
     def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
                  profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
-                 slack_token: str = None, slack_channel_name: str = None, aws_profile_name: str = None,
+                 slack_token: str = None, slack_channel_name: str = None, timezone: str = None, aws_profile_name: str = None,
                  aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
                  google_service_account_path: str = None, gcs_bucket_name: str = None):
         self.config_dir = config_dir
@@ -27,6 +28,7 @@ class Config:
         self.target_dir = config.get('target-path') or os.getcwd()
 
         self.update_bucket_website = update_bucket_website or config.get('update_bucket_website', False)
+        self.timezone = timezone or config.get('timezone')
 
         self.slack_webhook = slack_webhook or config.get(self._SLACK, {}).get('notification_webhook')
         self.slack_token = slack_token or config.get(self._SLACK, {}).get('token')
@@ -72,6 +74,7 @@ class Config:
 
     def validate_monitor(self):
         self._validate_elementary_profile()
+        self._validate_timezone()
         if not self.has_slack:
             raise InvalidArgumentsError('Either a Slack token and a channel or a Slack webhook is required.')
 
@@ -91,3 +94,7 @@ class Config:
                 raise NoElementaryProfileError
         except FileNotFoundError:
             raise NoProfilesFileError(self.profiles_dir)
+
+    def _validate_timezone(self):
+      if self.timezone and not tz.gettz(self.timezone):
+         raise InvalidArgumentsError('An invalid timezone was provided.')

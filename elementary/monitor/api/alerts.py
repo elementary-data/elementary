@@ -4,6 +4,7 @@ from typing import Callable, List
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.config.config import Config
 from elementary.monitor.alerts.alerts import AlertsQueryResult, Alerts
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
@@ -15,8 +16,9 @@ logger = get_logger(__name__)
 
 
 class AlertsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner, elementary_database_and_schema: str):
+    def __init__(self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str):
         super().__init__(dbt_runner)
+        self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
     def query(self, days_back: int) -> Alerts:
@@ -46,16 +48,17 @@ class AlertsAPI(APIClient):
         if raw_alerts:
             alert_dicts = json.loads(raw_alerts[0])
             for alert_dict in alert_dicts:
-                notmalaized_alert = self._normalize_alert(alert=alert_dict)
+                normalized_alert = self._normalize_alert(alert=alert_dict)
                 try:
                     alerts.append(alert_factory_func(
                         elementary_database_and_schema=self.elementary_database_and_schema,
-                        **notmalaized_alert
+                        timezone=self.config.timezone,
+                        **normalized_alert
                     ))
                 except Exception:
                     malformed_alerts.append(MalformedAlert(
-                        id=notmalaized_alert['id'],
-                        data=notmalaized_alert,
+                        id=normalized_alert['id'],
+                        data=normalized_alert
                     ))
         if malformed_alerts:
             logger.error('Failed to parse some alerts.')

@@ -90,6 +90,12 @@ def get_cli_properties() -> dict:
     help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
+    '--timezone', '-tz',
+    type=str,
+    default=None,
+    help="The timezone of which all timestamps will be converted to. (default is user local timezone)",
+)
+@click.option(
     '--full-refresh-dbt-package', '-f',
     type=bool,
     default=False,
@@ -115,6 +121,7 @@ def monitor(
         slack_webhook,
         slack_token,
         slack_channel_name,
+		timezone,
         config_dir,
         profiles_dir,
         update_dbt_package,
@@ -133,7 +140,7 @@ def monitor(
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(config_dir, profiles_dir, profile_target, slack_webhook=slack_webhook, slack_token=slack_token,
-                    slack_channel_name=slack_channel_name)
+                    slack_channel_name=slack_channel_name, timezone=timezone)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor', get_cli_properties(), ctx.command.name)
     try:
