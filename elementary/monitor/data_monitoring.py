@@ -140,7 +140,7 @@ class DataMonitoring:
                 disable_passed_test_metrics=disable_passed_test_metrics)
             models, dbt_sidebar = self._get_dbt_models_and_sidebar()
             models_coverages = self._get_dbt_models_test_coverages()
-            models_runs = self._get_models_runs(days_back=days_back)
+            models_runs, model_runs_totals = self._get_models_runs_and_totals(days_back=days_back)
             lineage = self._get_lineage()
             output_data['models'] = models
             output_data['dbt_sidebar'] = dbt_sidebar
@@ -149,6 +149,7 @@ class DataMonitoring:
             output_data['test_runs_totals'] = test_runs_totals
             output_data['coverages'] = models_coverages
             output_data['model_runs'] = models_runs
+            output_data['model_runs_totals'] = model_runs_totals
             output_data['lineage'] = lineage.dict()
             output_data['tracking'] = {
                 'posthog_api_key': tracking.POSTHOG_PROJECT_API_KEY,
@@ -250,10 +251,20 @@ class DataMonitoring:
         self.execution_properties['elementary_test_count'] = elementary_test_count
         return tests_results
     
-    def _get_models_runs(self, days_back: Optional[int] = None):
+    def _get_models_runs_and_totals(self, days_back: Optional[int] = None):
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         models_runs = models_api.get_models_runs(days_back=days_back)
-        return [model_runs.dict(by_alias=True) for model_runs in models_runs]
+        models_runs_dicts = []
+        model_runs_totals = {}
+        for model_runs in models_runs:
+            models_runs_dicts.append(model_runs.dict(by_alias=True))
+            model_runs_totals[model_runs.unique_id] = {
+                'errors': model_runs.totals.errors,
+                'warnings': 0,
+                'resolved': 0,
+                'passed': model_runs.totals.success
+            }
+        return models_runs_dicts, model_runs_totals
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
