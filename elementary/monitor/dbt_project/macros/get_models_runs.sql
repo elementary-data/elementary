@@ -11,7 +11,7 @@
             schema_name as schema,
             status,
             case
-                when status = 'error' then 0
+                when status != 'success' then 0
                 else round(execution_time, 1)
             end as execution_time,
             full_refresh,
