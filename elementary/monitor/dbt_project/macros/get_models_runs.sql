@@ -10,7 +10,10 @@
             name,
             schema_name as schema,
             status,
-            round(execution_time, 1) as execution_time,
+            case
+                when status = 'error' then 0
+                else round(execution_time, 1)
+            end as execution_time,
             full_refresh,
             materialization,
             compiled_sql,
