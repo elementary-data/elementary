@@ -29,7 +29,7 @@ from elementary.monitor.api.tests.schema import InvocationSchema, ModelUniqueIdT
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
-from elementary.utils.time import get_now_utc_str
+from elementary.utils.time import get_now_utc_iso_format
 
 logger = get_logger(__name__)
 
@@ -128,7 +128,7 @@ class DataMonitoring:
                         test_runs_amount: Optional[int] = None, file_path: Optional[str] = None,
                         disable_passed_test_metrics: bool = False, should_open_browser: bool = True) -> Tuple[
         bool, str]:
-        now_utc = get_now_utc_str()
+        now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, 'w') as html_file:
             output_data = {
