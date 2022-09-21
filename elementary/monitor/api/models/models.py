@@ -51,9 +51,11 @@ class ModelsAPI(APIClient):
                 for model_run
                 in model_runs
             ]
-            median_execution_time = statistics.median([model_run['execution_time'] for model_run in model_runs])
+            # We want to keep failed model runs out from the median.
+            execution_times_for_median = [model_run['execution_time'] for model_run in model_runs if model_run['status'] != 'error']
+            median_execution_time = statistics.median(execution_times_for_median) if len(execution_times_for_median) else 0
             last_model_run = sorted(model_runs, key=lambda run: run['generated_at'])[-1]
-            execution_time_change_rate = (last_model_run['execution_time'] / median_execution_time - 1) * 100
+            execution_time_change_rate = (last_model_run['execution_time'] / median_execution_time - 1) * 100 if median_execution_time != 0 else 0
             aggregated_models_runs.append(
                 ModelRunsSchema(
                     unique_id=model_unique_id,
