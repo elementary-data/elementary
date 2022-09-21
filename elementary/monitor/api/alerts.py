@@ -1,7 +1,7 @@
 import copy
 import json
-from typing import Callable, List
-
+from typing import Callable, List, Optional
+from elementary.config.config import Config
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.alerts.alerts import AlertsQueryResult, Alerts
@@ -15,8 +15,9 @@ logger = get_logger(__name__)
 
 
 class AlertsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner, elementary_database_and_schema: str):
+    def __init__(self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str):
         super().__init__(dbt_runner)
+        self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
     def query(self, days_back: int) -> Alerts:
@@ -50,6 +51,7 @@ class AlertsAPI(APIClient):
                 try:
                     alerts.append(alert_factory_func(
                         elementary_database_and_schema=self.elementary_database_and_schema,
+                        timezone=self.config.timezone,
                         **notmalaized_alert
                     ))
                 except Exception:
