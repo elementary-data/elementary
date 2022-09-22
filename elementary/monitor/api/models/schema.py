@@ -89,7 +89,7 @@ class ModelRunsSchema(BaseModel):
     schema_name: str = Field(alias='schema')
     name: str
     status: str
-    last_exec_time: str
+    last_exec_time: float
     compiled_sql: str
     median_exec_time: float
     exec_time_change_rate: float
