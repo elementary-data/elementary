@@ -75,6 +75,10 @@ jobs:
         with:
           python-version: '3.7.5'
 
+      - name: Install Spark requirements
+        if: inputs.warehouse-type == 'spark'
+        run: sudo apt-get install python-dev libsasl2-dev gcc
+
       - name: Install Elementary
         run: pip install "./elementary[${{ inputs.warehouse-type }}]"
 
