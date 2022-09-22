@@ -42,7 +42,7 @@ class TestsAPI(APIClient):
 
     def get_invocations(
             self,
-            invocations_per_test: int = 30,
+            invocations_per_test: int = 720,
             days_back: Optional[int] = 7
     ) -> Dict[TestUniqueIdType, InvocationsSchema]:
         run_operation_response = self.dbt_runner.run_operation(
