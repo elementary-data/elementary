@@ -130,6 +130,7 @@ class DataMonitoring:
         bool, str]:
         now_utc = get_now_utc_str()
         html_path = self._get_report_file_path(now_utc, file_path)
+        os.makedirs(os.path.dirname(html_path), exist_ok=True)
         with open(html_path, 'w') as html_file:
             output_data = {'creation_time': now_utc}
             test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(

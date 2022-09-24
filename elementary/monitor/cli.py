@@ -166,15 +166,22 @@ def monitor(
     '--disable-passed-test-metrics',
     type=bool,
     default=False,
-    help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
+    help="If set to true elementary report won't show data metrics for passed tests (this can improve report "
+         "creation time)."
+)
+@click.option(
+    '--target-dir', '-td',
+    type=str,
+    default=Config.DEFAULT_TARGET_DIR,
+    help="Set the output target directory of generated files."
 )
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path,
-           disable_passed_test_metrics):
+def report(ctx, days_back, config_dir, profiles_dir, target_dir, update_dbt_package, profile_target, executions_limit,
+           file_path,disable_passed_test_metrics):
     """
     Generate a local report of your warehouse.
     """
-    config = Config(config_dir, profiles_dir, profile_target)
+    config = Config(config_dir, profiles_dir, profile_target, target_dir=target_dir)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-report', get_cli_properties(), ctx.command.name)
     try:
@@ -269,7 +276,14 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--disable-passed-test-metrics',
     type=bool,
     default=False,
-    help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
+    help="If set to true elementary report won't show data metrics for passed tests (this can improve "
+         "report creation time)."
+)
+@click.option(
+    '--target-dir', '-td',
+    type=str,
+    default=Config.DEFAULT_TARGET_DIR,
+    help="Set the output target directory of generated files."
 )
 @click.pass_context
 def send_report(
@@ -277,6 +291,7 @@ def send_report(
         days_back,
         config_dir,
         profiles_dir,
+        target_dir,
         update_dbt_package,
         slack_token,
         slack_channel_name,
@@ -303,7 +318,8 @@ def send_report(
                     slack_channel_name=slack_channel_name, update_bucket_website=update_bucket_website,
                     aws_profile_name=aws_profile_name, aws_access_key_id=aws_access_key_id,
                     aws_secret_access_key=aws_secret_access_key, s3_bucket_name=s3_bucket_name,
-                    google_service_account_path=google_service_account_path, gcs_bucket_name=gcs_bucket_name)
+                    google_service_account_path=google_service_account_path, gcs_bucket_name=gcs_bucket_name,
+                    target_dir=target_dir)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
@@ -315,7 +331,8 @@ def send_report(
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
-            disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path, should_open_browser=False)
+            disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path,
+            should_open_browser=False)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path, remote_file_path=bucket_file_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)

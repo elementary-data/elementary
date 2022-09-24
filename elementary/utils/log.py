@@ -1,10 +1,11 @@
 import logging
+import os.path
 import sys
 
 from elementary.utils.env_vars import is_debug_mode_on
 
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
-LOG_FILE = "edr.log"
+LOG_FILE = "logs/edr.log"
 
 
 def get_console_handler():
@@ -15,6 +16,7 @@ def get_console_handler():
 
 
 def get_file_handler():
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
     file_handler = logging.FileHandler(LOG_FILE)
     file_handler.setFormatter(FORMATTER)
     file_handler.setLevel(logging.DEBUG)

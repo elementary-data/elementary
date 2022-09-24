@@ -127,15 +127,21 @@ def get_cli_lineage_generate_properties() -> dict:
     cls=RequiredIf,
     required_if='profiles_dir'
 )
+@click.option(
+    '--target-dir', '-td',
+    type=str,
+    default=LineageConfig.DEFAULT_TARGET_DIR,
+    help="Set the output target directory of generated files."
+)
 @click.pass_context
 def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, full_table_names: bool,
-            config_dir: str, profiles_dir: str, profile_name: str) -> None:
+            config_dir: str, profiles_dir: str, profile_name: str, target_dir: str) -> None:
     click.echo(f"Any feedback and suggestions are welcomed! join our community here - "
                f"https://bit.ly/slack-elementary\n")
     if ctx.invoked_subcommand is not None:
         return
 
-    config = LineageConfig(config_dir, profiles_dir, profile_name)
+    config = LineageConfig(config_dir, profiles_dir, profile_name, target_dir)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('lineage', get_cli_lineage_properties(), ctx.command.name)
     execution_properties = dict()
@@ -212,10 +218,16 @@ def lineage(ctx, database: str, schema: str, table: str, open_browser: bool, ful
     cls=RequiredIf,
     required_if='profiles_dir'
 )
+@click.option(
+    '--target-dir', '-td',
+    type=str,
+    default=LineageConfig.DEFAULT_TARGET_DIR,
+    help="Set the output target directory of generated files."
+)
 @click.pass_context
 def generate(ctx, start_date: datetime, end_date: datetime, databases: str, config_dir: str,
-             profiles_dir: str, profile_name: str):
-    config = LineageConfig(config_dir, profiles_dir, profile_name)
+             profiles_dir: str, profile_name: str, target_dir: str):
+    config = LineageConfig(config_dir, profiles_dir, profile_name, target_dir)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('lineage', get_cli_lineage_generate_properties(), ctx.command.name)
 

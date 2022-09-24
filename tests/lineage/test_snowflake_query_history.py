@@ -1,6 +1,8 @@
 import pytest
 from datetime import date, datetime
 from unittest import mock
+
+import elementary
 from elementary.lineage.snowflake_query_history import SnowflakeQueryHistory
 
 
