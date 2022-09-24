@@ -305,7 +305,6 @@ class LineageGraph:
         lineage_graph_file_path = os.path.join(target_dir_path, self.LINEAGE_GRAPH_FILE_MAME)
         lineage_graph_attributes_file_path = os.path.join(target_dir_path,
                                                           self.LINEAGE_GRAPH_ATTRIBUTES_FILE_NAME)
-        os.makedirs(os.path.dirname(lineage_graph_attributes_file_path), exist_ok=True)
 
         nx.write_gpickle(self._lineage_graph, lineage_graph_file_path)
         with open(lineage_graph_attributes_file_path, 'w') as graph_attributes_file:

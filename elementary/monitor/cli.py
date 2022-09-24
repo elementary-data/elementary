@@ -33,7 +33,8 @@ def common_options(func):
         '--config-dir', '-c',
         type=str,
         default=Config.DEFAULT_CONFIG_DIR,
-        help="Global settings for edr are configured in a config.yml file in this directory " "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default)."
+        help="Global settings for edr are configured in a config.yml file in this directory " 
+             "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default)."
     )(func)
     func = click.option(
         '--profile-target', '-t',
@@ -46,7 +47,13 @@ def common_options(func):
         type=str,
         default=Config.DEFAULT_PROFILES_DIR,
         help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-             "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
+             "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default)."
+    )(func)
+    func = click.option(
+        '--target-dir', '-td',
+        type=str,
+        default=Config.DEFAULT_TARGET_DIR,
+        help="Set the output target directory of generated files."
     )(func)
     return func
 
@@ -121,9 +128,10 @@ def monitor(
         slack_webhook,
         slack_token,
         slack_channel_name,
-		timezone,
+        timezone,
         config_dir,
         profiles_dir,
+        target_dir,
         update_dbt_package,
         full_refresh_dbt_package,
         profile_target,
@@ -140,7 +148,7 @@ def monitor(
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(config_dir, profiles_dir, profile_target, slack_webhook=slack_webhook, slack_token=slack_token,
-                    slack_channel_name=slack_channel_name, timezone=timezone)
+                    slack_channel_name=slack_channel_name, timezone=timezone, target_dir=target_dir)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor', get_cli_properties(), ctx.command.name)
     try:
@@ -175,12 +183,6 @@ def monitor(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report "
          "creation time)."
-)
-@click.option(
-    '--target-dir', '-td',
-    type=str,
-    default=Config.DEFAULT_TARGET_DIR,
-    help="Set the output target directory of generated files."
 )
 @click.pass_context
 def report(ctx, days_back, config_dir, profiles_dir, target_dir, update_dbt_package, profile_target, executions_limit,
@@ -285,12 +287,6 @@ def report(ctx, days_back, config_dir, profiles_dir, target_dir, update_dbt_pack
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve "
          "report creation time)."
-)
-@click.option(
-    '--target-dir', '-td',
-    type=str,
-    default=Config.DEFAULT_TARGET_DIR,
-    help="Set the output target directory of generated files."
 )
 @click.pass_context
 def send_report(

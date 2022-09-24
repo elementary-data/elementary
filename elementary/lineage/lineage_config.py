@@ -3,8 +3,8 @@ from elementary.config.config import Config
 
 
 class LineageConfig(Config):
-    def __init__(self, config_dir: str, profiles_dir: str, profile_name: str, target_dir: str) -> None:
-        super().__init__(config_dir, profiles_dir, target_dir=target_dir)
+    def __init__(self, config_dir: str, profiles_dir: str, profile_name: str) -> None:
+        super().__init__(config_dir, profiles_dir)
         self.profile_name = profile_name
         self.credentials, self.profiles_data = extract_credentials_and_data_from_profiles(profiles_dir,
                                                                                           profile_name)
