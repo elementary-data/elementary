@@ -49,6 +49,5 @@ class GCSClient:
     def get_credentials(config) -> Credentials:
         if config.google_service_account_path:
             return service_account.Credentials.from_service_account_file(config.google_service_account_path)
-        if config.google_use_oauth:
-            credentials, _ = google.auth.default()
-            return credentials
+        credentials, _ = google.auth.default()
+        return credentials

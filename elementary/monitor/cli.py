@@ -249,12 +249,6 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     help="The path to the Google service account JSON file"
 )
 @click.option(
-    '--google-use-oauth',
-    type=bool,
-    default=None,
-    help="Authenticate to Google with a user account (OAuth) rather than service account."
-)
-@click.option(
     '--gcs-bucket-name',
     type=str,
     default=None,
@@ -304,7 +298,6 @@ def send_report(
         aws_secret_access_key,
         s3_bucket_name,
         google_service_account_path,
-        google_use_oauth,
         gcs_bucket_name
 ):
     """
@@ -317,8 +310,7 @@ def send_report(
                     slack_channel_name=slack_channel_name, update_bucket_website=update_bucket_website,
                     aws_profile_name=aws_profile_name, aws_access_key_id=aws_access_key_id,
                     aws_secret_access_key=aws_secret_access_key, s3_bucket_name=s3_bucket_name,
-                    google_service_account_path=google_service_account_path, google_use_oauth=google_use_oauth,
-                    gcs_bucket_name=gcs_bucket_name)
+                    google_service_account_path=google_service_account_path, gcs_bucket_name=gcs_bucket_name)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:

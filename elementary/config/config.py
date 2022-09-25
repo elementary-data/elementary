@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 
+import google.auth
 from dateutil import tz
+from google.auth.exceptions import DefaultCredentialsError
 
 from elementary.exceptions.exceptions import NoElementaryProfileError, NoProfilesFileError, InvalidArgumentsError
 from elementary.utils.ordered_yaml import OrderedYaml
@@ -31,8 +33,6 @@ class Config:
             aws_secret_access_key: str = None,
             s3_bucket_name: str = None,
             google_service_account_path: str = None,
-            google_use_oauth: bool = None,
-            google_project_name: str = None,
             gcs_bucket_name: str = None
     ):
         self.config_dir = config_dir
@@ -58,7 +58,6 @@ class Config:
 
         self.google_service_account_path = google_service_account_path or config.get(self._GOOGLE, {}).get(
             'service_account_path')
-        self.google_use_oauth = google_use_oauth or config.get(self._GOOGLE, {}).get('oauth')
         self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get('gcs_bucket_name')
 
         self.anonymous_tracking_enabled = config.get('anonymous_usage_tracking', True)
@@ -73,7 +72,7 @@ class Config:
 
     @property
     def has_send_report_platform(self):
-        return (self.slack_token and self.slack_channel_name) or self.has_aws or self.has_gcs
+        return (self.slack_token and self.slack_channel_name) or self.has_s3 or self.has_gcs
 
     @property
     def has_slack(self) -> bool:
@@ -81,13 +80,25 @@ class Config:
 
     @property
     def has_aws(self) -> bool:
-        return self.s3_bucket_name and (
-                self.aws_profile_name or (self.aws_access_key_id and self.aws_secret_access_key)
-        )
+        return self.aws_profile_name or (self.aws_access_key_id and self.aws_secret_access_key)
+
+    @property
+    def has_s3(self):
+        return self.s3_bucket_name and self.has_aws
+
+    @property
+    def has_gcloud(self):
+        if self.google_service_account_path:
+            return True
+        try:
+            google.auth.default()
+            return True
+        except DefaultCredentialsError:
+            return False
 
     @property
     def has_gcs(self):
-        return self.gcs_bucket_name and (self.google_service_account_path or self.google_use_oauth)
+        return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
         self._validate_elementary_profile()
