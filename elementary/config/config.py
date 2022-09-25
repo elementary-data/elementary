@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dateutil import tz
 
 from elementary.exceptions.exceptions import NoElementaryProfileError, NoProfilesFileError, InvalidArgumentsError
@@ -15,14 +16,29 @@ class Config:
     DEFAULT_CONFIG_DIR = str(Path.home() / '.edr')
     DEFAULT_PROFILES_DIR = str(Path.home() / '.dbt')
 
-    def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
-                 profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
-                 slack_token: str = None, slack_channel_name: str = None, timezone: str = None, aws_profile_name: str = None,
-                 aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
-                 google_service_account_path: str = None, gcs_bucket_name: str = None):
+    def __init__(
+            self,
+            config_dir: str = DEFAULT_CONFIG_DIR,
+            profiles_dir: str = DEFAULT_PROFILES_DIR,
+            profile_target: str = None,
+            update_bucket_website: bool = None,
+            slack_webhook: str = None,
+            slack_token: str = None,
+            slack_channel_name: str = None,
+            timezone: str = None,
+            aws_profile_name: str = None,
+            aws_access_key_id: str = None,
+            aws_secret_access_key: str = None,
+            s3_bucket_name: str = None,
+            google_service_account_path: str = None,
+            google_use_oauth: bool = None,
+            google_project_name: str = None,
+            gcs_bucket_name: str = None
+    ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
+
         config = self._load_configuration()
 
         self.target_dir = config.get('target-path') or os.getcwd()
@@ -42,6 +58,7 @@ class Config:
 
         self.google_service_account_path = google_service_account_path or config.get(self._GOOGLE, {}).get(
             'service_account_path')
+        self.google_use_oauth = google_use_oauth or config.get(self._GOOGLE, {}).get('oauth')
         self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get('gcs_bucket_name')
 
         self.anonymous_tracking_enabled = config.get('anonymous_usage_tracking', True)
@@ -70,7 +87,7 @@ class Config:
 
     @property
     def has_gcs(self):
-        return self.gcs_bucket_name and self.google_service_account_path
+        return self.gcs_bucket_name and (self.google_service_account_path or self.google_use_oauth)
 
     def validate_monitor(self):
         self._validate_elementary_profile()
@@ -96,5 +113,5 @@ class Config:
             raise NoProfilesFileError(self.profiles_dir)
 
     def _validate_timezone(self):
-      if self.timezone and not tz.gettz(self.timezone):
-         raise InvalidArgumentsError('An invalid timezone was provided.')
+        if self.timezone and not tz.gettz(self.timezone):
+            raise InvalidArgumentsError('An invalid timezone was provided.')
