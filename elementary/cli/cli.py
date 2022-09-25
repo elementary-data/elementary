@@ -13,7 +13,7 @@ click.echo(f.renderText('Elementary'))
 elementary.cli.upgrade.recommend_version_upgrade()
 
 root_folder = os.path.join(os.path.dirname(__file__), '..')
-modules = ['lineage', 'monitor']
+modules = ['monitor']
 
 logger = get_logger(__name__)
 
