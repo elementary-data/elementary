@@ -1,4 +1,4 @@
-name: Release Test-PyPI package
+name: Release PyPI package
 on:
   push:
     tags:
@@ -34,4 +34,3 @@ jobs:
         with:
           user: ${{ secrets.PYPI_USER }}
           password: ${{ secrets.PYPI_PASS }}
-          repository_url: https://test.pypi.org/legacy/
