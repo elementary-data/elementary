@@ -32,6 +32,7 @@ class Config:
             aws_access_key_id: str = None,
             aws_secret_access_key: str = None,
             s3_bucket_name: str = None,
+            google_project_name: str = None,
             google_service_account_path: str = None,
             gcs_bucket_name: str = None
     ):
@@ -56,6 +57,7 @@ class Config:
         self.aws_secret_access_key = aws_secret_access_key
         self.s3_bucket_name = s3_bucket_name or config.get(self._AWS, {}).get('s3_bucket_name')
 
+        self.google_project_name = google_project_name or config.get(self._GOOGLE, {}).get('project_name')
         self.google_service_account_path = google_service_account_path or config.get(self._GOOGLE, {}).get(
             'service_account_path')
         self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get('gcs_bucket_name')

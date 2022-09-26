@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 class GCSClient:
     def __init__(self, config: Config):
         self.config = config
-        self.client = storage.Client(credentials=self.get_credentials(config))
+        self.client = self.get_client(config)
 
     @classmethod
     def create_client(cls, config: Config) -> Optional['GCSClient']:
@@ -45,8 +45,14 @@ class GCSClient:
             return False
         return True
 
+    def get_client(self, config: Config):
+        creds = self.get_credentials(config)
+        if config.google_project_name:
+            return storage.Client(config.google_project_name, credentials=creds)
+        return storage.Client(credentials=creds)
+
     @staticmethod
-    def get_credentials(config) -> Credentials:
+    def get_credentials(config: Config) -> Credentials:
         if config.google_service_account_path:
             return service_account.Credentials.from_service_account_file(config.google_service_account_path)
         credentials, _ = google.auth.default()
