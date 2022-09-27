@@ -50,9 +50,9 @@ def common_options(func):
              "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default)."
     )(func)
     func = click.option(
-        '--target-dir', '-td',
+        '--target-path', '-tp',
         type=str,
-        default=Config.DEFAULT_TARGET_DIR,
+        default=None,
         help="Set the output target directory of generated files."
     )(func)
     return func
@@ -131,7 +131,7 @@ def monitor(
         timezone,
         config_dir,
         profiles_dir,
-        target_dir,
+        target_path,
         update_dbt_package,
         full_refresh_dbt_package,
         profile_target,
@@ -148,7 +148,7 @@ def monitor(
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(config_dir, profiles_dir, profile_target, slack_webhook=slack_webhook, slack_token=slack_token,
-                    slack_channel_name=slack_channel_name, timezone=timezone, target_dir=target_dir)
+                    slack_channel_name=slack_channel_name, timezone=timezone, target_path=target_path)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor', get_cli_properties(), ctx.command.name)
     try:
@@ -185,12 +185,12 @@ def monitor(
          "creation time)."
 )
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, target_dir, update_dbt_package, profile_target, executions_limit,
-           file_path,disable_passed_test_metrics):
+def report(ctx, days_back, config_dir, profiles_dir, target_path, update_dbt_package, profile_target, executions_limit,
+           file_path, disable_passed_test_metrics):
     """
     Generate a local report of your warehouse.
     """
-    config = Config(config_dir, profiles_dir, profile_target, target_dir=target_dir)
+    config = Config(config_dir, profiles_dir, profile_target, target_path=target_path)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-report', get_cli_properties(), ctx.command.name)
     try:
@@ -294,7 +294,7 @@ def send_report(
         days_back,
         config_dir,
         profiles_dir,
-        target_dir,
+        target_path,
         update_dbt_package,
         slack_token,
         slack_channel_name,
@@ -322,7 +322,7 @@ def send_report(
                     aws_profile_name=aws_profile_name, aws_access_key_id=aws_access_key_id,
                     aws_secret_access_key=aws_secret_access_key, s3_bucket_name=s3_bucket_name,
                     google_service_account_path=google_service_account_path, gcs_bucket_name=gcs_bucket_name,
-                    target_dir=target_dir)
+                    target_path=target_path)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
