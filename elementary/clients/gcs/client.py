@@ -36,7 +36,8 @@ class GCSClient:
                     new_name=bucket_path.join_path([bucket_report_folder_path, 'index.html']) if bucket_report_folder_path else 'index.html'
                 )
                 logger.info("Updated GCS bucket's website.")
-        except google.cloud.exceptions.GoogleCloudError:
+        except google.cloud.exceptions.GoogleCloudError as gcp_exception:
             logger.error('Failed to upload report to GCS.')
+            logger.error('Error: %s', gcp_exception)
             return False
         return True
