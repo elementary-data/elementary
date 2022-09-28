@@ -29,7 +29,7 @@ from elementary.monitor.api.tests.schema import InvocationSchema, ModelUniqueIdT
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
-from elementary.utils.time import get_now_utc_str
+from elementary.utils.time import get_now_utc_iso_format
 
 logger = get_logger(__name__)
 
@@ -128,15 +128,19 @@ class DataMonitoring:
                         test_runs_amount: Optional[int] = None, file_path: Optional[str] = None,
                         disable_passed_test_metrics: bool = False, should_open_browser: bool = True) -> Tuple[
         bool, str]:
-        now_utc = get_now_utc_str()
+        now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, 'w') as html_file:
-            output_data = {'creation_time': now_utc}
+            output_data = {
+                'creation_time': now_utc,
+                'days_back': days_back
+            }
             test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
                 days_back=days_back, test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics)
             models, dbt_sidebar = self._get_dbt_models_and_sidebar()
             models_coverages = self._get_dbt_models_test_coverages()
+            models_runs, model_runs_totals = self._get_models_runs_and_totals(days_back=days_back)
             lineage = self._get_lineage()
             output_data['models'] = models
             output_data['dbt_sidebar'] = dbt_sidebar
@@ -144,6 +148,8 @@ class DataMonitoring:
             output_data['test_results_totals'] = test_results_totals
             output_data['test_runs_totals'] = test_runs_totals
             output_data['coverages'] = models_coverages
+            output_data['model_runs'] = models_runs
+            output_data['model_runs_totals'] = model_runs_totals
             output_data['lineage'] = lineage.dict()
             output_data['tracking'] = {
                 'posthog_api_key': tracking.POSTHOG_PROJECT_API_KEY,
@@ -244,6 +250,21 @@ class DataMonitoring:
             tests_results[test.model_unique_id].append(test_result.to_test_alert_api_dict())
         self.execution_properties['elementary_test_count'] = elementary_test_count
         return tests_results
+    
+    def _get_models_runs_and_totals(self, days_back: Optional[int] = None):
+        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        models_runs = models_api.get_models_runs(days_back=days_back)
+        models_runs_dicts = []
+        model_runs_totals = {}
+        for model_runs in models_runs:
+            models_runs_dicts.append(model_runs.dict(by_alias=True))
+            model_runs_totals[model_runs.unique_id] = {
+                'errors': model_runs.totals.errors,
+                'warnings': 0,
+                'resolved': 0,
+                'passed': model_runs.totals.success
+            }
+        return models_runs_dicts, model_runs_totals
 
     def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)

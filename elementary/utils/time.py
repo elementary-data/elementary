@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil import tz
 from typing import Optional
 
 MILLISECONDS_IN_SEC = 1000
 MILLISECONDS_IN_MIN = (1000 * 60)
 MILLISECONDS_IN_HOUR = (1000 * 60 * 60)
+
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 def convert_utc_time_to_timezone(utc_time: 'datetime', timezone: Optional[str] = None) -> 'datetime':    
@@ -14,8 +16,12 @@ def convert_utc_time_to_timezone(utc_time: 'datetime', timezone: Optional[str] =
     return utc_time.astimezone(to_zone)
 
 
-def get_now_utc_str() -> str:
-    return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+def get_now_utc_str(format: str = TIME_FORMAT) -> str:
+    return datetime.utcnow().strftime(format)
+
+
+def get_now_utc_iso_format() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def format_milliseconds(duration: int) -> str:
