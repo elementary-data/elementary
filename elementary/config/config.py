@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
+
+import google.auth
 from dateutil import tz
+from google.auth.exceptions import DefaultCredentialsError
 
 from elementary.exceptions.exceptions import NoElementaryProfileError, NoProfilesFileError, InvalidArgumentsError
 from elementary.utils.ordered_yaml import OrderedYaml
@@ -15,14 +18,28 @@ class Config:
     DEFAULT_CONFIG_DIR = str(Path.home() / '.edr')
     DEFAULT_PROFILES_DIR = str(Path.home() / '.dbt')
 
-    def __init__(self, config_dir: str = DEFAULT_CONFIG_DIR, profiles_dir: str = DEFAULT_PROFILES_DIR,
-                 profile_target: str = None, update_bucket_website: bool = None, slack_webhook: str = None,
-                 slack_token: str = None, slack_channel_name: str = None, timezone: str = None, aws_profile_name: str = None,
-                 aws_access_key_id: str = None, aws_secret_access_key: str = None, s3_bucket_name: str = None,
-                 google_service_account_path: str = None, gcs_bucket_name: str = None):
+    def __init__(
+            self,
+            config_dir: str = DEFAULT_CONFIG_DIR,
+            profiles_dir: str = DEFAULT_PROFILES_DIR,
+            profile_target: str = None,
+            update_bucket_website: bool = None,
+            slack_webhook: str = None,
+            slack_token: str = None,
+            slack_channel_name: str = None,
+            timezone: str = None,
+            aws_profile_name: str = None,
+            aws_access_key_id: str = None,
+            aws_secret_access_key: str = None,
+            s3_bucket_name: str = None,
+            google_project_name: str = None,
+            google_service_account_path: str = None,
+            gcs_bucket_name: str = None
+    ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
+
         config = self._load_configuration()
 
         self.target_dir = config.get('target-path') or os.getcwd()
@@ -40,6 +57,7 @@ class Config:
         self.aws_secret_access_key = aws_secret_access_key
         self.s3_bucket_name = s3_bucket_name or config.get(self._AWS, {}).get('s3_bucket_name')
 
+        self.google_project_name = google_project_name or config.get(self._GOOGLE, {}).get('project_name')
         self.google_service_account_path = google_service_account_path or config.get(self._GOOGLE, {}).get(
             'service_account_path')
         self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get('gcs_bucket_name')
@@ -56,7 +74,7 @@ class Config:
 
     @property
     def has_send_report_platform(self):
-        return (self.slack_token and self.slack_channel_name) or self.has_aws or self.has_gcs
+        return (self.slack_token and self.slack_channel_name) or self.has_s3 or self.has_gcs
 
     @property
     def has_slack(self) -> bool:
@@ -64,13 +82,25 @@ class Config:
 
     @property
     def has_aws(self) -> bool:
-        return self.s3_bucket_name and (
-                self.aws_profile_name or (self.aws_access_key_id and self.aws_secret_access_key)
-        )
+        return self.aws_profile_name or (self.aws_access_key_id and self.aws_secret_access_key)
+
+    @property
+    def has_s3(self):
+        return self.s3_bucket_name and self.has_aws
+
+    @property
+    def has_gcloud(self):
+        if self.google_service_account_path:
+            return True
+        try:
+            google.auth.default()
+            return True
+        except DefaultCredentialsError:
+            return False
 
     @property
     def has_gcs(self):
-        return self.gcs_bucket_name and self.google_service_account_path
+        return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
         self._validate_elementary_profile()
@@ -96,5 +126,5 @@ class Config:
             raise NoProfilesFileError(self.profiles_dir)
 
     def _validate_timezone(self):
-      if self.timezone and not tz.gettz(self.timezone):
-         raise InvalidArgumentsError('An invalid timezone was provided.')
+        if self.timezone and not tz.gettz(self.timezone):
+            raise InvalidArgumentsError('An invalid timezone was provided.')

@@ -121,7 +121,7 @@ def monitor(
         slack_webhook,
         slack_token,
         slack_channel_name,
-		timezone,
+        timezone,
         config_dir,
         profiles_dir,
         update_dbt_package,
@@ -246,7 +246,13 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     '--google-service-account-path',
     type=str,
     default=None,
-    help="The path to the Google service account json file"
+    help="The path to the Google service account JSON file"
+)
+@click.option(
+    '--google-project-name',
+    type=str,
+    default=None,
+    help='The GCloud project to upload the report to, otherwise use your default project.'
 )
 @click.option(
     '--gcs-bucket-name',
@@ -298,6 +304,7 @@ def send_report(
         aws_secret_access_key,
         s3_bucket_name,
         google_service_account_path,
+        google_project_name,
         gcs_bucket_name
 ):
     """
@@ -310,7 +317,8 @@ def send_report(
                     slack_channel_name=slack_channel_name, update_bucket_website=update_bucket_website,
                     aws_profile_name=aws_profile_name, aws_access_key_id=aws_access_key_id,
                     aws_secret_access_key=aws_secret_access_key, s3_bucket_name=s3_bucket_name,
-                    google_service_account_path=google_service_account_path, gcs_bucket_name=gcs_bucket_name)
+                    google_service_account_path=google_service_account_path, google_project_name=google_project_name,
+                    gcs_bucket_name=gcs_bucket_name)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start('monitor-send-report', get_cli_properties(), ctx.command.name)
     try:
@@ -322,7 +330,8 @@ def send_report(
         command_succeeded = False
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
-            disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path, should_open_browser=False)
+            disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path,
+            should_open_browser=False)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path, remote_file_path=bucket_file_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
