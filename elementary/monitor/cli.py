@@ -161,7 +161,7 @@ def monitor(
 @click.option(
     '--executions-limit', '-el',
     type=int,
-    default=30,
+    default=720,
     help='Set the number of invocations shown for each test in the "Test Runs" report.'
 )
 @click.option(
@@ -269,7 +269,7 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
 @click.option(
     '--executions-limit', '-el',
     type=int,
-    default=30,
+    default=720,
     help='Set the number of invocations shown for each test in the "Test Runs" report.'
 )
 @click.option(

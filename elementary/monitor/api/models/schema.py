@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 
 class ArtifactSchema(BaseModel):
@@ -10,6 +10,7 @@ class ArtifactSchema(BaseModel):
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
+    type: str
 
 
 class ModelSchema(ArtifactSchema):
@@ -66,3 +67,31 @@ class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
 class ModelCoverageSchema(BaseModel):
     table_tests: int
     column_tests: int
+
+
+class ModelRunSchema(BaseModel):
+    id: str
+    time_utc: str
+    status: str
+    full_refresh: bool
+    materialization: str
+    execution_time: float
+
+
+class TotalsModelRunsSchema(BaseModel):
+    errors: Optional[int] = 0
+    success: Optional[int] = 0
+
+
+class ModelRunsSchema(BaseModel):
+    unique_id: str
+    # schema is a saved name, so we use alias
+    schema_name: str = Field(alias='schema')
+    name: str
+    status: str
+    last_exec_time: float
+    compiled_sql: str
+    median_exec_time: float
+    exec_time_change_rate: float
+    totals: TotalsModelRunsSchema
+    runs: List[ModelRunSchema] 

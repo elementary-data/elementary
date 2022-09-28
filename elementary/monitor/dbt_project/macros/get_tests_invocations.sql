@@ -1,5 +1,4 @@
-{%- macro get_tests_invocations(invocations_per_test = 30, days_back = 7) -%}
-    {% set tests_invocations = {} %}
+{%- macro get_tests_invocations(invocations_per_test = 720, days_back = 7) -%}
     {% set tests_invocations_query %}
         with test_results as (
             select * from {{ ref('elementary', 'elementary_test_results') }}
