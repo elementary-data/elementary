@@ -23,9 +23,7 @@ with failed_tests as (
     {% if anomaly_detection_relation %}
         union all
         select * from {{ anomaly_detection_relation }}
-    {% endif %}
-
-    {% if data_monitoring_relation %}
+    {% elif data_monitoring_relation %}
         union all
         select * from {{ data_monitoring_relation }}
     {% endif %}
