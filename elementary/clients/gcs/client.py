@@ -23,8 +23,10 @@ class GCSClient:
     def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
         report_filename = bucket_path.basename(remote_bucket_file_path) if remote_bucket_file_path else path.basename(local_html_file_path)
         bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
+        logger.info("Pushing report file %s to bucket %s.", report_filename, self.config.gcs_bucket_name)
         try:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)
+            logger.debug("Successfully intialized client connection to gcs bucket: %s.", self.config.gcs_bucket_name)
             blob = bucket.blob(bucket_report_path)
             blob.upload_from_filename(local_html_file_path, content_type='text/html')
             logger.info('Uploaded report to GCS.')  
@@ -36,7 +38,7 @@ class GCSClient:
                     new_name=bucket_path.join_path([bucket_report_folder_path, 'index.html']) if bucket_report_folder_path else 'index.html'
                 )
                 logger.info("Updated GCS bucket's website.")
-        except google.cloud.exceptions.GoogleCloudError:
-            logger.error('Failed to upload report to GCS.')
+        except google.cloud.exceptions.GoogleCloudError as gcp_exception:
+            logger.error('Failed to upload report to GCS.\nError trace: %s', gcp_exception)
             return False
         return True
