@@ -36,6 +36,21 @@ For sending alerts or generating a report, there are two options:
 1. **Run Elementary CLI after each relevant dbt job** (`dbt test` / `dbt build` / `dbt run`).
 2. **Run Elementary CLI periodically** in a frequency that fits your dbt job executions.
 
+Here's why.
+
+We store _artifacts_, which is information about dbt-related resources such as models, tests, etc.
+You can view as models called `dbt_models`, `dbt_tests`, `dbt_exposures`, and so on.
+
+We internally use those models in order to gather the latest information on your dbt resources.
+For instance, you could define an `owner` or `subscribers` on your models, and we'll use them to tag the relevant users in our alerts.
+
+For our alerts to work properly, we'd want to make sure that the artifact models have been built according to the latest environment. This is why we recommend to run our models after changes in your project.
+
+We're working on changing the design so that you won't need to run those models, and instead we'll upload it for you using the `on-run-end` hook.
+This method makes sure that Elementary will be kept in sync with the latest resources.
+
+Hope that clarifies it.
+
 To make sure your project data is updated, we recommend running the elementary dbt artifacts models **on each PR merge** to your dbt production project:  
 ```shell
 dbt run --select edr.dbt_artifacts
