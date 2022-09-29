@@ -128,7 +128,7 @@ class ModelsAPI(APIClient):
                 )
         return coverages
 
-    def _normalize_dbt_artifact_dict(self, artifact: Union[ModelSchema, ExposureSchema, SourceSchema], ) -> Union[
+    def _normalize_dbt_artifact_dict(self, artifact: Union[ModelSchema, ExposureSchema, SourceSchema]) -> Union[
         NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema]:
         schema_to_normalized_schema_map = {
             ExposureSchema: NormalizedExposureSchema,
