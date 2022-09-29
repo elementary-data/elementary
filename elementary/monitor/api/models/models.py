@@ -89,7 +89,7 @@ class ModelsAPI(APIClient):
         models = dict()
         if models_results:
             for model_result in json.loads(models_results[0]):
-                model_data = ModelSchema(**model_result, artifact_type='model')
+                model_data = ModelSchema(**model_result)
                 normalized_model = ModelsAPI._normalize_dbt_artifact_dict(model_data, artifact_type="model")
                 model_unique_id = normalized_model.unique_id
                 models[model_unique_id] = normalized_model
@@ -100,7 +100,7 @@ class ModelsAPI(APIClient):
         sources = dict()
         if sources_results:
             for source_result in json.loads(sources_results[0]):
-                source_data = SourceSchema(**source_result, artifact_type='source')
+                source_data = SourceSchema(**source_result)
                 normalized_source = self._normalize_dbt_artifact_dict(source_data, artifact_type="source")
                 source_unique_id = normalized_source.unique_id
                 sources[source_unique_id] = normalized_source
@@ -111,7 +111,7 @@ class ModelsAPI(APIClient):
         exposures = dict()
         if exposures_results:
             for exposure_result in json.loads(exposures_results[0]):
-                exposure_data = ExposureSchema(**exposure_result, artifact_type='exposure')
+                exposure_data = ExposureSchema(**exposure_result)
                 normalized_exposure = self._normalize_dbt_artifact_dict(exposure_data, artifact_type="exposure")
                 exposure_unique_id = normalized_exposure.unique_id
                 exposures[exposure_unique_id] = normalized_exposure

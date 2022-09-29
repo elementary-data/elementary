@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from pydantic import BaseModel, Field, validator
 
 
@@ -17,19 +18,22 @@ class ModelSchema(ArtifactSchema):
     database_name: str = None
     schema_name: str
     table_name: str
+    artifact_type = 'model'
 
 
 class SourceSchema(ArtifactSchema):
     database_name: str = None
     schema_name: str
     table_name: str
+    artifact_type = 'source'
 
 
 class ExposureSchema(ArtifactSchema):
     url: Optional[str]
-    artifact_type: Optional[str]
+    type: Optional[str]
     maturity: Optional[str]
     owner_email: Optional[str]
+    artifact_type = 'exposure'
 
 
 class NormalizedArtifactSchema(BaseModel):
@@ -94,4 +98,4 @@ class ModelRunsSchema(BaseModel):
     median_exec_time: float
     exec_time_change_rate: float
     totals: TotalsModelRunsSchema
-    runs: List[ModelRunSchema] 
+    runs: List[ModelRunSchema]
