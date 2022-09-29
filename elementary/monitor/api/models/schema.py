@@ -10,7 +10,7 @@ class ArtifactSchema(BaseModel):
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
-    type: str
+    artifact_type: str
 
 
 class ModelSchema(ArtifactSchema):
@@ -27,7 +27,7 @@ class SourceSchema(ArtifactSchema):
 
 class ExposureSchema(ArtifactSchema):
     url: Optional[str]
-    type: Optional[str]
+    artifact_type: Optional[str]
     maturity: Optional[str]
     owner_email: Optional[str]
 
