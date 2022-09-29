@@ -1,7 +1,7 @@
-from collections import defaultdict
 import json
 import os
 import statistics
+from collections import defaultdict
 from typing import Dict, List, Optional, Union
 
 from elementary.clients.api.api import APIClient
@@ -31,11 +31,11 @@ class ModelsAPI(APIClient):
         run_operation_response = self.dbt_runner.run_operation(macro_name='get_models_runs',
                                                                macro_args=dict(days_back=days_back))
         model_run_dicts = json.loads(run_operation_response[0]) if run_operation_response else []
-        
+
         models_runs = defaultdict(list)
         for model_run in model_run_dicts:
             models_runs[model_run['unique_id']].append(model_run)
-        
+
         aggregated_models_runs = []
         for model_unique_id, model_runs in models_runs.items():
             totals = self._get_model_runs_totals(model_runs)
@@ -52,10 +52,13 @@ class ModelsAPI(APIClient):
                 in model_runs
             ]
             # The median should be based only on succesfull model runs.
-            successful_execution_times = [model_run['execution_time'] for model_run in model_runs if model_run['status'].lower() == 'success']
-            median_execution_time = statistics.median(successful_execution_times) if len(successful_execution_times) else 0
+            successful_execution_times = [model_run['execution_time'] for model_run in model_runs if
+                                          model_run['status'].lower() == 'success']
+            median_execution_time = statistics.median(successful_execution_times) if len(
+                successful_execution_times) else 0
             last_model_run = sorted(model_runs, key=lambda run: run['generated_at'])[-1]
-            execution_time_change_rate = (last_model_run['execution_time'] / median_execution_time - 1) * 100 if median_execution_time != 0 else 0
+            execution_time_change_rate = (last_model_run[
+                                              'execution_time'] / median_execution_time - 1) * 100 if median_execution_time != 0 else 0
             aggregated_models_runs.append(
                 ModelRunsSchema(
                     unique_id=model_unique_id,
@@ -86,34 +89,34 @@ class ModelsAPI(APIClient):
         models = dict()
         if models_results:
             for model_result in json.loads(models_results[0]):
-                model_data = ModelSchema(**model_result, type='model')
-                normalized_model = ModelsAPI._normalize_dbt_artifact_dict(model_data, type="model")
+                model_data = ModelSchema(**model_result)
+                normalized_model = self._normalize_dbt_artifact_dict(model_data)
                 model_unique_id = normalized_model.unique_id
                 models[model_unique_id] = normalized_model
         return models
-    
+
     def get_sources(self) -> Dict[str, NormalizedSourceSchema]:
         sources_results = self.dbt_runner.run_operation(macro_name="get_sources")
         sources = dict()
         if sources_results:
             for source_result in json.loads(sources_results[0]):
-                source_data = SourceSchema(**source_result, type='source')
-                normalized_source = self._normalize_dbt_artifact_dict(source_data, type="source")
+                source_data = SourceSchema(**source_result)
+                normalized_source = self._normalize_dbt_artifact_dict(source_data)
                 source_unique_id = normalized_source.unique_id
                 sources[source_unique_id] = normalized_source
         return sources
-    
+
     def get_exposures(self) -> Dict[str, NormalizedExposureSchema]:
         exposures_results = self.dbt_runner.run_operation(macro_name="get_exposures")
         exposures = dict()
         if exposures_results:
             for exposure_result in json.loads(exposures_results[0]):
-                exposure_data = ExposureSchema(**exposure_result, type='exposure')
-                normalized_exposure = self._normalize_dbt_artifact_dict(exposure_data, type="exposure")
+                exposure_data = ExposureSchema(**exposure_result)
+                normalized_exposure = self._normalize_dbt_artifact_dict(exposure_data)
                 exposure_unique_id = normalized_exposure.unique_id
                 exposures[exposure_unique_id] = normalized_exposure
         return exposures
-    
+
     def get_test_coverages(self) -> Dict[str, ModelCoverageSchema]:
         coverage_results = self.dbt_runner.run_operation(macro_name="get_dbt_models_test_coverage")
         coverages = dict()
@@ -125,11 +128,13 @@ class ModelsAPI(APIClient):
                 )
         return coverages
 
-    @staticmethod
-    def _normalize_dbt_artifact_dict(
-        artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
-        type: str
-    ) -> Union[NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema]:
+    def _normalize_dbt_artifact_dict(self, artifact: Union[ModelSchema, ExposureSchema, SourceSchema]) -> Union[
+        NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema]:
+        schema_to_normalized_schema_map = {
+            ExposureSchema: NormalizedExposureSchema,
+            ModelSchema: NormalizedModelSchema,
+            SourceSchema: NormalizedSourceSchema
+        }
         artifact_name = artifact.name
 
         owners = artifact.owners
@@ -147,44 +152,30 @@ class ModelsAPI(APIClient):
                 tags = loaded_tags
             else:
                 tags = [tags]
-        
+
         normalized_artifact = json.loads(artifact.json())
         normalized_artifact['owners'] = owners
         normalized_artifact['tags'] = tags
         normalized_artifact['model_name'] = artifact_name
-        normalized_artifact['normalized_full_path'] = ModelsAPI._normalize_artifact_path(
-            artifact_path=artifact.full_path,
-            artifact_package_name=artifact.package_name,
-            type=type
-        )
+        normalized_artifact['normalized_full_path'] = self._normalize_artifact_path(artifact)
 
-        if type == "exposure":
-            return NormalizedExposureSchema(**normalized_artifact)
-        elif type == "model":
-            return NormalizedModelSchema(**normalized_artifact)
-        elif type == "source":
-            return NormalizedSourceSchema(**normalized_artifact)
-    
+        return schema_to_normalized_schema_map[type(artifact)](**normalized_artifact)
+
     @classmethod
-    def _normalize_artifact_path(
-        cls,
-        artifact_path: str,
-        type: str,
-        artifact_package_name: Optional[str] = None,
-    ) -> str:
-        splited_artifact_path = artifact_path.split(os.path.sep)
+    def _normalize_artifact_path(cls, artifact: Union[ModelSchema, ExposureSchema, SourceSchema], ) -> str:
+        splited_artifact_path = artifact.full_path.split(os.path.sep)
         artifact_file_name = splited_artifact_path[-1]
 
         # If source, change models directory into sources and file extension from .yml to .sql
-        if type == "source":
+        if isinstance(artifact, SourceSchema):
             if splited_artifact_path[0] == "models":
                 splited_artifact_path[0] = f"sources"
             if artifact_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail =artifact_file_name.rpartition(YAML_FILE_EXTENSION)
+                head, _sep, tail = artifact_file_name.rpartition(YAML_FILE_EXTENSION)
                 splited_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
-        
+
         # Add package name to model path
-        if artifact_package_name:
-            splited_artifact_path.insert(0, artifact_package_name)
-        
+        if artifact.package_name:
+            splited_artifact_path.insert(0, artifact.package_name)
+
         return os.path.sep.join(splited_artifact_path)

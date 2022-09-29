@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from pydantic import BaseModel, Field, validator
 
 
@@ -10,7 +11,6 @@ class ArtifactSchema(BaseModel):
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
-    type: str
 
 
 class ModelSchema(ArtifactSchema):
@@ -94,4 +94,4 @@ class ModelRunsSchema(BaseModel):
     median_exec_time: float
     exec_time_change_rate: float
     totals: TotalsModelRunsSchema
-    runs: List[ModelRunSchema] 
+    runs: List[ModelRunSchema]
