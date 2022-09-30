@@ -16,7 +16,6 @@
             end as execution_time,
             full_refresh,
             materialization,
-            compiled_sql,
             generated_at
         from model_runs
         where {{ elementary.datediff(elementary.cast_as_timestamp('generated_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
