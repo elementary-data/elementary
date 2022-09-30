@@ -66,7 +66,6 @@ class ModelsAPI(APIClient):
                     name=last_model_run['name'],
                     status=last_model_run['status'],
                     last_exec_time=last_model_run['execution_time'],
-                    compiled_sql=last_model_run['compiled_sql'],
                     median_exec_time=median_execution_time,
                     exec_time_change_rate=execution_time_change_rate,
                     totals=totals,
