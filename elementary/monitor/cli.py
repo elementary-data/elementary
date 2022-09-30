@@ -187,11 +187,12 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     try:
         config.validate_report()
         data_monitoring = DataMonitoring(config, update_dbt_package)
-        success = data_monitoring.generate_report(tracking=anonymous_tracking, days_back=days_back,
-                                                  test_runs_amount=executions_limit, file_path=file_path,
-                                                  disable_passed_test_metrics=disable_passed_test_metrics)
+        generated_report_successfully, _ = data_monitoring.generate_report(
+            tracking=anonymous_tracking, days_back=days_back,
+            test_runs_amount=executions_limit, file_path=file_path,
+            disable_passed_test_metrics=disable_passed_test_metrics)
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
-        if not success:
+        if not generated_report_successfully:
             sys.exit(1)
     except Exception as exc:
         anonymous_tracking.track_cli_exception('monitor-report', exc, ctx.command.name)
