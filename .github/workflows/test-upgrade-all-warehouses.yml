@@ -1,7 +1,5 @@
-name: Test all warehouse platforms
+name: Test upgrade all warehouse platforms
 on:
-  schedule:
-    - cron: '0 10 * * *'
   workflow_dispatch:
 
 jobs:
@@ -9,7 +7,7 @@ jobs:
     strategy:
       matrix:
         warehouse-type: [ snowflake, bigquery, redshift, databricks, spark ]
-    uses: ./.github/workflows/test-warehouse.yml
+    uses: ./.github/workflows/test-upgrade-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
     secrets: inherit

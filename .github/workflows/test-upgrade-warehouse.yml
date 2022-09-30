@@ -1,0 +1,55 @@
+name: Test upgrade warehouse platform
+on:
+  workflow_dispatch:
+    inputs:
+      warehouse-type:
+        type: choice
+        required: true
+        description: Type of warehouse platform
+        options:
+          - snowflake
+          - bigquery
+          - redshift
+          - databricks
+          - spark
+
+  workflow_call:
+    inputs:
+      warehouse-type:
+        type: string
+        required: true
+
+jobs:
+  get-latest-release-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      py: ${{ steps.get-tag.outputs.py }}
+      dbt: ${{ steps.get-tag.outputs.dbt }}
+    steps:
+      - name: Get lastest release tag
+        id: get-tag
+        run: |
+          echo "::set-output name=py::$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')"
+          echo "::set-output name=dbt::$(curl -s https://api.github.com/repos/elementary-data/dbt-data-reliability/releases/latest | jq '.tag_name' | sed 's/\"//g')"
+
+      - name: Confirm release tag
+        run: |
+          echo "Python: ${{ steps.get-tag.outputs.py }}"
+          echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
+
+  pre-upgrade:
+    needs: get-latest-release-tag
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: ${{ inputs.warehouse-type }}
+      elementary-ref: ${{ needs.get-latest-release-tag.outputs.py }}
+      dbt-data-reliability-ref: ${{ needs.get-latest-release-tag.outputs.dbt }}
+    secrets: inherit
+
+  post-upgrade:
+    needs: pre-upgrade
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: ${{ inputs.warehouse-type }}
+      clear-tests: false
+    secrets: inherit
