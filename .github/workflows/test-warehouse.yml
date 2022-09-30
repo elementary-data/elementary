@@ -39,6 +39,16 @@ on:
         type: boolean
         required: false
         default: true
+      elementary-ref:
+        type: string
+        required: false
+      dbt-data-reliability-ref:
+        type: string
+        required: false
+      clear-tests:
+        type: boolean
+        required: false
+        default: true
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
