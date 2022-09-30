@@ -90,7 +90,7 @@ class ModelRunsSchema(BaseModel):
     name: str
     status: str
     last_exec_time: float
-    compiled_sql: str
+    compiled_sql: Optional[str]
     median_exec_time: float
     exec_time_change_rate: float
     totals: TotalsModelRunsSchema
