@@ -38,12 +38,12 @@ jobs:
           echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
 
   pre-upgrade:
-    needs: get-latest-release-tag
+    needs: get-latest-release-tags
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ inputs.warehouse-type }}
-      elementary-ref: ${{ needs.get-latest-release-tag.outputs.py }}
-      dbt-data-reliability-ref: ${{ needs.get-latest-release-tag.outputs.dbt }}
+      elementary-ref: ${{ needs.get-latest-release-tags.outputs.py }}
+      dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
     secrets: inherit
 
   post-upgrade:
