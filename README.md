@@ -10,7 +10,7 @@
 
 <div align="center">
 
-### Elementary is an open-source data observability solution, built for analytics & data engineers
+### Open-source data observability, built for analytics & data engineers
 
 Monitor your data quality, operation and performance directly from your dbt project.
 
