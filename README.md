@@ -8,6 +8,9 @@
 <h4 align="center">
 Monitor your data quality, operation and performance directly from your dbt project.
 </h4>
+<h4 align="center">
+Gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause.
+</h4>
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
@@ -23,12 +26,7 @@ Monitor your data quality, operation and performance directly from your dbt proj
 
 </div>
 
-## What is Elementary?
-
-Elementary is an open-source data observability solution for data & analytics engineers.
-
-Monitor your dbt project and data in minutes, and be the first to know of data issues. Gain immediate visibility, detect data issues, send actionable alerts, and understand the impact and root cause.
-
+## 
 
 <kbd align="center">
         <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
