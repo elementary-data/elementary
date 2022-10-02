@@ -2,6 +2,10 @@
 <img alt="Logo" src="static/header_git.png"/ width="1000">
 </p>
 
+<h1 align="center">
+ Data observability for analytics & data engineers
+</h1>
+
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
 <a href="https://docs.elementary-data.com/quickstart"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
@@ -10,13 +14,11 @@
 
 <div align="center">
 
-### Open-source data observability, built for analytics & data engineers
-
 **Monitor your data quality, operation and performance directly from your dbt project.**
 
 ⭐️ If you like it, star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="30"/></a> ⭐
 
-[Demo](https://bit.ly/3IAp9wf) | [Docs](https://docs.elementary-data.com/) | [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg)
+[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg)
 
 </div>
 
@@ -25,8 +27,7 @@
 Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart) 
 
 Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
-  
-Our full documentation is [available here](https://docs.elementary-data.com/). 
+
    
 ## Elementary Features
 
@@ -43,10 +44,10 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
  <img src="static/elementary_icon.ico" width="16"/> **Data lineage made simple, reliable, and automated**
 
 ##
-
-  
+ 
 Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
+Our full documentation is [available here](https://docs.elementary-data.com/).
 
   
 ## Demo & Sandbox
