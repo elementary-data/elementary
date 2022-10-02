@@ -30,34 +30,37 @@ Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quick
 Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
    
-## Elementary Features
+## Features
 
+<div align="center">
+        <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
+</div>
 
+<br>
 
  <img src="static/elementary_icon.ico" width="16"/>  **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
 
- <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a report for all dbt tests and share with your team. 
+ <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a data observability report, host it or share with your team.
 
- <img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader**
+ <img src="static/elementary_icon.ico" width="16"/> **Test results** - Enriched with details for fast triage of issues.
 
- <img src="static/elementary_icon.ico" width="16"/> **Slack alerts**
+ <img src="static/elementary_icon.ico" width="16"/> **Models performance** - Visibility of execution times, easy detection of degradation and bottlenecks.
 
- <img src="static/elementary_icon.ico" width="16"/> **Data lineage made simple, reliable, and automated**
+ <img src="static/elementary_icon.ico" width="16"/> **Data lineage** - Enriched with test results, easy to navigate and filter.
+
+ <img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs. 
+
+ <img src="static/elementary_icon.ico" width="16"/> **Slack alerts** - Actionable alerts, including custom channels and tagging of owners and subscribers.
+
+<br>
+
+<img src="static/Slack_alert_elementary.png" width="400"/>
 
 ##
  
 Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
-
-  
-## Demo & Sandbox
-
-Data observability report [sandbox](https://bit.ly/3IAp9wf).  
-
-Slack alert example:
-
-<img src="static/Slack_alert_elementary.png" width="400"/>
 
 ## Community & Support
 
