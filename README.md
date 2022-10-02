@@ -96,8 +96,8 @@ For additional information and help, you can use one of these channels:
 
 * [x] **Slack** ![](static/slack-16.png)
 * [x] **GitHub Actions**  ![](static/github-actions-16.png)
-* [x] **S3**  ![](static/s3-16.svg)
-* [x] **GCS**  ![](static/gcs-16.png)
+* [x] **Amazon S3**  ![](static/s3-16.svg)
+* [x] **Google Cloud Storage**  ![](static/gcs-16.png)
 
 
 
