@@ -22,16 +22,15 @@
 
 ## Quick start
 
-<img src="static/dbt_cli.png" width="18"/> Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart) 
+Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart) 
 
-<img src="static/elementary_cli.png" width="18"/> Step 2 - [Install Elementary CLI]()
-
-Next steps -  
+Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
   
 Our full documentation is [available here](https://docs.elementary-data.com/). 
-  
-  
+   
 ## Elementary Features
+
+
 
  <img src="static/elementary_icon.ico" width="16"/>  **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
 
