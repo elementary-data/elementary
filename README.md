@@ -107,6 +107,37 @@ Thank you :orange_heart: Whether it’s a bug fix, new feature, or additional do
 Check out the [contributions guide](https://docs.elementary-data.com/general/contributions) and [open issues](https://github.com/elementary-data/elementary/issues). 
 
 
-## **License**
+**Elementary contributors: ✨**
 
-Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary/blob/master/LICENSE) file for licensing information.
+[//]: contributor-faces
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<a href="https://github.com/oravi"><img src="https://avatars.githubusercontent.com/u/4517234?v=4" width="50" height="50" alt=""/></a> 
+<a href="https://github.com/elongl"><img src="https://avatars.githubusercontent.com/u/30181361?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Maayan-s"><img src="https://avatars.githubusercontent.com/u/22072028?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/IDoneShaveIt"><img src="https://avatars.githubusercontent.com/u/48473443?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hahnbeelee"><img src="https://avatars.githubusercontent.com/u/55263191?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/seanglynn-thrive"><img src="https://avatars.githubusercontent.com/u/93200565?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hanywang2"><img src="https://avatars.githubusercontent.com/u/44352119?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Nic3Guy"><img src="https://avatars.githubusercontent.com/u/17640648?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/yu-iskw"><img src="https://avatars.githubusercontent.com/u/1523515?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/nimrodne"><img src="https://avatars.githubusercontent.com/u/12689357?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hanrok"><img src="https://avatars.githubusercontent.com/u/24649215?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/shahafa"><img src="https://avatars.githubusercontent.com/u/904848?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/aaron-westlake"><img src="https://avatars.githubusercontent.com/u/99689538?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/YashPimple"><img src="https://avatars.githubusercontent.com/u/97302447?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Aylr"><img src="https://avatars.githubusercontent.com/u/928247?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/dorazouri"><img src="https://avatars.githubusercontent.com/u/17954776?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/ronmorgen1"><img src="https://avatars.githubusercontent.com/u/86912787?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Ecalzo"><img src="https://avatars.githubusercontent.com/u/44735669?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/civitaspo"><img src="https://avatars.githubusercontent.com/u/4525500?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/fredmny"><img src="https://avatars.githubusercontent.com/u/27257093?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/GtheSheep"><img src="https://avatars.githubusercontent.com/u/13685708?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/IrinaSel"><img src="https://avatars.githubusercontent.com/u/9607710?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/jtalmi"><img src="https://avatars.githubusercontent.com/u/7266609?v=4" width="50" height="50" alt=""/></a>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
