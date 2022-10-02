@@ -23,6 +23,12 @@ Monitor your data quality, operation and performance directly from your dbt proj
 
 </div>
 
+## What is Elementary?
+
+Elementary is an open-source data observability solution for data & analytics engineers.
+
+Monitor your dbt project and data in minutes, and be the first to know of data issues. Gain immediate visibility, detect data issues, send actionable alerts, and understand the impact and root cause.
+
 ## Quick start
 
 Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart) 
