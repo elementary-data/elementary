@@ -2,30 +2,23 @@
 <img alt="Logo" src="static/header_git.png"/ width="1000">
 </p>
 
-<p align="center">Open Source Data Observability for Analytics Engineers</p>
-
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
 <a href="https://docs.elementary-data.com/quickstart"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
 
-**Monitor your dbt tests results** and add **Elementary anomaly detection tests** to your dbt project. 
+<div align="center">
 
-See the test results on top of your dbt models in a report, with info for **fast triage**: test status, sample of failed rows, test queries, test configuration and anomaly detection metrics and graph.
+### Elementary is an open-source data observability solution, built for analytics & data engineers
 
-Share the report with your team, and use Slack integration for alerting on incidents. 
+Monitor your data quality, operation and performance directly from your dbt project.
 
+[Demo](https://bit.ly/3IAp9wf) | [Docs](https://docs.elementary-data.com/) | [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg)  
 
-##
+⭐️ If you like it, star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="22"/></a> ⭐️
 
-:star: Support us with a <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
-
-<img alt="UI" src="static/ui_for_git.png" width="800">
-
-### Checkout the [live demo](https://bit.ly/3IAp9wf)
- 
-
+</div>
 
 ## Quick start
   
