@@ -2,9 +2,11 @@
 <img alt="Logo" src="static/header_git.png"/ width="1000">
 </p>
 
-<h1 align="center">
+<h2 align="center">
  Data observability for analytics & data engineers
-</h1>
+</h2>
+
+**Monitor your data quality, operation and performance directly from your dbt project.**
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
@@ -13,8 +15,6 @@
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
 
 <div align="center">
-
-**Monitor your data quality, operation and performance directly from your dbt project.**
 
 ⭐️ If you like it, star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="30"/></a> ⭐
 
