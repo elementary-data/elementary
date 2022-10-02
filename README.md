@@ -22,7 +22,7 @@
 
 ## Quick start
 
-<img src="static/dbt_package.png" width="30"/> Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
+<img src="static/dbt_package.png" width="20"/> Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
 
 Step 2 - 🔌 [Install Elementary CLI]()
 
