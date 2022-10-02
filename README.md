@@ -21,10 +21,13 @@
 </div>
 
 ## Quick start
-  
-Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
-[Quick start: Data monitoring as dbt tests in minutes](https://bit.ly/3IdMjYW). 
 
+Step 1 - <a href="https://docs.elementary-data.com/quickstart"><img src="static/dbt_package.png" width="25"/></a> [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
+
+Step 2 - 🔌 [Install Elementary CLI]()
+
+Next steps -  
+  
 Our full documentation is [available here](https://docs.elementary-data.com/). 
   
   
