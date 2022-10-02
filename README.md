@@ -5,8 +5,9 @@
 <h2 align="center">
  Data observability for analytics & data engineers
 </h2>
-
+<div align="center">
 **Monitor your data quality, operation and performance directly from your dbt project.**
+</div>
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
