@@ -29,6 +29,13 @@ Elementary is an open-source data observability solution for data & analytics en
 
 Monitor your dbt project and data in minutes, and be the first to know of data issues. Gain immediate visibility, detect data issues, send actionable alerts, and understand the impact and root cause.
 
+
+<kbd align="center">
+        <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
+</kbd>
+
+<br>
+
 ## Quick start
 
 Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart) 
@@ -37,13 +44,6 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
 
    
 ## Features
-
-<kbd align="center">
-        <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
-</kbd>
-
-<br>
-<br>
 
 
  <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a data observability report, host it or share with your team.
