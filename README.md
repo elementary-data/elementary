@@ -37,10 +37,12 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
 </kbd>
 
 <br>
+<br>
 
- <img src="static/elementary_icon.ico" width="16"/>  **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
 
  <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a data observability report, host it or share with your team.
+
+ <img src="static/elementary_icon.ico" width="16"/> **Anomaly detection dbt tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
 
  <img src="static/elementary_icon.ico" width="16"/> **Test results** - Enriched with details for fast triage of issues.
 
