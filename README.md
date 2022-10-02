@@ -54,15 +54,19 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
 
  <img src="static/elementary_icon.ico" width="16"/> **Slack alerts** - Actionable alerts, including custom channels and tagging of owners and subscribers.
 
-<br>
-
-<img src="static/Slack_alert_elementary.png" width="400"/>
 
 ##
  
 Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
+
+
+## How it works?
+
+Elementary dbt package creates tables of metadata and test results in your data warehouse, as part of your dbt runs. The CLI tool reads the data from these tables, and is used to generate the UI and alerts. 
+
+<img align="center" style="max-width:300px;" src="static/how_elementary_works.png">
 
 ## Community & Support
 
@@ -75,10 +79,23 @@ For additional information and help, you can use one of these channels:
 
 ## **Integrations**
 
+* [x] **dbt core (>=1.0.0)** ![](static/dbt-16.png)
+* [x] **dbt cloud**  ![](static/dbt-16.png)
+
+**Data warehouses:**
 * [x] **Snowflake** ![](static/snowflake-16.png) 
-* [x] **BigQuery**  ![](static/bigquery-16.png) 
+* [x] **BigQuery**  ![](static/bigquery-16.svg) 
 * [x] **Redshift**  ![](static/redshift-16.png)
 * [x] **Databricks**  ![](static/databricks-16.png)
+
+**Operations:**
+
+* [x] **Slack** ![](static/slack-16.png)
+* [x] **GitHub Actions**  ![](static/github-actions-16.png)
+* [x] **S3**  ![](static/s3-16.svg)
+* [x] **GSC**  ![](static/gcs-16.png)
+
+
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
 
