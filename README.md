@@ -32,9 +32,9 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
    
 ## Features
 
-<div align="center">
+<kbd align="center">
         <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
-</div>
+</kbd>
 
 <br>
 
