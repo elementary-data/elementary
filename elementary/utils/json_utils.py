@@ -10,9 +10,9 @@ def try_load_json(string_value: str):
 
 def prettify_json_str_set(str_json_list: str) -> str:
     if not str_json_list:
-        return ''
+        return ""
 
     json_obj = try_load_json(str_json_list)
     if isinstance(json_obj, list):
-        return ', '.join(set(json_obj))
+        return ", ".join(set(json_obj))
     return str_json_list

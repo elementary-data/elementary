@@ -7,7 +7,7 @@ import re
 SEED_PATH_PATERN = re.compile(r"^seed\.")
 
 NodeUniqueIdType = str
-NodeType = Literal["model", "source", "exposure"] 
+NodeType = Literal["model", "source", "exposure"]
 
 
 class NodeDependsOnNodesSchema(BaseModel):
@@ -18,7 +18,9 @@ class NodeDependsOnNodesSchema(BaseModel):
     @validator("depends_on_nodes", pre=True, always=True)
     def set_depends_on_nodes(cls, depends_on_nodes):
         formatted_depends_on = depends_on_nodes or []
-        formatted_depends_on = [cls._format_node_id(node_id) for node_id in formatted_depends_on]
+        formatted_depends_on = [
+            cls._format_node_id(node_id) for node_id in formatted_depends_on
+        ]
         return [node_id for node_id in formatted_depends_on if node_id]
 
     @classmethod
@@ -51,7 +53,7 @@ class LineageSchema(BaseModel):
         graph = nx.Graph()
         graph.add_edges_from(self.edges)
         return graph
-    
+
     def to_directed_graph(self) -> nx.DiGraph:
         graph = nx.DiGraph()
         graph.add_edges_from(self.edges)
