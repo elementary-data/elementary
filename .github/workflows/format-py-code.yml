@@ -4,10 +4,6 @@ on:
     paths:
       - elementary/**
       - setup.py
-  pull_request:
-    paths:
-      - elementary/**
-      - setup.py
   workflow_dispatch:
 
 jobs:
@@ -18,7 +14,6 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Format
-        if: startsWith(github.head_ref, 'format-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
         uses: psf/black@stable
         with:
           options: ""
@@ -31,4 +26,4 @@ jobs:
           title: Python Formatting fixes
           body: This is an auto-generated PR with fixes by black.
           labels: format, black, automated
-          branch: format-patches/${{ github.head_ref }}
+          branch: format-patches
