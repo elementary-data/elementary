@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 
 
 class SourceFreshnessAlert(Alert):
-    TABLE_NAME = 'alerts_source_freshness'
+    TABLE_NAME = "alerts_source_freshness"
 
     def __init__(
             self,
