@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 
 class AlertsAPI(APIClient):
     def __init__(
-            self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str
+        self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -28,7 +28,7 @@ class AlertsAPI(APIClient):
         return Alerts(
             tests=self._query_test_alerts(days_back),
             models=self._query_model_alerts(days_back),
-            source_freshnesses=self._query_source_freshness_alerts(days_back)
+            source_freshnesses=self._query_source_freshness_alerts(days_back),
         )
 
     def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
@@ -51,15 +51,20 @@ class AlertsAPI(APIClient):
             ModelAlert,
         )
 
-    def _query_source_freshness_alerts(self, days_back: int) -> AlertsQueryResult[SourceFreshnessAlert]:
-        logger.info('Querying source freshness alerts.')
+    def _query_source_freshness_alerts(
+        self, days_back: int
+    ) -> AlertsQueryResult[SourceFreshnessAlert]:
+        logger.info("Querying source freshness alerts.")
         return self._query_alert_type(
-            {'macro_name': 'get_new_source_freshness_alerts', 'macro_args': {'days_back': days_back}},
-            SourceFreshnessAlert
+            {
+                "macro_name": "get_new_source_freshness_alerts",
+                "macro_args": {"days_back": days_back},
+            },
+            SourceFreshnessAlert,
         )
 
     def _query_alert_type(
-            self, run_operation_args: dict, alert_factory_func: Callable
+        self, run_operation_args: dict, alert_factory_func: Callable
     ) -> AlertsQueryResult:
         raw_alerts = self.dbt_runner.run_operation(**run_operation_args)
         alerts = []
@@ -130,5 +135,5 @@ class AlertsAPI(APIClient):
     def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
         chunk_list = []
         for i in range(0, len(items), chunk_size):
-            chunk_list.append(items[i: i + chunk_size])
+            chunk_list.append(items[i : i + chunk_size])
         return chunk_list

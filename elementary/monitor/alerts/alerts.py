@@ -37,11 +37,18 @@ class Alerts:
 
     @property
     def malformed_count(self):
-        return len(self.models.malformed_alerts) + len(self.tests.malformed_alerts) + len(
-            self.source_freshnesses.malformed_alerts)
+        return (
+            len(self.models.malformed_alerts)
+            + len(self.tests.malformed_alerts)
+            + len(self.source_freshnesses.malformed_alerts)
+        )
 
     def get_all(self) -> List[Alert]:
-        return self.models.get_all() + self.tests.get_all() + self.source_freshnesses.get_all()
+        return (
+            self.models.get_all()
+            + self.tests.get_all()
+            + self.source_freshnesses.get_all()
+        )
 
     def get_elementary_test_count(self):
         elementary_test_count = defaultdict(int)
