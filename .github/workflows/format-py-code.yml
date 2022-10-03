@@ -1,0 +1,34 @@
+name: Format Python code
+on:
+  push:
+    paths:
+      - elementary/**
+      - setup.py
+  pull_request:
+    paths:
+      - elementary/**
+      - setup.py
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v2
+
+      - name: Format
+        if: !startsWith(github.head_ref, 'format-patches') && github.event.pull_request.head.repo.full_name == github.repository
+        uses: psf/black@stable
+        with:
+          options: ""
+          src: "elementary"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: Python Formatting fixes
+          title: Python Formatting fixes
+          body: This is an auto-generated PR with fixes by black.
+          labels: format, black, automated
+          branch: format-patches/${{ github.head_ref }}
