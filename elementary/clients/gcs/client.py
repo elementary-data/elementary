@@ -19,30 +19,40 @@ class GCSClient:
         self.client = self.get_client(config)
 
     @classmethod
-    def create_client(cls, config: Config) -> Optional['GCSClient']:
+    def create_client(cls, config: Config) -> Optional["GCSClient"]:
         return cls(config) if config.has_gcs else None
 
-    def send_report(self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None) -> bool:
-        report_filename = bucket_path.basename(remote_bucket_file_path) if remote_bucket_file_path else path.basename(
-            local_html_file_path)
-        bucket_report_path = remote_bucket_file_path if remote_bucket_file_path else report_filename
+    def send_report(
+        self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
+    ) -> bool:
+        report_filename = (
+            bucket_path.basename(remote_bucket_file_path)
+            if remote_bucket_file_path
+            else path.basename(local_html_file_path)
+        )
+        bucket_report_path = (
+            remote_bucket_file_path if remote_bucket_file_path else report_filename
+        )
         logger.info(f'Uploading to GCS bucket "{self.config.gcs_bucket_name}"')
         try:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)
             blob = bucket.blob(bucket_report_path)
-            blob.upload_from_filename(local_html_file_path, content_type='text/html')
-            logger.info('Uploaded report to GCS.')
+            blob.upload_from_filename(local_html_file_path, content_type="text/html")
+            logger.info("Uploaded report to GCS.")
             if self.config.update_bucket_website:
                 bucket_report_folder_path = bucket_path.dirname(bucket_report_path)
                 bucket.copy_blob(
                     blob=blob,
                     destination_bucket=bucket,
                     new_name=bucket_path.join_path(
-                        [bucket_report_folder_path, 'index.html']) if bucket_report_folder_path else 'index.html'
+                        [bucket_report_folder_path, "index.html"]
+                    )
+                    if bucket_report_folder_path
+                    else "index.html",
                 )
                 logger.info("Updated GCS bucket's website.")
         except google.cloud.exceptions.GoogleCloudError:
-            logger.exception('Failed to upload report to GCS.')
+            logger.exception("Failed to upload report to GCS.")
             return False
         return True
 
@@ -55,6 +65,8 @@ class GCSClient:
     @staticmethod
     def get_credentials(config: Config) -> Credentials:
         if config.google_service_account_path:
-            return service_account.Credentials.from_service_account_file(config.google_service_account_path)
+            return service_account.Credentials.from_service_account_file(
+                config.google_service_account_path
+            )
         credentials, _ = google.auth.default()
         return credentials

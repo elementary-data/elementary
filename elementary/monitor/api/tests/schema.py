@@ -28,7 +28,7 @@ class TestMetadataSchema(BaseModel):
     status: str
     test_created_at: Optional[str] = None
     days_diff: float
-    
+
 
 class InvocationSchema(BaseModel):
     affected_rows: Optional[int]
