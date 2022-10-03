@@ -176,14 +176,31 @@ def monitor(
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
 )
 @click.option(
+    '--open-browser',
+    type=bool,
+    default=True,
+    help='Whether to open the report in the browser.'
+)
+@click.option(
     '--exclude-elementary-models',
     type=bool,
     default=False,
     help="Exclude Elementary's own models in the report."
 )
 @click.pass_context
-def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path,
-           disable_passed_test_metrics, exclude_elementary_models):
+def report(
+        ctx,
+        days_back,
+        config_dir,
+        profiles_dir,
+        update_dbt_package,
+        profile_target,
+        executions_limit,
+        file_path,
+        disable_passed_test_metrics,
+        open_browser,
+        exclude_elementary_models
+):
     """
     Generate a local report of your warehouse.
     """
@@ -196,7 +213,9 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
         generated_report_successfully, _ = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back,
             test_runs_amount=executions_limit, file_path=file_path,
-            disable_passed_test_metrics=disable_passed_test_metrics, exclude_elementary_models=exclude_elementary_models
+            disable_passed_test_metrics=disable_passed_test_metrics,
+            exclude_elementary_models=exclude_elementary_models,
+            should_open_browser=open_browser
         )
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
         if not generated_report_successfully:
