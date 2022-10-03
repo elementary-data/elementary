@@ -16,7 +16,9 @@ logger = get_logger(__name__)
 
 
 class AlertsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str):
+    def __init__(
+        self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str
+    ):
         super().__init__(dbt_runner)
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
@@ -28,20 +30,28 @@ class AlertsAPI(APIClient):
         )
 
     def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
-        logger.info('Querying test alerts.')
+        logger.info("Querying test alerts.")
         return self._query_alert_type(
-            {'macro_name': 'get_new_test_alerts', 'macro_args': {'days_back': days_back}},
-            TestAlert.create_test_alert_from_dict
+            {
+                "macro_name": "get_new_test_alerts",
+                "macro_args": {"days_back": days_back},
+            },
+            TestAlert.create_test_alert_from_dict,
         )
 
     def _query_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
-        logger.info('Querying model alerts.')
+        logger.info("Querying model alerts.")
         return self._query_alert_type(
-            {'macro_name': 'get_new_model_alerts', 'macro_args': {'days_back': days_back}},
-            ModelAlert
+            {
+                "macro_name": "get_new_model_alerts",
+                "macro_args": {"days_back": days_back},
+            },
+            ModelAlert,
         )
 
-    def _query_alert_type(self, run_operation_args: dict, alert_factory_func: Callable) -> AlertsQueryResult:
+    def _query_alert_type(
+        self, run_operation_args: dict, alert_factory_func: Callable
+    ) -> AlertsQueryResult:
         raw_alerts = self.dbt_runner.run_operation(**run_operation_args)
         alerts = []
         malformed_alerts = []
@@ -50,30 +60,31 @@ class AlertsAPI(APIClient):
             for alert_dict in alert_dicts:
                 normalized_alert = self._normalize_alert(alert=alert_dict)
                 try:
-                    alerts.append(alert_factory_func(
-                        elementary_database_and_schema=self.elementary_database_and_schema,
-                        timezone=self.config.timezone,
-                        **normalized_alert
-                    ))
+                    alerts.append(
+                        alert_factory_func(
+                            elementary_database_and_schema=self.elementary_database_and_schema,
+                            timezone=self.config.timezone,
+                            **normalized_alert,
+                        )
+                    )
                 except Exception:
-                    malformed_alerts.append(MalformedAlert(
-                        id=normalized_alert['id'],
-                        data=normalized_alert
-                    ))
+                    malformed_alerts.append(
+                        MalformedAlert(id=normalized_alert["id"], data=normalized_alert)
+                    )
         if malformed_alerts:
-            logger.error('Failed to parse some alerts.')
+            logger.error("Failed to parse some alerts.")
         return AlertsQueryResult(alerts, malformed_alerts)
 
     @classmethod
     def _normalize_alert(cls, alert: dict) -> dict:
         try:
             normalized_alert = copy.deepcopy(alert)
-            test_meta = try_load_json(normalized_alert.get('test_meta')) or {}
-            model_meta = try_load_json(normalized_alert.get('model_meta')) or {}
+            test_meta = try_load_json(normalized_alert.get("test_meta")) or {}
+            model_meta = try_load_json(normalized_alert.get("model_meta")) or {}
 
             subscribers = []
-            test_subscribers = test_meta.get('subscribers', [])
-            model_subscribers = model_meta.get('subscribers', [])
+            test_subscribers = test_meta.get("subscribers", [])
+            model_subscribers = model_meta.get("subscribers", [])
             if isinstance(test_subscribers, list):
                 subscribers.extend(test_subscribers)
             else:
@@ -84,30 +95,31 @@ class AlertsAPI(APIClient):
             else:
                 subscribers.append(model_subscribers)
 
-            model_slack_channel = model_meta.get('channel')
-            test_slack_channel = test_meta.get('channel')
+            model_slack_channel = model_meta.get("channel")
+            test_slack_channel = test_meta.get("channel")
             slack_channel = test_slack_channel or model_slack_channel
 
-            normalized_alert['subscribers'] = subscribers
-            normalized_alert['slack_channel'] = slack_channel
+            normalized_alert["subscribers"] = subscribers
+            normalized_alert["slack_channel"] = slack_channel
             return normalized_alert
         except Exception:
             logger.error(
-                f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used")
+                f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used"
+            )
             return alert
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run_operation(
-                macro_name='update_sent_alerts',
-                macro_args={'alert_ids': alert_ids_chunk, 'table_name': table_name},
-                json_logs=False
+                macro_name="update_sent_alerts",
+                macro_args={"alert_ids": alert_ids_chunk, "table_name": table_name},
+                json_logs=False,
             )
 
     @staticmethod
     def _split_list_to_chunks(items: list, chunk_size: int = 50) -> List[List]:
         chunk_list = []
         for i in range(0, len(items), chunk_size):
-            chunk_list.append(items[i: i + chunk_size])
+            chunk_list.append(items[i : i + chunk_size])
         return chunk_list

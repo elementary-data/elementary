@@ -13,19 +13,19 @@ logger = get_logger(__name__)
 
 class Alert:
     def __init__(
-            self,
-            id: str,
-            detected_at: str = None,
-            database_name: str = None,
-            schema_name: str = None,
-            elementary_database_and_schema: str = None,
-            owners: str = None,
-            tags: str = None,
-            status: str = None,
-            subscribers: Optional[List[str]] = None,
-            slack_channel: Optional[str] = None,
-            timezone: Optional[str] = None,
-            **kwargs
+        self,
+        id: str,
+        detected_at: str = None,
+        database_name: str = None,
+        schema_name: str = None,
+        elementary_database_and_schema: str = None,
+        owners: str = None,
+        tags: str = None,
+        status: str = None,
+        subscribers: Optional[List[str]] = None,
+        slack_channel: Optional[str] = None,
+        timezone: Optional[str] = None,
+        **kwargs,
     ):
         self.id = id
         self.elementary_database_and_schema = elementary_database_and_schema
@@ -34,8 +34,10 @@ class Alert:
         self.timezone = timezone
         try:
             detected_at_utc = datetime.fromisoformat(detected_at)
-            self.detected_at_utc = detected_at_utc.strftime('%Y-%m-%d %H:%M:%S')
-            self.detected_at = convert_utc_time_to_timezone(utc_time=detected_at_utc, timezone=self.timezone).strftime('%Y-%m-%d %H:%M:%S')
+            self.detected_at_utc = detected_at_utc.strftime("%Y-%m-%d %H:%M:%S")
+            self.detected_at = convert_utc_time_to_timezone(
+                utc_time=detected_at_utc, timezone=self.timezone
+            ).strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
             logger.error(f'Failed to parse "detect_at" field.')
         self.database_name = database_name
@@ -47,7 +49,7 @@ class Alert:
         self.slack_channel = slack_channel
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
-    _CONTINUATION_SYMBOL = '...'
+    _CONTINUATION_SYMBOL = "..."
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
@@ -56,35 +58,46 @@ class Alert:
     def _format_section_msg(cls, section_msg):
         if len(section_msg) < SectionBlock.text_max_length:
             return section_msg
-        return section_msg[
-               :SectionBlock.text_max_length - len(cls._CONTINUATION_SYMBOL) - cls._LONGEST_MARKDOWN_SUFFIX_LEN] + \
-               cls._CONTINUATION_SYMBOL + section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN:]
+        return (
+            section_msg[
+                : SectionBlock.text_max_length
+                - len(cls._CONTINUATION_SYMBOL)
+                - cls._LONGEST_MARKDOWN_SUFFIX_LEN
+            ]
+            + cls._CONTINUATION_SYMBOL
+            + section_msg[-cls._LONGEST_MARKDOWN_SUFFIX_LEN :]
+        )
 
     @classmethod
-    def _add_fields_section_to_slack_msg(cls, slack_message: dict, section_msgs: list, divider: bool = False):
+    def _add_fields_section_to_slack_msg(
+        cls, slack_message: dict, section_msgs: list, divider: bool = False
+    ):
         fields = []
         for section_msg in section_msgs:
-            fields.append({
-                "type": "mrkdwn",
-                "text": cls._format_section_msg(section_msg)
-            })
+            fields.append(
+                {"type": "mrkdwn", "text": cls._format_section_msg(section_msg)}
+            )
 
         block = []
         if divider:
             block.append({"type": "divider"})
         block.append({"type": "section", "fields": fields})
-        slack_message['attachments'][0]['blocks'].extend(block)
+        slack_message["attachments"][0]["blocks"].extend(block)
 
     @classmethod
-    def _add_text_section_to_slack_msg(cls, slack_message: dict, section_msg: str, divider: bool = False):
+    def _add_text_section_to_slack_msg(
+        cls, slack_message: dict, section_msg: str, divider: bool = False
+    ):
         block = []
         if divider:
             block.append({"type": "divider"})
-        block.append({
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": cls._format_section_msg(section_msg)
+        block.append(
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": cls._format_section_msg(section_msg),
+                },
             }
-        })
-        slack_message['attachments'][0]['blocks'].extend(block)
+        )
+        slack_message["attachments"][0]["blocks"].extend(block)
