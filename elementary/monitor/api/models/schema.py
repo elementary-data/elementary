@@ -36,7 +36,7 @@ class NormalizedArtifactSchema(BaseModel):
     owners: Optional[List[str]] = []
     tags: Optional[List[str]] = []
     # Should be changed to artifact_name.
-    # Currently its model_name to match the CLI UI. 
+    # Currently its model_name to match the CLI UI.
     model_name: str
     normalized_full_path: str
 
@@ -86,7 +86,7 @@ class TotalsModelRunsSchema(BaseModel):
 class ModelRunsSchema(BaseModel):
     unique_id: str
     # schema is a saved name, so we use alias
-    schema_name: str = Field(alias='schema')
+    schema_name: str = Field(alias="schema")
     name: str
     status: str
     last_exec_time: float

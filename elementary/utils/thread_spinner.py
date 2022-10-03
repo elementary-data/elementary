@@ -9,7 +9,9 @@ class ThreadSpinner:
         self.thread = Thread(target=self._run_spinner, args=(title,))
 
     def _run_spinner(self, title: str) -> None:
-        with alive_progress.alive_bar(title=title, bar=None, spinner='twirl', monitor=False) as spinner:
+        with alive_progress.alive_bar(
+            title=title, bar=None, spinner="twirl", monitor=False
+        ) as spinner:
             while not self.stop_spinner:
                 time.sleep(0.2)
                 spinner()

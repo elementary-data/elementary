@@ -6,11 +6,11 @@ import elementary.utils.package
 
 
 def _is_docker():
-    cgroup_path = Path('/proc/self/cgroup')
+    cgroup_path = Path("/proc/self/cgroup")
     return (
-            Path('/.dockerenv').exists()
-            or
-            cgroup_path.is_file() and any('docker' in line for line in cgroup_path.read_text().splitlines())
+        Path("/.dockerenv").exists()
+        or cgroup_path.is_file()
+        and any("docker" in line for line in cgroup_path.read_text().splitlines())
     )
 
 
@@ -19,15 +19,15 @@ def _is_airflow():
 
 
 def _is_github_actions():
-    return 'GITHUB_ACTIONS' in os.environ
+    return "GITHUB_ACTIONS" in os.environ
 
 
 def get_props():
     return {
-        'os': platform.system(),
-        'is_docker': _is_docker(),
-        'is_airflow': _is_airflow(),
-        'is_github_actions': _is_github_actions(),
-        'python_version': platform.python_version(),
-        'elementary_version': elementary.utils.package.get_package_version(),
+        "os": platform.system(),
+        "is_docker": _is_docker(),
+        "is_airflow": _is_airflow(),
+        "is_github_actions": _is_github_actions(),
+        "python_version": platform.python_version(),
+        "elementary_version": elementary.utils.package.get_package_version(),
     }

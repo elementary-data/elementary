@@ -3,13 +3,15 @@ from dateutil import tz
 from typing import Optional
 
 MILLISECONDS_IN_SEC = 1000
-MILLISECONDS_IN_MIN = (1000 * 60)
-MILLISECONDS_IN_HOUR = (1000 * 60 * 60)
+MILLISECONDS_IN_MIN = 1000 * 60
+MILLISECONDS_IN_HOUR = 1000 * 60 * 60
 
-TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-def convert_utc_time_to_timezone(utc_time: 'datetime', timezone: Optional[str] = None) -> 'datetime':    
+def convert_utc_time_to_timezone(
+    utc_time: "datetime", timezone: Optional[str] = None
+) -> "datetime":
     from_zone = tz.tzutc()
     to_zone = tz.gettz(timezone) if timezone else tz.tzlocal()
     utc_time = utc_time.replace(tzinfo=from_zone)
@@ -30,7 +32,10 @@ def format_milliseconds(duration: int) -> str:
     minutes = int((duration / MILLISECONDS_IN_MIN) % 60)
     hours = int(duration / MILLISECONDS_IN_HOUR)
 
-    remaining_milliseconds = duration - (hours * MILLISECONDS_IN_HOUR + minutes * MILLISECONDS_IN_MIN +
-                                         seconds * MILLISECONDS_IN_SEC)
+    remaining_milliseconds = duration - (
+        hours * MILLISECONDS_IN_HOUR
+        + minutes * MILLISECONDS_IN_MIN
+        + seconds * MILLISECONDS_IN_SEC
+    )
 
-    return f'{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms'
+    return f"{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms"
