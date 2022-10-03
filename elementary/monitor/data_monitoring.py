@@ -126,7 +126,8 @@ class DataMonitoring:
 
     def generate_report(self, tracking: AnonymousTracking, days_back: Optional[int] = None,
                         test_runs_amount: Optional[int] = None, file_path: Optional[str] = None,
-                        disable_passed_test_metrics: bool = False, should_open_browser: bool = True) -> Tuple[
+                        disable_passed_test_metrics: bool = False, should_open_browser: bool = True,
+                        exclude_elementary_models: bool = False) -> Tuple[
         bool, str]:
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -138,10 +139,11 @@ class DataMonitoring:
             test_results, test_results_totals, test_runs_totals = self._get_test_results_and_totals(
                 days_back=days_back, test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics)
-            models, dbt_sidebar = self._get_dbt_models_and_sidebar()
+            models, dbt_sidebar = self._get_dbt_models_and_sidebar(exclude_elementary_models)
             models_coverages = self._get_dbt_models_test_coverages()
-            models_runs, model_runs_totals = self._get_models_runs_and_totals(days_back=days_back)
-            lineage = self._get_lineage()
+            models_runs, model_runs_totals = self._get_models_runs_and_totals(
+                days_back=days_back, exclude_elementary_models=exclude_elementary_models)
+            lineage = self._get_lineage(exclude_elementary_models)
             output_data['models'] = models
             output_data['dbt_sidebar'] = dbt_sidebar
             output_data['test_results'] = test_results
@@ -199,9 +201,9 @@ class DataMonitoring:
         self.execution_properties['success'] = self.success
         return self.success
 
-    def _get_lineage(self) -> LineageSchema:
+    def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
-        return lineage_api.get_lineage()
+        return lineage_api.get_lineage(exclude_elementary_models)
 
     def _get_test_results_and_totals(self, days_back: Optional[int] = None, test_runs_amount: Optional[int] = None,
                                      disable_passed_test_metrics: bool = False):
@@ -250,10 +252,11 @@ class DataMonitoring:
             tests_results[test.model_unique_id].append(test_result.to_test_alert_api_dict())
         self.execution_properties['elementary_test_count'] = elementary_test_count
         return tests_results
-    
-    def _get_models_runs_and_totals(self, days_back: Optional[int] = None):
+
+    def _get_models_runs_and_totals(self, days_back: Optional[int] = None, exclude_elementary_models: bool = False):
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        models_runs = models_api.get_models_runs(days_back=days_back)
+        models_runs = models_api.get_models_runs(days_back=days_back,
+                                                 exclude_elementary_models=exclude_elementary_models)
         models_runs_dicts = []
         model_runs_totals = {}
         for model_runs in models_runs:
@@ -266,11 +269,11 @@ class DataMonitoring:
             }
         return models_runs_dicts, model_runs_totals
 
-    def _get_dbt_models_and_sidebar(self) -> Tuple[Dict, Dict]:
+    def _get_dbt_models_and_sidebar(self, exclude_elementary_models: bool = False) -> Tuple[Dict, Dict]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
 
-        models = models_api.get_models()
+        models = models_api.get_models(exclude_elementary_models)
         sources = models_api.get_sources()
         exposures = models_api.get_exposures()
 

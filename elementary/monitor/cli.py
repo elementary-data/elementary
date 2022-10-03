@@ -175,9 +175,15 @@ def monitor(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
 )
+@click.option(
+    '--exclude-elementary-models',
+    type=bool,
+    default=False,
+    help="Exclude Elementary's own models in the report."
+)
 @click.pass_context
 def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile_target, executions_limit, file_path,
-           disable_passed_test_metrics):
+           disable_passed_test_metrics, exclude_elementary_models):
     """
     Generate a local report of your warehouse.
     """
@@ -190,7 +196,8 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
         generated_report_successfully, _ = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back,
             test_runs_amount=executions_limit, file_path=file_path,
-            disable_passed_test_metrics=disable_passed_test_metrics)
+            disable_passed_test_metrics=disable_passed_test_metrics, exclude_elementary_models=exclude_elementary_models
+        )
         anonymous_tracking.track_cli_end('monitor-report', data_monitoring.properties(), ctx.command.name)
         if not generated_report_successfully:
             sys.exit(1)
@@ -285,6 +292,12 @@ def report(ctx, days_back, config_dir, profiles_dir, update_dbt_package, profile
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time)."
 )
+@click.option(
+    '--exclude-elementary-models',
+    type=bool,
+    default=False,
+    help="Exclude Elementary's own models in the report."
+)
 @click.pass_context
 def send_report(
         ctx,
@@ -306,7 +319,8 @@ def send_report(
         s3_bucket_name,
         google_service_account_path,
         google_project_name,
-        gcs_bucket_name
+        gcs_bucket_name,
+        exclude_elementary_models
 ):
     """
     Send the report to an external platform.
@@ -332,7 +346,7 @@ def send_report(
         generated_report_successfully, elementary_html_path = data_monitoring.generate_report(
             tracking=anonymous_tracking, days_back=days_back, test_runs_amount=executions_limit,
             disable_passed_test_metrics=disable_passed_test_metrics, file_path=local_file_path,
-            should_open_browser=False)
+            should_open_browser=False, exclude_elementary_models=exclude_elementary_models)
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(elementary_html_path, remote_file_path=bucket_file_path)
         anonymous_tracking.track_cli_end('monitor-send-report', data_monitoring.properties(), ctx.command.name)
