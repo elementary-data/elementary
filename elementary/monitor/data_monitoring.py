@@ -44,10 +44,10 @@ SQL_FILE_EXTENSION = ".sql"
 
 class DataMonitoring:
     def __init__(
-            self,
-            config: Config,
-            force_update_dbt_package: bool = False,
-            send_test_message_on_success: bool = False,
+        self,
+        config: Config,
+        force_update_dbt_package: bool = False,
+        send_test_message_on_success: bool = False,
     ):
         self.config = config
         self.dbt_runner = DbtRunner(
@@ -115,14 +115,16 @@ class DataMonitoring:
     def _send_alerts(self, alerts: Alerts):
         self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
         self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        self._send_alerts_to_slack(alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME)
+        self._send_alerts_to_slack(
+            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
+        )
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def run(
-            self,
-            days_back: int,
-            dbt_full_refresh: bool = False,
-            dbt_vars: Optional[dict] = None,
+        self,
+        days_back: int,
+        dbt_full_refresh: bool = False,
+        dbt_vars: Optional[dict] = None,
     ) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.dbt_runner.run(
@@ -136,7 +138,9 @@ class DataMonitoring:
             return self.success
 
         alerts = self.alerts_api.query(days_back)
-        self.execution_properties["elementary_test_count"] = alerts.get_elementary_test_count()
+        self.execution_properties[
+            "elementary_test_count"
+        ] = alerts.get_elementary_test_count()
         self.execution_properties["alert_count"] = alerts.count
         malformed_alert_count = alerts.malformed_count
         if malformed_alert_count > 0:
@@ -153,13 +157,13 @@ class DataMonitoring:
         return self.success
 
     def generate_report(
-            self,
-            tracking: AnonymousTracking,
-            days_back: Optional[int] = None,
-            test_runs_amount: Optional[int] = None,
-            file_path: Optional[str] = None,
-            disable_passed_test_metrics: bool = False,
-            should_open_browser: bool = True,
+        self,
+        tracking: AnonymousTracking,
+        days_back: Optional[int] = None,
+        test_runs_amount: Optional[int] = None,
+        file_path: Optional[str] = None,
+        disable_passed_test_metrics: bool = False,
+        should_open_browser: bool = True,
     ) -> Tuple[bool, str]:
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -208,7 +212,7 @@ class DataMonitoring:
                     """
                 html_file.write(compiled_output_html)
         with open(
-                os.path.join(self.config.target_dir, "elementary_output.json"), "w"
+            os.path.join(self.config.target_dir, "elementary_output.json"), "w"
         ) as elementary_output_json_file:
             elementary_output_json_file.write(dumped_output_data)
 
@@ -219,7 +223,7 @@ class DataMonitoring:
         return self.success, html_path
 
     def send_report(
-            self, local_html_path: str, remote_file_path: Optional[str] = None
+        self, local_html_path: str, remote_file_path: Optional[str] = None
     ) -> bool:
         if self.slack_client:
             send_succeded = self.slack_client.send_report(
@@ -253,10 +257,10 @@ class DataMonitoring:
         return lineage_api.get_lineage()
 
     def _get_test_results_and_totals(
-            self,
-            days_back: Optional[int] = None,
-            test_runs_amount: Optional[int] = None,
-            disable_passed_test_metrics: bool = False,
+        self,
+        days_back: Optional[int] = None,
+        test_runs_amount: Optional[int] = None,
+        disable_passed_test_metrics: bool = False,
     ):
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
@@ -285,10 +289,10 @@ class DataMonitoring:
             return dict(), dict(), dict()
 
     def _create_tests_results(
-            self,
-            tests_metadata: List[TestMetadataSchema],
-            tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
-            invocations: Dict[TestUniqueIdType, List[InvocationSchema]],
+        self,
+        tests_metadata: List[TestMetadataSchema],
+        tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
+        invocations: Dict[TestUniqueIdType, List[InvocationSchema]],
     ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
         elementary_test_count = defaultdict(int)
         tests_results = defaultdict(list)
@@ -362,7 +366,7 @@ class DataMonitoring:
         return data_monitoring_properties
 
     def _get_report_file_path(
-            self, generation_time: str, file_path: Optional[str] = None
+        self, generation_time: str, file_path: Optional[str] = None
     ) -> str:
         if file_path:
             if file_path.endswith(".htm") or file_path.endswith(".html"):

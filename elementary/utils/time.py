@@ -11,7 +11,7 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def convert_utc_time_to_timezone(
-        utc_time: "datetime", timezone: Optional[str] = None
+    utc_time: "datetime", timezone: Optional[str] = None
 ) -> "datetime":
     from_zone = tz.tzutc()
     to_zone = tz.gettz(timezone) if timezone else tz.tzlocal()
@@ -33,9 +33,9 @@ def format_milliseconds(duration: int) -> str:
     hours = int(duration / MILLISECONDS_IN_HOUR)
 
     remaining_milliseconds = duration - (
-            hours * MILLISECONDS_IN_HOUR
-            + minutes * MILLISECONDS_IN_MIN
-            + seconds * MILLISECONDS_IN_SEC
+        hours * MILLISECONDS_IN_HOUR
+        + minutes * MILLISECONDS_IN_MIN
+        + seconds * MILLISECONDS_IN_SEC
     )
 
     return f"{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms"
