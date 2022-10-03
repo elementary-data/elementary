@@ -19,11 +19,7 @@ jobs:
           options: ""
           src: "elementary"
 
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v3
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9.1.0
         with:
-          commit-message: Python Formatting fixes
-          title: Python Formatting fixes
-          body: This is an auto-generated PR with fixes by black.
-          labels: format, black, automated
-          branch: format-patches
+          message: "Formatted the codebase."
