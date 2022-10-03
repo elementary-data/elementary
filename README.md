@@ -68,7 +68,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
 ## How it works?
 
-Elementary dbt package creates tables of metadata and test results in your data warehouse, as part of your dbt runs. The CLI tool reads the data from these tables, and is used to generate the UI and alerts. 
+Elementary [dbt package](https://github.com/elementary-data/dbt-data-reliability) creates tables of metadata and test results in your data warehouse, as part of your dbt runs. The CLI tool reads the data from these tables, and is used to generate the UI and alerts. 
 
 <img align="center" style="max-width:300px;" src="static/how_elementary_works.png">
 
