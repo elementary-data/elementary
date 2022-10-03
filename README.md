@@ -2,7 +2,12 @@
 <img alt="Logo" src="static/header_git.png"/ width="1000">
 </p>
 
-<p align="center">Open Source Data Observability for Analytics Engineers</p>
+<h2 align="center">
+ Data observability for analytics & data engineers
+</h2>
+<h4 align="center">
+Monitor your data quality, operation and performance directly from your dbt project.
+</h4>
 
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
@@ -10,57 +15,62 @@
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
 
-**Monitor your dbt tests results** and add **Elementary anomaly detection tests** to your dbt project. 
+<div align="center">
 
-See the test results on top of your dbt models in a report, with info for **fast triage**: test status, sample of failed rows, test queries, test configuration and anomaly detection metrics and graph.
+⭐️ If you like it, star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="30"/></a> ⭐
 
-Share the report with your team, and use Slack integration for alerting on incidents. 
+[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg)
+
+</div>
+
+## What is Elementary?
+
+Elementary is an open-source data observability solution, built for dbt users. Setup in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause.
 
 
-##
+<kbd align="center">
+        <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
+</kbd>
 
-:star: Support us with a <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="40"/></a> :star:  
-
-<img alt="UI" src="static/ui_for_git.png" width="800">
-
-### Checkout the [live demo](https://bit.ly/3IAp9wf)
- 
-
+<br>
 
 ## Quick start
-  
-Install dbt package & CLI -> Configure tests in dbt -> Alerts on Slack and detailed report  
-[Quick start: Data monitoring as dbt tests in minutes](https://bit.ly/3IdMjYW). 
 
-Our full documentation is [available here](https://docs.elementary-data.com/). 
-  
-  
-## Elementary Features
+Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart) 
 
- <img src="static/elementary_icon.ico" width="16"/>  **Data anomalies monitoring as dbt tests** - Collect metrics and metadata over time, detect anomalies, as native dbt tests in your project!
+Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
- <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a report for all dbt tests and share with your team. 
+   
+## Features
 
- <img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader**
 
- <img src="static/elementary_icon.ico" width="16"/> **Slack alerts**
+ <img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a data observability report, host it or share with your team.
 
- <img src="static/elementary_icon.ico" width="16"/> **Data lineage made simple, reliable, and automated**
+ <img src="static/elementary_icon.ico" width="16"/> **Anomaly detection dbt tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
+
+ <img src="static/elementary_icon.ico" width="16"/> **Test results** - Enriched with details for fast triage of issues.
+
+ <img src="static/elementary_icon.ico" width="16"/> **Models performance** - Visibility of execution times, easy detection of degradation and bottlenecks.
+
+ <img src="static/elementary_icon.ico" width="16"/> **Data lineage** - Enriched with test results, easy to navigate and filter.
+
+ <img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs. 
+
+ <img src="static/elementary_icon.ico" width="16"/> **Slack alerts** - Actionable alerts, including custom channels and tagging of owners and subscribers.
+
 
 ##
-
-  
+ 
 Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
 
+Our full documentation is [available here](https://docs.elementary-data.com/).
 
-  
-## Demo & Sandbox
 
-Data observability report [sandbox](https://bit.ly/3IAp9wf).  
+## How it works?
 
-Slack alert example:
+Elementary [dbt package](https://github.com/elementary-data/dbt-data-reliability) creates tables of metadata and test results in your data warehouse, as part of your dbt runs. The CLI tool reads the data from these tables, and is used to generate the UI and alerts. 
 
-<img src="static/Slack_alert_elementary.png" width="400"/>
+<img align="center" style="max-width:300px;" src="static/how_elementary_works.png">
 
 ## Community & Support
 
@@ -73,10 +83,23 @@ For additional information and help, you can use one of these channels:
 
 ## **Integrations**
 
+* [x] **dbt core (>=1.0.0)** ![](static/dbt-16.png)
+* [x] **dbt cloud**  ![](static/dbt-16.png)
+
+**Data warehouses:**
 * [x] **Snowflake** ![](static/snowflake-16.png) 
-* [x] **BigQuery**  ![](static/bigquery-16.png) 
+* [x] **BigQuery**  ![](static/bigquery-16.svg) 
 * [x] **Redshift**  ![](static/redshift-16.png)
-* [x] **Databricks**  ![](static/databricks-16.png)
+* [x] **Databricks SQL**  ![](static/databricks-16.png)
+
+**Operations:**
+
+* [x] **Slack** ![](static/slack-16.png)
+* [x] **GitHub Actions**  ![](static/github-actions-16.png)
+* [x] **Amazon S3**  ![](static/s3-16.svg)
+* [x] **Google Cloud Storage**  ![](static/gcs-16.png)
+
+
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub issue](https://github.com/elementary-data/elementary-lineage/issues/new).
 
@@ -88,6 +111,37 @@ Thank you :orange_heart: Whether it’s a bug fix, new feature, or additional do
 Check out the [contributions guide](https://docs.elementary-data.com/general/contributions) and [open issues](https://github.com/elementary-data/elementary/issues). 
 
 
-## **License**
+**Elementary contributors: ✨**
 
-Elementary is licensed under Apache License 2.0. See the [LICENSE](https://github.com/elementary-data/elementary/blob/master/LICENSE) file for licensing information.
+[//]: contributor-faces
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<a href="https://github.com/oravi"><img src="https://avatars.githubusercontent.com/u/4517234?v=4" width="50" height="50" alt=""/></a> 
+<a href="https://github.com/elongl"><img src="https://avatars.githubusercontent.com/u/30181361?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Maayan-s"><img src="https://avatars.githubusercontent.com/u/22072028?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/IDoneShaveIt"><img src="https://avatars.githubusercontent.com/u/48473443?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hahnbeelee"><img src="https://avatars.githubusercontent.com/u/55263191?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/seanglynn-thrive"><img src="https://avatars.githubusercontent.com/u/93200565?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hanywang2"><img src="https://avatars.githubusercontent.com/u/44352119?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Nic3Guy"><img src="https://avatars.githubusercontent.com/u/17640648?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/yu-iskw"><img src="https://avatars.githubusercontent.com/u/1523515?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/nimrodne"><img src="https://avatars.githubusercontent.com/u/12689357?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hanrok"><img src="https://avatars.githubusercontent.com/u/24649215?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/shahafa"><img src="https://avatars.githubusercontent.com/u/904848?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/aaron-westlake"><img src="https://avatars.githubusercontent.com/u/99689538?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/YashPimple"><img src="https://avatars.githubusercontent.com/u/97302447?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Aylr"><img src="https://avatars.githubusercontent.com/u/928247?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/dorazouri"><img src="https://avatars.githubusercontent.com/u/17954776?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/ronmorgen1"><img src="https://avatars.githubusercontent.com/u/86912787?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Ecalzo"><img src="https://avatars.githubusercontent.com/u/44735669?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/civitaspo"><img src="https://avatars.githubusercontent.com/u/4525500?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/fredmny"><img src="https://avatars.githubusercontent.com/u/27257093?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/GtheSheep"><img src="https://avatars.githubusercontent.com/u/13685708?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/IrinaSel"><img src="https://avatars.githubusercontent.com/u/9607710?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/jtalmi"><img src="https://avatars.githubusercontent.com/u/7266609?v=4" width="50" height="50" alt=""/></a>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
