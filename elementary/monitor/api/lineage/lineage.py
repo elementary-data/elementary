@@ -65,7 +65,7 @@ class LineageAPI(APIClient):
         return dags
 
     def _get_nodes_depends_on_nodes(
-            self, exclude_elementary_models: bool = False
+        self, exclude_elementary_models: bool = False
     ) -> List[NodeDependsOnNodesSchema]:
         nodes_depends_on_nodes = []
         nodes_depends_on_nodes_results = self.dbt_runner.run_operation(
@@ -74,7 +74,7 @@ class LineageAPI(APIClient):
         )
         if nodes_depends_on_nodes_results:
             for node_depends_on_nodes_result in json.loads(
-                    nodes_depends_on_nodes_results[0]
+                nodes_depends_on_nodes_results[0]
             ):
                 nodes_depends_on_nodes.append(
                     NodeDependsOnNodesSchema(
@@ -91,7 +91,7 @@ class LineageAPI(APIClient):
 
     @staticmethod
     def _convert_depends_on_node_to_lineage_node(
-            nodes_depends_on_nodes: List[NodeDependsOnNodesSchema],
+        nodes_depends_on_nodes: List[NodeDependsOnNodesSchema],
     ) -> List[LineageNodeSchema]:
         return [
             LineageNodeSchema(type=node.type, id=node.unique_id)

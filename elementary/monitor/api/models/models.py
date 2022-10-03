@@ -35,7 +35,7 @@ class ModelsAPI(APIClient):
             macro_args={
                 "days_back": days_back,
                 "exclude_elementary": exclude_elementary_models,
-            }
+            },
         )
         model_run_dicts = (
             json.loads(run_operation_response[0]) if run_operation_response else []
