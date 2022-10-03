@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Format
         if: !startsWith(github.head_ref, 'format-patches') && github.event.pull_request.head.repo.full_name == github.repository
@@ -24,7 +24,7 @@ jobs:
           options: ""
           src: "elementary"
 
-      - name: Create Pull Request
+      - name: Create pull request
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: Python Formatting fixes
