@@ -1,16 +1,17 @@
 from datetime import datetime, timezone
-from dateutil import tz
 from typing import Optional
+
+from dateutil import tz
 
 MILLISECONDS_IN_SEC = 1000
 MILLISECONDS_IN_MIN = 1000 * 60
 MILLISECONDS_IN_HOUR = 1000 * 60 * 60
 
-TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def convert_utc_time_to_timezone(
-    utc_time: "datetime", timezone: Optional[str] = None
+        utc_time: "datetime", timezone: Optional[str] = None
 ) -> "datetime":
     from_zone = tz.tzutc()
     to_zone = tz.gettz(timezone) if timezone else tz.tzlocal()
@@ -18,7 +19,7 @@ def convert_utc_time_to_timezone(
     return utc_time.astimezone(to_zone)
 
 
-def get_now_utc_str(format: str = TIME_FORMAT) -> str:
+def get_now_utc_str(format: str = DATETIME_FORMAT) -> str:
     return datetime.utcnow().strftime(format)
 
 
@@ -27,15 +28,21 @@ def get_now_utc_iso_format() -> str:
 
 
 def format_milliseconds(duration: int) -> str:
-
     seconds = int((duration / MILLISECONDS_IN_SEC) % 60)
     minutes = int((duration / MILLISECONDS_IN_MIN) % 60)
     hours = int(duration / MILLISECONDS_IN_HOUR)
 
     remaining_milliseconds = duration - (
-        hours * MILLISECONDS_IN_HOUR
-        + minutes * MILLISECONDS_IN_MIN
-        + seconds * MILLISECONDS_IN_SEC
+            hours * MILLISECONDS_IN_HOUR
+            + minutes * MILLISECONDS_IN_MIN
+            + seconds * MILLISECONDS_IN_SEC
     )
 
     return f"{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms"
+
+
+def try_parse_time(isoformat_datetime: str) -> str:
+    try:
+        return datetime.fromisoformat(isoformat_datetime).strftime(DATETIME_FORMAT)
+    except ValueError:
+        return isoformat_datetime

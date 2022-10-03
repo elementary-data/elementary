@@ -20,13 +20,23 @@
     {% set alerts_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set new_alerts = [] %}
     {% for alert_dict in alerts_dicts %}
-        {% set new_alert_dict = {'id': alert_dict['alert_id'],
-                                 'unique_id': alert_dict['unique_id'],
-                                 'detected_at': alert_dict['detected_at'],
-                                 'max_loaded_at': alert_dict['max_loaded_at'],
-                                 'status': alert_dict['status'],
-                                 'owners': elementary.insensitive_get_dict_value(model_result_alert_dict, 'owners'),
-                                 'tags': elementary.insensitive_get_dict_value(model_result_alert_dict, 'tags')
+        {% set new_alert_dict = {'id': alert_dict.get('alert_id'),
+                                 'unique_id': alert_dict.get('unique_id'),
+                                 'detected_at': alert_dict.get('detected_at'),
+                                 'snapshotted_at': alert_dict.get('snapshotted_at'),
+                                 'max_loaded_at': alert_dict.get('max_loaded_at'),
+                                 'max_loaded_at_time_ago_in_s': alert_dict.get('max_loaded_at_time_ago_in_s'),
+                                 'database_name': alert_dict.get('database_name'),
+                                 'schema_name': alert_dict.get('schema_name'),
+                                 'source_name': alert_dict.get('source_name'),
+                                 'identifier': alert_dict.get('identifier'),
+                                 'freshness_error_after': alert_dict.get('freshness_error_after'),
+                                 'freshness_warn_after': alert_dict.get('freshness_warn_after'),
+                                 'freshness_filter': alert_dict.get('freshness_filter'),
+                                 'status': alert_dict.get('status'),
+                                 'owners': alert_dict.get('owner'),
+                                 'path': alert_dict.get('path'),
+                                 'tags': alert_dict.get('tags')
                                 } %}
         {% do new_alerts.append(new_alert_dict) %}
     {% endfor %}
