@@ -231,7 +231,7 @@ def report(
     file_path,
     disable_passed_test_metrics,
     open_browser,
-    exclude_elementary_models,
+    exclude_elementary_models
 ):
     """
     Generate a local report of your warehouse.
