@@ -56,7 +56,12 @@ class SourceFreshnessAlert(Alert):
             ],
             divider=True,
         )
-        if self.status == "error":
+        if self.status == "runtime error":
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f"*Error Message*\nFailed to calculate the source freshness.",
+            )
+        else:
             self._add_fields_section_to_slack_msg(
                 slack_message,
                 [
@@ -70,11 +75,6 @@ class SourceFreshnessAlert(Alert):
                     f"*Sampled At*\n{self.snapshotted_at}",
                 ],
                 divider=True,
-            )
-        elif self.status == "runtime error":
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Error Message*\nFailed to calculate the source freshness.",
             )
         self._add_fields_section_to_slack_msg(
             slack_message,
