@@ -42,6 +42,8 @@ class SourceFreshnessAlert(Alert):
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
+        elif self.status == "runtime error":
+            icon = ":no_entry:"
         slack_message = {"attachments": [{"blocks": []}]}
         self._add_text_section_to_slack_msg(
             slack_message, f"{icon} *dbt source freshness alert*"
