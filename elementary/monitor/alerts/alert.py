@@ -39,7 +39,7 @@ class Alert:
                 utc_time=detected_at_utc, timezone=self.timezone
             ).strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
-            logger.error(f'Failed to parse "detect_at" field.')
+            logger.error(f'Failed to parse "detected_at" field.')
         self.database_name = database_name
         self.schema_name = schema_name
         self.owners = prettify_json_str_set(owners)
