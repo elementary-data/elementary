@@ -216,8 +216,8 @@ def monitor(
 @click.option(
     "--exclude-elementary-models",
     type=bool,
-    default=False,
-    help="Exclude Elementary's own models in the report.",
+    default=True,
+    help="Exclude Elementary's internal models from the report.",
 )
 @click.pass_context
 def report(
@@ -352,8 +352,8 @@ def report(
 @click.option(
     "--exclude-elementary-models",
     type=bool,
-    default=False,
-    help="Exclude Elementary's own models in the report.",
+    default=True,
+    help="Exclude Elementary's internal models from the report.",
 )
 @click.pass_context
 def send_report(
