@@ -1,4 +1,4 @@
-{% macro get_models() %}
+{% macro get_models(exclude_elementary=false) %}
     {% set dbt_models_relation = ref('elementary', 'dbt_models') %}
     {%- if elementary.relation_exists(dbt_models_relation) -%}
         --{# TODO: should we group by #}
@@ -17,6 +17,9 @@
                   description,
                   original_path as full_path
                 from {{ dbt_models_relation }}
+                {% if exclude_elementary %}
+                  where package_name != 'elementary'
+                {% endif %}
               )
 
              select * from dbt_artifacts_models

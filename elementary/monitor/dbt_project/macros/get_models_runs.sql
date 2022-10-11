@@ -1,4 +1,4 @@
-{%- macro get_models_runs(days_back = 7) -%}
+{%- macro get_models_runs(days_back = 7, exclude_elementary=false) -%}
     {% set models_runs_query %}
         with model_runs as (
             select * from {{ ref('elementary', 'model_run_results') }}
@@ -19,6 +19,9 @@
             generated_at
         from model_runs
         where {{ elementary.datediff(elementary.cast_as_timestamp('generated_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
+        {% if exclude_elementary %}
+          and package_name != 'elementary'
+        {% endif %}
         order by generated_at
     {% endset %}
     {% set models_runs_agate = run_query(models_runs_query) %}

@@ -27,9 +27,15 @@ SQL_FILE_EXTENSION = ".sql"
 
 
 class ModelsAPI(APIClient):
-    def get_models_runs(self, days_back: Optional[int] = 7) -> List[ModelRunsSchema]:
+    def get_models_runs(
+        self, days_back: Optional[int] = 7, exclude_elementary_models: bool = False
+    ) -> List[ModelRunsSchema]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_models_runs", macro_args=dict(days_back=days_back)
+            macro_name="get_models_runs",
+            macro_args={
+                "days_back": days_back,
+                "exclude_elementary": exclude_elementary_models,
+            },
         )
         model_run_dicts = (
             json.loads(run_operation_response[0]) if run_operation_response else []
@@ -91,8 +97,13 @@ class ModelsAPI(APIClient):
         seccuss_runs = len([run for run in runs if run["status"] == "success"])
         return TotalsModelRunsSchema(errors=error_runs, success=seccuss_runs)
 
-    def get_models(self) -> Dict[str, NormalizedModelSchema]:
-        models_results = self.dbt_runner.run_operation(macro_name="get_models")
+    def get_models(
+        self, exclude_elementary_models: bool = False
+    ) -> Dict[str, NormalizedModelSchema]:
+        models_results = self.dbt_runner.run_operation(
+            macro_name="get_models",
+            macro_args={"exclude_elementary": exclude_elementary_models},
+        )
         models = dict()
         if models_results:
             for model_result in json.loads(models_results[0]):

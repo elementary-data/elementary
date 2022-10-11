@@ -1,7 +1,8 @@
 import json
-from typing import List
-import networkx as nx
 from collections import defaultdict
+from typing import List
+
+import networkx as nx
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -16,9 +17,11 @@ class LineageAPI(APIClient):
     def __init__(self, dbt_runner: DbtRunner):
         super().__init__(dbt_runner)
 
-    def get_lineage(self) -> LineageSchema:
+    def get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         lineage_graph = nx.DiGraph()
-        nodes_depends_on_nodes = self._get_nodes_depends_on_nodes()
+        nodes_depends_on_nodes = self._get_nodes_depends_on_nodes(
+            exclude_elementary_models
+        )
         for node_depends_on_nodes in nodes_depends_on_nodes:
             lineage_graph.add_edges_from(
                 [
@@ -61,10 +64,13 @@ class LineageAPI(APIClient):
             )
         return dags
 
-    def _get_nodes_depends_on_nodes(self) -> List[NodeDependsOnNodesSchema]:
+    def _get_nodes_depends_on_nodes(
+        self, exclude_elementary_models: bool = False
+    ) -> List[NodeDependsOnNodesSchema]:
         nodes_depends_on_nodes = []
         nodes_depends_on_nodes_results = self.dbt_runner.run_operation(
-            macro_name="get_nodes_depends_on_nodes"
+            macro_name="get_nodes_depends_on_nodes",
+            macro_args={"exclude_elementary": exclude_elementary_models},
         )
         if nodes_depends_on_nodes_results:
             for node_depends_on_nodes_result in json.loads(

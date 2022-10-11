@@ -213,6 +213,12 @@ def monitor(
     default=True,
     help="Whether to open the report in the browser.",
 )
+@click.option(
+    "--exclude-elementary-models",
+    type=bool,
+    default=True,
+    help="Exclude Elementary's internal models from the report.",
+)
 @click.pass_context
 def report(
     ctx,
@@ -225,6 +231,7 @@ def report(
     file_path,
     disable_passed_test_metrics,
     open_browser,
+    exclude_elementary_models,
 ):
     """
     Generate a local report of your warehouse.
@@ -243,6 +250,7 @@ def report(
             test_runs_amount=executions_limit,
             file_path=file_path,
             disable_passed_test_metrics=disable_passed_test_metrics,
+            exclude_elementary_models=exclude_elementary_models,
             should_open_browser=open_browser,
         )
         anonymous_tracking.track_cli_end(
@@ -341,6 +349,12 @@ def report(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
 )
+@click.option(
+    "--exclude-elementary-models",
+    type=bool,
+    default=True,
+    help="Exclude Elementary's internal models from the report.",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -363,6 +377,7 @@ def send_report(
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
+    exclude_elementary_models,
 ):
     """
     Send the report to an external platform.
@@ -412,6 +427,7 @@ def send_report(
             disable_passed_test_metrics=disable_passed_test_metrics,
             file_path=local_file_path,
             should_open_browser=False,
+            exclude_elementary_models=exclude_elementary_models,
         )
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(
