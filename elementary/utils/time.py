@@ -11,8 +11,8 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def convert_utc_time_to_timezone(
-    utc_time: "datetime", timezone: Optional[str] = None
-) -> "datetime":
+    utc_time: datetime, timezone: Optional[str] = None
+) -> datetime:
     from_zone = tz.tzutc()
     to_zone = tz.gettz(timezone) if timezone else tz.tzlocal()
     utc_time = utc_time.replace(tzinfo=from_zone)
@@ -41,8 +41,13 @@ def format_milliseconds(duration: int) -> str:
     return f"{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms"
 
 
-def try_parse_time(isoformat_datetime: str) -> str:
+def datetime_utc_str_to_timezone(
+    isoformat_datetime: str, timezone: Optional[str]
+) -> str:
     try:
-        return datetime.fromisoformat(isoformat_datetime).strftime(DATETIME_FORMAT)
+        parsed_time = datetime.fromisoformat(isoformat_datetime)
+        return convert_utc_time_to_timezone(parsed_time, timezone).strftime(
+            DATETIME_FORMAT
+        )
     except ValueError:
         return isoformat_datetime

@@ -4,7 +4,7 @@ from typing import Optional
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
-from elementary.utils.time import try_parse_time
+from elementary.utils.time import datetime_utc_str_to_timezone
 
 logger = get_logger(__name__)
 
@@ -28,8 +28,16 @@ class SourceFreshnessAlert(Alert):
     ) -> None:
         super().__init__(**kwargs)
         self.unique_id = unique_id
-        self.snapshotted_at = try_parse_time(snapshotted_at) if snapshotted_at else None
-        self.max_loaded_at = try_parse_time(max_loaded_at) if max_loaded_at else None
+        self.snapshotted_at = (
+            datetime_utc_str_to_timezone(snapshotted_at, self.timezone)
+            if snapshotted_at
+            else None
+        )
+        self.max_loaded_at = (
+            datetime_utc_str_to_timezone(max_loaded_at, self.timezone)
+            if max_loaded_at
+            else None
+        )
         self.max_loaded_at_time_ago_in_s = max_loaded_at_time_ago_in_s
         self.source_name = source_name
         self.identifier = identifier
