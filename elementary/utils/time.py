@@ -41,7 +41,7 @@ def format_milliseconds(duration: int) -> str:
     return f"{hours}h:{minutes}m:{seconds}s:{remaining_milliseconds}ms"
 
 
-def datetime_utc_str_to_timezone(
+def convert_datetime_utc_str_to_timezone_str(
     isoformat_datetime: str, timezone: Optional[str]
 ) -> str:
     try:
@@ -49,5 +49,5 @@ def datetime_utc_str_to_timezone(
         return convert_utc_time_to_timezone(parsed_time, timezone).strftime(
             DATETIME_FORMAT
         )
-    except ValueError:
+    except Exception:
         return isoformat_datetime

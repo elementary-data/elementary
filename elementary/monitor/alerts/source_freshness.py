@@ -4,7 +4,7 @@ from typing import Optional
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
-from elementary.utils.time import datetime_utc_str_to_timezone
+from elementary.utils.time import convert_datetime_utc_str_to_timezone_str
 
 logger = get_logger(__name__)
 
@@ -24,17 +24,18 @@ class SourceFreshnessAlert(Alert):
         freshness_warn_after: str,
         freshness_filter: str,
         path: str,
+        error: str,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.unique_id = unique_id
         self.snapshotted_at = (
-            datetime_utc_str_to_timezone(snapshotted_at, self.timezone)
+            convert_datetime_utc_str_to_timezone_str(snapshotted_at, self.timezone)
             if snapshotted_at
             else None
         )
         self.max_loaded_at = (
-            datetime_utc_str_to_timezone(max_loaded_at, self.timezone)
+            convert_datetime_utc_str_to_timezone_str(max_loaded_at, self.timezone)
             if max_loaded_at
             else None
         )
@@ -45,6 +46,7 @@ class SourceFreshnessAlert(Alert):
         self.freshness_warn_after = freshness_warn_after
         self.freshness_filter = freshness_filter
         self.path = path
+        self.error = error
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         icon = ":small_red_triangle:"
@@ -67,7 +69,8 @@ class SourceFreshnessAlert(Alert):
         if self.status == "runtime error":
             self._add_text_section_to_slack_msg(
                 slack_message,
-                f"*Error Message*\nFailed to calculate the source freshness.",
+                f"*Error Message*\nFailed to calculate the source freshness."
+                f"```{self.error}```",
             )
         else:
             self._add_fields_section_to_slack_msg(
