@@ -4,14 +4,8 @@
         with new_alerts as (
             select * from {{ ref('alerts_source_freshness') }}
             where alert_sent = false and {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
-        ),
-        sources as (
-            select * from {{ ref('elementary', 'dbt_sources') }}
         )
-
-        select *
-        from new_alerts
-        join sources on new_alerts.unique_id = sources .unique_id
+        select * from new_alerts
     {% endset %}
 
     {% set alerts_agate = run_query(select_new_alerts_query) %}
