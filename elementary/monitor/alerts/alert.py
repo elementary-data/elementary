@@ -37,7 +37,7 @@ class Alert:
             self.detected_at_utc = detected_at_utc.strftime(DATETIME_FORMAT)
             self.detected_at = convert_utc_time_to_timezone(
                 utc_time=detected_at_utc, timezone=self.timezone
-            ).strftime("%Y-%m-%d %H:%M:%S")
+            ).strftime(DATETIME_FORMAT)
         except Exception:
             logger.error(f'Failed to parse "detected_at" field.')
         self.database_name = database_name
