@@ -18,6 +18,7 @@ from elementary.monitor import dbt_project_utils
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert, ElementaryTestAlert
 from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
@@ -114,6 +115,9 @@ class DataMonitoring:
     def _send_alerts(self, alerts: Alerts):
         self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
         self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
+        self._send_alerts_to_slack(
+            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
+        )
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def run(

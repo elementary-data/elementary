@@ -6,6 +6,7 @@ from typing import TypeVar
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert, ElementaryTestAlert
 
 AlertType = TypeVar("AlertType")
@@ -28,17 +29,26 @@ class AlertsQueryResult(Generic[AlertType]):
 class Alerts:
     tests: AlertsQueryResult[TestAlert]
     models: AlertsQueryResult[ModelAlert]
+    source_freshnesses: AlertsQueryResult[SourceFreshnessAlert]
 
     @property
     def count(self) -> int:
-        return self.models.count + self.tests.count
+        return self.models.count + self.tests.count + self.source_freshnesses.count
 
     @property
     def malformed_count(self):
-        return len(self.models.malformed_alerts) + len(self.tests.malformed_alerts)
+        return (
+            len(self.models.malformed_alerts)
+            + len(self.tests.malformed_alerts)
+            + len(self.source_freshnesses.malformed_alerts)
+        )
 
     def get_all(self) -> List[Alert]:
-        return self.models.get_all() + self.tests.get_all()
+        return (
+            self.models.get_all()
+            + self.tests.get_all()
+            + self.source_freshnesses.get_all()
+        )
 
     def get_elementary_test_count(self):
         elementary_test_count = defaultdict(int)

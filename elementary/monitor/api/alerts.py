@@ -8,6 +8,7 @@ from elementary.config.config import Config
 from elementary.monitor.alerts.alerts import AlertsQueryResult, Alerts
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
@@ -27,6 +28,7 @@ class AlertsAPI(APIClient):
         return Alerts(
             tests=self._query_test_alerts(days_back),
             models=self._query_model_alerts(days_back),
+            source_freshnesses=self._query_source_freshness_alerts(days_back),
         )
 
     def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
@@ -47,6 +49,18 @@ class AlertsAPI(APIClient):
                 "macro_args": {"days_back": days_back},
             },
             ModelAlert,
+        )
+
+    def _query_source_freshness_alerts(
+        self, days_back: int
+    ) -> AlertsQueryResult[SourceFreshnessAlert]:
+        logger.info("Querying source freshness alerts.")
+        return self._query_alert_type(
+            {
+                "macro_name": "get_new_source_freshness_alerts",
+                "macro_args": {"days_back": days_back},
+            },
+            SourceFreshnessAlert,
         )
 
     def _query_alert_type(
