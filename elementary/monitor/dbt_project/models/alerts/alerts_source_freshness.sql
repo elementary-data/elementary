@@ -8,9 +8,9 @@
 }}
 
 
-{% set error_source_freshness_relation = adapter.get_relation(this.database, this.schema, 'alerts_dbt_source_freshness') %}
-{% if error_source_freshness_relation %}
-    select *, false as alert_sent from {{ error_source_freshness_relation }}
+{% set alerts_source_freshness_relation = adapter.get_relation(this.database, this.schema, 'alerts_dbt_source_freshness') %}
+{% if alerts_source_freshness_relation %}
+    select *, false as alert_sent from {{ alerts_source_freshness_relation }}
     {% if is_incremental() %}
         {{ get_new_alerts_where_clause(this) }}
     {% endif %}
