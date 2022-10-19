@@ -33,6 +33,7 @@ on:
         type: boolean
         required: false
         default: true
+        description: Whether to clean test environment
 
   workflow_call:
     inputs:
