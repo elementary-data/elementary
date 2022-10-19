@@ -20,7 +20,7 @@
         from model_runs
         where {{ elementary.datediff(elementary.cast_as_timestamp('generated_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         {% if exclude_elementary %}
-          and package_name != 'elementary'
+          and unique_id not like 'model.elementary.%'
         {% endif %}
         order by generated_at
     {% endset %}
