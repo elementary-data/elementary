@@ -1,7 +1,7 @@
 {% macro get_tests_sample_data(days_back = 7, metrics_sample_limit = 5, disable_passed_test_metrics = false) %}
     {% set select_test_results %}
         with test_results as (
-            select * from {{ ref('elementary', 'current_tests_run_results') }}
+            select * from {{ ref('elementary', 'elementary_test_results') }}
         ),
 
         tests_in_last_chosen_days as (

@@ -14,15 +14,27 @@ Elementary is an open-source data observability solution for data & analytics en
 Monitor your dbt project and data in minutes, and be the first to know of data issues. Gain immediate
 visibility, detect data issues, send actionable alerts, and understand the impact and root cause.
 
+<Frame>
+  <img
+    src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
+    alt="Demo"
+  />
+</Frame>
+
+
 ## Key features
 
 - **Data observability report ([live demo](https://storage.googleapis.com/elementary_static/elementary_demo.html))**
 
-  Triage anomalies and dbt tests in a UI that visualizes results and provides all the information you need in a single place.
+  Generate a data observability report, host it or share with your team.
 
 - **Data anomaly detection as dbt tests**
 
-  Monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection. Elementary data monitors are configured and executed like native tests in dbt your project!
+  Monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection. Elementary data monitors are configured and executed like native tests in dbt your project.
+
+- **Models performance**
+
+  Visibility of execution times, easy detection of degradation and bottlenecks.
 
 - **dbt artifacts and run results**
 
@@ -36,10 +48,6 @@ visibility, detect data issues, send actionable alerts, and understand the impac
 
   Inspect upstream and downstream dependencies to understand impact and root cause of data issues.
 
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304880/elementary/Demo-2-screens_k98bdr.gif"
-  alt="Demo"
-/>
 
 ## How it works?
 
@@ -71,12 +79,17 @@ Check out the [contributions guide](./general/contributions).
 
 - dbt Core (1.0.0 and above)
 - dbt Cloud
-- Slack
 
 Data warehouses:
 - Snowflake 
 - BigQuery
 - Redshift
 - Databricks SQL
+
+Operations:
+- Slack
+- GitHub Actions
+- Amazon S3
+- Google Cloud Storage
 
 Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [Github](https://github.com/elementary-data/elementary) issue.

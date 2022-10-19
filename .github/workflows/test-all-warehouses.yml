@@ -5,32 +5,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  snowflake:
+  test:
+    strategy:
+      matrix:
+        warehouse-type: [ snowflake, bigquery, redshift, databricks, spark ]
     uses: ./.github/workflows/test-warehouse.yml
     with:
-      warehouse-type: snowflake
-    secrets: inherit
-
-  bigquery:
-    uses: ./.github/workflows/test-warehouse.yml
-    with:
-      warehouse-type: bigquery
-    secrets: inherit
-
-  redshift:
-    uses: ./.github/workflows/test-warehouse.yml
-    with:
-      warehouse-type: redshift
-    secrets: inherit
-
-  databricks:
-    uses: ./.github/workflows/test-warehouse.yml
-    with:
-      warehouse-type: databricks
-    secrets: inherit
-
-  spark:
-    uses: ./.github/workflows/test-warehouse.yml
-    with:
-      warehouse-type: spark
+      warehouse-type: ${{ matrix.warehouse-type }}
     secrets: inherit

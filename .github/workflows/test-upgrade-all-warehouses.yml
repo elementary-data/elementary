@@ -1,0 +1,13 @@
+name: Test upgrade all warehouse platforms
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        warehouse-type: [ snowflake, bigquery, redshift, databricks, spark ]
+    uses: ./.github/workflows/test-upgrade-warehouse.yml
+    with:
+      warehouse-type: ${{ matrix.warehouse-type }}
+    secrets: inherit
