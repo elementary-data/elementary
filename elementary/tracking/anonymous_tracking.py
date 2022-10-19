@@ -117,6 +117,7 @@ class AnonymousTracking:
     ) -> None:
         props = {
             "exception_type": str(type(exc)),
+            "exception_content": str(exc),
             "module_name": module_name,
             "command": command,
             "version": get_package_version(),
