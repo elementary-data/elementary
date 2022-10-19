@@ -29,6 +29,10 @@ on:
         required: false
         default: true
         description: Whether to run E2E tests
+      clear-tests:
+        type: boolean
+        required: false
+        default: true
 
   workflow_call:
     inputs:
