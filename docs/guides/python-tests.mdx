@@ -162,7 +162,10 @@ which we returned a `DataFrame`.
 - `elementary.python` dbt test:
     - `code_macro: str`: Name of the macro that returns the Python code.
     - `macro_args: dict`: Arguments that are supplied to the macro - `{{ code_macro(macro_args) }}`.
-    - `packages: list[str]`: PyPI package requirements.
+    - All available configuration in Python models such as:
+      - `packages: list[str]`: PyPI package requirements.
+      - `submission_method: str`: `cluster` or `serverless` for BigQuery.
+      - ...
 - `def test(model_df, ref, session)` Python function:
     - Arguments
         - `model_df: DataFrame`: The model's `DataFrame` object.
