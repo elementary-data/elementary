@@ -5,6 +5,7 @@ on:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         warehouse-type: [ snowflake, bigquery, redshift, databricks, spark ]
     uses: ./.github/workflows/test-upgrade-warehouse.yml
