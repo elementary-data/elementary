@@ -14,11 +14,11 @@ the [Python models documentation](https://docs.getdbt.com/docs/building-a-dbt-pr
 
 ## What about tests?
 
-Following this logic, we'd also like to be able to test our data using those powerful tools and the convenient Python
+Just like with models, we'd also like to be able to test our data using those powerful tools and the convenient Python
 runtime.
 Certain problems such as validating JSONs or comparing tables become tremendously easier to solve.
-Currently, dbt doesn't provide an out-of-the-box mechanism to run tests using Python, but using dbt's building blocks,
-Elementary now has the ability of doing so.
+Currently, dbt doesn't provide an out-of-the-box mechanism to run tests using Python. Elementary now provides the
+ability to do so using dbt's building blocks.
 
 ## Elementary Python tests
 
@@ -29,7 +29,7 @@ their data.
 
 Let's start with a basic example and proceed gradually to show the full potential of Python tests.
 
-A test is defined like any other dbt test.
+A Python test is defined like any other dbt test.
 
 ```yaml models/schema.yml
   - name: orders
@@ -38,7 +38,7 @@ A test is defined like any other dbt test.
           code_macro: check_undelivered_orders
 ```
 
-Then, we define a macro under `macros/<macro>.sql` that contains the Python code.
+Then, we need to define a macro under `macros/<macro>.sql` that contains the Python code the test will execute.
 
 ```python macros/py_check_undelivered_orders.sql
 {% macro check_undelivered_orders(args) %}
@@ -69,9 +69,9 @@ You can return either of the following data types:
 - `bool`: Whether the test passed (`True`) or failed (`False`).
 
 In the example above, the test filters out rows that their `ORDER_STATUS` column is not `delivered` and returns the
-new `DataFrame`.
+new `DataFrame`. Let's move on to demonstrate Python's true power when it comes to testing.
 
-## Examples
+## Example use cases
 
 ### Comparing tables
 
@@ -114,18 +114,18 @@ If the `DataFrame` is not empty, the test will fail with the amount of failed re
 In this example we'll validate a JSON column according to a pre-defined schema.
 
 ```yaml models/schema.yml
-  - name: elementary_test_results
+  - name: login_events
     tests:
       - elementary.python:
           code_macro: validate_json
           macro_args:
-            schema: "{'type': 'object', 'properties': {'column_name': {'type': 'string'}}}"
-            column: test_params
+            schema: "{'type': 'object', 'properties': {'country': {'type': 'string'}}}"
+            column: geolocation_json
           packages: ['jsonschema']
 
 ```
 
-Here we'll be testing that the `column_name` that is provided in the `test_params` in the `elementary_test_results`
+Here we'll be testing that the `country` that is provided in the `geolocation_json` column in the `login_events`
 model is a `string`.
 
 ```python macros/py_validate_json.sql
@@ -182,10 +182,12 @@ which we returned a `DataFrame`.
 ## Setup
 
 Additional setup might be required depending on your warehouse.
-Given that Elementary's Python tests base on Python models' building blocks, the requirements are the same and can be found [here](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/python-models#specific-data-warehouses).
-
+Given that Elementary's Python tests base on Python models' building blocks, the requirements are the same and can be
+found [here](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/python-models#specific-data-warehouses)
+.
 
 ## Beta feature
 
-Running Python within the warehouse is a new feature in dbt and therefore there might be some bumps along the road.
-Please contact us in any of the mediums you find fit and we'll be glad to help.
+Running Python within the warehouse is a new feature in dbt and even newer in Elementary.
+Therefore, there might be some bumps along the road.
+Please contact us in any of the mediums you find fit, and we'll be glad to help.
