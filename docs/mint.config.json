@@ -46,7 +46,11 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "quickstart", "quickstart-cli"]
+      "pages": [
+        "introduction",
+        "quickstart",
+        "quickstart-cli"
+      ]
     },
     {
       "group": "Guides",
@@ -54,7 +58,8 @@
         "quickstart/generate-report-ui",
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
-        "guides/add-elementary-tests"
+        "guides/add-elementary-tests",
+        "guides/python-tests"
       ]
     },
     {
@@ -110,7 +115,7 @@
   },
   "analytics": {
     "ga4": {
-        "measurementId": "G-4DQN8YR4NH"
+      "measurementId": "G-4DQN8YR4NH"
     }
   }
 }
