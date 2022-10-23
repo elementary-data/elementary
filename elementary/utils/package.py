@@ -49,7 +49,9 @@ def check_dbt_pkg_compatible(current_dbt_pkg_ver: str):
     if relevant_py_pkg_index == -1:
         return
     dbt_pkg_range = compatibility_map[sorted_py_pkg_vers[relevant_py_pkg_index]]
-    incompatible_min = current_dbt_pkg_ver < dbt_pkg_range["min"]
+    incompatible_min = (
+        "min" in dbt_pkg_range and current_dbt_pkg_ver < dbt_pkg_range["min"]
+    )
     incompatible_max = (
         "max" in dbt_pkg_range and current_dbt_pkg_ver > dbt_pkg_range["max"]
     )
