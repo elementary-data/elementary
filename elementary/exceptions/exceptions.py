@@ -1,5 +1,7 @@
 import subprocess
 
+from packaging import version
+
 _QUICKSTART_CLI_ERR_MSG = (
     "Please refer for guidance - https://docs.elementary-data.com/quickstart-cli"
 )
@@ -48,3 +50,12 @@ class DbtCommandError(Error):
 
     def __init__(self, err: subprocess.CalledProcessError):
         super().__init__(f"Failed to run dbt command - {err.cmd}")
+
+
+class IncompatibleDbtPackageError(Error):
+    """Exception raised if Elementary's dbt package is incompatible with edr."""
+
+    def __init__(self, edr_version: version.Version, dbt_pkg_range: dict):
+        super().__init__(
+            f"edr version {edr_version} is only compatible with dbt package {dbt_pkg_range}."
+        )
