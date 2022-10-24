@@ -402,6 +402,7 @@ class DataMonitoring:
             return "<elementary_database>.<elementary_schema>"
 
     def _check_dbt_package_compatibility(self):
+        logger.info("Checking compatibility between edr and Elementary's dbt package.")
         try:
             dbt_pkg_version = self.dbt_runner.run_operation(
                 "get_elementary_dbt_pkg_version", quiet=True
