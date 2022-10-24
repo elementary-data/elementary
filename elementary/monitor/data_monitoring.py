@@ -405,7 +405,7 @@ class DataMonitoring:
     def _check_dbt_package_compatibility(self):
         try:
             current_dbt_pkg_version = self.dbt_runner.run_operation(
-                "get_dbt_elementary_pkg_version", quiet=True
+                "get_elementary_dbt_pkg_version", quiet=True
             )[0]
             if not current_dbt_pkg_version:
                 logger.debug("Unable to get Elementary's dbt package version.")

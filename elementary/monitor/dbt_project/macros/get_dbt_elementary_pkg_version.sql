@@ -1,4 +1,4 @@
-{% macro get_dbt_elementary_pkg_version() %}
+{% macro get_elementary_dbt_pkg_version() %}
   {% set database, schema = elementary.target_database(), target.schema %}
   {% set information_relation = adapter.get_relation(database, schema, 'information') %}
   {% if not information_relation %}
