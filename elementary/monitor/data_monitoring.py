@@ -14,7 +14,6 @@ from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
-from elementary.exceptions.exceptions import IncompatibleDbtPackageError
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
@@ -404,14 +403,12 @@ class DataMonitoring:
 
     def _check_dbt_package_compatibility(self):
         try:
-            current_dbt_pkg_version = self.dbt_runner.run_operation(
+            dbt_pkg_version = self.dbt_runner.run_operation(
                 "get_elementary_dbt_pkg_version", quiet=True
             )[0]
-            if not current_dbt_pkg_version:
+            if not dbt_pkg_version:
                 logger.debug("Unable to get Elementary's dbt package version.")
                 return
-            package.check_dbt_pkg_compatible(current_dbt_pkg_version)
-        except IncompatibleDbtPackageError:
-            raise
+            package.check_dbt_pkg_compatible(dbt_pkg_version)
         except Exception as err:
             logger.error(f"Failed to check compatibility with dbt package: {err}.")
