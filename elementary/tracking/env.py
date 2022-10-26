@@ -22,6 +22,10 @@ def _is_github_actions():
     return "GITHUB_ACTIONS" in os.environ
 
 
+def _is_elementary_hosted():
+    return "ELEMENTARY_HOSTED" in os.environ
+
+
 def get_props():
     return {
         "os": platform.system(),
@@ -30,4 +34,5 @@ def get_props():
         "is_github_actions": _is_github_actions(),
         "python_version": platform.python_version(),
         "elementary_version": elementary.utils.package.get_package_version(),
+        "elementary_hosted": _is_elementary_hosted(),
     }
