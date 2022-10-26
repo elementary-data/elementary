@@ -54,7 +54,7 @@ class SourceFreshnessAlert(Alert):
             icon = ":warning:"
         elif self.status == "runtime error":
             icon = ":x:"
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = {"blocks": []}
         self._add_text_section_to_slack_msg(
             slack_message, f"{icon} *dbt source freshness alert*"
         )
@@ -109,4 +109,4 @@ class SourceFreshnessAlert(Alert):
         self._add_fields_section_to_slack_msg(
             slack_message, [f"*Status*\n{self.status}", f"*Path*\n{self.path}"]
         )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)

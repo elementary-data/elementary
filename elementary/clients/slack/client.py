@@ -1,6 +1,4 @@
-import json
 from abc import ABC, abstractmethod
-import time
 from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
@@ -63,14 +61,7 @@ class SlackWebClient(SlackClient):
         self, channel_name: str, message: SlackMessageSchema, **kwargs
     ) -> bool:
         try:
-            self.client.chat_postMessage(
-                channel=channel_name,
-                text=message.text,
-                blocks=json.dumps(message.blocks) if message.blocks else None,
-                attachments=json.dumps(message.attachments)
-                if message.attachments
-                else None,
-            )
+            self.client.chat_postMessage(channel=channel_name, **message.dict())
             return True
         except SlackApiError as err:
             if self._handle_send_err(err, channel_name):
@@ -174,12 +165,9 @@ class SlackWebhookClient(SlackClient):
         )
 
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
-        response = self.client.send(
-            text=message.text, blocks=message.blocks, attachments=message.attachments
-        )
+        response = self.client.send(**message.dict())
         if response.status_code == OK_STATUS_CODE:
             return True
-
         else:
             logger.error(
                 f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}"

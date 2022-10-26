@@ -41,7 +41,7 @@ class ModelAlert(Alert):
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = {"blocks": []}
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt model alert*")
         self._add_fields_section_to_slack_msg(
             slack_message,
@@ -68,13 +68,13 @@ class ModelAlert(Alert):
             self._add_text_section_to_slack_msg(
                 slack_message, f"*Error Message*\n```{self.message}```"
             )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)
 
     def _snapshot_to_slack(self):
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = {"blocks": []}
         self._add_text_section_to_slack_msg(
             slack_message, f"{icon} *dbt snapshot alert*"
         )
@@ -96,4 +96,4 @@ class ModelAlert(Alert):
         self._add_text_section_to_slack_msg(
             slack_message, f"*Error Message*\n```{self.message}```"
         )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)

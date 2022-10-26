@@ -82,7 +82,7 @@ class Alert:
         if divider:
             block.append({"type": "divider"})
         block.append({"type": "section", "fields": fields})
-        slack_message["attachments"][0]["blocks"].extend(block)
+        slack_message["blocks"].extend(block)
 
     @classmethod
     def _add_text_section_to_slack_msg(
@@ -100,4 +100,4 @@ class Alert:
                 },
             }
         )
-        slack_message["attachments"][0]["blocks"].extend(block)
+        slack_message["blocks"].extend(block)

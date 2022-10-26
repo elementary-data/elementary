@@ -101,7 +101,7 @@ class DbtTestAlert(TestAlert):
             icon = ":warning:"
         if is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(self.__dict__))
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = {"blocks": []}
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt test alert*")
         self._add_fields_section_to_slack_msg(
             slack_message,
@@ -149,7 +149,7 @@ class DbtTestAlert(TestAlert):
                 f"*Test Results Sample*\n`{self.test_rows_sample}`",
                 divider=True,
             )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)
 
     def to_test_alert_api_dict(self):
         test_runs = (
@@ -203,7 +203,7 @@ class ElementaryTestAlert(DbtTestAlert):
 
         if is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(self.__dict__))
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = {"blocks": []}
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
@@ -246,7 +246,7 @@ class ElementaryTestAlert(DbtTestAlert):
             self._add_text_section_to_slack_msg(
                 slack_message, f"*Test Parameters*\n`{self.test_params}`", divider=True
             )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)
 
     def to_test_alert_api_dict(self):
         test_params = try_load_json(self.test_params) or {}
