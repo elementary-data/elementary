@@ -29,8 +29,8 @@ jobs:
       - name: Get lastest release tag
         id: get-tag
         run: |
-          echo "::set-output name=py::$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')"
-          echo "::set-output name=dbt::$(curl -s https://api.github.com/repos/elementary-data/dbt-data-reliability/releases/latest | jq '.tag_name' | sed 's/\"//g')"
+          echo "py=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "dbt=$(curl -s https://api.github.com/repos/elementary-data/dbt-data-reliability/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
 
       - name: Confirm release tag
         run: |
