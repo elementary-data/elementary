@@ -1,6 +1,5 @@
 import json
 from abc import ABC, abstractmethod
-import time
 from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
@@ -191,13 +190,7 @@ class SlackWebhookClient(SlackClient):
             return False
 
     def send_file(self, **kwargs):
-        logger.error(
-            "Slack webhook does not support sending files."
-            "Please use Slack token instead (see documentation on how to configure a slack token)"
-        )
+        raise NotImplementedError
 
     def send_report(self, **kwargs):
-        logger.error(
-            "Slack webhook does not support sending reports."
-            "Please use Slack token instead (see documentation on how to configure a slack token)"
-        )
+        raise NotImplementedError
