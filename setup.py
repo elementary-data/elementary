@@ -43,7 +43,7 @@ setup(
         "google-cloud-storage<3.0.0",
         "ruamel.yaml<1.0.0",
         "alive-progress<=2.3.1",
-        "slack-sdk>=3.9.0,<3.18.0",
+        "slack-sdk>=3.19.2,<4.0.0",
         "pydantic<2.0",
         "networkx>=2.3,<3",
     ],

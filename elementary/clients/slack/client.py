@@ -80,9 +80,13 @@ class SlackWebClient(SlackClient):
     def send_file(
         self, channel_name: str, file_path: str, message: SlackMessageSchema
     ) -> bool:
+        channel_id = self._get_channel_id(channel_name)
         try:
-            self.client.files_upload(
-                channels=channel_name, initial_comment=message.text, file=file_path
+            self.client.files_upload_v2(
+                channel=channel_id,
+                initial_comment=message.text,
+                file=file_path,
+                request_file_info=False,
             )
             return True
         except SlackApiError as err:
