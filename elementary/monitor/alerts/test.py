@@ -106,7 +106,10 @@ class DbtTestAlert(TestAlert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt test alert*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"],
+            [
+                f"*Table*\n{self.table_full_name}",
+                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
+            ],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
@@ -211,7 +214,10 @@ class ElementaryTestAlert(DbtTestAlert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *{alert_title}*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"],
+            [
+                f"*Table*\n{self.table_full_name}",
+                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
+            ],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
