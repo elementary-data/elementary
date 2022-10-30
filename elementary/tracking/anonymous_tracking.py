@@ -5,14 +5,13 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-import posthog
-from pydantic import BaseModel
-
 import elementary.tracking.env
+import posthog
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.utils.package import get_package_version
+from pydantic import BaseModel
 
 logging.getLogger("posthog").disabled = True
 
@@ -30,6 +29,7 @@ class AnonymousTracking:
         self._env_props = None
         self.anonymous_user_id = None
         self.anonymous_warehouse = None
+        self.dbt_pkg_version = None
         self.config = config
         self.do_not_track = config.anonymous_tracking_enabled is False
         self.run_id = str(uuid.uuid4())
@@ -109,6 +109,7 @@ class AnonymousTracking:
             "execution_properties": execution_properties,
             "module_name": module_name,
             "command": command,
+            "dbt_pkg_version": self.dbt_pkg_version,
         }
         self.send_event("cli-end", properties=props)
 
@@ -120,6 +121,7 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
             "version": get_package_version(),
+            "dbt_pkg_version": self.dbt_pkg_version,
         }
         self.send_event("cli-exception", properties=props)
 

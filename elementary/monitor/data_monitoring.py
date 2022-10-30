@@ -47,15 +47,20 @@ class DataMonitoring:
     def __init__(
         self,
         config: Config,
+        tracking: AnonymousTracking,
         force_update_dbt_package: bool = False,
         send_test_message_on_success: bool = False,
     ):
         self.config = config
+        self.tracking = tracking
         self.dbt_runner = DbtRunner(
             dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target
         )
         self.execution_properties = {}
-        self._check_dbt_package_compatibility()
+        dbt_pkg_version = self.get_elementary_dbt_pkg_version()
+        tracking.dbt_pkg_version = dbt_pkg_version
+        if dbt_pkg_version:
+            self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
         self.slack_client = SlackClient.create_client(self.config)
         self.s3_client = S3Client.create_client(self.config)
@@ -160,7 +165,6 @@ class DataMonitoring:
 
     def generate_report(
         self,
-        tracking: AnonymousTracking,
         days_back: Optional[int] = None,
         test_runs_amount: Optional[int] = None,
         file_path: Optional[str] = None,
@@ -199,10 +203,10 @@ class DataMonitoring:
             output_data["model_runs_totals"] = model_runs_totals
             output_data["lineage"] = lineage.dict()
             output_data["tracking"] = {
-                "posthog_api_key": tracking.POSTHOG_PROJECT_API_KEY,
-                "report_generator_anonymous_user_id": tracking.anonymous_user_id,
-                "anonymous_warehouse_id": tracking.anonymous_warehouse.id
-                if tracking.anonymous_warehouse
+                "posthog_api_key": self.tracking.POSTHOG_PROJECT_API_KEY,
+                "report_generator_anonymous_user_id": self.tracking.anonymous_user_id,
+                "anonymous_warehouse_id": self.tracking.anonymous_warehouse.id
+                if self.tracking.anonymous_warehouse
                 else None,
             }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
@@ -401,15 +405,20 @@ class DataMonitoring:
             logger.error("Failed to parse Elementary's database and schema.")
             return "<elementary_database>.<elementary_schema>"
 
-    def _check_dbt_package_compatibility(self):
-        logger.info("Checking compatibility between edr and Elementary's dbt package.")
+    def get_elementary_dbt_pkg_version(self) -> Optional[str]:
         try:
             dbt_pkg_version = self.dbt_runner.run_operation(
                 "get_elementary_dbt_pkg_version", quiet=True
             )[0]
-            if not dbt_pkg_version:
-                logger.debug("Unable to get Elementary's dbt package version.")
-                return
+            return dbt_pkg_version or None
+        except Exception as err:
+            logger.debug(f"Unable to get Elementary's dbt package version: {err}.")
+            return None
+
+    @staticmethod
+    def _check_dbt_package_compatibility(dbt_pkg_version: str):
+        logger.info("Checking compatibility between edr and Elementary's dbt package.")
+        try:
             package.check_dbt_pkg_compatible(dbt_pkg_version)
         except Exception as err:
             logger.error(f"Failed to check compatibility with dbt package: {err}.")
