@@ -39,7 +39,7 @@ class Alert:
             detected_at_datetime = datetime.fromisoformat(detected_at)
             self.detected_at = detected_at_datetime.astimezone(tz.tzlocal())
             self.detected_at_utc = detected_at_datetime.astimezone(tz.UTC)
-            self.detected_at_utc_str =  self.detected_at_utc.strftime(DATETIME_FORMAT)
+            self.detected_at_utc_str = self.detected_at_utc.strftime(DATETIME_FORMAT)
             self.detected_at_str = self.detected_at.strftime(DATETIME_FORMAT)
         except Exception:
             logger.error(f'Failed to parse "detected_at" field.')
