@@ -1,7 +1,6 @@
 import sys
 
 import click
-
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring import DataMonitoring
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -171,6 +170,7 @@ def monitor(
         config.validate_monitor()
         data_monitoring = DataMonitoring(
             config=config,
+            tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
         )
@@ -243,7 +243,11 @@ def report(
     )
     try:
         config.validate_report()
-        data_monitoring = DataMonitoring(config, update_dbt_package)
+        data_monitoring = DataMonitoring(
+            config=config,
+            tracking=anonymous_tracking,
+            force_update_dbt_package=update_dbt_package,
+        )
         generated_report_successfully, _ = data_monitoring.generate_report(
             tracking=anonymous_tracking,
             days_back=days_back,
@@ -414,7 +418,9 @@ def send_report(
             else slack_file_name
         )
         data_monitoring = DataMonitoring(
-            config=config, force_update_dbt_package=update_dbt_package
+            config=config,
+            tracking=anonymous_tracking,
+            force_update_dbt_package=update_dbt_package,
         )
         command_succeeded = False
         (
