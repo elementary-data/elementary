@@ -1,7 +1,7 @@
 name: Test all warehouse platforms
 on:
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '0 1 * * *'
   workflow_dispatch:
 
 jobs:
