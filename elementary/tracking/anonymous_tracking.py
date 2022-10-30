@@ -5,13 +5,13 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-import elementary.tracking.env
 import posthog
+from pydantic import BaseModel
+
+import elementary.tracking.env
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
-from elementary.utils.package import get_package_version
-from pydantic import BaseModel
 
 logging.getLogger("posthog").disabled = True
 
@@ -26,10 +26,9 @@ class AnonymousTracking:
     POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
 
     def __init__(self, config: Config) -> None:
-        self._env_props = None
+        self._env_props = {}
         self.anonymous_user_id = None
         self.anonymous_warehouse = None
-        self.dbt_pkg_version = None
         self.config = config
         self.do_not_track = config.anonymous_tracking_enabled is False
         self.run_id = str(uuid.uuid4())
@@ -38,7 +37,7 @@ class AnonymousTracking:
     def init(self):
         try:
             posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
-            self._env_props = elementary.tracking.env.get_props()
+            self._env_props.update(elementary.tracking.env.get_props())
             self.anonymous_user_id = self._get_anonymous_user_id()
             self.anonymous_warehouse = self._get_anonymous_warehouse()
         except Exception:
@@ -109,7 +108,6 @@ class AnonymousTracking:
             "execution_properties": execution_properties,
             "module_name": module_name,
             "command": command,
-            "dbt_pkg_version": self.dbt_pkg_version,
         }
         self.send_event("cli-end", properties=props)
 
@@ -120,8 +118,6 @@ class AnonymousTracking:
             "exception_type": str(type(exc)),
             "module_name": module_name,
             "command": command,
-            "version": get_package_version(),
-            "dbt_pkg_version": self.dbt_pkg_version,
         }
         self.send_event("cli-exception", properties=props)
 
@@ -154,3 +150,6 @@ class AnonymousTracking:
             return AnonymousWarehouse(id=anonymous_warehouse_id, type=adapter_type)
         except Exception:
             return None
+
+    def set_env(self, key: str, value):
+        self._env_props[key] = value

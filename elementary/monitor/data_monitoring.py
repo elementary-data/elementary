@@ -58,7 +58,7 @@ class DataMonitoring:
         )
         self.execution_properties = {}
         dbt_pkg_version = self.get_elementary_dbt_pkg_version()
-        tracking.dbt_pkg_version = dbt_pkg_version
+        tracking.set_env("dbt_pkg_version", dbt_pkg_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
