@@ -105,7 +105,7 @@ class DbtTestAlert(TestAlert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt test alert*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at}"],
+            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at_str}"],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
@@ -167,8 +167,8 @@ class DbtTestAlert(TestAlert):
                 "column_name": self.column_name,
                 "test_name": self.test_name,
                 "test_display_name": self.test_display_name,
-                "latest_run_time": self.detected_at,
-                "latest_run_time_utc": self.detected_at_utc,
+                "latest_run_time": self.detected_at.isoformat(),
+                "latest_run_time_utc": self.detected_at_utc.isoformat(),
                 "latest_run_status": self.status,
                 "model_unique_id": self.model_unique_id,
                 "table_unique_id": self.table_full_name,
@@ -210,7 +210,7 @@ class ElementaryTestAlert(DbtTestAlert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *{alert_title}*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at}"],
+            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at_str}"],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
@@ -285,8 +285,8 @@ class ElementaryTestAlert(DbtTestAlert):
                 "column_name": self.column_name,
                 "test_name": self.test_name,
                 "test_display_name": self.test_display_name,
-                "latest_run_time": self.detected_at,
-                "latest_run_time_utc": self.detected_at_utc,
+                "latest_run_time": self.detected_at.isoformat(),
+                "latest_run_time_utc": self.detected_at_utc.isoformat(),
                 "latest_run_status": self.status,
                 "model_unique_id": self.model_unique_id,
                 "table_unique_id": self.table_full_name,

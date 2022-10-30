@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil import tz
 from typing import List, Optional
 
 from slack_sdk.models.blocks import SectionBlock
@@ -6,7 +7,7 @@ from slack_sdk.models.blocks import SectionBlock
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
-from elementary.utils.time import convert_utc_time_to_timezone, DATETIME_FORMAT
+from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
@@ -31,13 +32,15 @@ class Alert:
         self.elementary_database_and_schema = elementary_database_and_schema
         self.detected_at_utc = None
         self.detected_at = None
+        self.detected_at_utc_str = None
+        self.detected_at_str = None
         self.timezone = timezone
         try:
-            detected_at_utc = datetime.fromisoformat(detected_at)
-            self.detected_at_utc = detected_at_utc.strftime(DATETIME_FORMAT)
-            self.detected_at = convert_utc_time_to_timezone(
-                utc_time=detected_at_utc, timezone=self.timezone
-            ).strftime(DATETIME_FORMAT)
+            detected_at_datetime = datetime.fromisoformat(detected_at)
+            self.detected_at = detected_at_datetime.astimezone(tz.tzlocal())
+            self.detected_at_utc = detected_at_datetime.astimezone(tz.UTC)
+            self.detected_at_utc_str =  self.detected_at_utc.strftime(DATETIME_FORMAT)
+            self.detected_at_str = self.detected_at.strftime(DATETIME_FORMAT)
         except Exception:
             logger.error(f'Failed to parse "detected_at" field.')
         self.database_name = database_name
