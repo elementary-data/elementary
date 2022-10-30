@@ -1,6 +1,5 @@
 import json
 from abc import ABC, abstractmethod
-import time
 from typing import Optional, List
 
 from slack_sdk import WebClient, WebhookClient
@@ -80,9 +79,13 @@ class SlackWebClient(SlackClient):
     def send_file(
         self, channel_name: str, file_path: str, message: SlackMessageSchema
     ) -> bool:
+        channel_id = self._get_channel_id(channel_name)
         try:
-            self.client.files_upload(
-                channels=channel_name, initial_comment=message.text, file=file_path
+            self.client.files_upload_v2(
+                channel=channel_id,
+                initial_comment=message.text,
+                file=file_path,
+                request_file_info=False,
             )
             return True
         except SlackApiError as err:
@@ -187,13 +190,7 @@ class SlackWebhookClient(SlackClient):
             return False
 
     def send_file(self, **kwargs):
-        logger.error(
-            "Slack webhook does not support sending files."
-            "Please use Slack token instead (see documentation on how to configure a slack token)"
-        )
+        raise NotImplementedError
 
     def send_report(self, **kwargs):
-        logger.error(
-            "Slack webhook does not support sending reports."
-            "Please use Slack token instead (see documentation on how to configure a slack token)"
-        )
+        raise NotImplementedError

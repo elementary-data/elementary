@@ -32,7 +32,7 @@ def get_props():
         "is_docker": _is_docker(),
         "is_airflow": _is_airflow(),
         "is_github_actions": _is_github_actions(),
+        "is_elementary_hosted": _is_elementary_hosted(),
         "python_version": platform.python_version(),
         "elementary_version": elementary.utils.package.get_package_version(),
-        "elementary_hosted": _is_elementary_hosted(),
     }
