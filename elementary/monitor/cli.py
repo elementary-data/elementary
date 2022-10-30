@@ -249,7 +249,6 @@ def report(
             force_update_dbt_package=update_dbt_package,
         )
         generated_report_successfully, _ = data_monitoring.generate_report(
-            tracking=anonymous_tracking,
             days_back=days_back,
             test_runs_amount=executions_limit,
             file_path=file_path,
@@ -427,7 +426,6 @@ def send_report(
             generated_report_successfully,
             elementary_html_path,
         ) = data_monitoring.generate_report(
-            tracking=anonymous_tracking,
             days_back=days_back,
             test_runs_amount=executions_limit,
             disable_passed_test_metrics=disable_passed_test_metrics,
