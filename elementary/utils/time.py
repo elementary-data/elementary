@@ -1,7 +1,11 @@
 from datetime import datetime, timezone
+from dateutil import tz
 from typing import Optional
 
-from dateutil import tz
+from elementary.utils.log import get_logger
+
+
+logger = get_logger(__name__)
 
 MILLISECONDS_IN_SEC = 1000
 MILLISECONDS_IN_MIN = 1000 * 60
@@ -24,7 +28,7 @@ def get_now_utc_str(format: str = DATETIME_FORMAT) -> str:
 
 
 def get_now_utc_iso_format() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def format_milliseconds(duration: int) -> str:
@@ -51,3 +55,19 @@ def convert_datetime_utc_str_to_timezone_str(
         )
     except Exception:
         return isoformat_datetime
+
+
+def convert_partial_iso_format_to_full_iso_format(partial_iso_format_time: str) -> str:
+    try:
+        date = datetime.fromisoformat(partial_iso_format_time)
+        # Get the given date timezone
+        time_zone_name = date.strftime("%Z")
+        time_zone = tz.gettz(time_zone_name) if time_zone_name else tz.UTC
+        date_with_timezone = date.replace(tzinfo=time_zone, microsecond=0)
+        return date_with_timezone.isoformat()
+    except ValueError as err:
+        logger.error(
+            f'Failed to covert time string: "{partial_iso_format_time}" to ISO format',
+            exc_info=True,
+        )
+        return partial_iso_format_time

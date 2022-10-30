@@ -4,7 +4,11 @@ from typing import Optional
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
-from elementary.utils.time import convert_datetime_utc_str_to_timezone_str
+from elementary.utils.time import (
+    convert_datetime_utc_str_to_timezone_str,
+    DATETIME_FORMAT,
+)
+
 
 logger = get_logger(__name__)
 
@@ -62,7 +66,7 @@ class SourceFreshnessAlert(Alert):
             slack_message,
             [
                 f"*Source*\n{self.source_name}.{self.identifier}",
-                f"*When*\n{self.detected_at}",
+                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             ],
             divider=True,
         )

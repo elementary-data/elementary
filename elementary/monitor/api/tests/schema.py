@@ -1,5 +1,7 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 TestUniqueIdType = str
@@ -29,12 +31,20 @@ class TestMetadataSchema(BaseModel):
     test_created_at: Optional[str] = None
     days_diff: float
 
+    @validator("detected_at", pre=True)
+    def format_detected_at(cls, detected_at):
+        return convert_partial_iso_format_to_full_iso_format(detected_at)
+
 
 class InvocationSchema(BaseModel):
     affected_rows: Optional[int]
     time_utc: str
     id: str
     status: str
+
+    @validator("time_utc", pre=True)
+    def format_time_utc(cls, time_utc):
+        return convert_partial_iso_format_to_full_iso_format(time_utc)
 
 
 class TotalsInvocationsSchema(BaseModel):
