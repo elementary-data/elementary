@@ -412,7 +412,7 @@ class DataMonitoring:
             )[0]
             return dbt_pkg_version or None
         except Exception as err:
-            logger.debug(f"Unable to get Elementary's dbt package version: {err}.")
+            logger.debug(f"Unable to get Elementary's dbt package version: {err}")
             return None
 
     @staticmethod
@@ -421,4 +421,4 @@ class DataMonitoring:
         try:
             package.check_dbt_pkg_compatible(dbt_pkg_version)
         except Exception as err:
-            logger.error(f"Failed to check compatibility with dbt package: {err}.")
+            logger.error(f"Failed to check compatibility with dbt package: {err}")
