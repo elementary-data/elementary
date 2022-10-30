@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 
-from elementary.utils.time import convert_partial_utc_iso_format_to_full_iso_format
+from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 class ArtifactSchema(BaseModel):
     name: str
@@ -79,7 +79,7 @@ class ModelRunSchema(BaseModel):
 
     @validator("time_utc", pre=True)
     def format_time_utc(cls, time_utc):
-        return convert_partial_utc_iso_format_to_full_iso_format(time_utc)
+        return convert_partial_iso_format_to_full_iso_format(time_utc)
 
 
 class TotalsModelRunsSchema(BaseModel):

@@ -46,7 +46,7 @@ class ModelAlert(Alert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt model alert*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Model*\n{self.alias}", f"*When*\n{self.detected_at_str}"],
+            [f"*Model*\n{self.alias}", f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
@@ -81,7 +81,7 @@ class ModelAlert(Alert):
         )
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Snapshot*\n{self.alias}", f"*When*\n{self.detected_at_str}"],
+            [f"*Snapshot*\n{self.alias}", f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(

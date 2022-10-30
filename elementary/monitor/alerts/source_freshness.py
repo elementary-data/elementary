@@ -62,7 +62,7 @@ class SourceFreshnessAlert(Alert):
             slack_message,
             [
                 f"*Source*\n{self.source_name}.{self.identifier}",
-                f"*When*\n{self.detected_at_str}",
+                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             ],
             divider=True,
         )

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, validator
 
-from elementary.utils.time import convert_partial_iso_format_to_full_iso_format, convert_partial_utc_iso_format_to_full_iso_format
+from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 TestUniqueIdType = str
@@ -44,7 +44,7 @@ class InvocationSchema(BaseModel):
 
     @validator("time_utc", pre=True)
     def format_time_utc(cls, time_utc):
-        return convert_partial_utc_iso_format_to_full_iso_format(time_utc)
+        return convert_partial_iso_format_to_full_iso_format(time_utc)
 
 
 class TotalsInvocationsSchema(BaseModel):

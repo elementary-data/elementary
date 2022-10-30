@@ -8,6 +8,7 @@ from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
+from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
@@ -105,7 +106,7 @@ class DbtTestAlert(TestAlert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt test alert*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at_str}"],
+            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
@@ -210,7 +211,7 @@ class ElementaryTestAlert(DbtTestAlert):
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *{alert_title}*")
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at_str}"],
+            [f"*Table*\n{self.table_full_name}", f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"],
             divider=True,
         )
         self._add_fields_section_to_slack_msg(
