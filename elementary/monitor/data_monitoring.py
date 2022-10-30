@@ -33,6 +33,7 @@ from elementary.monitor.api.tests.schema import (
 )
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.utils import package
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
 
@@ -54,6 +55,7 @@ class DataMonitoring:
             dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target
         )
         self.execution_properties = {}
+        self._check_dbt_package_compatibility()
         # slack client is optional
         self.slack_client = SlackClient.create_client(self.config)
         self.s3_client = S3Client.create_client(self.config)
@@ -398,3 +400,16 @@ class DataMonitoring:
         except Exception:
             logger.error("Failed to parse Elementary's database and schema.")
             return "<elementary_database>.<elementary_schema>"
+
+    def _check_dbt_package_compatibility(self):
+        logger.info("Checking compatibility between edr and Elementary's dbt package.")
+        try:
+            dbt_pkg_version = self.dbt_runner.run_operation(
+                "get_elementary_dbt_pkg_version", quiet=True
+            )[0]
+            if not dbt_pkg_version:
+                logger.debug("Unable to get Elementary's dbt package version.")
+                return
+            package.check_dbt_pkg_compatible(dbt_pkg_version)
+        except Exception as err:
+            logger.error(f"Failed to check compatibility with dbt package: {err}.")
