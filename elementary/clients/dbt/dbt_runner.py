@@ -1,6 +1,6 @@
 import json
-from json import JSONDecodeError
 import subprocess
+from json import JSONDecodeError
 from typing import List, Optional, Tuple
 
 from elementary.exceptions.exceptions import DbtCommandError
@@ -55,9 +55,6 @@ class DbtRunner:
                 capture_output=(json_output or quiet),
             )
         except subprocess.CalledProcessError as err:
-            logger.debug(
-                f"Failed to run dbt command - cmd: {err.cmd}, output: {err.output}, err: {err.stderr}"
-            )
             raise DbtCommandError(err)
         output = None
         if json_output:
