@@ -1,0 +1,59 @@
+---
+title: "Setup"
+---
+
+In this step we will setup the environment needed for running the tutorial and using Elementary.
+
+## Setup tutorial dbt project
+
+#### 1. Clone Elementary tutorial dbt project
+
+We created a dbt project to help us with the tutorial.
+The project is an extended version of the [dbt "jaffle shop" project](https://github.com/dbt-labs/jaffle_shop).
+It contains seeds and models that we will use to run Elementary's tests on, and collect arrtifacts.
+
+To clone the tutorial project run the following command:
+
+```shell
+git clone https://github.com/elementary-data/tutorial.git
+```
+
+#### 2. Create profile for elementary_tutorial dbt project
+
+Create a profile for `elementary_tutorial` at your `profiles.yml`
+
+#### 3. Install Elementary tutorial
+
+Elementary tutorial has a command that generates data for the tutorial.
+This is important because tests needs an updated data (time wise).
+In addition, when installing Elementary tutorial, we install (as a dependency) Elementary edr as well.
+
+To install Elementary tutorial, run the following command from the cloned tutorial repository directory:
+
+```shell
+pip install -e.
+```
+
+<Info>
+  
+If we don't have dbt installed for our tutorial environment, we can run the following command:
+
+```shell
+pip install -e.[<warehouse type>]
+```
+
+For example:
+
+```shell
+pip install -e.[snowflake]
+```
+
+</Info>
+
+#### 4. Generate tutorial data
+
+To generate the data for the tutorial, run the following command:
+
+```shell
+elementary-tutorial generate-tutorial-data
+```
