@@ -1,9 +1,10 @@
 name: Format Python code
 on:
   push:
+    branches-ignore:
+      - 'master'
     paths:
-      - elementary/**
-      - setup.py
+      - '**.py'
   workflow_dispatch:
 
 jobs:
