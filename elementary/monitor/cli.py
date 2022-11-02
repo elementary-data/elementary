@@ -1,6 +1,7 @@
 import sys
 
 import click
+
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring import DataMonitoring
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -52,6 +53,12 @@ def common_options(func):
         default=Config.DEFAULT_PROFILES_DIR,
         help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
         "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
+    )(func)
+    func = click.option(
+        "--prod",
+        type=bool,
+        default=False,
+        help="Specify True if running on your production environment.",
     )(func)
     return func
 
@@ -141,15 +148,12 @@ def monitor(
     profile_target,
     dbt_vars,
     test,
+    prod,
 ):
     """
     Monitor your warehouse.
     """
 
-    click.echo(
-        f"Any feedback and suggestions are welcomed! join our community here - "
-        f"https://bit.ly/slack-elementary\n"
-    )
     if ctx.invoked_subcommand is not None:
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
@@ -161,6 +165,7 @@ def monitor(
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
         timezone=timezone,
+        prod=prod,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
@@ -232,11 +237,12 @@ def report(
     disable_passed_test_metrics,
     open_browser,
     exclude_elementary_models,
+    prod,
 ):
     """
     Generate a local report of your warehouse.
     """
-    config = Config(config_dir, profiles_dir, profile_target)
+    config = Config(config_dir, profiles_dir, profile_target, prod=prod)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
         "monitor-report", get_cli_properties(), ctx.command.name
@@ -381,6 +387,7 @@ def send_report(
     google_project_name,
     gcs_bucket_name,
     exclude_elementary_models,
+    prod,
 ):
     """
     Send the report to an external platform.
@@ -402,6 +409,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        prod=prod,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(

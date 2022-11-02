@@ -209,6 +209,7 @@ class DataMonitoring:
                 if self.tracking.anonymous_warehouse
                 else None,
             }
+            output_data["prod"] = self.config.prod
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, "r") as template_html_file:
                 template_html_code = template_html_file.read()

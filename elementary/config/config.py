@@ -39,6 +39,7 @@ class Config:
         google_project_name: str = None,
         google_service_account_path: str = None,
         gcs_bucket_name: str = None,
+        prod: bool = False,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -80,6 +81,8 @@ class Config:
         self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get(
             "gcs_bucket_name"
         )
+
+        self.prod = prod or config.get("prod")
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
 

@@ -26,7 +26,7 @@ class AnonymousTracking:
     POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
 
     def __init__(self, config: Config) -> None:
-        self._env_props = {}
+        self._env_props = {"prod": config.prod}
         self.anonymous_user_id = None
         self.anonymous_warehouse = None
         self.config = config

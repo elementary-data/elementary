@@ -10,6 +10,10 @@ from elementary.utils.log import get_logger
 
 f = Figlet(font="slant")
 click.echo(f.renderText("Elementary"))
+click.echo(
+    f"Any feedback and suggestions are welcomed! Join our community here - "
+    f"https://bit.ly/slack-elementary\n"
+)
 elementary.cli.upgrade.recommend_version_upgrade()
 
 root_folder = os.path.join(os.path.dirname(__file__), "..")
