@@ -26,7 +26,7 @@ Create a profile for `elementary_tutorial` at your `profiles.yml`
 
 Elementary tutorial has a command that generates data for the tutorial.
 This is important because tests needs an updated data (time wise).
-In addition, when installing Elementary tutorial, we install (as a dependency) Elementary edr as well.
+In addition, when installing Elementary tutorial, we install (as a dependency) Elementary cli as well.
 
 To install Elementary tutorial, run the following command from the cloned tutorial repository directory:
 
@@ -57,3 +57,21 @@ To generate the data for the tutorial, run the following command:
 ```shell
 elementary-tutorial generate-tutorial-data
 ```
+
+#### 5. Create profile for Elementary's cli
+
+If we want to run Elementary's report over our tutorial project, we should create a dbt profile for elementary.
+
+To create a profile easily, run the following commands:
+
+```shell
+cd <tutorial cloned repository path>/elementary_tutorial/dbt_project
+```
+
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+Copy the output, fill in the missing fields and add the profile to your `profiles.yml`.
+
+You can see the full guide for configure Elementary profile [here](../quickstart-cli.mdx).
