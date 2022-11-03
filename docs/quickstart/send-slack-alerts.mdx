@@ -7,8 +7,8 @@ import InstallCLI from "../snippets/install-cli.mdx";
 import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
 import SetupSlackIntegration from "../snippets/setup-slack-integration.mdx";
 
-Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models runs and
-snapshots runs.
+Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models and
+snapshots runs, and source freshness.
 
 The alerts include information for fast triage.
 Also, you can add configuration for each test / model in your `.yml` files:
@@ -62,9 +62,10 @@ edr monitor
 
 ## Alert types configuration
 
-By default, the alerts that are sent are failed tests, errored models and errored snapshots. You can also monitor source
-freshness by running `dbt run-operation upload_source_freshness` right after `dbt source freshness`.
-You can choose to disable alert types by adding a var to your `dbt_project.yml`.
+By default, alerts are sent on failed tests, errored models and errored snapshots. 
+You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
+
+Below are the available vars and their default config: 
 
 ```yml dbt_project.yml
 vars:
@@ -73,7 +74,16 @@ vars:
   disable_model_alerts: false
   disable_test_alerts: false
   disable_warn_alerts: false
+  disable_skipped_model_alerts: true
+  disable_skipped_test_alerts: true
 ```
+
+## Alert on source freshness failures
+
+By default, alerts are sent on dbt tests, models and snapshots. 
+You can also monitor source freshness by running `dbt run-operation upload_source_freshness` right after each execution of `dbt source freshness`.
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert. 
+
 
 ## Customize alerts: owners, tags and subscribers
 
