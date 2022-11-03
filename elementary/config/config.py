@@ -46,39 +46,64 @@ class Config:
 
         config = self._load_configuration()
 
-        self.target_dir = config.get("target-path") or os.getcwd()
-
-        self.update_bucket_website = update_bucket_website or config.get(
-            "update_bucket_website", False
+        self.target_dir = _first_not_none(
+            config.get("target-path"),
+            os.getcwd(),
         )
-        self.timezone = timezone or config.get("timezone")
 
-        self.slack_webhook = slack_webhook or config.get(self._SLACK, {}).get(
-            "notification_webhook"
+        self.update_bucket_website = _first_not_none(
+            update_bucket_website,
+            config.get("update_bucket_website"),
+            False,
         )
-        self.slack_token = slack_token or config.get(self._SLACK, {}).get("token")
-        self.slack_channel_name = slack_channel_name or config.get(self._SLACK, {}).get(
-            "channel_name"
-        )
-        self.is_slack_workflow = config.get(self._SLACK, {}).get("workflows", False)
 
-        self.aws_profile_name = aws_profile_name or config.get(self._AWS, {}).get(
-            "profile_name"
+        self.timezone = _first_not_none(
+            timezone,
+            config.get("timezone"),
+        )
+
+        slack_config = config.get(self._SLACK, {})
+        self.slack_webhook = _first_not_none(
+            slack_webhook,
+            slack_config.get("notification_webhook"),
+        )
+        self.slack_token = _first_not_none(
+            slack_token,
+            slack_config.get("token"),
+        )
+        self.slack_channel_name = _first_not_none(
+            slack_channel_name,
+            slack_config.get("channel_name"),
+        )
+        self.is_slack_workflow = _first_not_none(
+            slack_config.get("workflows"),
+            False,
+        )
+        
+        aws_config = config.get(self._AWS, {})
+        self.aws_profile_name = _first_not_none(
+            aws_profile_name,
+            aws_config.get("profile_name"),
+        )
+        self.s3_bucket_name = _first_not_none(
+            s3_bucket_name,
+            aws_config.get("s3_bucket_name")
         )
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
-        self.s3_bucket_name = s3_bucket_name or config.get(self._AWS, {}).get(
-            "s3_bucket_name"
-        )
 
-        self.google_project_name = google_project_name or config.get(
-            self._GOOGLE, {}
-        ).get("project_name")
-        self.google_service_account_path = google_service_account_path or config.get(
-            self._GOOGLE, {}
-        ).get("service_account_path")
-        self.gcs_bucket_name = gcs_bucket_name or config.get(self._GOOGLE, {}).get(
-            "gcs_bucket_name"
+        google_config = config.get(self._GOOGLE, {})
+        self.google_project_name = _first_not_none(
+            google_project_name,
+            google_config.get("project_name"),
+        )
+        self.google_service_account_path = _first_not_none(
+            google_service_account_path,
+            google_config.get("service_account_path"),
+        )
+        self.gcs_bucket_name = _first_not_none(
+            gcs_bucket_name,
+            google_config.get("gcs_bucket_name"),
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
@@ -157,3 +182,10 @@ class Config:
     def _validate_timezone(self):
         if self.timezone and not tz.gettz(self.timezone):
             raise InvalidArgumentsError("An invalid timezone was provided.")
+
+    def _first_not_none(*values):
+        try:
+            return next((v for v in values if v is not None))
+        except StopIteration as e:
+            return None
+
