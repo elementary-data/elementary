@@ -9,6 +9,8 @@ After you [install the dbt package](../quickstart#install-the-dbt-package) and r
 Elementary is the first solution that delivers **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. Elementary dbt tests are actually data monitors that collect metrics and metadata over time. On each execution, the tests analyze the new data, compare it to historical metrics, and alert on anomalies and outliers.
 These tests are configured and executed like any other tests in your project.
 
+_Note_: Anomaly detection is not yet supported on Databricks.
+
 <Info>
   Elementary tests can only be used with the elementary models, so you must run
   "dbt run --select elementary" to create the Elementary package models.
