@@ -55,11 +55,6 @@ For sending alerts or generating a report, there are two options:
 1. **Run Elementary CLI after each relevant dbt job** (`dbt test` / `dbt build` / `dbt run`).
 2. **Run Elementary CLI periodically** in a frequency that fits your dbt job executions.
 
-To make sure your project data is updated, we recommend running the elementary dbt artifacts models **on each PR merge** to your dbt production project:  
-```shell
-dbt run --select edr.dbt_artifacts
-```
-
 ## Ways to run Elementary in production
 
 If your organization is using dbt-core, it would probably be a good choice to orchestrate Elementary using the same system that orchestrates dbt.
