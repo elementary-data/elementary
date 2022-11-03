@@ -1,8 +1,6 @@
 name: Format Python code
 on:
   push:
-    branches-ignore:
-      - 'master'
     paths:
       - '**.py'
   workflow_dispatch:
