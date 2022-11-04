@@ -2,8 +2,7 @@ name: Format Python code
 on:
   push:
     paths:
-      - elementary/**
-      - setup.py
+      - '**.py'
   workflow_dispatch:
 
 jobs:

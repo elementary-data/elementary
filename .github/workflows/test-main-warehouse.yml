@@ -4,12 +4,10 @@ on:
     branches: [ "master" ]
     paths:
       - elementary/**
-      - setup.py
   pull_request:
     branches: [ "master" ]
     paths:
       - elementary/**
-      - setup.py
   workflow_dispatch:
 
 
