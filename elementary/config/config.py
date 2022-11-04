@@ -79,15 +79,14 @@ class Config:
             slack_config.get("workflows"),
             False,
         )
-        
+
         aws_config = config.get(self._AWS, {})
         self.aws_profile_name = _first_not_none(
             aws_profile_name,
             aws_config.get("profile_name"),
         )
         self.s3_bucket_name = _first_not_none(
-            s3_bucket_name,
-            aws_config.get("s3_bucket_name")
+            s3_bucket_name, aws_config.get("s3_bucket_name")
         )
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
@@ -188,4 +187,3 @@ class Config:
             return next((v for v in values if v is not None))
         except StopIteration as e:
             return None
-
