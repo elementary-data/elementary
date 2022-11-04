@@ -2,6 +2,8 @@
 title: "Elementary in production"
 ---
 
+import Schemas from "../snippets/faq/question-schemas.mdx";
+
 Running Elementary in production means to include the dbt package in your production dbt project, 
 and setting up an automated manner to run the Elementary CLI.
 
@@ -29,17 +31,29 @@ On an orchestration system of your choice, run the CLI to:
 1. **Send Slack alerts** - Use the `edr monitor` command and Slack integration.
 2. **Generate a report** - Use the `edr monitor report` or `edr monitor send-report` that has built in support for sending the report to Slack / GCS / S3.
 
+
+## What permissions Elementary requires?
+
+The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile, 
+and network access to the data warehouse. 
+
+Also, in the `elementary` profile, the credentials should have permissions to:
+- Read all project schemas 
+- Write to the elementary schema
+
+On your dbt project, make sure that Elementary dbt package can: 
+- Read all project schemas
+- Write to the elementary and elementary tests schemas
+- Create schemas (alternatively, you can create the elementary schemas in advance)
+
+<Schemas />
+
 ## When to run Elementary?
 
 For sending alerts or generating a report, there are two options:
 
 1. **Run Elementary CLI after each relevant dbt job** (`dbt test` / `dbt build` / `dbt run`).
 2. **Run Elementary CLI periodically** in a frequency that fits your dbt job executions.
-
-To make sure your project data is updated, we recommend running the elementary dbt artifacts models **on each PR merge** to your dbt production project:  
-```shell
-dbt run --select edr.dbt_artifacts
-```
 
 ## Ways to run Elementary in production
 

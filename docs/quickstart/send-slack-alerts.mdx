@@ -7,7 +7,8 @@ import InstallCLI from "../snippets/install-cli.mdx";
 import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
 import SetupSlackIntegration from "../snippets/setup-slack-integration.mdx";
 
-Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models runs and snapshots runs.
+Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models and
+snapshots runs, and source freshness.
 
 The alerts include information for fast triage.
 Also, you can add configuration for each test / model in your `.yml` files:
@@ -18,8 +19,8 @@ Also, you can add configuration for each test / model in your `.yml` files:
 - dbt Tags - add custom context to the alert
 
 <img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
-  alt="New Slack alert format"
+src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
+alt="New Slack alert format"
 />
 
 ## Before you start
@@ -61,8 +62,10 @@ edr monitor
 
 ## Alert types configuration
 
-By default, the alerts that are sent are failed tests, errored models and errored snapshots.
-You can choose to disable alert types by adding a var to your `dbt_project.yml`.
+By default, alerts are sent on failed tests, errored models and errored snapshots. 
+You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
+
+Below are the available vars and their default config: 
 
 ```yml dbt_project.yml
 vars:
@@ -71,11 +74,21 @@ vars:
   disable_model_alerts: false
   disable_test_alerts: false
   disable_warn_alerts: false
+  disable_skipped_model_alerts: true
+  disable_skipped_test_alerts: true
 ```
+
+## Alert on source freshness failures
+
+By default, alerts are sent on dbt tests, models and snapshots. 
+You can also monitor source freshness by running `dbt run-operation upload_source_freshness` right after each execution of `dbt source freshness`.
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert. 
+
 
 ## Customize alerts: owners, tags and subscribers
 
-Elementary enriches alerts with dbt model/source/snapshot owners and tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
+Elementary enriches alerts with dbt model/source/snapshot owners and
+tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
 Also, you can use two custom Elementary fields:
 
 - Subscribers: to tag additional users except the owner in an alert.
@@ -110,7 +123,8 @@ models:
 if you want to tag a group or a channel in a slack alert:
 
 - Add it as model tag and use '#' as the prefix of the channel name.
-- For example, to tag the marketing team's data ops channel add the following to your `model schema.yml` / `properties.yml`.
+- For example, to tag the marketing team's data ops channel add the following to your `model schema.yml`
+  / `properties.yml`.
 
 ```yml properties.yml
 models:
@@ -157,9 +171,11 @@ Elementary supports configuring custom slack channels that are configured on you
 If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel.
 If you configure a custom slack channel for both a model and a test, the test channel overrides the model channel.
 
-For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops channel.
+For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops
+channel.
 
-To set it up, simply add the relevant channel to your models in the properties.yml (can be done also for sources and snapshots).
+To set it up, simply add the relevant channel to your models in the properties.yml (can be done also for sources and
+snapshots).
 
 ```yml properties.yml
 models:
@@ -168,7 +184,8 @@ models:
       channel: marketing_data_ops
 ```
 
-If your models are in folders by department / team, another useful option is to configure the channel in your `dbt_project.yml` file.
+If your models are in folders by department / team, another useful option is to configure the channel in
+your `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
@@ -196,5 +213,7 @@ models:
 
 ## Continuous alerting
 
-In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after your dbt job ends to monitor the latest data updates).
-If you need help or wish to consult on this, reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).
+In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after
+your dbt job ends to monitor the latest data updates).
+If you need help or wish to consult on this, reach out to us
+on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).

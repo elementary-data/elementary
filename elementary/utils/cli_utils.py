@@ -3,12 +3,13 @@ import click
 
 class RequiredIf(click.Option):
     def __init__(self, *args, **kwargs):
-        self.required_if = kwargs.pop('required_if')
+        self.required_if = kwargs.pop("required_if")
         assert self.required_if, "'required_if' parameter required"
-        kwargs['help'] = (kwargs.get('help', '') +
-                          ' NOTE: This argument must be configured together with %s.' %
-                          self.required_if
-                          ).strip()
+        kwargs["help"] = (
+            kwargs.get("help", "")
+            + " NOTE: This argument must be configured together with %s."
+            % self.required_if
+        ).strip()
         super(RequiredIf, self).__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
@@ -17,10 +18,10 @@ class RequiredIf(click.Option):
 
         if we_are_present and not other_present:
             raise click.UsageError(
-                "Illegal usage: `%s` must be configured with `%s`" % (
-                    self.name, self.required_if))
+                "Illegal usage: `%s` must be configured with `%s`"
+                % (self.name, self.required_if)
+            )
         else:
             self.prompt = None
 
-        return super(RequiredIf, self).handle_parse_result(
-            ctx, opts, args)
+        return super(RequiredIf, self).handle_parse_result(ctx, opts, args)

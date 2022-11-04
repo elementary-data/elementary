@@ -1,6 +1,8 @@
 import subprocess
 
-_QUICKSTART_CLI_ERR_MSG = 'Please refer for guidance - https://docs.elementary-data.com/quickstart-cli'
+_QUICKSTART_CLI_ERR_MSG = (
+    "Please refer for guidance - https://docs.elementary-data.com/quickstart-cli"
+)
 
 
 class Error(Exception):
@@ -15,14 +17,18 @@ class NoProfilesFileError(ConfigError):
     """Exception raised if profiles.yml was not found"""
 
     def __init__(self, profiles_dir: str):
-        super().__init__(f'Could not find "profiles.yml" at "{profiles_dir}". {_QUICKSTART_CLI_ERR_MSG}')
+        super().__init__(
+            f'Could not find "profiles.yml" at "{profiles_dir}". {_QUICKSTART_CLI_ERR_MSG}'
+        )
 
 
 class NoElementaryProfileError(ConfigError):
     """Exception raised if an 'elementary' profile doesn't exist"""
 
     def __init__(self):
-        super().__init__(f'Unable to find "elementary" profile. {_QUICKSTART_CLI_ERR_MSG}')
+        super().__init__(
+            f'Unable to find "elementary" profile. {_QUICKSTART_CLI_ERR_MSG}'
+        )
 
 
 class InvalidArgumentsError(ConfigError):
@@ -41,4 +47,6 @@ class DbtCommandError(Error):
     """Exception raised while executing a dbt command"""
 
     def __init__(self, err: subprocess.CalledProcessError):
-        super().__init__(f'Failed to run dbt command - {err.cmd}')
+        super().__init__(
+            f"Failed to run dbt command - cmd: {err.cmd}, output: {err.output}, err: {err.stderr}"
+        )

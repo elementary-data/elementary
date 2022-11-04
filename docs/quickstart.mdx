@@ -41,20 +41,19 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
 
-<TipInfo>
+<Info>
   
 Make sure to copy the packages that are relevant to your dbt version.
 
-</TipInfo>
+</Info>
 
 **For dbt 1.2.0 and above:**
 
 ```yml packages.yml
 packages:
   - package: elementary-data/elementary
-    version: 0.4.11
-    ## compatible with Elementary CLI version 0.4.11
-    ## see docs: https://docs.elementary-data.com/
+    version: 0.5.4
+    ## Docs: https://docs.elementary-data.com
 ```
 
 **For dbt >=1.0.0 \<1.2.0:**
@@ -62,9 +61,8 @@ packages:
 ```yml packages.yml
 packages:
   - package: elementary-data/elementary
-    version: 0.4.11
-    ## compatible with Elementary CLI version 0.4.11
-    ## see docs: https://docs.elementary-data.com/
+    version: 0.5.4
+    ## Docs: https://docs.elementary-data.com
 
     ## !! Important !! For dbt <1.2.0 ##
     ## (Prevents dbt_utils versions exceptions) ##
@@ -74,12 +72,14 @@ packages:
 
 ### 2. Add to your `dbt_project.yml`
 
-<TipInfo>
-This means Elementary models will have their own schema.
+<Info>
+This means Elementary models will have their own schemas.
+Depending on your project custom schemas rules (see [dbt custom schema docs](https://docs.getdbt.com/docs/build/custom-schemas)), the schemas will be named `elementary` & `elementary__tests` or `<target_schema>_elementary` & `<target_schema>_elementary__tests` (being `<target_schema> = analytics` very often).
 
-Make sure your user has permissions to create schemas.
+Make sure your user (or the orchestrator user) has permissions to create schemas.
+If not, ask your admin to create both schemas and grant permissions to the relevant users / groups.
 
-</TipInfo>
+</Info>
 
 ```yml dbt_project.yml
 models:

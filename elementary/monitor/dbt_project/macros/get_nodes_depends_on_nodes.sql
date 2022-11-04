@@ -1,7 +1,10 @@
-{% macro get_nodes_depends_on_nodes() %}
+{% macro get_nodes_depends_on_nodes(exclude_elementary=false) %}
     {% set models_depends_on_nodes_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}
+            {% if exclude_elementary %}
+              where package_name != 'elementary'
+            {% endif %}
         ),
 
         dbt_sources as (

@@ -46,7 +46,11 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "quickstart", "quickstart-cli"]
+      "pages": [
+        "introduction",
+        "quickstart",
+        "quickstart-cli"
+      ]
     },
     {
       "group": "Guides",
@@ -54,7 +58,8 @@
         "quickstart/generate-report-ui",
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
-        "guides/add-elementary-tests"
+        "guides/add-elementary-tests",
+        "guides/python-tests"
       ]
     },
     {
@@ -107,5 +112,10 @@
   "footerSocials": {
     "website": "https://www.elementary-data.com",
     "slack": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+  },
+  "analytics": {
+    "ga4": {
+      "measurementId": "G-4DQN8YR4NH"
+    }
   }
 }

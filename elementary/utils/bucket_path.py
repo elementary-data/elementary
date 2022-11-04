@@ -1,6 +1,6 @@
 from typing import Optional
 
-BUCKET_PATH_SEP = '/'
+BUCKET_PATH_SEP = "/"
 
 
 def dirname(bucket_path: str) -> Optional[str]:

@@ -8,16 +8,14 @@ All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
 ## Slack
 
-After you [setup a Slack app and token](../integrations/slack#slack-integration-setup) you can run the command:
+After you [set up a Slack app and token](../integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
 edr monitor send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 ```
 
-You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr monitor send-report` command.
-The report will be sent to your Slack channel under the provided name:
-
-- Make sure the report name you provided has a suffix of `.html`.
+You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr monitor send-report`
+command. Make sure the report name you provided ends with `.html`.
 
 ### Configuration
 
@@ -25,8 +23,8 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 
 ```yml
 slack:
-  token: [Slack token]
-  channel_name: [Slack channel]
+  token: [ Slack token ]
+  channel_name: [ Slack channel ]
 ```
 
 ## Amazon S3
@@ -49,10 +47,8 @@ Alternatively, you can pass the access key ID and secret access key:
 edr monitor send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SECRET_ACCESS_KEY> --s3-bucket-name <BUCKET_NAME>
 ```
 
-You can control the name of the report by providing `--bucket-file-path <REPORT_NAME>` to the `edr monitor send-report` command.
-The report will be uploaded to your bucket under the provided path:
-
-- Make sure the bucket file path ends with a suffix of `.html`.
+You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
+the `edr monitor send-report` command. Make sure the report's file name ends with `.html`.
 
 ### Hosting the report as a website
 
@@ -70,27 +66,35 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 
 ```yml
 aws:
-  profile_name: [AWS profile name]
-  s3_bucket_name: [S3 bucket name]
+  profile_name: [ AWS profile name ]
+  s3_bucket_name: [ S3 bucket name ]
 
-update_bucket_website: [true | false]
+update_bucket_website: [ true | false ]
 ```
 
 ## Google Cloud Storage (GCS)
 
-The prerequisites are to have
-a [Google service account file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and
-a [GCS bucket](https://cloud.google.com/storage/docs/creating-buckets).
-Once you have it, you can send the report to your GCS bucket by running the command:
+The prerequisite is to have a [GCS bucket](https://cloud.google.com/storage/docs/creating-buckets).  
+Once you have it, you'll need to provide one of two ways to authenticate:
+
+### [Service Account](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) (Recommended)
+
+you can send the report to your GCS bucket by running the command:
 
 ```shell
 edr monitor send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
 ```
 
-You can control the name of the report by providing `--bucket-file-path <REPORT_NAME>` to the `edr monitor send-report` command.
-The report will be uploaded to your bucket under the provided path:
+### OAuth using `gcloud`
 
-- Make sure the bucket file path ends with a suffix of `.html`.
+If you're using OAuth with `gcloud`, simply omit `--google-service-account-path`:
+
+```shell
+edr monitor send-report --gcs-bucket-name <BUCKET_NAME>
+```
+
+You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
+the `edr monitor send-report` command. Make sure the report's file name ends with `.html`.
 
 ### Hosting the report as a website
 
@@ -109,10 +113,10 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 
 ```yml
 google:
-  service_account_path: [Google service account path]
-  gcs_bucket_name: [GCS bucket name]
+  service_account_path: [ Google service account path ]
+  gcs_bucket_name: [ GCS bucket name ]
 
-update_bucket_website: [true | false]
+update_bucket_website: [ true | false ]
 ```
 
 ## Missing something?

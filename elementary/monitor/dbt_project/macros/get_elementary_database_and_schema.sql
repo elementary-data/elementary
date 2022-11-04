@@ -1,5 +1,5 @@
 {% macro get_elementary_database_and_schema() %}
-    {% set database, schema = elementary.get_package_database_and_schema('elementary') %}
+    {% set database, schema = elementary.target_database(), target.schema %}
     {% if database %}
         {{ elementary.edr_log(database ~ '.' ~ schema) }}
     {% else %}

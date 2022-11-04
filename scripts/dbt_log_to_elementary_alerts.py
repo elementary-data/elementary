@@ -1,7 +1,7 @@
 import json
 import sys
 
-ALERT_PREFIX = 'Elementary: '
+ALERT_PREFIX = "Elementary: "
 
 
 def get_elementary_log_lines(dbt_log: str):
@@ -21,7 +21,9 @@ def get_json_logs(log_lines: [str]):
 def get_elementary_alerts(elementary_json_logs: [dict]):
     elementary_alerts = []
     for json_log in elementary_json_logs:
-        elementary_alerts.extend(json.loads(''.join(json_log['data']['msg'].split(ALERT_PREFIX, 1)[1:])))
+        elementary_alerts.extend(
+            json.loads("".join(json_log["data"]["msg"].split(ALERT_PREFIX, 1)[1:]))
+        )
     return elementary_alerts
 
 
@@ -31,9 +33,9 @@ def main():
     elementary_log_lines = get_elementary_log_lines(dbt_log)
     elementary_json_logs = get_json_logs(elementary_log_lines)
     elementary_alerts = get_elementary_alerts(elementary_json_logs)
-    with open('elementary_alerts.json', 'w') as f:
+    with open("elementary_alerts.json", "w") as f:
         f.write(json.dumps(elementary_alerts))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
