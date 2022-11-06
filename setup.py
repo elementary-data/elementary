@@ -13,22 +13,13 @@ setup(
     description="Data monitoring and lineage",
     version="0.5.4",
     packages=find_packages(),
+    include_package_data=True,
     python_requires=">=3.6.2",
     entry_points="""
         [console_scripts]
         edr=elementary.cli.cli:cli
     """,
     author="Elementary",
-    package_data={
-        "": [
-            "header.html",
-            "index.html",
-            "dbt_project/*",
-            "dbt_project/macros/*",
-            "dbt_project/models/*",
-            "dbt_project/models/alerts/*",
-        ]
-    },
     keyword="data, lineage, data lineage, data warehouse, DWH, observability, data monitoring, data observability, "
     "Snowflake, BigQuery, Redshift, data reliability, analytics engineering",
     long_description=README,

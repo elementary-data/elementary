@@ -278,6 +278,9 @@ class DataMonitoring:
                 days_back=days_back,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
+            import ipdb
+
+            ipdb.set_trace()
             invocations = tests_api.get_invocations(
                 invocations_per_test=test_runs_amount, days_back=days_back
             )
