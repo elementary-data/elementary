@@ -55,7 +55,7 @@ class DbtRunner:
                 capture_output=(json_output or quiet),
             )
         except subprocess.CalledProcessError as err:
-            raise DbtCommandError(err)
+            raise DbtCommandError(err, command_args)
         output = None
         if json_output:
             output = result.stdout.decode("utf-8")

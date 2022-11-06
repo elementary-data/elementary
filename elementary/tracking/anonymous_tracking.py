@@ -9,6 +9,7 @@ import posthog
 from pydantic import BaseModel
 
 import elementary.tracking.env
+import elementary.exceptions.exceptions
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
@@ -119,6 +120,8 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
+        if isinstance(exc, elementary.exceptions.exceptions.Error):
+            props.update(exc.anonymous_tracking_context)
         self.send_event("cli-exception", properties=props)
 
     def track_cli_help(self):
