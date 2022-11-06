@@ -93,7 +93,6 @@
                 package_name,
                 type,
                 original_path,
-                compiled_sql,
                 path,
                 generated_at   
             from dbt_tests
@@ -134,7 +133,6 @@
                 tests.package_name,
                 tests.type,
                 tests.original_path,
-                tests.compiled_sql,
                 tests.path,
                 tests.generated_at
             from dbt_tests_with_elementary_unique_id tests
