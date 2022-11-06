@@ -25,6 +25,7 @@ setup(
             "index.html",
             "dbt_project/*",
             "dbt_project/macros/*",
+            "dbt_project/macros/cte/*",
             "dbt_project/models/*",
             "dbt_project/models/alerts/*",
         ]
