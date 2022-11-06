@@ -1,7 +1,7 @@
 {%- macro get_tests_invocations(invocations_per_test = 720, days_back = 7) -%}
     {% set tests_invocations_query %}
         with test_results as (
-            {{ elementary_internal.current_tests_run_results_query(days_back=days_back) }}
+            {{ current_tests_run_results_query(days_back=days_back) }}
         ),
 
         test_results_in_last_chosen_days as (
