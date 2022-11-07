@@ -57,17 +57,31 @@ class InvalidAlertType(Error):
 
 class DbtCommandError(Error):
     """Exception raised while executing a dbt command"""
-    def __init__(self, err: subprocess.CalledProcessError, command_args: List[str]):
+    def __init__(self, err: subprocess.CalledProcessError, base_command_args: List[str]):
         super().__init__(
             f"Failed to run dbt command - cmd: {err.cmd}, output: {err.output}, err: {err.stderr}"
         )
 
-        self.command_args = command_args
+        # Command args sent to _run_command (without additional user-specific args it as such as projects / profiles
+        # dir)
+        self.base_command_args = base_command_args
+
         self.return_code = err.returncode
 
     @property
     def anonymous_tracking_context(self):
         return {
-            "command_args": self.command_args,
-            "return_code": self.return_code
+            "command_args": self.base_command_args,
+            "return_code": self.return_code,
+            **self.extract_detailed_dbt_command_args(self.base_command_args)
         }
+
+    @staticmethod
+    def extract_detailed_dbt_command_args(command_args):
+        dbt_command_type = command_args[0]
+        detailed_command_args = {"dbt_command_type": dbt_command_type}
+
+        if dbt_command_type == "run-operation":
+            detailed_command_args["macro_name"] = command_args[1]
+
+        return detailed_command_args
