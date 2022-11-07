@@ -122,6 +122,7 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/elongl"><img src="https://avatars.githubusercontent.com/u/30181361?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/Maayan-s"><img src="https://avatars.githubusercontent.com/u/22072028?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/IDoneShaveIt"><img src="https://avatars.githubusercontent.com/u/48473443?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/haritamar"><img src="https://avatars.githubusercontent.com/u/11314965?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/hahnbeelee"><img src="https://avatars.githubusercontent.com/u/55263191?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/seanglynn-thrive"><img src="https://avatars.githubusercontent.com/u/93200565?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/hanywang2"><img src="https://avatars.githubusercontent.com/u/44352119?v=4" width="50" height="50" alt=""/></a>
@@ -146,6 +147,7 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/rloredo"><img src="https://avatars.githubusercontent.com/u/21148554?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/a13xa1v35"><img src="https://avatars.githubusercontent.com/u/25589304?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/kopackiw"><img src="https://avatars.githubusercontent.com/u/26244440?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/eKatia"><img src="https://avatars.githubusercontent.com/u/79864170?v=4" width="50" height="50" alt=""/></a>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
