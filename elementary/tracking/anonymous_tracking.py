@@ -41,6 +41,7 @@ class AnonymousTracking:
         # We want to avoid sending an event for each one of these (as there might be many of them), so we will send
         # them as a part of the cli-end event.
         self.internal_exceptions = []
+        self.internal_exceptions_count = 0
 
     def init(self):
         try:
@@ -117,8 +118,9 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
-        if self.internal_exceptions:
+        if self.internal_exceptions_count > 0:
             props["internal_exceptions"] = self.internal_exceptions
+            props["internal_exceptions_count"] = self.internal_exceptions_count
         self.send_event("cli-end", properties=props)
 
     def track_cli_exception(
@@ -133,6 +135,7 @@ class AnonymousTracking:
         self.send_event("cli-exception", properties=props)
 
     def record_cli_internal_exception(self, exc: Exception):
+        self.internal_exceptions_count += 1
         if len(self.internal_exceptions) < self.INTERNAL_EXCEPTIONS_LIMIT:
             self.internal_exceptions.append(self._get_exception_properties(exc))
 
