@@ -117,7 +117,10 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
-        if self.internal_exceptions and len(self.internal_exceptions) < self.INTERNAL_EXCEPTIONS_LIMIT:
+        if (
+            self.internal_exceptions
+            and len(self.internal_exceptions) < self.INTERNAL_EXCEPTIONS_LIMIT
+        ):
             props["internal_exceptions"] = self.internal_exceptions
         self.send_event("cli-end", properties=props)
 
