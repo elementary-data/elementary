@@ -1,5 +1,10 @@
+import json
 import subprocess
 from typing import List
+
+from elementary.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 _QUICKSTART_CLI_ERR_MSG = (
     "Please refer for guidance - https://docs.elementary-data.com/quickstart-cli"
@@ -81,10 +86,17 @@ class DbtCommandError(Error):
 
     @staticmethod
     def extract_detailed_dbt_command_args(command_args):
-        dbt_command_type = command_args[0]
-        detailed_command_args = {"dbt_command_type": dbt_command_type}
+        try:
+            dbt_command_type = command_args[0]
+            detailed_command_args = {"dbt_command_type": dbt_command_type}
 
-        if dbt_command_type == "run-operation":
-            detailed_command_args["macro_name"] = command_args[1]
+            if dbt_command_type == "run-operation":
+                detailed_command_args["macro_name"] = command_args[1]
 
-        return detailed_command_args
+                if "--args" in command_args:
+                    args_index = command_args.index("--args")
+                    detailed_command_args["macro_args"] = json.loads(command_args[args_index + 1])
+
+            return detailed_command_args
+        except Exception as ex:
+            logger.error(f"Failed to extract detailed dbt command args, error: {ex}")
