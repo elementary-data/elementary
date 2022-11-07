@@ -62,9 +62,11 @@ class DataMonitoring:
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
-        self.slack_client = SlackClient.create_client(self.config)
-        self.s3_client = S3Client.create_client(self.config)
-        self.gcs_client = GCSClient.create_client(self.config)
+        self.slack_client = SlackClient.create_client(
+            self.config, tracking=self.tracking
+        )
+        self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
+        self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.alerts_api = AlertsAPI(
@@ -293,7 +295,8 @@ class DataMonitoring:
             self.execution_properties["test_result_count"] = len(tests_metadata)
             return tests_results, test_results_totals, test_runs_totals
         except Exception as e:
-            logger.error(f"Could not get test results and totals - Error: {e}")
+            logger.exception(f"Could not get test results and totals - Error: {e}")
+            self.tracking.record_cli_internal_exception(e)
             self.success = False
             return dict(), dict(), dict()
 
@@ -401,8 +404,9 @@ class DataMonitoring:
             return self.dbt_runner.run_operation(
                 "get_elementary_database_and_schema", quiet=True
             )[0]
-        except Exception:
+        except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
+            self.tracking.record_cli_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
 
     def get_elementary_dbt_pkg_version(self) -> Optional[str]:
@@ -412,13 +416,14 @@ class DataMonitoring:
             )[0]
             return dbt_pkg_version or None
         except Exception as err:
-            logger.debug(f"Unable to get Elementary's dbt package version: {err}")
+            logger.error(f"Unable to get Elementary's dbt package version: {err}")
+            self.tracking.record_cli_internal_exception(err)
             return None
 
-    @staticmethod
-    def _check_dbt_package_compatibility(dbt_pkg_version: str):
+    def _check_dbt_package_compatibility(self, dbt_pkg_version: str):
         logger.info("Checking compatibility between edr and Elementary's dbt package.")
         try:
             package.check_dbt_pkg_compatible(dbt_pkg_version)
         except Exception as err:
             logger.error(f"Failed to check compatibility with dbt package: {err}")
+            self.tracking.record_cli_internal_exception(err)

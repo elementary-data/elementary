@@ -8,6 +8,7 @@ from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
+from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -16,20 +17,25 @@ OK_STATUS_CODE = 200
 
 
 class SlackClient(ABC):
-    def __init__(self, token: str = None, webhook: str = None) -> None:
+    def __init__(
+        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None
+    ) -> None:
         self.token = token
         self.webhook = webhook
         self.client = self._initial_client()
+        self.tracking = tracking
         self._initial_retry_handlers()
 
     @staticmethod
-    def create_client(config: Config) -> Optional["SlackClient"]:
+    def create_client(
+        config: Config, tracking: AnonymousTracking = None
+    ) -> Optional["SlackClient"]:
         if not config.has_slack:
             return None
         if config.slack_token:
-            return SlackWebClient(token=config.slack_token)
+            return SlackWebClient(token=config.slack_token, tracking=tracking)
         elif config.slack_webhook:
-            return SlackWebhookClient(webhook=config.slack_webhook)
+            return SlackWebhookClient(webhook=config.slack_webhook, tracking=tracking)
 
     @abstractmethod
     def _initial_client(self):
@@ -74,6 +80,7 @@ class SlackWebClient(SlackClient):
         except SlackApiError as err:
             if self._handle_send_err(err, channel_name):
                 return self.send_message(channel_name, message)
+            self.tracking.record_cli_internal_exception(err)
             return False
 
     def send_file(
@@ -118,8 +125,10 @@ class SlackWebClient(SlackClient):
                 f"Channel {channel_name} not found. Available channels: {available_channel_names}"
             )
             return None
-        except Exception:
+        except Exception as e:
             logger.error(f"Elementary app failed to query Slack channels.")
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(e)
             return None
 
     def _join_channel(self, channel_id: str) -> bool:
@@ -128,6 +137,8 @@ class SlackWebClient(SlackClient):
             return True
         except SlackApiError as e:
             logger.error(f"Elementary app failed to join the given channel. Error: {e}")
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(e)
             return False
 
     def _get_channels(self) -> List[dict]:
@@ -149,6 +160,8 @@ class SlackWebClient(SlackClient):
             logger.error(
                 f"Elementary app failed to query all Slack public channels. Error: {e}"
             )
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(e)
             return []
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
