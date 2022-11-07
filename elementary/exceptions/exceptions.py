@@ -95,7 +95,9 @@ class DbtCommandError(Error):
 
                 if "--args" in command_args:
                     args_index = command_args.index("--args")
-                    detailed_command_args["macro_args"] = json.loads(command_args[args_index + 1])
+                    detailed_command_args["macro_args"] = json.loads(
+                        command_args[args_index + 1]
+                    )
 
             return detailed_command_args
         except Exception as ex:
