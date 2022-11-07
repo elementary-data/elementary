@@ -62,7 +62,9 @@ class DataMonitoring:
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
-        self.slack_client = SlackClient.create_client(self.config, tracking=self.tracking)
+        self.slack_client = SlackClient.create_client(
+            self.config, tracking=self.tracking
+        )
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
         self._download_dbt_package_if_needed(force_update_dbt_package)

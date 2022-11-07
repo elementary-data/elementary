@@ -21,7 +21,9 @@ class GCSClient:
         self.tracking = tracking
 
     @classmethod
-    def create_client(cls, config: Config, tracking: AnonymousTracking = None) -> Optional["GCSClient"]:
+    def create_client(
+        cls, config: Config, tracking: AnonymousTracking = None
+    ) -> Optional["GCSClient"]:
         return cls(config, tracking=tracking) if config.has_gcs else None
 
     def send_report(

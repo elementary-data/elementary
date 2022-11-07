@@ -17,7 +17,9 @@ OK_STATUS_CODE = 200
 
 
 class SlackClient(ABC):
-    def __init__(self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None) -> None:
+    def __init__(
+        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None
+    ) -> None:
         self.token = token
         self.webhook = webhook
         self.client = self._initial_client()
@@ -25,7 +27,9 @@ class SlackClient(ABC):
         self._initial_retry_handlers()
 
     @staticmethod
-    def create_client(config: Config, tracking: AnonymousTracking = None) -> Optional["SlackClient"]:
+    def create_client(
+        config: Config, tracking: AnonymousTracking = None
+    ) -> Optional["SlackClient"]:
         if not config.has_slack:
             return None
         if config.slack_token:

@@ -135,9 +135,7 @@ class AnonymousTracking:
 
     @staticmethod
     def _get_exception_properties(exc: Exception):
-        props = {
-            "exception_type": str(type(exc))
-        }
+        props = {"exception_type": str(type(exc))}
         if isinstance(exc, elementary.exceptions.exceptions.Error):
             props.update(exc.anonymous_tracking_context)
         return props

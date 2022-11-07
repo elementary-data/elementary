@@ -24,7 +24,9 @@ class S3Client:
         self.tracking = tracking
 
     @classmethod
-    def create_client(cls, config: Config, tracking: AnonymousTracking = None) -> Optional["S3Client"]:
+    def create_client(
+        cls, config: Config, tracking: AnonymousTracking = None
+    ) -> Optional["S3Client"]:
         return cls(config, tracking=tracking) if config.has_s3 else None
 
     def send_report(

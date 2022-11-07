@@ -57,7 +57,10 @@ class InvalidAlertType(Error):
 
 class DbtCommandError(Error):
     """Exception raised while executing a dbt command"""
-    def __init__(self, err: subprocess.CalledProcessError, base_command_args: List[str]):
+
+    def __init__(
+        self, err: subprocess.CalledProcessError, base_command_args: List[str]
+    ):
         super().__init__(
             f"Failed to run dbt command - cmd: {err.cmd}, output: {err.output}, err: {err.stderr}"
         )
@@ -73,7 +76,7 @@ class DbtCommandError(Error):
         return {
             "command_args": self.base_command_args,
             "return_code": self.return_code,
-            **self.extract_detailed_dbt_command_args(self.base_command_args)
+            **self.extract_detailed_dbt_command_args(self.base_command_args),
         }
 
     @staticmethod
