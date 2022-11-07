@@ -26,6 +26,8 @@ class AnonymousTracking:
     ANONYMOUS_USER_ID_FILE = ".user_id"
     POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
 
+    INTERNAL_EXCEPTIONS_LIMIT = 5
+
     def __init__(self, config: Config) -> None:
         self._env_props = {}
         self.anonymous_user_id = None
@@ -115,7 +117,7 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
-        if self.internal_exceptions:
+        if self.internal_exceptions and len(self.internal_exceptions) < self.INTERNAL_EXCEPTIONS_LIMIT:
             props["internal_exceptions"] = self.internal_exceptions
         self.send_event("cli-end", properties=props)
 
