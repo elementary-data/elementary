@@ -105,8 +105,6 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
-        if self.internal_exceptions:
-            props["internal_exceptions"] = self.internal_exceptions
         self.send_event("cli-start", properties=props)
 
     def track_cli_end(
@@ -117,6 +115,8 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
+        if self.internal_exceptions:
+            props["internal_exceptions"] = self.internal_exceptions
         self.send_event("cli-end", properties=props)
 
     def track_cli_exception(
