@@ -39,9 +39,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git clone https://github.com/elementary-data/elementary.git
-          ls
           cd elementary
           git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
+          sed 's/version="${{ needs.get-latest-release-tags.outputs.py }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped }}"/' ./setup.py
+          sed 's/version: ${{ needs.get-latest-release-tags.outputs.dbt }}/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
           sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped }}"/' ./setup.py
           sed -i 's/version: ${{ needs.get-latest-release-tags.outputs.dbt }}/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
           git config --global user.email "elementary-github-action@elementary-data.com"
