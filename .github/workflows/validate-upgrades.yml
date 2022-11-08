@@ -3,12 +3,12 @@ on:
   pull_request:
     types:
       - opened
-    branches:
-      - "release/**"
+    branches: [ "master" ]
   workflow_dispatch:
 
-jobs:
+jobs:  
   get-latest-release-tags:
+    if:  startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-latest
     outputs:
       py: ${{ steps.get-tag.outputs.py }}
@@ -26,6 +26,7 @@ jobs:
           echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
 
   validate-upgrade-tests:
+    if:  startsWith(github.head_ref, 'releases/')
     strategy:
       fail-fast: false
       matrix:
