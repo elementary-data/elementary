@@ -22,8 +22,8 @@ jobs:
       - name: Bump tag version
         id: bump-tag
         run: |
-          echo "py-bump=&(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
-          echo "dbt-bump=&(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "py-bump=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "dbt-bump=$(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
 
       - name: Confirm release tag
         run: |
@@ -33,7 +33,7 @@ jobs:
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bump }}"
 
   validate-upgrade-dbt-package:
-    if: ${{ needs.get-latest-release-tags.outputs.dbt }} == 1.1.1
+    if: 0.0.0 == 1.1.1
     strategy:
       fail-fast: false
       matrix:
@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
 
   validate-upgrade-cli:
-    if: ${{ needs.get-latest-release-tags.outputs.dbt }} == 1.1.1
+    if: 0.0.0 == 1.1.1
     strategy:
       fail-fast: false
       matrix:
