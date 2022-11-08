@@ -33,7 +33,7 @@ jobs:
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bump }}"
 
   validate-upgrade-dbt-package:
-    if: "0.0.0" == "1.1.1"
+    if: '0.0.0' == '1.1.1'
     strategy:
       fail-fast: false
       matrix:
@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
 
   validate-upgrade-cli:
-    if: "0.0.0" == "1.1.1"
+    if: '0.0.0' == '1.1.1'
     strategy:
       fail-fast: false
       matrix:
