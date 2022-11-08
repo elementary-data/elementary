@@ -55,4 +55,4 @@ jobs:
       - name: Commit changes
         run: git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
       - name: Push code
-          git push origin release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
+        run: git push origin release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
