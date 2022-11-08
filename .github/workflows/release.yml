@@ -49,7 +49,7 @@ jobs:
           git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
           sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py-number }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"/' ./setup.py
           sed -i '$s/version:.*/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
-          git config --global user.email "idanshavit31@gmail.com"
-          git config --global user.name "IDoneShaveIt"
+          git config --global user.email idanshavit31@gmail.com
+          git config --global user.name IDoneShaveIt
           git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
           git push origin -u HEAD
