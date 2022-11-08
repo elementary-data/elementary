@@ -8,6 +8,8 @@ jobs:
     outputs:
       py: ${{ steps.get-tag.outputs.py }}
       dbt: ${{ steps.get-tag.outputs.dbt }}
+      py-bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
+      dbt-bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
     steps:
       - name: Get lastest release tag
         id: get-tag
@@ -18,12 +20,29 @@ jobs:
       - name: Bump tag version
         id: bump-tag
         run: |
-          echo "py-bump=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
-          echo "dbt-bump=$(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "py-bumped=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "dbt-bumped=$(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
 
       - name: Confirm release tag
         run: |
           echo "Python: ${{ steps.get-tag.outputs.py }}"
           echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
-          echo "Python bumped: ${{ steps.bump-tag.outputs.py-bump }}"
-          echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bump }}"
+          echo "Python bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
+          echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
+
+  bump-cli-versio:
+    needs: get-latest-release-tags
+    runs-on: ubuntu-latest
+    secrets: inherit
+    steps:
+      - name: bump-version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone https://github.com/elementary-data/elementary.git
+          cd elementary
+          git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
+          sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped }}"/' ./setup.py
+          sed -i 's/version: ${{ needs.get-latest-release-tags.outputs.dbt }}/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
+          git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
+          git push origin -u HEAD
