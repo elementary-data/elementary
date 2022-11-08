@@ -43,5 +43,7 @@ jobs:
           git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
           sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped }}"/' ./setup.py
           sed -i 's/version: ${{ needs.get-latest-release-tags.outputs.dbt }}/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
+          git config --global user.email "elementary-github-action@elementary-data.com"
+          git config --global user.name "Elementary Github action"
           git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
           git push origin -u HEAD
