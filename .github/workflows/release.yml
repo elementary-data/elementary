@@ -40,16 +40,19 @@ jobs:
     needs: get-latest-release-tags
     runs-on: ubuntu-latest
     steps:
-      - name: bump-version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Create release branch
+        run: git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
+      - name: Initial config:
         run: |
-          git clone https://github.com/elementary-data/elementary.git
-          cd elementary
-          git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - name: Bump version
+        run: |
           sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py-number }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"/' ./setup.py
           sed -i '$s/version:.*/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
-          git push -u origin HEAD
+      - name: Commit changes
+        run: git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
+      - name: Push code
+          git push origin release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
