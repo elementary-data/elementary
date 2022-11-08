@@ -1,0 +1,38 @@
+name: Validate upgrades
+on:
+  pull_request:
+    types:
+      - opened
+    branches:
+      - "release/**"
+  workflow_dispatch:
+
+jobs:
+  get-latest-release-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      py: ${{ steps.get-tag.outputs.py }}
+      dbt: ${{ steps.get-tag.outputs.dbt }}
+    steps:
+      - name: Get lastest release tag
+        id: get-tag
+        run: |
+          echo "py=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "dbt=$(curl -s https://api.github.com/repos/elementary-data/dbt-data-reliability/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+
+      - name: Confirm release tag
+        run: |
+          echo "Python: ${{ steps.get-tag.outputs.py }}"
+          echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
+
+  validate-upgrade-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        warehouse-type: [snowflake, bigquery, redshift, databricks, spark]
+    needs: get-latest-release-tags
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: ${{ matrix.warehouse-type }}
+      dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
+    secrets: inherit
