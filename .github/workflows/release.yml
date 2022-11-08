@@ -27,29 +27,3 @@ jobs:
           echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
           echo "Python bumped: ${{ steps.bump-tag.outputs.py-bump }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bump }}"
-
-  validate-upgrade-dbt-package:
-    if: '0.0.0' == '1.1.1'
-    strategy:
-      fail-fast: false
-      matrix:
-        warehouse-type: [snowflake, bigquery, redshift, databricks]
-    needs: get-latest-release-tags
-    uses: ./.github/workflows/test-warehouse.yml
-    with:
-      warehouse-type: ${{ matrix.warehouse-type }}
-      dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
-    secrets: inherit
-
-  validate-upgrade-cli:
-    if: '0.0.0' == '1.1.1'
-    strategy:
-      fail-fast: false
-      matrix:
-        warehouse-type: [snowflake, bigquery, redshift, databricks]
-    needs: get-latest-release-tags
-    uses: ./.github/workflows/test-warehouse.yml
-    with:
-      warehouse-type: ${{ matrix.warehouse-type }}
-      elementary-ref: ${{ needs.get-latest-release-tags.outputs.py }}
-    secrets: inherit
