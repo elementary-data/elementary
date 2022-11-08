@@ -8,8 +8,8 @@ jobs:
     outputs:
       py: ${{ steps.get-tag.outputs.py }}
       dbt: ${{ steps.get-tag.outputs.dbt }}
-      py-bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
-      dbt-bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
+      py-bumped: ${{ steps.bump-tag.outputs.py-bumped }}
+      dbt-bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}
     steps:
       - name: Get lastest release tag
         id: get-tag
