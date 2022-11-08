@@ -7,27 +7,33 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       py: ${{ steps.get-tag.outputs.py }}
+      py-number: ${{ steps.get-tag.outputs.py-number }}
       dbt: ${{ steps.get-tag.outputs.dbt }}
-      py-bumped: ${{ steps.bump-tag.outputs.py-bumped }}
+      py-bumped-number: ${{ steps.bump-tag.outputs.py-bumped-number }}
       dbt-bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}
+      py-bumped: ${{ steps.bump-tag.outputs.py-bumped }}
     steps:
       - name: Get lastest release tag
         id: get-tag
         run: |
           echo "py=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "py-number=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g' | cut -c 2-)" >> $GITHUB_OUTPUT
           echo "dbt=$(curl -s https://api.github.com/repos/elementary-data/dbt-data-reliability/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
 
       - name: Bump tag version
         id: bump-tag
         run: |
           echo "py-bumped=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "py-bumped-number=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=. | cut -c 2-)" >> $GITHUB_OUTPUT
           echo "dbt-bumped=$(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
 
       - name: Confirm release tag
         run: |
           echo "Python: ${{ steps.get-tag.outputs.py }}"
+          echo "Python number: ${{ steps.get-tag.outputs.py-number }}"
           echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
           echo "Python bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
+          echo "Python bumped number: ${{ steps.bump-tag.outputs.py-bumped-number }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
 
   bump-cli-versio:
@@ -41,10 +47,8 @@ jobs:
           git clone https://github.com/elementary-data/elementary.git
           cd elementary
           git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
-          sed 's/version="${{ needs.get-latest-release-tags.outputs.py }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped }}"/' ./setup.py
-          sed 's/version: ${{ needs.get-latest-release-tags.outputs.dbt }}/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
-          sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped }}"/' ./setup.py
-          sed -i 's/version: ${{ needs.get-latest-release-tags.outputs.dbt }}/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
+          sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py-number }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"/' ./setup.py
+          sed -i '$s/version:.*/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
           git config --global user.email "elementary-github-action@elementary-data.com"
           git config --global user.name "Elementary Github action"
           git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
