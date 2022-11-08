@@ -33,7 +33,6 @@ jobs:
   bump-cli-versio:
     needs: get-latest-release-tags
     runs-on: ubuntu-latest
-    secrets: inherit
     steps:
       - name: bump-version
         env:
