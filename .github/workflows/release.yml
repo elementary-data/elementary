@@ -1,0 +1,60 @@
+name: Release workflow
+on:
+  pull_request:
+    types:
+      - opened
+    branches: ["master"]
+  workflow_dispatch:
+
+jobs:
+  get-latest-release-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      py: ${{ steps.get-tag.outputs.py }}
+      dbt: ${{ steps.get-tag.outputs.dbt }}
+    steps:
+      - name: Get lastest release tag
+        id: get-tag
+        run: |
+          echo "py=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "dbt=$(curl -s https://api.github.com/repos/elementary-data/dbt-data-reliability/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+
+      - name: Bump tag version
+        id: bump-tag
+        run: |
+          echo "py-bump=&(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "dbt-bump=&(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+
+      - name: Confirm release tag
+        run: |
+          echo "Python: ${{ steps.get-tag.outputs.py }}"
+          echo "dbt: ${{ steps.get-tag.outputs.dbt }}"
+          echo "Python bumped: ${{ steps.bump-tag.outputs.py-bump }}"
+          echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bump }}"
+
+  validate-upgrade-dbt-package:
+    if: ${{ steps.get-tag.outputs.dbt }} == 1.1.1
+    steps:
+      - name: Validate upgrade dbt package
+        strategy:
+          fail-fast: false
+          matrix:
+            warehouse-type: [snowflake, bigquery, redshift, databricks]
+        needs: get-latest-release-tags
+        uses: ./.github/workflows/test-warehouse.yml
+        with:
+          warehouse-type: ${{ matrix.warehouse-type }}
+          dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
+        secrets: inherit
+
+      - name: Validate upgrade cli
+        strategy:
+          fail-fast: false
+          matrix:
+            warehouse-type: [snowflake, bigquery, redshift, databricks]
+        needs: get-latest-release-tags
+        uses: ./.github/workflows/test-warehouse.yml
+        with:
+          warehouse-type: ${{ matrix.warehouse-type }}
+          elementary-ref: ${{ needs.get-latest-release-tags.outputs.py }}
+        secrets: inherit
