@@ -55,6 +55,7 @@ jobs:
 
   recommendation:
     runs-on: ubuntu-latest
+    needs: [get-latest-release-tags, validate-upgrade-cli]
     steps:
       - name: recommend unbreaking change upgrade
         run: |
