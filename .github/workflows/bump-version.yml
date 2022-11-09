@@ -31,7 +31,7 @@ jobs:
           echo "cli version: ${{ steps.validate-cli-input.outputs.cli-validation }}"
           echo "dbt package version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}"
       - name: fail on invalid input
-        if: ${{ steps.validate-cli-input.outputs.cli-validation }}
+        if: ${{ steps.validate-cli-input.outputs.cli-validation != inputs.cli-version }}
         uses: actions/github-script@v6
         with:
           script: |
