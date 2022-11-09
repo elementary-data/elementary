@@ -1,4 +1,4 @@
-name: Release workflow
+name: Release upgrades validations
 on:
   workflow_dispatch:
 
@@ -36,23 +36,21 @@ jobs:
           echo "Python bumped number: ${{ steps.bump-tag.outputs.py-bumped-number }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
 
-  bump-cli-versio:
+  validate-upgrade-cli:
+    strategy:
+      fail-fast: false
+      matrix:
+        warehouse-type: [snowflake]
     needs: get-latest-release-tags
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: ${{ matrix.warehouse-type }}
+      dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
+    secrets: inherit
+
+  recommend:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Create release branch
-        run: git checkout -b release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
-      - name: Initial config
+      - name: recommend upgdrade
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email noreply@github.com
-      - name: Bump version
-        run: |
-          sed -i 's/version="${{ needs.get-latest-release-tags.outputs.py-number }}"/version="${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"/' ./setup.py
-          sed -i '$s/version:.*/version: ${{ needs.get-latest-release-tags.outputs.dbt-bumped }}/' ./elementary/monitor/dbt_project/packages.yml
-      - name: Commit changes
-        run: git commit -am "release ${{ needs.get-latest-release-tags.outputs.py-bumped }}"
-      - name: Push code
-        run: git push origin release/${{ needs.get-latest-release-tags.outputs.py-bumped }}
+          if ${{ jobs.validate-upgrade-cli.result }} == "success"; then echo "Everything runs successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}" ; else echo "Upgrade validation failed. Make sure you do anything to keep backwards competability - If not possible, update major."; fi
