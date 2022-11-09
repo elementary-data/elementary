@@ -1,0 +1,66 @@
+name: Draft release
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        type: string
+        required: true
+        description: Release version (starts with v)
+
+  workflow_call:
+    inputs:
+      release-version:
+        type: string
+        required: true
+
+jobs:
+  validate-version:
+    runs-on: ubuntu-latest
+    outputs:
+      validated-version: ${{ steps.validate-input.outputs.version-validation }}
+    steps:
+      - name: validate version input
+        id: validate-input
+        run: echo "version-validation=$(echo ${{ inputs.release-version }} | sed -n '/^v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
+      - name: echo versions
+        run: |
+          echo "Release version: ${{ steps.validate-input.outputs.version-validation }}"
+      - name: fail on invalid input
+        if: ${{ steps.validate-input.outputs.version-validation == '' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed("Invalid release version - ${{ inputs.release-version }}")
+  
+  draft-release:
+    needs: validate-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        with:
+          tag_name: test ${{ inputs.release-version }}
+          release_name: test ${{ inputs.release-version }}
+          body: |
+            **New Features**
+
+            - <Fill new feature here>
+
+            **Changes**
+
+            - <Fill change here>
+
+            **Bug Fixes**
+
+            - <Fill bug fix here>
+
+            **Contributions & Acknowledgements**
+
+            - <Fill contribution here>
+          draft: true
+          prerelease: false
