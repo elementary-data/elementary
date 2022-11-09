@@ -2,26 +2,34 @@ name: Bump version
 on:
   workflow_dispatch:
     inputs:
-      version:
+      cli-version:
         type: string
         required: true
-        description: New version
+        description: New cli version
+      dbt-package-version:
+        type: string
+        required: false
+        description: Elementary package version (will use cli version if not provided)
 
 jobs:
   validate-version:
     runs-on: ubuntu-latest
     outputs:
-      validated-version: ${{ steps.validate-input.outputs.validation }}
+      validated-cli-version: ${{ steps.validate-cli-input.outputs.cli-validation }}
+      validated-dbt-package-version: ${{ steps.vvalidate-dbt-package-input.outputs.dbt-package-validation }}
     steps:
-      - name: validate version input
-        id: validate-input
-        run: echo "validation=$(echo ${{ inputs.version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
+      - name: validate cli version input
+        id: validate-cli-input
+        run: echo "cli-validation=$(echo ${{ inputs.cli-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
+      - name: validate dbt package verion
+        id: validate-dbt-package-input
+        run: if ${{ inputs.dbt-package-version }}; then echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')"; else echo "dbt-package-validation=$(echo ${{ steps.validate-cli-input.outputs.cli-validation }})" >> $GITHUB_OUTPUT
       - name: fail on invalid input
-        if: ${{ steps.validate-input.outputs.validation }} != ${{ inputs.version }}
+        if: ${{ steps.validate-cli-input.outputs.cli-validation }} == null || ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} is null
         uses: actions/github-script@v3
         with:
           script: |
-            core.setFailed('Invalid input version')
+            core.setFailed('Invalid version inputs')
 
   bump-cli-version:
     needs: validate-version
@@ -30,15 +38,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Create release branch
-        run: git checkout -b release/v${{ inputs.version }}
+        run: git checkout -b release/v${{ inputs.cli-version }}
       - name: Initial config
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
       - name: Bump version
         run: |
-          sed -i 's/version="[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$"/version="${{ inputs.version }}"/' ./setup.py
-          sed -i '$s/version:.*/version: ${{ inputs.version }}/' ./elementary/monitor/dbt_project/packages.yml
+          sed -i 's/version="[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version="${{ inputs.cli-version }}"/' ./setup.py
+          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.validated-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
       - name: Commit changes
         run: git commit -am "release v${{ inputs.version }}"
       - name: Push code
