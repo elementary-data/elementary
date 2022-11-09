@@ -16,16 +16,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       validated-cli-version: ${{ steps.validate-cli-input.outputs.cli-validation }}
-      validated-dbt-package-version: ${{ steps.vvalidate-dbt-package-input.outputs.dbt-package-validation }}
+      validated-dbt-package-version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} || ${{ steps.validate-cli-input.outputs.cli-validation }}
     steps:
       - name: validate cli version input
         id: validate-cli-input
         run: echo "cli-validation=$(echo ${{ inputs.cli-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
-      - name: validate dbt package verion
+      - name: validate dbt package version
+        if: ${{ inputs.dbt-package-version }}
         id: validate-dbt-package-input
-        run: if ${{ inputs.dbt-package-version }}; then echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} else | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" ; else echo "dbt-package-validation=$(echo ${{ steps.validate-cli-input.outputs.cli-validation }})"; fi >> $GITHUB_OUTPUT
+        run: echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
       - name: fail on invalid input
-        if: ${{ steps.validate-cli-input.outputs.cli-validation }} == null || ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} is null
+        if: ${{ steps.validate-cli-input.outputs.cli-validation }} == null || ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} == null
         uses: actions/github-script@v3
         with:
           script: |
