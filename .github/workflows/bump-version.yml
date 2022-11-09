@@ -26,6 +26,10 @@ jobs:
         if: ${{ inputs.dbt-package-version }}
         id: validate-dbt-package-input
         run: echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
+      - name: echo versions
+        run: |
+          echo "cli version: ${{ steps.validate-cli-input.outputs.cli-validation }}"
+          echo "dbt package version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}"
       - name: fail on invalid input
         if: ${{ steps.validate-cli-input.outputs.cli-validation }}
         run: |
