@@ -57,11 +57,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: recommend unbreaking change upgrade
-        if: ${{ jobs.validate-upgrade-cli.result == "success" }}
         run: |
           echo "Everything runs successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"
       - name: recommend breaking change upgrade
-        if: ${{ jobs.validate-upgrade-cli.result != "success" }}
+        if: ${{ failure() }}
         uses: actions/github-script@v6
         with:
           script: |
