@@ -61,6 +61,6 @@ jobs:
         run: |
           sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.default-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
       - name: Commit changes
-        run: git commit -am "release v${{ inputs.version }}"
+        run: git commit -am "release v${{ inputs.cli-version }}"
       - name: Push code
-        run: git push origin release/v${{ inputs.version }}
+        run: git push origin release/v${{ inputs.cli-version }}
