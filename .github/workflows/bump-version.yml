@@ -11,6 +11,16 @@ on:
         required: false
         description: Elementary package version (will use cli version if not provided)
 
+  workflow_call:
+    inputs:
+      nputs:
+      cli-version:
+        type: string
+        required: true
+      dbt-package-version:
+        type: string
+        required: false
+
 jobs:
   validate-version:
     runs-on: ubuntu-latest

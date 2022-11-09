@@ -1,6 +1,11 @@
 name: Release upgrades validations
 on:
   workflow_dispatch:
+    inputs:
+      should-bump-on-success:
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   get-latest-release-tags:
@@ -64,6 +69,7 @@ jobs:
 
   bump-version:
     needs: [get-latest-release-tags, recommendation]
+    if: ${{ inputs.should-bump-on-success == 'true' }}
     uses: ./.github/workflows/bump-version.yml
     with:
       cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
