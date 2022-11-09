@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       validated-cli-version: ${{ steps.validate-cli-input.outputs.cli-validation }}
-      validated-dbt-package-version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} || ${{ steps.validate-cli-input.outputs.cli-validation }}
+      default-dbt-package-version: ${{ steps.validate-cli-input.outputs.cli-validation }}
+      validated-dbt-package-version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}
     steps:
       - name: validate cli version input
         id: validate-cli-input
@@ -26,11 +27,10 @@ jobs:
         id: validate-dbt-package-input
         run: echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
       - name: fail on invalid input
-        if: ${{ steps.validate-cli-input.outputs.cli-validation }} == null || ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} == null
-        uses: actions/github-script@v3
-        with:
-          script: |
-            core.setFailed('Invalid version inputs')
+        if: ${{ steps.validate-cli-input.outputs.cli-validation }}
+        run: |
+          echo "Invalid version inputs"
+          exit 1
 
   bump-cli-version:
     needs: validate-version
