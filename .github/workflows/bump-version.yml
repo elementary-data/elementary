@@ -13,7 +13,6 @@ on:
 
   workflow_call:
     inputs:
-      nputs:
       cli-version:
         type: string
         required: true

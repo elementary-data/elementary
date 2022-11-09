@@ -4,6 +4,7 @@ on:
     inputs:
       should-bump-on-success:
         type: boolean
+        required: false
         default: false
 
 jobs:
