@@ -64,3 +64,18 @@ jobs:
         run: git commit -am "release v${{ inputs.cli-version }}"
       - name: Push code
         run: git push origin release/v${{ inputs.cli-version }}
+
+  create-pr:
+    needs: bump-cli-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: create pull request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "release/v${{ inputs.cli-version }}"
+          destination_branch: "master"
+          pr_title: "release/v${{ inputs.cli-version }}"
+          pr_body: "Open automatically using bump version workflow"
+          pr_draft: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
