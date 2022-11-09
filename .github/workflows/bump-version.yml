@@ -77,5 +77,4 @@ jobs:
           destination_branch: "master"
           pr_title: "release/v${{ inputs.cli-version }}"
           pr_body: "Open automatically using bump version workflow"
-          pr_draft: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
