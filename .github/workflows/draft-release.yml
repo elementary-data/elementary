@@ -44,8 +44,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         with:
-          tag_name: test ${{ inputs.release-version }}
-          release_name: test ${{ inputs.release-version }}
+          tag_name: ${{ inputs.release-version }}
+          release_name: ${{ inputs.release-version }}
           body: |
             **New Features**
 
