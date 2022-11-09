@@ -31,7 +31,7 @@ jobs:
           echo "cli version: ${{ steps.validate-cli-input.outputs.cli-validation }}"
           echo "dbt package version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}"
       - name: fail on invalid input
-        if: ${{ steps.validate-cli-input.outputs.cli-validation != inputs.cli-version }}
+        if: ${{ steps.validate-cli-input.outputs.cli-validation == "" }}
         uses: actions/github-script@v6
         with:
           script: |
@@ -52,7 +52,14 @@ jobs:
       - name: Bump version
         run: |
           sed -i 's/version="[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version="${{ inputs.cli-version }}"/' ./setup.py
+      - name: Bump version for package (using input)
+        if: ${{ steps.validate-cli-input.outputs.validated-dbt-package-version != ""}}
+        run: |
           sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.validated-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
+      - name: Bump version for package (using default)
+        if: ${{ steps.validate-cli-input.outputs.validated-dbt-package-version == ""}}
+        run: |
+          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.default-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
       - name: Commit changes
         run: git commit -am "release v${{ inputs.version }}"
       - name: Push code
