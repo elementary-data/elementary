@@ -23,7 +23,7 @@ jobs:
         run: echo "cli-validation=$(echo ${{ inputs.cli-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
       - name: validate dbt package verion
         id: validate-dbt-package-input
-        run: if ${{ inputs.dbt-package-version }}; then echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')"; else echo "dbt-package-validation=$(echo ${{ steps.validate-cli-input.outputs.cli-validation }})" >> $GITHUB_OUTPUT
+        run: if ${{ inputs.dbt-package-version }}; then echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} else | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" ; else echo "dbt-package-validation=$(echo ${{ steps.validate-cli-input.outputs.cli-validation }})"; fi >> $GITHUB_OUTPUT
       - name: fail on invalid input
         if: ${{ steps.validate-cli-input.outputs.cli-validation }} == null || ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }} is null
         uses: actions/github-script@v3
