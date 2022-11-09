@@ -40,23 +40,21 @@ jobs:
           echo "Python bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
           echo "Python bumped number: ${{ steps.bump-tag.outputs.py-bumped-number }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
-          echo "should bump: ${{ inputs.should-bump-on-success }}"
-
-      - name: test bool
-        if: ${{ inputs.should-bump-on-success == 'true' }}
-        run: |
-          echo "bool is string"
-
-      - name: test bool 2
-        if: ${{ inputs.should-bump-on-success }}
-        run: |
-          echo "bool is bool"
+  
+    bump-version:
+    needs: [get-latest-release-tags]
+    if: ${{ inputs.should-bump-on-success }}
+    uses: ./.github/workflows/bump-version.yml
+    with:
+      cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
+      dbt-package-version: ${{ needs.get-latest-release-tags.outputs.dbt }}
+    secrets: inherit
 
   validate-upgrade-cli:
     strategy:
       fail-fast: false
       matrix:
-        warehouse-type: [snowflake]
+        warehouse-type: [ snowflake, bigquery, redshift, databricks ]
     needs: get-latest-release-tags
     uses: ./.github/workflows/test-warehouse.yml
     with:
@@ -79,11 +77,3 @@ jobs:
           script: |
             core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards competability - If not possible, update minor.")
 
-  bump-version:
-    needs: [get-latest-release-tags, recommendation]
-    if: ${{ inputs.should-bump-on-success == 'true' }}
-    uses: ./.github/workflows/bump-version.yml
-    with:
-      cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
-      dbt-package-version: ${{ needs.get-latest-release-tags.outputs.dbt }}
-    secrets: inherit
