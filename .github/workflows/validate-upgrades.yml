@@ -48,9 +48,24 @@ jobs:
       dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
     secrets: inherit
 
-  recommend:
+  recommendation:
     runs-on: ubuntu-latest
     steps:
-      - name: recommend upgdrade
+      - name: recommend unbreaking change upgrade
+        if: ${{ jobs.validate-upgrade-cli.result == "success" }}
         run: |
-          if ${{ jobs.validate-upgrade-cli.result }} == "success"; then echo "Everything runs successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}" ; else echo "Upgrade validation failed. Make sure you do anything to keep backwards competability - If not possible, update major."; fi
+          echo "Everything runs successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"
+      - name: recommend breaking change upgrade
+        if: ${{ jobs.validate-upgrade-cli.result != "success" }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards competability - If not possible, update minor.")
+
+  bump-version:
+    needs: [get-latest-release-tags, recommendation]
+    uses: ./.github/workflows/bump-version.yml
+    with:
+      cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
+      dbt-package-version: ${{ needs.get-latest-release-tags.outputs.dbt }}
+    secrets: inherit
