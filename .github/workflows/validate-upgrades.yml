@@ -40,15 +40,6 @@ jobs:
           echo "Python bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
           echo "Python bumped number: ${{ steps.bump-tag.outputs.py-bumped-number }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
-  
-  bump-version:
-    needs: [get-latest-release-tags]
-    if: ${{ inputs.should-bump-on-success }}
-    uses: ./.github/workflows/bump-version.yml
-    with:
-      cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
-      dbt-package-version: ${{ needs.get-latest-release-tags.outputs.dbt }}
-    secrets: inherit
 
   validate-upgrade-cli:
     strategy:
@@ -77,3 +68,11 @@ jobs:
           script: |
             core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards competability - If not possible, update minor.")
 
+  bump-version:
+    needs: [get-latest-release-tags, recommendation]
+    if: ${{ inputs.should-bump-on-success }}
+    uses: ./.github/workflows/bump-version.yml
+    with:
+      cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
+      dbt-package-version: ${{ needs.get-latest-release-tags.outputs.dbt }}
+    secrets: inherit
