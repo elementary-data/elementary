@@ -41,7 +41,7 @@ jobs:
           echo "Python bumped number: ${{ steps.bump-tag.outputs.py-bumped-number }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
   
-    bump-version:
+  bump-version:
     needs: [get-latest-release-tags]
     if: ${{ inputs.should-bump-on-success }}
     uses: ./.github/workflows/bump-version.yml
