@@ -32,9 +32,10 @@ jobs:
           echo "dbt package version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}"
       - name: fail on invalid input
         if: ${{ steps.validate-cli-input.outputs.cli-validation }}
-        run: |
-          echo "Invalid version inputs"
-          exit 1
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed("Invalid version inputs")
 
   bump-cli-version:
     needs: validate-version
