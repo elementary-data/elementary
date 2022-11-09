@@ -40,6 +40,7 @@ jobs:
           echo "Python bumped: ${{ steps.bump-tag.outputs.py-bumped }}"
           echo "Python bumped number: ${{ steps.bump-tag.outputs.py-bumped-number }}"
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
+          echo "should bump: ${{ inputs.should-bump-on-success }}"
 
   validate-upgrade-cli:
     strategy:
@@ -51,6 +52,7 @@ jobs:
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
+      dbt-version: 1.0.0
     secrets: inherit
 
   recommendation:
