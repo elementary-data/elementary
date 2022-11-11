@@ -135,7 +135,7 @@ class Config:
 
     @property
     def has_s3(self):
-        return self.s3_bucket_name and self.has_aws
+        return self.s3_bucket_name
 
     @property
     def has_gcloud(self):
