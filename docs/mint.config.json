@@ -100,15 +100,6 @@
       ]
     },
     {
-      "group": "Tutorial",
-      "pages": [
-        "tutorial/elementary-tutorial",
-        "tutorial/setup",
-        "tutorial/tests-with-elementary",
-        "tutorial/running-elementary"
-      ]
-    },
-    {
       "group": "Community & Support",
       "pages": [
         "general/troubleshooting",
