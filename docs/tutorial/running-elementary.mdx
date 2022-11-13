@@ -1,0 +1,94 @@
+---
+title: "Running Elementary"
+---
+
+Now that we defined Elemntary's tests, it is time to run Elementary!
+
+## Running Elementary
+
+before we start, lets make sure that we work from our dbt project directory:
+
+```shell
+cd <tutorial cloned repository path>/elementary_tutorial/dbt_project
+```
+
+#### 1. Populate vaild data
+
+We want to seed data to our project warehouse, so we could run Elementary and play with our tests:
+
+```shell
+dbt seed -s training
+```
+
+The next step is to run our models and create the data at our warehouse:
+
+```shell
+dbt run --vars "{'anomalies': False}"
+```
+
+<Info>
+
+We set the anomalies flag to False, to make sure we are only seeding good data to our warehouse.
+
+</Info>
+
+#### 2. Running Elementary
+
+Now that we have populated data to our warehouse, we want to run our tests and see that everything passed when our data is good and valid!
+
+Lets run the tests:
+
+```shell
+dbt test
+```
+
+All our tests should pass!
+
+To have a better visualisation of our test runs, lets create Elementary's report:
+
+```shell
+cli monitor report
+```
+
+#### 3. Populate broken data
+
+Now that we saw that our tests work and everything is pass when our data is good and valid,
+Lets populate broken data to our project warehouse, so we could really see how our tests work:
+
+```shell
+dbt seed -s validation
+```
+
+The next step is to run our models and create the data at our warehouse:
+
+```shell
+dbt run --vars "{'anomalies': True}"
+```
+
+<Info>
+
+We set the anomalies flag to True, to make sure we are seeding broken data to our warehouse.
+
+</Info>
+
+#### 4. Running Elementary again!
+
+Now that we have populated broken data to our warehouse, we want to run our tests and see that our tests monitor our data!
+
+Lets run the tests:
+
+```shell
+dbt test
+```
+
+All our tests should fail!
+
+To have a better visualisation of our test runs, lets create Elementary's report:
+
+```shell
+cli monitor report
+```
+
+#### Congratulations!
+
+Congratulations! We successfully configured Elementary's tests & ran Elementary's Report!!!
