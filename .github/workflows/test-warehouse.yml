@@ -63,7 +63,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     concurrency:
       group: tests-${{ inputs.warehouse-type }}-${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
