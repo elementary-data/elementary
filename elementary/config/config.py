@@ -128,12 +128,6 @@ class Config:
         return self.slack_webhook or (self.slack_token and self.slack_channel_name)
 
     @property
-    def has_aws(self) -> bool:
-        return self.aws_profile_name or (
-            self.aws_access_key_id and self.aws_secret_access_key
-        )
-
-    @property
     def has_s3(self):
         return self.s3_bucket_name
 
