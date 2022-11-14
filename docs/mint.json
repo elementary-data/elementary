@@ -46,11 +46,7 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "quickstart-cli"
-      ]
+      "pages": ["introduction", "quickstart", "quickstart-cli"]
     },
     {
       "group": "Guides",
@@ -117,5 +113,9 @@
     "ga4": {
       "measurementId": "G-4DQN8YR4NH"
     }
+  },
+  "classes": {
+    "anchors": "group-hover:bg-gradient-to-tr from-[#FE8913] to-[#FE10B0]",
+    "activeAnchors": "bg-gradient-to-tr"
   }
 }
