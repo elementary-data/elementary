@@ -1,7 +1,7 @@
 {%- macro get_test_results(days_back = 7, results_sample_limit = 5) -%}
     {% set select_test_results %}
         with test_results as (
-            select * from {{ ref('elementary', 'elementary_test_results') }}
+            {{ elementary_internal.current_tests_run_results_query(days_back=days_back) }}
         ),
 
         tests_in_last_chosen_days as (
@@ -9,7 +9,6 @@
                   {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
                   row_number() over (partition by model_unique_id, test_unique_id, column_name, test_sub_type order by detected_at desc) as row_number
                 from test_results
-                where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         ),
 
         latest_tests_in_the_last_chosen_days as (
