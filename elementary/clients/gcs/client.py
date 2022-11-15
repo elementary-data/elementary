@@ -7,6 +7,7 @@ from google.cloud import storage
 from google.oauth2 import service_account
 
 from elementary.config.config import Config
+from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 
@@ -14,13 +15,16 @@ logger = get_logger(__name__)
 
 
 class GCSClient:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, tracking: AnonymousTracking = None):
         self.config = config
         self.client = self.get_client(config)
+        self.tracking = tracking
 
     @classmethod
-    def create_client(cls, config: Config) -> Optional["GCSClient"]:
-        return cls(config) if config.has_gcs else None
+    def create_client(
+        cls, config: Config, tracking: AnonymousTracking = None
+    ) -> Optional["GCSClient"]:
+        return cls(config, tracking=tracking) if config.has_gcs else None
 
     def send_report(
         self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
@@ -51,8 +55,10 @@ class GCSClient:
                     else "index.html",
                 )
                 logger.info("Updated GCS bucket's website.")
-        except google.cloud.exceptions.GoogleCloudError:
+        except google.cloud.exceptions.GoogleCloudError as ex:
             logger.exception("Failed to upload report to GCS.")
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(ex)
             return False
         return True
 

@@ -66,8 +66,7 @@ def convert_partial_iso_format_to_full_iso_format(partial_iso_format_time: str) 
         date_with_timezone = date.replace(tzinfo=time_zone, microsecond=0)
         return date_with_timezone.isoformat()
     except ValueError as err:
-        logger.error(
-            f'Failed to covert time string: "{partial_iso_format_time}" to ISO format',
-            exc_info=True,
+        logger.exception(
+            f'Failed to covert time string: "{partial_iso_format_time}" to ISO format'
         )
         return partial_iso_format_time

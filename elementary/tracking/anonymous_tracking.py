@@ -9,6 +9,7 @@ import posthog
 from pydantic import BaseModel
 
 import elementary.tracking.env
+import elementary.exceptions.exceptions
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
@@ -25,6 +26,8 @@ class AnonymousTracking:
     ANONYMOUS_USER_ID_FILE = ".user_id"
     POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
 
+    INTERNAL_EXCEPTIONS_LIMIT = 5
+
     def __init__(self, config: Config) -> None:
         self._env_props = {}
         self.anonymous_user_id = None
@@ -33,6 +36,12 @@ class AnonymousTracking:
         self.do_not_track = config.anonymous_tracking_enabled is False
         self.run_id = str(uuid.uuid4())
         self.init()
+
+        # Exceptions that occurred during the run of the CLI, but don't fail the entire run.
+        # We want to avoid sending an event for each one of these (as there might be many of them), so we will send
+        # them as a part of the cli-end event.
+        self.internal_exceptions = []
+        self.internal_exceptions_count = 0
 
     def init(self):
         try:
@@ -109,17 +118,33 @@ class AnonymousTracking:
             "module_name": module_name,
             "command": command,
         }
+        if self.internal_exceptions_count > 0:
+            props["internal_exceptions"] = self.internal_exceptions
+            props["internal_exceptions_count"] = self.internal_exceptions_count
         self.send_event("cli-end", properties=props)
 
     def track_cli_exception(
         self, module_name: str, exc: Exception, command: str = None
     ) -> None:
         props = {
-            "exception_type": str(type(exc)),
             "module_name": module_name,
             "command": command,
         }
+        props.update(self._get_exception_properties(exc))
+
         self.send_event("cli-exception", properties=props)
+
+    def record_cli_internal_exception(self, exc: Exception):
+        self.internal_exceptions_count += 1
+        if len(self.internal_exceptions) < self.INTERNAL_EXCEPTIONS_LIMIT:
+            self.internal_exceptions.append(self._get_exception_properties(exc))
+
+    @staticmethod
+    def _get_exception_properties(exc: Exception):
+        props = {"exception_type": str(type(exc))}
+        if isinstance(exc, elementary.exceptions.exceptions.Error):
+            props.update(exc.anonymous_tracking_context)
+        return props
 
     def track_cli_help(self):
         self.send_event("cli-help")

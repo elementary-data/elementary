@@ -5,6 +5,7 @@ import boto3
 import botocore.exceptions
 
 from elementary.config.config import Config
+from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 
@@ -12,7 +13,7 @@ logger = get_logger(__name__)
 
 
 class S3Client:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, tracking: AnonymousTracking = None):
         self.config = config
         aws_session = boto3.Session(
             profile_name=config.aws_profile_name,
@@ -20,10 +21,13 @@ class S3Client:
             aws_secret_access_key=config.aws_secret_access_key,
         )
         self.client = aws_session.client("s3")
+        self.tracking = tracking
 
     @classmethod
-    def create_client(cls, config: Config) -> Optional["S3Client"]:
-        return cls(config) if config.has_s3 else None
+    def create_client(
+        cls, config: Config, tracking: AnonymousTracking = None
+    ) -> Optional["S3Client"]:
+        return cls(config, tracking=tracking) if config.has_s3 else None
 
     def send_report(
         self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
@@ -52,7 +56,9 @@ class S3Client:
                     WebsiteConfiguration={"IndexDocument": {"Suffix": report_filename}},
                 )
                 logger.info("Updated S3 bucket's website.")
-        except botocore.exceptions.ClientError:
+        except botocore.exceptions.ClientError as ex:
             logger.exception("Failed to upload report to S3.")
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(ex)
             return False
         return True
