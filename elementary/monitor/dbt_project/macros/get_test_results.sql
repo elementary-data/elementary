@@ -29,6 +29,7 @@
             test_results_description,
             owners,
             tags,
+            meta,
             test_results_query,
             other,
             test_name,

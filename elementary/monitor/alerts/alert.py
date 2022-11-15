@@ -26,6 +26,7 @@ class Alert:
         subscribers: Optional[List[str]] = None,
         slack_channel: Optional[str] = None,
         timezone: Optional[str] = None,
+        meta: Optional[dict] = None,
         **kwargs,
     ):
         self.id = id
@@ -43,6 +44,7 @@ class Alert:
         self.schema_name = schema_name
         self.owners = prettify_json_str_set(owners)
         self.tags = prettify_json_str_set(tags)
+        self.meta = meta
         self.status = status
         self.subscribers = subscribers
         self.slack_channel = slack_channel
