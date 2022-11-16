@@ -253,7 +253,7 @@
         test_results.test_params,
         test_results.severity,
         test_results.status,
-        tests.meta
+        tests.meta,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results test_results
     join dbt_tests tests on test_results.test_unique_id = tests.unique_id
