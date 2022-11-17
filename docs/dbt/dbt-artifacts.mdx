@@ -2,7 +2,7 @@
 title: "dbt artifacts"
 ---
 
-The [Elementary dbt package](../quickstart#install-the-dbt-package) includes uploading and modeling of dbt artifacts.
+The [Elementary dbt package](/quickstart#install-the-dbt-package) includes uploading and modeling of dbt artifacts.
 
 <Accordion title="What are dbt artifacts?">
 Each dbt invocation generates artifacts, with details about the project resources, configuration and execution. Most are in json format. The artifacts are practically the metadata and logs of the dbt project.
@@ -16,11 +16,11 @@ The Elementary dbt package includes macros that extract specific fields from the
 Some artifacts are updated by an [on-run-end](https://docs.getdbt.com/reference/project-configs/on-run-start-on-run-end) hook when you run `dbt run / test / build`, and some only when you run the models:
 
 - **On run end:**
-    - `elementary_test_results` - Results of all dbt tests (including elementary and other packages, such as dbt_expectations and dbt_utils).
-    - `dbt_run_results` - Results of all dbt executions.
+  - `elementary_test_results` - Results of all dbt tests (including elementary and other packages, such as dbt_expectations and dbt_utils).
+  - `dbt_run_results` - Results of all dbt executions.
 - **`dbt run` that includes elementary models:**
-    - `dbt_models`, `dbt_tests`, `dbt_sources`, `dbt_exposures`, `dbt_metrics` - Metadata and configuration. It is recommended to run these models when you make changes in your projects.
-    
+  - `dbt_models`, `dbt_tests`, `dbt_sources`, `dbt_exposures`, `dbt_metrics` - Metadata and configuration. It is recommended to run these models when you make changes in your projects.
+
 ## Which artifacts are uploaded and modeled?
 
 Elementary uploads fields from the run-results, and the graph object (includes data of manifest, catalog and sources).
