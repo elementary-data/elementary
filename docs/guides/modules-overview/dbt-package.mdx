@@ -42,6 +42,13 @@ Run results of dbt invocations, inserted at the end of each invocation.
 Each row is the invocation result of a single resource (model, test, snapshot, etc).
 New data is loaded to this model on an on-run-end hook named `elementary.upload_run_results` from each invocation that produces a result object.
 
+### dbt_invocations
+*Incremental model*
+
+Attributes associated with each dbt invocation. Inserted at the end of each invocation.
+Each row is the result of a single invocation (dbt run, dbt test, dbt build, etc).
+New data is loaded to this model on an on-run-end hook named `elementary.upload_run_results`.
+
 ### model_run_results
 *View*
 
