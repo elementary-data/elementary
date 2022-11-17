@@ -21,7 +21,8 @@
             test_sub_type,
             column_name,
             test_results_query,
-            status
+            status,
+            result_rows
         from latest_tests_in_the_last_chosen_days
     {%- endset -%}
     {% set tests_results_agate = run_query(select_test_results) %}
@@ -53,7 +54,7 @@
                     from all_test_results
                     where is_anomalous = TRUE
                 {% endset %}
-                {% set test_rows_sample = elementary_internal.get_test_rows_sample(dimension_test_result_query, test_type, metrics_sample_limit) %}
+                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, dimension_test_result_query, test_type, metrics_sample_limit) %}
                 {% set anomalous_rows = [] %}
                 {% set headers = [{'id': 'anomalous_value_timestamp', 'display_name': 'timestamp', 'type': 'date'}] %}
                 {% for row in test_rows_sample %}
@@ -85,7 +86,7 @@
                     'test_rows_sample': anomalous_rows
                 } %}
             {% else %}
-                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, metrics_sample_limit) %}
+                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, test_results_query, test_type, metrics_sample_limit) %}
             {% endif %}
         {%- endif -%}
         {% set sub_test_unique_id = get_sub_test_unique_id(
