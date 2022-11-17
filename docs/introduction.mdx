@@ -1,12 +1,15 @@
+---
+title: "Introduction"
+---
+
 <Frame>
-  <div class="dark:bg-slate-200 rounded-md p-4">
+  <div class="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/mintlify/image/upload/v1659304877/elementary/Logo_V2_chbdpu.png"
       alt="Elementary Logo"
     />
   </div>
 </Frame>
-
 
 ## What is Elementary?
 
@@ -21,7 +24,6 @@ visibility, detect data issues, send actionable alerts, and understand the impac
     alt="Demo"
   />
 </Frame>
-
 
 ## Key features
 
@@ -49,13 +51,12 @@ visibility, detect data issues, send actionable alerts, and understand the impac
 
   Inspect upstream and downstream dependencies to understand impact and root cause of data issues.
 
-
 ## How it works?
 
-For the data monitoring and dbt artifacts collection, we developed a [dbt package](./quickstart#install-the-dbt-package).
+For the data monitoring and dbt artifacts collection, we developed a [dbt package](/quickstart#install-the-dbt-package).
 The monitoring configuration is configured in your dbt project, and the monitors are dbt macros and models. All the collected data is saved to an elementary schema in your DWH.
 
-[Elementary CLI](./understand-elementary/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
+[Elementary CLI](/understand-elementary/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/High-level-flow_d21jfj.png"
@@ -74,7 +75,7 @@ For additional information and help, you can use one of these channels:
 
 Thank you 🧡 Whether it’s a bug fix, new feature, or documentation changes - we greatly appreciate contributions!
 
-Check out the [contributions guide](./general/contributions).
+Check out the [contributions guide](/general/contributions).
 
 ## Integrations
 
@@ -82,12 +83,14 @@ Check out the [contributions guide](./general/contributions).
 - dbt Cloud
 
 Data warehouses:
-- Snowflake 
+
+- Snowflake
 - BigQuery
 - Redshift
 - Databricks SQL
 
 Operations:
+
 - Slack
 - GitHub Actions
 - Amazon S3
