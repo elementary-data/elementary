@@ -46,7 +46,7 @@ If undefined, default is null (no time buckets).
 <Accordion title="sensitivity">
 `sensitivity`: [int]
 
-Threshold for the anomaly sensitivity, the [global default](../guides/add-elementary-tests) is 3. If defined for a test, the test param is used instead of the global one.
+Threshold for the anomaly sensitivity, the [global default](/guides/add-elementary-tests) is 3. If defined for a test, the test param is used instead of the global one.
 A higher number means less sensitivity (less anomalies), and a lower number means more sensitivity (more anomalies).
 
 </Accordion>
@@ -187,7 +187,7 @@ You can change their defaults by adding them with a new value in your `dbt_proje
 <Accordion title="days_back">
 `days_back`: [int]
 
-The maximum timeframe for running [time buckets](./data-anomaly-detection#tests-and-monitors-types) monitors, as well as to calculate a baseline for anomaly detection.
+The maximum timeframe for running [time buckets](/guides/data-anomaly-detection#tests-and-monitors-types) monitors, as well as to calculate a baseline for anomaly detection.
 This limit is applied in three cases: - On the first run of elementary or on full refresh (first run for all tables). - For each new table that is added to the monitoring (first run for table). - On each new metric that is added to the configuration (first run of new metric). - If there was a gap bigger than this limit since the last run.
 If undefined, _default is 14 days back_.
 
@@ -204,7 +204,7 @@ If undefined, _default is 2 buckets_.
 <Accordion title="anomaly_sensitivity">
 `anomaly_sensitivity`: [int]
 
-This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](./data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies).
+This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](/guides/data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies).
 If undefined, _default threshold is 3_.
 
 </Accordion>
@@ -226,8 +226,8 @@ These results are later merged to the incremental tables in the main elementary 
 # optional #
 # Global vars for data monitoring#
 vars:
-  days_back: 14   # maximum timeframe for collecting metrics and analyzing anomalies
-  anomaly_sensitivity: 3   # sensitivity of anomaly detection
-  backfill_days: 2   # days to backfill on each run, adjust to your data delays
-  tests_schema_name: '__tests'  # suffix for elementary tests temp results schema  
+  days_back: 14 # maximum timeframe for collecting metrics and analyzing anomalies
+  anomaly_sensitivity: 3 # sensitivity of anomaly detection
+  backfill_days: 2 # days to backfill on each run, adjust to your data delays
+  tests_schema_name: "__tests" # suffix for elementary tests temp results schema
 ```

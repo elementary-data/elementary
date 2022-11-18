@@ -11,10 +11,10 @@ If you get an empty report, there are several steps to understand what went wron
 
 - **Check that dbt package version is the latest**
 
-- Refer to the [dbt package installation guide](../quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- Refer to the [dbt package installation guide](/quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
 
 - **Check if the table `elementary_test_results` exists and has data**
-- If the table does not exist - refer to the [dbt package installation guide](../quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- If the table does not exist - refer to the [dbt package installation guide](/quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
 - If the table exists but has no data - Did you execute `dbt test` since deploying the package and creating the models?
 - If yes, make sure the table was created as an incremental table (not a regular table or view).
 - If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
@@ -140,6 +140,7 @@ After that restart your CMD and try `edr` again.
 This means the installation was not completed successfully. This is usually a Python dependencies issue.
 
 Please try installing again on a clean virtual env:
+
 ```shell
 pip install virtualenv
 python3 -m venv virtualenv_elementary
@@ -150,7 +151,6 @@ python3 -m pip install elementary-data
 python3 -m pip install elementary-data[<adapter>]
 ```
 
-
 </Accordion>
 
 <Accordion title="I changed `days back` but the results are the same">
@@ -160,11 +160,11 @@ If you change it after executing elementary tests, you will need to run a full r
 The steps are:
 
 1. Change var `days_back` in your `dbt_project.yml`.
-2. Full refresh of the model 'data_monitoring_metrics' by running ``` dbt run --select data_monitoring_metrics --full-refresh```.
+2. Full refresh of the model 'data_monitoring_metrics' by running ` dbt run --select data_monitoring_metrics --full-refresh`.
 3. Running the elementary tests again.
 
 If you want the Elementary UI to show data for a longer period of time, use the days-back option of the CLI:
-```edr monitor report --days-back 45```
+`edr monitor report --days-back 45`
 
 </Accordion>
 
@@ -173,7 +173,6 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
 
 </Accordion>
-  
 
 ## Other issues?
 

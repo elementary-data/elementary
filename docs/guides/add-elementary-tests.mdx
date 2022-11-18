@@ -2,7 +2,7 @@
 title: "Add anomaly detection tests"
 ---
 
-After you [install the dbt package](../quickstart#install-the-dbt-package) and related configuration, you can add Elementary data tests.
+After you [install the dbt package](/quickstart#install-the-dbt-package) and related configuration, you can add Elementary data tests.
 
 ## Data monitors as dbt tests
 
@@ -24,7 +24,7 @@ _Note_: Anomaly detection is not yet supported on Databricks in dbt Cloud.
 
 `elementary.table_anomalies`
 
-Executes table level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
+Executes table level monitors and anomaly detection. Specific monitors are [detailed here](/data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies` key.
 By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
 
 <CodeGroup>
@@ -136,7 +136,7 @@ models:
 
 `elementary.all_columns_anomalies`
 
-Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
+Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using the `all_columns_anomalies` key.
 
 <CodeGroup>
 
@@ -178,8 +178,8 @@ models:
 
 Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
 
-*Not supported in Databricks.*
-  
+_Not supported in Databricks._
+
 <CodeGroup>
 
 ```yml Models
@@ -219,7 +219,7 @@ models:
 
 `elementary.column_anomalies`
 
-Executes column level monitors and anomaly detection. Specific monitors are [detailed here](./data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
+Executes column level monitors and anomaly detection. Specific monitors are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using the `column_anomalies` key.
 
 <CodeGroup>
 
@@ -293,11 +293,11 @@ Elementary tests are added to models / sources / columns of your dbt project jus
 
 Elementary tests have three levels of configurations:
 
-1. [Test arguments](./elementary-tests-configuration#test-arguments) - Test specific arguments.
+1. [Test arguments](/guides/elementary-tests-configuration#test-arguments) - Test specific arguments.
 2. Table configuration - Configure the timestamp column and details of a monitored table.
-3. [Global vars](./elementary-tests-configuration#data-monitoring-global-vars) - Optional configuration parameters of the operation.
+3. [Global vars](/guides/elementary-tests-configuration#data-monitoring-global-vars) - Optional configuration parameters of the operation.
 
-More on data tests configuration [here](./elementary-tests-configuration).
+More on data tests configuration [here](/guides/elementary-tests-configuration).
 
 We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
 If you wish to only be warned on anomalies, configure the severity of the tests to warn.
@@ -442,7 +442,7 @@ At the end of the `dbt test` run, all results and collected metrics are merged i
 
 ## What does it mean when a test fails?
 
-When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection](./data-anomaly-detection#anomaly-detection).
+When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection](/guides/data-anomaly-detection#anomaly-detection).
 
 ## Where are Elementary tests results stored?
 
@@ -454,4 +454,4 @@ At the end of the `dbt test` run, all results and collected metrics are merged i
 
 ## Alerts on detected anomalies (failed tests)
 
-To get Slack notifications, refer to the [Slack integration](../integrations/slack).
+To get Slack notifications, refer to the [Slack integration](/integrations/slack).

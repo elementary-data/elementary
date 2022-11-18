@@ -3,12 +3,12 @@ title: "Data observability report"
 ---
 
 Elementary has a UI for visualization and exploration of data from
-the [dbt-package](../general/contributions#contributing-to-the-dbt-package) tables, which includes dbt
+the [dbt-package](/general/contributions#contributing-to-the-dbt-package) tables, which includes dbt
 test results, Elementary anomaly detection results, dbt artifacts, etc.
 
 In order to visualize the data from
-the [dbt-package](../general/contributions#contributing-to-the-dbt-package) tables, use
-the [CLI](./cli-install) you can generate the Elementary UI.
+the [dbt-package](/general/contributions#contributing-to-the-dbt-package) tables, use
+the [CLI](/understand-elementary/cli-install) you can generate the Elementary UI.
 After installing and configuring the CLI, execute the command:
 
 ```shell
@@ -19,8 +19,8 @@ The command will use the provided connection profile to access the data warehous
 generate the UI as an HTML file.
 
 <img
-src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
-alt="Demo"
+  src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
+  alt="Demo"
 />
 
 ## Report Screens
@@ -28,7 +28,7 @@ alt="Demo"
 ### Test Results
 
 The `Test results` tab shows the latest result for each dbt or Elementary test that was executed in the last 7 days (Can
-be changed by passing `--days-back` param to the [CLI](../understand-elementary/cli-commands)).
+be changed by passing `--days-back` param to the [CLI](/understand-elementary/cli-commands)).
 
 Initially, the report presents all tests, sorted by status (failures on top) and last run time. The grey header on the
 top of the screen shows the total amount of results of each status.
@@ -52,15 +52,15 @@ The rows are expandable, and on expansion show information that can help underst
 - For schema changes tests - detected schema changes.
 
 <img
-src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/data-observability-ui-test-results-screen_vgk121.gif"
-alt="Data observability UI Test Result Screen"
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304887/elementary/data-observability-ui-test-results-screen_vgk121.gif"
+  alt="Data observability UI Test Result Screen"
 />
 
 ## Test runs
 
 The `Test runs` tab shows the last 30 runs (can be changed by passing `--executions-limit` param to
-the [CLI](../understand-elementary/cli-commands#cli-advanced-options)) for each dbt or Elementary test that was executed in the last 7 days (
-can be changed by passing `--days-back` param to the [CLI](../understand-elementary/cli-commands#cli-advanced-options)).
+the [CLI](/understand-elementary/cli-commands#cli-advanced-options)) for each dbt or Elementary test that was executed in the last 7 days (
+can be changed by passing `--days-back` param to the [CLI](/understand-elementary/cli-commands#cli-advanced-options)).
 
 Initially, the report presents all tests, sorted by results (results containing failures on top), fail rate and last run
 time. The grey header on the top of the screen shows the total amount of runs for each status.
@@ -90,7 +90,7 @@ The rows are expandable, and on expansion show information about the last runs o
 When selecting a dbt model/source in the navigation bar, a lineage icon will appear next to the
 selected dbt model/source:
 
-<img class="m-0 float-right" src="../pics/lineage_icon.png" width="18" />
+<img class="m-0 float-right" src="/pics/lineage_icon.png" width="18" />
 
 </div>
 
@@ -102,15 +102,13 @@ This is useful when trying to find the root cause of a test failure or when tryi
 test failure, for example on an exposure or a dashboard in the data stack.
 
 <img
-src="../pics/elementary-data-lineage-gif.gif"
-alt="Data lineage navigation bar"
+  src="/pics/elementary-data-lineage-gif.gif"
+  alt="Data lineage navigation bar"
 />
-
-
 
 ## Configure report sharing
 
 The data tests report UI can be sent via Slack, Google Cloud Storage, or Amazon S3 when you
 run `edr monitor send-report`.
 
-Refer to [this guide](../quickstart/share-report-ui) for detailed instructions.
+Refer to [this guide](/quickstart/share-report-ui) for detailed instructions.
