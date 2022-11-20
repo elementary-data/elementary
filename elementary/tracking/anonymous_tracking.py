@@ -155,6 +155,7 @@ class AnonymousTracking:
                 dbt_project_utils.PATH,
                 self.config.profiles_dir,
                 self.config.profile_target,
+                dbt_quoting=self.config.dbt_quoting,
             )
             if not dbt_project_utils.dbt_package_exists():
                 dbt_runner.deps(quiet=True)

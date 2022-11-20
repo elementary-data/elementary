@@ -54,7 +54,10 @@ class DataMonitoring:
         self.config = config
         self.tracking = tracking
         self.dbt_runner = DbtRunner(
-            dbt_project_utils.PATH, self.config.profiles_dir, self.config.profile_target
+            dbt_project_utils.PATH,
+            self.config.profiles_dir,
+            self.config.profile_target,
+            dbt_quoting=self.config.dbt_quoting,
         )
         self.execution_properties = {}
         dbt_pkg_version = self.get_elementary_dbt_pkg_version()

@@ -1,7 +1,10 @@
+import json
 import os
+from json import JSONDecodeError
 from pathlib import Path
 
 import google.auth
+import jsonschema
 from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError
 
@@ -22,11 +25,22 @@ class Config:
     DEFAULT_CONFIG_DIR = str(Path.home() / ".edr")
     DEFAULT_PROFILES_DIR = str(Path.home() / ".dbt")
 
+    DBT_TRACKING_JSON_SCHEMA = {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+            key: {"type": ["boolean", "null"]}
+            for key in ["database", "schema", "identifier"]
+        },
+        "additionalProperties": False,
+    }
+
     def __init__(
         self,
         config_dir: str = DEFAULT_CONFIG_DIR,
         profiles_dir: str = DEFAULT_PROFILES_DIR,
         profile_target: str = None,
+        dbt_quoting: bool = None,
         update_bucket_website: bool = None,
         slack_webhook: str = None,
         slack_token: str = None,
@@ -43,6 +57,7 @@ class Config:
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
+        self.dbt_quoting = self._parse_dbt_quoting(dbt_quoting)
 
         config = self._load_configuration()
 
@@ -179,3 +194,32 @@ class Config:
     @staticmethod
     def _first_not_none(*values):
         return next((v for v in values if v is not None), None)
+
+    @classmethod
+    def _parse_dbt_quoting(cls, dbt_quoting):
+        dbt_quoting = dbt_quoting.strip()
+        if dbt_quoting == "all":
+            return {"database": True, "schema": True, "identifier": True}
+        elif dbt_quoting == "none":
+            return {"database": False, "schema": False, "identifier": False}
+        else:
+            try:
+                parsed_dbt_quoting = json.loads(dbt_quoting)
+                jsonschema.validate(parsed_dbt_quoting, cls.DBT_TRACKING_JSON_SCHEMA)
+
+                full_dbt_quoting = {
+                    "database": None,
+                    "schema": None,
+                    "identifier": None,
+                }
+                full_dbt_quoting.update(json.loads(dbt_quoting))
+                return full_dbt_quoting
+            except json.JSONDecodeError:
+                raise InvalidArgumentsError(
+                    "An invalid JSON was passed for argument dbt_quoting"
+                )
+            except jsonschema.exceptions.ValidationError:
+                raise InvalidArgumentsError(
+                    "The supplied parameter dbt_quoting is a valid JSON but has an incorrect "
+                    "format"
+                )
