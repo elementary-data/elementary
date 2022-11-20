@@ -1,1 +1,15 @@
+# **Elementary Tutorial **
 
+Welcome to the Elementary tutorial. In this tutorial you will learn how to use Elementary to monitor changes in your data.
+
+The tutorial is divided into 5 stages:
+
+1.  Tutorial Environment Setup
+    
+2.  Installing Elementary Packages
+    
+3.  Viewing and Understanding Elementary Artifacts
+    
+4.  Adding Elementary Tests
+    
+5.  Generating Elementary Reports with the Elementary CLI
