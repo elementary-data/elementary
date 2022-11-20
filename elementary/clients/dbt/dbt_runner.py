@@ -19,7 +19,7 @@ class DbtRunner:
         profiles_dir: str,
         target: Optional[str] = None,
         raise_on_failure: bool = True,
-        dbt_quoting: bool = False,
+        dbt_quoting: bool = None,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
