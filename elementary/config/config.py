@@ -197,6 +197,9 @@ class Config:
 
     @classmethod
     def _parse_dbt_quoting(cls, dbt_quoting):
+        if dbt_quoting is None:
+            return None
+
         dbt_quoting = dbt_quoting.strip()
         if dbt_quoting == "all":
             return {"database": True, "schema": True, "identifier": True}
