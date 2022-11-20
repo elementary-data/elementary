@@ -106,3 +106,16 @@ If you wish, here are the options for providing paths and names that are differe
 ```shell
 -tz, --timezone TEXT
 ```
+
+- **dbt Quoting:**
+  Optionally control the [quoting setting](https://docs.getdbt.com/reference/project-configs/quoting) of the
+  internal dbt package of the elementary CLI.
+  You should use this setting if you are overriding dbt's default quoting in your main dbt package.
+
+```shell
+-q, --dbt-quoting [all|none|quoting config json]
+
+# If a quoting config json is supplied, it should be of the following format:
+{"database": true/false/null, "schema": true/false/null, "identifier": true/false/null}
+# (true - use quoting, false - don't use quoting, none - use dbt's default according to the adapter being used)
+```
