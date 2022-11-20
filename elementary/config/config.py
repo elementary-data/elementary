@@ -212,7 +212,7 @@ class Config:
                     "schema": None,
                     "identifier": None,
                 }
-                full_dbt_quoting.update(json.loads(dbt_quoting))
+                full_dbt_quoting.update(parsed_dbt_quoting)
                 return full_dbt_quoting
             except json.JSONDecodeError:
                 raise InvalidArgumentsError(
