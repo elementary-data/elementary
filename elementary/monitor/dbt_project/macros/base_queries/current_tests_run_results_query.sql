@@ -205,10 +205,11 @@
         test_results.test_short_name,
         test_results.test_alias,
         test_results.result_rows,
+        tests.meta,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results_with_final_unique_id test_results
     left join first_time_test_occurred first_occurred on test_results.elementary_unique_id = first_occurred.elementary_unique_id
-  
+    left join dbt_tests_with_final_unique_id tests on test_results.elementary_unique_id = tests.elementary_unique_id
 {% endmacro %}
 
 
@@ -255,6 +256,7 @@
         test_results.test_params,
         test_results.severity,
         test_results.status,
+        tests.meta,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results test_results
     join dbt_tests tests on test_results.test_unique_id = tests.unique_id

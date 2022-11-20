@@ -6,12 +6,13 @@ Elementary has a Slack integration to send alerts about failures in dbt tests, E
 
 The alerts include information for fast triage.
 Also, you can add configuration for each test / model in your `.yml` files:
+
 - Custom channels - distribute alerts based on their context
 - Owners - tag the owner of the model
 - Subscribers - let users subscribe to models and tests they care about
 - dbt Tags - add custom context to the alert
 
-In order to send Slack alerts after you deploy the [dbt-package](../general/contributions#contributing-to-the-dbt-package) and configure tests, use the [CLI](./cli-install) and the [Slack](../integrations/slack) integration.
+In order to send Slack alerts after you deploy the [dbt-package](/general/contributions#contributing-to-the-dbt-package) and configure tests, use the [CLI](/understand-elementary/cli-install) and the [Slack](/integrations/slack) integration.
 
 After installing and configuring the CLI, execute the command:
 
@@ -21,4 +22,7 @@ edr monitor
 
 The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and send informative alerts to Slack.
 
-<img src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png" alt="New Slack alert format" />
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
+  alt="New Slack alert format"
+/>

@@ -8,7 +8,7 @@ All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
 ## Slack
 
-After you [set up a Slack app and token](../integrations/slack#slack-integration-setup) you can run the command:
+After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
 edr monitor send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
@@ -23,8 +23,8 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 
 ```yml
 slack:
-  token: [ Slack token ]
-  channel_name: [ Slack channel ]
+  token: [Slack token]
+  channel_name: [Slack channel]
 ```
 
 ## Amazon S3
@@ -66,10 +66,10 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 
 ```yml
 aws:
-  profile_name: [ AWS profile name ]
-  s3_bucket_name: [ S3 bucket name ]
+  profile_name: [AWS profile name]
+  s3_bucket_name: [S3 bucket name]
 
-update_bucket_website: [ true | false ]
+update_bucket_website: [true | false]
 ```
 
 ## Google Cloud Storage (GCS)
@@ -113,10 +113,10 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 
 ```yml
 google:
-  service_account_path: [ Google service account path ]
-  gcs_bucket_name: [ GCS bucket name ]
+  service_account_path: [Google service account path]
+  gcs_bucket_name: [GCS bucket name]
 
-update_bucket_website: [ true | false ]
+update_bucket_website: [true | false]
 ```
 
 ## Missing something?

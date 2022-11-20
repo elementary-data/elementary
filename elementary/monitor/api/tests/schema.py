@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional
 from pydantic import BaseModel, validator
 
@@ -22,6 +23,7 @@ class TestMetadataSchema(BaseModel):
     test_results_description: Optional[str]
     owners: Optional[str]
     tags: Optional[str]
+    meta: Optional[dict]
     test_results_query: Optional[str] = None
     other: Optional[str]
     test_name: str
@@ -34,6 +36,10 @@ class TestMetadataSchema(BaseModel):
     @validator("detected_at", pre=True)
     def format_detected_at(cls, detected_at):
         return convert_partial_iso_format_to_full_iso_format(detected_at)
+
+    @validator("meta", pre=True)
+    def load_meta(cls, meta):
+        return json.loads(meta) if meta else {}
 
 
 class InvocationSchema(BaseModel):

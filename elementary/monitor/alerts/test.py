@@ -85,6 +85,7 @@ class DbtTestAlert(TestAlert):
         self.test_results_description = (
             test_results_description.capitalize() if test_results_description else ""
         )
+        self.test_description = self.meta.get("description") if self.meta else ""
         self.error_message = self.test_results_description
         self.column_name = column_name or ""
         self.severity = severity
@@ -115,6 +116,10 @@ class DbtTestAlert(TestAlert):
         self._add_fields_section_to_slack_msg(
             slack_message,
             [f"*Status*\n{self.status}", f"*Test name*\n{self.test_name}"],
+        )
+        self._add_fields_section_to_slack_msg(
+            slack_message,
+            [f"*Description*\n{self.test_description}"],
         )
         self._add_fields_section_to_slack_msg(
             slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
@@ -181,6 +186,7 @@ class DbtTestAlert(TestAlert):
                 "test_query": self.test_results_query,
                 "test_params": self.test_params,
                 "test_created_at": self.test_created_at,
+                "description": self.test_description,
             },
             "test_results": {
                 "display_name": self.test_display_name + " - failed results sample",
@@ -226,6 +232,10 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*Test name*\n{self.test_name}",
                 f"*{sub_type_title}:*\n{self.test_sub_type_display_name}",
             ],
+        )
+        self._add_fields_section_to_slack_msg(
+            slack_message,
+            [f"*Description*\n{self.test_description}"],
         )
         self._add_fields_section_to_slack_msg(
             slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
@@ -302,6 +312,7 @@ class ElementaryTestAlert(DbtTestAlert):
                 "test_query": self.test_results_query,
                 "test_params": test_params,
                 "test_created_at": self.test_created_at,
+                "description": self.test_description,
             },
             "test_results": test_alerts,
             "test_runs": test_runs,

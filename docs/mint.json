@@ -19,11 +19,19 @@
   "topbarLinks": [
     {
       "name": "Blog",
-      "url": "https://www.elementary-data.com/blog"
+      "url": "https://www.elementary-data.com/blog",
+      "color": {
+        "from": "#FE8913",
+        "to": "#FE10B0"
+      }
     },
     {
       "name": "Support",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg",
+      "color": {
+        "from": "#FE8913",
+        "to": "#FE10B0"
+      }
     }
   ],
   "anchors": [
@@ -112,10 +120,9 @@
   "analytics": {
     "ga4": {
       "measurementId": "G-4DQN8YR4NH"
+    },
+    "posthog": {
+      "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
     }
-  },
-  "classes": {
-    "anchors": "group-hover:bg-gradient-to-tr from-[#FE8913] to-[#FE10B0]",
-    "activeAnchors": "bg-gradient-to-tr"
   }
 }
