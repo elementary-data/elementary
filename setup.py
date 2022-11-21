@@ -38,7 +38,6 @@ setup(
         "pydantic<2.0",
         "networkx>=2.3,<3",
         "packaging>=20.9,<22.0",
-        "jsonschema",
     ],
     extras_require={
         "snowflake": ["dbt-snowflake>=0.20,<2.0.0"],

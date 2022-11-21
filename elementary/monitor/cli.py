@@ -16,6 +16,16 @@ logger = get_logger(__name__)
 # Displayed in reverse order in --help.
 def common_options(func):
     func = click.option(
+        "--dbt-env-var",
+        "-ev",
+        "dbt_env_vars",
+        type=str,
+        multiple=True,
+        help="Use this option to supply an environment variable to the edr internal dbt package. "
+        "Can be supplied multiple times and should be of the following format: "
+        "-dq ENV_VAR_1:value1 -dq ENV_VAR_2:value2 ...",
+    )(func)
+    func = click.option(
         "--dbt-quoting",
         "-dq",
         type=str,
@@ -148,6 +158,7 @@ def monitor(
     update_dbt_package,
     full_refresh_dbt_package,
     dbt_quoting,
+    dbt_env_vars,
     profile_target,
     dbt_vars,
     test,
@@ -168,6 +179,7 @@ def monitor(
         profiles_dir,
         profile_target,
         dbt_quoting=dbt_quoting,
+        dbt_env_vars=dbt_env_vars,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
@@ -238,6 +250,7 @@ def report(
     profiles_dir,
     update_dbt_package,
     dbt_quoting,
+    dbt_env_vars,
     profile_target,
     executions_limit,
     file_path,
@@ -248,7 +261,13 @@ def report(
     """
     Generate a local report of your warehouse.
     """
-    config = Config(config_dir, profiles_dir, profile_target, dbt_quoting=dbt_quoting)
+    config = Config(
+        config_dir,
+        profiles_dir,
+        profile_target,
+        dbt_quoting=dbt_quoting,
+        dbt_env_vars=dbt_env_vars,
+    )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
         "monitor-report", get_cli_properties(), ctx.command.name
@@ -378,6 +397,7 @@ def send_report(
     profiles_dir,
     update_dbt_package,
     dbt_quoting,
+    dbt_env_vars,
     slack_token,
     slack_channel_name,
     slack_file_name,
@@ -406,6 +426,7 @@ def send_report(
         profiles_dir,
         profile_target,
         dbt_quoting=dbt_quoting,
+        dbt_env_vars=dbt_env_vars,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
         update_bucket_website=update_bucket_website,

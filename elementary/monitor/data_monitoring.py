@@ -57,7 +57,7 @@ class DataMonitoring:
             dbt_project_utils.PATH,
             self.config.profiles_dir,
             self.config.profile_target,
-            dbt_quoting=self.config.dbt_quoting,
+            dbt_env_vars=self.config.dbt_env_vars,
         )
         self.execution_properties = {}
         dbt_pkg_version = self.get_elementary_dbt_pkg_version()

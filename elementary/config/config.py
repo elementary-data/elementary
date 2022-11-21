@@ -2,9 +2,9 @@ import json
 import os
 from json import JSONDecodeError
 from pathlib import Path
+from typing import List
 
 import google.auth
-import jsonschema
 from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError
 
@@ -22,18 +22,20 @@ class Config:
     _GOOGLE = "google"
     _CONFIG_FILE_NAME = "config.yml"
 
+    # Quoting env vars
+    _DATABASE_QUOTING = "DATABASE_QUOTING"
+    _SCHEMA_QUOTING = "SCHEMA_QUOTING"
+    _IDENTIFIER_QUOTING = "IDENTIFIER_QUOTING"
+    _QUOTING_KEY_MAPPING = {
+        "database": _DATABASE_QUOTING,
+        "schema": _SCHEMA_QUOTING,
+        "identifier": _IDENTIFIER_QUOTING,
+    }
+    _QUOTING_VALID_KEYS = set(_QUOTING_KEY_MAPPING.keys())
+    _QUOTING_ENV_VARS = set(_QUOTING_KEY_MAPPING.values())
+
     DEFAULT_CONFIG_DIR = str(Path.home() / ".edr")
     DEFAULT_PROFILES_DIR = str(Path.home() / ".dbt")
-
-    DBT_TRACKING_JSON_SCHEMA = {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "type": "object",
-        "properties": {
-            key: {"type": ["boolean", "null"]}
-            for key in ["database", "schema", "identifier"]
-        },
-        "additionalProperties": False,
-    }
 
     def __init__(
         self,
@@ -41,6 +43,7 @@ class Config:
         profiles_dir: str = DEFAULT_PROFILES_DIR,
         profile_target: str = None,
         dbt_quoting: bool = None,
+        dbt_env_vars: List[str] = None,
         update_bucket_website: bool = None,
         slack_webhook: str = None,
         slack_token: str = None,
@@ -57,7 +60,9 @@ class Config:
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
-        self.dbt_quoting = self._parse_dbt_quoting(dbt_quoting)
+
+        self.dbt_env_vars = self._parse_env_vars(dbt_env_vars)
+        self.dbt_env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
         config = self._load_configuration()
 
@@ -195,34 +200,42 @@ class Config:
     def _first_not_none(*values):
         return next((v for v in values if v is not None), None)
 
+    @staticmethod
+    def _parse_env_vars(dbt_env_vars):
+        if dbt_env_vars is None:
+            return {}
+
+        env_vars = {}
+        for env_var in dbt_env_vars:
+            env_var_parts = env_var.split(":")
+            if len(env_var_parts) != 2:
+                raise InvalidArgumentsError(
+                    "Invalid env var specification: %s" % env_var_parts
+                )
+
+            env_vars[env_var_parts[0]] = env_var_parts[1]
+
+        return env_vars
+
     @classmethod
-    def _parse_dbt_quoting(cls, dbt_quoting):
+    def _parse_dbt_quoting_to_env_vars(cls, dbt_quoting):
         if dbt_quoting is None:
-            return None
+            return {}
 
-        dbt_quoting = dbt_quoting.strip()
         if dbt_quoting == "all":
-            return {"database": True, "schema": True, "identifier": True}
+            return {env_var: "True" for env_var in cls._QUOTING_ENV_VARS}
         elif dbt_quoting == "none":
-            return {"database": False, "schema": False, "identifier": False}
-        else:
-            try:
-                parsed_dbt_quoting = json.loads(dbt_quoting)
-                jsonschema.validate(parsed_dbt_quoting, cls.DBT_TRACKING_JSON_SCHEMA)
+            return {env_var: "False" for env_var in cls._QUOTING_ENV_VARS}
 
-                full_dbt_quoting = {
-                    "database": None,
-                    "schema": None,
-                    "identifier": None,
-                }
-                full_dbt_quoting.update(parsed_dbt_quoting)
-                return full_dbt_quoting
-            except json.JSONDecodeError:
-                raise InvalidArgumentsError(
-                    "An invalid JSON was passed for argument dbt_quoting"
-                )
-            except jsonschema.exceptions.ValidationError:
-                raise InvalidArgumentsError(
-                    "The supplied parameter dbt_quoting is a valid JSON but has an incorrect "
-                    "format"
-                )
+        dbt_quoting_keys = {part.strip() for part in dbt_quoting.split(",")}
+        if not dbt_quoting_keys.issubset(cls._QUOTING_VALID_KEYS):
+            raise InvalidArgumentsError(
+                "Invalid quoting specification: %s" % dbt_quoting
+            )
+
+        env_vars = {env_var: "False" for env_var in cls._QUOTING_ENV_VARS}
+        env_vars.update(
+            {cls._QUOTING_KEY_MAPPING[key]: "True" for key in dbt_quoting_keys}
+        )
+
+        return env_vars

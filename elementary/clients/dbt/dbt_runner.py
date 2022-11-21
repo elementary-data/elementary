@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 from json import JSONDecodeError
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 from elementary.exceptions.exceptions import DbtCommandError
 from elementary.utils.log import get_logger
@@ -19,13 +19,13 @@ class DbtRunner:
         profiles_dir: str,
         target: Optional[str] = None,
         raise_on_failure: bool = True,
-        dbt_quoting: bool = None,
+        dbt_env_vars: Dict[str, str] = None,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
         self.raise_on_failure = raise_on_failure
-        self.dbt_quoting = dbt_quoting
+        self.dbt_env_vars = dbt_env_vars
 
     def _run_command(
         self,
@@ -163,12 +163,6 @@ class DbtRunner:
 
     def _get_command_env(self):
         env = os.environ.copy()
-        if self.dbt_quoting is not None:
-            env.update(
-                {
-                    "DATABASE_QUOTING": str(self.dbt_quoting.get("database")),
-                    "SCHEMA_QUOTING": str(self.dbt_quoting.get("schema")),
-                    "IDENTIFIER_QUOTING": str(self.dbt_quoting.get("identifier")),
-                }
-            )
+        if self.dbt_env_vars is not None:
+            env.update(self.dbt_env_vars)
         return env
