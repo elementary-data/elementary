@@ -16,6 +16,15 @@ logger = get_logger(__name__)
 # Displayed in reverse order in --help.
 def common_options(func):
     func = click.option(
+        "--dbt-quoting",
+        "-dq",
+        type=str,
+        default=None,
+        help="Use this variable to override dbt's default quoting behavior for the edr internal dbt package. Can be "
+        "one of the following: (1) all, (2) none, or (3) a combination of database,schema,identifier - for "
+        'example "schema,identifier"',
+    )(func)
+    func = click.option(
         "--update-dbt-package",
         "-u",
         type=bool,
@@ -138,6 +147,7 @@ def monitor(
     profiles_dir,
     update_dbt_package,
     full_refresh_dbt_package,
+    dbt_quoting,
     profile_target,
     dbt_vars,
     test,
@@ -157,6 +167,7 @@ def monitor(
         config_dir,
         profiles_dir,
         profile_target,
+        dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
@@ -226,6 +237,7 @@ def report(
     config_dir,
     profiles_dir,
     update_dbt_package,
+    dbt_quoting,
     profile_target,
     executions_limit,
     file_path,
@@ -236,7 +248,12 @@ def report(
     """
     Generate a local report of your warehouse.
     """
-    config = Config(config_dir, profiles_dir, profile_target)
+    config = Config(
+        config_dir,
+        profiles_dir,
+        profile_target,
+        dbt_quoting=dbt_quoting,
+    )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
         "monitor-report", get_cli_properties(), ctx.command.name
@@ -365,6 +382,7 @@ def send_report(
     config_dir,
     profiles_dir,
     update_dbt_package,
+    dbt_quoting,
     slack_token,
     slack_channel_name,
     slack_file_name,
@@ -392,6 +410,7 @@ def send_report(
         config_dir,
         profiles_dir,
         profile_target,
+        dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
         update_bucket_website=update_bucket_website,
