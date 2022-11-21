@@ -43,7 +43,6 @@ class Config:
         profiles_dir: str = DEFAULT_PROFILES_DIR,
         profile_target: str = None,
         dbt_quoting: bool = None,
-        dbt_env_vars: List[str] = None,
         update_bucket_website: bool = None,
         slack_webhook: str = None,
         slack_token: str = None,
@@ -61,7 +60,8 @@ class Config:
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
 
-        self.dbt_env_vars = self._parse_env_vars(dbt_env_vars)
+        # Additional env vars supplied to dbt invocations
+        self.dbt_env_vars = dict()
         self.dbt_env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
         config = self._load_configuration()
