@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 def common_options(func):
     func = click.option(
         "--dbt-quoting",
-        "-q",
+        "-dq",
         type=str,
         default=None,
         help="Use this variable to override dbt's default quoting behavior for the edr internal dbt package. Can be one "
