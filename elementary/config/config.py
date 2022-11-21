@@ -200,23 +200,6 @@ class Config:
     def _first_not_none(*values):
         return next((v for v in values if v is not None), None)
 
-    @staticmethod
-    def _parse_env_vars(dbt_env_vars):
-        if dbt_env_vars is None:
-            return {}
-
-        env_vars = {}
-        for env_var in dbt_env_vars:
-            env_var_parts = env_var.split(":")
-            if len(env_var_parts) != 2:
-                raise InvalidArgumentsError(
-                    "Invalid env var specification: %s" % env_var_parts
-                )
-
-            env_vars[env_var_parts[0]] = env_var_parts[1]
-
-        return env_vars
-
     @classmethod
     def _parse_dbt_quoting_to_env_vars(cls, dbt_quoting):
         if dbt_quoting is None:
