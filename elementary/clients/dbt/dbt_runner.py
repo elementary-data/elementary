@@ -44,10 +44,11 @@ class DbtRunner:
         if vars:
             json_vars = json.dumps(vars)
             dbt_command.extend(["--vars", json_vars])
+        log_msg = f"Running {' '.join(dbt_command)}"
         if not quiet:
-            logger.info(f"Running {' '.join(dbt_command)} (this might take a while)")
+            logger.info(log_msg)
         else:
-            logger.debug(f"Running {' '.join(dbt_command)}")
+            logger.debug(log_msg)
         try:
             result = subprocess.run(
                 dbt_command,
