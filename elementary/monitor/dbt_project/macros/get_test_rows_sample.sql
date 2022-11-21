@@ -1,5 +1,5 @@
 {%- macro get_test_rows_sample(test, test_results_query, test_type, results_sample_limit = 5) -%}
-    {% if test.result_rows %}
+    {% if test.result_rows is not none %}
       {% do return(fromjson(test.result_rows)) %}
     {% endif %}
 
