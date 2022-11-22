@@ -21,12 +21,14 @@ class TestAlert(Alert):
         model_unique_id: str,
         test_unique_id: str,
         test_created_at: Optional[str] = None,
+        test_meta: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at
+        self.test_meta = test_meta
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -43,6 +45,10 @@ class TestAlert(Alert):
         if test_alert_dict.get("test_type") == "dbt_test":
             return DbtTestAlert(**test_alert_dict)
         return ElementaryTestAlert(**test_alert_dict)
+
+    def get_alert_fields(self) -> Optional[list]:
+        meta = try_load_json(self.test_meta) or {}
+        return meta.get("alert_fields")
 
 
 class DbtTestAlert(TestAlert):
@@ -98,6 +104,8 @@ class DbtTestAlert(TestAlert):
                 self.failed_rows_count = int(found_rows_number)
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        alert_fields = self.get_alert_fields()
+
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
@@ -105,6 +113,7 @@ class DbtTestAlert(TestAlert):
             return SlackMessageSchema(text=json.dumps(self.__dict__))
         slack_message = {"attachments": [{"blocks": []}]}
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt test alert*")
+
         self._add_fields_section_to_slack_msg(
             slack_message,
             [
@@ -113,36 +122,59 @@ class DbtTestAlert(TestAlert):
             ],
             divider=True,
         )
+
         self._add_fields_section_to_slack_msg(
             slack_message,
             [f"*Status*\n{self.status}", f"*Test name*\n{self.test_name}"],
         )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Description*\n{self.test_description}"],
-        )
-        self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
-        )
-        if self.subscribers:
+
+        if self.column_name:
+            self._add_text_section_to_slack_msg(
+                slack_message, f"*Column*\n{self.column_name}", divider=True
+            )
+
+        if self.test_description and (
+            alert_fields is None or "description" in alert_fields
+        ):
+            self._add_fields_section_to_slack_msg(
+                slack_message,
+                [f"*Description*\n{self.test_description}"],
+            )
+
+        if alert_fields is None or "owners" in alert_fields:
+            self._add_fields_section_to_slack_msg(
+                slack_message,
+                [f"*Owners*\n{self.owners}"],
+            )
+
+        if alert_fields is None or "tags" in alert_fields:
+            self._add_fields_section_to_slack_msg(
+                slack_message,
+                [f"*Tags*\n{self.tags}"],
+            )
+
+        if self.subscribers and (alert_fields is None or "subscribers" in alert_fields):
             self._add_fields_section_to_slack_msg(
                 slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
             )
-        if self.error_message:
+
+        if self.error_message and (
+            alert_fields is None or "error_message" in alert_fields
+        ):
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Error Message*\n```{self.error_message}```",
                 divider=True,
             )
-        if self.column_name:
-            self._add_text_section_to_slack_msg(
-                slack_message, f"*Column*\n{self.column_name}", divider=True
-            )
-        if self.test_params:
+
+        if self.test_params and (alert_fields is None or "test_params" in alert_fields):
             self._add_text_section_to_slack_msg(
                 slack_message, f"*Test Parameters*\n`{self.test_params}`", divider=True
             )
-        if self.test_results_query:
+
+        if self.test_results_query and (
+            alert_fields is None or "test_query" in alert_fields
+        ):
             msg = f"*Test Query*\n```{self.test_results_query}```"
             if len(msg) > SectionBlock.text_max_length:
                 msg = (
@@ -152,7 +184,9 @@ class DbtTestAlert(TestAlert):
                 )
             self._add_text_section_to_slack_msg(slack_message, msg, divider=True)
 
-        if self.test_rows_sample:
+        if self.test_rows_sample and (
+            alert_fields is None or "test_result_samples" in alert_fields
+        ):
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Test Results Sample*\n`{self.test_rows_sample}`",
@@ -200,6 +234,8 @@ class DbtTestAlert(TestAlert):
 
 class ElementaryTestAlert(DbtTestAlert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        alert_fields = self.get_alert_fields()
+
         anomalous_value = None
         if self.test_type == "schema_change":
             alert_title = "Schema change detected"
@@ -233,33 +269,53 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*{sub_type_title}:*\n{self.test_sub_type_display_name}",
             ],
         )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Description*\n{self.test_description}"],
-        )
-        self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
-        )
-        if self.subscribers:
+
+        if self.test_description and (
+            alert_fields is None or "description" in alert_fields
+        ):
+            self._add_fields_section_to_slack_msg(
+                slack_message,
+                [f"*Description*\n{self.test_description}"],
+            )
+
+        if alert_fields is None or "owners" in alert_fields:
+            self._add_fields_section_to_slack_msg(
+                slack_message,
+                [f"*Owners*\n{self.owners}"],
+            )
+
+        if alert_fields is None or "tags" in alert_fields:
+            self._add_fields_section_to_slack_msg(
+                slack_message,
+                [f"*Tags*\n{self.tags}"],
+            )
+
+        if self.subscribers and (alert_fields is None or "subscribers" in alert_fields):
             self._add_fields_section_to_slack_msg(
                 slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
             )
-        if self.error_message:
+
+        if self.error_message and (
+            alert_fields is None or "error_message" in alert_fields
+        ):
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Error Message*\n```{self.error_message}```",
                 divider=True,
             )
-        column_msgs = []
-        if self.column_name:
-            column_msgs.append(f"*Column*\n{self.column_name}")
-        if anomalous_value:
-            column_msgs.append(f"*Anomalous Values*\n{anomalous_value}")
-        if column_msgs:
-            self._add_fields_section_to_slack_msg(
-                slack_message, column_msgs, divider=True
-            )
-        if self.test_params:
+
+        if alert_fields is None or "test_result_samples" in alert_fields:
+            column_msgs = []
+            if self.column_name:
+                column_msgs.append(f"*Column*\n{self.column_name}")
+            if anomalous_value:
+                column_msgs.append(f"*Anomalous Values*\n{anomalous_value}")
+            if column_msgs:
+                self._add_fields_section_to_slack_msg(
+                    slack_message, column_msgs, divider=True
+                )
+
+        if self.test_params and (alert_fields is None or "test_params" in alert_fields):
             self._add_text_section_to_slack_msg(
                 slack_message, f"*Test Parameters*\n`{self.test_params}`", divider=True
             )
