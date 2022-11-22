@@ -1,4 +1,8 @@
-{%- macro get_test_rows_sample(test_results_query, test_type, results_sample_limit = 5) -%}
+{%- macro get_test_rows_sample(test, test_results_query, test_type, results_sample_limit = 5) -%}
+    {% if test.result_rows is not none %}
+      {% do return(fromjson(test.result_rows)) %}
+    {% endif %}
+
     {% set test_rows_sample = none %}
     {% if test_results_query %}
         {% set test_rows_sample_query = test_results_query %}
