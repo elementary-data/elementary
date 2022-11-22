@@ -2,6 +2,11 @@
 title: "Elementary Managed"
 ---
 
+import AddConnectionProfile from "./snippets/add-connection-profile.mdx";
+import ConnectionProfile from "./snippets/faq/question-connection-profile.mdx";
+import ProfilePermissions from "./snippets/faq/question-profile-permissions.mdx";
+
+
 Elementary Managed is a cloud service that offers orchestration and hosting of Elementary as a service.
 
 *The service is currently in private beta, you can [contact us](mailto:team@elementary-data.com) for details.*
@@ -27,13 +32,25 @@ Once every day / hour the service reads the new data from the schema, and genera
 3. Sign up to the service.
 4. Configure the service on the onboarding screen. These settings can later be changed through *settings*. 
 
-## Settings and connection profile
+## Settings 
 
 Required settings:
 - Switch the `Report Scheduling Enabled` to on. 
 - Configure a [Cron schedule](/cloud/elementary-managed#cron-schedule-configuration) for invocations timing.
 - Select your warehouse type.
-- Upload a dbt `profiles.yml` file with a profile named elementary, configured to the elementary schema. For details on how to create the profile, refer to the `Configure Elementary profile` section of the [Quickstart](/quickstart-cli).
+- Upload a dbt `profiles.yml` file with a profile named elementary, configured to the elementary schema.
+
+Before installing the CLI, make sure to complete the steps dbt package installation, including executing `dbt run` with the Elementary package models.
+
+<Accordion title="Not sure how to create the profile?">
+
+<AddConnectionProfile />
+
+<ConnectionProfile />
+
+<ProfilePermissions />
+
+</Accordion>
 
 Optional settings:
 - Configure a Slack token and channel for Slack alerts. Note that the channel is just a default one, you can [configure multiple channels](/quickstart/send-slack-alerts#customize-alerts-owners-tags-and-subscribers) in your dbt project ymls.
