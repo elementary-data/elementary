@@ -136,7 +136,7 @@ class DbtTestAlert(TestAlert):
         if self.test_description and (
             alert_fields is None or "description" in alert_fields
         ):
-            self._add_fields_section_to_slack_msg(
+            self._add_text_section_to_slack_msg(
                 slack_message,
                 [f"*Description*\n{self.test_description}"],
             )
@@ -273,7 +273,7 @@ class ElementaryTestAlert(DbtTestAlert):
         if self.test_description and (
             alert_fields is None or "description" in alert_fields
         ):
-            self._add_fields_section_to_slack_msg(
+            self._add_text_section_to_slack_msg(
                 slack_message,
                 [f"*Description*\n{self.test_description}"],
             )
