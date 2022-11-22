@@ -2,6 +2,49 @@
 title: "Elementary managed"
 ---
 
+Elementary managed is a cloud service that offers orchestration and hosting of Elementary as a service.
+
+*The service is currently in private beta, you can [contact us](mailto:team@elementary-data.com) for details.*
+
+## How it works?
+
+The Elementary dbt package runs as part of your dbt invocations. 
+The package collects and stores data such as run results, test results, anomaly detection results and more.
+
+This data is saved to an Elementary schema in the DWH.
+The cloud service requires access only to this schema.
+Once every day / hour the cloud reads the new data from the schema, and generates a report UI and Slack alerts.
+
+<img
+    src="/pics/elementary-managed.png"
+    alt="Elementary managed high level flow"
+/>
+
+# Onboarding to Elementary managed
+
+1. Read the [Terms of Service](https://www.elementary-data.com/terms-of-service), and send us a <a href="mailto:team@elementary-data.com?subject=I want to try Elementary managed!&body=I accept the Terms of Service of Elementary managed. Please send me an onboarding link.">confirmation email</a>.
+2. In replay, you will get an email with a link to login page.
+3. Sign up to the service.
+4. Configure the service on the onboarding screen. These settings can later be changed through *settings*. 
+
+## Settings and connection profile
+
+Required settings:
+- Switch the `Report Schedualing Enabled` to on. 
+- Configure a [Cron schedule](/cloud/elementary-managed#cron-schedule-configuration) for invocations timing.
+- Select your warehouse type.
+- Upload a dbt `profiles.yml` file with a profile named elementary, configured to the elementary schema. For details on how to create the profile, refer to the `Configure Elementary profile` section of the [Quickstart](/quickstart-cli).
+
+Optional settings:
+- Configure a Slack token and channel for Slack alerts. Note that the channel is just a default one, you can [configure multiple channels](/quickstart/send-slack-alerts#customize-alerts-owners-tags-and-subscribers) in your dbt project ymls.
+- Configure a Slack token and channel if you want Elementary to send a copy of the report to Slack.
+- Configure your own S3 bucket and / or GCS instance for hosting the report outside Elementary cloud as well.
+
+<img
+    src="/pics/onboarding-elementary-managed.png"
+    alt="Elementary managed settings"
+/>
+
 ## Cron schedule configuration
 
 The cron definition in Elementary is based on the AWS cron expression syntax.
@@ -10,3 +53,21 @@ More details about it can be found [here](https://docs.aws.amazon.com/eventbridg
 Here are a few examples -
 - Run Elementary report and alerts daily at 6am UTC - 0 6 ? * * *
 - Run Elementary hourly - 0 * ? * * *
+
+# Pricing 
+
+Elementary has two subscription options:
+
+<img
+    src="/pics/pricing-elementary-managed.png"
+    alt="Elementary managed pricing"
+/>
+
+## Security and privacy
+
+Elementary cloud requires access only to the Elementary schema and the tables in it. 
+The data in the schema in full is stored in the client's data warehouse. 
+
+We secure Elementary cloud infrastructure with the highest standards. 
+You can delete your account at any time, and all your configuration and reports will be deleted immediately and permanently from Elementary servers.
+For details, refer tou our [Terms of Service](https://www.elementary-data.com/terms-of-service).
