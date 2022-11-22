@@ -1,7 +1,8 @@
 import json
+import os
 import subprocess
 from json import JSONDecodeError
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 from elementary.exceptions.exceptions import DbtCommandError
 from elementary.utils.log import get_logger
@@ -18,11 +19,13 @@ class DbtRunner:
         profiles_dir: str,
         target: Optional[str] = None,
         raise_on_failure: bool = True,
+        dbt_env_vars: Dict[str, str] = None,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
         self.raise_on_failure = raise_on_failure
+        self.dbt_env_vars = dbt_env_vars
 
     def _run_command(
         self,
@@ -54,6 +57,7 @@ class DbtRunner:
                 dbt_command,
                 check=self.raise_on_failure,
                 capture_output=(json_output or quiet),
+                env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
             raise DbtCommandError(err, command_args)
@@ -157,3 +161,9 @@ class DbtRunner:
             command_args=command_args, vars=vars, quiet=quiet
         )
         return success
+
+    def _get_command_env(self):
+        env = os.environ.copy()
+        if self.dbt_env_vars is not None:
+            env.update(self.dbt_env_vars)
+        return env
