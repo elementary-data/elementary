@@ -1,6 +1,7 @@
 {%- macro get_test_rows_sample(test, test_results_query, test_type, results_sample_limit = 5) -%}
-    {% if test.result_rows is not none %}
-      {% do return(fromjson(test.result_rows)) %}
+    {% set result_rows = test.result_rows %}
+    {% if result_rows is defined and result_rows is not none %}
+      {% do return(fromjson(result_rows)) %}
     {% endif %}
 
     {% set test_rows_sample = none %}
