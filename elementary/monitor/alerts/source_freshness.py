@@ -62,13 +62,13 @@ class SourceFreshnessAlert(Alert):
         self._add_text_section_to_slack_msg(
             slack_message, f"{icon} *dbt source freshness alert*"
         )
+        self._add_divider(slack_message)
         self._add_fields_section_to_slack_msg(
             slack_message,
             [
                 f"*Source*\n{self.source_name}.{self.identifier}",
                 f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             ],
-            divider=True,
         )
         if self.status == "runtime error":
             self._add_text_section_to_slack_msg(
@@ -83,13 +83,13 @@ class SourceFreshnessAlert(Alert):
                     f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s)}"
                 ],
             )
+            self._add_divider(slack_message)
             self._add_fields_section_to_slack_msg(
                 slack_message,
                 [
                     f"*Last Record At*\n{self.max_loaded_at}",
                     f"*Sampled At*\n{self.snapshotted_at}",
                 ],
-                divider=True,
             )
         self._add_fields_section_to_slack_msg(
             slack_message,
