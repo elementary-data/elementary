@@ -129,7 +129,8 @@
             severity,
             status,
             test_short_name,
-            test_alias
+            test_alias,
+            result_rows
         from elementary_test_results
     ),
 
@@ -161,7 +162,8 @@
             results.severity,
             results.status,
             results.test_short_name,
-            results.test_alias
+            results.test_alias,
+            results.result_rows
         from elementary_test_results_with_elementary_unique_id results
         join dbt_tests_with_same_name_count counter on results.elementary_unique_id = counter.elementary_unique_id
     ),
@@ -202,6 +204,7 @@
         test_results.status,
         test_results.test_short_name,
         test_results.test_alias,
+        test_results.result_rows,
         tests.meta,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results_with_final_unique_id test_results

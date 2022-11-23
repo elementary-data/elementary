@@ -36,7 +36,7 @@
 
         {% set test_rows_sample = none %}
         {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error') -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, results_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_alert_dict, test_results_query, test_type, results_sample_limit) %}
         {%- endif -%}
 
         {% set test_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_meta') %}

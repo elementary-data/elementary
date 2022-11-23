@@ -21,7 +21,8 @@
             test_sub_type,
             column_name,
             test_results_query,
-            status
+            status,
+            result_rows
         from latest_tests_in_the_last_chosen_days
     {%- endset -%}
     {% set tests_results_agate = run_query(select_test_results) %}
@@ -34,26 +35,15 @@
         {% set test_sub_type = elementary.insensitive_get_dict_value(test, 'test_sub_type') %}
         {% set status = elementary.insensitive_get_dict_value(test, 'status') | lower %}
 
-        {% set test_rows_sample = none %}
         {% set elementary_tests_allowlist_status = ['fail', 'warn']  %}
         {% if not disable_passed_test_metrics %}
             {% do elementary_tests_allowlist_status.append('pass') %}
         {% endif %}
+        {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, test_results_query, test_type, metrics_sample_limit) %}
         {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
             {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
             {# Currently we show only the anomalous for all of the dimensions. #}
             {% if test_sub_type == 'dimension' %}
-                {% set dimension_test_result_query %}
-                    with all_test_results as (
-                        select *
-                        from ({{test_results_query}})
-                    )
-
-                    select *
-                    from all_test_results
-                    where is_anomalous = TRUE
-                {% endset %}
-                {% set test_rows_sample = elementary_internal.get_test_rows_sample(dimension_test_result_query, test_type, metrics_sample_limit) %}
                 {% set anomalous_rows = [] %}
                 {% set headers = [{'id': 'anomalous_value_timestamp', 'display_name': 'timestamp', 'type': 'date'}] %}
                 {% for row in test_rows_sample %}
@@ -84,8 +74,6 @@
                     'headers': headers,
                     'test_rows_sample': anomalous_rows
                 } %}
-            {% else %}
-                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_results_query, test_type, metrics_sample_limit) %}
             {% endif %}
         {%- endif -%}
         {% set sub_test_unique_id = get_sub_test_unique_id(
