@@ -12,6 +12,31 @@ from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
+TABLE_INFO_FIELD = "table_info"
+TIME_FIELD = "time"
+STATUS_FIELD = "status"
+DESCRIPTION_FIELD = "description"
+OWNERS_FIELD = "owners"
+TAGS_FIELD = "tags"
+SUBSCRIBERS_FIELD = "subscribers"
+ERROR_MESSAGE_FIELD = "error_message"
+TEST_PARAMS_FIELD = "test_params"
+TEST_QUERY_FIELD = "test_query"
+TEST_RESULTS_SAMPLE_FIELD = "test_results_sample"
+DEFAULT_ALERT_FIELDS = [
+    TABLE_INFO_FIELD,
+    TIME_FIELD,
+    STATUS_FIELD,
+    DESCRIPTION_FIELD,
+    OWNERS_FIELD,
+    TAGS_FIELD,
+    SUBSCRIBERS_FIELD,
+    ERROR_MESSAGE_FIELD,
+    TEST_PARAMS_FIELD,
+    TEST_QUERY_FIELD,
+    TEST_RESULTS_SAMPLE_FIELD,
+]
+
 
 class TestAlert(Alert):
     TABLE_NAME = "alerts"
@@ -52,11 +77,12 @@ class TestAlert(Alert):
         test_meta = try_load_json(self.test_meta) or {}
         model_meta = try_load_json(self.model_meta) or {}
         # If there is no alerts_fields in the test meta object,
-        # we return the model alerts_fields from the model meta object
+        # we return the model alerts_fields from the model meta object.
+        # The fallback is DEFAULT_ALERT_FIELDS.
         return (
             test_meta.get("alert_fields")
             if test_meta.get("alert_fields")
-            else model_meta.get("alert_fields")
+            else model_meta.get("alert_fields", DEFAULT_ALERT_FIELDS)
         )
 
 
@@ -128,7 +154,7 @@ class DbtTestAlert(TestAlert):
         )
         self._add_divider(slack_message)
 
-        if alert_fields is None or "table_info" in alert_fields:
+        if TABLE_INFO_FIELD in alert_fields:
             msg = [f"*Table*\n{self.table_full_name}"]
             if self.column_name:
                 msg.append(f"*Column*\n{self.column_name}")
@@ -138,57 +164,57 @@ class DbtTestAlert(TestAlert):
             )
             self._add_divider(slack_message)
 
-        if alert_fields is None or "time" in alert_fields:
+        if TIME_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             )
 
-        if alert_fields is None or "status" in alert_fields:
+        if STATUS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Status*\n{self.status}",
             )
 
-        if alert_fields is None or "description" in alert_fields:
+        if DESCRIPTION_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Description*\n{f'```{self.test_description}```' if self.test_description else '_No description_'}",
             )
 
-        if alert_fields is None or "owners" in alert_fields:
+        if OWNERS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
             )
 
-        if alert_fields is None or "tags" in alert_fields:
+        if TAGS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
             )
 
-        if alert_fields is None or "subscribers" in alert_fields:
+        if SUBSCRIBERS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}',
             )
 
-        if alert_fields is None or "error_message" in alert_fields:
+        if ERROR_MESSAGE_FIELD in alert_fields:
             self._add_divider(slack_message)
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Error Message*\n{f'```{self.error_message}```' if self.error_message else '_No error message_'}",
             )
 
-        if alert_fields is None or "test_params" in alert_fields:
+        if TEST_PARAMS_FIELD in alert_fields:
             self._add_divider(slack_message)
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Test Parameters*\n{f'`{self.test_params}`' if self.test_params else '_No test params_'}",
             )
 
-        if alert_fields is None or "test_query" in alert_fields:
+        if TEST_QUERY_FIELD in alert_fields:
             self._add_divider(slack_message)
             if self.test_results_query:
                 msg = f"*Test Query*\n```{self.test_results_query}```"
@@ -204,7 +230,7 @@ class DbtTestAlert(TestAlert):
                     slack_message, f"*Test Query*\n_No test query_"
                 )
 
-        if alert_fields is None or "test_results_sample" in alert_fields:
+        if TEST_RESULTS_SAMPLE_FIELD in alert_fields:
             self._add_divider(slack_message)
             self._add_text_section_to_slack_msg(
                 slack_message,
@@ -282,7 +308,7 @@ class ElementaryTestAlert(DbtTestAlert):
         )
         self._add_divider(slack_message)
 
-        if alert_fields is None or "table_info" in alert_fields:
+        if TABLE_INFO_FIELD in alert_fields:
             msg = [f"*Table*\n{self.table_full_name}"]
             if self.column_name:
                 msg.append(f"*Column*\n{self.column_name}")
@@ -292,44 +318,44 @@ class ElementaryTestAlert(DbtTestAlert):
             )
             self._add_divider(slack_message)
 
-        if alert_fields is None or "time" in alert_fields:
+        if TIME_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             )
 
-        if alert_fields is None or "description" in alert_fields:
+        if DESCRIPTION_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Description*\n{f'```{self.test_description}```' if self.test_description else '_No description_'}",
             )
 
-        if alert_fields is None or "owners" in alert_fields:
+        if OWNERS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
             )
 
-        if alert_fields is None or "tags" in alert_fields:
+        if TAGS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
             )
 
-        if alert_fields is None or "subscribers" in alert_fields:
+        if SUBSCRIBERS_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}',
             )
 
-        if alert_fields is None or "error_message" in alert_fields:
+        if ERROR_MESSAGE_FIELD in alert_fields:
             self._add_divider(slack_message)
             self._add_text_section_to_slack_msg(
                 slack_message,
                 f"*Error Message*\n{f'```{self.error_message}```' if self.error_message else '_No error message_'}",
             )
 
-        if alert_fields is None or "test_results_sample" in alert_fields:
+        if TEST_RESULTS_SAMPLE_FIELD in alert_fields:
             self._add_divider(slack_message)
             if anomalous_value:
                 column_msgs = []
@@ -344,7 +370,7 @@ class ElementaryTestAlert(DbtTestAlert):
                     f"*Test Results Sample*\n_No test results sample_",
                 )
 
-        if alert_fields is None or "test_params" in alert_fields:
+        if TEST_PARAMS_FIELD in alert_fields:
             self._add_divider(slack_message)
             self._add_text_section_to_slack_msg(
                 slack_message,
