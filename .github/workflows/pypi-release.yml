@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish-to-pypi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v3
