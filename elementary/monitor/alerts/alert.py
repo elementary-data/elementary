@@ -70,9 +70,11 @@ class Alert:
         )
 
     @classmethod
-    def _add_fields_section_to_slack_msg(
-        cls, slack_message: dict, section_msgs: list, divider: bool = False
-    ):
+    def _add_divider(cls, slack_message: dict):
+        slack_message["attachments"][0]["blocks"].extend([{"type": "divider"}])
+
+    @classmethod
+    def _add_fields_section_to_slack_msg(cls, slack_message: dict, section_msgs: list):
         fields = []
         for section_msg in section_msgs:
             fields.append(
@@ -80,18 +82,12 @@ class Alert:
             )
 
         block = []
-        if divider:
-            block.append({"type": "divider"})
         block.append({"type": "section", "fields": fields})
         slack_message["attachments"][0]["blocks"].extend(block)
 
     @classmethod
-    def _add_text_section_to_slack_msg(
-        cls, slack_message: dict, section_msg: str, divider: bool = False
-    ):
+    def _add_text_section_to_slack_msg(cls, slack_message: dict, section_msg: str):
         block = []
-        if divider:
-            block.append({"type": "divider"})
         block.append(
             {
                 "type": "section",
