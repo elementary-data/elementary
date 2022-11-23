@@ -22,6 +22,7 @@ class TestAlert(Alert):
         test_unique_id: str,
         test_created_at: Optional[str] = None,
         test_meta: Optional[str] = None,
+        model_meta: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -29,6 +30,7 @@ class TestAlert(Alert):
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at
         self.test_meta = test_meta
+        self.model_meta = model_meta
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -47,8 +49,15 @@ class TestAlert(Alert):
         return ElementaryTestAlert(**test_alert_dict)
 
     def get_alert_fields(self) -> Optional[list]:
-        meta = try_load_json(self.test_meta) or {}
-        return meta.get("alert_fields")
+        test_meta = try_load_json(self.test_meta) or {}
+        model_meta = try_load_json(self.model_meta) or {}
+        # If there is no alerts_fields in the test meta object,
+        # we return the model alerts_fields from the model meta object
+        return (
+            test_meta.get("alert_fields")
+            if test_meta.get("alert_fields")
+            else model_meta.get("alert_fields")
+        )
 
 
 class DbtTestAlert(TestAlert):
