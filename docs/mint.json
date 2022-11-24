@@ -54,7 +54,22 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "quickstart", "quickstart-cli"]
+      "pages": [
+        "introduction",
+        "quickstart",
+        "quickstart-cli",
+        {
+          "group": "Quickstart: Tutorial",
+          "pages": [
+            "tutorial/tutorial-start",
+            "tutorial/setup",
+            "tutorial/installing-elementary",
+            "tutorial/viewing-artifacts",
+            "tutorial/adding-elementary-tests",
+            "tutorial/running-elementary"
+          ]
+        }
+      ]
     },
     {
       "group": "Guides",
