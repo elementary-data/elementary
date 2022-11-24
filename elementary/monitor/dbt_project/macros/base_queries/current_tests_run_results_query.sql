@@ -195,7 +195,6 @@
         test_results.test_results_query,
         test_results.other,
         case
-            when (test_results.test_alias = test_results.test_name and test_results.test_alias is not null) then test_results.test_alias
             when test_results.test_short_name is not null then test_results.test_short_name
             else test_results.test_name
         end as test_name,
