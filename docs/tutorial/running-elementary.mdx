@@ -1,94 +1,69 @@
 ---
-title: "Running Elementary"
+title: "Running Elementary Tests and Reports with the CLI"
 ---
+import InstallCLI from "../snippets/install-cli.mdx";
+import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
+import CommunitySupport from "../snippets/support-contact.mdx";
 
-Now that we defined Elemntary's tests, it is time to run Elementary!
+# Elementary CLI Setup
 
-## Running Elementary
+Elementary's CLI can only be run locally (for now) and requires adjustment to the `profiles.yml`. 
 
-before we start, lets make sure that we work from our dbt project directory:
+The CLI tool allows users to access reports and results based on the tests we just configured. While we have already added the Elementary packages to our dbt project, the Elementary CLI requires a separate installation, as it can only be run locally.
+<Warning>
+Important:  Both dbt Cloud and dbt Core users will need to run the Elementary CLI locally. If you are a cloud user, you will need to ensure your configuration has met all the [prerequisites](https://docs.elementary-data.com/tutorial/setup).
+</Warning>
+<Accordion title="1. Install the Elementary CLI">
+Run one of the following commands based on your platform:
+<InstallCLI />
+</Accordion>
+<br/>
+<Accordion title="2. Creating a Profile for the CLI">
+<AddConnectionProfile />
+</Accordion>
+<br/>
+# Running Elementary
 
-```shell
-cd <tutorial cloned repository path>/elementary_tutorial/dbt_project
-```
-
-#### 1. Populate vaild data
-
-We want to seed data to our project warehouse, so we could run Elementary and play with our tests:
-
-```shell
-dbt seed -s training
-```
-
-The next step is to run our models and create the data at our warehouse:
-
+Now that we have added Elementary tests to our schemas.yml file, it’s time to run our first tests. We begin by running on a subset of our data that is all valid:
 ```shell
 dbt run --vars "{'anomalies': False}"
 ```
-
-<Info>
-
-We set the anomalies flag to False, to make sure we are only seeding good data to our warehouse.
-
-</Info>
-
-#### 2. Running Elementary
-
-Now that we have populated data to our warehouse, we want to run our tests and see that everything passed when our data is good and valid!
-
-Lets run the tests:
-
+<Warning>
+Note: Here we are setting the anomalies flag to False - only seeding valid data to our DWH.
+</Warning>
+<br/>
+# Your First Test
+Now that we have populated our data warehouse with valid data, we will run our tests and ensure that everything passes:
 ```shell
 dbt test
 ```
-
-All our tests should pass!
-
-To have a better visualisation of our test runs, lets create Elementary's report:
-
+All of our tests (except the dbt project's example tests) should pass. Now, let's visualize our results:
 ```shell
 edr monitor report
 ```
-
-#### 3. Populate broken data
-
-Now that we saw that our tests work and everything is pass when our data is good and valid,
-Lets populate broken data to our project warehouse, so we could really see how our tests work:
-
-```shell
-dbt seed -s validation
-```
-
-The next step is to run our models and create the data at our warehouse:
-
+<Frame>
+  <img
+    src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
+    alt="Demo"
+  />
+</Frame>
+**You've just run your first Elementary report!**
+<br/>
+# Let's get real though...
+Data is rarely perfect. Let’s get real and add some more data to our project:
 ```shell
 dbt run --vars "{'anomalies': True}"
 ```
-
-<Info>
-
-We set the anomalies flag to True, to make sure we are seeding broken data to our warehouse.
-
-</Info>
-
-#### 4. Running Elementary again!
-
-Now that we have populated broken data to our warehouse, we want to run our tests and see that our tests monitor our data!
-
-Lets run the tests:
-
+Now let's run our tests again:
 ```shell
 dbt test
 ```
-
-All our tests should fail!
-
-To have a better visualisation of our test runs, lets create Elementary's report:
-
+Now we should see our Elementary tests fail!
+Now let's visualize this failure:
 ```shell
 edr monitor report
 ```
+# Congratulations!
+Congratulations, you succesfully configured Elementary's tests and ran the report!
 
-#### Congratulations!
-
-Congratulations! We successfully configured Elementary's tests & ran Elementary's Report!!!
+<CommunitySupport />
