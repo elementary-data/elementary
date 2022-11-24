@@ -156,10 +156,6 @@ def monitor(
     Monitor your warehouse.
     """
 
-    click.echo(
-        f"Any feedback and suggestions are welcomed! join our community here - "
-        f"https://bit.ly/slack-elementary\n"
-    )
     if ctx.invoked_subcommand is not None:
         return
     vars = yaml.loads(dbt_vars) if dbt_vars else None
