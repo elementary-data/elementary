@@ -1,0 +1,252 @@
+---
+title: "Adding Elementary Tests"
+---
+# Adding Elementary Tests
+
+This tutorial will add a few common tests to our data set.
+To read more about Elementary's suite of tests click [here](https://docs.elementary-data.com/guides/add-elementary-tests). <br/>
+
+There are 3 models in our tutorial:<br/>
+- **Customers**
+- **Orders**
+- **Returned Orders** 
+
+In Elementary Data, tests are added to the `schema.yml` file. We will now navigate there and add tests for each of our models.
+<Warning>
+A `schema.yml` file that includes all the below tests can be found at the bottom of this page, so there is no need to manually add each test.
+</Warning>
+<br/>
+<Accordion title="Test 1: Customer Signups">
+First, we will use the **tables_anomalies** test to perform a **row_count**. This tests counts the number of rows created in a given period to determine if there have been any anomalies in the number of signups in a given time period.
+
+We will add the **table_anomalies** test using **row_count** as a monitor as follows:
+```yaml
+models:
+  - name: customers
+    description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
+    config:
+      tags: ["PII"]
+    tests:
+      - elementary.table_anomalies:
+          table_anomalies:
+            - row_count
+```
+Now that we have selected row_count as our monitor, we must define a column to use for our timestamp. This will be used to create time buckets for anomaly detection. We select the **signup_date** column as seen below:
+```yaml
+models:
+  - name: customers
+    description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
+    config:
+      tags: ["PII"]
+      elementary:
+        timestamp_column: "signup_date"
+    tests:
+      - elementary.table_anomalies:
+          table_anomalies:
+            - row_count
+```
+This test will fail if there are any days (as defined by **signup_date**)  where the number of rows exceeds 3 standard deviations above/below the mean.
+</Accordion>
+<br/>
+<Accordion title="Test 2: Returned Orders">
+Similar to Test 1, we will use the **table_anomalies** test and **row_count** to detect an anomalous number of returned orders in a given time period. In this test, however, we will define the timestamp column at the test level - instead of at the model level.
+```yaml
+  - name: returned_orders
+    description: This table contains all of the returned orders
+    config:
+      tags: ["finance"]
+
+    tests:
+      - elementary.table_anomalies:
+          tags: ["table_anomalies"]
+          table_anomalies:
+            - row_count
+          timestamp_column: "order_date"
+```
+</Accordion>
+<br/>
+<Accordion title="Test 3: Dimension Anomalies in the Orders Model">
+The **elementary.dimension_anomalies** tests can be used to check for anomalies in the distribution of data in low cardinality fields. First, we will select the **status** column in the Orders model to run this test on:
+```yaml
+  - name: orders
+    description: This table has basic information about orders, as well as some derived facts based on payments
+    config:
+      tags: ["finance"]
+
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions:
+            - status
+```
+Next, we will define a timestamp column for determining time buckets:
+```yaml
+  - name: orders
+    description: This table has basic information about orders, as well as some derived facts based on payments
+    config:
+      tags: ["finance"]
+      elementary:
+        timestamp_column: "order_date"
+
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions:
+            - status
+```
+This test will gather row count metrics for each value in the **status** column and will fail if the distribution deviates substantially from the mean.
+</Accordion>
+<br/>
+<Accordion title="Test 4: Column Anomalies in the Customers Model">
+We will use the **elementary.column_anomalies** test to monitor the count of customers with 0 orders. To do so, we will define a **zero_count** test under **elementary.column_anomalies** for the **number_of_orders** column:
+```yaml
+      - name: number_of_orders
+        description: Count of the number of orders a customer has placed
+        tests:
+          - elementary.column_anomalies:
+              config:
+                severity: warn
+              tags: ["column_anomalies"]
+              column_anomalies:
+                - zero_count
+              timestamp_column: "signup_date"
+```
+<Info>
+Notice that we already defined the **timestamp_column** at the model level, so we don't have to define it in the test.
+</Info>
+</Accordion>
+<br/>
+Copy the text below into your `schema.yml` file to add all of the above tests to our project:
+<Accordion title="Final schema.yml file">
+
+```yaml
+version: 2
+
+models:
+  - name: customers
+    description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
+    config:
+      tags: ["PII"]
+      elementary:
+        timestamp_column: "signup_date"
+    tests:
+      - elementary.table_anomalies:
+          table_anomalies:
+            - row_count
+
+    columns:
+      - name: customer_id
+        description: This is a unique identifier for a customer
+
+      - name: first_name
+        description: Customer's first name. PII.
+
+      - name: last_name
+        description: Customer's last name. PII.
+
+      - name: first_order
+        description: Date (UTC) of a customer's first order
+
+      - name: most_recent_order
+        description: Date (UTC) of a customer's most recent order
+
+      - name: number_of_orders
+        description: Count of the number of orders a customer has placed
+        tests:
+          - elementary.column_anomalies:
+              config:
+                severity: warn
+              tags: ["column_anomalies"]
+              column_anomalies:
+                - zero_count
+              timestamp_column: "signup_date"
+
+      - name: customer_lifetime_value
+        description: Total value (AUD) of a customer's orders
+
+      - name: customer_email
+        description: Customer's email. PII.
+
+      - name: signup_date
+        description: Date (UTC) of a customer's signup to the online shop.
+
+  - name: orders
+    description: This table has basic information about orders, as well as some derived facts based on payments
+    config:
+      tags: ["finance"]
+      elementary:
+        timestamp_column: "order_date"
+
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions:
+            - status
+    columns:
+      - name: order_id
+        description: This is a unique identifier for an order
+
+      - name: customer_id
+        description: Foreign key to the customers table
+
+      - name: order_date
+        description: Date (UTC) that the order was placed
+
+      - name: status
+        description: '{{ doc("orders_status") }}'
+
+      - name: amount
+        description: Total amount (AUD) of the order
+
+      - name: credit_card_amount
+        description: Amount of the order (AUD) paid for by credit card
+
+      - name: coupon_amount
+        description: Amount of the order (AUD) paid for by coupon
+
+      - name: bank_transfer_amount
+        description: Amount of the order (AUD) paid for by bank transfer
+
+      - name: gift_card_amount
+        description: Amount of the order (AUD) paid for by gift card
+
+  - name: returned_orders
+    description: This table contains all of the returned orders
+    config:
+      tags: ["finance"]
+
+    tests:
+      - elementary.table_anomalies:
+          tags: ["table_anomalies"]
+          table_anomalies:
+            - row_count
+          timestamp_column: "order_date"
+
+    columns:
+      - name: order_id
+        description: This is a unique identifier for an order
+
+      - name: customer_id
+        description: Foreign key to the customers table
+
+      - name: order_date
+        description: Date (UTC) that the order was placed
+
+      - name: status
+        description: '{{ doc("orders_status") }}'
+
+      - name: amount
+        description: Total amount (AUD) of the order
+
+      - name: credit_card_amount
+        description: Amount of the order (AUD) paid for by credit card
+
+      - name: coupon_amount
+        description: Amount of the order (AUD) paid for by coupon
+
+      - name: bank_transfer_amount
+        description: Amount of the order (AUD) paid for by bank transfer
+
+      - name: gift_card_amount
+        description: Amount of the order (AUD) paid for by gift card
+```
+</Accordion>
+<br/>
+### You have now added Elementary tests to your project. Now let's see how they are run and visualized.

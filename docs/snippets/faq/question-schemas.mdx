@@ -1,0 +1,28 @@
+<Accordion title="What schemas Elementary adds? What is '__tests' schema?">
+
+The schemas structure we recommend is:
+
+- Your schemas
+- Elementary models schema - The schema name is configured under your `dbt_project.yml`.
+- Elementary temp test results schema - The Elementary schema name with `__test` suffix.
+
+
+We recommend configuring a dedicated schema for the Elementary models using the [dbt custom schema](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/using-custom-schemas) option.
+Here is an example configuration, that creates a schema with the suffix '_elementary' for elementary models:
+```yml dbt_project.yml
+models:
+  elementary:
+    +schema: elementary
+```
+
+Also, Elementary creates a schema to store temp tables with results of elementary anomaly detection tests.
+As some users have hundreds of Elementary tests, we didn't want tons of small tables to be created in the Elementary schema.
+These results are later merged to the incremental tables in the main elementary schema.
+
+You may change the suffix of the tests schema using a var:
+```yml dbt_project.yml
+vars:
+  tests_schema_name: '_test_results'
+```
+
+</Accordion>

@@ -2,7 +2,7 @@
 title: "Elementary in production"
 ---
 
-import Schema from "../snippets/faq/question-schema.mdx";
+import Schemas from "../snippets/faq/question-schemas.mdx";
 
 Running Elementary in production means to include the dbt package in your production dbt project, 
 and setting up an automated manner to run the Elementary CLI.
@@ -43,10 +43,10 @@ Also, in the `elementary` profile, the credentials should have permissions to:
 
 On your dbt project, make sure that Elementary dbt package can: 
 - Read all project schemas
-- Write to the elementary schema
-- Create a schema (alternatively, you can create the elementary schema in advance)
+- Write to the elementary and elementary tests schemas
+- Create schemas (alternatively, you can create the elementary schemas in advance)
 
-<Schema />
+<Schemas />
 
 ## When to run Elementary?
 

@@ -1,7 +1,8 @@
 ---
 title: "dbt package"
 ---
-import SchemaNoAccordion from "../../snippets/faq/question-schema-no-accordion.mdx";
+
+import Schemas from "../../snippets/faq/question-schemas.mdx";
 
 For the data monitoring and dbt artifacts collection, edr executes a dbt package we developed.
 The package adds modles, macros, and Elementary monitors as dbt tests to your project.
@@ -20,9 +21,14 @@ To start, refer to the [installation guide](/quickstart#how-to-install-elementar
 
 The code of the Elementary dbt package can be found here: [https://github.com/elementary-data/dbt-data-reliability](https://github.com/elementary-data/dbt-data-reliability)
 
-# Elementary dbt package schema
+# Elementary dbt package schemas
 
-<SchemaNoAccordion />
+The Elementary dbt package stores data in 2 schemas:
+
+- Elementary models schema
+- Elementary temp tests results schema
+
+<Schemas />
 
 # Elementary dbt package models
 

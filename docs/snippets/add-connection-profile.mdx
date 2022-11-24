@@ -1,6 +1,6 @@
 import AllProfiles from "./profiles/all-profiles.mdx";
 
-## Configure Elementary profile
+## Configuring the Elementary Profile
 
 In order to connect, Elementary needs a [connection profile](https://docs.getdbt.com/dbt-cli/configure-your-profile) in a file named `profiles.yml`.
 This profile will be used by the CLI, to connect to the DWH and find the dbt package tables.
@@ -10,10 +10,11 @@ The easiest way to generate the profile is to run the following command within t
 ```shell
 dbt run-operation elementary.generate_elementary_cli_profile
 ```
-
+<Warning>
+Ensure that you fill in your password and any other missing fields after you paste the profile in your **local** `profiles.yml` file.  
+</Warning>
 Copy the output, fill in the missing fields and add the profile to your `profiles.yml`.
 Here is a demonstration:
-
 <Frame>
   <div style={{ paddingBottom: "64.98194945848375%" }}>
     <iframe
@@ -38,5 +39,6 @@ Here is a demonstration:
 - Path: `HOME_DIR/.dbt/profiles.yml`
 - Profile name: `elementary`
 - Schema name: The schema of elementary models, default is `<your_dbt_project_schema>_elementary`
+
 
 <AllProfiles />
