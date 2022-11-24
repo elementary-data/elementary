@@ -3,8 +3,9 @@ from typing import Optional
 import click
 import pkg_resources
 import requests
-from elementary.utils.log import get_logger
 from packaging import version
+
+from elementary.utils.log import get_logger
 
 _PYPI_URL = "https://pypi.org/pypi/elementary-data/json"
 
@@ -32,8 +33,8 @@ def check_dbt_pkg_compatible(dbt_pkg_ver: str):
     py_pkg_ver = version.parse(get_package_version())
     if dbt_pkg_ver.major != py_pkg_ver.major or dbt_pkg_ver.minor != py_pkg_ver.minor:
         click.secho(
-            f"You are using incompatible versions between 'edr' ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n"
-            "Please change the major and minor versions to align.\n",
+            f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n"
+            "Please upgrade the major and minor versions to align.\n",
             fg="yellow",
         )
     else:
