@@ -1,6 +1,5 @@
 import json
 import os
-import shlex
 import subprocess
 from json import JSONDecodeError
 from typing import List, Optional, Tuple, Dict
@@ -48,7 +47,7 @@ class DbtRunner:
         if vars:
             json_vars = json.dumps(vars)
             dbt_command.extend(["--vars", json_vars])
-        log_msg = f"Running {shlex.join(dbt_command)}"
+        log_msg = f"Running {' '.join(dbt_command)}"
         if not quiet:
             logger.info(log_msg)
         else:
