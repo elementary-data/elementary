@@ -70,11 +70,16 @@ class Alert:
         )
 
     @classmethod
-    def _add_divider(cls, slack_message: dict):
-        slack_message["attachments"][0]["blocks"].extend([{"type": "divider"}])
+    def _add_divider(cls, slack_message: dict, add_to_attachment: bool = False):
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend([{"type": "divider"}])
+        else:
+            slack_message["blocks"].extend([{"type": "divider"}])
 
     @classmethod
-    def _add_fields_section_to_slack_msg(cls, slack_message: dict, section_msgs: list):
+    def _add_fields_section_to_slack_msg(
+        cls, slack_message: dict, section_msgs: list, add_to_attachment: bool = False
+    ):
         fields = []
         for section_msg in section_msgs:
             fields.append(
@@ -83,10 +88,16 @@ class Alert:
 
         block = []
         block.append({"type": "section", "fields": fields})
-        slack_message["attachments"][0]["blocks"].extend(block)
+
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend(block)
+        else:
+            slack_message["blocks"].extend(block)
 
     @classmethod
-    def _add_text_section_to_slack_msg(cls, slack_message: dict, section_msg: str):
+    def _add_text_section_to_slack_msg(
+        cls, slack_message: dict, section_msg: str, add_to_attachment: bool = False
+    ):
         block = []
         block.append(
             {
@@ -97,4 +108,26 @@ class Alert:
                 },
             }
         )
-        slack_message["attachments"][0]["blocks"].extend(block)
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend(block)
+        else:
+            slack_message["blocks"].extend(block)
+
+    @classmethod
+    def _add_header_section_to_slack_msg(
+        cls, slack_message: dict, section_msg: str, add_to_attachment: bool = False
+    ):
+        block = []
+        block.append(
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": section_msg,
+                },
+            }
+        )
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend(block)
+        else:
+            slack_message["blocks"].extend(block)
