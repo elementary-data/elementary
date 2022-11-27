@@ -6,8 +6,10 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
+import click
 import pkg_resources
 from alive_progress import alive_it
+from packaging import version
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.gcs.client import GCSClient
@@ -423,10 +425,19 @@ class DataMonitoring:
             self.tracking.record_cli_internal_exception(err)
             return None
 
-    def _check_dbt_package_compatibility(self, dbt_pkg_version: str):
-        logger.info("Checking compatibility between edr and Elementary's dbt package.")
-        try:
-            package.check_dbt_pkg_compatible(dbt_pkg_version)
-        except Exception as err:
-            logger.error(f"Failed to check compatibility with dbt package: {err}")
-            self.tracking.record_cli_internal_exception(err)
+    @staticmethod
+    def _check_dbt_package_compatibility(dbt_pkg_ver: str):
+        dbt_pkg_ver = version.parse(dbt_pkg_ver)
+        py_pkg_ver = version.parse(package.get_package_version())
+        logger.info(
+            f"Checking compatibility between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver})."
+        )
+        if (
+            dbt_pkg_ver.major != py_pkg_ver.major
+            or dbt_pkg_ver.minor != py_pkg_ver.minor
+        ):
+            click.secho(
+                f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
+                "Please upgrade the major and minor versions to align.\n",
+                fg="yellow",
+            )

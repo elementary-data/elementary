@@ -1,3 +1,5 @@
+from elementary.utils import package
+from typing import Any
 import os
 
 import click
@@ -48,6 +50,14 @@ class ElementaryCLI(click.MultiCommand):
         self.format_help_text(ctx, formatter)
         self.format_options(ctx, formatter)
         self.format_epilog(ctx, formatter)
+
+    def invoke(self, ctx: click.Context) -> Any:
+        click.echo(
+            f"Any feedback and suggestions are welcomed! join our community here - "
+            f"https://bit.ly/slack-elementary\n"
+        )
+        logger.info(f"Running with edr={package.get_package_version()}")
+        return super().invoke(ctx)
 
 
 cli = ElementaryCLI(

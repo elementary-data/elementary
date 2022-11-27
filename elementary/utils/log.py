@@ -3,7 +3,9 @@ import sys
 
 from elementary.utils.env_vars import is_debug_mode_on
 
-FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+FORMATTER = logging.Formatter(
+    "%(asctime)s — %(levelname)s — %(message)s", "%Y-%m-%d %H:%M:%S"
+)
 LOG_FILE = "edr.log"
 
 

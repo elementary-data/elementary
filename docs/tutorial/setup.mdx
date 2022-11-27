@@ -1,18 +1,19 @@
 ---
-title: "Setup tutorial environment"
+title: "Setting Up your Tutorial Environment"
+sidebarTitle: "Environment setup"
 ---
 
 In this step you will setup the environment needed for running the tutorial and using Elementary.
 
-## Before you start
+## Before you start:
 
-<Info> 
-  
+<Info>
+
   **Prerequisites**
 
 For the tutorial you will need:
 
-1. Working Python installation
+1. A working Python installation
 2. [pip installer](https://pip.pypa.io/en/stable/) for Python
 3. Access and credentials to a data warehouse supported by Elementary
 
@@ -20,184 +21,65 @@ We also recommend you work with a [Python virtual environment](https://docs.pyth
 
 </Info>
 
-## Setup tutorial dbt project
+## Setting Up Your Tutorial Project:
 
 <Accordion title="dbt core">
 
-#### 1. Create Elementary tutorial dbt project
+### 1. Initialize a New dbt Project:
 
-We created a dbt project to help us with the tutorial.
-The project is an extended version of the [dbt "jaffle shop" project](https://github.com/dbt-labs/jaffle_shop).
-It contains seeds and models that we will use to run Elementary's tests on, and collect arrtifacts.
-
-In order to use the tutorial project, you can either clone the project, or initial a new project and copy the relevant files from the tutorial project.
-
-<Accordion title="Clone Elementary tutorial dbt project">
-
-#### 1. Clone Elementary tutorial dbt project
-
-To clone the tutorial project run the following command:
-
-```shell
-git clone https://github.com/elementary-data/tutorial.git
-```
-
-#### 2. Create profile for elementary_tutorial dbt project
-
-Create a profile for `elementary_tutorial` at your `profiles.yml`
-
-</Accordion>
-
-<Accordion title="Initial Elementary tutorial dbt project">
-
-#### 1. Initial dbt project
-
-To initial the tutorial project run the following command:
+Name the project `elementary_tutorial`
 
 ```shell
 dbt init elementary_tutorial
 ```
+Ensure that you have a working connection to your DWH. To troubleshoot, you can run **dbt debug**.
 
-#### 2. Add models to the dbt project
+<br />
+<br />
 
-After we initialized the tutorial dbt project, we want to add the relevant files to the project:
+### 2. Add Sample Data to your Tutorial Project
 
-- seeds: copy the folders from the [tutorial repo seeds folder](https://github.com/elementary-data/tutorial/tree/main/seeds) to your tutorial dbt project seeds folder.
-- models: copy the folders from the [tutorial repo models folder](https://github.com/elementary-data/tutorial/tree/main/models) to your tutorial dbt project models folder. Notice that the `schema.yml` file is already defineds with all of the tutorial models (without the tests).
+We created a dbt project to help us with the tutorial.
+The project is an extended version of the **dbt "jaffle shop" project**.
+It contains seeds and models that we will use to run Elementary's tests on, and collect arrtifacts.
 
-#### 3. Add elementary dbt package to the project
+In order to load the tutorial project into your dbt project [download the files here](https://github.com/elementary-data/elementary-tutorial/archive/refs/heads/main.zip).
 
-We want to add elementary to our dbt project. To do so add the following lines to the `packages.yml` file:
 
-```yaml
-packages:
-  - package: elementary-data/elementary
-    version: [">=0.5.3", "<1.0.0"]
-```
-
-#### Define schema for elementary
-
-Elementary requires to define a schema for it. We should add the following lines to our `dbt_project.yml` file:
-
-```yaml
-models:
-  elementary:
-    +schema: "elementary"
-```
-
-</Accordion>
-
-#### 2. Seed the tutorial data
-
-Run deps to install the tutorial dbt project packages:
-
-```shell
-dbt deps
-```
-
-Run seed to seed the tutorial data into the warehouse
-
+- **seeds**: copy the **validation** and **training** folders from the **seeds** directory into your local project's **seeds** folder.
+- **models**: copy all of the files plus the **staging** folder into the **models** folder in your local dbt project.
+<br />
+### 3. Seed Data to our DWH
+We will populate our DWH with the sample data:
 ```shell
 dbt seed
 ```
-
 </Accordion>
-
+<br />
 <Accordion title="dbt cloud">
 
-#### 1. Fork Elementary tutorial repo
+#### 1. Fork the Elementary Tutorial Repo
 
 We created a dbt project to help us with the tutorial.
-The project is an extended version of the [dbt "jaffle shop" project](https://github.com/dbt-labs/jaffle_shop).
+The project is an extended version of the dbt **jaffle shop** project.
 It contains seeds and models that we will use to run Elementary's tests on, and collect arrtifacts.
 
-In order to load the tutorial project into your dbt cloud, you need to fork the repo and connect a new project to it.
+In order to load the tutorial project into your dbt cloud environment, you need to fork the repo and connect a new project to it.
 
 To fork the the tutorial repo, go to the [tutorial repo](https://github.com/elementary-data/tutorial) and click on the `fork` button.
 
-To create a new project at your dbt cloud, go to `Account Settings` and click on the `New Project` button under the `Projects` section.
-
-<Info>
-
-Make sure you name your profile `elementary_tutorial`.
-
-</Info>
-
-#### 2. Seed the tutorial data
-
-Run deps to install the tutorial dbt project packages:
-
-```shell
-dbt deps
-```
-
-Run seed to seed the tutorial data into the warehouse
-
+#### 2. Create a new dbt Project
+To create a new project in dbt cloud, go to `Account Settings` and click on the `New Project` button under the `Projects` section.<br/> Create a new project where the connection profile is named `elementary_tutorial`.
+<Warning>
+**Make sure you name your connection profile `elementary_tutorial`.**
+</Warning>
+#### 3. Connect to the Tutorial Repo
+Connect to the forked repository.
+#### 4. Seed Data to our DWH
+After creating a branch, we will populate our DWH with the sample data:
 ```shell
 dbt seed
 ```
-
 </Accordion>
-
-## Setup Elementary CLI
-
-<Accordion title="dbt core">
-
-#### 1. Install Elementary CLI
-
-To install Elementary CLI, run the following command:
-
-```shell
-pip install elementary-data
-```
-
-#### 2. Create profile for Elementary CLI
-
-If we want to run Elementary's report over our tutorial project, we should create a dbt profile for elementary.
-
-To create a profile easily, run the following command:
-
-```shell
-dbt run-operation elementary.generate_elementary_cli_profile
-```
-
-Copy the output, fill in the missing fields and add the profile to your `profiles.yml`.
-
-You can see the full guide for configure Elementary profile [here](/quickstart-cli).
-
-</Accordion>
-
-<Accordion title="dbt cloud">
-
-#### 1. Install Elementary CLI
-
-Elementary CLI is a python package that works outside of dbt cloud.
-Because of that, in order to run Elementary CLI, we need to install it using python on our local machine.
-
-To install Elementary CLI, run the following command:
-
-```shell
-pip install elementary-data
-```
-
-#### 2. Create profile for Elementary CLI
-
-If we want to run Elementary's report over our tutorial project, we should create a dbt profile for elementary.
-
-To create a profile easily, run the following command in your dbt cloud tutorial project:
-
-```shell
-dbt run-operation elementary.generate_elementary_cli_profile
-```
-
-Copy the output, fill in the missing fields and create a `profiles.yml` file in your local machine with it.
-
-<Info>
-
-Remember where you saved your `profiles.yml` file, we will use it later when we will run Elementary CLI.
-
-</Info>
-
-You can see the full guide for configure Elementary profile [here](/quickstart-cli).
-
-</Accordion>
+<br/>
+**Now, let's add Elementary's package into our project.**
