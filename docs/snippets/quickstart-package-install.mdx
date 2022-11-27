@@ -67,8 +67,8 @@ packages:
 ### 2. Add to your `dbt_project.yml`
 
 <Info>
-This means Elementary models will have their own schemas.
-Depending on your project custom schemas rules (see [dbt custom schema docs](https://docs.getdbt.com/docs/build/custom-schemas)), the schemas will be named `elementary` & `elementary__tests` or `<target_schema>_elementary` & `<target_schema>_elementary__tests` (being `<target_schema> = analytics` very often).
+This means Elementary models will have their own schema.
+Depending on your project custom schema rules (see [dbt custom schema docs](https://docs.getdbt.com/docs/build/custom-schemas)), the schema will be named `elementary` or `<target_schema>_elementary` (being `<target_schema> = analytics` very often).
 
 Make sure your user (or the orchestrator user) has permissions to create schemas.
 If not, ask your admin to create both schemas and grant permissions to the relevant users / groups.
