@@ -6,6 +6,11 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.schema.test import (
+    AnomalyTestConfigurationSchema,
+    DbtTestConfigurationSchema,
+    TestResultSchema,
+)
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
@@ -161,6 +166,15 @@ class DbtTestAlert(TestAlert):
         return SlackMessageSchema(attachments=slack_message["attachments"])
 
     def to_test_alert_api_dict(self):
+        configuration = DbtTestConfigurationSchema(
+            test_name=self.test_name,
+        )
+
+        result = TestResultSchema(
+            result_description=self.test_results_description,
+            result_query=self.test_results_query,
+        )
+
         test_runs = (
             {**self.test_runs, "display_name": self.test_display_name}
             if self.test_runs
@@ -187,6 +201,8 @@ class DbtTestAlert(TestAlert):
                 "test_params": self.test_params,
                 "test_created_at": self.test_created_at,
                 "description": self.test_description,
+                "result": result.dict(),
+                "configuration": configuration.dict(),
             },
             "test_results": {
                 "display_name": self.test_display_name + " - failed results sample",
@@ -267,6 +283,19 @@ class ElementaryTestAlert(DbtTestAlert):
 
     def to_test_alert_api_dict(self):
         test_params = try_load_json(self.test_params) or {}
+
+        configuration = AnomalyTestConfigurationSchema(
+            test_name=self.test_name,
+            timestamp_column=test_params.get("timestamp_column"),
+            testing_timeframe=test_params.get("timeframe"),
+            anomaly_threshold=test_params.get("sensitivity"),
+        )
+
+        result = TestResultSchema(
+            result_description=self.test_results_description,
+            result_query=self.test_results_query,
+        )
+
         test_alerts = None
         if self.test_type == "anomaly_detection":
             timestamp_column = test_params.get("timestamp_column")
@@ -313,6 +342,8 @@ class ElementaryTestAlert(DbtTestAlert):
                 "test_params": test_params,
                 "test_created_at": self.test_created_at,
                 "description": self.test_description,
+                "result": result.dict(),
+                "configuration": configuration.dict(),
             },
             "test_results": test_alerts,
             "test_runs": test_runs,
