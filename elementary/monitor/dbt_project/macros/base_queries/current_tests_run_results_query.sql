@@ -27,8 +27,8 @@
     dbt_tests_with_elementary_unique_id as (
         select 
             case
-                {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt) #}
-                {# This making us use test_unique_id for all schema change tests #}
+                {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt)
+                This making us use test_unique_id for all schema change tests #}
                 when short_name = 'schema_changes' then unique_id 
                 when (alias = name and alias is not null and test_column_name is not null and short_name is not null) then parent_model_unique_id || '.' || test_column_name || '.' || alias || '.' || short_name
                 when (alias = name and alias is not null and short_name is not null) then parent_model_unique_id || '.' || alias || '.' || short_name
@@ -106,8 +106,8 @@
     elementary_test_results_with_elementary_unique_id as (
         select
             case
-                {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt) #}
-                {# This making us use test_unique_id for all schema change tests #}
+                {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt)
+                This making us use test_unique_id for all schema change tests #}
                 when test_type = 'schema_change' then test_unique_id
                 when (test_alias = test_name and test_alias is not null and column_name is not null and test_short_name is not null) then model_unique_id || '.' || column_name || '.' || test_alias || '.' || test_short_name
                 when (test_alias = test_name and test_alias is not null and test_short_name is not null) then model_unique_id || '.' || test_alias || '.' || test_short_name
