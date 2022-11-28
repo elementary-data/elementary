@@ -2,11 +2,15 @@ import pathlib
 
 from setuptools import setup, find_packages
 
+from elementary.monitor import dbt_project_utils
+
 # The directory containing this file.
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file.
 README = (HERE / "README.md").read_text()
+
+dbt_project_utils.clear_dbt_packages()
 
 setup(
     name="elementary-data",

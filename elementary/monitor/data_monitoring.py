@@ -106,7 +106,7 @@ class DataMonitoring:
         self.sent_alert_count += len(sent_alert_ids)
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()
+        internal_dbt_package_exists = dbt_project_utils.dbt_packages_exist()
         self.execution_properties["dbt_package_exists"] = internal_dbt_package_exists
         self.execution_properties[
             "force_update_dbt_packages"

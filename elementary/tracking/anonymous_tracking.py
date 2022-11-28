@@ -157,7 +157,7 @@ class AnonymousTracking:
                 self.config.profile_target,
                 dbt_env_vars=self.config.dbt_env_vars,
             )
-            if not dbt_project_utils.dbt_package_exists():
+            if not dbt_project_utils.dbt_packages_exist():
                 dbt_runner.deps(quiet=True)
 
             adapter_type, adapter_unique_id = json.loads(
