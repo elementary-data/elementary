@@ -11,6 +11,9 @@ from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
+MAX_SLACK_SECTION_SIZE = 2
+SHOW_MORE_ATTACHMENTS_MARK = 5
+
 
 class Alert:
     def __init__(
@@ -54,6 +57,10 @@ class Alert:
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
+
+    @classmethod
+    def _initial_slack_message(cls):
+        return {"blocks": [], "attachments": [{"blocks": []}]}
 
     @classmethod
     def _format_section_msg(cls, section_msg):
@@ -131,3 +138,41 @@ class Alert:
             slack_message["attachments"][0]["blocks"].extend(block)
         else:
             slack_message["blocks"].extend(block)
+
+    @classmethod
+    def _add_compacted_sections_to_slack_msg(
+        cls,
+        slack_message: dict,
+        section_msgs: str,
+        add_to_attachment: bool = False,
+        pad_to_show_more_mark: bool = False,
+    ):
+        # Compacting sections into attachments.
+        # Each section can contian MAX_SLACK_SECTION_SIZE fields.
+        attachments = []
+        section_fields = []
+
+        for section_msg in section_msgs:
+            section_field = {
+                "type": "mrkdwn",
+                "text": cls._format_section_msg(section_msg),
+            }
+            if len(section_fields) < MAX_SLACK_SECTION_SIZE:
+                section_fields.append(section_field)
+            else:
+                attachment = {"type": "section", "fields": section_fields}
+                attachments.append(attachment)
+                section_fields = [section_field]
+
+        attachment = {"type": "section", "fields": section_fields}
+        attachments.append(attachment)
+
+        while pad_to_show_more_mark and len(attachments) < SHOW_MORE_ATTACHMENTS_MARK:
+            section_field = {"type": "mrkdwn", "text": "\t"}
+            attachment = {"type": "section", "fields": [section_field]}
+            attachments.append(attachment)
+
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend(attachments)
+        else:
+            slack_message["blocks"].extend(attachments)
