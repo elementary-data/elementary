@@ -57,10 +57,10 @@ class DbtTestAlert(TestAlert):
         test_rows_sample,
         other,
         test_name,
-        test_short_name,
         test_params,
         severity,
         test_runs=None,
+        test_short_name=None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
