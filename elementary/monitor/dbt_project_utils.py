@@ -3,8 +3,6 @@ import shutil
 
 _MONITOR_DIR = os.path.dirname(os.path.realpath(__file__))
 
-_DBT_PACKAGE_NAME = "elementary"
-
 PATH = os.path.join(_MONITOR_DIR, "dbt_project")
 
 # Compatibility for previous dbt versions
