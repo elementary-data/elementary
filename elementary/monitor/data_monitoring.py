@@ -52,6 +52,7 @@ class DataMonitoring:
         tracking: AnonymousTracking,
         force_update_dbt_package: bool = False,
         send_test_message_on_success: bool = False,
+        disable_samples: bool = False,
     ):
         self.config = config
         self.tracking = tracking
@@ -80,6 +81,7 @@ class DataMonitoring:
         self.sent_alert_count = 0
         self.success = True
         self.send_test_message_on_success = send_test_message_on_success
+        self.disable_samples = disable_samples
 
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
@@ -134,7 +136,7 @@ class DataMonitoring:
         )
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
-    def run(
+    def run_alerts(
         self,
         days_back: int,
         dbt_full_refresh: bool = False,
@@ -151,7 +153,7 @@ class DataMonitoring:
             self.execution_properties["success"] = self.success
             return self.success
 
-        alerts = self.alerts_api.query(days_back)
+        alerts = self.alerts_api.query(days_back, disable_samples=self.disable_samples)
         self.execution_properties[
             "elementary_test_count"
         ] = alerts.get_elementary_test_count()
@@ -284,6 +286,7 @@ class DataMonitoring:
             tests_sample_data = tests_api.get_tests_sample_data(
                 days_back=days_back,
                 disable_passed_test_metrics=disable_passed_test_metrics,
+                disable_samples=self.disable_samples,
             )
             invocations = tests_api.get_invocations(
                 invocations_per_test=test_runs_amount, days_back=days_back
