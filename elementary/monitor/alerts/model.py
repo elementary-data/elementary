@@ -42,7 +42,7 @@ class ModelAlert(Alert):
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = self._initial_slack_message()
         self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt model alert*")
         self._add_divider(slack_message)
         self._add_fields_section_to_slack_msg(
@@ -51,34 +51,43 @@ class ModelAlert(Alert):
                 f"*Model*\n{self.alias}",
                 f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             ],
+            add_to_attachment=True,
         )
         self._add_fields_section_to_slack_msg(
             slack_message,
             [f"*Status*\n{self.status}", f"*Materialization*\n{self.materialization}"],
+            add_to_attachment=True,
         )
         self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
+            slack_message,
+            [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"],
+            add_to_attachment=True,
         )
         if self.subscribers:
             self._add_fields_section_to_slack_msg(
-                slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
+                slack_message,
+                [f'*Subscribers*\n{", ".join(set(self.subscribers))}'],
+                add_to_attachment=True,
             )
-        self._add_divider(slack_message)
+        self._add_divider(slack_message, add_to_attachment=True)
         self._add_fields_section_to_slack_msg(
             slack_message,
             [f"*Full Refresh*\n{self.full_refresh}", f"*Path*\n{self.path}"],
+            add_to_attachment=True,
         )
         if self.message:
             self._add_text_section_to_slack_msg(
-                slack_message, f"*Error Message*\n```{self.message}```"
+                slack_message,
+                f"*Error Message*\n```{self.message}```",
+                add_to_attachment=True,
             )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)
 
     def _snapshot_to_slack(self):
         icon = ":small_red_triangle:"
         if self.status == "warn":
             icon = ":warning:"
-        slack_message = {"attachments": [{"blocks": []}]}
+        slack_message = self._initial_slack_message()
         self._add_text_section_to_slack_msg(
             slack_message, f"{icon} *dbt snapshot alert*"
         )
@@ -89,18 +98,27 @@ class ModelAlert(Alert):
                 f"*Snapshot*\n{self.alias}",
                 f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
             ],
+            add_to_attachment=True,
         )
         self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
+            slack_message,
+            [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"],
+            add_to_attachment=True,
         )
         if self.subscribers:
             self._add_fields_section_to_slack_msg(
-                slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
+                slack_message,
+                [f'*Subscribers*\n{", ".join(set(self.subscribers))}'],
+                add_to_attachment=True,
             )
         self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Status*\n{self.status}", f"*Path*\n{self.original_path}"]
+            slack_message,
+            [f"*Status*\n{self.status}", f"*Path*\n{self.original_path}"],
+            add_to_attachment=True,
         )
         self._add_text_section_to_slack_msg(
-            slack_message, f"*Error Message*\n```{self.message}```"
+            slack_message,
+            f"*Error Message*\n```{self.message}```",
+            add_to_attachment=True,
         )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+        return SlackMessageSchema(**slack_message)
