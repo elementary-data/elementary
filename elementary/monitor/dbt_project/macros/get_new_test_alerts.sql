@@ -60,6 +60,7 @@
                                  'test_rows_sample': test_rows_sample,
                                  'other': elementary.insensitive_get_dict_value(test_result_alert_dict, 'other'),
                                  'test_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_name'),
+                                 'test_short_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_short_name'),
                                  'test_params': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_params'),
                                  'severity': elementary.insensitive_get_dict_value(test_result_alert_dict, 'severity'),
                                  'test_meta': test_meta,
