@@ -283,11 +283,13 @@ class DataMonitoring:
         tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
             tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
-            tests_sample_data = tests_api.get_tests_sample_data(
-                days_back=days_back,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-                disable_samples=self.disable_samples,
-            )
+            if self.disable_samples:
+                tests_sample_data = {}
+            else:
+                tests_sample_data = tests_api.get_tests_sample_data(
+                    days_back=days_back,
+                    disable_passed_test_metrics=disable_passed_test_metrics,
+                )
             invocations = tests_api.get_invocations(
                 invocations_per_test=test_runs_amount, days_back=days_back
             )
