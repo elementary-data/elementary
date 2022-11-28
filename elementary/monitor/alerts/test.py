@@ -60,6 +60,7 @@ class DbtTestAlert(TestAlert):
         test_params,
         severity,
         test_runs=None,
+        test_short_name=None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -70,6 +71,7 @@ class DbtTestAlert(TestAlert):
         ]
         self.table_full_name = ".".join(table_full_name_parts).lower()
         self.test_name = test_name
+        self.test_short_name = test_short_name
         self.test_display_name = self.display_name(test_name) if test_name else ""
         self.other = other
         self.test_sub_type = test_sub_type or ""
@@ -115,7 +117,10 @@ class DbtTestAlert(TestAlert):
         )
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Status*\n{self.status}", f"*Test name*\n{self.test_name}"],
+            [
+                f"*Status*\n{self.status}",
+                f"*Test name*\n{self.test_short_name if self.test_short_name else self.test_name}",
+            ],
         )
         self._add_fields_section_to_slack_msg(
             slack_message,
@@ -229,7 +234,7 @@ class ElementaryTestAlert(DbtTestAlert):
         self._add_fields_section_to_slack_msg(
             slack_message,
             [
-                f"*Test name*\n{self.test_name}",
+                f"*Test name*\n{self.test_short_name if self.test_short_name else self.test_name}",
                 f"*{sub_type_title}:*\n{self.test_sub_type_display_name}",
             ],
         )
