@@ -1,4 +1,4 @@
-{% macro get_new_test_alerts(days_back, results_sample_limit = 5) %}
+{% macro get_new_test_alerts(days_back, results_sample_limit=5, disable_samples=false) %}
     -- depends_on: {{ ref('alerts') }}
     {% set select_new_alerts_query %}
         with new_alerts as (
@@ -35,7 +35,7 @@
         {% set status = elementary.insensitive_get_dict_value(test_result_alert_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}
-        {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error') -%}
+        {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
             {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_alert_dict, test_results_query, test_type, results_sample_limit) %}
         {%- endif -%}
 

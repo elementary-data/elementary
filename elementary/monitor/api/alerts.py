@@ -24,19 +24,24 @@ class AlertsAPI(APIClient):
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
-    def query(self, days_back: int) -> Alerts:
+    def query(self, days_back: int, disable_samples: bool = False) -> Alerts:
         return Alerts(
-            tests=self._query_test_alerts(days_back),
+            tests=self._query_test_alerts(days_back, disable_samples),
             models=self._query_model_alerts(days_back),
             source_freshnesses=self._query_source_freshness_alerts(days_back),
         )
 
-    def _query_test_alerts(self, days_back: int) -> AlertsQueryResult[TestAlert]:
+    def _query_test_alerts(
+        self, days_back: int, disable_samples: bool = False
+    ) -> AlertsQueryResult[TestAlert]:
         logger.info("Querying test alerts.")
         return self._query_alert_type(
             {
                 "macro_name": "get_new_test_alerts",
-                "macro_args": {"days_back": days_back},
+                "macro_args": {
+                    "days_back": days_back,
+                    "disable_samples": disable_samples,
+                },
             },
             TestAlert.create_test_alert_from_dict,
         )
