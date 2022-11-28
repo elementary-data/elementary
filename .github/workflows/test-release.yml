@@ -1,4 +1,4 @@
-name: Validate release upgrades
+name: Test release
 on:
   workflow_dispatch:
     inputs:
