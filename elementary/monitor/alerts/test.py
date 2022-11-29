@@ -171,42 +171,40 @@ class DbtTestAlert(TestAlert):
 
         compaced_sections = []
         if TEST_NAME_FIELD in alert_fields:
-            compaced_sections.append(f"*Test name*\n_{self.test_name}_")
+            compaced_sections.append(f"*Test name*\n{self.test_name}")
 
         if TIME_FIELD in alert_fields:
             compaced_sections.append(
-                f"*When*\n_{self.detected_at.strftime(DATETIME_FORMAT)}_"
+                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"
             )
 
-        if DESCRIPTION_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Description*\n{f'```{self.test_description}```' if self.test_description else '_No description_'}"
-            )
+        if TAGS_FIELD in alert_fields:
+            compaced_sections.append(f"*Tags*\n{self.tags if self.tags else 'No tags'}")
 
         if STATUS_FIELD in alert_fields:
             compaced_sections.append(f"*Status*\n{icon}{self.status}")
 
         if TABLE_FIELD in alert_fields:
-            compaced_sections.append(f"*Table*\n_{self.table_full_name}_")
+            compaced_sections.append(f"*Table*\n{self.table_full_name}")
 
         if COLUMN_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Column*\n{f'_{self.column_name}_' if self.column_name else '_No column_'}"
+                f"*Column*\n{self.column_name if self.column_name else 'No column'}"
             )
 
         if OWNERS_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
-            )
-
-        if TAGS_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+                f"*Owners*\n{self.owners if self.owners else 'No owners'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
             compaced_sections.append(
-                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
+                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "No subscribers"}'
+            )
+
+        if DESCRIPTION_FIELD in alert_fields:
+            compaced_sections.append(
+                f"*Description*\n{self.test_description if self.test_description else 'No description'}"
             )
 
         self._add_compacted_sections_to_slack_msg(
@@ -222,7 +220,7 @@ class DbtTestAlert(TestAlert):
             for alert_field in alert_fields
         ):
             self._add_header_section_to_slack_msg(
-                slack_message, f":mag: Result", add_to_attachment=True
+                slack_message, f"Result :mag:", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
@@ -236,7 +234,7 @@ class DbtTestAlert(TestAlert):
             if ERROR_MESSAGE_FIELD in alert_fields and self.error_message:
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Error Message*\n```{self.error_message}```",
+                    f"*Error Message*\n```{self.error_message.strip()}```",
                     add_to_attachment=True,
                 )
 
@@ -259,7 +257,7 @@ class DbtTestAlert(TestAlert):
             for alert_field in alert_fields
         ):
             self._add_header_section_to_slack_msg(
-                slack_message, f":wrench: Configuration", add_to_attachment=True
+                slack_message, f"Configuration :wrench:", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
@@ -348,43 +346,41 @@ class ElementaryTestAlert(DbtTestAlert):
         compaced_sections = []
         if TEST_NAME_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Test name*\n_{self.test_name} - {self.test_sub_type_display_name}_"
+                f"*Test name*\n{self.test_name} - {self.test_sub_type_display_name}"
             )
 
         if TIME_FIELD in alert_fields:
             compaced_sections.append(
-                f"*When*\n_{self.detected_at.strftime(DATETIME_FORMAT)}_"
+                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"
             )
 
-        if DESCRIPTION_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Description*\n{f'```{self.test_description}```' if self.test_description else '_No description_'}"
-            )
+        if TAGS_FIELD in alert_fields:
+            compaced_sections.append(f"*Tags*\n{self.tags if self.tags else 'No tags'}")
 
         if STATUS_FIELD in alert_fields:
             compaced_sections.append(f"*Status*\n{icon}{self.status}")
 
         if TABLE_FIELD in alert_fields:
-            compaced_sections.append(f"*Table*\n_{self.table_full_name}_")
+            compaced_sections.append(f"*Table*\n{self.table_full_name}")
 
         if COLUMN_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Column*\n{f'_{self.column_name}_' if self.column_name else '_No column_'}"
+                f"*Column*\n{self.column_name if self.column_name else 'No column'}"
             )
 
         if OWNERS_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
-            )
-
-        if TAGS_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+                f"*Owners*\n{self.owners if self.owners else 'No owners'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
             compaced_sections.append(
-                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
+                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "No subscribers"}'
+            )
+
+        if DESCRIPTION_FIELD in alert_fields:
+            compaced_sections.append(
+                f"*Description*\n{self.test_description if self.test_description else 'No description'}"
             )
 
         self._add_compacted_sections_to_slack_msg(
@@ -400,7 +396,7 @@ class ElementaryTestAlert(DbtTestAlert):
             for alert_field in alert_fields
         ):
             self._add_header_section_to_slack_msg(
-                slack_message, f":mag: Result", add_to_attachment=True
+                slack_message, f"Result :mag:", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
@@ -417,7 +413,7 @@ class ElementaryTestAlert(DbtTestAlert):
             if ERROR_MESSAGE_FIELD in alert_fields and self.error_message:
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Error Message*\n```{self.error_message}```",
+                    f"*Error Message*\n```{self.error_message.strip()}```",
                     add_to_attachment=True,
                 )
 
@@ -428,7 +424,7 @@ class ElementaryTestAlert(DbtTestAlert):
             for alert_field in alert_fields
         ):
             self._add_header_section_to_slack_msg(
-                slack_message, f":wrench: Configuration", add_to_attachment=True
+                slack_message, f"Configuration :wrench:", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
