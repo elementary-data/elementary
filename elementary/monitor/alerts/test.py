@@ -179,7 +179,9 @@ class DbtTestAlert(TestAlert):
             )
 
         if TAGS_FIELD in alert_fields:
-            compaced_sections.append(f"*Tags*\n{self.tags if self.tags else 'No tags'}")
+            compaced_sections.append(
+                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+            )
 
         if STATUS_FIELD in alert_fields:
             compaced_sections.append(f"*Status*\n{icon}{self.status}")
@@ -189,17 +191,17 @@ class DbtTestAlert(TestAlert):
 
         if COLUMN_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Column*\n{self.column_name if self.column_name else 'No column'}"
+                f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
 
         if OWNERS_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Owners*\n{self.owners if self.owners else 'No owners'}"
+                f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
             compaced_sections.append(
-                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "No subscribers"}'
+                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
             )
 
         self._add_compacted_sections_to_slack_msg(
@@ -211,7 +213,7 @@ class DbtTestAlert(TestAlert):
         if DESCRIPTION_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
-                f"*Description*\n{self.test_description if self.test_description else 'No description'}",
+                f"*Description*\n{self.test_description if self.test_description else '_No description_'}",
                 add_to_attachment=True,
             )
 
@@ -357,7 +359,9 @@ class ElementaryTestAlert(DbtTestAlert):
             )
 
         if TAGS_FIELD in alert_fields:
-            compaced_sections.append(f"*Tags*\n{self.tags if self.tags else 'No tags'}")
+            compaced_sections.append(
+                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+            )
 
         if STATUS_FIELD in alert_fields:
             compaced_sections.append(f"*Status*\n{icon}{self.status}")
@@ -367,17 +371,17 @@ class ElementaryTestAlert(DbtTestAlert):
 
         if COLUMN_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Column*\n{self.column_name if self.column_name else 'No column'}"
+                f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
 
         if OWNERS_FIELD in alert_fields:
             compaced_sections.append(
-                f"*Owners*\n{self.owners if self.owners else 'No owners'}"
+                f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
             compaced_sections.append(
-                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "No subscribers"}'
+                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
             )
 
         self._add_compacted_sections_to_slack_msg(
@@ -389,7 +393,7 @@ class ElementaryTestAlert(DbtTestAlert):
         if DESCRIPTION_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
                 slack_message,
-                f"*Description*\n{self.test_description if self.test_description else 'No description'}",
+                f"*Description*\n{self.test_description if self.test_description else '_No description_'}",
                 add_to_attachment=True,
             )
 
