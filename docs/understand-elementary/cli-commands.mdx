@@ -22,7 +22,8 @@ Read from the test results table and generate the [Elementary UI](/understand-el
 edr monitor report
 ```
 
-Read from the test results table and generate the [Elementary UI](/understand-elementary/elementary-report-ui) and send it to external
+Read from the test results table and generate the [Elementary UI](/understand-elementary/elementary-report-ui) and send
+it to external
 platforms such as Slack, S3, GCS:
 
 ```shell
@@ -120,4 +121,12 @@ If you wish, here are the options for providing paths and names that are differe
 # * --dbt-quoting none
 # * --dbt-quoting identifier
 # * --dbt-quoting schema,identifier
+```
+
+- **Disable samples:**
+  Disable sampling of data in the report and alerts.
+  Useful if your data is sensitive or contains PII.
+
+```shell
+--disable-samples BOOLEAN
 ```

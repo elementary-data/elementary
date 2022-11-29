@@ -1,6 +1,7 @@
 import sys
 
 import click
+
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring import DataMonitoring
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -15,6 +16,12 @@ logger = get_logger(__name__)
 
 # Displayed in reverse order in --help.
 def common_options(func):
+    func = click.option(
+        "--disable-samples",
+        type=bool,
+        default=False,
+        help="Disable sampling of data. Useful if your data contains PII.",
+    )(func)
     func = click.option(
         "--dbt-quoting",
         "-dq",
@@ -151,6 +158,7 @@ def monitor(
     profile_target,
     dbt_vars,
     test,
+    disable_samples,
 ):
     """
     Monitor your warehouse.
@@ -180,8 +188,9 @@ def monitor(
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
+            disable_samples=disable_samples,
         )
-        success = data_monitoring.run(
+        success = data_monitoring.run_alerts(
             days_back, full_refresh_dbt_package, dbt_vars=vars
         )
         anonymous_tracking.track_cli_end(
@@ -240,6 +249,7 @@ def report(
     disable_passed_test_metrics,
     open_browser,
     exclude_elementary_models,
+    disable_samples,
 ):
     """
     Generate a local report of your warehouse.
@@ -260,6 +270,7 @@ def report(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
+            disable_samples=disable_samples,
         )
         generated_report_successfully, _ = data_monitoring.generate_report(
             days_back=days_back,
@@ -395,6 +406,7 @@ def send_report(
     google_project_name,
     gcs_bucket_name,
     exclude_elementary_models,
+    disable_samples,
 ):
     """
     Send the report to an external platform.
@@ -435,6 +447,7 @@ def send_report(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
+            disable_samples=disable_samples,
         )
         command_succeeded = False
         (

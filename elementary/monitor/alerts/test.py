@@ -109,6 +109,7 @@ class DbtTestAlert(TestAlert):
         test_params,
         severity,
         test_runs=None,
+        test_short_name=None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -119,6 +120,7 @@ class DbtTestAlert(TestAlert):
         ]
         self.table_full_name = ".".join(table_full_name_parts).lower()
         self.test_name = test_name
+        self.test_short_name = test_short_name
         self.test_display_name = self.display_name(test_name) if test_name else ""
         self.other = other
         self.test_sub_type = test_sub_type or ""
