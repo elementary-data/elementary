@@ -168,3 +168,7 @@ class DbtRunner:
         if self.dbt_env_vars is not None:
             env.update(self.dbt_env_vars)
         return env
+
+    def debug(self, quiet: bool = False) -> bool:
+        success, _ = self._run_command(command_args=["debug"], quiet=quiet)
+        return success

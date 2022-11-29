@@ -65,7 +65,7 @@ def common_options(func):
         "--profiles-dir",
         "-p",
         type=str,
-        default=Config.DEFAULT_PROFILES_DIR,
+        default=None,
         help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
         "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
     )(func)
