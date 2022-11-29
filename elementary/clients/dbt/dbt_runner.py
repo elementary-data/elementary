@@ -16,8 +16,8 @@ class DbtRunner:
     def __init__(
         self,
         project_dir: str,
-        profiles_dir: str,
-        target: Optional[str] = None,
+        profiles_dir: str = None,
+        target: str = None,
         raise_on_failure: bool = True,
         dbt_env_vars: Dict[str, str] = None,
     ) -> None:
@@ -41,7 +41,8 @@ class DbtRunner:
             json_output = True
         dbt_command.extend(command_args)
         dbt_command.extend(["--project-dir", self.project_dir])
-        dbt_command.extend(["--profiles-dir", self.profiles_dir])
+        if self.profiles_dir:
+            dbt_command.extend(["--profiles-dir", self.profiles_dir])
         if self.target:
             dbt_command.extend(["--target", self.target])
         if vars:

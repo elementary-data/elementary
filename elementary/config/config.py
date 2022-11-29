@@ -35,12 +35,11 @@ class Config:
     _QUOTING_ENV_VARS = set(_QUOTING_KEY_MAPPING.values())
 
     DEFAULT_CONFIG_DIR = str(Path.home() / ".edr")
-    DEFAULT_PROFILES_DIR = str(Path.home() / ".dbt")
 
     def __init__(
         self,
         config_dir: str = DEFAULT_CONFIG_DIR,
-        profiles_dir: str = DEFAULT_PROFILES_DIR,
+        profiles_dir: str = None,
         profile_target: str = None,
         dbt_quoting: bool = None,
         update_bucket_website: bool = None,
