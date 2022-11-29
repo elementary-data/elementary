@@ -178,7 +178,7 @@ class DbtTestAlert(TestAlert):
 
     def to_test_alert_api_dict(self):
         configuration = DbtTestConfigurationSchema(
-            test_name=self.test_name,
+            test_name=self.test_name, test_params=try_load_json(self.test_params)
         )
 
         result = TestResultSchema(
@@ -300,6 +300,7 @@ class ElementaryTestAlert(DbtTestAlert):
             timestamp_column=test_params.get("timestamp_column"),
             testing_timeframe=test_params.get("timeframe"),
             anomaly_threshold=test_params.get("sensitivity"),
+            test_params=test_params if test_params else None,
         )
 
         result = TestResultSchema(

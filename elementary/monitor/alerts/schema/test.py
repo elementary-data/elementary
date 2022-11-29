@@ -9,10 +9,10 @@ class TestResultSchema(BaseModel):
 
 class DbtTestConfigurationSchema(BaseModel):
     test_name: str
+    test_params: Optional[dict] = None
 
 
-class AnomalyTestConfigurationSchema(BaseModel):
-    test_name: str
+class AnomalyTestConfigurationSchema(DbtTestConfigurationSchema):
     timestamp_column: Optional[str] = None
     testing_timeframe: Optional[str] = None
     anomaly_threshold: Optional[str] = None
