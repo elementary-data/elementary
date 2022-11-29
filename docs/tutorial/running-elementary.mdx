@@ -6,7 +6,7 @@ import InstallCLI from "../snippets/install-cli.mdx";
 import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
 import CommunitySupport from "../snippets/support-contact.mdx";
 
-# Elementary CLI Setup
+## Elementary CLI Setup
 
 Elementary's CLI can only be run locally (for now) and requires adjustment to the `profiles.yml`. 
 
@@ -23,7 +23,7 @@ Run one of the following commands based on your platform:
 <AddConnectionProfile />
 </Accordion>
 <br/>
-# Running Elementary
+## Running Elementary
 
 Now that we have added Elementary tests to our schemas.yml file, it’s time to run our first tests. We begin by running on a subset of our data that is all valid:
 ```shell
@@ -33,7 +33,7 @@ dbt run --vars "{'anomalies': False}"
 Note: Here we are setting the anomalies flag to False - only seeding valid data to our DWH.
 </Warning>
 <br/>
-# Your First Test
+## Your First Test
 Now that we have populated our data warehouse with valid data, we will run our tests and ensure that everything passes:
 ```shell
 dbt test
@@ -50,7 +50,7 @@ edr monitor report
 </Frame>
 **You've just run your first Elementary report!**
 <br/>
-# Let's get real though...
+## Let's get real though...
 Data is rarely perfect. Let’s get real and add some more data to our project:
 ```shell
 dbt run --vars "{'anomalies': True}"

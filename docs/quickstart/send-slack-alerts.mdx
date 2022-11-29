@@ -85,7 +85,7 @@ You can also monitor source freshness by running `dbt run-operation upload_sourc
 This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert. 
 
 
-## Customize alerts: owners, tags and subscribers
+## Customize alerts: owners, test descriptions, tags and subscribers
 
 Elementary enriches alerts with dbt model/source/snapshot owners and
 tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
@@ -119,6 +119,19 @@ models:
 
 </Accordion>
 
+<Accordion title="Test descriptions">
+If you want to a description to a test in a slack alert:
+
+```yml properties.yml
+models:
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
+```
+
+</Accordion>
+  
+  
 <Accordion title="Tags">
 if you want to tag a group or a channel in a slack alert:
 
@@ -127,11 +140,10 @@ if you want to tag a group or a channel in a slack alert:
   / `properties.yml`.
 
 ```yml properties.yml
-models:
-  - name: my_model_name
+tests:
+  - test_name:
     meta:
-      owner: "@jessica.jones"
-      tags: ["#marketing-data-ops"]
+      description: "This is the test description"
 ```
 
 </Accordion>
