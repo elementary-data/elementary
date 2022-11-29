@@ -202,16 +202,18 @@ class DbtTestAlert(TestAlert):
                 f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "No subscribers"}'
             )
 
-        if DESCRIPTION_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Description*\n{self.test_description if self.test_description else 'No description'}"
-            )
-
         self._add_compacted_sections_to_slack_msg(
             slack_message,
             compaced_sections,
             add_to_attachment=True,
         )
+
+        if DESCRIPTION_FIELD in alert_fields:
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f"*Description*\n{self.test_description if self.test_description else 'No description'}",
+                add_to_attachment=True,
+            )
 
         # Result sectiom
         if any(
@@ -378,16 +380,18 @@ class ElementaryTestAlert(DbtTestAlert):
                 f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "No subscribers"}'
             )
 
-        if DESCRIPTION_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Description*\n{self.test_description if self.test_description else 'No description'}"
-            )
-
         self._add_compacted_sections_to_slack_msg(
             slack_message,
             compaced_sections,
             add_to_attachment=True,
         )
+
+        if DESCRIPTION_FIELD in alert_fields:
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f"*Description*\n{self.test_description if self.test_description else 'No description'}",
+                add_to_attachment=True,
+            )
 
         # Result sectiom
         if any(
