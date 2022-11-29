@@ -21,12 +21,16 @@ class TestAlert(Alert):
         model_unique_id: str,
         test_unique_id: str,
         test_created_at: Optional[str] = None,
+        test_meta: Optional[str] = None,
+        model_meta: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at
+        self.test_meta = try_load_json(test_meta) or {}
+        self.model_meta = try_load_json(model_meta) or {}
 
     def to_test_alert_api_dict(self) -> dict:
         raise NotImplementedError
@@ -87,7 +91,9 @@ class DbtTestAlert(TestAlert):
         self.test_results_description = (
             test_results_description.capitalize() if test_results_description else ""
         )
-        self.test_description = self.meta.get("description") if self.meta else ""
+        self.test_description = (
+            self.test_meta.get("description") if self.test_meta else ""
+        )
         self.error_message = self.test_results_description
         self.column_name = column_name or ""
         self.severity = severity
@@ -122,9 +128,9 @@ class DbtTestAlert(TestAlert):
                 f"*Test name*\n{self.test_short_name if self.test_short_name else self.test_name}",
             ],
         )
-        self._add_fields_section_to_slack_msg(
+        self._add_text_section_to_slack_msg(
             slack_message,
-            [f"*Description*\n{self.test_description}"],
+            f"*Description*\n{self.test_description if self.test_description else 'No description'}",
         )
         self._add_fields_section_to_slack_msg(
             slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
@@ -238,9 +244,9 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*{sub_type_title}:*\n{self.test_sub_type_display_name}",
             ],
         )
-        self._add_fields_section_to_slack_msg(
+        self._add_text_section_to_slack_msg(
             slack_message,
-            [f"*Description*\n{self.test_description}"],
+            f"*Description*\n{self.test_description if self.test_description else 'No description'}",
         )
         self._add_fields_section_to_slack_msg(
             slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
