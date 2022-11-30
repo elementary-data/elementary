@@ -238,7 +238,7 @@ class DataMonitoring:
             try:
                 webbrowser.open_new_tab("file://" + html_path)
             except webbrowser.Error as e:
-                logger.exception(f"Could not open {html_path} in the browser - Error: {e}")
+                logger.error("Unable to open the web browser.")
 
         self.execution_properties["report_end"] = True
         self.execution_properties["success"] = self.success
