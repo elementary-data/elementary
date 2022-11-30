@@ -60,6 +60,12 @@ class SlackClient(ABC):
         raise NotImplementedError
 
 
+    @abstractmethod
+    def get_user_id_from_email(self, email: str):
+        raise NotImplementedError
+
+
+
 class SlackWebClient(SlackClient):
     def _initial_client(self):
         return WebClient(token=self.token)
@@ -111,6 +117,14 @@ class SlackWebClient(SlackClient):
         else:
             logger.error("Failed to send report to Slack.")
         return send_succeed
+
+    def get_user_id_from_email(self, email: str) -> str:
+        logger.info(f"Attempting to get slack id of user: {email}")
+        try:
+            return self.client.users_lookupByEmail(email=email)["user"]["id"]
+        except SlackApiError as e:
+            logger.error(f"Slack client error: {e.response['error']}")
+        return ""
 
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
         try:
@@ -206,4 +220,7 @@ class SlackWebhookClient(SlackClient):
         raise NotImplementedError
 
     def send_report(self, **kwargs):
+        raise NotImplementedError
+
+    def get_user_id_from_email(self, **kwargs):
         raise NotImplementedError
