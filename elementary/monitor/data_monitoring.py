@@ -235,7 +235,11 @@ class DataMonitoring:
             elementary_output_json_file.write(dumped_output_data)
 
         if should_open_browser:
-            webbrowser.open_new_tab("file://" + html_path)
+            try:
+                webbrowser.open_new_tab("file://" + html_path)
+            except webbrowser.Error as e:
+                logger.exception(f"Could not open {html_path} in the browser - Error: {e}")
+
         self.execution_properties["report_end"] = True
         self.execution_properties["success"] = self.success
         return self.success, html_path
