@@ -21,8 +21,8 @@ DESCRIPTION_FIELD = "description"
 OWNERS_FIELD = "owners"
 TAGS_FIELD = "tags"
 SUBSCRIBERS_FIELD = "subscribers"
-ERROR_MESSAGE_FIELD = "error_message"
-TEST_PARAMS_FIELD = "test_params"
+RESULT_MESSAGE_FIELD = "result_message"
+TEST_PARAMS_FIELD = "test_parameters"
 TEST_QUERY_FIELD = "test_query"
 TEST_RESULTS_SAMPLE_FIELD = "test_results_sample"
 DEFAULT_ALERT_FIELDS = [
@@ -35,13 +35,13 @@ DEFAULT_ALERT_FIELDS = [
     OWNERS_FIELD,
     TAGS_FIELD,
     SUBSCRIBERS_FIELD,
-    ERROR_MESSAGE_FIELD,
+    RESULT_MESSAGE_FIELD,
     TEST_PARAMS_FIELD,
     TEST_QUERY_FIELD,
     TEST_RESULTS_SAMPLE_FIELD,
 ]
 RESULT_SECTION_FIELDS = [
-    ERROR_MESSAGE_FIELD,
+    RESULT_MESSAGE_FIELD,
     TEST_QUERY_FIELD,
     TEST_RESULTS_SAMPLE_FIELD,
 ]
@@ -166,56 +166,69 @@ class DbtTestAlert(TestAlert):
         slack_message = self._initial_slack_message()
 
         # Alert info section
-        self._add_header_section_to_slack_msg(slack_message, f"{icon} dbt test alert")
+        self._add_header_to_slack_msg(slack_message, f"{icon} dbt test alert")
+        self._add_context_to_slack_msg(
+            slack_message,
+            [
+                f"*Test:* {self.test_name}     |"
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*     |",
+                f"*Test status:* {self.status}",
+            ],
+        )
         self._add_divider(slack_message)
 
-        compaced_sections = []
-        if TEST_NAME_FIELD in alert_fields:
-            compaced_sections.append(f"*Test name*\n{self.test_name}")
-
-        if TIME_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"
-            )
-
-        if TAGS_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
-            )
-
-        if STATUS_FIELD in alert_fields:
-            compaced_sections.append(f"*Status*\n{icon}{self.status}")
-
         if TABLE_FIELD in alert_fields:
-            compaced_sections.append(f"*Table*\n{self.table_full_name}")
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f"*Table*\n{self.table_full_name}",
+                add_to_attachment=True,
+            )
+
+        compacted_sections = []
 
         if COLUMN_FIELD in alert_fields:
-            compaced_sections.append(
+            compacted_sections.append(
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
 
+        if TAGS_FIELD in alert_fields:
+            compacted_sections.append(
+                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+            )
+
         if OWNERS_FIELD in alert_fields:
-            compaced_sections.append(
+            compacted_sections.append(
                 f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
-            compaced_sections.append(
+            compacted_sections.append(
                 f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
             )
 
         self._add_compacted_sections_to_slack_msg(
             slack_message,
-            compaced_sections,
+            compacted_sections,
             add_to_attachment=True,
         )
 
         if DESCRIPTION_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Description*\n{self.test_description if self.test_description else '_No description_'}",
-                add_to_attachment=True,
+                slack_message, "*Description*", add_to_attachment=True
             )
+
+            if self.test_description:
+                self._add_context_to_slack_msg(
+                    slack_message,
+                    [self.test_description],
+                    add_to_attachment=True,
+                )
+            else:
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    f"_No description_",
+                    add_to_attachment=True,
+                )
 
         # Result sectiom
         if any(
@@ -223,30 +236,41 @@ class DbtTestAlert(TestAlert):
             for result_field in RESULT_SECTION_FIELDS
             for alert_field in alert_fields
         ):
-            self._add_header_section_to_slack_msg(
-                slack_message, f"Result :mag:", add_to_attachment=True
+            self._add_text_section_to_slack_msg(
+                slack_message, f":mag: Result", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
-            if TEST_RESULTS_SAMPLE_FIELD in alert_fields and self.test_rows_sample:
+            if RESULT_MESSAGE_FIELD in alert_fields and self.error_message:
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Result message*"], add_to_attachment=True
+                )
+
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Test Results Sample*\n`{self.test_rows_sample}`",
+                    f"```{self.error_message.strip()}```",
                     add_to_attachment=True,
                 )
 
-            if ERROR_MESSAGE_FIELD in alert_fields and self.error_message:
+            if TEST_RESULTS_SAMPLE_FIELD in alert_fields and self.test_rows_sample:
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Test results sample*"], add_to_attachment=True
+                )
+
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Error Message*\n```{self.error_message.strip()}```",
+                    f"`{self.test_rows_sample}`",
                     add_to_attachment=True,
                 )
 
             if TEST_QUERY_FIELD in alert_fields and self.test_results_query:
-                msg = f"*Test Query*\n```{self.test_results_query}```"
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Test query*"], add_to_attachment=True
+                )
+
+                msg = f"```{self.test_results_query}```"
                 if len(msg) > SectionBlock.text_max_length:
                     msg = (
-                        f"*Query for Test's Query*\n"
                         f"_The test query was too long, here's a query to get it._\n"
                         f"```SELECT test_results_query FROM {self.elementary_database_and_schema}.elementary_test_results WHERE test_execution_id = '{self.id}'```"
                     )
@@ -260,16 +284,21 @@ class DbtTestAlert(TestAlert):
             for configuration_field in CONFIGURATION_SECTION_FIELDS
             for alert_field in alert_fields
         ):
-            self._add_header_section_to_slack_msg(
-                slack_message, f"Configuration :wrench:", add_to_attachment=True
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f":hammer_and_wrench: Configuration",
+                add_to_attachment=True,
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
             if TEST_PARAMS_FIELD in alert_fields and self.test_params:
-                # self._add_divider(slack_message, add_to_attachment=True)
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Test parameters*"], add_to_attachment=True
+                )
+
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Test Parameters*\n`{self.test_params}`",
+                    f"`{self.test_params}`",
                     add_to_attachment=True,
                 )
 
@@ -344,58 +373,69 @@ class ElementaryTestAlert(DbtTestAlert):
             icon = ":x:"
 
         # Alert info section
-        self._add_header_section_to_slack_msg(slack_message, f"{icon} {alert_title}")
+        self._add_header_to_slack_msg(slack_message, f"{icon} {alert_title}")
+        self._add_context_to_slack_msg(
+            slack_message,
+            [
+                f"*Test:* {self.test_name} - {self.test_sub_type_display_name}     |",
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*     |",
+                f"*Test status:* {self.status}",
+            ],
+        )
         self._add_divider(slack_message)
 
-        compaced_sections = []
-        if TEST_NAME_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Test name*\n{self.test_name} - {self.test_sub_type_display_name}"
-            )
-
-        if TIME_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}"
-            )
-
-        if TAGS_FIELD in alert_fields:
-            compaced_sections.append(
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
-            )
-
-        if STATUS_FIELD in alert_fields:
-            compaced_sections.append(f"*Status*\n{icon}{self.status}")
-
         if TABLE_FIELD in alert_fields:
-            compaced_sections.append(f"*Table*\n{self.table_full_name}")
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f"*Table*\n{self.table_full_name}",
+                add_to_attachment=True,
+            )
+
+        compacted_sections = []
 
         if COLUMN_FIELD in alert_fields:
-            compaced_sections.append(
+            compacted_sections.append(
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
 
+        if TAGS_FIELD in alert_fields:
+            compacted_sections.append(
+                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+            )
+
         if OWNERS_FIELD in alert_fields:
-            compaced_sections.append(
+            compacted_sections.append(
                 f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
-            compaced_sections.append(
+            compacted_sections.append(
                 f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
             )
 
         self._add_compacted_sections_to_slack_msg(
             slack_message,
-            compaced_sections,
+            compacted_sections,
             add_to_attachment=True,
         )
 
         if DESCRIPTION_FIELD in alert_fields:
             self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Description*\n{self.test_description if self.test_description else '_No description_'}",
-                add_to_attachment=True,
+                slack_message, "*Description*", add_to_attachment=True
             )
+
+            if self.test_description:
+                self._add_context_to_slack_msg(
+                    slack_message,
+                    [self.test_description],
+                    add_to_attachment=True,
+                )
+            else:
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    f"_No description_",
+                    add_to_attachment=True,
+                )
 
         # Result sectiom
         if any(
@@ -403,27 +443,35 @@ class ElementaryTestAlert(DbtTestAlert):
             for result_field in RESULT_SECTION_FIELDS
             for alert_field in alert_fields
         ):
-            self._add_header_section_to_slack_msg(
-                slack_message, f"Result :mag:", add_to_attachment=True
+            self._add_text_section_to_slack_msg(
+                slack_message, f":mag: Result", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
-            if TEST_RESULTS_SAMPLE_FIELD in alert_fields and anomalous_value:
-                column_msgs = []
-                if self.column_name:
-                    column_msgs.append(f"*Column*\n{self.column_name}")
-                column_msgs.append(f"*Anomalous Values*\n{anomalous_value}")
-                if column_msgs:
-                    self._add_fields_section_to_slack_msg(
-                        slack_message, column_msgs, add_to_attachment=True
-                    )
+            if RESULT_MESSAGE_FIELD in alert_fields and self.error_message:
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Result message*"], add_to_attachment=True
+                )
 
-            if ERROR_MESSAGE_FIELD in alert_fields and self.error_message:
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Error Message*\n```{self.error_message.strip()}```",
+                    f"```{self.error_message.strip()}```",
                     add_to_attachment=True,
                 )
+
+            if TEST_RESULTS_SAMPLE_FIELD in alert_fields and anomalous_value:
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Test results sample*"], add_to_attachment=True
+                )
+
+                messagess = []
+                if self.column_name:
+                    messagess.append(f"*Column*: {self.column_name}     |")
+                messagess.append(f"*Anomalous Values*: {anomalous_value}")
+                if messagess:
+                    self._add_context_to_slack_msg(
+                        slack_message, messagess, add_to_attachment=True
+                    )
 
         # Configuration sectiom
         if any(
@@ -431,15 +479,21 @@ class ElementaryTestAlert(DbtTestAlert):
             for configuration_field in CONFIGURATION_SECTION_FIELDS
             for alert_field in alert_fields
         ):
-            self._add_header_section_to_slack_msg(
-                slack_message, f"Configuration :wrench:", add_to_attachment=True
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f":hammer_and_wrench: Configuration",
+                add_to_attachment=True,
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
             if TEST_PARAMS_FIELD in alert_fields and self.test_params:
+                self._add_context_to_slack_msg(
+                    slack_message, ["*Test parameters*"], add_to_attachment=True
+                )
+
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"*Test Parameters*\n`{self.test_params}`",
+                    f"`{self.test_params}`",
                     add_to_attachment=True,
                 )
 

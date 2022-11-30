@@ -106,7 +106,7 @@ class Alert:
         cls, slack_message: dict, section_msg: str, add_to_attachment: bool = False
     ):
         block = []
-        block.append(
+        block = [
             {
                 "type": "section",
                 "text": {
@@ -114,26 +114,44 @@ class Alert:
                     "text": cls._format_section_msg(section_msg),
                 },
             }
-        )
+        ]
         if add_to_attachment:
             slack_message["attachments"][0]["blocks"].extend(block)
         else:
             slack_message["blocks"].extend(block)
 
     @classmethod
-    def _add_header_section_to_slack_msg(
-        cls, slack_message: dict, section_msg: str, add_to_attachment: bool = False
+    def _add_context_to_slack_msg(
+        cls, slack_message: dict, context_msgs: list, add_to_attachment: bool = False
     ):
-        block = []
-        block.append(
+        fields = []
+        for context_msg in context_msgs:
+            fields.append(
+                {
+                    "type": "mrkdwn",
+                    "text": cls._format_section_msg(context_msg),
+                }
+            )
+
+        block = [{"type": "context", "elements": fields}]
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend(block)
+        else:
+            slack_message["blocks"].extend(block)
+
+    @classmethod
+    def _add_header_to_slack_msg(
+        cls, slack_message: dict, msg: str, add_to_attachment: bool = False
+    ):
+        block = [
             {
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": section_msg,
+                    "text": msg,
                 },
             }
-        )
+        ]
         if add_to_attachment:
             slack_message["attachments"][0]["blocks"].extend(block)
         else:
