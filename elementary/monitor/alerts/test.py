@@ -14,9 +14,7 @@ logger = get_logger(__name__)
 
 
 TABLE_FIELD = "table"
-COLUMN_FIELD = "field"
-TIME_FIELD = "time"
-STATUS_FIELD = "status"
+COLUMN_FIELD = "column"
 DESCRIPTION_FIELD = "description"
 OWNERS_FIELD = "owners"
 TAGS_FIELD = "tags"
@@ -28,8 +26,6 @@ TEST_RESULTS_SAMPLE_FIELD = "test_results_sample"
 DEFAULT_ALERT_FIELDS = [
     TABLE_FIELD,
     COLUMN_FIELD,
-    TIME_FIELD,
-    STATUS_FIELD,
     DESCRIPTION_FIELD,
     OWNERS_FIELD,
     TAGS_FIELD,
