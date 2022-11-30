@@ -96,9 +96,7 @@ class DbtTestAlert(TestAlert):
         self.test_results_description = (
             test_results_description.capitalize() if test_results_description else ""
         )
-        self.test_description = (
-            self.test_meta.get("description") if self.test_meta else ""
-        )
+        self.test_description = self._get_test_description()
         self.error_message = self.test_results_description
         self.column_name = column_name or ""
         self.severity = severity
@@ -109,6 +107,14 @@ class DbtTestAlert(TestAlert):
             if found_rows_number:
                 found_rows_number = found_rows_number.group()
                 self.failed_rows_count = int(found_rows_number)
+
+    def _get_test_description(self):
+        if self.test_meta:
+            return self.test_meta.get("description")
+        elif self.meta:
+            return self.meta.get("description")
+        else:
+            return None
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         icon = ":small_red_triangle:"
