@@ -100,7 +100,7 @@ class ModelAlert(Alert):
                 )
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    self.full_refresh,
+                    str(self.full_refresh),
                     add_to_attachment=True,
                 )
 
