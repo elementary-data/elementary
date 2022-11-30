@@ -300,7 +300,6 @@ class ElementaryTestAlert(DbtTestAlert):
             timestamp_column=test_params.get("timestamp_column"),
             testing_timeframe=test_params.get("timeframe"),
             anomaly_threshold=test_params.get("sensitivity"),
-            test_params=test_params if test_params else None,
         )
 
         result = TestResultSchema(

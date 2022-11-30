@@ -12,7 +12,8 @@ class DbtTestConfigurationSchema(BaseModel):
     test_params: Optional[dict] = None
 
 
-class AnomalyTestConfigurationSchema(DbtTestConfigurationSchema):
+class AnomalyTestConfigurationSchema(BaseModel):
+    test_name: str
     timestamp_column: Optional[str] = None
     testing_timeframe: Optional[str] = None
     anomaly_threshold: Optional[str] = None
