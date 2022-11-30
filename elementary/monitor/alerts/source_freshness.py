@@ -53,48 +53,122 @@ class SourceFreshnessAlert(Alert):
         self.error = error
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
-        elif self.status == "runtime error":
-            icon = ":x:"
+        icon = self._get_slack_status_icon()
         slack_message = self._initial_slack_message()
-        self._add_text_section_to_slack_msg(
-            slack_message, f"{icon} *dbt source freshness alert*"
+
+        # Alert info section
+        self._add_header_to_slack_msg(
+            slack_message, f"{icon} dbt source freshness alert"
         )
-        self._add_divider(slack_message)
-        self._add_fields_section_to_slack_msg(
+        self._add_context_to_slack_msg(
             slack_message,
             [
-                f"*Source*\n{self.source_name}.{self.identifier}",
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
+                f"*Source:* {self.alias}     |",
+                f"*Status:* {self.status}     |",
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
             ],
+        )
+        self._add_divider(slack_message)
+
+        compacted_sections = [
+            f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
+            f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
+            f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+        ]
+        self._add_compacted_sections_to_slack_msg(
+            slack_message, compacted_sections, add_to_attachment=True
+        )
+
+        # Pad till "See more"
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+
+        # Result sectiom
+        self._add_text_section_to_slack_msg(
+            slack_message, f":mag: *Run*", add_to_attachment=True
+        )
+        self._add_divider(slack_message, add_to_attachment=True)
+
+        self._add_text_section_to_slack_msg(
+            slack_message,
+            f"```{self.message.strip()}```",
             add_to_attachment=True,
         )
+
         if self.status == "runtime error":
+            self._add_context_to_slack_msg(
+                slack_message, [f"*Run message*"], add_to_attachment=True
+            )
             self._add_text_section_to_slack_msg(
                 slack_message,
-                f"*Error Message*\nFailed to calculate the source freshness."
-                f"```{self.error}```",
+                f"Failed to calculate the source freshness\n" f"```{self.error}```",
                 add_to_attachment=True,
             )
         else:
-            self._add_fields_section_to_slack_msg(
+            compacted_sections = [
+                f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s)}",
+                f"*Last Record At*\n{self.max_loaded_at}",
+                f"*Sampled At*\n{self.snapshotted_at}",
+            ]
+            self._add_compacted_sections_to_slack_msg(
+                slack_message, compacted_sections, add_to_attachment=True
+            )
+
+        # Configuration section
+        if (
+            self.freshness_error_after
+            or self.freshness_warn_after
+            or self.freshness_filter
+            or self.path
+        ):
+            self._add_text_section_to_slack_msg(
                 slack_message,
-                [
-                    f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s)}"
-                ],
+                f":hammer_and_wrench: *Configuration*",
                 add_to_attachment=True,
             )
             self._add_divider(slack_message, add_to_attachment=True)
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [
-                    f"*Last Record At*\n{self.max_loaded_at}",
-                    f"*Sampled At*\n{self.snapshotted_at}",
-                ],
-                add_to_attachment=True,
-            )
+
+            if self.freshness_error_after:
+                self._add_context_to_slack_msg(
+                    slack_message, [f"*Error after*"], add_to_attachment=True
+                )
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    self.freshness_error_after,
+                    add_to_attachment=True,
+                )
+
+            if self.freshness_warn_after:
+                self._add_context_to_slack_msg(
+                    slack_message, [f"*Warn after*"], add_to_attachment=True
+                )
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    self.freshness_warn_after,
+                    add_to_attachment=True,
+                )
+
+            if self.freshness_filter:
+                self._add_context_to_slack_msg(
+                    slack_message, [f"*Filter*"], add_to_attachment=True
+                )
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    f"`{self.freshness_filter}`",
+                    add_to_attachment=True,
+                )
+
+            if self.path:
+                self._add_context_to_slack_msg(
+                    slack_message, [f"*Path*"], add_to_attachment=True
+                )
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    self.path,
+                    add_to_attachment=True,
+                )
+
         self._add_fields_section_to_slack_msg(
             slack_message,
             [
@@ -109,21 +183,9 @@ class SourceFreshnessAlert(Alert):
                 f"*Filter*\n`{self.freshness_filter}`",
                 add_to_attachment=True,
             )
-
         self._add_fields_section_to_slack_msg(
             slack_message,
-            [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"],
-            add_to_attachment=True,
-        )
-        if self.subscribers:
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [f'*Subscribers*\n{", ".join(set(self.subscribers))}'],
-                add_to_attachment=True,
-            )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Status*\n{self.status}", f"*Path*\n{self.path}"],
+            [f"*Path*\n{self.path}"],
             add_to_attachment=True,
         )
         return SlackMessageSchema(**slack_message)

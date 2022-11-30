@@ -93,8 +93,7 @@ class Alert:
                 {"type": "mrkdwn", "text": cls._format_section_msg(section_msg)}
             )
 
-        block = []
-        block.append({"type": "section", "fields": fields})
+        block = [{"type": "section", "fields": fields}]
 
         if add_to_attachment:
             slack_message["attachments"][0]["blocks"].extend(block)
@@ -105,13 +104,30 @@ class Alert:
     def _add_text_section_to_slack_msg(
         cls, slack_message: dict, section_msg: str, add_to_attachment: bool = False
     ):
-        block = []
         block = [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
                     "text": cls._format_section_msg(section_msg),
+                },
+            }
+        ]
+        if add_to_attachment:
+            slack_message["attachments"][0]["blocks"].extend(block)
+        else:
+            slack_message["blocks"].extend(block)
+
+    @classmethod
+    def _add_empty_section_to_slack_msg(
+        cls, slack_message: dict, add_to_attachment: bool = False
+    ):
+        block = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": cls._format_section_msg("\t"),
                 },
             }
         ]
@@ -194,3 +210,11 @@ class Alert:
             slack_message["attachments"][0]["blocks"].extend(attachments)
         else:
             slack_message["blocks"].extend(attachments)
+
+    def _get_slack_status_icon(self) -> str:
+        icon = ":small_red_triangle:"
+        if self.status == "warn":
+            icon = ":warning:"
+        elif self.status == "error":
+            icon = ":x:"
+        return icon

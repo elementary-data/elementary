@@ -39,86 +39,143 @@ class ModelAlert(Alert):
         return self._model_to_slack()
 
     def _model_to_slack(self):
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
+        icon = self._get_slack_status_icon()
         slack_message = self._initial_slack_message()
-        self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt model alert*")
-        self._add_divider(slack_message)
-        self._add_fields_section_to_slack_msg(
+
+        # Alert info section
+        self._add_header_to_slack_msg(slack_message, f"{icon} dbt model alert")
+        self._add_context_to_slack_msg(
             slack_message,
             [
-                f"*Model*\n{self.alias}",
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
+                f"*Model:* {self.alias}     |",
+                f"*Status:* {self.status}     |",
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
             ],
-            add_to_attachment=True,
         )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Status*\n{self.status}", f"*Materialization*\n{self.materialization}"],
-            add_to_attachment=True,
+        self._add_divider(slack_message)
+
+        compacted_sections = [
+            f"*Materialization*\n{self.materialization if self.materialization else '_No materialization_'}",
+            f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
+            f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
+            f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+        ]
+        self._add_compacted_sections_to_slack_msg(
+            slack_message, compacted_sections, add_to_attachment=True
         )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"],
-            add_to_attachment=True,
-        )
-        if self.subscribers:
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [f'*Subscribers*\n{", ".join(set(self.subscribers))}'],
-                add_to_attachment=True,
-            )
-        self._add_divider(slack_message, add_to_attachment=True)
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Full Refresh*\n{self.full_refresh}", f"*Path*\n{self.path}"],
-            add_to_attachment=True,
-        )
+
+        # Pad till "See more"
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+
+        # Result sectiom
         if self.message:
             self._add_text_section_to_slack_msg(
+                slack_message, f":mag: *Run*", add_to_attachment=True
+            )
+            self._add_divider(slack_message, add_to_attachment=True)
+
+            self._add_context_to_slack_msg(
+                slack_message, [f"*Run message*"], add_to_attachment=True
+            )
+            self._add_text_section_to_slack_msg(
                 slack_message,
-                f"*Error Message*\n```{self.message}```",
+                f"```{self.message.strip()}```",
                 add_to_attachment=True,
             )
+
+        # Configuration section
+        if self.full_refresh or self.path:
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f":hammer_and_wrench: *Configuration*",
+                add_to_attachment=True,
+            )
+            self._add_divider(slack_message, add_to_attachment=True)
+
+            if self.full_refresh:
+                self._add_context_to_slack_msg(
+                    slack_message, [f"*Full refresh*"], add_to_attachment=True
+                )
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    self.full_refresh,
+                    add_to_attachment=True,
+                )
+
+            if self.path:
+                self._add_context_to_slack_msg(
+                    slack_message, [f"*Path*"], add_to_attachment=True
+                )
+                self._add_text_section_to_slack_msg(
+                    slack_message,
+                    self.path,
+                    add_to_attachment=True,
+                )
         return SlackMessageSchema(**slack_message)
 
     def _snapshot_to_slack(self):
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
+        icon = self._get_slack_status_icon()
         slack_message = self._initial_slack_message()
-        self._add_text_section_to_slack_msg(
-            slack_message, f"{icon} *dbt snapshot alert*"
-        )
-        self._add_divider(slack_message)
-        self._add_fields_section_to_slack_msg(
+
+        # Alert info section
+        self._add_header_to_slack_msg(slack_message, f"{icon} dbt snapshot alert")
+        self._add_context_to_slack_msg(
             slack_message,
             [
-                f"*Snapshot*\n{self.alias}",
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
+                f"*Snapshot:* {self.alias}     |",
+                f"*Status:* {self.status}     |",
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
             ],
-            add_to_attachment=True,
         )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"],
-            add_to_attachment=True,
+        self._add_divider(slack_message)
+
+        compacted_sections = [
+            f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
+            f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
+            f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+        ]
+        self._add_compacted_sections_to_slack_msg(
+            slack_message, compacted_sections, add_to_attachment=True
         )
-        if self.subscribers:
-            self._add_fields_section_to_slack_msg(
+
+        # Pad till "See more"
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
+
+        # Result sectiom
+        if self.message:
+            self._add_text_section_to_slack_msg(
+                slack_message, f":mag: *Run*", add_to_attachment=True
+            )
+            self._add_divider(slack_message, add_to_attachment=True)
+
+            self._add_context_to_slack_msg(
+                slack_message, [f"*Run message*"], add_to_attachment=True
+            )
+            self._add_text_section_to_slack_msg(
                 slack_message,
-                [f'*Subscribers*\n{", ".join(set(self.subscribers))}'],
+                f"```{self.message.strip()}```",
                 add_to_attachment=True,
             )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Status*\n{self.status}", f"*Path*\n{self.original_path}"],
-            add_to_attachment=True,
-        )
-        self._add_text_section_to_slack_msg(
-            slack_message,
-            f"*Error Message*\n```{self.message}```",
-            add_to_attachment=True,
-        )
+
+        # Configuration section
+        if self.original_path:
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                f":hammer_and_wrench: *Configuration*",
+                add_to_attachment=True,
+            )
+            self._add_divider(slack_message, add_to_attachment=True)
+
+            self._add_context_to_slack_msg(
+                slack_message, [f"*Path*"], add_to_attachment=True
+            )
+            self._add_text_section_to_slack_msg(
+                slack_message,
+                self.original_path,
+                add_to_attachment=True,
+            )
         return SlackMessageSchema(**slack_message)

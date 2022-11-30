@@ -12,7 +12,7 @@ from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
-TEST_NAME_FIELD = "test_name"
+
 TABLE_FIELD = "table"
 COLUMN_FIELD = "field"
 TIME_FIELD = "time"
@@ -26,7 +26,6 @@ TEST_PARAMS_FIELD = "test_parameters"
 TEST_QUERY_FIELD = "test_query"
 TEST_RESULTS_SAMPLE_FIELD = "test_results_sample"
 DEFAULT_ALERT_FIELDS = [
-    TEST_NAME_FIELD,
     TABLE_FIELD,
     COLUMN_FIELD,
     TIME_FIELD,
@@ -155,12 +154,8 @@ class DbtTestAlert(TestAlert):
         # Blocks will always be fully displayed
         # Only the first 5 attachments will be displayed before Slack collapse the rest into a "show more" section
         alert_fields = self.get_alert_fields()
+        icon = self._get_slack_status_icon()
 
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
-        elif self.status == "error":
-            icon = ":x:"
         if is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(self.__dict__))
         slack_message = self._initial_slack_message()
@@ -170,9 +165,9 @@ class DbtTestAlert(TestAlert):
         self._add_context_to_slack_msg(
             slack_message,
             [
-                f"*Test:* {self.test_name}     |"
-                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*     |",
-                f"*Test status:* {self.status}",
+                f"*Test:* {self.test_short_name if self.test_short_name else self.test_name}     |",
+                f"*Status:* {self.status}     |",
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
             ],
         )
         self._add_divider(slack_message)
@@ -213,11 +208,11 @@ class DbtTestAlert(TestAlert):
         )
 
         if DESCRIPTION_FIELD in alert_fields:
-            self._add_text_section_to_slack_msg(
-                slack_message, "*Description*", add_to_attachment=True
-            )
-
             if self.test_description:
+                self._add_text_section_to_slack_msg(
+                    slack_message, "*Description*", add_to_attachment=True
+                )
+
                 self._add_context_to_slack_msg(
                     slack_message,
                     [self.test_description],
@@ -226,8 +221,11 @@ class DbtTestAlert(TestAlert):
             else:
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"_No description_",
+                    "*Description*\n_No description_",
                     add_to_attachment=True,
+                )
+                self._add_empty_section_to_slack_msg(
+                    slack_message, add_to_attachment=True
                 )
 
         # Result sectiom
@@ -237,7 +235,7 @@ class DbtTestAlert(TestAlert):
             for alert_field in alert_fields
         ):
             self._add_text_section_to_slack_msg(
-                slack_message, f":mag: Result", add_to_attachment=True
+                slack_message, f":mag: *Result*", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
@@ -286,7 +284,7 @@ class DbtTestAlert(TestAlert):
         ):
             self._add_text_section_to_slack_msg(
                 slack_message,
-                f":hammer_and_wrench: Configuration",
+                f":hammer_and_wrench: *Configuration*",
                 add_to_attachment=True,
             )
             self._add_divider(slack_message, add_to_attachment=True)
@@ -349,6 +347,7 @@ class ElementaryTestAlert(DbtTestAlert):
         # Blocks will always be fully displayed
         # Only the first 5 attachments will be displayed before Slack collapse the rest into a "show more" section
         alert_fields = self.get_alert_fields()
+        icon = self._get_slack_status_icon()
 
         anomalous_value = None
         if self.test_type == "schema_change":
@@ -366,20 +365,14 @@ class ElementaryTestAlert(DbtTestAlert):
 
         slack_message = self._initial_slack_message()
 
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
-        elif self.status == "error":
-            icon = ":x:"
-
         # Alert info section
         self._add_header_to_slack_msg(slack_message, f"{icon} {alert_title}")
         self._add_context_to_slack_msg(
             slack_message,
             [
-                f"*Test:* {self.test_name} - {self.test_sub_type_display_name}     |",
-                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*     |",
-                f"*Test status:* {self.status}",
+                f"*Test:* {self.test_short_name if self.test_short_name else self.test_name} - {self.test_sub_type_display_name}     |",
+                f"*Status:* {self.status}     |",
+                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
             ],
         )
         self._add_divider(slack_message)
@@ -420,11 +413,11 @@ class ElementaryTestAlert(DbtTestAlert):
         )
 
         if DESCRIPTION_FIELD in alert_fields:
-            self._add_text_section_to_slack_msg(
-                slack_message, "*Description*", add_to_attachment=True
-            )
-
             if self.test_description:
+                self._add_text_section_to_slack_msg(
+                    slack_message, "*Description*", add_to_attachment=True
+                )
+
                 self._add_context_to_slack_msg(
                     slack_message,
                     [self.test_description],
@@ -433,8 +426,11 @@ class ElementaryTestAlert(DbtTestAlert):
             else:
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    f"_No description_",
+                    "*Description*\n_No description_",
                     add_to_attachment=True,
+                )
+                self._add_empty_section_to_slack_msg(
+                    slack_message, add_to_attachment=True
                 )
 
         # Result sectiom
@@ -444,7 +440,7 @@ class ElementaryTestAlert(DbtTestAlert):
             for alert_field in alert_fields
         ):
             self._add_text_section_to_slack_msg(
-                slack_message, f":mag: Result", add_to_attachment=True
+                slack_message, f":mag: *Result*", add_to_attachment=True
             )
             self._add_divider(slack_message, add_to_attachment=True)
 
@@ -481,7 +477,7 @@ class ElementaryTestAlert(DbtTestAlert):
         ):
             self._add_text_section_to_slack_msg(
                 slack_message,
-                f":hammer_and_wrench: Configuration",
+                f":hammer_and_wrench: *Configuration*",
                 add_to_attachment=True,
             )
             self._add_divider(slack_message, add_to_attachment=True)
