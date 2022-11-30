@@ -100,7 +100,7 @@ class ModelAlert(Alert):
                 )
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    str(self.full_refresh),
+                    f"`{str(self.full_refresh)}`",
                     add_to_attachment=True,
                 )
 
@@ -110,7 +110,7 @@ class ModelAlert(Alert):
                 )
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    self.path,
+                    f"`{self.path}`",
                     add_to_attachment=True,
                 )
         return SlackMessageSchema(**slack_message)
@@ -175,7 +175,7 @@ class ModelAlert(Alert):
             )
             self._add_text_section_to_slack_msg(
                 slack_message,
-                self.original_path,
+                f"`{self.original_path}`",
                 add_to_attachment=True,
             )
         return SlackMessageSchema(**slack_message)

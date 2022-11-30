@@ -135,7 +135,7 @@ class SourceFreshnessAlert(Alert):
                 )
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    self.freshness_error_after,
+                    f"`{self.freshness_error_after}`",
                     add_to_attachment=True,
                 )
 
@@ -145,7 +145,7 @@ class SourceFreshnessAlert(Alert):
                 )
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    self.freshness_warn_after,
+                    f"`{self.freshness_warn_after}`",
                     add_to_attachment=True,
                 )
 
@@ -165,27 +165,7 @@ class SourceFreshnessAlert(Alert):
                 )
                 self._add_text_section_to_slack_msg(
                     slack_message,
-                    self.path,
+                    f"`{self.path}`",
                     add_to_attachment=True,
                 )
-
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Error After*\n`{self.freshness_error_after}`",
-                f"*Warn After*\n`{self.freshness_warn_after}`",
-            ],
-            add_to_attachment=True,
-        )
-        if self.freshness_filter:
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Filter*\n`{self.freshness_filter}`",
-                add_to_attachment=True,
-            )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [f"*Path*\n{self.path}"],
-            add_to_attachment=True,
-        )
         return SlackMessageSchema(**slack_message)
