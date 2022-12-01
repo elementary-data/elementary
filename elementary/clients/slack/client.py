@@ -25,6 +25,7 @@ class SlackClient(ABC):
         self.client = self._initial_client()
         self.tracking = tracking
         self._initial_retry_handlers()
+        self.email_to_user_id_cache = {}
 
     @staticmethod
     def create_client(
@@ -69,6 +70,8 @@ class SlackClient(ABC):
 class SlackWebClient(SlackClient):
     def _initial_client(self):
         return WebClient(token=self.token)
+
+
 
     def send_message(
         self, channel_name: str, message: SlackMessageSchema, **kwargs
@@ -121,7 +124,9 @@ class SlackWebClient(SlackClient):
     def get_user_id_from_email(self, email: str) -> str:
         logger.info(f"Attempting to get slack id of user: {email}")
         try:
-            return self.client.users_lookupByEmail(email=email)["user"]["id"]
+            if email not in self.email_to_user_id_cache:
+                self.email_to_user_id_cache[email] = self.client.users_lookupByEmail(email=email)["user"]["id"]
+            return self.email_to_user_id_cache[email]
         except SlackApiError as e:
             logger.error(f"Slack client error: {e.response['error']}")
         return ""
