@@ -16,10 +16,10 @@ class DbtRunner:
     def __init__(
         self,
         project_dir: str,
-        profiles_dir: str = None,
-        target: str = None,
+        profiles_dir: Optional[str] = None,
+        target: Optional[str] = None,
         raise_on_failure: bool = True,
-        dbt_env_vars: Dict[str, str] = None,
+        dbt_env_vars: Optional[Dict[str, str]] = None,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
