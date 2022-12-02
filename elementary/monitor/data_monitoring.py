@@ -88,24 +88,24 @@ class DataMonitoring:
         self.disable_samples = disable_samples
 
     def _parse_emails_to_ids(self, owners_str: str):
-
         def _regex_match_owner_email(potential_email_str):
-            email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+            email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
 
             return re.fullmatch(email_regex, potential_email_str)
 
         def _validate_owner(owner):
             validated_owner = self.slack_client.get_user_id_from_email(owner)
             if validated_owner:
-                owner_handle = f'<@{validated_owner}>'
+                owner_handle = f"<@{validated_owner}>"
             else:
                 owner_handle = owner
             return owner_handle
 
-        if owners_str != [] and owners_str != '':
-            owners_list = [owner.strip() for owner in owners_str.split(',')]
+        if owners_str != [] and owners_str != "":
+            owners_list = [owner.strip() for owner in owners_str.split(",")]
             owners_validated = [
-                _validate_owner(owner) if _regex_match_owner_email(owner) else owner for owner in owners_list
+                _validate_owner(owner) if _regex_match_owner_email(owner) else owner
+                for owner in owners_list
             ]
             parsed_owners_str = ", ".join(set(owners_validated))
             return parsed_owners_str
