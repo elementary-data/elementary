@@ -42,8 +42,8 @@ class Alert:
             logger.error(f'Failed to parse "detected_at" field.')
         self.database_name = database_name
         self.schema_name = schema_name
-        self.owners = prettify_json_str_set(owners)
-        self.tags = prettify_json_str_set(tags)
+        self.owners = owners
+        self.tags = tags
         self.meta = meta
         self.status = status
         self.subscribers = subscribers
