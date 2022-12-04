@@ -29,7 +29,7 @@
             case
                 {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt)
                 This making us use test_unique_id for all schema change tests #}
-                when short_name = 'schema_changes' then unique_id 
+                when short_name like 'schema_changes%' then unique_id
                 when (alias = name and alias is not null and test_column_name is not null and short_name is not null) then parent_model_unique_id || '.' || test_column_name || '.' || alias || '.' || short_name
                 when (alias = name and alias is not null and short_name is not null) then parent_model_unique_id || '.' || alias || '.' || short_name
                 else unique_id
