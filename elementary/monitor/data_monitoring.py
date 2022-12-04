@@ -27,6 +27,7 @@ from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
+from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import (
     InvocationSchema,
@@ -225,7 +226,7 @@ class DataMonitoring:
                 test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
-            models, dbt_sidebar = self._get_dbt_models_and_sidebar(
+            models, sidebars = self._get_dbt_models_and_sidebars(
                 exclude_elementary_models
             )
             models_coverages = self._get_dbt_models_test_coverages()
@@ -234,7 +235,7 @@ class DataMonitoring:
             )
             lineage = self._get_lineage(exclude_elementary_models)
             output_data["models"] = models
-            output_data["dbt_sidebar"] = dbt_sidebar
+            output_data["sidebars"] = sidebars.dict()
             output_data["test_results"] = test_results
             output_data["test_results_totals"] = test_results_totals
             output_data["test_runs_totals"] = test_runs_totals
@@ -397,9 +398,9 @@ class DataMonitoring:
             }
         return models_runs_dicts, model_runs_totals
 
-    def _get_dbt_models_and_sidebar(
+    def _get_dbt_models_and_sidebars(
         self, exclude_elementary_models: bool = False
-    ) -> Tuple[Dict, Dict]:
+    ) -> Tuple[Dict, SidebarsSchema]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
 
@@ -417,9 +418,9 @@ class DataMonitoring:
             serializable_nodes[key] = dict(nodes[key])
 
         # Currently we don't show exposures as part of the sidebar
-        dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
+        sidebars = sidebar_api.get_sidebars(models=models, sources=sources)
 
-        return serializable_nodes, dbt_sidebar
+        return serializable_nodes, sidebars
 
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
         models_api = ModelsAPI(dbt_runner=self.dbt_runner)

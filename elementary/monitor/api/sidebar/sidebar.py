@@ -1,13 +1,23 @@
+from collections import defaultdict
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.models.schema import NormalizedModelSchema
+from elementary.monitor.api.sidebar.schema import (
+    DbtSidebarSchema,
+    OwnersSidebarSchema,
+    TagsSidebarSchema,
+    SidebarsSchema,
+)
 from elementary.monitor.api.tests.tests import TestsAPI
+from elementary.utils.json_utils import try_load_json
 
 SIDEBAR_FILES_KEYWORD = "__files__"
+NO_TAGS_DEFAULT_TREE = "No tags"
+NO_OWNERS_DEFAULT_TREE = "No owners"
 
 
 class SidebarAPI(APIClient):
@@ -16,11 +26,21 @@ class SidebarAPI(APIClient):
         self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
 
-    def get_sidebar(
+    def get_sidebars(
         self,
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedModelSchema],
-    ) -> dict:
+    ) -> SidebarsSchema:
+        dbt_sidebar = self.get_dbt_sidebar(models, sources)
+        tags_sidebar = self.get_tags_sidebar(models, sources)
+        owners_sidebar = self.get_owners_sidebar(models, sources)
+        return SidebarsSchema(dbt=dbt_sidebar, tags=tags_sidebar, owners=owners_sidebar)
+
+    def get_dbt_sidebar(
+        self,
+        models: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedModelSchema],
+    ) -> DbtSidebarSchema:
         sidebar = dict()
         for model in [*models.values(), *sources.values()]:
             self._update_dbt_sidebar(
@@ -48,3 +68,33 @@ class SidebarAPI(APIClient):
                 if part not in dbt_sidebar:
                     dbt_sidebar[part] = {}
                 dbt_sidebar = dbt_sidebar[part]
+
+    def get_tags_sidebar(
+        self,
+        models: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedModelSchema],
+    ) -> TagsSidebarSchema:
+        sidebar = defaultdict(list)
+        for artifact in [*models.values(), *sources.values()]:
+            unique_id = artifact.unique_id
+            if artifact.tags:
+                for tag in artifact.tags:
+                    sidebar[tag].append(unique_id)
+            else:
+                sidebar[NO_TAGS_DEFAULT_TREE].append(unique_id)
+        return sidebar
+
+    def get_owners_sidebar(
+        self,
+        models: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedModelSchema],
+    ) -> OwnersSidebarSchema:
+        sidebar = defaultdict(list)
+        for artifact in [*models.values(), *sources.values()]:
+            unique_id = artifact.unique_id
+            if artifact.owners:
+                for owner in artifact.owners:
+                    sidebar[owner].append(unique_id)
+            else:
+                sidebar[NO_OWNERS_DEFAULT_TREE].append(unique_id)
+        return sidebar
