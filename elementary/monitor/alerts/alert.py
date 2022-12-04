@@ -35,10 +35,11 @@ class Alert:
         self.detected_at = None
         self.timezone = timezone
         try:
-            self.detected_at = convert_utc_iso_format_to_datetime(
-                detected_at
-            ).astimezone(tz.gettz(timezone) if timezone else tz.tzlocal())
-            self.detected_at_utc = convert_utc_iso_format_to_datetime(detected_at)
+            detected_at_datetime = convert_utc_iso_format_to_datetime(detected_at)
+            self.detected_at_utc = detected_at_datetime
+            self.detected_at = detected_at_datetime.astimezone(
+                tz.gettz(timezone) if timezone else tz.tzlocal()
+            )
         except Exception:
             logger.error(f'Failed to parse "detected_at" field.')
         self.database_name = database_name
