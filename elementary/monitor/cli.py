@@ -140,7 +140,7 @@ def get_cli_properties() -> dict:
     "--test",
     type=str,
     default=None,
-    help="Specify raw YAML string of your dbt variables.",
+    help="Test message to send in case there are no alerts.",
 )
 @click.pass_context
 def monitor(
