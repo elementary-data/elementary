@@ -138,9 +138,9 @@ def get_cli_properties() -> dict:
 )
 @click.option(
     "--test",
-    type=str,
-    default=None,
-    help="Test message to send in case there are no alerts.",
+    type=bool,
+    default=False,
+    help="Whether to send a test message in case there are no alerts.",
 )
 @click.pass_context
 def monitor(

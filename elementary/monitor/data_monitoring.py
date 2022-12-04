@@ -16,6 +16,7 @@ from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.clients.slack.client import SlackClient
+from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.alerts.alert import Alert
@@ -156,8 +157,11 @@ class DataMonitoring:
     def _send_test_message(self):
         self.slack_client.send_message(
             channel_name=self.config.slack_channel_name,
-            message=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            message=SlackMessageSchema(
+                text=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            ),
         )
+        logger.info("Sent the test message.")
 
     def _send_alerts(self, alerts: Alerts):
         self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
