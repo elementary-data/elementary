@@ -40,6 +40,9 @@ class ModelAlert(Alert):
         return self._model_to_slack()
 
     def _model_to_slack(self):
+        tags = prettify_json_str_set(self.tags)
+        owners = prettify_json_str_set(self.owners)
+        subscribers = prettify_json_str_set(self.subscribers)
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
@@ -55,9 +58,9 @@ class ModelAlert(Alert):
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
-                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
-                f"*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else '_No subscribers_'}",
+                f"*Tags*\n{tags if tags else '_No tags_'}",
+                f"*Owners*\n{owners if owners else '_No owners_'}",
+                f"*Subscribers*\n{subscribers if subscribers else '_No subscribers_'}",
             ]
         )
 
@@ -106,6 +109,9 @@ class ModelAlert(Alert):
         )
 
     def _snapshot_to_slack(self):
+        tags = prettify_json_str_set(self.tags)
+        owners = prettify_json_str_set(self.owners)
+        subscribers = prettify_json_str_set(self.subscribers)
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
@@ -123,9 +129,9 @@ class ModelAlert(Alert):
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
-                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
-                f"*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else '_No subscribers_'}",
+                f"*Tags*\n{tags if tags else '_No tags_'}",
+                f"*Owners*\n{owners if owners else '_No owners_'}",
+                f"*Subscribers*\n{subscribers if subscribers else '_No subscribers_'}",
             ]
         )
 

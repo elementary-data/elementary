@@ -177,16 +177,17 @@ class DbtTestAlert(TestAlert):
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
         if TAGS_FIELD in alert_fields:
-            compacted_sections.append(
-                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}"
-            )
+            tags = prettify_json_str_set(self.tags)
+            compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
         if OWNERS_FIELD in alert_fields:
+            owners = prettify_json_str_set(self.owners)
             compacted_sections.append(
-                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}"
+                f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
+            subscribers = prettify_json_str_set(self.subscribers)
             compacted_sections.append(
-                f'*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else "_No subscribers_"}'
+                f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
             )
         if compacted_sections:
             preview.extend(
@@ -354,16 +355,17 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
         if TAGS_FIELD in alert_fields:
-            compacted_sections.append(
-                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}"
-            )
+            tags = prettify_json_str_set(self.tags)
+            compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
         if OWNERS_FIELD in alert_fields:
+            owners = prettify_json_str_set(self.owners)
             compacted_sections.append(
-                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}"
+                f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
+            subscribers = prettify_json_str_set(self.subscribers)
             compacted_sections.append(
-                f'*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else "_No subscribers_"}'
+                f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
             )
         if compacted_sections:
             preview.extend(
