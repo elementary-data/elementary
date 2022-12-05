@@ -1,6 +1,7 @@
 import json
 
 from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.clients.slack.slack_message_builder import AlertSlackMessageBuilder
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
@@ -40,143 +41,113 @@ class ModelAlert(Alert):
         return self._model_to_slack()
 
     def _model_to_slack(self):
-        icon = self._get_slack_status_icon()
-        slack_message = self._initial_slack_message()
+        icon = AlertSlackMessageBuilder.get_slack_status_icon(self.status)
 
-        # Alert info section
-        self._add_header_to_slack_msg(slack_message, f"{icon} dbt model alert")
-        self._add_context_to_slack_msg(
-            slack_message,
-            [
-                f"*Model:* {self.alias}     |",
-                f"*Status:* {self.status}     |",
-                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
-            ],
-        )
-        self._add_divider(slack_message)
-
-        compacted_sections = [
-            f"*Materialization*\n{self.materialization if self.materialization else '_No materialization_'}",
-            f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
-            f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
-            f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+        title = [
+            AlertSlackMessageBuilder.create_header_block(f"{icon} dbt model alert"),
+            AlertSlackMessageBuilder.create_context_block(
+                [
+                    f"*Model:* {self.alias}     |",
+                    f"*Status:* {self.status}     |",
+                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                ],
+            ),
         ]
-        self._add_compacted_sections_to_slack_msg(
-            slack_message, compacted_sections, add_to_attachment=True
+
+        preview = AlertSlackMessageBuilder.create_compacted_sections_blocks(
+            [
+                f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
+                f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
+                f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+            ]
         )
 
-        # Pad till "See more"
-        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
-        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
-        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
-
-        # Result sectiom
+        result = []
         if self.message:
-            self._add_text_section_to_slack_msg(
-                slack_message, f":mag: *Run*", add_to_attachment=True
-            )
-            self._add_divider(slack_message, add_to_attachment=True)
-
-            self._add_context_to_slack_msg(
-                slack_message, [f"*Run message*"], add_to_attachment=True
-            )
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"```{self.message.strip()}```",
-                add_to_attachment=True,
+            result.extend(
+                [
+                    AlertSlackMessageBuilder.create_context_block(["*Result message*"]),
+                    AlertSlackMessageBuilder.create_text_section_block(
+                        f"```{self.message.strip()}```"
+                    ),
+                ]
             )
 
-        # Configuration section
-        if self.full_refresh or self.path:
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f":hammer_and_wrench: *Configuration*",
-                add_to_attachment=True,
+        configuration = []
+        if self.materialization:
+            configuration.append(
+                AlertSlackMessageBuilder.create_context_block([f"*Materialization*"])
             )
-            self._add_divider(slack_message, add_to_attachment=True)
+            configuration.append(
+                AlertSlackMessageBuilder.create_text_section_block(
+                    f"`{str(self.materialization)}`"
+                )
+            )
+        if self.full_refresh:
+            configuration.append(
+                AlertSlackMessageBuilder.create_context_block([f"*Full refresh*"])
+            )
+            configuration.append(
+                AlertSlackMessageBuilder.create_text_section_block(
+                    f"`{self.full_refresh}`"
+                )
+            )
+        if self.path:
+            configuration.append(
+                AlertSlackMessageBuilder.create_context_block([f"*Path*"])
+            )
+            configuration.append(
+                AlertSlackMessageBuilder.create_text_section_block(f"`{self.path}`")
+            )
 
-            if self.full_refresh:
-                self._add_context_to_slack_msg(
-                    slack_message, [f"*Full refresh*"], add_to_attachment=True
-                )
-                self._add_text_section_to_slack_msg(
-                    slack_message,
-                    f"`{str(self.full_refresh)}`",
-                    add_to_attachment=True,
-                )
-
-            if self.path:
-                self._add_context_to_slack_msg(
-                    slack_message, [f"*Path*"], add_to_attachment=True
-                )
-                self._add_text_section_to_slack_msg(
-                    slack_message,
-                    f"`{self.path}`",
-                    add_to_attachment=True,
-                )
-        return SlackMessageSchema(**slack_message)
+        return AlertSlackMessageBuilder(
+            title=title, preview=preview, result=result, configuration=configuration
+        ).get_slack_message()
 
     def _snapshot_to_slack(self):
-        icon = self._get_slack_status_icon()
-        slack_message = self._initial_slack_message()
+        icon = AlertSlackMessageBuilder.get_slack_status_icon(self.status)
 
-        # Alert info section
-        self._add_header_to_slack_msg(slack_message, f"{icon} dbt snapshot alert")
-        self._add_context_to_slack_msg(
-            slack_message,
-            [
-                f"*Snapshot:* {self.alias}     |",
-                f"*Status:* {self.status}     |",
-                f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
-            ],
-        )
-        self._add_divider(slack_message)
-
-        compacted_sections = [
-            f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
-            f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
-            f"*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else '_No subscribers_'}",
+        title = [
+            AlertSlackMessageBuilder.create_header_block(f"{icon} dbt snapshot alert"),
+            AlertSlackMessageBuilder.create_context_block(
+                [
+                    f"*Snapshot:* {self.alias}     |",
+                    f"*Status:* {self.status}     |",
+                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                ],
+            ),
         ]
-        self._add_compacted_sections_to_slack_msg(
-            slack_message, compacted_sections, add_to_attachment=True
+
+        preview = AlertSlackMessageBuilder.create_compacted_sections_blocks(
+            [
+                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
+                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
+                f"*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else '_No subscribers_'}",
+            ]
         )
 
-        # Pad till "See more"
-        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
-        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
-        self._add_empty_section_to_slack_msg(slack_message, add_to_attachment=True)
-
-        # Result sectiom
+        result = []
         if self.message:
-            self._add_text_section_to_slack_msg(
-                slack_message, f":mag: *Run*", add_to_attachment=True
-            )
-            self._add_divider(slack_message, add_to_attachment=True)
-
-            self._add_context_to_slack_msg(
-                slack_message, [f"*Run message*"], add_to_attachment=True
-            )
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"```{self.message.strip()}```",
-                add_to_attachment=True,
+            result.extend(
+                [
+                    AlertSlackMessageBuilder.create_context_block(["*Result message*"]),
+                    AlertSlackMessageBuilder.create_text_section_block(
+                        f"```{self.message.strip()}```"
+                    ),
+                ]
             )
 
-        # Configuration section
+        configuration = []
         if self.original_path:
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f":hammer_and_wrench: *Configuration*",
-                add_to_attachment=True,
+            configuration.append(
+                AlertSlackMessageBuilder.create_context_block([f"*Path*"])
             )
-            self._add_divider(slack_message, add_to_attachment=True)
+            configuration.append(
+                AlertSlackMessageBuilder.create_text_section_block(
+                    f"`{self.original_path}`"
+                )
+            )
 
-            self._add_context_to_slack_msg(
-                slack_message, [f"*Path*"], add_to_attachment=True
-            )
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"`{self.original_path}`",
-                add_to_attachment=True,
-            )
-        return SlackMessageSchema(**slack_message)
+        return AlertSlackMessageBuilder(
+            title=title, preview=preview, result=result, configuration=configuration
+        ).get_slack_message()
