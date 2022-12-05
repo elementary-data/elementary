@@ -5,7 +5,6 @@ from typing import Optional
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.clients.slack.slack_message_builder import AlertSlackMessageBuilder
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.json_utils import prettify_json_str_set, try_load_json
 from elementary.utils.log import get_logger
@@ -148,14 +147,14 @@ class DbtTestAlert(TestAlert):
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         alert_fields = self.get_alert_fields()
-        icon = AlertSlackMessageBuilder.get_slack_status_icon(self.status)
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         if is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(self.__dict__))
 
         title = [
-            AlertSlackMessageBuilder.create_header_block(f"{icon} dbt test alert"),
-            AlertSlackMessageBuilder.create_context_block(
+            self.slack_message_builder.create_header_block(f"{icon} dbt test alert"),
+            self.slack_message_builder.create_context_block(
                 [
                     f"*Test:* {self.test_short_name if self.test_short_name else self.test_name}     |",
                     f"*Status:* {self.status}     |",
@@ -167,7 +166,7 @@ class DbtTestAlert(TestAlert):
         preview = []
         if TABLE_FIELD in alert_fields:
             preview.append(
-                AlertSlackMessageBuilder.create_text_section_block(
+                self.slack_message_builder.create_text_section_block(
                     f"*Table*\n{self.table_full_name}"
                 )
             )
@@ -191,7 +190,7 @@ class DbtTestAlert(TestAlert):
             )
         if compacted_sections:
             preview.extend(
-                AlertSlackMessageBuilder.create_compacted_sections_blocks(
+                self.slack_message_builder.create_compacted_sections_blocks(
                     compacted_sections
                 )
             )
@@ -200,10 +199,10 @@ class DbtTestAlert(TestAlert):
             if self.test_description:
                 preview.extend(
                     [
-                        AlertSlackMessageBuilder.create_text_section_block(
+                        self.slack_message_builder.create_text_section_block(
                             "*Description*"
                         ),
-                        AlertSlackMessageBuilder.create_context_block(
+                        self.slack_message_builder.create_context_block(
                             [self.test_description]
                         ),
                     ]
@@ -211,10 +210,10 @@ class DbtTestAlert(TestAlert):
             else:
                 preview.extend(
                     [
-                        AlertSlackMessageBuilder.create_text_section_block(
+                        self.slack_message_builder.create_text_section_block(
                             "*Description*\n_No description_"
                         ),
-                        AlertSlackMessageBuilder.create_empty_section_block(),
+                        self.slack_message_builder.create_empty_section_block(),
                     ]
                 )
 
@@ -222,8 +221,10 @@ class DbtTestAlert(TestAlert):
         if RESULT_MESSAGE_FIELD in alert_fields and self.error_message:
             result.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(["*Result message*"]),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
                         f"```{self.error_message.strip()}```"
                     ),
                 ]
@@ -232,10 +233,10 @@ class DbtTestAlert(TestAlert):
         if TEST_RESULTS_SAMPLE_FIELD in alert_fields and self.test_rows_sample:
             result.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(
+                    self.slack_message_builder.create_context_block(
                         ["*Test results sample*"]
                     ),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_text_section_block(
                         f"`{self.test_rows_sample}`"
                     ),
                 ]
@@ -243,7 +244,7 @@ class DbtTestAlert(TestAlert):
 
         if TEST_QUERY_FIELD in alert_fields and self.test_results_query:
             result.append(
-                AlertSlackMessageBuilder.create_context_block(["*Test query*"])
+                self.slack_message_builder.create_context_block(["*Test query*"])
             )
 
             msg = f"```{self.test_results_query}```"
@@ -252,24 +253,24 @@ class DbtTestAlert(TestAlert):
                     f"_The test query was too long, here's a query to get it._\n"
                     f"```SELECT test_results_query FROM {self.elementary_database_and_schema}.elementary_test_results WHERE test_execution_id = '{self.id}'```"
                 )
-            result.append(AlertSlackMessageBuilder.create_text_section_block(msg))
+            result.append(self.slack_message_builder.create_text_section_block(msg))
 
         configuration = []
         if TEST_PARAMS_FIELD in alert_fields and self.test_params:
             configuration.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(
+                    self.slack_message_builder.create_context_block(
                         ["*Test parameters*"]
                     ),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_text_section_block(
                         f"`{self.test_params}`"
                     ),
                 ]
             )
 
-        return AlertSlackMessageBuilder(
+        return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
-        ).get_slack_message()
+        )
 
     def to_test_alert_api_dict(self):
         test_runs = (
@@ -312,7 +313,7 @@ class DbtTestAlert(TestAlert):
 class ElementaryTestAlert(DbtTestAlert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         alert_fields = self.get_alert_fields()
-        icon = AlertSlackMessageBuilder.get_slack_status_icon(self.status)
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         anomalous_value = None
         if self.test_type == "schema_change":
@@ -329,8 +330,8 @@ class ElementaryTestAlert(DbtTestAlert):
             return SlackMessageSchema(text=json.dumps(self.__dict__))
 
         title = [
-            AlertSlackMessageBuilder.create_header_block(f"{icon} {alert_title}"),
-            AlertSlackMessageBuilder.create_context_block(
+            self.slack_message_builder.create_header_block(f"{icon} {alert_title}"),
+            self.slack_message_builder.create_context_block(
                 [
                     f"*Test:* {self.test_short_name if self.test_short_name else self.test_name} - {self.test_sub_type_display_name}     |",
                     f"*Status:* {self.status}     |",
@@ -342,7 +343,7 @@ class ElementaryTestAlert(DbtTestAlert):
         preview = []
         if TABLE_FIELD in alert_fields:
             preview.append(
-                AlertSlackMessageBuilder.create_text_section_block(
+                self.slack_message_builder.create_text_section_block(
                     f"*Table*\n{self.table_full_name}"
                 )
             )
@@ -366,7 +367,7 @@ class ElementaryTestAlert(DbtTestAlert):
             )
         if compacted_sections:
             preview.extend(
-                AlertSlackMessageBuilder.create_compacted_sections_blocks(
+                self.slack_message_builder.create_compacted_sections_blocks(
                     compacted_sections
                 )
             )
@@ -375,10 +376,10 @@ class ElementaryTestAlert(DbtTestAlert):
             if self.test_description:
                 preview.extend(
                     [
-                        AlertSlackMessageBuilder.create_text_section_block(
+                        self.slack_message_builder.create_text_section_block(
                             "*Description*"
                         ),
-                        AlertSlackMessageBuilder.create_context_block(
+                        self.slack_message_builder.create_context_block(
                             [self.test_description]
                         ),
                     ]
@@ -386,10 +387,10 @@ class ElementaryTestAlert(DbtTestAlert):
             else:
                 preview.extend(
                     [
-                        AlertSlackMessageBuilder.create_text_section_block(
+                        self.slack_message_builder.create_text_section_block(
                             "*Description*\n_No description_"
                         ),
-                        AlertSlackMessageBuilder.create_empty_section_block(),
+                        self.slack_message_builder.create_empty_section_block(),
                     ]
                 )
 
@@ -397,8 +398,10 @@ class ElementaryTestAlert(DbtTestAlert):
         if RESULT_MESSAGE_FIELD in alert_fields and self.error_message:
             result.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(["*Result message*"]),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
                         f"```{self.error_message.strip()}```"
                     ),
                 ]
@@ -406,31 +409,35 @@ class ElementaryTestAlert(DbtTestAlert):
 
         if TEST_RESULTS_SAMPLE_FIELD in alert_fields and anomalous_value:
             result.append(
-                AlertSlackMessageBuilder.create_context_block(["*Test results sample*"])
+                self.slack_message_builder.create_context_block(
+                    ["*Test results sample*"]
+                )
             )
             messagess = []
             if self.column_name:
                 messagess.append(f"*Column*: {self.column_name}     |")
             messagess.append(f"*Anomalous Values*: {anomalous_value}")
             if messagess:
-                result.append(AlertSlackMessageBuilder.create_context_block(messagess))
+                result.append(
+                    self.slack_message_builder.create_context_block(messagess)
+                )
 
         configuration = []
         if TEST_PARAMS_FIELD in alert_fields and self.test_params:
             configuration.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(
+                    self.slack_message_builder.create_context_block(
                         ["*Test parameters*"]
                     ),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_text_section_block(
                         f"`{self.test_params}`"
                     ),
                 ]
             )
 
-        return AlertSlackMessageBuilder(
+        return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
-        ).get_slack_message()
+        )
 
     def to_test_alert_api_dict(self):
         test_params = try_load_json(self.test_params) or {}

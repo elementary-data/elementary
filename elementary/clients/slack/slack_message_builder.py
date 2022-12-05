@@ -1,31 +1,13 @@
 from slack_sdk.models.blocks import SectionBlock
-from typing import List, Optional
+from typing import List
 
-from elementary.clients.slack.schema import (
-    SlackMessageSchema,
-    AlertSlackMessageSchema,
-    AlertDetailsPartSlackMessageSchema,
-    SlackBlocksType,
-)
+from elementary.clients.slack.schema import SlackMessageSchema, SlackBlocksType
+
 
 LONGEST_MARKDOWN_SUFFIX_LEN = 3
 CONTINUATION_SYMBOL = "..."
 MAX_SLACK_SECTION_SIZE = 2
 SHOW_MORE_ATTACHMENTS_MARK = 5
-
-
-class PreviewIsTooLongError(Exception):
-    def __init__(
-        self,
-        preview_blocks: SlackBlocksType,
-        message: str = f"There are too manny blocks at the preview section of the alert (more than {SHOW_MORE_ATTACHMENTS_MARK})",
-    ) -> None:
-        self.preview_blocks = preview_blocks
-        self.message = message
-        super().__init__(self.message)
-
-    def __str__(self) -> str:
-        return f"{len(self.preview_blocks)} provieded -> {self.message}"
 
 
 class SlackMessageBuilder:
@@ -150,87 +132,3 @@ class SlackMessageBuilder:
 
     def get_slack_message(self) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
-
-
-class AlertSlackMessageBuilder(SlackMessageBuilder):
-    def __init__(
-        self,
-        title: Optional[SlackBlocksType] = None,
-        preview: Optional[SlackBlocksType] = None,
-        result: Optional[SlackBlocksType] = None,
-        configuration: Optional[SlackBlocksType] = None,
-    ) -> None:
-        super().__init__()
-        self.alert = AlertSlackMessageSchema(
-            title=title,
-            preview=preview,
-            details=AlertDetailsPartSlackMessageSchema(
-                result=result, configuration=configuration
-            ),
-        )
-        self._initial_slack_alert(self.alert)
-
-    def _initial_slack_alert(
-        self, alert: AlertSlackMessageSchema
-    ) -> SlackMessageSchema:
-        self._add_title_to_slack_alert(alert.title)
-        self._add_preview_to_slack_alert(alert.preview)
-        self._add_details_to_slack_alert(alert.details)
-
-    def _add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
-        if title_blocks:
-            title = [*title_blocks, self.create_divider_block()]
-            self._add_blocks_to_blocks_section(title)
-
-    def _add_preview_to_slack_alert(
-        self, preview_blocks: Optional[SlackBlocksType] = None
-    ):
-        if preview_blocks:
-            validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
-            self._add_blocks_to_attachments_sections(validated_preview_blocks)
-
-    def _add_details_to_slack_alert(
-        self, details_blocks: Optional[AlertDetailsPartSlackMessageSchema] = None
-    ):
-        if details_blocks:
-            if details_blocks.result:
-                result_blocks = [
-                    self.create_text_section_block(":mag: *Result*"),
-                    self.create_divider_block(),
-                    *details_blocks.result,
-                ]
-                self._add_blocks_to_attachments_sections(result_blocks)
-
-            if details_blocks.configuration:
-                result_blocks = [
-                    self.create_text_section_block(
-                        ":hammer_and_wrench: *Configuration*"
-                    ),
-                    self.create_divider_block(),
-                    *details_blocks.configuration,
-                ]
-                self._add_blocks_to_attachments_sections(result_blocks)
-
-    @classmethod
-    def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):
-        preview_blocks_count = len(preview_blocks)
-
-        if not preview_blocks:
-            return
-
-        if preview_blocks_count > SHOW_MORE_ATTACHMENTS_MARK:
-            raise PreviewIsTooLongError(preview_blocks)
-
-        elif (
-            preview_blocks_count < SHOW_MORE_ATTACHMENTS_MARK
-            and preview_blocks_count > 0
-        ):
-            padded_preview_blocks = [*preview_blocks]
-            blocks_counter = preview_blocks_count
-            while blocks_counter < SHOW_MORE_ATTACHMENTS_MARK:
-                padded_preview_blocks.append(cls.create_empty_section_block())
-                blocks_counter += 1
-            return padded_preview_blocks
-
-        else:
-            return preview_blocks

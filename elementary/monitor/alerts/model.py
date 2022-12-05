@@ -1,7 +1,6 @@
 import json
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.clients.slack.slack_message_builder import AlertSlackMessageBuilder
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
@@ -41,11 +40,11 @@ class ModelAlert(Alert):
         return self._model_to_slack()
 
     def _model_to_slack(self):
-        icon = AlertSlackMessageBuilder.get_slack_status_icon(self.status)
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
-            AlertSlackMessageBuilder.create_header_block(f"{icon} dbt model alert"),
-            AlertSlackMessageBuilder.create_context_block(
+            self.slack_message_builder.create_header_block(f"{icon} dbt model alert"),
+            self.slack_message_builder.create_context_block(
                 [
                     f"*Model:* {self.alias}     |",
                     f"*Status:* {self.status}     |",
@@ -54,7 +53,7 @@ class ModelAlert(Alert):
             ),
         ]
 
-        preview = AlertSlackMessageBuilder.create_compacted_sections_blocks(
+        preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
                 f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
                 f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
@@ -66,8 +65,10 @@ class ModelAlert(Alert):
         if self.message:
             result.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(["*Result message*"]),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
                         f"```{self.message.strip()}```"
                     ),
                 ]
@@ -76,40 +77,42 @@ class ModelAlert(Alert):
         configuration = []
         if self.materialization:
             configuration.append(
-                AlertSlackMessageBuilder.create_context_block([f"*Materialization*"])
+                self.slack_message_builder.create_context_block([f"*Materialization*"])
             )
             configuration.append(
-                AlertSlackMessageBuilder.create_text_section_block(
+                self.slack_message_builder.create_text_section_block(
                     f"`{str(self.materialization)}`"
                 )
             )
         if self.full_refresh:
             configuration.append(
-                AlertSlackMessageBuilder.create_context_block([f"*Full refresh*"])
+                self.slack_message_builder.create_context_block([f"*Full refresh*"])
             )
             configuration.append(
-                AlertSlackMessageBuilder.create_text_section_block(
+                self.slack_message_builder.create_text_section_block(
                     f"`{self.full_refresh}`"
                 )
             )
         if self.path:
             configuration.append(
-                AlertSlackMessageBuilder.create_context_block([f"*Path*"])
+                self.slack_message_builder.create_context_block([f"*Path*"])
             )
             configuration.append(
-                AlertSlackMessageBuilder.create_text_section_block(f"`{self.path}`")
+                self.slack_message_builder.create_text_section_block(f"`{self.path}`")
             )
 
-        return AlertSlackMessageBuilder(
+        return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
-        ).get_slack_message()
+        )
 
     def _snapshot_to_slack(self):
-        icon = AlertSlackMessageBuilder.get_slack_status_icon(self.status)
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
-            AlertSlackMessageBuilder.create_header_block(f"{icon} dbt snapshot alert"),
-            AlertSlackMessageBuilder.create_context_block(
+            self.slack_message_builder.create_header_block(
+                f"{icon} dbt snapshot alert"
+            ),
+            self.slack_message_builder.create_context_block(
                 [
                     f"*Snapshot:* {self.alias}     |",
                     f"*Status:* {self.status}     |",
@@ -118,7 +121,7 @@ class ModelAlert(Alert):
             ),
         ]
 
-        preview = AlertSlackMessageBuilder.create_compacted_sections_blocks(
+        preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
                 f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
                 f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
@@ -130,8 +133,10 @@ class ModelAlert(Alert):
         if self.message:
             result.extend(
                 [
-                    AlertSlackMessageBuilder.create_context_block(["*Result message*"]),
-                    AlertSlackMessageBuilder.create_text_section_block(
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
                         f"```{self.message.strip()}```"
                     ),
                 ]
@@ -140,14 +145,14 @@ class ModelAlert(Alert):
         configuration = []
         if self.original_path:
             configuration.append(
-                AlertSlackMessageBuilder.create_context_block([f"*Path*"])
+                self.slack_message_builder.create_context_block([f"*Path*"])
             )
             configuration.append(
-                AlertSlackMessageBuilder.create_text_section_block(
+                self.slack_message_builder.create_text_section_block(
                     f"`{self.original_path}`"
                 )
             )
 
-        return AlertSlackMessageBuilder(
+        return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
-        ).get_slack_message()
+        )
