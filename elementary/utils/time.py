@@ -14,6 +14,10 @@ MILLISECONDS_IN_HOUR = 1000 * 60 * 60
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
+def convert_utc_iso_format_to_datetime(utc_iso_format: str) -> datetime:
+    return datetime.fromisoformat(utc_iso_format).replace(tzinfo=tz.tzutc())
+
+
 def convert_utc_time_to_timezone(
     utc_time: datetime, timezone: Optional[str] = None
 ) -> datetime:
