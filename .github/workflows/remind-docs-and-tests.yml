@@ -1,4 +1,4 @@
-name: Remind docs
+name: Remind docs and tests
 on:
   pull_request:
     branches: [ "master" ]
@@ -12,5 +12,5 @@ jobs:
           pullRequestOpened: |
             👋 @{{ author }}
             Thank you for raising your pull request.
-            Please make sure you have documented all user-facing changes in the docs.
+            Please make sure to add tests and document all user-facing changes.
             You can do this by editing the `docs` files in this pull request.
