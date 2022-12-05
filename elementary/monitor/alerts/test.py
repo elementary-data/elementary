@@ -6,7 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.utils.json_utils import try_load_json
+from elementary.utils.json_utils import prettify_json_str_set, try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
@@ -184,17 +184,17 @@ class DbtTestAlert(TestAlert):
 
         if TAGS_FIELD in alert_fields:
             compacted_sections.append(
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}"
             )
 
         if OWNERS_FIELD in alert_fields:
             compacted_sections.append(
-                f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
+                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
             compacted_sections.append(
-                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
+                f'*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else "_No subscribers_"}'
             )
 
         self._add_compacted_sections_to_slack_msg(
@@ -389,17 +389,17 @@ class ElementaryTestAlert(DbtTestAlert):
 
         if TAGS_FIELD in alert_fields:
             compacted_sections.append(
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}"
+                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}"
             )
 
         if OWNERS_FIELD in alert_fields:
             compacted_sections.append(
-                f"*Owners*\n{self.owners if self.owners else '_No owners_'}"
+                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}"
             )
 
         if SUBSCRIBERS_FIELD in alert_fields:
             compacted_sections.append(
-                f'*Subscribers*\n{", ".join(set(self.subscribers)) if self.subscribers else "_No subscribers_"}'
+                f'*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else "_No subscribers_"}'
             )
 
         self._add_compacted_sections_to_slack_msg(

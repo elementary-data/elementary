@@ -3,6 +3,7 @@ from typing import Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
     convert_datetime_utc_str_to_timezone_str,
@@ -71,9 +72,9 @@ class SourceFreshnessAlert(Alert):
         self._add_divider(slack_message)
 
         compacted_sections = [
-            f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
-            f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
-            f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+            f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
+            f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
+            f"*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else '_No subscribers_'}",
         ]
         self._add_compacted_sections_to_slack_msg(
             slack_message, compacted_sections, add_to_attachment=True
