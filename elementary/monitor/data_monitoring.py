@@ -418,7 +418,9 @@ class DataMonitoring:
             serializable_nodes[key] = dict(nodes[key])
 
         # Currently we don't show exposures as part of the sidebar
-        sidebars = sidebar_api.get_sidebars(models=models, sources=sources)
+        sidebars = sidebar_api.get_sidebars(
+            artifacts=[*models.values(), *sources.values()]
+        )
 
         return serializable_nodes, sidebars
 
