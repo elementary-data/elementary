@@ -55,9 +55,9 @@ class ModelAlert(Alert):
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Tags*\n{self.tags if self.tags else '_No tags_'}",
-                f"*Owners*\n{self.owners if self.owners else '_No owners_'}",
-                f"*Subscribers*\n{', '.join(set(self.subscribers)) if self.subscribers else '_No subscribers_'}",
+                f"*Tags*\n{prettify_json_str_set(self.tags) if self.tags else '_No tags_'}",
+                f"*Owners*\n{prettify_json_str_set(self.owners) if self.owners else '_No owners_'}",
+                f"*Subscribers*\n{prettify_json_str_set(self.subscribers) if self.subscribers else '_No subscribers_'}",
             ]
         )
 
