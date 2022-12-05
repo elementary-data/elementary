@@ -6,7 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.utils.json_utils import try_load_json
+from elementary.utils.json_utils import prettify_json_str_set, try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
@@ -133,11 +133,16 @@ class DbtTestAlert(TestAlert):
             f"*Description*\n{self.test_description if self.test_description else 'No description'}",
         )
         self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
+            slack_message,
+            [
+                f"*Owners*\n{prettify_json_str_set(self.owners)}",
+                f"*Tags*\n{prettify_json_str_set(self.tags)}",
+            ],
         )
         if self.subscribers:
             self._add_fields_section_to_slack_msg(
-                slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
+                slack_message,
+                [f"*Subscribers*\n{prettify_json_str_set(self.subscribers)}"],
             )
         if self.error_message:
             self._add_text_section_to_slack_msg(
@@ -249,11 +254,16 @@ class ElementaryTestAlert(DbtTestAlert):
             f"*Description*\n{self.test_description if self.test_description else 'No description'}",
         )
         self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
+            slack_message,
+            [
+                f"*Owners*\n{prettify_json_str_set(self.owners)}",
+                f"*Tags*\n{prettify_json_str_set(self.tags)}",
+            ],
         )
         if self.subscribers:
             self._add_fields_section_to_slack_msg(
-                slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
+                slack_message,
+                [f"*Subscribers*\n{prettify_json_str_set(self.subscribers)}"],
             )
         if self.error_message:
             self._add_text_section_to_slack_msg(
