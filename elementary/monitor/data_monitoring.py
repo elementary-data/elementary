@@ -10,8 +10,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import click
 import pkg_resources
 from alive_progress import alive_it
-from packaging import version
-
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
@@ -41,6 +39,7 @@ from elementary.utils import package
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
+from packaging import version
 
 logger = get_logger(__name__)
 
@@ -70,7 +69,9 @@ class DataMonitoring:
         self.project_name = latest_invocation.get("project_name")
         self.target_name = latest_invocation.get("target_name")
         dbt_pkg_version = latest_invocation.get("elementary_version")
+        dbt_version = latest_invocation.get("dbt_version")
         tracking.set_env("dbt_pkg_version", dbt_pkg_version)
+        tracking.set_env("dbt_version", dbt_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
