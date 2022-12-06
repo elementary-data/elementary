@@ -65,7 +65,7 @@ def common_options(func):
         "--profiles-dir",
         "-p",
         type=str,
-        default=Config.DEFAULT_PROFILES_DIR,
+        default=None,
         help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
         "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
     )(func)
@@ -138,9 +138,9 @@ def get_cli_properties() -> dict:
 )
 @click.option(
     "--test",
-    type=str,
-    default=None,
-    help="Specify raw YAML string of your dbt variables.",
+    type=bool,
+    default=False,
+    help="Whether to send a test message in case there are no alerts.",
 )
 @click.pass_context
 def monitor(

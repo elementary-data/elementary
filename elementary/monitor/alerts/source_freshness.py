@@ -3,6 +3,7 @@ from typing import Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
     convert_datetime_utc_str_to_timezone_str,
@@ -104,11 +105,16 @@ class SourceFreshnessAlert(Alert):
             )
 
         self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Owners*\n{self.owners}", f"*Tags*\n{self.tags}"]
+            slack_message,
+            [
+                f"*Owners*\n{prettify_json_str_set(self.owners)}",
+                f"*Tags*\n{prettify_json_str_set(self.tags)}",
+            ],
         )
         if self.subscribers:
             self._add_fields_section_to_slack_msg(
-                slack_message, [f'*Subscribers*\n{", ".join(set(self.subscribers))}']
+                slack_message,
+                [f"*Subscribers*\n{prettify_json_str_set(self.subscribers)}"],
             )
         self._add_fields_section_to_slack_msg(
             slack_message, [f"*Status*\n{self.status}", f"*Path*\n{self.path}"]
