@@ -11,10 +11,11 @@ import posthog
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
-from elementary.utils import env_vars
+from elementary.utils.log import get_logger
 from pydantic import BaseModel
 
 logging.getLogger("posthog").disabled = True
+logger = get_logger(__name__)
 
 
 class AnonymousWarehouse(BaseModel):
@@ -90,7 +91,7 @@ class AnonymousTracking:
                 },
             )
         except Exception:
-            pass
+            logger.debug("Unable to send tracking event.", exc_info=True)
 
     def track_cli_start(
         self, module_name: str, cli_properties: dict, command: str = None
