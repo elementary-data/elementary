@@ -5,14 +5,14 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-import posthog
-from pydantic import BaseModel
-
-import elementary.tracking.env
 import elementary.exceptions.exceptions
+import elementary.tracking.env
+import posthog
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
+from elementary.utils import env_vars
+from pydantic import BaseModel
 
 logging.getLogger("posthog").disabled = True
 
@@ -53,17 +53,9 @@ class AnonymousTracking:
             pass
 
     def _get_anonymous_user_id(self):
-        legacy_user_id_path = Path().joinpath(
-            self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE
-        )
         user_id_path = Path().joinpath(
             self.config.config_dir, self.ANONYMOUS_USER_ID_FILE
         )
-        # First check legacy file path
-        try:
-            return legacy_user_id_path.read_text()
-        except OSError:
-            pass
         try:
             return user_id_path.read_text()
         except OSError:

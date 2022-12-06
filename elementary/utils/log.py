@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from elementary.utils.env_vars import is_debug_mode_on
+from elementary.utils.env_vars import is_debug
 
 FORMATTER = logging.Formatter(
     "%(asctime)s — %(levelname)s — %(message)s", "%Y-%m-%d %H:%M:%S"
@@ -12,7 +12,7 @@ LOG_FILE = "edr.log"
 def get_console_handler():
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(FORMATTER)
-    console_handler.setLevel(logging.DEBUG if is_debug_mode_on() else logging.INFO)
+    console_handler.setLevel(logging.DEBUG if is_debug() else logging.INFO)
     return console_handler
 
 
