@@ -6,6 +6,11 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.schema.test import (
+    AnomalyTestConfigurationSchema,
+    DbtTestConfigurationSchema,
+    TestResultSchema,
+)
 from elementary.utils.json_utils import prettify_json_str_set, try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
@@ -91,9 +96,7 @@ class DbtTestAlert(TestAlert):
         self.test_results_description = (
             test_results_description.capitalize() if test_results_description else ""
         )
-        self.test_description = (
-            self.test_meta.get("description") if self.test_meta else ""
-        )
+        self.test_description = self._get_test_description()
         self.error_message = self.test_results_description
         self.column_name = column_name or ""
         self.severity = severity
@@ -104,6 +107,14 @@ class DbtTestAlert(TestAlert):
             if found_rows_number:
                 found_rows_number = found_rows_number.group()
                 self.failed_rows_count = int(found_rows_number)
+
+    def _get_test_description(self):
+        if self.test_meta:
+            return self.test_meta.get("description")
+        elif self.meta:
+            return self.meta.get("description")
+        else:
+            return None
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         icon = ":small_red_triangle:"
@@ -177,6 +188,15 @@ class DbtTestAlert(TestAlert):
         return SlackMessageSchema(attachments=slack_message["attachments"])
 
     def to_test_alert_api_dict(self):
+        configuration = DbtTestConfigurationSchema(
+            test_name=self.test_name, test_params=try_load_json(self.test_params)
+        )
+
+        result = TestResultSchema(
+            result_description=self.test_results_description,
+            result_query=self.test_results_query,
+        )
+
         test_runs = (
             {**self.test_runs, "display_name": self.test_display_name}
             if self.test_runs
@@ -203,6 +223,8 @@ class DbtTestAlert(TestAlert):
                 "test_params": self.test_params,
                 "test_created_at": self.test_created_at,
                 "description": self.test_description,
+                "result": result.dict(),
+                "configuration": configuration.dict(),
             },
             "test_results": {
                 "display_name": self.test_display_name + " - failed results sample",
@@ -288,6 +310,19 @@ class ElementaryTestAlert(DbtTestAlert):
 
     def to_test_alert_api_dict(self):
         test_params = try_load_json(self.test_params) or {}
+
+        configuration = AnomalyTestConfigurationSchema(
+            test_name=self.test_name,
+            timestamp_column=test_params.get("timestamp_column"),
+            testing_timeframe=test_params.get("timeframe"),
+            anomaly_threshold=test_params.get("sensitivity"),
+        )
+
+        result = TestResultSchema(
+            result_description=self.test_results_description,
+            result_query=self.test_results_query,
+        )
+
         test_alerts = None
         if self.test_type == "anomaly_detection":
             timestamp_column = test_params.get("timestamp_column")
@@ -334,6 +369,8 @@ class ElementaryTestAlert(DbtTestAlert):
                 "test_params": test_params,
                 "test_created_at": self.test_created_at,
                 "description": self.test_description,
+                "result": result.dict(),
+                "configuration": configuration.dict(),
             },
             "test_results": test_alerts,
             "test_runs": test_runs,

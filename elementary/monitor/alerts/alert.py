@@ -5,7 +5,6 @@ from typing import List, Optional
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
