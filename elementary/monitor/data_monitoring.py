@@ -1,3 +1,4 @@
+import ast
 import json
 import os
 import os.path
@@ -5,7 +6,7 @@ import re
 import webbrowser
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 import pkg_resources
@@ -91,7 +92,7 @@ class DataMonitoring:
         self.send_test_message_on_success = send_test_message_on_success
         self.disable_samples = disable_samples
 
-    def _parse_emails_to_ids(self, emails: List[str]) -> str:
+    def _parse_emails_to_ids(self, emails: Union[str, List[str]]) -> str:
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
 
@@ -101,15 +102,19 @@ class DataMonitoring:
             user_id = self.slack_client.get_user_id_from_email(email)
             return f"<@{user_id}>" if user_id else email
 
-        if isinstance(emails, list) and emails != []:
-            ids = [
-                _get_user_id(email) if _regex_match_owner_email(email) else email
-                for email in emails
-            ]
-            parsed_ids_str = prettify_json_str_set(ids)
-            return parsed_ids_str
-        else:
-            return prettify_json_str_set(emails)
+        def _parse_str_to_list(emails: str) -> List[str]:
+            try:
+                return ast.literal_eval(emails)
+            except:
+                return list(emails.split(","))
+
+        emails = _parse_str_to_list(emails) if isinstance(emails, str) else emails
+        ids = [
+            _get_user_id(email) if _regex_match_owner_email(email) else email
+            for email in emails
+        ]
+        parsed_ids_str = prettify_json_str_set(ids)
+        return parsed_ids_str
 
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
