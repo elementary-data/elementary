@@ -20,6 +20,91 @@ _Note_: Anomaly detection is not yet supported on Databricks in dbt Cloud.
 
 ### Table (model / source) tests:
 
+<Accordion title="elementary.volume">
+
+`elementary.volume`
+
+Monitors the row count of your table.
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    tests:
+      - elementary.volume:
+          timestamp_column: < timestamp column >
+          where_expression: < sql expression >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.volume:
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.volume:
+          tags: ['elementary']
+```
+
+</CodeGroup>
+
+</Accordion>
+
+<Accordion title="elementary.freshness">
+
+`elementary.volume`
+
+Monitors the freshness of your table.
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    tests:
+      - elementary.freshness:
+          timestamp_column: < timestamp column >
+          where_expression: < sql expression >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    tests:
+      - elementary.freshness:
+          timestamp_column: 'loaded_at'
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+```
+
+</CodeGroup>
+
+</Accordion>
+
 <Accordion title="elementary.table_anomalies">
 
 `elementary.table_anomalies`
@@ -42,6 +127,7 @@ models:
           table_anomalies: < specific monitors, all if null >
           # optional - configure different freshness column than timestamp column
           freshness_column: < freshness_column >
+          where_expression: < sql expression >
 ```
 
 ```yml Models example
@@ -57,6 +143,7 @@ models:
           table_anomalies:
             - row_count
             - freshness
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
           # optional - use tags to run elementary tests on a dedicated run
           tags: ['elementary']
           config:
@@ -66,7 +153,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-      - elementary.table_anomalies
+      - elementary.table_anomalies:
           tags: ['elementary']
 ```
 
@@ -151,6 +238,7 @@ models:
     tests:
       - elementary.all_columns_anomalies:
           column_anomalies: < specific monitors, all if null >
+          where_expression: < sql expression >
 ```
 
 ```yml Models example
@@ -163,6 +251,7 @@ models:
         timestamp_column: "loaded_at"
     tests:
       - elementary.all_columns_anomalies:
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
           tags: ["elementary"]
           # optional - change global sensitivity
           sensitivity: 3.5
@@ -244,6 +333,7 @@ models:
         tests:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
+              where_expression: < sql expression >
 ```
 
 ```yml Models example
@@ -261,6 +351,7 @@ models:
               column_anomalies:
                 - missing_count
                 - min_length
+              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
               tags: ['elementary']
 
   - name: users
@@ -274,6 +365,7 @@ models:
           - elementary.column_anomalies:
               tags: ['elementary']
               timestamp_column: 'updated_at'
+              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
       - name: user_name
         tests:
           - elementary.column_anomalies:
