@@ -42,6 +42,36 @@ class TestMetadataSchema(BaseModel):
         return json.loads(meta) if meta else {}
 
 
+class TotalsSchema(BaseModel):
+    errors: Optional[int] = 0
+    warnings: Optional[int] = 0
+    passed: Optional[int] = 0
+    failures: Optional[int] = 0
+
+    def add_total(self, status):
+        total_adders = {
+            "error": self._add_error,
+            "warn": self._add_warning,
+            "fail": self._add_failure,
+            "pass": self._add_passed,
+        }
+        adder = total_adders.get(status)
+        if adder:
+            adder()
+
+    def _add_error(self):
+        self.errors += 1
+
+    def _add_warning(self):
+        self.warnings += 1
+
+    def _add_passed(self):
+        self.passed += 1
+
+    def _add_failure(self):
+        self.failures += 1
+
+
 class InvocationSchema(BaseModel):
     affected_rows: Optional[int]
     time_utc: str
@@ -53,11 +83,8 @@ class InvocationSchema(BaseModel):
         return convert_partial_iso_format_to_full_iso_format(time_utc)
 
 
-class TotalsInvocationsSchema(BaseModel):
-    errors: Optional[int] = 0
-    warnings: Optional[int] = 0
-    passed: Optional[int] = 0
-    resolved: Optional[int] = 0
+class TotalsInvocationsSchema(TotalsSchema):
+    pass
 
 
 class InvocationsSchema(BaseModel):
@@ -65,3 +92,13 @@ class InvocationsSchema(BaseModel):
     totals: TotalsInvocationsSchema
     invocations: List[InvocationSchema]
     description: str
+
+
+class FilterSchema(BaseModel):
+    name: str
+    display_name: str
+    model_unique_ids: List[Optional[str]] = []
+
+    def add_model_unique_id(self, model_unique_id: str):
+        new_model_unique_ids = list(set([*self.model_unique_ids, model_unique_id]))
+        self.model_unique_ids = new_model_unique_ids

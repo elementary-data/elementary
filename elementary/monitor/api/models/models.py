@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Union
 from elementary.clients.api.api import APIClient
 from elementary.monitor.api.models.schema import (
     ExposureSchema,
+    FilterSchema,
     ModelCoverageSchema,
     ModelRunSchema,
     ModelRunsSchema,
@@ -205,3 +206,24 @@ class ModelsAPI(APIClient):
             splited_artifact_path.insert(0, artifact.package_name)
 
         return os.path.sep.join(splited_artifact_path)
+
+    @staticmethod
+    def get_filters(models_runs: List[ModelRunsSchema]) -> List[FilterSchema]:
+        successful_runs_filter = FilterSchema(
+            name="success", display_name="Successful Runs"
+        )
+        failed_runs_filter = FilterSchema(name="errors", display_name="Faield Runs")
+        no_runs_filter = FilterSchema(name="no_runs", display_name="No Runs")
+
+        for model_runs in models_runs:
+            totals = model_runs.totals
+            unique_id = model_runs.unique_id
+            if totals.success:
+                successful_runs_filter.add_model_unique_id(unique_id)
+            if totals.errors:
+                failed_runs_filter.add_model_unique_id(unique_id)
+            if not totals.success and not totals.errors:
+                no_runs_filter.add_model_unique_id(unique_id)
+
+        filters = [successful_runs_filter, failed_runs_filter, no_runs_filter]
+        return [filter for filter in filters if len(filter.model_unique_ids)]
