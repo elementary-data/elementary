@@ -4,6 +4,11 @@ repos:
     hooks:
       - id: black
 
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+
   - repo: local
     hooks:
       - id: no_commit
