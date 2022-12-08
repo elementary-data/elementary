@@ -1,6 +1,7 @@
-import alive_progress
 import time
 from threading import Thread
+
+import alive_progress
 
 
 class ThreadSpinner:

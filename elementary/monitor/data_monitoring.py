@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import click
 import pkg_resources
 from alive_progress import alive_it
+from packaging import version
+
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
@@ -21,7 +23,7 @@ from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert, ElementaryTestAlert
+from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
@@ -41,7 +43,6 @@ from elementary.utils import package
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
-from packaging import version
 
 logger = get_logger(__name__)
 
@@ -218,6 +219,7 @@ class DataMonitoring:
         disable_passed_test_metrics: bool = False,
         should_open_browser: bool = True,
         exclude_elementary_models: bool = False,
+        project_name: Optional[str] = None,
     ) -> Tuple[bool, str]:
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
@@ -276,7 +278,7 @@ class DataMonitoring:
                 else None,
             }
             output_data["env"] = {
-                "project_name": self.project_name,
+                "project_name": project_name or self.project_name,
                 "target_name": self.target_name,
             }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")

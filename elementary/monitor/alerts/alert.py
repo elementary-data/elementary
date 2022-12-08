@@ -1,7 +1,7 @@
 from datetime import datetime
-from dateutil import tz
 from typing import List, Optional
 
+from dateutil import tz
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema

@@ -1,7 +1,7 @@
 import os
 import os.path
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Any, Dict, Union
 
 import dbt.config
 import google.cloud.bigquery

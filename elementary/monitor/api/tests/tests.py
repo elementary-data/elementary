@@ -6,10 +6,10 @@ from typing import Any, Dict, List, Optional
 from elementary.clients.api.api import APIClient
 from elementary.monitor.api.tests.schema import (
     FilterSchema,
+    InvocationSchema,
     InvocationsSchema,
     TestMetadataSchema,
     TestUniqueIdType,
-    InvocationSchema,
     TotalsInvocationsSchema,
     TotalsSchema,
 )
