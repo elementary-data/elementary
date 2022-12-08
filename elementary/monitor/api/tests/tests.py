@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional
 
 from elementary.clients.api.api import APIClient
 from elementary.monitor.api.tests.schema import (
-    FilterSchema,
     InvocationSchema,
     InvocationsSchema,
     TestMetadataSchema,
@@ -207,37 +206,3 @@ class TestsAPI(APIClient):
             totals_dict[model_unique_id] = TotalsSchema()
 
         totals_dict[model_unique_id].add_total(status)
-
-    @staticmethod
-    def get_filters(totals: Dict[str, TotalsSchema]) -> List[FilterSchema]:
-        failures_filter = FilterSchema(name="failures", display_name="Failures")
-        warnings_filter = FilterSchema(name="warnings", display_name="Warnings")
-        errors_filter = FilterSchema(name="errors", display_name="Errors")
-        passed_filter = FilterSchema(name="passed", display_name="Passed")
-        no_tests_filter = FilterSchema(name="no_test", display_name="No Tests")
-
-        for model_unique_id, total in totals.items():
-            if total.failures:
-                failures_filter.add_model_unique_id(model_unique_id)
-            if total.warnings:
-                warnings_filter.add_model_unique_id(model_unique_id)
-            if total.errors:
-                errors_filter.add_model_unique_id(model_unique_id)
-            if total.passed:
-                passed_filter.add_model_unique_id(model_unique_id)
-            if (
-                not total.failures
-                and not total.warnings
-                and not total.errors
-                and not total.passed
-            ):
-                no_tests_filter.add_model_unique_id(model_unique_id)
-
-        filters = [
-            failures_filter,
-            warnings_filter,
-            errors_filter,
-            passed_filter,
-            no_tests_filter,
-        ]
-        return [filter for filter in filters if len(filter.model_unique_ids)]

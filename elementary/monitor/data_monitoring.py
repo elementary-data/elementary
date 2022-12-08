@@ -25,9 +25,17 @@ from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 from elementary.monitor.api.alerts import AlertsAPI
+from elementary.monitor.api.filters.filters import FiltersAPI
+from elementary.monitor.api.filters.schema import FiltersSchema
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
+from elementary.monitor.api.models.schema import (
+    ModelRunsSchema,
+    NormalizedExposureSchema,
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+)
 from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import (
@@ -71,6 +79,7 @@ class DataMonitoring:
         self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
         self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
+        self.filter_api = FiltersAPI(dbt_runner=self.dbt_runner)
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -225,6 +234,15 @@ class DataMonitoring:
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, "w") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
+
+            models = self.models_api.get_models(exclude_elementary_models)
+            sources = self.models_api.get_sources()
+            exposures = self.models_api.get_exposures()
+            tests_metadata = self.tests_api.get_tests_metadata(days_back=days_back)
+            models_runs = self.models_api.get_models_runs(
+                days_back=days_back, exclude_elementary_models=exclude_elementary_models
+            )
+
             (
                 test_results,
                 test_results_totals,
@@ -233,20 +251,21 @@ class DataMonitoring:
                 days_back=days_back,
                 test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
+                tests_metadata=tests_metadata,
             )
-            models, sidebars = self._get_dbt_models_and_sidebars(
-                exclude_elementary_models
+            serializable_models, sidebars = self._get_dbt_models_and_sidebars(
+                models, sources, exposures
             )
             models_coverages = self._get_dbt_models_test_coverages()
-            (
-                models_runs,
-                models_runs_dicts,
-                model_runs_totals,
-            ) = self._get_models_runs_and_totals(
-                days_back=days_back, exclude_elementary_models=exclude_elementary_models
+            models_runs_dicts, model_runs_totals = self._get_models_runs_and_totals(
+                models_runs
             )
             lineage = self._get_lineage(exclude_elementary_models)
-            output_data["models"] = models
+            filters = self.filter_api.get_filters(
+                test_results_totals, test_runs_totals, models, sources, models_runs
+            )
+
+            output_data["models"] = serializable_models
             output_data["sidebars"] = sidebars.dict()
             output_data["test_results"] = test_results
             output_data["test_results_totals"] = self._serialize_totals(
@@ -256,19 +275,7 @@ class DataMonitoring:
             output_data["coverages"] = models_coverages
             output_data["model_runs"] = models_runs_dicts
             output_data["model_runs_totals"] = model_runs_totals
-            output_data["filters"] = {
-                "test_results": [
-                    filter.dict()
-                    for filter in self.tests_api.get_filters(test_results_totals)
-                ],
-                "test_runs": [
-                    filter.dict()
-                    for filter in self.tests_api.get_filters(test_runs_totals)
-                ],
-                "model_runs": [
-                    filter.dict() for filter in self.models_api.get_filters(models_runs)
-                ],
-            }
+            output_data["filters"] = filters.dict()
             output_data["lineage"] = lineage.dict()
             output_data["tracking"] = {
                 "posthog_api_key": self.tracking.POSTHOG_PROJECT_API_KEY,
@@ -342,12 +349,12 @@ class DataMonitoring:
 
     def _get_test_results_and_totals(
         self,
+        tests_metadata: Optional[List[TestMetadataSchema]],
         days_back: Optional[int] = None,
         test_runs_amount: Optional[int] = None,
         disable_passed_test_metrics: bool = False,
     ):
         try:
-            tests_metadata = self.tests_api.get_tests_metadata(days_back=days_back)
             if self.disable_samples:
                 tests_sample_data = {}
             else:
@@ -413,12 +420,7 @@ class DataMonitoring:
             serialized_totals[model_unique_id] = total.dict()
         return serialized_totals
 
-    def _get_models_runs_and_totals(
-        self, days_back: Optional[int] = None, exclude_elementary_models: bool = False
-    ):
-        models_runs = self.models_api.get_models_runs(
-            days_back=days_back, exclude_elementary_models=exclude_elementary_models
-        )
+    def _get_models_runs_and_totals(self, models_runs: List[ModelRunsSchema]):
         models_runs_dicts = []
         model_runs_totals = {}
         for model_runs in models_runs:
@@ -426,18 +428,17 @@ class DataMonitoring:
             model_runs_totals[model_runs.unique_id] = {
                 "errors": model_runs.totals.errors,
                 "warnings": 0,
-                "resolved": 0,
+                "failures": 0,
                 "passed": model_runs.totals.success,
             }
-        return models_runs, models_runs_dicts, model_runs_totals
+        return models_runs_dicts, model_runs_totals
 
     def _get_dbt_models_and_sidebars(
-        self, exclude_elementary_models: bool = False
+        self,
+        models: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedSourceSchema],
+        exposures: Dict[str, NormalizedExposureSchema],
     ) -> Tuple[Dict, SidebarsSchema]:
-        models = self.models_api.get_models(exclude_elementary_models)
-        sources = self.models_api.get_sources()
-        exposures = self.models_api.get_exposures()
-
         self.execution_properties["model_count"] = len(models)
         self.execution_properties["source_count"] = len(sources)
         self.execution_properties["exposure_count"] = len(exposures)
