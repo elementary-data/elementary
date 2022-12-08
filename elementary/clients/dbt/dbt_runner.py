@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 from json import JSONDecodeError
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 from elementary.exceptions.exceptions import DbtCommandError
 from elementary.utils.log import get_logger

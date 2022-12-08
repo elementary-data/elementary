@@ -5,14 +5,15 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
+import posthog
+from pydantic import BaseModel
+
 import elementary.exceptions.exceptions
 import elementary.tracking.env
-import posthog
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.utils.log import get_logger
-from pydantic import BaseModel
 
 logging.getLogger("posthog").disabled = True
 logger = get_logger(__name__)

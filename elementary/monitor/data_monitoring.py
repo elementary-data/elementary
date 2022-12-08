@@ -23,7 +23,7 @@ from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert, ElementaryTestAlert
+from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
