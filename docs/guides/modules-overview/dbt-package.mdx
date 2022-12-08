@@ -40,9 +40,10 @@ New data is loaded to this model on an on-run-end hook named `elementary.upload_
 
 _Incremental model_
 
-Attributes associated with each dbt invocation. Inserted at the end of each invocation.
+Attributes associated with each dbt invocation, inserted at the end of each invocation.
 Each row is the result of a single invocation (dbt run, dbt test, dbt build, etc).
-New data is loaded to this model on an on-run-end hook named `elementary.upload_run_results`.
+New data is loaded to this model on an on-run-end hook named `elementary.upload_dbt_invocation`.
+It also contains information about your job or what triggered the invocation such as `pull_request_id` and `cause`.
 
 ### model_run_results
 
@@ -59,6 +60,14 @@ _View_
 Run results of dbt snapshots, enriched with snapshots metadata.
 Each row is the result of a single snapshot.
 This is a view that joins data from `dbt_run_results` and `dbt_snapshots`.
+
+### job_run_results
+
+_View_
+
+Run results of dbt invocations, enriched with jobs metadata.
+Each row is the result of a single job.
+This is a view on `dbt_invocations`.
 
 ### elementary_test_results
 
