@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+import re
 import webbrowser
 from collections import defaultdict
 from datetime import datetime
@@ -9,12 +10,11 @@ from typing import Any, Dict, List, Optional, Tuple
 import click
 import pkg_resources
 from alive_progress import alive_it
-from packaging import version
-
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.clients.slack.client import SlackClient
+from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.alerts.alert import Alert
@@ -36,8 +36,10 @@ from elementary.monitor.api.tests.schema import (
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import package
+from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
+from packaging import version
 
 logger = get_logger(__name__)
 
@@ -63,8 +65,13 @@ class DataMonitoring:
             dbt_env_vars=self.config.dbt_env_vars,
         )
         self.execution_properties = {}
-        dbt_pkg_version = self.get_elementary_dbt_pkg_version()
+        latest_invocation = self.get_latest_invocation()
+        self.project_name = latest_invocation.get("project_name")
+        self.target_name = latest_invocation.get("target_name")
+        dbt_pkg_version = latest_invocation.get("elementary_version")
+        dbt_version = latest_invocation.get("dbt_version")
         tracking.set_env("dbt_pkg_version", dbt_pkg_version)
+        tracking.set_env("dbt_version", dbt_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
@@ -83,6 +90,26 @@ class DataMonitoring:
         self.send_test_message_on_success = send_test_message_on_success
         self.disable_samples = disable_samples
 
+    def _parse_emails_to_ids(self, emails: List[str]) -> str:
+        def _regex_match_owner_email(potential_email: str) -> bool:
+            email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+
+            return re.fullmatch(email_regex, potential_email)
+
+        def _get_user_id(email: str) -> str:
+            user_id = self.slack_client.get_user_id_from_email(email)
+            return f"<@{user_id}>" if user_id else email
+
+        if isinstance(emails, list) and emails != []:
+            ids = [
+                _get_user_id(email) if _regex_match_owner_email(email) else email
+                for email in emails
+            ]
+            parsed_ids_str = prettify_json_str_set(ids)
+            return parsed_ids_str
+        else:
+            return prettify_json_str_set(emails)
+
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
             return
@@ -90,6 +117,8 @@ class DataMonitoring:
         sent_alert_ids = []
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         for alert in alerts_with_progress_bar:
+            alert.owners = self._parse_emails_to_ids(alert.owners)
+            alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
             alert_msg = alert.to_slack()
             sent_successfully = self.slack_client.send_message(
                 channel_name=alert.slack_channel
@@ -125,8 +154,11 @@ class DataMonitoring:
     def _send_test_message(self):
         self.slack_client.send_message(
             channel_name=self.config.slack_channel_name,
-            message=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            message=SlackMessageSchema(
+                text=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            ),
         )
+        logger.info("Sent the test message.")
 
     def _send_alerts(self, alerts: Alerts):
         self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
@@ -218,6 +250,10 @@ class DataMonitoring:
                 if self.tracking.anonymous_warehouse
                 else None,
             }
+            output_data["env"] = {
+                "project_name": self.project_name,
+                "target_name": self.target_name,
+            }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, "r") as template_html_file:
                 template_html_code = template_html_file.read()
@@ -235,7 +271,11 @@ class DataMonitoring:
             elementary_output_json_file.write(dumped_output_data)
 
         if should_open_browser:
-            webbrowser.open_new_tab("file://" + html_path)
+            try:
+                webbrowser.open_new_tab("file://" + html_path)
+            except webbrowser.Error as e:
+                logger.error("Unable to open the web browser.")
+
         self.execution_properties["report_end"] = True
         self.execution_properties["success"] = self.success
         return self.success, html_path
@@ -419,16 +459,16 @@ class DataMonitoring:
             self.tracking.record_cli_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
 
-    def get_elementary_dbt_pkg_version(self) -> Optional[str]:
+    def get_latest_invocation(self) -> Dict[str, Any]:
         try:
-            dbt_pkg_version = self.dbt_runner.run_operation(
-                "get_elementary_dbt_pkg_version", quiet=True
+            latest_invocation = self.dbt_runner.run_operation(
+                "get_latest_invocation", quiet=True
             )[0]
-            return dbt_pkg_version or None
+            return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
-            logger.error(f"Unable to get Elementary's dbt package version: {err}")
+            logger.error(f"Unable to get the latest invocation: {err}")
             self.tracking.record_cli_internal_exception(err)
-            return None
+            return {}
 
     @staticmethod
     def _check_dbt_package_compatibility(dbt_pkg_ver: str):
