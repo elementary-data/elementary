@@ -235,6 +235,11 @@ def monitor(
     default=True,
     help="Exclude Elementary's internal models from the report.",
 )
+@click.option(
+    "--project-name",
+    type=str,
+    help="The project name to display in the report.",
+)
 @click.pass_context
 def report(
     ctx,
@@ -250,6 +255,7 @@ def report(
     open_browser,
     exclude_elementary_models,
     disable_samples,
+    project_name,
 ):
     """
     Generate a local report of your warehouse.
@@ -279,6 +285,7 @@ def report(
             disable_passed_test_metrics=disable_passed_test_metrics,
             exclude_elementary_models=exclude_elementary_models,
             should_open_browser=open_browser,
+            project_name=project_name,
         )
         anonymous_tracking.track_cli_end(
             "monitor-report", data_monitoring.properties(), ctx.command.name
@@ -382,6 +389,11 @@ def report(
     default=True,
     help="Exclude Elementary's internal models from the report.",
 )
+@click.option(
+    "--project-name",
+    type=str,
+    help="The project name to display in the report.",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -407,6 +419,7 @@ def send_report(
     gcs_bucket_name,
     exclude_elementary_models,
     disable_samples,
+    project_name,
 ):
     """
     Send the report to an external platform.
@@ -460,6 +473,7 @@ def send_report(
             file_path=local_file_path,
             should_open_browser=False,
             exclude_elementary_models=exclude_elementary_models,
+            project_name=project_name,
         )
         if generated_report_successfully and elementary_html_path:
             command_succeeded = data_monitoring.send_report(
