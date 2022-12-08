@@ -255,11 +255,11 @@ class DataMonitoring:
             output_data["model_runs"] = models_runs_dicts
             output_data["model_runs_totals"] = model_runs_totals
             output_data["filters"] = {
-                "tests_results": [
+                "test_results": [
                     filter.dict()
                     for filter in self.tests_api.get_filters(test_results_totals)
                 ],
-                "tests_runs": [
+                "test_runs": [
                     filter.dict()
                     for filter in self.tests_api.get_filters(test_runs_totals)
                 ],
