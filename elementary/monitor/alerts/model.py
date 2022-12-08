@@ -42,7 +42,7 @@ class ModelAlert(Alert):
     def _model_to_slack(self):
         tags = prettify_json_str_set(self.tags)
         owners = prettify_json_str_set(self.owners)
-        subscribers = prettify_json_str_set(self.subscribers)
+        subscribers = prettify_json_str_set(", ".join(self.subscribers))
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
@@ -111,7 +111,7 @@ class ModelAlert(Alert):
     def _snapshot_to_slack(self):
         tags = prettify_json_str_set(self.tags)
         owners = prettify_json_str_set(self.owners)
-        subscribers = prettify_json_str_set(self.subscribers)
+        subscribers = prettify_json_str_set(", ".join(self.subscribers))
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [

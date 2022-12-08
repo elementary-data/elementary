@@ -196,7 +196,7 @@ class DbtTestAlert(TestAlert):
                 f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
-            subscribers = prettify_json_str_set(self.subscribers)
+            subscribers = prettify_json_str_set(", ".join(self.subscribers))
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
             )
@@ -385,7 +385,7 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
-            subscribers = prettify_json_str_set(self.subscribers)
+            subscribers = prettify_json_str_set(", ".join(self.subscribers))
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
             )

@@ -55,7 +55,7 @@ class SourceFreshnessAlert(Alert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         tags = prettify_json_str_set(self.tags)
         owners = prettify_json_str_set(self.owners)
-        subscribers = prettify_json_str_set(self.subscribers)
+        subscribers = prettify_json_str_set(", ".join(self.subscribers))
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
