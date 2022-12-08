@@ -5,7 +5,7 @@ from typing import Callable, List
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts import AlertsQueryResult, Alerts
+from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert

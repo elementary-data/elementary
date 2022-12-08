@@ -1,6 +1,5 @@
-from elementary.utils import package
-from typing import Any
 import os
+from typing import Any
 
 import click
 from pyfiglet import Figlet
@@ -8,6 +7,7 @@ from pyfiglet import Figlet
 import elementary.cli.upgrade
 from elementary.config.config import Config
 from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.utils import package
 from elementary.utils.log import get_logger
 
 f = Figlet(font="slant")

@@ -1,8 +1,8 @@
-from slack_sdk.models.blocks import SectionBlock
 from typing import List
 
-from elementary.clients.slack.schema import SlackMessageSchema, SlackBlocksType
+from slack_sdk.models.blocks import SectionBlock
 
+from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 
 LONGEST_MARKDOWN_SUFFIX_LEN = 3
 CONTINUATION_SYMBOL = "..."

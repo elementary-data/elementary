@@ -1,11 +1,12 @@
-from dateutil import tz
 from typing import List, Optional
 
+from dateutil import tz
+
+from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import (
-    SlackMessageBuilder,
     SHOW_MORE_ATTACHMENTS_MARK,
+    SlackMessageBuilder,
 )
-from elementary.clients.slack.schema import SlackMessageSchema, SlackBlocksType
 from elementary.monitor.alerts.schema.slack_alert import (
     AlertDetailsPartSlackMessageSchema,
     AlertSlackMessageSchema,

@@ -1,8 +1,9 @@
+import re
 from typing import List, Optional, Tuple
+
+import networkx as nx
 from pydantic import BaseModel, validator
 from pydantic.typing import Literal
-import networkx as nx
-import re
 
 SEED_PATH_PATERN = re.compile(r"^seed\.")
 

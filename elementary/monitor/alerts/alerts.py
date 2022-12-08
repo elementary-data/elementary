@@ -1,13 +1,12 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Generic
-from typing import TypeVar
+from typing import Generic, List, TypeVar
 
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert, ElementaryTestAlert
+from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 
 AlertType = TypeVar("AlertType")
 

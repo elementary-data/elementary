@@ -6,10 +6,9 @@ from elementary.monitor.alerts.alert import Alert
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
-    convert_datetime_utc_str_to_timezone_str,
     DATETIME_FORMAT,
+    convert_datetime_utc_str_to_timezone_str,
 )
-
 
 logger = get_logger(__name__)
 

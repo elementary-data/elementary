@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Optional, List
+from typing import List, Optional
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError

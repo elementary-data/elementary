@@ -1,6 +1,8 @@
 import json
-import pytest
 from unittest import mock
+
+import pytest
+
 from elementary.clients.dbt.dbt_runner import DbtRunner
 
 

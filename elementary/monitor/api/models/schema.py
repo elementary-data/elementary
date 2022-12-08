@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, validator
 from typing import List, Optional
+
+from pydantic import BaseModel, Field, validator
 
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 

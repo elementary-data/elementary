@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import BaseModel
 
 from elementary.clients.slack.schema import SlackBlocksType

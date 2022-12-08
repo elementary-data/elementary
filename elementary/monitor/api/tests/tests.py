@@ -5,10 +5,10 @@ from typing import Any, Dict, List, Optional
 
 from elementary.clients.api.api import APIClient
 from elementary.monitor.api.tests.schema import (
+    InvocationSchema,
     InvocationsSchema,
     TestMetadataSchema,
     TestUniqueIdType,
-    InvocationSchema,
     TotalsInvocationsSchema,
 )
 from elementary.utils.log import get_logger

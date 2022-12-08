@@ -8,13 +8,15 @@ from typing import Optional
 import posthog
 from pydantic import BaseModel
 
-import elementary.tracking.env
 import elementary.exceptions.exceptions
+import elementary.tracking.env
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
+from elementary.utils.log import get_logger
 
 logging.getLogger("posthog").disabled = True
+logger = get_logger(__name__)
 
 
 class AnonymousWarehouse(BaseModel):
@@ -53,17 +55,9 @@ class AnonymousTracking:
             pass
 
     def _get_anonymous_user_id(self):
-        legacy_user_id_path = Path().joinpath(
-            self.config.profiles_dir, self.ANONYMOUS_USER_ID_FILE
-        )
         user_id_path = Path().joinpath(
             self.config.config_dir, self.ANONYMOUS_USER_ID_FILE
         )
-        # First check legacy file path
-        try:
-            return legacy_user_id_path.read_text()
-        except OSError:
-            pass
         try:
             return user_id_path.read_text()
         except OSError:
@@ -98,7 +92,7 @@ class AnonymousTracking:
                 },
             )
         except Exception:
-            pass
+            logger.debug("Unable to send tracking event.", exc_info=True)
 
     def track_cli_start(
         self, module_name: str, cli_properties: dict, command: str = None

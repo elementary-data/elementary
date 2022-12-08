@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
-from dateutil import tz
 from typing import Optional
 
-from elementary.utils.log import get_logger
+from dateutil import tz
 
+from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
