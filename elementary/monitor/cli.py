@@ -47,6 +47,12 @@ def common_options(func):
         help="Set a limit to how far back should edr collect data.",
     )(func)
     func = click.option(
+        "--env",
+        type=str,
+        default="dev",
+        help="The environment that you're running against. Usually this would be either 'dev' or 'prod'.",
+    )(func)
+    func = click.option(
         "--config-dir",
         "-c",
         type=str,
@@ -159,6 +165,7 @@ def monitor(
     dbt_vars,
     test,
     disable_samples,
+    env,
 ):
     """
     Monitor your warehouse.
@@ -176,6 +183,7 @@ def monitor(
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
         timezone=timezone,
+        env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
@@ -256,6 +264,7 @@ def report(
     exclude_elementary_models,
     disable_samples,
     project_name,
+    env,
 ):
     """
     Generate a local report of your warehouse.
@@ -265,6 +274,7 @@ def report(
         profiles_dir,
         profile_target,
         dbt_quoting=dbt_quoting,
+        env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
@@ -420,6 +430,7 @@ def send_report(
     exclude_elementary_models,
     disable_samples,
     project_name,
+    env,
 ):
     """
     Send the report to an external platform.
@@ -442,6 +453,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
