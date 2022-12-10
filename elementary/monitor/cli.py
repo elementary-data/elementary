@@ -48,9 +48,9 @@ def common_options(func):
     )(func)
     func = click.option(
         "--env",
-        type=str,
+        type=click.Choice(["dev", "prod"]),
         default="dev",
-        help="The environment that you're running against. Usually this would be either 'dev' or 'prod'.",
+        help="This flag indicates if you are running Elementary in prod or dev environment and will be reflected accordingly in the report.",
     )(func)
     func = click.option(
         "--config-dir",
@@ -65,7 +65,7 @@ def common_options(func):
         "-t",
         type=str,
         default=None,
-        help="if you have multiple targets for Elementary, optionally use this flag to choose a specific target.",
+        help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target.",
     )(func)
     func = click.option(
         "--profiles-dir",
