@@ -131,9 +131,6 @@ class SlackWebClient(SlackClient):
 
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
         cursor = None
-        import ipdb
-
-        ipdb.set_trace()
         while True:
             response = self.client.conversations_list(
                 cursor=cursor,
