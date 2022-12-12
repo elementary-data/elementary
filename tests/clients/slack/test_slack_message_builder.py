@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 
 
@@ -75,59 +76,214 @@ def test_create_text_section_block(section_message):
     )
 
 
-@pytest.mark.parametrize(
-    "command",
-    [
-        "seed",
-        "snapshot",
-        "deps",
-    ],
-)
-@mock.patch("subprocess.run")
-def test_dbt_runner_seed(mock_subprocess_run, command):
-    project_dir = "proj_dir"
-    profiles_dir = "prof_dir"
-    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
-    if command == "seed":
-        dbt_runner.seed()
-    elif command == "snapshot":
-        dbt_runner.snapshot()
-    elif command == "deps":
-        dbt_runner.deps()
-    mock_subprocess_run.assert_called()
-    mock_subprocess_run.asset_has_calls(
-        mock.call(
-            ["dbt", command, "--project-dir", "proj_dir", "--profiles-dir", "prof_dir"],
-            mock.ANY,
-            mock.ANY,
-        )
+def test_create_empty_section_block():
+    empty_section_block = SlackMessageBuilder.create_empty_section_block()
+    assert json.dumps(empty_section_block, sort_keys=True) == json.dumps(
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "\t",
+            },
+        },
+        sort_keys=True,
+    )
+
+
+def test_create_context_block():
+    context_messages = ["first section"]
+    context_section_block = SlackMessageBuilder.create_context_block(context_messages)
+    assert json.dumps(context_section_block, sort_keys=True) == json.dumps(
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "first section",
+                }
+            ],
+        },
+        sort_keys=True,
+    )
+
+    context_messages = ["first section", "second section"]
+    context_section_block = SlackMessageBuilder.create_context_block(context_messages)
+    assert json.dumps(context_section_block, sort_keys=True) == json.dumps(
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "first section",
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "second section",
+                },
+            ],
+        },
+        sort_keys=True,
     )
 
 
 @pytest.mark.parametrize(
-    "model,full_refresh,dbt_vars",
+    "message",
     [
-        ("m1", True, None),
-        ("m1", False, {"key1": "x", "key2": "y", "key3": "z"}),
-        (None, True, {"key1": "x", "key2": "y", "key3": "z"}),
-        (None, False, None),
+        "first",
+        "second",
+        "third",
     ],
 )
-@mock.patch("subprocess.run")
-def test_dbt_runner_run(mock_subprocess_run, model, full_refresh, dbt_vars):
-    project_dir = "proj_dir"
-    profiles_dir = "prof_dir"
-    expanded_dbt_vars = json.dumps(dbt_vars)
-    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
-    dbt_runner.run(model, full_refresh=full_refresh, vars=dbt_vars)
-    mock_subprocess_run.assert_called()
-    if model is not None:
-        assert model in mock_subprocess_run.call_args[0][0]
-    if full_refresh:
-        assert "--full-refresh" in mock_subprocess_run.call_args[0][0]
-    if dbt_vars is None:
-        assert "--vars" not in mock_subprocess_run.call_args[0][0]
-        assert expanded_dbt_vars not in mock_subprocess_run.call_args[0][0]
-    if dbt_vars is not None:
-        assert "--vars" in mock_subprocess_run.call_args[0][0]
-        assert expanded_dbt_vars in mock_subprocess_run.call_args[0][0]
+def test_create_header_block(message):
+    header_block = SlackMessageBuilder.create_header_block(message)
+    assert json.dumps(header_block, sort_keys=True) == json.dumps(
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": message,
+            },
+        },
+        sort_keys=True,
+    )
+
+
+def test_create_compacted_sections_blocks():
+    # no sections
+    section_messages = []
+    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
+        section_messages
+    )
+    assert json.dumps(compacted_section, sort_keys=True) == json.dumps(
+        [{"type": "section", "fields": []}], sort_keys=True
+    )
+
+    # even secations
+    section_messages = ["One", "Two", "Three", "Four"]
+    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
+        section_messages
+    )
+    assert json.dumps(compacted_section, sort_keys=True) == json.dumps(
+        [
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": "One"},
+                    {"type": "mrkdwn", "text": "Two"},
+                ],
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": "Three"},
+                    {"type": "mrkdwn", "text": "Four"},
+                ],
+            },
+        ],
+        sort_keys=True,
+    )
+
+    # odd sections
+    section_messages = ["One", "Two", "Three", "Four", "Five"]
+    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
+        section_messages
+    )
+    assert json.dumps(compacted_section, sort_keys=True) == json.dumps(
+        [
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": "One"},
+                    {"type": "mrkdwn", "text": "Two"},
+                ],
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": "Three"},
+                    {"type": "mrkdwn", "text": "Four"},
+                ],
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {"type": "mrkdwn", "text": "Five"},
+                ],
+            },
+        ],
+        sort_keys=True,
+    )
+
+
+def test_get_slack_status_icon():
+    assert SlackMessageBuilder.get_slack_status_icon("warn") == ":warning:"
+    assert SlackMessageBuilder.get_slack_status_icon("error") == ":x:"
+    assert (
+        SlackMessageBuilder.get_slack_status_icon("anything else")
+        == ":small_red_triangle:"
+    )
+
+
+def test_get_slack_message():
+    slack_message_builder = SlackMessageBuilder()
+    slack_message = slack_message_builder.get_slack_message()
+    assert isinstance(slack_message, SlackMessageSchema)
+    assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
+        {"blocks": [], "attachments": [{"blocks": []}], "text": None}, sort_keys=True
+    )
+
+
+def test_add_blocks_to_attachments_sections():
+    slack_message_builder = SlackMessageBuilder()
+    first_block = slack_message_builder.create_divider_block()
+    second_block = slack_message_builder.create_empty_section_block()
+    slack_message_builder._add_blocks_to_attachments_sections([first_block])
+    slack_message_builder._add_blocks_to_attachments_sections([second_block])
+    slack_message = slack_message_builder.get_slack_message()
+    assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
+        {
+            "blocks": [],
+            "attachments": [
+                {
+                    "blocks": [
+                        {"type": "divider"},
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "\t",
+                            },
+                        },
+                    ]
+                }
+            ],
+            "text": None,
+        },
+        sort_keys=True,
+    )
+
+
+def test_add_blocks_to_blocks_section():
+    slack_message_builder = SlackMessageBuilder()
+    first_block = slack_message_builder.create_divider_block()
+    second_block = slack_message_builder.create_empty_section_block()
+    slack_message_builder._add_blocks_to_blocks_section([first_block])
+    slack_message_builder._add_blocks_to_blocks_section([second_block])
+    slack_message = slack_message_builder.get_slack_message()
+    assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
+        {
+            "blocks": [
+                {"type": "divider"},
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "\t",
+                    },
+                },
+            ],
+            "attachments": [{"blocks": []}],
+            "text": None,
+        },
+        sort_keys=True,
+    )
