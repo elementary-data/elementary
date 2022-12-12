@@ -83,12 +83,8 @@ class InvocationSchema(BaseModel):
         return convert_partial_iso_format_to_full_iso_format(time_utc)
 
 
-class TotalsInvocationsSchema(TotalsSchema):
-    pass
-
-
 class InvocationsSchema(BaseModel):
     fail_rate: float
-    totals: TotalsInvocationsSchema
+    totals: TotalsSchema
     invocations: List[InvocationSchema]
     description: str

@@ -9,7 +9,6 @@ from elementary.monitor.api.tests.schema import (
     InvocationsSchema,
     TestMetadataSchema,
     TestUniqueIdType,
-    TotalsInvocationsSchema,
     TotalsSchema,
 )
 from elementary.utils.log import get_logger
@@ -108,15 +107,15 @@ class TestsAPI(APIClient):
     @staticmethod
     def _get_test_invocations_totals(
         invocations: List[InvocationSchema],
-    ) -> TotalsInvocationsSchema:
-        totals = TotalsInvocationsSchema()
+    ) -> TotalsSchema:
+        totals = TotalsSchema()
         for invocation in invocations:
             totals.add_total(invocation.status)
         return totals
 
     @staticmethod
     def _get_invocations_description(
-        invocations_totals: TotalsInvocationsSchema,
+        invocations_totals: TotalsSchema,
     ) -> str:
         all_invocations_count = (
             invocations_totals.errors

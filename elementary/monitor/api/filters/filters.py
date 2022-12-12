@@ -20,7 +20,7 @@ class FiltersAPI(APIClient):
     def get_filters(
         self,
         test_results_totals: Dict[str, TotalsSchema],
-        test_tuns_totals: Dict[str, TotalsSchema],
+        test_runs_totals: Dict[str, TotalsSchema],
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
         models_runs: List[ModelRunsSchema],
@@ -28,7 +28,7 @@ class FiltersAPI(APIClient):
         test_results_filters = self._get_test_filters(
             test_results_totals, models, sources
         )
-        test_runs_filters = self._get_test_filters(test_tuns_totals, models, sources)
+        test_runs_filters = self._get_test_filters(test_runs_totals, models, sources)
         model_runs_filters = self._get_model_runs_filters(models_runs)
         return FiltersSchema(
             test_results=test_results_filters,
