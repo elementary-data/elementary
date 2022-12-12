@@ -24,6 +24,19 @@ The code of the Elementary dbt package can be found here: [https://github.com/el
 
 <SchemaNoAccordion />
 
+# Elementary schema and full refresh
+
+Elementary incremental models are not full-refreshed by default. This is because these models contain
+information such as historical runs and test results, which typically you'd want to maintain even when full refreshing
+the models of your main dbt project.
+
+However, if you wish to change this behavior and include Elementary models as a part of the full refresh, you can set
+the following var:
+```yaml
+vars:
+  elementary_full_refresh: true
+```
+
 # Elementary dbt package models
 
 ## Run results
