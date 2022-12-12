@@ -1,4 +1,4 @@
-name: Close inactive issues
+name: Close stale issues and PRs
 on:
   schedule:
     - cron: "30 1 * * *"
@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/stale@v5
         with:
+          days-before-stale: 180
           stale-issue-message: |
             This issue is stale because it has been open for too long with no activity.
             If you would like the issue to remain open, please remove the stale label or leave a comment.

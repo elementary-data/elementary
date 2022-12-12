@@ -49,10 +49,12 @@ class Config:
         google_project_name: str = None,
         google_service_account_path: str = None,
         gcs_bucket_name: str = None,
+        env: str = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
         self.profile_target = profile_target
+        self.env = env
 
         # Additional env vars supplied to dbt invocations
         self.dbt_env_vars = dict()

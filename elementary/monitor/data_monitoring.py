@@ -83,11 +83,10 @@ class DataMonitoring:
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
-        self.target_name = latest_invocation.get("target_name")
+        tracking.set_env("target_name", latest_invocation.get("target_name"))
+        tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
         dbt_pkg_version = latest_invocation.get("elementary_version")
-        dbt_version = latest_invocation.get("dbt_version")
         tracking.set_env("dbt_pkg_version", dbt_pkg_version)
-        tracking.set_env("dbt_version", dbt_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
@@ -286,7 +285,7 @@ class DataMonitoring:
             }
             output_data["env"] = {
                 "project_name": project_name or self.project_name,
-                "target_name": self.target_name,
+                "env": self.config.env,
             }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, "r") as template_html_file:
