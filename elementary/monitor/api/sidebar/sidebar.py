@@ -20,11 +20,6 @@ NO_OWNERS_DEFAULT_TREE = "No owners"
 
 
 class SidebarAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner):
-        super().__init__(dbt_runner)
-        self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
-
     def get_sidebars(
         self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
     ) -> SidebarsSchema:
