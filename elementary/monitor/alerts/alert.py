@@ -129,14 +129,14 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
                 self._add_blocks_to_attachments_sections(result_blocks)
 
             if details_blocks.configuration:
-                result_blocks = [
+                configuration_blocks = [
                     self.create_text_section_block(
                         ":hammer_and_wrench: *Configuration*"
                     ),
                     self.create_divider_block(),
                     *details_blocks.configuration,
                 ]
-                self._add_blocks_to_attachments_sections(result_blocks)
+                self._add_blocks_to_attachments_sections(configuration_blocks)
 
     @classmethod
     def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):
