@@ -3,8 +3,6 @@ from collections import defaultdict
 from typing import List, Union
 
 from elementary.clients.api.api import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.models.schema import NormalizedModelSchema
 from elementary.monitor.api.sidebar.schema import (
     DbtSidebarSchema,
@@ -12,7 +10,6 @@ from elementary.monitor.api.sidebar.schema import (
     SidebarsSchema,
     TagsSidebarSchema,
 )
-from elementary.monitor.api.tests.tests import TestsAPI
 
 SIDEBAR_FILES_KEYWORD = "__files__"
 NO_TAGS_DEFAULT_TREE = "No tags"
