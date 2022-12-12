@@ -8,6 +8,71 @@ from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 
 def test_create_divider_block():
     devider_block = SlackMessageBuilder.create_divider_block()
+    assert json.dumps(devider_block, sort_keys=True) == json.dumps(
+        {"type": "divider"}, sort_keys=True
+    )
+
+
+def test_create_fields_section_block():
+    section_messages = ["first section"]
+    fields_section_block = SlackMessageBuilder.create_fields_section_block(
+        section_messages
+    )
+    assert json.dumps(fields_section_block, sort_keys=True) == json.dumps(
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": "first section",
+                }
+            ],
+        },
+        sort_keys=True,
+    )
+
+    section_messages = ["first section", "second section"]
+    fields_section_block = SlackMessageBuilder.create_fields_section_block(
+        section_messages
+    )
+    assert json.dumps(fields_section_block, sort_keys=True) == json.dumps(
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": "first section",
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "second section",
+                },
+            ],
+        },
+        sort_keys=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "section_message",
+    [
+        "first",
+        "second",
+        "third",
+    ],
+)
+def test_create_text_section_block(section_message):
+    text_section_block = SlackMessageBuilder.create_text_section_block(section_message)
+    assert json.dumps(text_section_block, sort_keys=True) == json.dumps(
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": section_message,
+            },
+        },
+        sort_keys=True,
+    )
 
 
 @pytest.mark.parametrize(
