@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
@@ -130,23 +130,19 @@ class SlackWebClient(SlackClient):
         return ""
 
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
-        try:
-            available_channels = self._get_channels()
-            available_channel_names = []
-            for available_channel in available_channels:
-                available_channel_name = available_channel["name"]
-                available_channel_names.append(available_channel_name)
-                if available_channel_name == channel_name:
-                    return available_channel["id"]
-            logger.error(
-                f"Channel {channel_name} not found. Available channels: {available_channel_names}"
+        cursor = None
+        while True:
+            response = self.client.conversations_list(
+                cursor=cursor,
+                types="public_channel,private_channel",
+                exclude_archived=True,
             )
-            return None
-        except Exception as e:
-            logger.error(f"Elementary app failed to query Slack channels.")
-            if self.tracking:
-                self.tracking.record_cli_internal_exception(e)
-            return None
+            for channel in response["channels"]:
+                if channel["name"] == channel_name:
+                    return channel["id"]
+            cursor = response.get("response_metadata", {}).get("next_cursor")
+            if not cursor:
+                return None
 
     def _join_channel(self, channel_id: str) -> bool:
         try:
@@ -157,29 +153,6 @@ class SlackWebClient(SlackClient):
             if self.tracking:
                 self.tracking.record_cli_internal_exception(e)
             return False
-
-    def _get_channels(self) -> List[dict]:
-        try:
-            channels = []
-            has_more = True
-            cursor = None
-            while has_more:
-                response = self.client.conversations_list(
-                    cursor=cursor,
-                    types="public_channel,private_channel",
-                    exclude_archived=True,
-                )
-                channels.extend(response["channels"])
-                cursor = response.get("response_metadata", {}).get("next_cursor")
-                has_more = True if cursor else False
-            return channels
-        except SlackApiError as e:
-            logger.error(
-                f"Elementary app failed to query all Slack public channels. Error: {e}"
-            )
-            if self.tracking:
-                self.tracking.record_cli_internal_exception(e)
-            return []
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
         err_type = err.response.data["error"]
