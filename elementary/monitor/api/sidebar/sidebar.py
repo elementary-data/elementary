@@ -1,5 +1,5 @@
-from collections import defaultdict
 import os
+from collections import defaultdict
 from typing import List, Union
 
 from elementary.clients.api.api import APIClient
@@ -9,8 +9,8 @@ from elementary.monitor.api.models.schema import NormalizedModelSchema
 from elementary.monitor.api.sidebar.schema import (
     DbtSidebarSchema,
     OwnersSidebarSchema,
-    TagsSidebarSchema,
     SidebarsSchema,
+    TagsSidebarSchema,
 )
 from elementary.monitor.api.tests.tests import TestsAPI
 

@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Dict, List
+
+from pydantic import BaseModel
 
 DbtSidebarSchema = dict
 TagsSidebarSchema = Dict[str, List[str]]
