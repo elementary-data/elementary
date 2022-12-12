@@ -136,6 +136,7 @@ class SlackWebClient(SlackClient):
                 cursor=cursor,
                 types="public_channel,private_channel",
                 exclude_archived=True,
+                limit=1000,
             )
             for channel in response["channels"]:
                 if channel["name"] == channel_name:
