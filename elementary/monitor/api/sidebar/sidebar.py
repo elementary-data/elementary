@@ -1,25 +1,20 @@
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 from elementary.clients.api.api import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.monitor.api.models.models import ModelsAPI
-from elementary.monitor.api.models.schema import NormalizedModelSchema
-from elementary.monitor.api.tests.tests import TestsAPI
+from elementary.monitor.api.models.schema import (
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+)
 
 SIDEBAR_FILES_KEYWORD = "__files__"
 
 
 class SidebarAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner):
-        super().__init__(dbt_runner)
-        self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
-
     def get_sidebar(
         self,
         models: Dict[str, NormalizedModelSchema],
-        sources: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedSourceSchema],
     ) -> dict:
         sidebar = dict()
         for model in [*models.values(), *sources.values()]:
