@@ -4,29 +4,15 @@ import os.path
 import re
 import webbrowser
 from collections import defaultdict
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-import click
 import pkg_resources
-from alive_progress import alive_it
-from packaging import version
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
-from elementary.clients.slack.client import SlackClient
-from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
-from elementary.monitor import dbt_project_utils
-from elementary.monitor.alerts.alert import Alert
-from elementary.monitor.alerts.alerts import Alerts
-from elementary.monitor.alerts.model import ModelAlert
-from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
-from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.filters.filters import FiltersAPI
-from elementary.monitor.api.filters.schema import FiltersSchema
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
@@ -46,10 +32,9 @@ from elementary.monitor.api.tests.schema import (
     TotalsSchema,
 )
 from elementary.monitor.api.tests.tests import TestsAPI
-from elementary.monitor.schema import DataMonitoringFilter
+from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.schema import DataMonitoringFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
-from elementary.utils import package
-from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
 
@@ -59,56 +44,26 @@ YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
 
 
-class DataMonitoring:
+class DataMonitoringReport(DataMonitoring):
     def __init__(
         self,
         config: Config,
         tracking: AnonymousTracking,
         force_update_dbt_package: bool = False,
-        send_test_message_on_success: bool = False,
         disable_samples: bool = False,
         filter: Optional[str] = None,
     ):
-        self.config = config
-        self.tracking = tracking
-        self.dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
-            self.config.profiles_dir,
-            self.config.profile_target,
-            dbt_env_vars=self.config.dbt_env_vars,
-        )
-        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
+        super().__init__(config, tracking, force_update_dbt_package, disable_samples)
+        self.filter = self._parse_filter(filter)
+        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner, filter=self.filter)
         self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
         self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
         self.filter_api = FiltersAPI(dbt_runner=self.dbt_runner)
-        self.execution_properties = {}
-        latest_invocation = self.get_latest_invocation()
-        self.project_name = latest_invocation.get("project_name")
-        tracking.set_env("target_name", latest_invocation.get("target_name"))
-        tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
-        dbt_pkg_version = latest_invocation.get("elementary_version")
-        tracking.set_env("dbt_pkg_version", dbt_pkg_version)
-        if dbt_pkg_version:
-            self._check_dbt_package_compatibility(dbt_pkg_version)
-        # slack client is optional
-        self.slack_client = SlackClient.create_client(
-            self.config, tracking=self.tracking
-        )
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-        self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
-        self.alerts_api = AlertsAPI(
-            self.dbt_runner, self.config, self.elementary_database_and_schema
-        )
-        self.sent_alert_count = 0
-        self.success = True
-        self.send_test_message_on_success = send_test_message_on_success
-        self.disable_samples = disable_samples
-        self.filter = self._parse_filter(filter)
 
-    def _parse_filter(self, filter: Optional[str] = None) -> dict:
+    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringFilter:
         data_monitoring_filter = DataMonitoringFilter()
         if filter:
             invocation_id_regex = re.compile(r"invocation_id:\w+")
@@ -134,120 +89,6 @@ class DataMonitoring:
             else:
                 logger.error(f"Could not parse the given -s/--select: {filter}")
         return data_monitoring_filter
-
-    def _parse_emails_to_ids(self, emails: List[str]) -> str:
-        def _regex_match_owner_email(potential_email: str) -> bool:
-            email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-
-            return re.fullmatch(email_regex, potential_email)
-
-        def _get_user_id(email: str) -> str:
-            user_id = self.slack_client.get_user_id_from_email(email)
-            return f"<@{user_id}>" if user_id else email
-
-        if isinstance(emails, list) and emails != []:
-            ids = [
-                _get_user_id(email) if _regex_match_owner_email(email) else email
-                for email in emails
-            ]
-            parsed_ids_str = prettify_json_str_set(ids)
-            return parsed_ids_str
-        else:
-            return prettify_json_str_set(emails)
-
-    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
-        if not alerts:
-            return
-
-        sent_alert_ids = []
-        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
-        for alert in alerts_with_progress_bar:
-            alert.owners = self._parse_emails_to_ids(alert.owners)
-            alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
-            alert_msg = alert.to_slack()
-            sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel
-                if alert.slack_channel
-                else self.config.slack_channel_name,
-                message=alert_msg,
-            )
-            if sent_successfully:
-                sent_alert_ids.append(alert.id)
-            else:
-                logger.error(
-                    f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
-                )
-                self.success = False
-        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        self.sent_alert_count += len(sent_alert_ids)
-
-    def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()
-        self.execution_properties["dbt_package_exists"] = internal_dbt_package_exists
-        self.execution_properties[
-            "force_update_dbt_packages"
-        ] = force_update_dbt_packages
-        if not internal_dbt_package_exists or force_update_dbt_packages:
-            logger.info("Downloading edr internal dbt package")
-            package_downloaded = self.dbt_runner.deps()
-            self.execution_properties["package_downloaded"] = package_downloaded
-            if not package_downloaded:
-                logger.error("Could not download internal dbt package")
-                self.success = False
-                return
-
-    def _send_test_message(self):
-        self.slack_client.send_message(
-            channel_name=self.config.slack_channel_name,
-            message=SlackMessageSchema(
-                text=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-            ),
-        )
-        logger.info("Sent the test message.")
-
-    def _send_alerts(self, alerts: Alerts):
-        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
-        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        self._send_alerts_to_slack(
-            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
-        )
-        self.execution_properties["sent_alert_count"] = self.sent_alert_count
-
-    def run_alerts(
-        self,
-        days_back: int,
-        dbt_full_refresh: bool = False,
-        dbt_vars: Optional[dict] = None,
-    ) -> bool:
-        logger.info("Running internal dbt run to aggregate alerts")
-        success = self.dbt_runner.run(
-            models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
-        )
-        self.execution_properties["alerts_run_success"] = success
-        if not success:
-            logger.info("Could not aggregate alerts successfully")
-            self.success = False
-            self.execution_properties["success"] = self.success
-            return self.success
-
-        alerts = self.alerts_api.query(days_back, disable_samples=self.disable_samples)
-        self.execution_properties[
-            "elementary_test_count"
-        ] = alerts.get_elementary_test_count()
-        self.execution_properties["alert_count"] = alerts.count
-        malformed_alert_count = alerts.malformed_count
-        if malformed_alert_count > 0:
-            self.success = False
-        self.execution_properties["malformed_alert_count"] = malformed_alert_count
-        self.execution_properties["has_subscribers"] = any(
-            alert.subscribers for alert in alerts.get_all()
-        )
-        self._send_alerts(alerts)
-        if self.send_test_message_on_success and alerts.count == 0:
-            self._send_test_message()
-        self.execution_properties["run_end"] = True
-        self.execution_properties["success"] = self.success
-        return self.success
 
     def generate_report(
         self,
@@ -488,12 +329,6 @@ class DataMonitoring:
         coverages = self.models_api.get_test_coverages()
         return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
-    def properties(self):
-        data_monitoring_properties = {
-            "data_monitoring_properties": self.execution_properties
-        }
-        return data_monitoring_properties
-
     def _get_report_file_path(
         self, generation_time: str, file_path: Optional[str] = None
     ) -> str:
@@ -509,41 +344,3 @@ class DataMonitoring:
                 ),
             )
         )
-
-    def get_elementary_database_and_schema(self):
-        try:
-            return self.dbt_runner.run_operation(
-                "get_elementary_database_and_schema", quiet=True
-            )[0]
-        except Exception as ex:
-            logger.error("Failed to parse Elementary's database and schema.")
-            self.tracking.record_cli_internal_exception(ex)
-            return "<elementary_database>.<elementary_schema>"
-
-    def get_latest_invocation(self) -> Dict[str, Any]:
-        try:
-            latest_invocation = self.dbt_runner.run_operation(
-                "get_latest_invocation", quiet=True
-            )[0]
-            return json.loads(latest_invocation)[0] if latest_invocation else {}
-        except Exception as err:
-            logger.error(f"Unable to get the latest invocation: {err}")
-            self.tracking.record_cli_internal_exception(err)
-            return {}
-
-    @staticmethod
-    def _check_dbt_package_compatibility(dbt_pkg_ver: str):
-        dbt_pkg_ver = version.parse(dbt_pkg_ver)
-        py_pkg_ver = version.parse(package.get_package_version())
-        logger.info(
-            f"Checking compatibility between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver})."
-        )
-        if (
-            dbt_pkg_ver.major != py_pkg_ver.major
-            or dbt_pkg_ver.minor != py_pkg_ver.minor
-        ):
-            click.secho(
-                f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
-                "Please upgrade the major and minor versions to align.\n",
-                fg="yellow",
-            )

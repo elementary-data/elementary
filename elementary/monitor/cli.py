@@ -3,7 +3,12 @@ import sys
 import click
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.data_monitoring_alerts import (
+    DataMonitoringAlerts,
+)
+from elementary.monitor.data_monitoring.data_monitoring_report import (
+    DataMonitoringReport,
+)
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
@@ -191,7 +196,7 @@ def monitor(
     )
     try:
         config.validate_monitor()
-        data_monitoring = DataMonitoring(
+        data_monitoring = DataMonitoringAlerts(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
@@ -289,7 +294,7 @@ def report(
     )
     try:
         config.validate_report()
-        data_monitoring = DataMonitoring(
+        data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
@@ -483,7 +488,7 @@ def send_report(
             if bucket_file_path
             else slack_file_name
         )
-        data_monitoring = DataMonitoring(
+        data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,

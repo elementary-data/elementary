@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from elementary.clients.api.api import APIClient
+from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.api.tests.schema import (
     InvocationSchema,
     InvocationsSchema,
@@ -11,12 +12,28 @@ from elementary.monitor.api.tests.schema import (
     TestUniqueIdType,
     TotalsSchema,
 )
+from elementary.monitor.data_monitoring.schema import DataMonitoringFilter
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
 
 class TestsAPI(APIClient):
+    def __init__(
+        self, dbt_runner: DbtRunner, filter: Optional[DataMonitoringFilter] = None
+    ):
+        super().__init__(dbt_runner)
+        self.filter = filter
+        self.invocation_id = self._get_invocation_id_from_filter(self.filter)
+
+    def _get_invocation_id_from_filter(self, filter: DataMonitoringFilter) -> str:
+        if filter.invocation_id:
+            return filter.invocation_id
+        elif filter.invocation_time:
+            invocation_response = self.dbt_runner.run_operation(
+                macro_name="get_test_results", macro_args=dict(days_back=days_back)
+            )
+
     @staticmethod
     def get_test_sub_type_unique_id(
         model_unique_id: str,
