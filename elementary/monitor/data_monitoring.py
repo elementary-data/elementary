@@ -25,15 +25,25 @@ from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 from elementary.monitor.api.alerts import AlertsAPI
+from elementary.monitor.api.filters.filters import FiltersAPI
+from elementary.monitor.api.filters.schema import FiltersSchema
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
+from elementary.monitor.api.models.schema import (
+    ModelRunsSchema,
+    NormalizedExposureSchema,
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+)
+from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import (
     InvocationSchema,
     ModelUniqueIdType,
     TestMetadataSchema,
     TestUniqueIdType,
+    TotalsSchema,
 )
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -65,6 +75,11 @@ class DataMonitoring:
             self.config.profile_target,
             dbt_env_vars=self.config.dbt_env_vars,
         )
+        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
+        self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+        self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
+        self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
+        self.filter_api = FiltersAPI(dbt_runner=self.dbt_runner)
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -218,6 +233,15 @@ class DataMonitoring:
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, "w") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
+
+            models = self.models_api.get_models(exclude_elementary_models)
+            sources = self.models_api.get_sources()
+            exposures = self.models_api.get_exposures()
+            tests_metadata = self.tests_api.get_tests_metadata(days_back=days_back)
+            models_runs = self.models_api.get_models_runs(
+                days_back=days_back, exclude_elementary_models=exclude_elementary_models
+            )
+
             (
                 test_results,
                 test_results_totals,
@@ -226,23 +250,31 @@ class DataMonitoring:
                 days_back=days_back,
                 test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
+                tests_metadata=tests_metadata,
             )
-            models, dbt_sidebar = self._get_dbt_models_and_sidebar(
-                exclude_elementary_models
+            serializable_models, sidebars = self._get_dbt_models_and_sidebars(
+                models, sources, exposures
             )
             models_coverages = self._get_dbt_models_test_coverages()
-            models_runs, model_runs_totals = self._get_models_runs_and_totals(
-                days_back=days_back, exclude_elementary_models=exclude_elementary_models
+            models_runs_dicts, model_runs_totals = self._get_models_runs_and_totals(
+                models_runs
             )
             lineage = self._get_lineage(exclude_elementary_models)
-            output_data["models"] = models
-            output_data["dbt_sidebar"] = dbt_sidebar
+            filters = self.filter_api.get_filters(
+                test_results_totals, test_runs_totals, models, sources, models_runs
+            )
+
+            output_data["models"] = serializable_models
+            output_data["sidebars"] = sidebars.dict()
             output_data["test_results"] = test_results
-            output_data["test_results_totals"] = test_results_totals
-            output_data["test_runs_totals"] = test_runs_totals
+            output_data["test_results_totals"] = self._serialize_totals(
+                test_results_totals
+            )
+            output_data["test_runs_totals"] = self._serialize_totals(test_runs_totals)
             output_data["coverages"] = models_coverages
-            output_data["model_runs"] = models_runs
+            output_data["model_runs"] = models_runs_dicts
             output_data["model_runs_totals"] = model_runs_totals
+            output_data["filters"] = filters.dict()
             output_data["lineage"] = lineage.dict()
             output_data["tracking"] = {
                 "posthog_api_key": self.tracking.POSTHOG_PROJECT_API_KEY,
@@ -312,26 +344,24 @@ class DataMonitoring:
         return self.success
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
-        lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
-        return lineage_api.get_lineage(exclude_elementary_models)
+        return self.lineage_api.get_lineage(exclude_elementary_models)
 
     def _get_test_results_and_totals(
         self,
+        tests_metadata: Optional[List[TestMetadataSchema]],
         days_back: Optional[int] = None,
         test_runs_amount: Optional[int] = None,
         disable_passed_test_metrics: bool = False,
     ):
-        tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         try:
-            tests_metadata = tests_api.get_tests_metadata(days_back=days_back)
             if self.disable_samples:
                 tests_sample_data = {}
             else:
-                tests_sample_data = tests_api.get_tests_sample_data(
+                tests_sample_data = self.tests_api.get_tests_sample_data(
                     days_back=days_back,
                     disable_passed_test_metrics=disable_passed_test_metrics,
                 )
-            invocations = tests_api.get_invocations(
+            invocations = self.tests_api.get_invocations(
                 invocations_per_test=test_runs_amount, days_back=days_back
             )
             tests_results = self._create_tests_results(
@@ -339,8 +369,8 @@ class DataMonitoring:
                 tests_sample_data=tests_sample_data,
                 invocations=invocations,
             )
-            test_results_totals = tests_api.get_total_tests_results(tests_metadata)
-            test_runs_totals = tests_api.get_total_tests_runs(
+            test_results_totals = self.tests_api.get_total_tests_results(tests_metadata)
+            test_runs_totals = self.tests_api.get_total_tests_runs(
                 tests_metadata=tests_metadata, tests_invocations=invocations
             )
             self.execution_properties["test_result_count"] = len(tests_metadata)
@@ -360,7 +390,9 @@ class DataMonitoring:
         elementary_test_count = defaultdict(int)
         tests_results = defaultdict(list)
         for test in tests_metadata:
-            test_sub_type_unique_id = TestsAPI.get_test_sub_type_unique_id(**dict(test))
+            test_sub_type_unique_id = self.tests_api.get_test_sub_type_unique_id(
+                **dict(test)
+            )
             metadata = dict(test)
             test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
             test_invocations = invocations.get(test_sub_type_unique_id)
@@ -380,13 +412,14 @@ class DataMonitoring:
         self.execution_properties["elementary_test_count"] = elementary_test_count
         return tests_results
 
-    def _get_models_runs_and_totals(
-        self, days_back: Optional[int] = None, exclude_elementary_models: bool = False
-    ):
-        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        models_runs = models_api.get_models_runs(
-            days_back=days_back, exclude_elementary_models=exclude_elementary_models
-        )
+    @staticmethod
+    def _serialize_totals(totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
+        serialized_totals = dict()
+        for model_unique_id, total in totals.items():
+            serialized_totals[model_unique_id] = total.dict()
+        return serialized_totals
+
+    def _get_models_runs_and_totals(self, models_runs: List[ModelRunsSchema]):
         models_runs_dicts = []
         model_runs_totals = {}
         for model_runs in models_runs:
@@ -394,21 +427,17 @@ class DataMonitoring:
             model_runs_totals[model_runs.unique_id] = {
                 "errors": model_runs.totals.errors,
                 "warnings": 0,
-                "resolved": 0,
+                "failures": 0,
                 "passed": model_runs.totals.success,
             }
         return models_runs_dicts, model_runs_totals
 
-    def _get_dbt_models_and_sidebar(
-        self, exclude_elementary_models: bool = False
-    ) -> Tuple[Dict, Dict]:
-        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
-
-        models = models_api.get_models(exclude_elementary_models)
-        sources = models_api.get_sources()
-        exposures = models_api.get_exposures()
-
+    def _get_dbt_models_and_sidebars(
+        self,
+        models: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedSourceSchema],
+        exposures: Dict[str, NormalizedExposureSchema],
+    ) -> Tuple[Dict, SidebarsSchema]:
         self.execution_properties["model_count"] = len(models)
         self.execution_properties["source_count"] = len(sources)
         self.execution_properties["exposure_count"] = len(exposures)
@@ -419,13 +448,14 @@ class DataMonitoring:
             serializable_nodes[key] = dict(nodes[key])
 
         # Currently we don't show exposures as part of the sidebar
-        dbt_sidebar = sidebar_api.get_sidebar(models=models, sources=sources)
+        sidebars = self.sidebar_api.get_sidebars(
+            artifacts=[*models.values(), *sources.values()]
+        )
 
-        return serializable_nodes, dbt_sidebar
+        return serializable_nodes, sidebars
 
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
-        models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        coverages = models_api.get_test_coverages()
+        coverages = self.models_api.get_test_coverages()
         return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
     def properties(self):
