@@ -102,7 +102,7 @@ def get_cli_properties() -> dict:
 @common_options
 @click.option(
     "--slack-webhook",
-    "-s",
+    "-sw",
     type=str,
     default=None,
     help="A slack webhook URL for sending alerts to a specific channel.",
@@ -248,6 +248,12 @@ def monitor(
     type=str,
     help="The project name to display in the report.",
 )
+@click.option(
+    "--select",
+    "-s",
+    type=str,
+    help="Filter the report by invocation_id / invocation_time / model_tag",
+)
 @click.pass_context
 def report(
     ctx,
@@ -265,6 +271,7 @@ def report(
     disable_samples,
     project_name,
     env,
+    select,
 ):
     """
     Generate a local report of your warehouse.
@@ -287,6 +294,7 @@ def report(
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
+            filter=select,
         )
         generated_report_successfully, _ = data_monitoring.generate_report(
             days_back=days_back,
@@ -404,6 +412,12 @@ def report(
     type=str,
     help="The project name to display in the report.",
 )
+@click.option(
+    "--select",
+    "-s",
+    type=str,
+    help="Filter the report by invocation_id / invocation_time / model_tag",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -431,6 +445,7 @@ def send_report(
     disable_samples,
     project_name,
     env,
+    select,
 ):
     """
     Send the report to an external platform.
@@ -473,6 +488,7 @@ def send_report(
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
+            filter=select,
         )
         command_succeeded = False
         (

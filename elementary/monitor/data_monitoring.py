@@ -36,6 +36,7 @@ from elementary.monitor.api.tests.schema import (
     TestUniqueIdType,
 )
 from elementary.monitor.api.tests.tests import TestsAPI
+from elementary.monitor.schema import DataMonitoringFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import package
 from elementary.utils.json_utils import prettify_json_str_set
@@ -56,6 +57,7 @@ class DataMonitoring:
         force_update_dbt_package: bool = False,
         send_test_message_on_success: bool = False,
         disable_samples: bool = False,
+        filter: Optional[str] = None,
     ):
         self.config = config
         self.tracking = tracking
@@ -89,6 +91,34 @@ class DataMonitoring:
         self.success = True
         self.send_test_message_on_success = send_test_message_on_success
         self.disable_samples = disable_samples
+        self.filter = self._parse_filter(filter)
+
+    def _parse_filter(self, filter: Optional[str] = None) -> dict:
+        data_monitoring_filter = DataMonitoringFilter()
+        if filter:
+            invocation_id_regex = re.compile(r"invocation_id:\w+")
+            invocation_time_regex = re.compile(
+                r"invocation_time:([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00))?(\17[0-5]\d)))"
+            )
+            last_invocation_regex = re.compile(r"last_invocation")
+
+            invocation_id_match = invocation_id_regex.search(filter)
+            invocation_time_match = invocation_time_regex.search(filter)
+            last_invocation_match = last_invocation_regex.search(filter)
+
+            if last_invocation_match:
+                data_monitoring_filter = DataMonitoringFilter(last_invocation=True)
+            elif invocation_id_match:
+                data_monitoring_filter = DataMonitoringFilter(
+                    invocation_id=invocation_id_match.group().split(":", 1)[1]
+                )
+            elif invocation_time_match:
+                data_monitoring_filter = DataMonitoringFilter(
+                    invocation_time=invocation_time_match.group().split(":", 1)[1]
+                )
+            else:
+                logger.error(f"Could not parse the given -s/--select: {filter}")
+        return data_monitoring_filter
 
     def _parse_emails_to_ids(self, emails: List[str]) -> str:
         def _regex_match_owner_email(potential_email: str) -> bool:
