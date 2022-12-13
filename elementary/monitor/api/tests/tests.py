@@ -9,7 +9,7 @@ from elementary.monitor.api.tests.schema import (
     InvocationsSchema,
     TestMetadataSchema,
     TestUniqueIdType,
-    TotalsInvocationsSchema,
+    TotalsSchema,
 )
 from elementary.utils.log import get_logger
 
@@ -107,35 +107,23 @@ class TestsAPI(APIClient):
     @staticmethod
     def _get_test_invocations_totals(
         invocations: List[InvocationSchema],
-    ) -> TotalsInvocationsSchema:
-        error_runs = len(
-            [
-                invocation
-                for invocation in invocations
-                if invocation.status in ["error", "fail"]
-            ]
-        )
-        warrning_runs = len(
-            [invocation for invocation in invocations if invocation.status == "warn"]
-        )
-        passed_runs = len(
-            [invocation for invocation in invocations if invocation.status == "pass"]
-        )
-        return TotalsInvocationsSchema(
-            errors=error_runs, warnings=warrning_runs, passed=passed_runs, resolved=0
-        )
+    ) -> TotalsSchema:
+        totals = TotalsSchema()
+        for invocation in invocations:
+            totals.add_total(invocation.status)
+        return totals
 
     @staticmethod
     def _get_invocations_description(
-        invocations_totals: TotalsInvocationsSchema,
+        invocations_totals: TotalsSchema,
     ) -> str:
         all_invocations_count = (
             invocations_totals.errors
             + invocations_totals.warnings
             + invocations_totals.passed
-            + invocations_totals.resolved
+            + invocations_totals.failures
         )
-        return f"There were {invocations_totals.errors or 'no'} failures and {invocations_totals.warnings or 'no'} warnings on the last {all_invocations_count} test runs."
+        return f"There were {invocations_totals.failures or 'no'} failures, {invocations_totals.errors or 'no'} errors and {invocations_totals.warnings or 'no'} warnings on the last {all_invocations_count} test runs."
 
     @staticmethod
     def _parse_affected_row(results_description: str) -> Optional[int]:
@@ -154,7 +142,7 @@ class TestsAPI(APIClient):
         self,
         tests_metadata: Optional[List[TestMetadataSchema]] = None,
         days_back: Optional[int] = None,
-    ):
+    ) -> Dict[str, TotalsSchema]:
         tests: List[TestMetadataSchema] = (
             tests_metadata
             if tests_metadata is not None
@@ -175,7 +163,7 @@ class TestsAPI(APIClient):
         tests_invocations: Optional[Dict[TestUniqueIdType, InvocationsSchema]] = None,
         invocations_per_test: Optional[int] = None,
         days_back: Optional[int] = None,
-    ):
+    ) -> Dict[str, TotalsSchema]:
         tests: List[TestMetadataSchema] = (
             tests_metadata
             if tests_metadata is not None
@@ -197,52 +185,23 @@ class TestsAPI(APIClient):
 
     @staticmethod
     def _update_test_runs_totals(
-        totals_dict: dict,
+        totals_dict: Dict[str, TotalsSchema],
         test: TestMetadataSchema,
         test_invocations: List[InvocationSchema],
     ):
         model_unique_id = test.model_unique_id
 
         if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = {
-                "errors": 0,
-                "warnings": 0,
-                "resolved": 0,
-                "passed": 0,
-            }
+            totals_dict[model_unique_id] = TotalsSchema()
 
         for test_invocation in test_invocations:
-            invocation_status = test_invocation.status
-            if invocation_status == "warn":
-                totals_status = "warnings"
-            elif invocation_status == "error" or invocation_status == "fail":
-                totals_status = "errors"
-            elif invocation_status == "pass":
-                totals_status = "passed"
-            else:
-                totals_status = None
-
-            if totals_status is not None:
-                totals_dict[model_unique_id][totals_status] += 1
+            totals_dict[model_unique_id].add_total(test_invocation.status)
 
     @staticmethod
-    def _update_test_results_totals(totals_dict, model_unique_id, status):
+    def _update_test_results_totals(
+        totals_dict: Dict[str, TotalsSchema], model_unique_id: str, status: str
+    ):
         if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = {
-                "errors": 0,
-                "warnings": 0,
-                "resolved": 0,
-                "passed": 0,
-            }
+            totals_dict[model_unique_id] = TotalsSchema()
 
-        if status == "warn":
-            totals_status = "warnings"
-        elif status == "error" or status == "fail":
-            totals_status = "errors"
-        elif status == "pass":
-            totals_status = "passed"
-        else:
-            totals_status = None
-
-        if totals_status is not None:
-            totals_dict[model_unique_id][totals_status] += 1
+        totals_dict[model_unique_id].add_total(status)
