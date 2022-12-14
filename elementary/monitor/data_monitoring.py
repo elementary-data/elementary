@@ -84,6 +84,7 @@ class DataMonitoring:
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         tracking.set_env("target_name", latest_invocation.get("target_name"))
+        tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
         tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
         dbt_pkg_version = latest_invocation.get("elementary_version")
         tracking.set_env("dbt_pkg_version", dbt_pkg_version)
