@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
@@ -232,12 +233,12 @@ def test_get_slack_message():
     )
 
 
-def test_add_blocks_to_attachments_sections():
+def test_add_blocks_as_attachments():
     slack_message_builder = SlackMessageBuilder()
     first_block = slack_message_builder.create_divider_block()
     second_block = slack_message_builder.create_empty_section_block()
-    slack_message_builder._add_blocks_to_attachments_sections([first_block])
-    slack_message_builder._add_blocks_to_attachments_sections([second_block])
+    slack_message_builder._add_blocks_as_attachments([first_block])
+    slack_message_builder._add_blocks_as_attachments([second_block])
     slack_message = slack_message_builder.get_slack_message()
     assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
         {
@@ -262,12 +263,12 @@ def test_add_blocks_to_attachments_sections():
     )
 
 
-def test_add_blocks_to_blocks_section():
+def test_add_always_displayed_blocks():
     slack_message_builder = SlackMessageBuilder()
     first_block = slack_message_builder.create_divider_block()
     second_block = slack_message_builder.create_empty_section_block()
-    slack_message_builder._add_blocks_to_blocks_section([first_block])
-    slack_message_builder._add_blocks_to_blocks_section([second_block])
+    slack_message_builder._add_always_displayed_blocks([first_block])
+    slack_message_builder._add_always_displayed_blocks([second_block])
     slack_message = slack_message_builder.get_slack_message()
     assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
         {
@@ -286,3 +287,17 @@ def test_add_blocks_to_blocks_section():
         },
         sort_keys=True,
     )
+
+
+def test_get_limited_markdown_msg():
+    slack_message_builder = SlackMessageBuilder()
+    short_message = "short message"
+    long_message = short_message * 3000
+
+    markdown_short_message = slack_message_builder.get_limited_markdown_msg(
+        short_message
+    )
+    markdown_long_message = slack_message_builder.get_limited_markdown_msg(long_message)
+    assert markdown_short_message == short_message
+    assert len(markdown_long_message) == SectionBlock.text_max_length
+    assert markdown_long_message.endswith("...age")

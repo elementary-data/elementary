@@ -8,7 +8,7 @@ from elementary.monitor.alerts.alert import (
 )
 from elementary.monitor.alerts.schema.slack_alert import (
     AlertDetailsPartSlackMessageSchema,
-    AlertSlackMessageSchema,
+    SlackAlertMessageSchema,
 )
 
 
@@ -242,3 +242,27 @@ def test_add_details_to_slack_alert():
         },
         sort_keys=True,
     )
+
+
+def test_prettify_list_variations():
+    message_builder = AlertSlackMessageBuilder()
+    list_prettified = message_builder.prettify_list_variations(
+        ["name1", "name2", "name2"]
+    )
+    assert list_prettified == "name1, name2" or list_prettified == "name2, name1"
+
+    assert (
+        message_builder.prettify_list_variations("name1, name2, name2")
+        == "name1, name2, name2"
+    )
+
+    string_of_list_prettified = message_builder.prettify_list_variations(
+        '["name1", "name2", "name2"]'
+    )
+    assert (
+        string_of_list_prettified == "name1, name2"
+        or string_of_list_prettified == "name2, name1"
+    )
+
+    assert message_builder.prettify_list_variations({}) == ""
+    assert message_builder.prettify_list_variations(123) == ""

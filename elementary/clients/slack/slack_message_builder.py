@@ -7,7 +7,7 @@ from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 LONGEST_MARKDOWN_SUFFIX_LEN = 3
 CONTINUATION_SYMBOL = "..."
 MAX_SLACK_SECTION_SIZE = 2
-SHOW_MORE_ATTACHMENTS_MARK = 5
+MAX_ALERT_PREVIEW_BLOCKS = 5
 
 
 class SlackMessageBuilder:
@@ -18,14 +18,18 @@ class SlackMessageBuilder:
     def _initial_slack_message(cls) -> dict:
         return {"blocks": [], "attachments": [{"blocks": []}]}
 
-    def _add_blocks_to_blocks_section(self, blocks: SlackBlocksType):
+    def _add_always_displayed_blocks(self, blocks: SlackBlocksType):
+        # In oppose to attachments Blocks are always displayed, use this for parts that should always be displayed in the message
         self.slack_message["blocks"].extend(blocks)
 
-    def _add_blocks_to_attachments_sections(self, blocks: SlackBlocksType):
+    def _add_blocks_as_attachments(self, blocks: SlackBlocksType):
+        # The first 5 attachments Blocks are always displayed.
+        # The rest of the attachments Blocks are hidden behind "show more" button.
+        # NOTICE: attachments blocks are depricated by Slack.
         self.slack_message["attachments"][0]["blocks"].extend(blocks)
 
     @staticmethod
-    def _format_section_msg(section_msg: str) -> str:
+    def get_limited_markdown_msg(section_msg: str) -> str:
         if len(section_msg) < SectionBlock.text_max_length:
             return section_msg
         return (
@@ -49,7 +53,7 @@ class SlackMessageBuilder:
             fields.append(
                 {
                     "type": "mrkdwn",
-                    "text": SlackMessageBuilder._format_section_msg(section_msg),
+                    "text": SlackMessageBuilder.get_limited_markdown_msg(section_msg),
                 }
             )
 
@@ -61,7 +65,7 @@ class SlackMessageBuilder:
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": SlackMessageBuilder._format_section_msg(section_msg),
+                "text": SlackMessageBuilder.get_limited_markdown_msg(section_msg),
             },
         }
 
@@ -71,7 +75,7 @@ class SlackMessageBuilder:
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": SlackMessageBuilder._format_section_msg("\t"),
+                "text": SlackMessageBuilder.get_limited_markdown_msg("\t"),
             },
         }
 
@@ -82,7 +86,7 @@ class SlackMessageBuilder:
             fields.append(
                 {
                     "type": "mrkdwn",
-                    "text": SlackMessageBuilder._format_section_msg(context_msg),
+                    "text": SlackMessageBuilder.get_limited_markdown_msg(context_msg),
                 }
             )
 
@@ -108,7 +112,7 @@ class SlackMessageBuilder:
         for section_msg in section_msgs:
             section_field = {
                 "type": "mrkdwn",
-                "text": SlackMessageBuilder._format_section_msg(section_msg),
+                "text": SlackMessageBuilder.get_limited_markdown_msg(section_msg),
             }
             if len(section_fields) < MAX_SLACK_SECTION_SIZE:
                 section_fields.append(section_field)

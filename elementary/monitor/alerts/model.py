@@ -2,7 +2,6 @@ import json
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
@@ -40,9 +39,11 @@ class ModelAlert(Alert):
         return self._model_to_slack()
 
     def _model_to_slack(self):
-        tags = prettify_json_str_set(self.tags)
-        owners = prettify_json_str_set(self.owners)
-        subscribers = prettify_json_str_set(", ".join(self.subscribers))
+        tags = self.slack_message_builder.prettify_list_variations(self.tags)
+        owners = self.slack_message_builder.prettify_list_variations(self.owners)
+        subscribers = self.slack_message_builder.prettify_list_variations(
+            self.subscribers
+        )
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
@@ -109,9 +110,11 @@ class ModelAlert(Alert):
         )
 
     def _snapshot_to_slack(self):
-        tags = prettify_json_str_set(self.tags)
-        owners = prettify_json_str_set(self.owners)
-        subscribers = prettify_json_str_set(", ".join(self.subscribers))
+        tags = self.slack_message_builder.prettify_list_variations(self.tags)
+        owners = self.slack_message_builder.prettify_list_variations(self.owners)
+        subscribers = self.slack_message_builder.prettify_list_variations(
+            self.subscribers
+        )
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [

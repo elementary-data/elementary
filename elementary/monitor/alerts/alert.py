@@ -1,16 +1,17 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from dateutil import tz
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import (
-    SHOW_MORE_ATTACHMENTS_MARK,
+    MAX_ALERT_PREVIEW_BLOCKS,
     SlackMessageBuilder,
 )
 from elementary.monitor.alerts.schema.slack_alert import (
     AlertDetailsPartSlackMessageSchema,
-    AlertSlackMessageSchema,
+    SlackAlertMessageSchema,
 )
+from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -68,7 +69,7 @@ class PreviewIsTooLongError(Exception):
     def __init__(
         self,
         preview_blocks: SlackBlocksType,
-        message: str = f"There are too manny blocks at the preview section of the alert (more than {SHOW_MORE_ATTACHMENTS_MARK})",
+        message: str = f"There are too many blocks at the preview section of the alert (more than {MAX_ALERT_PREVIEW_BLOCKS})",
     ) -> None:
         self.preview_blocks = preview_blocks
         self.message = message
@@ -89,32 +90,32 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
         result: Optional[SlackBlocksType] = None,
         configuration: Optional[SlackBlocksType] = None,
     ) -> SlackMessageSchema:
-        alert = AlertSlackMessageSchema(
+        alert = SlackAlertMessageSchema(
             title=title,
             preview=preview,
             details=AlertDetailsPartSlackMessageSchema(
                 result=result, configuration=configuration
             ),
         )
-        self._create_slack_alert(alert)
-        return super().get_slack_message()
+        return self._create_slack_alert(alert)
 
-    def _create_slack_alert(self, alert: AlertSlackMessageSchema) -> SlackMessageSchema:
+    def _create_slack_alert(self, alert: SlackAlertMessageSchema) -> SlackMessageSchema:
         self._add_title_to_slack_alert(alert.title)
         self._add_preview_to_slack_alert(alert.preview)
         self._add_details_to_slack_alert(alert.details)
+        return super().get_slack_message()
 
     def _add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
         if title_blocks:
             title = [*title_blocks, self.create_divider_block()]
-            self._add_blocks_to_blocks_section(title)
+            self._add_always_displayed_blocks(title)
 
     def _add_preview_to_slack_alert(
         self, preview_blocks: Optional[SlackBlocksType] = None
     ):
         if preview_blocks:
             validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
-            self._add_blocks_to_attachments_sections(validated_preview_blocks)
+            self._add_blocks_as_attachments(validated_preview_blocks)
 
     def _add_details_to_slack_alert(
         self, details_blocks: Optional[AlertDetailsPartSlackMessageSchema] = None
@@ -126,7 +127,7 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
                     self.create_divider_block(),
                     *details_blocks.result,
                 ]
-                self._add_blocks_to_attachments_sections(result_blocks)
+                self._add_blocks_as_attachments(result_blocks)
 
             if details_blocks.configuration:
                 configuration_blocks = [
@@ -136,28 +137,37 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
                     self.create_divider_block(),
                     *details_blocks.configuration,
                 ]
-                self._add_blocks_to_attachments_sections(configuration_blocks)
+                self._add_blocks_as_attachments(configuration_blocks)
 
     @classmethod
     def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):
-        preview_blocks_count = len(preview_blocks)
-
         if not preview_blocks:
             return
 
-        if preview_blocks_count > SHOW_MORE_ATTACHMENTS_MARK:
+        preview_blocks_count = len(preview_blocks)
+        if preview_blocks_count > MAX_ALERT_PREVIEW_BLOCKS:
             raise PreviewIsTooLongError(preview_blocks)
 
         elif (
-            preview_blocks_count < SHOW_MORE_ATTACHMENTS_MARK
-            and preview_blocks_count > 0
+            preview_blocks_count < MAX_ALERT_PREVIEW_BLOCKS and preview_blocks_count > 0
         ):
             padded_preview_blocks = [*preview_blocks]
             blocks_counter = preview_blocks_count
-            while blocks_counter < SHOW_MORE_ATTACHMENTS_MARK:
+            while blocks_counter < MAX_ALERT_PREVIEW_BLOCKS:
                 padded_preview_blocks.append(cls.create_empty_section_block())
                 blocks_counter += 1
             return padded_preview_blocks
 
         else:
             return preview_blocks
+
+    @staticmethod
+    def prettify_list_variations(list_variation: Union[List[str], str]) -> str:
+        if isinstance(list_variation, str):
+            return prettify_json_str_set(list_variation)
+
+        elif isinstance(list_variation, list):
+            return ", ".join(set(list_variation))
+
+        else:
+            return ""

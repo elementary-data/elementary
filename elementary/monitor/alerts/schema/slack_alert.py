@@ -10,7 +10,7 @@ class AlertDetailsPartSlackMessageSchema(BaseModel):
     configuration: Optional[SlackBlocksType] = None
 
 
-class AlertSlackMessageSchema(BaseModel):
+class SlackAlertMessageSchema(BaseModel):
     title: Optional[SlackBlocksType] = None
     preview: Optional[SlackBlocksType] = None
     details: Optional[AlertDetailsPartSlackMessageSchema] = None

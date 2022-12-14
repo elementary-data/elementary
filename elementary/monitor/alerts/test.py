@@ -11,7 +11,7 @@ from elementary.monitor.alerts.schema.test import (
     DbtTestConfigurationSchema,
     TestResultSchema,
 )
-from elementary.utils.json_utils import prettify_json_str_set, try_load_json
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
@@ -182,15 +182,17 @@ class DbtTestAlert(TestAlert):
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
         if TAGS_FIELD in alert_fields:
-            tags = prettify_json_str_set(self.tags)
+            tags = self.slack_message_builder.prettify_list_variations(self.tags)
             compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
         if OWNERS_FIELD in alert_fields:
-            owners = prettify_json_str_set(self.owners)
+            owners = self.slack_message_builder.prettify_list_variations(self.owners)
             compacted_sections.append(
                 f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
-            subscribers = prettify_json_str_set(", ".join(self.subscribers))
+            subscribers = self.slack_message_builder.prettify_list_variations(
+                self.subscribers
+            )
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
             )
@@ -214,13 +216,10 @@ class DbtTestAlert(TestAlert):
                     ]
                 )
             else:
-                preview.extend(
-                    [
-                        self.slack_message_builder.create_text_section_block(
-                            "*Description*\n_No description_"
-                        ),
-                        self.slack_message_builder.create_empty_section_block(),
-                    ]
+                preview.append(
+                    self.slack_message_builder.create_text_section_block(
+                        "*Description*\n_No description_"
+                    )
                 )
 
         result = []
@@ -371,15 +370,17 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
         if TAGS_FIELD in alert_fields:
-            tags = prettify_json_str_set(self.tags)
+            tags = self.slack_message_builder.prettify_list_variations(self.tags)
             compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
         if OWNERS_FIELD in alert_fields:
-            owners = prettify_json_str_set(self.owners)
+            owners = self.slack_message_builder.prettify_list_variations(self.owners)
             compacted_sections.append(
                 f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
-            subscribers = prettify_json_str_set(", ".join(self.subscribers))
+            subscribers = self.slack_message_builder.prettify_list_variations(
+                self.subscribers
+            )
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
             )
@@ -403,13 +404,10 @@ class ElementaryTestAlert(DbtTestAlert):
                     ]
                 )
             else:
-                preview.extend(
-                    [
-                        self.slack_message_builder.create_text_section_block(
-                            "*Description*\n_No description_"
-                        ),
-                        self.slack_message_builder.create_empty_section_block(),
-                    ]
+                preview.append(
+                    self.slack_message_builder.create_text_section_block(
+                        "*Description*\n_No description_"
+                    )
                 )
 
         result = []
@@ -435,10 +433,7 @@ class ElementaryTestAlert(DbtTestAlert):
             if self.column_name:
                 messagess.append(f"*Column*: {self.column_name}     |")
             messagess.append(f"*Anomalous Values*: {anomalous_value}")
-            if messagess:
-                result.append(
-                    self.slack_message_builder.create_context_block(messagess)
-                )
+            result.append(self.slack_message_builder.create_context_block(messagess))
 
         configuration = []
         if TEST_PARAMS_FIELD in alert_fields and self.test_params:
