@@ -1,0 +1,33 @@
+name: Run unittest
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - elementary/**
+  pull_request:
+    branches: ["master"]
+    paths:
+      - elementary/**
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.7.5"
+
+      - name: Install Elementary
+        run: pip install "./elementary"
+
+      - name: Install dev requirements
+        run: pip install -r dev-requirements.txt
+
+     - name: Test with pytest
+        run: |
+          pytest
