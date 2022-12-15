@@ -33,7 +33,7 @@ class DbtRunner:
         json_logs: bool = False,
         vars: Optional[dict] = None,
         quiet: bool = False,
-    ) -> Tuple[bool, str]:
+    ) -> Tuple[bool, Optional[str]]:
         dbt_command = ["dbt"]
         json_output = False
         if json_logs:

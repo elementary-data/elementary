@@ -18,7 +18,10 @@ OK_STATUS_CODE = 200
 
 class SlackClient(ABC):
     def __init__(
-        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None
+        self,
+        token: Optional[str] = None,
+        webhook: Optional[str] = None,
+        tracking: Optional[AnonymousTracking] = None,
     ) -> None:
         self.token = token
         self.webhook = webhook

@@ -16,13 +16,13 @@ class ArtifactSchema(BaseModel):
 
 
 class ModelSchema(ArtifactSchema):
-    database_name: str = None
+    database_name: Optional[str] = None
     schema_name: str
     table_name: str
 
 
 class SourceSchema(ArtifactSchema):
-    database_name: str = None
+    database_name: Optional[str] = None
     schema_name: str
     table_name: str
 

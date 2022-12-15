@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional
 
 import google.auth
 from dateutil import tz
@@ -34,22 +35,22 @@ class Config:
     def __init__(
         self,
         config_dir: str = DEFAULT_CONFIG_DIR,
-        profiles_dir: str = None,
-        profile_target: str = None,
-        dbt_quoting: bool = None,
-        update_bucket_website: bool = None,
-        slack_webhook: str = None,
-        slack_token: str = None,
-        slack_channel_name: str = None,
-        timezone: str = None,
-        aws_profile_name: str = None,
-        aws_access_key_id: str = None,
-        aws_secret_access_key: str = None,
-        s3_bucket_name: str = None,
-        google_project_name: str = None,
-        google_service_account_path: str = None,
-        gcs_bucket_name: str = None,
-        env: str = None,
+        profiles_dir: Optional[str] = None,
+        profile_target: Optional[str] = None,
+        dbt_quoting: Optional[bool] = None,
+        update_bucket_website: Optional[bool] = None,
+        slack_webhook: Optional[str] = None,
+        slack_token: Optional[str] = None,
+        slack_channel_name: Optional[str] = None,
+        timezone: Optional[str] = None,
+        aws_profile_name: Optional[str] = None,
+        aws_access_key_id: Optional[str] = None,
+        aws_secret_access_key: Optional[str] = None,
+        s3_bucket_name: Optional[str] = None,
+        google_project_name: Optional[str] = None,
+        google_service_account_path: Optional[str] = None,
+        gcs_bucket_name: Optional[str] = None,
+        env: Optional[str] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
