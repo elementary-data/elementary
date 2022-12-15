@@ -1,4 +1,3 @@
-import ast
 import json
 import os
 import os.path
@@ -27,7 +26,6 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.filters.filters import FiltersAPI
-from elementary.monitor.api.filters.schema import FiltersSchema
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
@@ -49,7 +47,7 @@ from elementary.monitor.api.tests.schema import (
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import package
-from elementary.utils.json_utils import prettify_json_str_set
+from elementary.utils.json_utils import parse_str_to_list, prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
 
@@ -110,20 +108,13 @@ class DataMonitoring:
     def _parse_emails_to_ids(self, emails: Union[str, List[str]]) -> str:
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-
-            return re.fullmatch(email_regex, potential_email)
+            return bool(re.fullmatch(email_regex, potential_email))
 
         def _get_user_id(email: str) -> str:
             user_id = self.slack_client.get_user_id_from_email(email)
             return f"<@{user_id}>" if user_id else email
 
-        def _parse_str_to_list(emails: str) -> List[str]:
-            try:
-                return ast.literal_eval(emails)
-            except:
-                return list(emails.split(","))
-
-        emails = _parse_str_to_list(emails) if isinstance(emails, str) else emails
+        emails = parse_str_to_list(emails) if isinstance(emails, str) else emails
         ids = [
             _get_user_id(email) if _regex_match_owner_email(email) else email
             for email in emails

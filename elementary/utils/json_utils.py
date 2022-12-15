@@ -1,4 +1,6 @@
+import ast
 import json
+from typing import List, Union
 
 
 def try_load_json(string_value: str):
@@ -8,7 +10,7 @@ def try_load_json(string_value: str):
         return None
 
 
-def prettify_json_str_set(str_json_list: str) -> str:
+def prettify_json_str_set(str_json_list: Union[str, list]) -> str:
     if not str_json_list:
         return ""
 
@@ -16,3 +18,10 @@ def prettify_json_str_set(str_json_list: str) -> str:
     if isinstance(json_obj, list):
         return ", ".join(set(json_obj))
     return str_json_list
+
+
+def parse_str_to_list(string_value: str) -> List[str]:
+    try:
+        return ast.literal_eval(string_value)
+    except Exception:
+        return string_value.split(",")
