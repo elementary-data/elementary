@@ -3,7 +3,6 @@ from typing import Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
     DATETIME_FORMAT,
@@ -53,69 +52,94 @@ class SourceFreshnessAlert(Alert):
         self.error = error
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
-        elif self.status == "runtime error":
-            icon = ":x:"
-        slack_message = {"attachments": [{"blocks": []}]}
-        self._add_text_section_to_slack_msg(
-            slack_message, f"{icon} *dbt source freshness alert*"
+        tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+        owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+        subscribers = self.slack_message_builder.prettify_and_dedup_list(
+            self.subscribers
         )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
+
+        title = [
+            self.slack_message_builder.create_header_block(
+                f"{icon} dbt source freshness alert"
+            ),
+            self.slack_message_builder.create_context_block(
+                [
+                    f"*Source:* {self.alias}     |",
+                    f"*Status:* {self.status}     |",
+                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                ],
+            ),
+        ]
+
+        preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Source*\n{self.source_name}.{self.identifier}",
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
-            ],
-            divider=True,
+                f"*Tags*\n{tags if tags else '_No tags_'}",
+                f"*Owners*\n{owners if owners else '_No owners_'}",
+                f"*Subscribers*\n{subscribers if subscribers else '_No subscribers_'}",
+            ]
         )
+
+        result = []
         if self.status == "runtime error":
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Error Message*\nFailed to calculate the source freshness."
-                f"```{self.error}```",
+            result.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"Failed to calculate the source freshness\n"
+                        f"```{self.error}```"
+                    ),
+                ]
             )
         else:
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [
-                    f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s)}"
-                ],
-            )
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [
-                    f"*Last Record At*\n{self.max_loaded_at}",
-                    f"*Sampled At*\n{self.snapshotted_at}",
-                ],
-                divider=True,
-            )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Error After*\n`{self.freshness_error_after}`",
-                f"*Warn After*\n`{self.freshness_warn_after}`",
-            ],
-        )
-        if self.freshness_filter:
-            self._add_text_section_to_slack_msg(
-                slack_message, f"*Filter*\n`{self.freshness_filter}`"
+            result.extend(
+                self.slack_message_builder.create_compacted_sections_blocks(
+                    [
+                        f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s)}",
+                        f"*Last Record At*\n{self.max_loaded_at}",
+                        f"*Sampled At*\n{self.snapshotted_at}",
+                    ]
+                )
             )
 
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Owners*\n{prettify_json_str_set(self.owners)}",
-                f"*Tags*\n{prettify_json_str_set(self.tags)}",
-            ],
-        )
-        if self.subscribers:
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [f"*Subscribers*\n{prettify_json_str_set(self.subscribers)}"],
+        configuration = []
+        if self.freshness_error_after:
+            configuration.append(
+                self.slack_message_builder.create_context_block([f"*Error after*"])
             )
-        self._add_fields_section_to_slack_msg(
-            slack_message, [f"*Status*\n{self.status}", f"*Path*\n{self.path}"]
+            configuration.append(
+                self.slack_message_builder.create_text_section_block(
+                    f"`{self.freshness_error_after}`"
+                )
+            )
+        if self.freshness_warn_after:
+            configuration.append(
+                self.slack_message_builder.create_context_block([f"*Warn after*"])
+            )
+            configuration.append(
+                self.slack_message_builder.create_text_section_block(
+                    f"`{self.freshness_warn_after}`"
+                )
+            )
+        if self.freshness_filter:
+            configuration.append(
+                self.slack_message_builder.create_context_block([f"*Filter*"])
+            )
+            configuration.append(
+                self.slack_message_builder.create_text_section_block(
+                    f"`{self.freshness_filter}`"
+                )
+            )
+        if self.path:
+            configuration.append(
+                self.slack_message_builder.create_context_block([f"*Path*"])
+            )
+            configuration.append(
+                self.slack_message_builder.create_text_section_block(f"`{self.path}`")
+            )
+
+        return self.slack_message_builder.get_slack_message(
+            title=title, preview=preview, result=result, configuration=configuration
         )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
