@@ -119,8 +119,8 @@ class DataMonitoring:
 
         items = parse_str_to_list(items) if isinstance(items, str) else items
         ids = [
-            _get_user_id(email) if _regex_match_owner_email(email) else email
-            for email in items
+            _get_user_id(item) if _regex_match_owner_email(item) else item
+            for item in items
         ]
         parsed_ids_str = prettify_json_str_set(ids)
         return parsed_ids_str
