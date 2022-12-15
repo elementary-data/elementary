@@ -23,7 +23,7 @@ jobs:
           python-version: "3.7.5"
 
       - name: Install Elementary
-        run: pip install -e.
+        run: pip install .
 
       - name: Install dev requirements
         run: pip install -r dev-requirements.txt
