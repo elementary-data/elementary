@@ -5,7 +5,7 @@ import re
 import webbrowser
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 import pkg_resources
@@ -26,7 +26,6 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 from elementary.monitor.api.alerts import AlertsAPI
 from elementary.monitor.api.filters.filters import FiltersAPI
-from elementary.monitor.api.filters.schema import FiltersSchema
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
@@ -48,7 +47,7 @@ from elementary.monitor.api.tests.schema import (
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import package
-from elementary.utils.json_utils import prettify_json_str_set
+from elementary.utils.json_utils import parse_str_to_list, prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
 
@@ -106,25 +105,27 @@ class DataMonitoring:
         self.send_test_message_on_success = send_test_message_on_success
         self.disable_samples = disable_samples
 
-    def _parse_emails_to_ids(self, emails: List[str]) -> str:
+    def _parse_emails_to_ids(self, slack_members: Union[str, List[str]]) -> str:
+        if not slack_members:
+            return slack_members
+
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-
-            return re.fullmatch(email_regex, potential_email)
+            return bool(re.fullmatch(email_regex, potential_email))
 
         def _get_user_id(email: str) -> str:
             user_id = self.slack_client.get_user_id_from_email(email)
             return f"<@{user_id}>" if user_id else email
 
-        if isinstance(emails, list) and emails != []:
-            ids = [
-                _get_user_id(email) if _regex_match_owner_email(email) else email
-                for email in emails
-            ]
-            parsed_ids_str = prettify_json_str_set(ids)
-            return parsed_ids_str
-        else:
-            return prettify_json_str_set(emails)
+        if isinstance(slack_members, str):
+            slack_members = parse_str_to_list(slack_members)
+        ids = [
+            _get_user_id(slack_member)
+            if _regex_match_owner_email(slack_member)
+            else slack_member
+            for slack_member in slack_members
+        ]
+        return prettify_json_str_set(ids)
 
     def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
         if not alerts:
