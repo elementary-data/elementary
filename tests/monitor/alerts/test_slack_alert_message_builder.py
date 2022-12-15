@@ -3,17 +3,13 @@ import json
 import pytest
 
 from elementary.monitor.alerts.alert import (
-    AlertSlackMessageBuilder,
     PreviewIsTooLongError,
-)
-from elementary.monitor.alerts.schema.slack_alert import (
-    AlertDetailsPartSlackMessageSchema,
-    SlackAlertMessageSchema,
+    SlackAlertMessageBuilder,
 )
 
 
 def test_add_title_to_slack_alert():
-    message_builder = AlertSlackMessageBuilder()
+    message_builder = SlackAlertMessageBuilder()
     title = message_builder.create_header_block("This is an header!")
     sub_title = message_builder.create_context_block(["I am only a sub title :("])
     message_builder._add_title_to_slack_alert([title, sub_title])
@@ -31,7 +27,7 @@ def test_add_title_to_slack_alert():
 
 
 def test_validate_preview_blocks():
-    message_builder = AlertSlackMessageBuilder()
+    message_builder = SlackAlertMessageBuilder()
     block = message_builder.create_divider_block()
 
     # No blocks
@@ -94,7 +90,7 @@ def test_validate_preview_blocks():
 
 
 def test_add_preview_to_slack_alert():
-    message_builder = AlertSlackMessageBuilder()
+    message_builder = SlackAlertMessageBuilder()
     title = message_builder.create_header_block("This is an header!")
     sub_title = message_builder.create_context_block(["I am only a sub title :("])
     message_builder._add_preview_to_slack_alert([title, sub_title])
@@ -136,12 +132,11 @@ def test_add_preview_to_slack_alert():
 
 
 def test_add_details_to_slack_alert():
-    block = AlertSlackMessageBuilder.create_divider_block()
+    block = SlackAlertMessageBuilder.create_divider_block()
 
-    # No details blocks
-    message_builder = AlertSlackMessageBuilder()
-    details = AlertDetailsPartSlackMessageSchema()
-    message_builder._add_details_to_slack_alert(details)
+    # No result and configuration blocks
+    message_builder = SlackAlertMessageBuilder()
+    message_builder._add_details_to_slack_alert()
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -150,10 +145,9 @@ def test_add_details_to_slack_alert():
         sort_keys=True,
     )
 
-    # Only result details
-    message_builder = AlertSlackMessageBuilder()
-    details = AlertDetailsPartSlackMessageSchema(result=[block, block])
-    message_builder._add_details_to_slack_alert(details)
+    # Only result blocks
+    message_builder = SlackAlertMessageBuilder()
+    message_builder._add_details_to_slack_alert(result=[block, block])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -177,10 +171,9 @@ def test_add_details_to_slack_alert():
         sort_keys=True,
     )
 
-    # Only configuration details
-    message_builder = AlertSlackMessageBuilder()
-    details = AlertDetailsPartSlackMessageSchema(configuration=[block, block])
-    message_builder._add_details_to_slack_alert(details)
+    # Only configuration blocks
+    message_builder = SlackAlertMessageBuilder()
+    message_builder._add_details_to_slack_alert(configuration=[block, block])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -205,11 +198,10 @@ def test_add_details_to_slack_alert():
     )
 
     # All details
-    message_builder = AlertSlackMessageBuilder()
-    details = AlertDetailsPartSlackMessageSchema(
+    message_builder = SlackAlertMessageBuilder()
+    message_builder._add_details_to_slack_alert(
         configuration=[block, block], result=[block, block]
     )
-    message_builder._add_details_to_slack_alert(details)
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -244,19 +236,19 @@ def test_add_details_to_slack_alert():
     )
 
 
-def test_prettify_list_variations():
-    message_builder = AlertSlackMessageBuilder()
-    list_prettified = message_builder.prettify_list_variations(
+def test_prettify_and_dedup_list():
+    message_builder = SlackAlertMessageBuilder()
+    list_prettified = message_builder.prettify_and_dedup_list(
         ["name1", "name2", "name2"]
     )
     assert list_prettified == "name1, name2" or list_prettified == "name2, name1"
 
     assert (
-        message_builder.prettify_list_variations("name1, name2, name2")
+        message_builder.prettify_and_dedup_list("name1, name2, name2")
         == "name1, name2, name2"
     )
 
-    string_of_list_prettified = message_builder.prettify_list_variations(
+    string_of_list_prettified = message_builder.prettify_and_dedup_list(
         '["name1", "name2", "name2"]'
     )
     assert (
@@ -264,5 +256,5 @@ def test_prettify_list_variations():
         or string_of_list_prettified == "name2, name1"
     )
 
-    assert message_builder.prettify_list_variations({}) == ""
-    assert message_builder.prettify_list_variations(123) == ""
+    assert message_builder.prettify_and_dedup_list({}) == {}
+    assert message_builder.prettify_and_dedup_list(123) == 123

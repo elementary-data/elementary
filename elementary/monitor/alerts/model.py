@@ -39,9 +39,9 @@ class ModelAlert(Alert):
         return self._model_to_slack()
 
     def _model_to_slack(self):
-        tags = self.slack_message_builder.prettify_list_variations(self.tags)
-        owners = self.slack_message_builder.prettify_list_variations(self.owners)
-        subscribers = self.slack_message_builder.prettify_list_variations(
+        tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+        owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+        subscribers = self.slack_message_builder.prettify_and_dedup_list(
             self.subscribers
         )
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
@@ -110,9 +110,9 @@ class ModelAlert(Alert):
         )
 
     def _snapshot_to_slack(self):
-        tags = self.slack_message_builder.prettify_list_variations(self.tags)
-        owners = self.slack_message_builder.prettify_list_variations(self.owners)
-        subscribers = self.slack_message_builder.prettify_list_variations(
+        tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+        owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+        subscribers = self.slack_message_builder.prettify_and_dedup_list(
             self.subscribers
         )
         icon = self.slack_message_builder.get_slack_status_icon(self.status)

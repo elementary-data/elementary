@@ -7,10 +7,6 @@ from elementary.clients.slack.slack_message_builder import (
     MAX_ALERT_PREVIEW_BLOCKS,
     SlackMessageBuilder,
 )
-from elementary.monitor.alerts.schema.slack_alert import (
-    AlertDetailsPartSlackMessageSchema,
-    SlackAlertMessageSchema,
-)
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
@@ -35,7 +31,7 @@ class Alert:
         meta: Optional[dict] = None,
         **kwargs,
     ):
-        self.slack_message_builder = AlertSlackMessageBuilder()
+        self.slack_message_builder = SlackAlertMessageBuilder()
         self.id = id
         self.elementary_database_and_schema = elementary_database_and_schema
         self.detected_at_utc = None
@@ -79,7 +75,7 @@ class PreviewIsTooLongError(Exception):
         return f"{len(self.preview_blocks)} provieded -> {self.message}"
 
 
-class AlertSlackMessageBuilder(SlackMessageBuilder):
+class SlackAlertMessageBuilder(SlackMessageBuilder):
     def __init__(self) -> None:
         super().__init__()
 
@@ -90,19 +86,20 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
         result: Optional[SlackBlocksType] = None,
         configuration: Optional[SlackBlocksType] = None,
     ) -> SlackMessageSchema:
-        alert = SlackAlertMessageSchema(
-            title=title,
-            preview=preview,
-            details=AlertDetailsPartSlackMessageSchema(
-                result=result, configuration=configuration
-            ),
+        return self._create_slack_alert(
+            title=title, preview=preview, result=result, configuration=configuration
         )
-        return self._create_slack_alert(alert)
 
-    def _create_slack_alert(self, alert: SlackAlertMessageSchema) -> SlackMessageSchema:
-        self._add_title_to_slack_alert(alert.title)
-        self._add_preview_to_slack_alert(alert.preview)
-        self._add_details_to_slack_alert(alert.details)
+    def _create_slack_alert(
+        self,
+        title: Optional[SlackBlocksType] = None,
+        preview: Optional[SlackBlocksType] = None,
+        result: Optional[SlackBlocksType] = None,
+        configuration: Optional[SlackBlocksType] = None,
+    ) -> SlackMessageSchema:
+        self._add_title_to_slack_alert(title)
+        self._add_preview_to_slack_alert(preview)
+        self._add_details_to_slack_alert(result, configuration)
         return super().get_slack_message()
 
     def _add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
@@ -118,26 +115,25 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
             self._add_blocks_as_attachments(validated_preview_blocks)
 
     def _add_details_to_slack_alert(
-        self, details_blocks: Optional[AlertDetailsPartSlackMessageSchema] = None
+        self,
+        result: Optional[SlackBlocksType] = None,
+        configuration: Optional[SlackBlocksType] = None,
     ):
-        if details_blocks:
-            if details_blocks.result:
-                result_blocks = [
-                    self.create_text_section_block(":mag: *Result*"),
-                    self.create_divider_block(),
-                    *details_blocks.result,
-                ]
-                self._add_blocks_as_attachments(result_blocks)
+        if result:
+            result_blocks = [
+                self.create_text_section_block(":mag: *Result*"),
+                self.create_divider_block(),
+                *result,
+            ]
+            self._add_blocks_as_attachments(result_blocks)
 
-            if details_blocks.configuration:
-                configuration_blocks = [
-                    self.create_text_section_block(
-                        ":hammer_and_wrench: *Configuration*"
-                    ),
-                    self.create_divider_block(),
-                    *details_blocks.configuration,
-                ]
-                self._add_blocks_as_attachments(configuration_blocks)
+        if configuration:
+            configuration_blocks = [
+                self.create_text_section_block(":hammer_and_wrench: *Configuration*"),
+                self.create_divider_block(),
+                *configuration,
+            ]
+            self._add_blocks_as_attachments(configuration_blocks)
 
     @classmethod
     def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):
@@ -162,7 +158,9 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
             return preview_blocks
 
     @staticmethod
-    def prettify_list_variations(list_variation: Union[List[str], str]) -> str:
+    def prettify_and_dedup_list(
+        list_variation: Union[List[str], str]
+    ) -> Union[List[str], str]:
         if isinstance(list_variation, str):
             return prettify_json_str_set(list_variation)
 
@@ -170,4 +168,4 @@ class AlertSlackMessageBuilder(SlackMessageBuilder):
             return ", ".join(set(list_variation))
 
         else:
-            return ""
+            return list_variation

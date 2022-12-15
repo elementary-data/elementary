@@ -52,9 +52,9 @@ class SourceFreshnessAlert(Alert):
         self.error = error
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        tags = self.slack_message_builder.prettify_list_variations(self.tags)
-        owners = self.slack_message_builder.prettify_list_variations(self.owners)
-        subscribers = self.slack_message_builder.prettify_list_variations(
+        tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+        owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+        subscribers = self.slack_message_builder.prettify_and_dedup_list(
             self.subscribers
         )
         icon = self.slack_message_builder.get_slack_status_icon(self.status)

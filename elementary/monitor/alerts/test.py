@@ -182,15 +182,15 @@ class DbtTestAlert(TestAlert):
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
         if TAGS_FIELD in alert_fields:
-            tags = self.slack_message_builder.prettify_list_variations(self.tags)
+            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
             compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
         if OWNERS_FIELD in alert_fields:
-            owners = self.slack_message_builder.prettify_list_variations(self.owners)
+            owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
             compacted_sections.append(
                 f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
-            subscribers = self.slack_message_builder.prettify_list_variations(
+            subscribers = self.slack_message_builder.prettify_and_dedup_list(
                 self.subscribers
             )
             compacted_sections.append(
@@ -370,15 +370,15 @@ class ElementaryTestAlert(DbtTestAlert):
                 f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
         if TAGS_FIELD in alert_fields:
-            tags = self.slack_message_builder.prettify_list_variations(self.tags)
+            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
             compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
         if OWNERS_FIELD in alert_fields:
-            owners = self.slack_message_builder.prettify_list_variations(self.owners)
+            owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
             compacted_sections.append(
                 f"*Owners*\n{owners if owners else '_No owners_'}"
             )
         if SUBSCRIBERS_FIELD in alert_fields:
-            subscribers = self.slack_message_builder.prettify_list_variations(
+            subscribers = self.slack_message_builder.prettify_and_dedup_list(
                 self.subscribers
             )
             compacted_sections.append(
