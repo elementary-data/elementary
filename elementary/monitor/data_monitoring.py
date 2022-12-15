@@ -105,7 +105,10 @@ class DataMonitoring:
         self.send_test_message_on_success = send_test_message_on_success
         self.disable_samples = disable_samples
 
-    def _parse_emails_to_ids(self, emails: Union[str, List[str]]) -> str:
+    def _parse_emails_to_ids(self, items: Union[str, List[str]]) -> str:
+        if not items:
+            return items
+
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
             return bool(re.fullmatch(email_regex, potential_email))
@@ -114,10 +117,10 @@ class DataMonitoring:
             user_id = self.slack_client.get_user_id_from_email(email)
             return f"<@{user_id}>" if user_id else email
 
-        emails = parse_str_to_list(emails) if isinstance(emails, str) else emails
+        items = parse_str_to_list(items) if isinstance(items, str) else items
         ids = [
             _get_user_id(email) if _regex_match_owner_email(email) else email
-            for email in emails
+            for email in items
         ]
         parsed_ids_str = prettify_json_str_set(ids)
         return parsed_ids_str
