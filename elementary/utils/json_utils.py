@@ -24,4 +24,4 @@ def parse_str_to_list(string_value: str) -> List[str]:
     try:
         return ast.literal_eval(string_value)
     except Exception:
-        return string_value.split(",")
+        return [part.strip() for part in string_value.split(",")]
