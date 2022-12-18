@@ -20,9 +20,9 @@ _Note_: Anomaly detection is not yet supported on Databricks in dbt Cloud.
 
 ### Table (model / source) tests:
 
-<Accordion title="elementary.volume">
+<Accordion title="elementary.volume_anomalies">
 
-`elementary.volume`
+`elementary.volume_anomalies`
 
 Monitors the row count of your table.
 
@@ -34,7 +34,7 @@ version: 2
 models:
   - name: < model name >
     tests:
-      - elementary.volume:
+      - elementary.volume_anomalies:
           timestamp_column: < timestamp column >
           where_expression: < sql expression >
 ```
@@ -48,7 +48,7 @@ models:
       elementary:
         timestamp_column: 'loaded_at'
     tests:
-      - elementary.volume:
+      - elementary.volume_anomalies:
           where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
           # optional - use tags to run elementary tests on a dedicated run
           tags: ['elementary']
@@ -59,7 +59,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-      - elementary.volume:
+      - elementary.volume_anomalies:
           tags: ['elementary']
 ```
 
@@ -67,9 +67,9 @@ models:
 
 </Accordion>
 
-<Accordion title="elementary.freshness">
+<Accordion title="elementary.freshness_anomalies">
 
-`elementary.volume`
+`elementary.volume_anomalies`
 
 Monitors the freshness of your table.
 
@@ -81,7 +81,7 @@ version: 2
 models:
   - name: < model name >
     tests:
-      - elementary.freshness:
+      - elementary.freshness_anomalies:
           timestamp_column: < timestamp column >
           where_expression: < sql expression >
 ```
@@ -92,7 +92,7 @@ version: 2
 models:
   - name: login_events
     tests:
-      - elementary.freshness:
+      - elementary.freshness_anomalies:
           timestamp_column: 'loaded_at'
           # optional - use tags to run elementary tests on a dedicated run
           tags: ['elementary']
