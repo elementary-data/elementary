@@ -17,7 +17,6 @@ from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
-
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
 DESCRIPTION_FIELD = "description"
@@ -268,7 +267,7 @@ class DbtTestAlert(TestAlert):
                         ["*Test parameters*"]
                     ),
                     self.slack_message_builder.create_text_section_block(
-                        f"`{self.test_params}`"
+                        f"```{self.test_params}```"
                     ),
                 ]
             )
@@ -443,7 +442,7 @@ class ElementaryTestAlert(DbtTestAlert):
                         ["*Test parameters*"]
                     ),
                     self.slack_message_builder.create_text_section_block(
-                        f"`{self.test_params}`"
+                        f"```{self.test_params}```"
                     ),
                 ]
             )
