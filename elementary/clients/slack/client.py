@@ -61,7 +61,7 @@ class SlackClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_user_id_from_email(self, email: str):
+    def get_user_id_from_email(self, email: str) -> Optional[str]:
         raise NotImplementedError
 
 
@@ -117,7 +117,7 @@ class SlackWebClient(SlackClient):
             logger.error("Failed to send report to Slack.")
         return send_succeed
 
-    def get_user_id_from_email(self, email: str) -> str:
+    def get_user_id_from_email(self, email: str) -> Optional[str]:
         try:
             if email not in self.email_to_user_id_cache:
                 user_id = self.client.users_lookupByEmail(email=email)["user"]["id"]
@@ -197,5 +197,5 @@ class SlackWebhookClient(SlackClient):
     def send_report(self, **kwargs):
         raise NotImplementedError
 
-    def get_user_id_from_email(self, email: str):
+    def get_user_id_from_email(self, email: str) -> Optional[str]:
         return None
