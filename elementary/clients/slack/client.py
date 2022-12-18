@@ -65,7 +65,7 @@ class SlackClient(ABC):
             if email not in self.email_to_user_id_cache:
                 user_id = self.client.users_lookupByEmail(email=email)["user"]["id"]
                 self.email_to_user_id_cache[email] = user_id
-                return user_id
+            return self.email_to_user_id_cache[email]
         except SlackApiError:
             logger.debug(f"Unable to get user id from email.", exc_info=True)
             return email
