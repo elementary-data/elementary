@@ -123,8 +123,8 @@ class SlackWebClient(SlackClient):
                 user_id = self.client.users_lookupByEmail(email=email)["user"]["id"]
                 self.email_to_user_id_cache[email] = user_id
             return self.email_to_user_id_cache[email]
-        except SlackApiError:
-            logger.debug(f"Unable to get user ID from email.", exc_info=True)
+        except SlackApiError as err:
+            logger.error(f"Unable to get Slack user ID from email: {err}.")
             return None
 
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
