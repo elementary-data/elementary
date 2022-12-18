@@ -55,7 +55,7 @@ class DataMonitoringReport(DataMonitoring):
     ):
         super().__init__(config, tracking, force_update_dbt_package, disable_samples)
         self.filter = self._parse_filter(filter)
-        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner, filter=self.filter)
+        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
         self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
         self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
@@ -235,8 +235,11 @@ class DataMonitoringReport(DataMonitoring):
             invocations = self.tests_api.get_invocations(
                 invocations_per_test=test_runs_amount, days_back=days_back
             )
+            raw_test_results = self.tests_api.get_test_results(
+                tests_metadata=tests_metadata, filter=self.filter
+            )
             tests_results = self._create_tests_results(
-                tests_metadata=tests_metadata,
+                raw_test_results=raw_test_results,
                 tests_sample_data=tests_sample_data,
                 invocations=invocations,
             )
@@ -254,13 +257,13 @@ class DataMonitoringReport(DataMonitoring):
 
     def _create_tests_results(
         self,
-        tests_metadata: List[TestMetadataSchema],
+        raw_test_results: List[TestMetadataSchema],
         tests_sample_data: Dict[TestUniqueIdType, Dict[str, Any]],
         invocations: Dict[TestUniqueIdType, List[InvocationSchema]],
     ) -> Dict[ModelUniqueIdType, Dict[str, Any]]:
         elementary_test_count = defaultdict(int)
         tests_results = defaultdict(list)
-        for test in tests_metadata:
+        for test in raw_test_results:
             test_sub_type_unique_id = self.tests_api.get_test_sub_type_unique_id(
                 **dict(test)
             )

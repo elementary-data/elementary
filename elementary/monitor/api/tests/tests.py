@@ -19,21 +19,6 @@ logger = get_logger(__name__)
 
 
 class TestsAPI(APIClient):
-    def __init__(
-        self, dbt_runner: DbtRunner, filter: Optional[DataMonitoringFilter] = None
-    ):
-        super().__init__(dbt_runner)
-        self.filter = filter
-        self.invocation_id = self._get_invocation_id_from_filter(self.filter)
-
-    def _get_invocation_id_from_filter(self, filter: DataMonitoringFilter) -> str:
-        if filter.invocation_id:
-            return filter.invocation_id
-        elif filter.invocation_time:
-            invocation_response = self.dbt_runner.run_operation(
-                macro_name="get_test_results", macro_args=dict(days_back=days_back)
-            )
-
     @staticmethod
     def get_test_sub_type_unique_id(
         model_unique_id: str,
@@ -54,6 +39,54 @@ class TestsAPI(APIClient):
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
         return [TestMetadataSchema(**test_metadata) for test_metadata in tests_metadata]
+
+    def _get_invocation_id_from_filter(self, filter: DataMonitoringFilter) -> str:
+        if filter.invocation_id:
+            return filter.invocation_id
+        elif filter.invocation_time:
+            invocation_response = self.dbt_runner.run_operation(
+                macro_name="get_last_invocation_id",
+                macro_args=dict(type="test", invocation_time=filter.invocation_time),
+            )
+            last_invocation = (
+                json.loads(invocation_response[0]) if invocation_response else None
+            )
+            return last_invocation[0]["invocation_id"] if last_invocation else None
+        elif filter.last_invocation:
+            invocation_response = self.dbt_runner.run_operation(
+                macro_name="get_last_invocation_id",
+                macro_args=dict(type="test"),
+            )
+            last_invocation = (
+                json.loads(invocation_response[0]) if invocation_response else None
+            )
+            return last_invocation[0]["invocation_id"] if last_invocation else None
+
+    def get_test_results(
+        self,
+        tests_metadata: List[TestMetadataSchema] = None,
+        filter: Optional[DataMonitoringFilter] = None,
+    ) -> List[TestMetadataSchema]:
+        invocation_id = self._get_invocation_id_from_filter(filter)
+        if invocation_id:
+            test_unique_ids_response = self.dbt_runner.run_operation(
+                macro_name="get_test_unique_ids_from_invocation",
+                macro_args=dict(invocation_id=invocation_id),
+            )
+            test_unique_ids = [
+                test_unique_id["unique_id"]
+                for test_unique_id in (
+                    json.loads(test_unique_ids_response[0])
+                    if test_unique_ids_response
+                    else []
+                )
+            ]
+            return [
+                test_metadata
+                for test_metadata in tests_metadata
+                if test_metadata.test_unique_id in test_unique_ids
+            ]
+        return tests_metadata
 
     def get_tests_sample_data(
         self,

@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
+
+SlackBlockType = dict
+SlackBlocksType = List[Optional[SlackBlockType]]
 
 
 class SlackMessageSchema(BaseModel):

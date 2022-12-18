@@ -11,11 +11,35 @@ from elementary.monitor.alerts.schema.test import (
     DbtTestConfigurationSchema,
     TestResultSchema,
 )
-from elementary.utils.json_utils import prettify_json_str_set, try_load_json
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
+
+
+TABLE_FIELD = "table"
+COLUMN_FIELD = "column"
+DESCRIPTION_FIELD = "description"
+OWNERS_FIELD = "owners"
+TAGS_FIELD = "tags"
+SUBSCRIBERS_FIELD = "subscribers"
+RESULT_MESSAGE_FIELD = "result_message"
+TEST_PARAMS_FIELD = "test_parameters"
+TEST_QUERY_FIELD = "test_query"
+TEST_RESULTS_SAMPLE_FIELD = "test_results_sample"
+DEFAULT_ALERT_FIELDS = [
+    TABLE_FIELD,
+    COLUMN_FIELD,
+    DESCRIPTION_FIELD,
+    OWNERS_FIELD,
+    TAGS_FIELD,
+    SUBSCRIBERS_FIELD,
+    RESULT_MESSAGE_FIELD,
+    TEST_PARAMS_FIELD,
+    TEST_QUERY_FIELD,
+    TEST_RESULTS_SAMPLE_FIELD,
+]
 
 
 class TestAlert(Alert):
@@ -52,6 +76,16 @@ class TestAlert(Alert):
         if test_alert_dict.get("test_type") == "dbt_test":
             return DbtTestAlert(**test_alert_dict)
         return ElementaryTestAlert(**test_alert_dict)
+
+    def get_alert_fields(self) -> Optional[list]:
+        # If there is no alerts_fields in the test meta object,
+        # we return the model alerts_fields from the model meta object.
+        # The fallback is DEFAULT_ALERT_FIELDS.
+        return (
+            self.test_meta.get("alert_fields")
+            if self.test_meta.get("alert_fields")
+            else self.model_meta.get("alert_fields", DEFAULT_ALERT_FIELDS)
+        )
 
 
 class DbtTestAlert(TestAlert):
@@ -117,75 +151,131 @@ class DbtTestAlert(TestAlert):
             return None
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
+        alert_fields = self.get_alert_fields()
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
+
         if is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(self.__dict__))
-        slack_message = {"attachments": [{"blocks": []}]}
-        self._add_text_section_to_slack_msg(slack_message, f"{icon} *dbt test alert*")
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Table*\n{self.table_full_name}",
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
-            ],
-            divider=True,
-        )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Status*\n{self.status}",
-                f"*Test name*\n{self.test_short_name if self.test_short_name else self.test_name}",
-            ],
-        )
-        self._add_text_section_to_slack_msg(
-            slack_message,
-            f"*Description*\n{self.test_description if self.test_description else 'No description'}",
-        )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Owners*\n{prettify_json_str_set(self.owners)}",
-                f"*Tags*\n{prettify_json_str_set(self.tags)}",
-            ],
-        )
-        if self.subscribers:
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [f"*Subscribers*\n{prettify_json_str_set(self.subscribers)}"],
+
+        title = [
+            self.slack_message_builder.create_header_block(f"{icon} dbt test alert"),
+            self.slack_message_builder.create_context_block(
+                [
+                    f"*Test:* {self.test_short_name if self.test_short_name else self.test_name}     |",
+                    f"*Status:* {self.status}     |",
+                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                ],
+            ),
+        ]
+
+        preview = []
+        if TABLE_FIELD in alert_fields:
+            preview.append(
+                self.slack_message_builder.create_text_section_block(
+                    f"*Table*\n{self.table_full_name}"
+                )
             )
-        if self.error_message:
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Error Message*\n```{self.error_message}```",
-                divider=True,
+
+        compacted_sections = []
+        if COLUMN_FIELD in alert_fields:
+            compacted_sections.append(
+                f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
-        if self.column_name:
-            self._add_text_section_to_slack_msg(
-                slack_message, f"*Column*\n{self.column_name}", divider=True
+        if TAGS_FIELD in alert_fields:
+            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+            compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
+        if OWNERS_FIELD in alert_fields:
+            owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+            compacted_sections.append(
+                f"*Owners*\n{owners if owners else '_No owners_'}"
             )
-        if self.test_params:
-            self._add_text_section_to_slack_msg(
-                slack_message, f"*Test Parameters*\n`{self.test_params}`", divider=True
+        if SUBSCRIBERS_FIELD in alert_fields:
+            subscribers = self.slack_message_builder.prettify_and_dedup_list(
+                self.subscribers
             )
-        if self.test_results_query:
-            msg = f"*Test Query*\n```{self.test_results_query}```"
+            compacted_sections.append(
+                f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
+            )
+        if compacted_sections:
+            preview.extend(
+                self.slack_message_builder.create_compacted_sections_blocks(
+                    compacted_sections
+                )
+            )
+
+        if DESCRIPTION_FIELD in alert_fields:
+            if self.test_description:
+                preview.extend(
+                    [
+                        self.slack_message_builder.create_text_section_block(
+                            "*Description*"
+                        ),
+                        self.slack_message_builder.create_context_block(
+                            [self.test_description]
+                        ),
+                    ]
+                )
+            else:
+                preview.append(
+                    self.slack_message_builder.create_text_section_block(
+                        "*Description*\n_No description_"
+                    )
+                )
+
+        result = []
+        if RESULT_MESSAGE_FIELD in alert_fields and self.error_message:
+            result.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"```{self.error_message.strip()}```"
+                    ),
+                ]
+            )
+
+        if TEST_RESULTS_SAMPLE_FIELD in alert_fields and self.test_rows_sample:
+            result.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Test results sample*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"`{self.test_rows_sample}`"
+                    ),
+                ]
+            )
+
+        if TEST_QUERY_FIELD in alert_fields and self.test_results_query:
+            result.append(
+                self.slack_message_builder.create_context_block(["*Test query*"])
+            )
+
+            msg = f"```{self.test_results_query}```"
             if len(msg) > SectionBlock.text_max_length:
                 msg = (
-                    f"*Query for Test's Query*\n"
                     f"_The test query was too long, here's a query to get it._\n"
                     f"```SELECT test_results_query FROM {self.elementary_database_and_schema}.elementary_test_results WHERE test_execution_id = '{self.id}'```"
                 )
-            self._add_text_section_to_slack_msg(slack_message, msg, divider=True)
+            result.append(self.slack_message_builder.create_text_section_block(msg))
 
-        if self.test_rows_sample:
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Test Results Sample*\n`{self.test_rows_sample}`",
-                divider=True,
+        configuration = []
+        if TEST_PARAMS_FIELD in alert_fields and self.test_params:
+            configuration.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Test parameters*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"`{self.test_params}`"
+                    ),
+                ]
             )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+
+        return self.slack_message_builder.get_slack_message(
+            title=title, preview=preview, result=result, configuration=configuration
+        )
 
     def to_test_alert_api_dict(self):
         configuration = DbtTestConfigurationSchema(
@@ -238,6 +328,9 @@ class DbtTestAlert(TestAlert):
 
 class ElementaryTestAlert(DbtTestAlert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        alert_fields = self.get_alert_fields()
+        icon = self.slack_message_builder.get_slack_status_icon(self.status)
+
         anomalous_value = None
         if self.test_type == "schema_change":
             alert_title = "Schema change detected"
@@ -251,62 +344,113 @@ class ElementaryTestAlert(DbtTestAlert):
 
         if is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(self.__dict__))
-        slack_message = {"attachments": [{"blocks": []}]}
-        icon = ":small_red_triangle:"
-        if self.status == "warn":
-            icon = ":warning:"
-        self._add_text_section_to_slack_msg(slack_message, f"{icon} *{alert_title}*")
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Table*\n{self.table_full_name}",
-                f"*When*\n{self.detected_at.strftime(DATETIME_FORMAT)}",
-            ],
-            divider=True,
-        )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Test name*\n{self.test_short_name if self.test_short_name else self.test_name}",
-                f"*{sub_type_title}:*\n{self.test_sub_type_display_name}",
-            ],
-        )
-        self._add_text_section_to_slack_msg(
-            slack_message,
-            f"*Description*\n{self.test_description if self.test_description else 'No description'}",
-        )
-        self._add_fields_section_to_slack_msg(
-            slack_message,
-            [
-                f"*Owners*\n{prettify_json_str_set(self.owners)}",
-                f"*Tags*\n{prettify_json_str_set(self.tags)}",
-            ],
-        )
-        if self.subscribers:
-            self._add_fields_section_to_slack_msg(
-                slack_message,
-                [f"*Subscribers*\n{prettify_json_str_set(self.subscribers)}"],
+
+        title = [
+            self.slack_message_builder.create_header_block(f"{icon} {alert_title}"),
+            self.slack_message_builder.create_context_block(
+                [
+                    f"*Test:* {self.test_short_name if self.test_short_name else self.test_name} - {self.test_sub_type_display_name}     |",
+                    f"*Status:* {self.status}     |",
+                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                ],
+            ),
+        ]
+
+        preview = []
+        if TABLE_FIELD in alert_fields:
+            preview.append(
+                self.slack_message_builder.create_text_section_block(
+                    f"*Table*\n{self.table_full_name}"
+                )
             )
-        if self.error_message:
-            self._add_text_section_to_slack_msg(
-                slack_message,
-                f"*Error Message*\n```{self.error_message}```",
-                divider=True,
+
+        compacted_sections = []
+        if COLUMN_FIELD in alert_fields:
+            compacted_sections.append(
+                f"*Column*\n{self.column_name if self.column_name else '_No column_'}"
             )
-        column_msgs = []
-        if self.column_name:
-            column_msgs.append(f"*Column*\n{self.column_name}")
-        if anomalous_value:
-            column_msgs.append(f"*Anomalous Values*\n{anomalous_value}")
-        if column_msgs:
-            self._add_fields_section_to_slack_msg(
-                slack_message, column_msgs, divider=True
+        if TAGS_FIELD in alert_fields:
+            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+            compacted_sections.append(f"*Tags*\n{tags if tags else '_No tags_'}")
+        if OWNERS_FIELD in alert_fields:
+            owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+            compacted_sections.append(
+                f"*Owners*\n{owners if owners else '_No owners_'}"
             )
-        if self.test_params:
-            self._add_text_section_to_slack_msg(
-                slack_message, f"*Test Parameters*\n`{self.test_params}`", divider=True
+        if SUBSCRIBERS_FIELD in alert_fields:
+            subscribers = self.slack_message_builder.prettify_and_dedup_list(
+                self.subscribers
             )
-        return SlackMessageSchema(attachments=slack_message["attachments"])
+            compacted_sections.append(
+                f'*Subscribers*\n{subscribers if subscribers else "_No subscribers_"}'
+            )
+        if compacted_sections:
+            preview.extend(
+                self.slack_message_builder.create_compacted_sections_blocks(
+                    compacted_sections
+                )
+            )
+
+        if DESCRIPTION_FIELD in alert_fields:
+            if self.test_description:
+                preview.extend(
+                    [
+                        self.slack_message_builder.create_text_section_block(
+                            "*Description*"
+                        ),
+                        self.slack_message_builder.create_context_block(
+                            [self.test_description]
+                        ),
+                    ]
+                )
+            else:
+                preview.append(
+                    self.slack_message_builder.create_text_section_block(
+                        "*Description*\n_No description_"
+                    )
+                )
+
+        result = []
+        if RESULT_MESSAGE_FIELD in alert_fields and self.error_message:
+            result.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"```{self.error_message.strip()}```"
+                    ),
+                ]
+            )
+
+        if TEST_RESULTS_SAMPLE_FIELD in alert_fields and anomalous_value:
+            result.append(
+                self.slack_message_builder.create_context_block(
+                    ["*Test results sample*"]
+                )
+            )
+            messagess = []
+            if self.column_name:
+                messagess.append(f"*Column*: {self.column_name}     |")
+            messagess.append(f"*Anomalous Values*: {anomalous_value}")
+            result.append(self.slack_message_builder.create_context_block(messagess))
+
+        configuration = []
+        if TEST_PARAMS_FIELD in alert_fields and self.test_params:
+            configuration.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Test parameters*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"`{self.test_params}`"
+                    ),
+                ]
+            )
+
+        return self.slack_message_builder.get_slack_message(
+            title=title, preview=preview, result=result, configuration=configuration
+        )
 
     def to_test_alert_api_dict(self):
         test_params = try_load_json(self.test_params) or {}
