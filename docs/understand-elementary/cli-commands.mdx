@@ -34,6 +34,13 @@ edr monitor send-report
 
 If you wish, here are the options for providing paths and names that are different than default:
 
+- **dbt project path:**
+  The path of the directory in which your `dbt_project.yml` file is located. Default is the working directory.
+
+```shell
+--project-dir <PATH>
+```
+
 - **Profile directory path:**
   The path of the directory in which your `profiles.yml` file is located. Default is `HOME_DIR/.dbt`
 - This option must be configured together with profile name.
