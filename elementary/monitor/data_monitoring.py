@@ -84,6 +84,7 @@ class DataMonitoring:
             self.user_dbt_runner = None
             logger.warning(
                 "Please run edr from your dbt project directory or specify --project-dir. "
+                "Not doing so will result in not up-to-date data. "
                 "This will be required on following versions."
             )
 
