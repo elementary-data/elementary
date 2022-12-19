@@ -7,7 +7,6 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import click
 import pkg_resources
 from alive_progress import alive_it
 from packaging import version
@@ -74,16 +73,19 @@ class DataMonitoring:
             self.config.profile_target,
             dbt_env_vars=self.config.dbt_env_vars,
         )
-        self.user_dbt_runner = (
-            DbtRunner(
+        if self.config.project_dir:
+            self.user_dbt_runner = DbtRunner(
                 self.config.project_dir,
                 self.config.profiles_dir,
                 self.config.profile_target,
                 dbt_env_vars=self.config.dbt_env_vars,
             )
-            if self.config.project_dir
-            else None
-        )
+        else:
+            self.user_dbt_runner = None
+            logger.warning(
+                "Please run edr from your dbt project directory or specify --project-dir. "
+                "This will be required on following versions."
+            )
 
         self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
@@ -530,12 +532,11 @@ class DataMonitoring:
             dbt_pkg_ver.major != py_pkg_ver.major
             or dbt_pkg_ver.minor != py_pkg_ver.minor
         ):
-            click.secho(
+            logger.warning(
                 f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
                 "Please upgrade the major and minor versions to align.\n",
-                fg="yellow",
             )
 
     def run_artifacts(self):
-        logger.info("Running dbt artifacts models to get their latest state.")
+        logger.info("Syncing with dbt project to its latest state.")
         self.user_dbt_runner.run("edr.dbt_artifacts")
