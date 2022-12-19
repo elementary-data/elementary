@@ -1,15 +1,10 @@
-To start using Elementary to monitor you dbt tests, executions and data, you need to add our dbt package to your dbt
-project.
+To start using Elementary to monitor you dbt tests, executions and data, you need to add our dbt package to your dbt project.
 
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on.
 
-Add packages to your project by creating a 'packages.yml' file under the main project directory (where your '
-dbt_project.yml is), and adding the relevant package. After you add a new package, run dbt deps to actually pull it's
-code to your project. This is also how you update packages.
-Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/)
-, [dbt_date](https://github.com/calogica/dbt-date/tree/0.5.4/)
-, [codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.5.0/).
+Add packages to your project by creating a 'packages.yml' file under the main project directory (where your 'dbt_project.yml is), and adding the relevant package. After you add a new package, run dbt deps to actually pull it's code to your project. This is also how you update packages.
+Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/), [dbt_date](https://github.com/calogica/dbt-date/tree/0.5.4/), [codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.5.0/).
 
 </Accordion>
 
@@ -40,11 +35,47 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
 
+<Info>
+
+Make sure to copy the packages that are relevant to your dbt version.
+
+</Info>
+
+**For dbt 1.3.0 and above:**
+
 ```yml packages.yml
 packages:
   - package: elementary-data/elementary
     version: 0.6.4
     ## Docs: https://docs.elementary-data.com
+```
+
+**For dbt >=1.2.0 \<1.3.0:**
+
+```yml packages.yml
+packages:
+  - package: elementary-data/elementary
+    version: 0.6.4
+    ## Docs: https://docs.elementary-data.com
+
+    ## !! Important !! For dbt >=1.2.0 \<1.3.0 ##
+    ## (Prevents dbt_utils versions exceptions) ##
+  - package: dbt-labs/dbt_utils
+    version: [">=0.8.0", "<1.0.0"]
+```
+
+**For dbt >=1.0.0 \<1.2.0:**
+
+```yml packages.yml
+packages:
+  - package: elementary-data/elementary
+    version: 0.6.4
+    ## Docs: https://docs.elementary-data.com
+
+    ## !! Important !! For dbt <1.2.0 ##
+    ## (Prevents dbt_utils versions exceptions) ##
+  - package: dbt-labs/dbt_utils
+    version: [">=0.8.0", "<0.9.0"]
 ```
 
 ### 2. Add to your `dbt_project.yml`
@@ -78,5 +109,4 @@ dbt deps
 dbt run --select elementary
 ```
 
-This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt
-executions.
+This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt executions.
