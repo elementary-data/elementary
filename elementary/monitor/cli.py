@@ -72,14 +72,14 @@ def common_options(func):
         "-p",
         type=str,
         default=None,
-        help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-        "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
+        help="Which directory to look in for the profiles.yml file. "
+        "If not set, edr will look in the current working directory first, then HOME/.dbt/",
     )(func)
     func = click.option(
         "--project-dir",
         type=str,
         default=None,
-        help="Specify your dbt project dir where a dbt_project.yml is located.",
+        help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
     )(func)
     return func
 
