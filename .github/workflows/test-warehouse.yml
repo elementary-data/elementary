@@ -58,6 +58,10 @@ on:
         required: false
         default: true
 
+defaults:
+  run:
+    working-directory: dbt-data-reliability/integration_tests
+
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
@@ -68,14 +72,6 @@ jobs:
       group: tests-${{ inputs.warehouse-type }}-${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
     steps:
-      - name: Write dbt profiles
-        env:
-          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
-        run: |
-          mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
-
       - name: Checkout Elementary
         uses: actions/checkout@v3
         with:
@@ -88,6 +84,14 @@ jobs:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
+
+      - name: Write dbt profiles
+        env:
+          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
+        run: |
+          mkdir -p ~/.dbt
+          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
+          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Setup Python
         uses: actions/setup-python@v4
