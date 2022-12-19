@@ -1,8 +1,9 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
+from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
 
 class DataMonitoringFilter(BaseModel):
@@ -13,5 +14,8 @@ class DataMonitoringFilter(BaseModel):
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time):
         if invocation_time:
-            return convert_partial_iso_format_to_full_iso_format(invocation_time)
+            invocation_datetime = convert_local_time_to_timezone(
+                datetime.fromisoformat(invocation_time)
+            )
+            return invocation_datetime.strftime(DATETIME_FORMAT)
         return None
