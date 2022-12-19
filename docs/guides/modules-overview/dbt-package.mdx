@@ -24,6 +24,19 @@ The code of the Elementary dbt package can be found here: [https://github.com/el
 
 <SchemaNoAccordion />
 
+# Elementary schema and full refresh
+
+Elementary incremental models are not full-refreshed by default. This is because these models contain
+information such as historical runs and test results, which typically you'd want to maintain even when full refreshing
+the models of your main dbt project.
+
+However, if you wish to change this behavior and include Elementary models as a part of the full refresh, you can set
+the following var:
+```yaml
+vars:
+  elementary_full_refresh: true
+```
+
 # Elementary dbt package models
 
 ## Run results
@@ -40,9 +53,10 @@ New data is loaded to this model on an on-run-end hook named `elementary.upload_
 
 _Incremental model_
 
-Attributes associated with each dbt invocation. Inserted at the end of each invocation.
+Attributes associated with each dbt invocation, inserted at the end of each invocation.
 Each row is the result of a single invocation (dbt run, dbt test, dbt build, etc).
-New data is loaded to this model on an on-run-end hook named `elementary.upload_run_results`.
+New data is loaded to this model on an on-run-end hook named `elementary.upload_dbt_invocation`.
+It also contains information about your job or what triggered the invocation such as `pull_request_id` and `cause`.
 
 ### model_run_results
 
@@ -59,6 +73,14 @@ _View_
 Run results of dbt snapshots, enriched with snapshots metadata.
 Each row is the result of a single snapshot.
 This is a view that joins data from `dbt_run_results` and `dbt_snapshots`.
+
+### job_run_results
+
+_View_
+
+Run results of dbt invocations, enriched with jobs metadata.
+Each row is the result of a single job.
+This is a view on `dbt_invocations`.
 
 ### elementary_test_results
 
