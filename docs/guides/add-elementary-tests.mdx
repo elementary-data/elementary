@@ -20,6 +20,91 @@ _Note_: Anomaly detection is not yet supported on Databricks in dbt Cloud.
 
 ### Table (model / source) tests:
 
+<Accordion title="elementary.volume_anomalies">
+
+`elementary.volume_anomalies`
+
+Monitors the row count of your table.
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    tests:
+      - elementary.volume_anomalies:
+          timestamp_column: < timestamp column >
+          where_expression: < sql expression >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.volume_anomalies:
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.volume_anomalies:
+          tags: ['elementary']
+```
+
+</CodeGroup>
+
+</Accordion>
+
+<Accordion title="elementary.freshness_anomalies">
+
+`elementary.volume_anomalies`
+
+Monitors the freshness of your table.
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    tests:
+      - elementary.freshness_anomalies:
+          timestamp_column: < timestamp column >
+          where_expression: < sql expression >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    tests:
+      - elementary.freshness_anomalies:
+          timestamp_column: 'loaded_at'
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+```
+
+</CodeGroup>
+
+</Accordion>
+
 <Accordion title="elementary.table_anomalies">
 
 `elementary.table_anomalies`
@@ -42,6 +127,7 @@ models:
           table_anomalies: < specific monitors, all if null >
           # optional - configure different freshness column than timestamp column
           freshness_column: < freshness_column >
+          where_expression: < sql expression >
 ```
 
 ```yml Models example
@@ -57,6 +143,7 @@ models:
           table_anomalies:
             - row_count
             - freshness
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
           # optional - use tags to run elementary tests on a dedicated run
           tags: ['elementary']
           config:
@@ -66,7 +153,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-      - elementary.table_anomalies
+      - elementary.table_anomalies:
           tags: ['elementary']
 ```
 
@@ -151,6 +238,7 @@ models:
     tests:
       - elementary.all_columns_anomalies:
           column_anomalies: < specific monitors, all if null >
+          where_expression: < sql expression >
 ```
 
 ```yml Models example
@@ -163,6 +251,7 @@ models:
         timestamp_column: "loaded_at"
     tests:
       - elementary.all_columns_anomalies:
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
           tags: ["elementary"]
           # optional - change global sensitivity
           sensitivity: 3.5
@@ -213,6 +302,127 @@ models:
 
 </Accordion>
 
+<Accordion title="elementary.schema_changes_from_baseline">
+
+`elementary.schema_changes_from_baseline`
+
+Checks for schema changes against baseline columns defined in a source's or model's configuration.
+For this test to work, the configuration should contain columns and data types.
+
+The initial configuration needed for this test to work can be auto-generated (see details below).
+
+Supported parameters for the test:
+* `fail_on_added` - If set, the test will fail if there are columns in the table that do not exist in the baseline (default:
+False - meaning added columns won't cause the test to fail).
+* `enforce_types` - If set, the test will raise an error if there are columns that are defined without a data type (default:
+False - in this case the test will not fail, but instead will only verify that the column exists and not its type)
+
+_Not supported in Databricks._
+
+<Accordion title="How to auto-generate the baseline">
+
+In order for the schema changes from baseline test to work, a baseline needs to be generated from an initial state of
+the table and and it should be added to the configuration of the source / model under "columns". The baseline consists
+of the name and data type for each column.
+
+In order to generate the baseline, Elementary provides the `generate_schema_baseline_test` macro. By default,
+running it will generate a schema_changes_from_baseline test for all sources, but it can be customized with
+the following arguments:
+* `name` - run on a specific source / model
+* `include_models` - whether or not to generate tests for models (default - false)
+* `include_sources` - whether or not to generate tests for sources (default - true)
+* `fail_on_added` - if set, the "fail_on_added" parameter will be added to the configuration of the tests with the supplied setting
+* `enforce_types` - if set, the "enforce_types" parameter will be added to the configuration of the tests with the supplied setting
+
+Examples:
+```shell
+# Generate a schema changes from baseline test for all sources
+dbt run-operation elementary.generate_schema_baseline_test
+
+# Generate a schema changes from baseline test for a specific model / source named "orders"
+dbt run-operation elementary.generate_schema_baseline_test --args '{"name": "orders"}'
+
+# Generate a schema changes from baseline test for all sources and all models
+dbt run-operation elementary.generate_schema_baseline_test --args '{"include_models": true}'
+
+# Generate a schema changes from baseline test with the "fail_on_added" and "enforce_types" parameters set to true
+dbt run-operation elementary.generate_schema_baseline_test --args '{"fail_on_added": true, "enforce_types": true}'
+```
+
+</Accordion>
+
+<CodeGroup>
+
+```yml Sources
+version: 2
+
+sources:
+  - name: < source name >
+    database: < database name >
+    schema: < schema name >
+    tables:
+      - name: < table name >
+        columns:
+          - name: < column 1 >
+            data_type: < data type 1 >
+          - name: < column 2 >
+            data_type: < data type 2 >
+        tests:
+          - elementary.schema_changes_from_baseline
+```
+
+```yml Sources example
+version: 2
+
+sources:
+  - name: 'my_non_dbt_data'
+    database: 'raw_events'
+    schema: 'product'
+    tables:
+      - name: 'raw_product_login_events'
+        columns:
+          - name: event_name
+            data_type: text
+          - name: event_id
+            data_type: integer
+        tests:
+          - elementary.schema_changes_from_baseline
+              tags: ["elementary"]
+```
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column 1 >
+        data_type: < data type 1 >
+      - name: < column 2 >
+        data_type: < data type 1 >
+    tests:
+      - elementary.schema_changes_from_baseline
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    columns:
+      - name: event_name
+        data_type: text
+      - name: event_id
+        data_type: integer
+    tests:
+      - elementary.schema_changes_from_baseline:
+          tags: ["elementary"]
+```
+
+</CodeGroup>
+
+</Accordion>
+
 ### Column test:
 
 <Accordion title="elementary.column_anomalies">
@@ -244,6 +454,7 @@ models:
         tests:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
+              where_expression: < sql expression >
 ```
 
 ```yml Models example
@@ -261,6 +472,7 @@ models:
               column_anomalies:
                 - missing_count
                 - min_length
+              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
               tags: ['elementary']
 
   - name: users
@@ -274,6 +486,7 @@ models:
           - elementary.column_anomalies:
               tags: ['elementary']
               timestamp_column: 'updated_at'
+              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
       - name: user_name
         tests:
           - elementary.column_anomalies:
@@ -281,6 +494,96 @@ models:
                 - missing_count
                 - min_length
               tags: ['elementary']
+```
+
+</CodeGroup>
+
+</Accordion>
+
+<Accordion title="elementary.json_schema">
+
+`elementary.json_schema`
+
+Allows validating that a string column matches a given JSON schema. The test expects a JSON schema as input,
+defined according to the [JSON schema standard](https://json-schema.org/), defined in YAML format (see an example below).
+
+This test along with the relevant JSON schema can be auto-generated:
+
+<Accordion title="How to auto-generate the JSON schema test">
+
+Elementary provides the `generate_json_schema_test` macro in order to auto-generate the JSON schema for a given
+column using existing data.
+
+Example usage:
+```shell
+>>> dbt run-operation elementary.generate_json_schema_test --args '{"node_name": "login_events", "column_name": "raw_event_data"}'
+Please add the following test to your model configuration:
+----------------------------------------------------------
+
+columns:
+  - name: raw_event_data
+    tests:
+      - elementary.json_schema:
+          type: object
+          properties:
+            event_id:
+              type: integer
+            event_name:
+              type: string
+            event_args:
+              type: array
+              items:
+                type: string
+          required:
+            - event_id
+            - event_name
+```
+
+_Note_: The `generate_json_schema_test` macro relies on a 3rd-party python library called `genson`. If you are using
+BigQuery, you will need to pre-install this library in your Dataproc cluster (See [dbt's documentation on Python models](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/python-models#specific-data-platforms)
+for more details)
+
+</Accordion>
+
+_Note_: This test relies on our [Python tests capability](/guides/python-tests), and is currently only supported for
+Snowflake and BigQuery data warehouses.
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.json_schema:
+              <json schema parameters>
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    columns:
+      - name: raw_event_data
+        tests:
+          - elementary.json_schema:
+              type: object
+              properties:
+                event_id:
+                  type: integer
+                event_name:
+                  type: string
+                event_args:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - event_id
+                - event_name
 ```
 
 </CodeGroup>
@@ -408,7 +711,7 @@ sources:
 
 ```yml Sources example
 sources:
-  - name: 'my_non_dbt_table'
+  - name: 'my_non_dbt_data'
     database: 'raw_events'
     schema: 'product'
     tables:
@@ -427,10 +730,16 @@ sources:
                 - null_count
                 - missing_count
                 - zero_count
-         columns:
+          - elementary.schema_changes_from_baseline
+        columns:
           - name: user_id
+            data_type: text
             tests:
               - elementary.column_anomalies
+          - name: event_name
+            data_type: text
+          - name: event_id
+            data_type: integer
 ```
 
 </CodeGroup>

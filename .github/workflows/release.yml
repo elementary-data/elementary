@@ -3,7 +3,6 @@ on:
   push:
     tags:
       - v[0-9].[0-9]+.[0-9]+
-  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -63,7 +62,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@3
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true

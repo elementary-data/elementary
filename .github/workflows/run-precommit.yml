@@ -1,4 +1,4 @@
-name: Format Python code
+name: Run pre-commit hooks
 on:
   push:
     paths:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  format:
+  code-quality:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Elementary
@@ -22,8 +22,3 @@ jobs:
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files --show-diff-on-failure
-
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v9.1.0
-        with:
-          message: "Formatted the codebase."
