@@ -68,18 +68,30 @@ class DataMonitoring:
     ):
         self.config = config
         self.tracking = tracking
-        self.dbt_runner = DbtRunner(
+        self.internal_dbt_runner = DbtRunner(
             dbt_project_utils.PATH,
             self.config.profiles_dir,
             self.config.profile_target,
             dbt_env_vars=self.config.dbt_env_vars,
         )
-        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
-        self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
-        self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
-        self.filter_api = FiltersAPI(dbt_runner=self.dbt_runner)
+        self.user_dbt_runner = (
+            DbtRunner(
+                self.config.project_dir,
+                self.config.profiles_dir,
+                self.config.profile_target,
+                dbt_env_vars=self.config.dbt_env_vars,
+            )
+            if self.config.project_dir
+            else None
+        )
+
+        self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
+        self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
+        self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
+        self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
+        self.filter_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
         self.execution_properties = {}
+        tracking.set_env("has_project_dir", bool(self.config.project_dir))
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         tracking.set_env("target_name", latest_invocation.get("target_name"))
@@ -98,92 +110,12 @@ class DataMonitoring:
         self._download_dbt_package_if_needed(force_update_dbt_package)
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.alerts_api = AlertsAPI(
-            self.dbt_runner, self.config, self.elementary_database_and_schema
+            self.internal_dbt_runner, self.config, self.elementary_database_and_schema
         )
         self.sent_alert_count = 0
         self.success = True
         self.send_test_message_on_success = send_test_message_on_success
         self.disable_samples = disable_samples
-
-    def _parse_emails_to_ids(self, slack_members: Union[str, List[str]]) -> str:
-        if not slack_members:
-            return slack_members
-
-        def _regex_match_owner_email(potential_email: str) -> bool:
-            email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-            return bool(re.fullmatch(email_regex, potential_email))
-
-        def _get_user_id(email: str) -> str:
-            user_id = self.slack_client.get_user_id_from_email(email)
-            return f"<@{user_id}>" if user_id else email
-
-        if isinstance(slack_members, str):
-            slack_members = parse_str_to_list(slack_members)
-        ids = [
-            _get_user_id(slack_member)
-            if _regex_match_owner_email(slack_member)
-            else slack_member
-            for slack_member in slack_members
-        ]
-        return prettify_json_str_set(ids)
-
-    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
-        if not alerts:
-            return
-
-        sent_alert_ids = []
-        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
-        for alert in alerts_with_progress_bar:
-            alert.owners = self._parse_emails_to_ids(alert.owners)
-            alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
-            alert_msg = alert.to_slack()
-            sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel
-                if alert.slack_channel
-                else self.config.slack_channel_name,
-                message=alert_msg,
-            )
-            if sent_successfully:
-                sent_alert_ids.append(alert.id)
-            else:
-                logger.error(
-                    f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
-                )
-                self.success = False
-        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        self.sent_alert_count += len(sent_alert_ids)
-
-    def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()
-        self.execution_properties["dbt_package_exists"] = internal_dbt_package_exists
-        self.execution_properties[
-            "force_update_dbt_packages"
-        ] = force_update_dbt_packages
-        if not internal_dbt_package_exists or force_update_dbt_packages:
-            logger.info("Downloading edr internal dbt package")
-            package_downloaded = self.dbt_runner.deps()
-            self.execution_properties["package_downloaded"] = package_downloaded
-            if not package_downloaded:
-                logger.error("Could not download internal dbt package")
-                self.success = False
-                return
-
-    def _send_test_message(self):
-        self.slack_client.send_message(
-            channel_name=self.config.slack_channel_name,
-            message=SlackMessageSchema(
-                text=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-            ),
-        )
-        logger.info("Sent the test message.")
-
-    def _send_alerts(self, alerts: Alerts):
-        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
-        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        self._send_alerts_to_slack(
-            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
-        )
-        self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def run_alerts(
         self,
@@ -191,8 +123,10 @@ class DataMonitoring:
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
+        if self.user_dbt_runner:
+            self.run_artifacts()
         logger.info("Running internal dbt run to aggregate alerts")
-        success = self.dbt_runner.run(
+        success = self.internal_dbt_runner.run(
             models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
         )
         self.execution_properties["alerts_run_success"] = success
@@ -231,6 +165,8 @@ class DataMonitoring:
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ) -> Tuple[bool, str]:
+        if self.user_dbt_runner:
+            self.run_artifacts()
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, "w") as html_file:
@@ -344,6 +280,86 @@ class DataMonitoring:
 
         self.execution_properties["success"] = self.success
         return self.success
+
+    def _parse_emails_to_ids(self, slack_members: Union[str, List[str]]) -> str:
+        if not slack_members:
+            return slack_members
+
+        def _regex_match_owner_email(potential_email: str) -> bool:
+            email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+            return bool(re.fullmatch(email_regex, potential_email))
+
+        def _get_user_id(email: str) -> str:
+            user_id = self.slack_client.get_user_id_from_email(email)
+            return f"<@{user_id}>" if user_id else email
+
+        if isinstance(slack_members, str):
+            slack_members = parse_str_to_list(slack_members)
+        ids = [
+            _get_user_id(slack_member)
+            if _regex_match_owner_email(slack_member)
+            else slack_member
+            for slack_member in slack_members
+        ]
+        return prettify_json_str_set(ids)
+
+    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
+        if not alerts:
+            return
+
+        sent_alert_ids = []
+        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
+        for alert in alerts_with_progress_bar:
+            alert.owners = self._parse_emails_to_ids(alert.owners)
+            alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
+            alert_msg = alert.to_slack()
+            sent_successfully = self.slack_client.send_message(
+                channel_name=alert.slack_channel
+                if alert.slack_channel
+                else self.config.slack_channel_name,
+                message=alert_msg,
+            )
+            if sent_successfully:
+                sent_alert_ids.append(alert.id)
+            else:
+                logger.error(
+                    f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
+                )
+                self.success = False
+        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
+        self.sent_alert_count += len(sent_alert_ids)
+
+    def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
+        internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()
+        self.execution_properties["dbt_package_exists"] = internal_dbt_package_exists
+        self.execution_properties[
+            "force_update_dbt_packages"
+        ] = force_update_dbt_packages
+        if not internal_dbt_package_exists or force_update_dbt_packages:
+            logger.info("Downloading edr internal dbt package")
+            package_downloaded = self.internal_dbt_runner.deps()
+            self.execution_properties["package_downloaded"] = package_downloaded
+            if not package_downloaded:
+                logger.error("Could not download internal dbt package")
+                self.success = False
+                return
+
+    def _send_test_message(self):
+        self.slack_client.send_message(
+            channel_name=self.config.slack_channel_name,
+            message=SlackMessageSchema(
+                text=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            ),
+        )
+        logger.info("Sent the test message.")
+
+    def _send_alerts(self, alerts: Alerts):
+        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
+        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
+        self._send_alerts_to_slack(
+            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
+        )
+        self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         return self.lineage_api.get_lineage(exclude_elementary_models)
@@ -484,7 +500,7 @@ class DataMonitoring:
 
     def get_elementary_database_and_schema(self):
         try:
-            return self.dbt_runner.run_operation(
+            return self.internal_dbt_runner.run_operation(
                 "get_elementary_database_and_schema", quiet=True
             )[0]
         except Exception as ex:
@@ -494,7 +510,7 @@ class DataMonitoring:
 
     def get_latest_invocation(self) -> Dict[str, Any]:
         try:
-            latest_invocation = self.dbt_runner.run_operation(
+            latest_invocation = self.internal_dbt_runner.run_operation(
                 "get_latest_invocation", quiet=True
             )[0]
             return json.loads(latest_invocation)[0] if latest_invocation else {}
@@ -519,3 +535,7 @@ class DataMonitoring:
                 "Please upgrade the major and minor versions to align.\n",
                 fg="yellow",
             )
+
+    def run_artifacts(self):
+        logger.info("Running dbt artifacts models to get their latest state.")
+        self.user_dbt_runner.run("edr.dbt_artifacts")
