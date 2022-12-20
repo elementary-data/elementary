@@ -1,11 +1,14 @@
 import json
 import re
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from dateutil import tz
 
 from elementary.clients.api.api import APIClient
+from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.monitor.api.invocations.invocations import InvocationsAPI
+from elementary.monitor.api.invocations.schema import DbtInvocationSchema
 from elementary.monitor.api.tests.schema import (
     InvocationSchema,
     InvocationsSchema,
@@ -34,6 +37,10 @@ TEST_INVOCATIONS = "test_invocations"
 
 
 class TestsAPI(APIClient):
+    def __init__(self, dbt_runner: DbtRunner):
+        super().__init__(dbt_runner)
+        self.invocatons_api = InvocationsAPI(dbt_runner)
+
     @staticmethod
     def get_test_sub_type_unique_id(
         model_unique_id: str,
@@ -60,30 +67,23 @@ class TestsAPI(APIClient):
         self.set_run_cache(key=TESTS_METADATA, value=tests_metadata)
         return tests_metadata
 
-    def _get_invocation_id_from_filter(self, filter: DataMonitoringFilter) -> dict:
-        invocation_id = None
+    def _get_invocation_from_filter(
+        self, filter: DataMonitoringFilter
+    ) -> Optional[DbtInvocationSchema]:
+        invocation = None
         if filter.invocation_id:
-            invocation_id = filter.invocation_id
+            invocation = self.invocatons_api.get_invocation_by_id(
+                type="test", invocation_id=filter.invocation_id
+            )
         elif filter.invocation_time:
-            invocation_response = self.dbt_runner.run_operation(
-                macro_name="get_last_tests_invocation_id",
-                macro_args=dict(invocation_time=filter.invocation_time),
+            invocation = self.invocatons_api.get_invocation_by_time(
+                type="test", invocation_max_time=filter.invocation_time
             )
-            invocation = (
-                json.loads(invocation_response[0]) if invocation_response else None
-            )
-            invocation_id = invocation[0]["invocation_id"] if invocation else None
         elif filter.last_invocation:
-            invocation_response = self.dbt_runner.run_operation(
-                macro_name="get_last_tests_invocation_id",
-            )
-            invocation = (
-                json.loads(invocation_response[0]) if invocation_response else None
-            )
-            invocation_id = invocation[0]["invocation_id"] if invocation else None
+            invocation = self.invocatons_api.get_last_invocation(type="test")
 
-        self.set_run_cache(key=INVOCATION, value=invocation_id)
-        return invocation_id
+        self.set_run_cache(key=INVOCATION, value=invocation)
+        return invocation
 
     def get_tests_sample_data(
         self,
@@ -184,11 +184,15 @@ class TestsAPI(APIClient):
         disable_passed_test_metrics: bool = False,
         disable_samples: bool = False,
         filter: Optional[DataMonitoringFilter] = None,
-    ) -> Dict[ModelUniqueIdType, TestResultSchema]:
+    ) -> Tuple[
+        Dict[ModelUniqueIdType, TestResultSchema], Optional[DbtInvocationSchema]
+    ]:
         test_results_metadata = self.get_run_cache(TESTS_METADATA)
-        invocation_id = self._get_invocation_id_from_filter(filter)
-        if invocation_id:
-            test_results_metadata = self.get_tests_metadata(invocation_id=invocation_id)
+        invocation = self._get_invocation_from_filter(filter)
+        if invocation.invocation_id:
+            test_results_metadata = self.get_tests_metadata(
+                invocation_id=invocation.invocation_id
+            )
         elif test_results_metadata is None:
             test_results_metadata = self.get_tests_metadata(days_back=days_back)
 
@@ -215,7 +219,7 @@ class TestsAPI(APIClient):
             test_results[test_metadata.model_unique_id].append(test_result)
 
         self.set_run_cache(key=TEST_RESULTS, value=test_results)
-        return test_results
+        return test_results, invocation
 
     def get_test_runs(
         self, days_back: Optional[int] = 7, invocations_per_test: int = 720

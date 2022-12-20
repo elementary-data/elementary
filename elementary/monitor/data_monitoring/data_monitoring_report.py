@@ -105,7 +105,11 @@ class DataMonitoringReport(DataMonitoring):
             )
             tests_metadata = self.tests_api.get_tests_metadata(days_back=days_back)
 
-            test_results, test_results_totals = self._get_test_results_and_totals(
+            (
+                test_results,
+                test_results_totals,
+                invocation,
+            ) = self._get_test_results_and_totals(
                 days_back=days_back,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
@@ -146,6 +150,7 @@ class DataMonitoringReport(DataMonitoring):
 
             output_data["models"] = serializable_models
             output_data["sidebars"] = sidebars.dict()
+            output_data["invocation"] = invocation.dict()
             output_data["test_results"] = serializable_test_results
             output_data["test_results_totals"] = self._serialize_totals(
                 test_results_totals
@@ -233,7 +238,7 @@ class DataMonitoringReport(DataMonitoring):
         disable_passed_test_metrics: bool = False,
     ):
         try:
-            tests_results = self.tests_api.get_test_results(
+            tests_results, invocation = self.tests_api.get_test_results(
                 filter=self.filter,
                 days_back=days_back,
                 disable_passed_test_metrics=disable_passed_test_metrics,
@@ -243,7 +248,7 @@ class DataMonitoringReport(DataMonitoring):
             for test_results in tests_results.values():
                 tests_info.extend([result.metadata for result in test_results])
             test_results_totals = self.tests_api.get_total_tests_results(tests_info)
-            return tests_results, test_results_totals
+            return tests_results, test_results_totals, invocation
         except Exception as e:
             logger.exception(f"Could not get test results and totals - Error: {e}")
             self.tracking.record_cli_internal_exception(e)
