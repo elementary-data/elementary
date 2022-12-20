@@ -7,7 +7,7 @@ from elementary.clients.slack.slack_message_builder import (
     MAX_ALERT_PREVIEW_BLOCKS,
     SlackMessageBuilder,
 )
-from elementary.utils.json_utils import prettify_json_str_set
+from elementary.utils.json_utils import prettify_json_str_set, try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -27,8 +27,12 @@ class Alert:
         status: str = None,
         subscribers: Optional[List[str]] = None,
         slack_channel: Optional[str] = None,
+        alert_suppression_interval: Optional[int] = 0,
+        alert_fields: Optional[list] = None,
         timezone: Optional[str] = None,
         meta: Optional[dict] = None,
+        test_meta: Optional[str] = None,
+        model_meta: Optional[str] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
@@ -50,9 +54,13 @@ class Alert:
         self.owners = owners
         self.tags = tags
         self.meta = meta
+        self.test_meta = try_load_json(test_meta) or {}
+        self.model_meta = try_load_json(model_meta) or {}
         self.status = status
         self.subscribers = subscribers
         self.slack_channel = slack_channel
+        self.alert_suppression_interval = alert_suppression_interval
+        self.alert_fields = alert_fields
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."

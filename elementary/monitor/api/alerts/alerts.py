@@ -10,7 +10,7 @@ from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.utils.json_utils import try_load_json
+from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -96,36 +96,7 @@ class AlertsAPI(APIClient):
 
     @classmethod
     def _normalize_alert(cls, alert: dict) -> dict:
-        try:
-            normalized_alert = copy.deepcopy(alert)
-            test_meta = try_load_json(normalized_alert.get("test_meta")) or {}
-            model_meta = try_load_json(normalized_alert.get("model_meta")) or {}
-
-            subscribers = []
-            test_subscribers = test_meta.get("subscribers", [])
-            model_subscribers = model_meta.get("subscribers", [])
-            if isinstance(test_subscribers, list):
-                subscribers.extend(test_subscribers)
-            else:
-                subscribers.append(test_subscribers)
-
-            if isinstance(model_subscribers, list):
-                subscribers.extend(model_subscribers)
-            else:
-                subscribers.append(model_subscribers)
-
-            model_slack_channel = model_meta.get("channel")
-            test_slack_channel = test_meta.get("channel")
-            slack_channel = test_slack_channel or model_slack_channel
-
-            normalized_alert["subscribers"] = subscribers
-            normalized_alert["slack_channel"] = slack_channel
-            return normalized_alert
-        except Exception:
-            logger.error(
-                f"Failed to extract alert subscribers and alert custom slack channel {alert.get('id')}. Ignoring it for now and main slack channel will be used"
-            )
-            return alert
+        return NormalizedAlert(alert).get_normalized_alert()
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)

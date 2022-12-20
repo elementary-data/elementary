@@ -62,15 +62,35 @@ class SourceFreshnessAlert(Alert):
         title = [
             self.slack_message_builder.create_header_block(
                 f"{icon} dbt source freshness alert"
-            ),
-            self.slack_message_builder.create_context_block(
-                [
-                    f"*Source:* {self.alias}     |",
-                    f"*Status:* {self.status}     |",
-                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
-                ],
-            ),
+            )
         ]
+        if self.alert_suppression_interval:
+            title.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Source:* {self.alias}     |",
+                            f"*Status:* {self.status}",
+                        ],
+                    ),
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Suppression interval:* {self.alert_suppression_interval} hours",
+                        ],
+                    ),
+                ]
+            )
+        else:
+            title.append(
+                self.slack_message_builder.create_context_block(
+                    [
+                        f"*Source:* {self.alias}     |",
+                        f"*Status:* {self.status}     |"
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                    ],
+                ),
+            )
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [

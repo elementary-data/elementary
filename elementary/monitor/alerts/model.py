@@ -47,15 +47,35 @@ class ModelAlert(Alert):
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
-            self.slack_message_builder.create_header_block(f"{icon} dbt model alert"),
-            self.slack_message_builder.create_context_block(
-                [
-                    f"*Model:* {self.alias}     |",
-                    f"*Status:* {self.status}     |",
-                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
-                ],
-            ),
+            self.slack_message_builder.create_header_block(f"{icon} dbt model alert")
         ]
+        if self.alert_suppression_interval:
+            title.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Model:* {self.alias}     |",
+                            f"*Status:* {self.status}",
+                        ],
+                    ),
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Suppression interval:* {self.alert_suppression_interval} hours",
+                        ],
+                    ),
+                ]
+            )
+        else:
+            title.append(
+                self.slack_message_builder.create_context_block(
+                    [
+                        f"*Model:* {self.alias}     |",
+                        f"*Status:* {self.status}     |",
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                    ],
+                ),
+            )
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
@@ -118,17 +138,35 @@ class ModelAlert(Alert):
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
         title = [
-            self.slack_message_builder.create_header_block(
-                f"{icon} dbt snapshot alert"
-            ),
-            self.slack_message_builder.create_context_block(
-                [
-                    f"*Snapshot:* {self.alias}     |",
-                    f"*Status:* {self.status}     |",
-                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
-                ],
-            ),
+            self.slack_message_builder.create_header_block(f"{icon} dbt snapshot alert")
         ]
+        if self.alert_suppression_interval:
+            title.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Snapshot:* {self.alias}     |",
+                            f"*Status:* {self.status}",
+                        ],
+                    ),
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Suppression interval:* {self.alert_suppression_interval} hours",
+                        ],
+                    ),
+                ]
+            )
+        else:
+            title.append(
+                self.slack_message_builder.create_context_block(
+                    [
+                        f"*Snapshot:* {self.alias}     |",
+                        f"*Status:* {self.status}     |",
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                    ],
+                ),
+            )
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
