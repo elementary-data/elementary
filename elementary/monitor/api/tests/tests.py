@@ -52,7 +52,10 @@ class TestsAPI(APIClient):
         return f"{model_unique_id}.{test_unique_id}.{column_name if column_name else 'None'}.{test_sub_type if test_sub_type else 'None'}"
 
     def get_tests_metadata(
-        self, days_back: Optional[int] = 7, invocation_id: str = None
+        self,
+        days_back: Optional[int] = 7,
+        invocation_id: str = None,
+        should_cache: bool = True,
     ) -> List[TestMetadataSchema]:
         run_operation_response = self.dbt_runner.run_operation(
             macro_name="get_test_results",
@@ -64,7 +67,8 @@ class TestsAPI(APIClient):
         tests_metadata = [
             TestMetadataSchema(**test_metadata) for test_metadata in tests_metadata
         ]
-        self.set_run_cache(key=TESTS_METADATA, value=tests_metadata)
+        if should_cache:
+            self.set_run_cache(key=TESTS_METADATA, value=tests_metadata)
         return tests_metadata
 
     def _get_invocation_from_filter(
@@ -191,7 +195,7 @@ class TestsAPI(APIClient):
         invocation = self._get_invocation_from_filter(filter)
         if invocation.invocation_id:
             test_results_metadata = self.get_tests_metadata(
-                invocation_id=invocation.invocation_id
+                invocation_id=invocation.invocation_id, should_cache=False
             )
         elif test_results_metadata is None:
             test_results_metadata = self.get_tests_metadata(days_back=days_back)
