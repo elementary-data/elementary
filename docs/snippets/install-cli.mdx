@@ -17,4 +17,11 @@ pip install 'elementary-data[databricks]'
 
 Run `edr --help` in order to ensure the installation was successful.
 
+### Integrate dbt project
+
+Upon running `edr`, please make sure to `cd` into the root of your dbt project.
+Alternatively, you can provide the `--project-dir` argument to specify its path.
+This is required so that `edr` will be able to get the most up-to-date state of your project such as models, tests,
+snapshots, their owners, tags, etc.
+
 If you're receiving `command not found: edr` please check our [troubleshooting guide](/general/troubleshooting).
