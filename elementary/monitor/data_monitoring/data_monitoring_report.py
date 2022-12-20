@@ -3,6 +3,7 @@ import os
 import os.path
 import re
 import webbrowser
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
 import pkg_resources
@@ -138,15 +139,17 @@ class DataMonitoringReport(DataMonitoring):
             )
             self.execution_properties["test_result_count"] = len(tests_metadata)
 
-            serializable_test_results = []
-            for test_result in test_results.values():
-                serializable_test_results.extend(
+            serializable_test_results = defaultdict(list)
+            for model_unique_id, test_result in test_results.items():
+                serializable_test_results[model_unique_id].extend(
                     [result.dict() for result in test_result]
                 )
 
-            serializable_test_runs = []
-            for test_run in test_runs.values():
-                serializable_test_runs.extend([run.dict() for run in test_run])
+            serializable_test_runs = defaultdict(list)
+            for model_unique_id, test_run in test_runs.items():
+                serializable_test_runs[model_unique_id].extend(
+                    [run.dict() for run in test_run]
+                )
 
             output_data["models"] = serializable_models
             output_data["sidebars"] = sidebars.dict()
