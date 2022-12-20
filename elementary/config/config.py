@@ -55,7 +55,7 @@ class Config:
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
-        self.project_dir = project_dir or self.get_user_project_dir()
+        self.project_dir = project_dir or self.locate_user_project_dir()
         self.profile_target = profile_target
         self.env = env
 
@@ -223,7 +223,7 @@ class Config:
         return env_vars
 
     @staticmethod
-    def get_user_project_dir() -> Optional[str]:
+    def locate_user_project_dir() -> Optional[str]:
         working_dir = Path.cwd()
         if working_dir.joinpath("dbt_project.yml").exists():
             return str(working_dir)
