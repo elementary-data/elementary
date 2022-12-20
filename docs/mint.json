@@ -78,6 +78,7 @@
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
         "guides/add-elementary-tests",
+        "guides/add-schema-tests",
         "guides/python-tests"
       ]
     },
