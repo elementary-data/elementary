@@ -113,6 +113,13 @@ def get_cli_properties() -> dict:
     help="A slack webhook URL for sending alerts to a specific channel.",
 )
 @click.option(
+    "--deprecated-slack-webhook",
+    "-s",  # Deprecatred - will be used for --select in the future
+    type=str,
+    default=None,
+    help="DEPRECATED! - A slack webhook URL for sending alerts to a specific channel.",
+)
+@click.option(
     "--slack-token",
     "-st",
     type=str,
@@ -158,6 +165,7 @@ def monitor(
     ctx,
     days_back,
     slack_webhook,
+    deprecated_slack_webhook,
     slack_token,
     slack_channel_name,
     timezone,
@@ -175,9 +183,15 @@ def monitor(
     """
     Monitor your warehouse.
     """
-
     if ctx.invoked_subcommand is not None:
         return
+    if deprecated_slack_webhook is not None:
+        click.secho(
+            f'\n"-s" is deprecated and won\'t be supported in the near future.\n'
+            f'Please use "-sw" or "--slack-webhook" for passing Slack webhook.\n',
+            fg="bright_red",
+        )
+        slack_webhook = deprecated_slack_webhook
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
         config_dir,
@@ -255,7 +269,6 @@ def monitor(
 )
 @click.option(
     "--select",
-    "-s",
     type=str,
     help="Filter the report by invocation_id / invocation_time / model_tag",
 )
@@ -419,7 +432,6 @@ def report(
 )
 @click.option(
     "--select",
-    "-s",
     type=str,
     help="Filter the report by invocation_id / invocation_time / model_tag",
 )
