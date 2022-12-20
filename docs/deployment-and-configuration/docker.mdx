@@ -1,0 +1,38 @@
+---
+title: "Docker"
+---
+
+Elementary offers a [Docker image](https://github.com/elementary-data/elementary/pkgs/container/elementary) that can be
+used to run `edr` commands.
+
+Using a prebuilt Docker image to install Elementary in production has a few benefits: it already includes `edr`, the
+database adapters, and pinned versions of all their dependencies. By contrast, `pip install elementary-data`
+takes longer to run, and will always install the latest compatible versions of every dependency.
+
+You might also be able to use Docker to install and develop locally if you don't have a Python environment set up.
+However, if you're a frequent local developer, we recommend that you install Elementary via `pip` instead.
+
+### Install Elementary Docker image
+
+Install an image using the `docker pull` command:
+
+```bash
+# For the latest version.
+docker pull ghcr.io/elementary-data/elementary:latest
+
+# For a specific version (for instance, 0.6.3).
+docker pull ghcr.io/elementary-data/elementary:v0.6.3
+```
+
+### Running Elementary Docker image in a container
+
+The `ENTRYPOINT` for Elementary Docker image is the command `edr`.
+You can bind-mount your project to `/app` and use `edr` as normal:
+
+```bash
+docker run \
+--mount type=bind,source=path/to/project,target=/app \
+--mount type=bind,source=path/to/profiles-dir,target=/root/.dbt/ \
+ghcr.io/elementary-data/elementary \
+monitor
+```
