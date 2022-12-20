@@ -16,7 +16,7 @@ However, if you're a frequent local developer, we recommend that you install Ele
 
 Install an image using the `docker pull` command:
 
-```bash
+```shell
 # For the latest version.
 docker pull ghcr.io/elementary-data/elementary:latest
 
@@ -29,7 +29,7 @@ docker pull ghcr.io/elementary-data/elementary:v0.6.3
 The `ENTRYPOINT` for Elementary Docker image is the command `edr`.
 You can bind-mount your project to `/app` and use `edr` as normal:
 
-```bash
+```shell
 docker run \
 --mount type=bind,source=path/to/project,target=/app \
 --mount type=bind,source=path/to/profiles-dir,target=/root/.dbt/ \
