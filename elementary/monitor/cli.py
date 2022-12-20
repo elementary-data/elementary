@@ -55,7 +55,7 @@ def common_options(func):
     func = click.option(
         "--config-dir",
         "-c",
-        type=str,
+        type=click.Path(),
         default=Config.DEFAULT_CONFIG_DIR,
         help="Global settings for edr are configured in a config.yml file in this directory "
         "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default).",
@@ -70,14 +70,14 @@ def common_options(func):
     func = click.option(
         "--profiles-dir",
         "-p",
-        type=str,
+        type=click.Path(exists=True),
         default=None,
         help="Which directory to look in for the profiles.yml file. "
         "If not set, edr will look in the current working directory first, then HOME/.dbt/",
     )(func)
     func = click.option(
         "--project-dir",
-        type=str,
+        type=click.Path(exists=True),
         default=None,
         help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
     )(func)
