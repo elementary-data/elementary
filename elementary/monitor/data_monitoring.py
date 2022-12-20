@@ -171,7 +171,7 @@ class DataMonitoring:
         if self.user_dbt_runner:
             self.run_elementary_models()
         now_utc = get_now_utc_iso_format()
-        html_path = self._get_report_file_path(now_utc, file_path)
+        html_path = self._get_report_file_path(file_path)
         with open(html_path, "w") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
 
@@ -485,9 +485,7 @@ class DataMonitoring:
         }
         return data_monitoring_properties
 
-    def _get_report_file_path(
-        self, generation_time: str, file_path: Optional[str] = None
-    ) -> str:
+    def _get_report_file_path(self, file_path: Optional[str] = None) -> str:
         if file_path:
             if file_path.endswith(".htm") or file_path.endswith(".html"):
                 return os.path.abspath(file_path)
@@ -495,10 +493,8 @@ class DataMonitoring:
         return os.path.abspath(
             os.path.join(
                 self.config.target_dir,
-                f"elementary - {generation_time} utc.html".replace(" ", "_").replace(
-                    ":", "-"
-                ),
-            )
+                f"elementary_report.html",
+            ),
         )
 
     def get_elementary_database_and_schema(self):
