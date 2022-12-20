@@ -32,7 +32,16 @@ edr monitor send-report
 
 ## CLI Options
 
-If you wish, here are the options for providing paths and names that are different than default:
+You can define options either via the CLI or using environment variables in the following
+format: `EDR_<COMMAND>_<OPTION>=<VALUE>`.
+
+```shell
+export EDR_MONITOR_REPORT_FILE_PATH="my_report.html"
+edr monitor report
+# Equivalent to: edr monitor report --file-path "my_report.html"
+```
+
+Here is a list of all the available options:
 
 - **dbt project path:**
   The path of the directory in which your `dbt_project.yml` file is located. Default is the working directory.
