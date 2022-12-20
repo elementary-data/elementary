@@ -127,7 +127,7 @@ class DataMonitoring:
         dbt_vars: Optional[dict] = None,
     ) -> bool:
         if self.user_dbt_runner:
-            self.run_artifacts()
+            self.run_elementary_models()
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.internal_dbt_runner.run(
             models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
@@ -169,7 +169,7 @@ class DataMonitoring:
         project_name: Optional[str] = None,
     ) -> Tuple[bool, str]:
         if self.user_dbt_runner:
-            self.run_artifacts()
+            self.run_elementary_models()
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(now_utc, file_path)
         with open(html_path, "w") as html_file:
@@ -538,6 +538,6 @@ class DataMonitoring:
                 "Please upgrade the major and minor versions to align.\n",
             )
 
-    def run_artifacts(self):
+    def run_elementary_models(self):
         logger.info("Syncing with dbt project to its latest state.")
-        self.user_dbt_runner.run("edr.dbt_artifacts")
+        self.user_dbt_runner.run("elementary")
