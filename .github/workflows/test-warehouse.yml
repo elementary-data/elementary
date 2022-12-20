@@ -60,6 +60,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  TESTS_DIR: dbt-data-reliability/integration_tests
 
 jobs:
   test:
@@ -68,14 +69,6 @@ jobs:
       group: tests-${{ inputs.warehouse-type }}-${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
     steps:
-      - name: Write dbt profiles
-        env:
-          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
-        run: |
-          mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
-
       - name: Checkout Elementary
         uses: actions/checkout@v3
         with:
@@ -88,6 +81,14 @@ jobs:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
+
+      - name: Write dbt profiles
+        env:
+          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
+        run: |
+          mkdir -p ~/.dbt
+          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
+          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -130,11 +131,13 @@ jobs:
         run: edr --help
 
       - name: Run monitor
+        working-directory: ${{ env.TESTS_DIR }}
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
         run: edr monitor -t "${{ inputs.warehouse-type }}" --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Run report
+        working-directory: ${{ env.TESTS_DIR }}
         run: edr monitor report -t "${{ inputs.warehouse-type }}" --file-path "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
 
       - name: Upload report artifact
@@ -149,6 +152,7 @@ jobs:
         run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
+        working-directory: ${{ env.TESTS_DIR }}
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
