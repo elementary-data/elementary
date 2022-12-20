@@ -70,7 +70,7 @@ class TestsAPI(APIClient):
     def _get_invocation_from_filter(
         self, filter: DataMonitoringFilter
     ) -> Optional[DbtInvocationSchema]:
-        invocation = None
+        invocation = DbtInvocationSchema()
         if filter.invocation_id:
             invocation = self.invocatons_api.get_invocation_by_id(
                 type="test", invocation_id=filter.invocation_id

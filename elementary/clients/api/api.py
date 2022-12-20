@@ -13,4 +13,4 @@ class APIClient:
         self.run_cache[key] = value
 
     def get_run_cache(self, key: str) -> Any:
-        self.run_cache[key]
+        return self.run_cache[key]
