@@ -94,7 +94,6 @@ class DataMonitoring:
         self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
         self.filter_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
         self.execution_properties = {}
-        tracking.set_env("has_project_dir", bool(self.config.project_dir))
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         tracking.set_env("target_name", latest_invocation.get("target_name"))
