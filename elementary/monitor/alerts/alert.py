@@ -18,6 +18,9 @@ class Alert:
     def __init__(
         self,
         id: str,
+        suppression_interval: int,
+        suppression_status: str,
+        sent_at: str = None,
         detected_at: str = None,
         database_name: str = None,
         schema_name: str = None,
@@ -37,6 +40,10 @@ class Alert:
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
         self.id = id
+        self.alert_suppression = dict(
+            suppression_status=suppression_status,
+            sent_at=sent_at,
+        )
         self.elementary_database_and_schema = elementary_database_and_schema
         self.detected_at_utc = None
         self.detected_at = None

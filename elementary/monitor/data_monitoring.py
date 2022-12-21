@@ -202,7 +202,9 @@ class DataMonitoring:
             self.execution_properties["success"] = self.success
             return self.success
 
-        alerts = self.alerts_api.query(days_back, disable_samples=self.disable_samples)
+        alerts = self.alerts_api.get_new_alerts(
+            days_back, disable_samples=self.disable_samples
+        )
         self.execution_properties[
             "elementary_test_count"
         ] = alerts.get_elementary_test_count()

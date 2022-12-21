@@ -1,9 +1,9 @@
 {% macro get_new_test_alerts(days_back, results_sample_limit=5, disable_samples=false) %}
     -- depends_on: {{ ref('alerts') }}
     {% set select_new_alerts_query %}
-        with new_alerts as (
+        with alerts_in_time_limit as (
             select * from {{ ref('alerts') }}
-            where alert_sent = false and {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
+            where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         ),
         models as (
             select * from {{ ref('elementary', 'dbt_models') }}
@@ -20,10 +20,46 @@
             select unique_id, meta from sources
         )
 
-        select new_alerts.*, tests.meta as test_meta, artifacts_meta.meta as model_meta
+        select 
+            alerts_in_time_limit.alert_id,
+            alerts_in_time_limit.data_issue_id,
+            alerts_in_time_limit.test_execution_id,
+            alerts_in_time_limit.test_unique_id,
+            alerts_in_time_limit.model_unique_id,
+            alerts_in_time_limit.detected_at,
+            alerts_in_time_limit.database_name,
+            alerts_in_time_limit.schema_name,
+            alerts_in_time_limit.table_name,
+            alerts_in_time_limit.column_name,
+            alerts_in_time_limit.alert_type,
+            alerts_in_time_limit.sub_type,
+            alerts_in_time_limit.alert_description,
+            alerts_in_time_limit.owners,
+            alerts_in_time_limit.tags,
+            alerts_in_time_limit.alert_results_query,
+            alerts_in_time_limit.other,
+            alerts_in_time_limit.test_name,
+            alerts_in_time_limit.test_params,
+            alerts_in_time_limit.severity,
+            alerts_in_time_limit.status,
+            alerts_in_time_limit.result_rows,
+            alerts_in_time_limit.test_short_name,
+            alerts_in_time_limit.suppression_interval,
+            {# backwards compatibility #}
+            case
+                when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = TRUE then 'sent'
+                when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = FALSE then 'pending'
+                else suppression_status
+            as suppression_status,
+            case 
+                when alerts_in_time_limit.sent_at is NULL then '1970-01-01 00:00:00'
+                else alerts_in_time_limit.sent_at
+            as sent_at,
+            tests.meta as test_meta,
+            artifacts_meta.meta as model_meta
         from new_alerts
-        left join tests on new_alerts.test_unique_id = tests.unique_id
-        left join artifacts_meta on new_alerts.model_unique_id = artifacts_meta.unique_id
+        left join tests on alerts_in_time_limit.test_unique_id = tests.unique_id
+        left join artifacts_meta on alerts_in_time_limit.model_unique_id = artifacts_meta.unique_id
     {% endset %}
 
     {% set alerts_agate = run_query(select_new_alerts_query) %}
@@ -65,8 +101,10 @@
                                  'severity': elementary.insensitive_get_dict_value(test_result_alert_dict, 'severity'),
                                  'test_meta': test_meta,
                                  'model_meta': model_meta,
+                                 'suppression_status': elementary.insensitive_get_dict_value(model_result_alert_dict, 'suppression_status'),
+                                 'sent_at': elementary.insensitive_get_dict_value(model_result_alert_dict, 'sent_at'),
                                  'status': status} %}
-        {% do new_alerts.append(new_alert_dict) %}
+        {% do alerts_in_time_limit.append(new_alert_dict) %}
     {% endfor %}
     {% do elementary.edr_log(tojson(new_alerts)) %}
 {% endmacro %}

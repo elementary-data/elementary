@@ -1,10 +1,12 @@
-import copy
 import json
-from typing import Callable, List
+from collections import defaultdict
+from datetime import datetime
+from typing import Callable, Dict, List
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
+from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
@@ -12,6 +14,7 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
 from elementary.utils.log import get_logger
+from elementary.utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
 
@@ -24,12 +27,140 @@ class AlertsAPI(APIClient):
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
-    def query(self, days_back: int, disable_samples: bool = False) -> Alerts:
-        return Alerts(
-            tests=self._query_test_alerts(days_back, disable_samples),
-            models=self._query_model_alerts(days_back),
-            source_freshnesses=self._query_source_freshness_alerts(days_back),
+    def get_new_alerts(self, days_back: int, disable_samples: bool = False) -> Alerts:
+        test_alerts = self._query_test_alerts(days_back, disable_samples)
+        model_alerts = self._query_model_alerts(days_back)
+        source_freshness_alerts = self._query_source_freshness_alerts(days_back)
+
+        new_test_alerts = self.skip_alerts(test_alerts, TestAlert.TABLE_NAME)
+        new_model_alerts = self.skip_alerts(model_alerts, ModelAlert.TABLE_NAME)
+        new_source_freshness_alerts = self.skip_alerts(
+            source_freshness_alerts, SourceFreshnessAlert.TABLE_NAME
         )
+        return Alerts(
+            tests=new_test_alerts,
+            models=new_model_alerts,
+            source_freshnesses=new_source_freshness_alerts,
+        )
+
+    def skip_alerts(
+        self, alerts: AlertsQueryResult[Alert], table_name: str
+    ) -> AlertsQueryResult[Alert]:
+        alerts_last_sent_time = self._get_alerts_last_sent_time(alerts)
+        alerts_to_skip = self._get_alerts_to_skip(
+            alerts=alerts, alerts_last_sent_time=alerts_last_sent_time
+        )
+        alert_ids_chunks = self._split_list_to_chunks(alerts_to_skip)
+        for alert_ids_chunk in alert_ids_chunks:
+            self.dbt_runner.run_operation(
+                macro_name="update_skipped_alerts",
+                macro_args={
+                    "alert_ids": alert_ids_chunk,
+                    "table_name": table_name,
+                },
+                json_logs=False,
+            )
+        alerts_to_send = []
+        for alert in alerts.alerts:
+            id = (
+                alert.test_unique_id
+                if isinstance(alert, TestAlert)
+                else alert.unique_id
+            )
+            if id in alerts_to_skip:
+                continue
+            alerts_to_send.append(alert)
+
+        malformed_alerts_to_send = []
+        for alert in alerts.malformed_alerts:
+            id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
+            if id in alerts_to_skip:
+                continue
+            malformed_alerts_to_send.append(alert)
+
+        return AlertsQueryResult(
+            alerts=alerts_to_send, malformed_alerts=malformed_alerts_to_send
+        )
+
+    def _get_alerts_last_sent_time(
+        slef, alerts: AlertsQueryResult[Alert]
+    ) -> Dict[str, str]:
+        alerts_last_sent_time = defaultdict(lambda: None)
+        for alert in alerts.alerts:
+            if alert.alert_suppression.get("suppression_status") == "sent":
+                if isinstance(alert, TestAlert):
+                    current_last_sent_at = alerts_last_sent_time[alert.test_unique_id]
+                    alerts_last_sent_time[alert.test_unique_id] = max(
+                        alert.alert_suppression.get("sent_at"), current_last_sent_at
+                    )
+                else:
+                    current_last_sent_at = alerts_last_sent_time[alert.unique_id]
+                    alerts_last_sent_time[alert.unique_id] = max(
+                        alert.alert_suppression.get("sent_at"), current_last_sent_at
+                    )
+
+        for alert in alerts.malformed_alerts:
+            if (
+                alert.data.get("alert_suppression", {}).get("suppression_status")
+                == "sent"
+            ):
+                id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
+                current_last_sent_at = alerts_last_sent_time[id]
+                alerts_last_sent_time[id] = max(
+                    alert.data.get("sent_at"), current_last_sent_at
+                )
+
+        return alerts_last_sent_time
+
+    def _get_alerts_to_skip(
+        self, alerts: AlertsQueryResult[Alert], alerts_last_sent_time: Dict[str, str]
+    ) -> List[str]:
+        alerts_to_skip = []
+        current_time_utc = datetime.utcnow()
+        for alert in alerts.alerts:
+            if alert.alert_suppression.get("suppression_status") == "pending":
+                id = (
+                    alert.test_unique_id
+                    if isinstance(alert, TestAlert)
+                    else alert.unique_id
+                )
+                suppression_interval = alert.alert_suppression_interval
+                last_sent_time = (
+                    datetime.fromisoformat(alerts_last_sent_time[id])
+                    if alerts_last_sent_time[id]
+                    else None
+                )
+                is_alert_in_suppression = (
+                    (current_time_utc - last_sent_time).seconds / 3600
+                    <= suppression_interval
+                    if last_sent_time
+                    else False
+                )
+                if is_alert_in_suppression:
+                    alerts_to_skip.append(alert.id)
+
+        for alert in alerts.malformed_alerts:
+            if (
+                alert.data.get("alert_suppression", {}).get("suppression_status")
+                == "pending"
+            ):
+                id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
+                suppression_interval = alert.data.get("alert_suppression_interval")
+                last_sent_time = (
+                    datetime.fromisoformat(alerts_last_sent_time[id])
+                    if alerts_last_sent_time[id]
+                    else None
+                )
+                is_alert_in_suppression = (
+                    (current_time_utc - last_sent_time).seconds / 3600
+                    <= suppression_interval
+                    if last_sent_time
+                    else False
+                )
+                if is_alert_in_suppression:
+                    alerts_to_skip.append(alert.id)
+
+        return alerts_to_skip
 
     def _query_test_alerts(
         self, days_back: int, disable_samples: bool = False
@@ -103,7 +234,11 @@ class AlertsAPI(APIClient):
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run_operation(
                 macro_name="update_sent_alerts",
-                macro_args={"alert_ids": alert_ids_chunk, "table_name": table_name},
+                macro_args={
+                    "alert_ids": alert_ids_chunk,
+                    "sent_time": get_now_utc_str(),
+                    "table_name": table_name,
+                },
                 json_logs=False,
             )
 
