@@ -29,12 +29,20 @@ DEFAULT_ALERT_FIELDS = [
     TEST_RESULTS_SAMPLE_FIELD,
 ]
 
+TEST_META_KEY = "test_meta"
+MODEL_META_KEY = "model_meta"
+ALERTS_CONFIG_KEY = "alerts_config"
+SUBSCRIBERS_KEY = "subscribers"
+CHANNEL_KEY = "channel"
+ALERT_FIELDS_KEY = "alert_fields"
+ALERT_SUPRESSION_INTERVAL_KEY = "alert_suppression_interval"
+
 
 class NormalizedAlert:
     def __init__(self, alert: dict) -> None:
         self.alert = alert
-        self.test_meta = self._flatten_meta("test_meta")
-        self.model_meta = self._flatten_meta("model_meta")
+        self.test_meta = self._flatten_meta(TEST_META_KEY)
+        self.model_meta = self._flatten_meta(MODEL_META_KEY)
         self.normalized_alert = self._normalize_alert()
 
     def get_normalized_alert(self) -> dict:
@@ -43,17 +51,19 @@ class NormalizedAlert:
     def _flatten_meta(self, node_meta_field: str) -> dict:
         # backwards compatibility for alert configuration
         meta = try_load_json(self.alert.get(node_meta_field)) or {}
-        return {**meta, **meta.get("alerts_config", {})}
+        flatten_meta = {**meta, **meta.get(ALERTS_CONFIG_KEY, {})}
+        flatten_meta.pop(ALERTS_CONFIG_KEY, None)
+        return flatten_meta
 
     def _normalize_alert(self):
         try:
             normalized_alert = copy.deepcopy(self.alert)
-            normalized_alert["subscribers"] = self._get_alert_subscribers()
+            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_subscribers()
             normalized_alert["slack_channel"] = self._get_alert_chennel()
             normalized_alert[
-                "alert_suppression_interval"
+                ALERT_SUPRESSION_INTERVAL_KEY
             ] = self._get_alert_suppression_interval()
-            normalized_alert["alert_fields"] = self._get_alert_fields()
+            normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
             return normalized_alert
         except Exception:
             logger.error(
@@ -63,8 +73,8 @@ class NormalizedAlert:
 
     def _get_alert_subscribers(self) -> List[Optional[str]]:
         subscribers = []
-        test_subscribers = self.test_meta.get("subscribers", [])
-        model_subscribers = self.model_meta.get("subscribers", [])
+        test_subscribers = self.test_meta.get(SUBSCRIBERS_KEY, [])
+        model_subscribers = self.model_meta.get(SUBSCRIBERS_KEY, [])
         if isinstance(test_subscribers, list):
             subscribers.extend(test_subscribers)
         else:
@@ -77,16 +87,16 @@ class NormalizedAlert:
         return subscribers
 
     def _get_alert_chennel(self) -> Optional[str]:
-        model_slack_channel = self.model_meta.get("channel")
-        test_slack_channel = self.test_meta.get("channel")
+        model_slack_channel = self.model_meta.get(CHANNEL_KEY)
+        test_slack_channel = self.test_meta.get(CHANNEL_KEY)
         return test_slack_channel or model_slack_channel
 
     def _get_alert_suppression_interval(self) -> int:
         model_alert_suppression_interval = self.model_meta.get(
-            "alert_suppression_interval"
+            ALERT_SUPRESSION_INTERVAL_KEY
         )
         test_alert_suppression_interval = self.test_meta.get(
-            "alert_suppression_interval"
+            ALERT_SUPRESSION_INTERVAL_KEY
         )
         if test_alert_suppression_interval is not None:
             return test_alert_suppression_interval
@@ -100,7 +110,7 @@ class NormalizedAlert:
         # we return the model alerts_fields from the model meta object.
         # The fallback is DEFAULT_ALERT_FIELDS.
         return (
-            self.test_meta.get("alert_fields")
-            if self.test_meta.get("alert_fields")
-            else self.model_meta.get("alert_fields", DEFAULT_ALERT_FIELDS)
+            self.test_meta.get(ALERT_FIELDS_KEY)
+            if self.test_meta.get(ALERT_FIELDS_KEY)
+            else self.model_meta.get(ALERT_FIELDS_KEY, DEFAULT_ALERT_FIELDS)
         )
