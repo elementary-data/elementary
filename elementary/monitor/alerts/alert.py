@@ -18,8 +18,7 @@ class Alert:
     def __init__(
         self,
         id: str,
-        suppression_interval: int,
-        suppression_status: str,
+        suppression_status: str = None,
         sent_at: str = None,
         detected_at: str = None,
         database_name: str = None,
