@@ -65,7 +65,9 @@ def common_options(func):
         "-t",
         type=str,
         default=None,
-        help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target.",
+        help="Which target to load for the given profile. "
+        "If specified, the target will be used for both the 'elementary' profile and your dbt project."
+        "Else, the default target will be used.",
     )(func)
     func = click.option(
         "--profiles-dir",
