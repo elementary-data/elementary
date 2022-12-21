@@ -42,10 +42,8 @@ class AlertsAPI(APIClient):
         )
         return alerts_to_send
 
-    def get_model_alerts(self, days_back: int, disable_samples: bool = False):
-        pending_model_alerts = self._query_pending_model_alerts(
-            days_back, disable_samples
-        )
+    def get_model_alerts(self, days_back: int):
+        pending_model_alerts = self._query_pending_model_alerts(days_back)
         last_alert_sent_times = self._query_last_model_alert_times(days_back)
         alerts_to_skip, alerts_to_send = self._sort_alerts(
             pending_model_alerts, last_alert_sent_times
@@ -55,11 +53,9 @@ class AlertsAPI(APIClient):
         )
         return alerts_to_send
 
-    def get_source_freshness_alerts(
-        self, days_back: int, disable_samples: bool = False
-    ):
+    def get_source_freshness_alerts(self, days_back: int):
         pending_source_freshness_alerts = self._query_pending_source_freshness_alerts(
-            days_back, disable_samples
+            days_back
         )
         last_alert_sent_times = self._query_last_source_freshness_alert_times(days_back)
         alerts_to_skip, alerts_to_send = self._sort_alerts(
@@ -94,13 +90,13 @@ class AlertsAPI(APIClient):
         malformed_alerts_to_send = []
 
         for alert in pending_alerts.alerts:
-            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts and alert.id not in latest_alerts_id:
                 alerts_to_skip.append(alert.id)
             else:
                 alerts_to_send.append(alert)
 
         for alert in pending_alerts.malformed_alerts:
-            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts and alert.id not in latest_alerts_id:
                 alerts_to_skip.append(alert.id)
             else:
                 malformed_alerts_to_send.append(alert)
@@ -110,7 +106,7 @@ class AlertsAPI(APIClient):
         )
 
     def _get_suppressed_alerts(
-        alerts: AlertsQueryResult[Alert], last_alert_sent_times: Dict[str, str]
+        self, alerts: AlertsQueryResult[Alert], last_alert_sent_times: Dict[str, str]
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()

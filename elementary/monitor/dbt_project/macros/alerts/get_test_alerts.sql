@@ -134,6 +134,7 @@
             max(sent_at) as last_sent_at
         from alerts_in_time_limit
         where suppression_status = 'sent'
+        group by test_unique_id
     {% endset %}
 
     {% set alerts_agate = run_query(select_last_alert_sent_times_query) %}
