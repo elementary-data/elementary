@@ -29,6 +29,16 @@ class AlertsAPI(APIClient):
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
+    def get_new_alerts(self, days_back: int, disable_samples: bool = False) -> Alerts:
+        new_test_alerts = self.get_test_alerts(days_back, disable_samples)
+        new_model_alerts = self.get_model_alerts(days_back)
+        new_source_freshness_alerts = self.get_source_freshness_alerts(days_back)
+        return Alerts(
+            tests=new_test_alerts,
+            models=new_model_alerts,
+            source_freshnesses=new_source_freshness_alerts,
+        )
+
     def get_test_alerts(self, days_back: int, disable_samples: bool = False):
         pending_test_alerts = self._query_pending_test_alerts(
             days_back, disable_samples
@@ -65,16 +75,6 @@ class AlertsAPI(APIClient):
             alerts_to_skip=alerts_to_skip, table_name=SourceFreshnessAlert.TABLE_NAME
         )
         return alerts_to_send
-
-    def get_new_alerts(self, days_back: int, disable_samples: bool = False) -> Alerts:
-        new_test_alerts = self.get_test_alerts(days_back, disable_samples)
-        new_model_alerts = self.get_model_alerts(days_back)
-        new_source_freshness_alerts = self.get_source_freshness_alerts(days_back)
-        return Alerts(
-            tests=new_test_alerts,
-            models=new_model_alerts,
-            source_freshnesses=new_source_freshness_alerts,
-        )
 
     def _sort_alerts(
         self,
@@ -132,25 +132,21 @@ class AlertsAPI(APIClient):
                 suppressed_alerts.append(alert.id)
 
         for alert in alerts.malformed_alerts:
-            if (
-                alert.data.get("alert_suppression", {}).get("suppression_status")
-                == "pending"
-            ):
-                id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
-                suppression_interval = alert.data.get("alert_suppression_interval")
-                last_sent_time = (
-                    datetime.fromisoformat(last_alert_sent_times[id])
-                    if last_alert_sent_times[id]
-                    else None
-                )
-                is_alert_in_suppression = (
-                    (current_time_utc - last_sent_time).seconds / 3600
-                    <= suppression_interval
-                    if last_sent_time
-                    else False
-                )
-                if is_alert_in_suppression:
-                    suppressed_alerts.append(alert.id)
+            id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
+            suppression_interval = alert.data.get("alert_suppression_interval")
+            last_sent_time = (
+                datetime.fromisoformat(last_alert_sent_times[id])
+                if last_alert_sent_times[id]
+                else None
+            )
+            is_alert_in_suppression = (
+                (current_time_utc - last_sent_time).seconds / 3600
+                <= suppression_interval
+                if last_sent_time
+                else False
+            )
+            if is_alert_in_suppression:
+                suppressed_alerts.append(alert.id)
 
         return suppressed_alerts
 
@@ -218,14 +214,6 @@ class AlertsAPI(APIClient):
             TestAlert.create_test_alert_from_dict,
         )
 
-    def _query_last_test_alert_times(self, days_back: int) -> Dict[str, str]:
-        logger.info("Querying test alerts last sent times.")
-        response = self.dbt_runner.run_operation(
-            macro_name="get_last_test_alert_sent_times",
-            macro_args={"days_back": days_back},
-        )
-        return json.loads(response[0])
-
     def _query_pending_model_alerts(
         self, days_back: int
     ) -> AlertsQueryResult[ModelAlert]:
@@ -238,14 +226,6 @@ class AlertsAPI(APIClient):
             ModelAlert,
         )
 
-    def _query_last_model_alert_times(self, days_back: int) -> Dict[str, str]:
-        logger.info("Querying model alerts last sent times.")
-        response = self.dbt_runner.run_operation(
-            macro_name="get_last_model_alert_sent_times",
-            macro_args={"days_back": days_back},
-        )
-        return json.loads(response[0])
-
     def _query_pending_source_freshness_alerts(
         self, days_back: int
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
@@ -257,6 +237,22 @@ class AlertsAPI(APIClient):
             },
             SourceFreshnessAlert,
         )
+
+    def _query_last_test_alert_times(self, days_back: int) -> Dict[str, str]:
+        logger.info("Querying test alerts last sent times.")
+        response = self.dbt_runner.run_operation(
+            macro_name="get_last_test_alert_sent_times",
+            macro_args={"days_back": days_back},
+        )
+        return json.loads(response[0])
+
+    def _query_last_model_alert_times(self, days_back: int) -> Dict[str, str]:
+        logger.info("Querying model alerts last sent times.")
+        response = self.dbt_runner.run_operation(
+            macro_name="get_last_model_alert_sent_times",
+            macro_args={"days_back": days_back},
+        )
+        return json.loads(response[0])
 
     def _query_last_source_freshness_alert_times(
         self, days_back: int
