@@ -90,13 +90,13 @@ class AlertsAPI(APIClient):
         malformed_alerts_to_send = []
 
         for alert in pending_alerts.alerts:
-            if alert.id in suppressed_alerts and alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
                 alerts_to_skip.append(alert.id)
             else:
                 alerts_to_send.append(alert)
 
         for alert in pending_alerts.malformed_alerts:
-            if alert.id in suppressed_alerts and alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
                 alerts_to_skip.append(alert.id)
             else:
                 malformed_alerts_to_send.append(alert)
