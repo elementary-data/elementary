@@ -32,6 +32,7 @@ logger = get_logger(__name__)
 
 class TestAlert(Alert):
     TABLE_NAME = "alerts"
+    __test__ = False  # Mark for pytest
 
     def __init__(
         self,
