@@ -31,6 +31,7 @@ with failed_tests as (
 
 select 
     *,
+    false as alert_sent,  {# backwards compatibility #}
     'pending' as suppression_status,
     NULL as sent_at
 from failed_tests

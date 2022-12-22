@@ -12,6 +12,7 @@
 {% if alerts_source_freshness_relation %}
     select 
       *,
+      false as alert_sent,  {# backwards compatibility #}
       'pending' as suppression_status,
       NULL as sent_at
     from {{ alerts_source_freshness_relation }}
