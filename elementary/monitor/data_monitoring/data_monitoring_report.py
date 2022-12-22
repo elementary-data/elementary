@@ -48,11 +48,11 @@ class DataMonitoringReport(DataMonitoring):
     ):
         super().__init__(config, tracking, force_update_dbt_package, disable_samples)
         self.filter = self._parse_filter(filter)
-        self.tests_api = TestsAPI(dbt_runner=self.dbt_runner)
-        self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-        self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
-        self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
-        self.filter_api = FiltersAPI(dbt_runner=self.dbt_runner)
+        self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
+        self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
+        self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
+        self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
+        self.filter_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
@@ -94,7 +94,7 @@ class DataMonitoringReport(DataMonitoring):
         project_name: Optional[str] = None,
     ) -> Tuple[bool, str]:
         now_utc = get_now_utc_iso_format()
-        html_path = self._get_report_file_path(now_utc, file_path)
+        html_path = self._get_report_file_path(file_path)
         with open(html_path, "w") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
 
@@ -330,9 +330,7 @@ class DataMonitoringReport(DataMonitoring):
         coverages = self.models_api.get_test_coverages()
         return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
-    def _get_report_file_path(
-        self, generation_time: str, file_path: Optional[str] = None
-    ) -> str:
+    def _get_report_file_path(self, file_path: Optional[str] = None) -> str:
         if file_path:
             if file_path.endswith(".htm") or file_path.endswith(".html"):
                 return os.path.abspath(file_path)
@@ -340,8 +338,6 @@ class DataMonitoringReport(DataMonitoring):
         return os.path.abspath(
             os.path.join(
                 self.config.target_dir,
-                f"elementary - {generation_time} utc.html".replace(" ", "_").replace(
-                    ":", "-"
-                ),
+                f"elementary_report.html",
             )
         )

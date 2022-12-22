@@ -69,3 +69,17 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  merge-to-prod:
+    runs-on: ubuntu-latest
+    needs: build-and-push-docker-image
+
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v3
+
+      - name: Merge 'master' to 'prod'
+        run: |
+          git checkout prod
+          git merge master
+          git push

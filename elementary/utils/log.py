@@ -3,9 +3,28 @@ import sys
 
 from elementary.utils.env_vars import is_debug
 
-FORMATTER = logging.Formatter(
-    "%(asctime)s — %(levelname)s — %(message)s", "%Y-%m-%d %H:%M:%S"
-)
+
+class ColoredFormatter(logging.Formatter):
+    YELLOW = "\x1b[33;20m"
+    RED = "\x1b[31;20m"
+    BOLD_RED = "\x1b[31;1m"
+    RESET = "\x1b[0m"
+    FORMAT = "%(asctime)s — %(levelname)s — %(message)s"
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+    FORMATS = {
+        logging.WARNING: YELLOW + FORMAT + RESET,
+        logging.ERROR: RED + FORMAT + RESET,
+        logging.CRITICAL: BOLD_RED + FORMAT + RESET,
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno, self.FORMAT)
+        formatter = logging.Formatter(log_fmt, self.DATE_FORMAT)
+        return formatter.format(record)
+
+
+FORMATTER = ColoredFormatter()
 LOG_FILE = "edr.log"
 
 

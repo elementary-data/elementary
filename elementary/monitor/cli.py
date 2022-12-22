@@ -60,7 +60,7 @@ def common_options(func):
     func = click.option(
         "--config-dir",
         "-c",
-        type=str,
+        type=click.Path(),
         default=Config.DEFAULT_CONFIG_DIR,
         help="Global settings for edr are configured in a config.yml file in this directory "
         "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default).",
@@ -70,15 +70,23 @@ def common_options(func):
         "-t",
         type=str,
         default=None,
-        help="If you have multiple targets for Elementary, optionally use this flag to choose a specific target.",
+        help="Which target to load for the given profile. "
+        "If specified, the target will be used for both the 'elementary' profile and your dbt project."
+        "Else, the default target will be used.",
     )(func)
     func = click.option(
         "--profiles-dir",
         "-p",
-        type=str,
+        type=click.Path(exists=True),
         default=None,
-        help="Specify your profiles dir where a profiles.yml is located, this could be a dbt profiles dir "
-        "(if your profiles dir is ~/.dbt, no need to provide this parameter as we use it as default).",
+        help="Which directory to look in for the profiles.yml file. "
+        "If not set, edr will look in the current working directory first, then HOME/.dbt/",
+    )(func)
+    func = click.option(
+        "--project-dir",
+        type=click.Path(exists=True),
+        default=None,
+        help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
     )(func)
     return func
 
@@ -171,6 +179,7 @@ def monitor(
     timezone,
     config_dir,
     profiles_dir,
+    project_dir,
     update_dbt_package,
     full_refresh_dbt_package,
     dbt_quoting,
@@ -196,6 +205,7 @@ def monitor(
     config = Config(
         config_dir,
         profiles_dir,
+        project_dir,
         profile_target,
         dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
@@ -278,6 +288,7 @@ def report(
     days_back,
     config_dir,
     profiles_dir,
+    project_dir,
     update_dbt_package,
     dbt_quoting,
     profile_target,
@@ -297,6 +308,7 @@ def report(
     config = Config(
         config_dir,
         profiles_dir,
+        project_dir,
         profile_target,
         dbt_quoting=dbt_quoting,
         env=env,
@@ -441,6 +453,7 @@ def send_report(
     days_back,
     config_dir,
     profiles_dir,
+    project_dir,
     update_dbt_package,
     dbt_quoting,
     slack_token,
@@ -473,6 +486,7 @@ def send_report(
     config = Config(
         config_dir,
         profiles_dir,
+        project_dir,
         profile_target,
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
