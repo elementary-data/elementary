@@ -84,19 +84,18 @@ class AlertsAPI(APIClient):
         suppressed_alerts = self._get_suppressed_alerts(
             pending_alerts, last_alert_sent_times
         )
-        latest_alerts_id = self._get_latest_alerts(pending_alerts)
         alerts_to_skip = []
         alerts_to_send = []
         malformed_alerts_to_send = []
 
         for alert in pending_alerts.alerts:
-            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts:
                 alerts_to_skip.append(alert.id)
             else:
                 alerts_to_send.append(alert)
 
         for alert in pending_alerts.malformed_alerts:
-            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts:
                 alerts_to_skip.append(alert.id)
             else:
                 malformed_alerts_to_send.append(alert)
@@ -149,43 +148,6 @@ class AlertsAPI(APIClient):
                 suppressed_alerts.append(alert.id)
 
         return suppressed_alerts
-
-    def _get_latest_alerts(self, alerts: AlertsQueryResult[Alert]) -> List[str]:
-        alert_last_times = defaultdict(lambda: None)
-        latest_alert_ids = []
-        for alert in alerts.alerts:
-            id = (
-                alert.test_unique_id
-                if isinstance(alert, TestAlert)
-                else alert.unique_id
-            )
-            current_last_alert = alert_last_times[id]
-            alert_detected_at = alert.detected_at.strftime(DATETIME_FORMAT)
-            if not current_last_alert:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-            elif current_last_alert["detected_at"] < alert_detected_at:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-
-        for alert in alerts.malformed_alerts:
-            id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
-            current_last_alert = alert_last_times[id]
-            alert_detected_at = alert.data.get("detected_at").strftime(DATETIME_FORMAT)
-            if not current_last_alert:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-            elif current_last_alert["detected_at"] < alert_detected_at:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-
-        for alert_last_time in alert_last_times.values():
-            latest_alert_ids.append(alert_last_time.get("alert_id"))
-        return latest_alert_ids
 
     def _skip_alerts(self, alerts_to_skip: List[str], table_name: str):
         alert_ids_chunks = self._split_list_to_chunks(alerts_to_skip)

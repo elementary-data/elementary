@@ -20,67 +20,6 @@ def _initial_alerts_api_client():
     )
 
 
-def test_get_latest_alerts():
-    alerts_api = _initial_alerts_api_client()
-    # 2 instences of the same test alert on different time
-    alert_1 = TestAlert(
-        id="1",
-        model_unique_id="model_id_1",
-        test_unique_id="test_id_1",
-        test_created_at="2022-10-10 10:10:10",
-        detected_at="2022-10-10 10:00:00",
-    )
-    alert_2 = TestAlert(
-        id="2",
-        model_unique_id="model_id_1",
-        test_unique_id="test_id_1",
-        test_created_at="2022-10-10 09:10:10",
-        detected_at="2022-10-10 09:00:00",
-    )
-    # 2 instences of the same model alert on different time
-    alert_3 = ModelAlert(
-        id="3",
-        unique_id="model_id_1",
-        alias="modely",
-        path="my/path",
-        original_path="",
-        materialization="table",
-        message="",
-        full_refresh=False,
-        detected_at="2022-10-10 10:00:00",
-    )
-    alert_4 = ModelAlert(
-        id="4",
-        unique_id="model_id_1",
-        alias="modely",
-        path="my/path",
-        original_path="",
-        materialization="table",
-        message="",
-        full_refresh=False,
-        detected_at="2022-10-10 09:00:00",
-    )
-    # single instance of alert
-    alert_5 = ModelAlert(
-        id="5",
-        unique_id="model_id_2",
-        alias="model2",
-        path="my/path2",
-        original_path="",
-        materialization="table",
-        message="",
-        full_refresh=False,
-        detected_at="2022-10-10 08:00:00",
-    )
-    alerts = AlertsQueryResult(
-        alerts=[alert_1, alert_2, alert_3, alert_4, alert_5], malformed_alerts=[]
-    )
-    latest_alerts = alerts_api._get_latest_alerts(alerts)
-    assert json.dumps(latest_alerts, sort_keys=True) == json.dumps(
-        [alert_1.id, alert_3.id, alert_5.id], sort_keys=True
-    )
-
-
 def test_get_suppressed_alerts():
     alerts_api = _initial_alerts_api_client()
     current_time = datetime.utcnow()
