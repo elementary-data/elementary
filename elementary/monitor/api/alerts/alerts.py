@@ -118,8 +118,8 @@ class AlertsAPI(APIClient):
             )
             suppression_interval = alert.alert_suppression_interval
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times[id])
-                if last_alert_sent_times[id]
+                datetime.fromisoformat(last_alert_sent_times.get(id))
+                if last_alert_sent_times.get(id)
                 else None
             )
             is_alert_in_suppression = (
@@ -135,8 +135,8 @@ class AlertsAPI(APIClient):
             id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
             suppression_interval = alert.data.get("alert_suppression_interval")
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times[id])
-                if last_alert_sent_times[id]
+                datetime.fromisoformat(last_alert_sent_times.get(id))
+                if last_alert_sent_times.get(id)
                 else None
             )
             is_alert_in_suppression = (
