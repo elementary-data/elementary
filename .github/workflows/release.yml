@@ -3,7 +3,6 @@ on:
   push:
     tags:
       - v[0-9].[0-9]+.[0-9]+
-  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -41,6 +40,7 @@ jobs:
 
   build-and-push-docker-image:
     runs-on: ubuntu-latest
+    needs: publish-to-pypi
     permissions:
       contents: read
       packages: write
@@ -63,9 +63,23 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@3
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  merge-to-prod:
+    runs-on: ubuntu-latest
+    needs: build-and-push-docker-image
+
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v3
+
+      - name: Merge 'master' to 'prod'
+        run: |
+          git checkout prod
+          git merge master
+          git push

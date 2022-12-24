@@ -78,6 +78,7 @@
         "quickstart/share-report-ui",
         "quickstart/send-slack-alerts",
         "guides/add-elementary-tests",
+        "guides/add-schema-tests",
         "guides/python-tests"
       ]
     },
@@ -85,6 +86,7 @@
       "group": "Deployment and Configuration",
       "pages": [
         "deployment-and-configuration/elementary-in-production",
+        "deployment-and-configuration/docker",
         "deployment-and-configuration/github-actions",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"

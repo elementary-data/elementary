@@ -87,10 +87,3 @@ jobs:
           pr_title: "release/v${{ inputs.cli-version }}"
           pr_body: "Open automatically using bump version workflow"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-  draft-release:
-    needs: [create-pr]
-    uses: ./.github/workflows/draft-release.yml
-    with:
-      release-version: v${{ inputs.cli-version }}
-    secrets: inherit

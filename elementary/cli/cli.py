@@ -29,6 +29,7 @@ class ElementaryCLI(click.MultiCommand):
         return rv
 
     def get_command(self, ctx, name):
+        ctx.auto_envvar_prefix = "EDR"
         ns = {}
         fn = os.path.join(root_folder, name, "cli.py")
         try:

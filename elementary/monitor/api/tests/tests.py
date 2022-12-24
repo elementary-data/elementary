@@ -159,25 +159,13 @@ class TestsAPI(APIClient):
 
     def get_total_tests_runs(
         self,
-        tests_metadata: Optional[List[TestMetadataSchema]] = None,
-        tests_invocations: Optional[Dict[TestUniqueIdType, InvocationsSchema]] = None,
-        invocations_per_test: Optional[int] = None,
-        days_back: Optional[int] = None,
+        tests_metadata: List[TestMetadataSchema],
+        tests_invocations: Dict[TestUniqueIdType, InvocationsSchema],
     ) -> Dict[str, TotalsSchema]:
-        tests: List[TestMetadataSchema] = (
-            tests_metadata
-            if tests_metadata is not None
-            else self.get_tests_metadata(days_back=days_back)
-        )
-        invocations: Optional[Dict[TestUniqueIdType, InvocationsSchema]] = (
-            tests_invocations
-            if tests_invocations is not None
-            else self.get_invocations(invocations_per_test=invocations_per_test)
-        )
         totals = dict()
-        for test in tests:
+        for test in tests_metadata:
             test_sub_type_unique_id = self.get_test_sub_type_unique_id(**dict(test))
-            test_invocations = invocations[test_sub_type_unique_id].invocations
+            test_invocations = tests_invocations[test_sub_type_unique_id].invocations
             self._update_test_runs_totals(
                 totals_dict=totals, test=test, test_invocations=test_invocations
             )

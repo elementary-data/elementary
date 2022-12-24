@@ -52,7 +52,7 @@ jobs:
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
-      dbt-version: '1.0.0'
+      dbt-version: '1.1.0'
     secrets: inherit
 
   recommendation:
@@ -67,7 +67,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards competability - If not possible, update minor.")
+            core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards compatibility - If not possible, update minor.")
 
   bump-version:
     needs: [ get-latest-release-tags, recommendation ]

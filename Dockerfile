@@ -1,4 +1,5 @@
-FROM python:3.8
+FROM python:3.10.7
 
-COPY . .
-RUN pip install ".[snowflake, bigquery, redshift, databricks]"
+WORKDIR /app
+RUN pip install "elementary-data[snowflake, bigquery, redshift, databricks]"
+ENTRYPOINT ["edr"]
