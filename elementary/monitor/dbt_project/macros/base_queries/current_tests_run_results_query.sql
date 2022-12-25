@@ -114,6 +114,7 @@
                 else test_unique_id
             end as elementary_unique_id,
             id,
+            invocation_id,
             data_issue_id,
             test_execution_id,
             test_unique_id,
@@ -147,6 +148,7 @@
                 else results.test_unique_id
             end as elementary_unique_id,
             results.id,
+            results.invocation_id,
             results.data_issue_id,
             results.test_execution_id,
             results.test_unique_id,
@@ -184,6 +186,7 @@
 
     select
         test_results.id,
+        test_results.invocation_id,
         test_results.data_issue_id,
         test_results.test_execution_id,
         test_results.elementary_unique_id as test_unique_id,
@@ -241,6 +244,7 @@
     
     select
         test_results.id,
+        test_results.invocation_id,
         test_results.data_issue_id,
         test_results.test_execution_id,
         test_results.test_unique_id,
