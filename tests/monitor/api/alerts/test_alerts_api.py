@@ -37,6 +37,7 @@ def test_get_suppressed_alerts():
     # Test alert with interval that passed the suppression time
     alert_1 = TestAlert(
         id="1",
+        unique_id="test_id_1",
         model_unique_id="model_id_1",
         test_unique_id="test_id_1",
         test_created_at="2022-10-10 10:10:10",
@@ -46,6 +47,7 @@ def test_get_suppressed_alerts():
     # Test alert with interval that hasn't passed the suppression time
     alert_2 = TestAlert(
         id="2",
+        unique_id="test_id_2",
         model_unique_id="model_id_1",
         test_unique_id="test_id_2",
         test_created_at="2022-10-10 09:10:10",

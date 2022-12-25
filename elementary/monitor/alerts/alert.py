@@ -19,7 +19,7 @@ class Alert:
     def __init__(
         self,
         id: str,
-        unique_id: str,
+        unique_id: str = None,
         suppression_status: str = None,
         sent_at: str = None,
         detected_at: str = None,
