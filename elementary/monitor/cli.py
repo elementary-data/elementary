@@ -78,7 +78,7 @@ def common_options(cmd: str):
             "--days-back",
             "-d",
             type=int,
-            default=2 if cmd == Command.MONITOR else 7,
+            default=1 if cmd == Command.MONITOR else 7,
             help="Set a limit to how far back should edr collect data.",
         )(func)
         func = click.option(
