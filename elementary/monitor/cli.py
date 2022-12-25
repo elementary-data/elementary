@@ -14,8 +14,14 @@ yaml = OrderedYaml()
 logger = get_logger(__name__)
 
 
+class Command:
+    MONITOR = "monitor"
+    REPORT = "monitor-report"
+    SEND_REPORT = "monitor-send-report"
+
+
 # Displayed in reverse order in --help.
-def common_options(days_back=7):
+def common_options(cmd: str):
     def decorator(func):
         func = click.option(
             "--disable-samples",
@@ -40,11 +46,39 @@ def common_options(days_back=7):
             help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
             "see documentation to learn more).",
         )(func)
+        if cmd in (Command.MONITOR, Command.SEND_REPORT):
+            func = click.option(
+                "--slack-channel-name",
+                "-ch",
+                type=str,
+                default=None,
+                help="The Slack channel to send messages to.",
+            )(func)
+            func = click.option(
+                "--slack-token",
+                "-st",
+                type=str,
+                default=None,
+                help="The Slack token for your workspace.",
+            )(func)
+        if cmd in (Command.REPORT, Command.SEND_REPORT):
+            func = click.option(
+                "--exclude-elementary-models",
+                type=bool,
+                default=True,
+                help="Exclude Elementary's internal models from the report.",
+            )(func)
+            func = click.option(
+                "--project-name",
+                type=str,
+                default=None,
+                help="The project name to display in the report.",
+            )(func)
         func = click.option(
             "--days-back",
             "-d",
             type=int,
-            default=days_back,
+            default=2 if cmd == Command.MONITOR else 7,
             help="Set a limit to how far back should edr collect data.",
         )(func)
         func = click.option(
@@ -110,27 +144,13 @@ def get_cli_properties() -> dict:
 
 
 @click.group(invoke_without_command=True)
-@common_options(days_back=2)
+@common_options(Command.MONITOR)
 @click.option(
     "--slack-webhook",
     "-s",
     type=str,
     default=None,
     help="A slack webhook URL for sending alerts to a specific channel.",
-)
-@click.option(
-    "--slack-token",
-    "-st",
-    type=str,
-    default=None,
-    help="A slack token for sending alerts over slack.",
-)
-@click.option(
-    "--slack-channel-name",
-    "-ch",
-    type=str,
-    default=None,
-    help="The slack channel which all alerts will be sent to.",
 )
 @click.option(
     "--timezone",
@@ -200,7 +220,7 @@ def monitor(
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
-        "monitor", get_cli_properties(), ctx.command.name
+        Command.MONITOR, get_cli_properties(), ctx.command.name
     )
     try:
         config.validate_monitor()
@@ -215,17 +235,17 @@ def monitor(
             days_back, full_refresh_dbt_package, dbt_vars=vars
         )
         anonymous_tracking.track_cli_end(
-            "monitor", data_monitoring.properties(), ctx.command.name
+            Command.MONITOR, data_monitoring.properties(), ctx.command.name
         )
         if not success:
             sys.exit(1)
     except Exception as exc:
-        anonymous_tracking.track_cli_exception("monitor", exc, ctx.command.name)
+        anonymous_tracking.track_cli_exception(Command.MONITOR, exc, ctx.command.name)
         raise
 
 
 @monitor.command()
-@common_options()
+@common_options(Command.REPORT)
 @click.option(
     "--executions-limit",
     "-el",
@@ -249,17 +269,6 @@ def monitor(
     type=bool,
     default=True,
     help="Whether to open the report in the browser.",
-)
-@click.option(
-    "--exclude-elementary-models",
-    type=bool,
-    default=True,
-    help="Exclude Elementary's internal models from the report.",
-)
-@click.option(
-    "--project-name",
-    type=str,
-    help="The project name to display in the report.",
 )
 @click.pass_context
 def report(
@@ -293,7 +302,7 @@ def report(
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
-        "monitor-report", get_cli_properties(), ctx.command.name
+        Command.REPORT, get_cli_properties(), ctx.command.name
     )
     try:
         config.validate_report()
@@ -313,31 +322,17 @@ def report(
             project_name=project_name,
         )
         anonymous_tracking.track_cli_end(
-            "monitor-report", data_monitoring.properties(), ctx.command.name
+            Command.REPORT, data_monitoring.properties(), ctx.command.name
         )
         if not generated_report_successfully:
             sys.exit(1)
     except Exception as exc:
-        anonymous_tracking.track_cli_exception("monitor-report", exc, ctx.command.name)
+        anonymous_tracking.track_cli_exception(Command.REPORT, exc, ctx.command.name)
         raise
 
 
 @monitor.command()
-@common_options()
-@click.option(
-    "--slack-token",
-    "-st",
-    type=str,
-    default=None,
-    help="A slack token for sending alerts over slack.",
-)
-@click.option(
-    "--slack-channel-name",
-    "-ch",
-    type=str,
-    default=None,
-    help="The slack channel which all alerts will be sent to.",
-)
+@common_options(Command.SEND_REPORT)
 @click.option(
     "--slack-file-name",
     type=str,
@@ -408,17 +403,6 @@ def report(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
 )
-@click.option(
-    "--exclude-elementary-models",
-    type=bool,
-    default=True,
-    help="Exclude Elementary's internal models from the report.",
-)
-@click.option(
-    "--project-name",
-    type=str,
-    help="The project name to display in the report.",
-)
 @click.pass_context
 def send_report(
     ctx,
@@ -474,7 +458,7 @@ def send_report(
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(
-        "monitor-send-report", get_cli_properties(), ctx.command.name
+        Command.SEND_REPORT, get_cli_properties(), ctx.command.name
     )
     try:
         config.validate_send_report()
@@ -509,14 +493,14 @@ def send_report(
                 elementary_html_path, remote_file_path=bucket_file_path
             )
         anonymous_tracking.track_cli_end(
-            "monitor-send-report", data_monitoring.properties(), ctx.command.name
+            Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name
         )
         if not command_succeeded:
             sys.exit(1)
 
     except Exception as exc:
         anonymous_tracking.track_cli_exception(
-            "monitor-send-report", exc, ctx.command.name
+            Command.SEND_REPORT, exc, ctx.command.name
         )
         raise
 
