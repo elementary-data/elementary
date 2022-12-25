@@ -32,16 +32,18 @@ logger = get_logger(__name__)
 
 class TestAlert(Alert):
     TABLE_NAME = "alerts"
-    __test__ = False  # Mark for pytest
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runsapa
 
     def __init__(
         self,
         model_unique_id: str,
         test_unique_id: str,
         test_created_at: Optional[str] = None,
+        test_meta: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.test_meta = try_load_json(test_meta) or {}
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at

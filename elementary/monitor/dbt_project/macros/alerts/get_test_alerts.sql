@@ -80,6 +80,7 @@
         {% set model_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_meta') %}
 
         {% set pending_alert_dict = {'id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id'),
+                                 'unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
                                  'model_unique_id': model_unique_id,
                                  'test_unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
                                  'detected_at': elementary.insensitive_get_dict_value(test_result_alert_dict, 'detected_at'),

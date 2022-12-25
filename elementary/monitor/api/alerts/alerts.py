@@ -1,13 +1,11 @@
 import json
-from collections import defaultdict
 from datetime import datetime
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Union
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.alerts.alert import Alert
-from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult
+from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult, AlertType
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -39,48 +37,47 @@ class AlertsAPI(APIClient):
             source_freshnesses=new_source_freshness_alerts,
         )
 
-    def get_test_alerts(self, days_back: int, disable_samples: bool = False):
+    def get_test_alerts(
+        self, days_back: int, disable_samples: bool = False
+    ) -> AlertsQueryResult[TestAlert]:
         pending_test_alerts = self._query_pending_test_alerts(
             days_back, disable_samples
         )
         last_alert_sent_times = self._query_last_test_alert_times(days_back)
-        alerts_to_skip, alerts_to_send = self._sort_alerts(
-            pending_test_alerts, last_alert_sent_times
-        )
-        self._skip_alerts(
-            alerts_to_skip=alerts_to_skip, table_name=TestAlert.TABLE_NAME
-        )
-        return alerts_to_send
+        test_alerts = self._sort_alerts(pending_test_alerts, last_alert_sent_times)
+        return test_alerts
 
-    def get_model_alerts(self, days_back: int):
+    def get_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
         pending_model_alerts = self._query_pending_model_alerts(days_back)
         last_alert_sent_times = self._query_last_model_alert_times(days_back)
-        alerts_to_skip, alerts_to_send = self._sort_alerts(
-            pending_model_alerts, last_alert_sent_times
-        )
-        self._skip_alerts(
-            alerts_to_skip=alerts_to_skip, table_name=ModelAlert.TABLE_NAME
-        )
-        return alerts_to_send
+        model_alerts = self._sort_alerts(pending_model_alerts, last_alert_sent_times)
+        return model_alerts
 
-    def get_source_freshness_alerts(self, days_back: int):
+    def get_source_freshness_alerts(
+        self, days_back: int
+    ) -> AlertsQueryResult[SourceFreshnessAlert]:
         pending_source_freshness_alerts = self._query_pending_source_freshness_alerts(
             days_back
         )
         last_alert_sent_times = self._query_last_source_freshness_alert_times(days_back)
-        alerts_to_skip, alerts_to_send = self._sort_alerts(
+        source_freshness_alerts = self._sort_alerts(
             pending_source_freshness_alerts, last_alert_sent_times
         )
-        self._skip_alerts(
-            alerts_to_skip=alerts_to_skip, table_name=SourceFreshnessAlert.TABLE_NAME
-        )
-        return alerts_to_send
+        return source_freshness_alerts
 
     def _sort_alerts(
         self,
-        pending_alerts: AlertsQueryResult[Alert],
+        pending_alerts: Union[
+            AlertsQueryResult[TestAlert],
+            AlertsQueryResult[ModelAlert],
+            AlertsQueryResult[SourceFreshnessAlert],
+        ],
         last_alert_sent_times: Dict[str, str],
-    ) -> Tuple[List[str], AlertsQueryResult[Alert]]:
+    ) -> Union[
+        AlertsQueryResult[TestAlert],
+        AlertsQueryResult[ModelAlert],
+        AlertsQueryResult[SourceFreshnessAlert],
+    ]:
         suppressed_alerts = self._get_suppressed_alerts(
             pending_alerts, last_alert_sent_times
         )
@@ -90,35 +87,39 @@ class AlertsAPI(APIClient):
 
         for alert in pending_alerts.alerts:
             if alert.id in suppressed_alerts:
-                alerts_to_skip.append(alert.id)
+                alerts_to_skip.append(alert)
             else:
                 alerts_to_send.append(alert)
 
         for alert in pending_alerts.malformed_alerts:
             if alert.id in suppressed_alerts:
-                alerts_to_skip.append(alert.id)
+                alerts_to_skip.append(alert)
             else:
                 malformed_alerts_to_send.append(alert)
 
-        return alerts_to_skip, AlertsQueryResult(
-            alerts=alerts_to_send, malformed_alerts=malformed_alerts_to_send
+        return AlertsQueryResult(
+            alerts=alerts_to_send,
+            malformed_alerts=malformed_alerts_to_send,
+            alerts_to_skip=alerts_to_skip,
         )
 
     def _get_suppressed_alerts(
-        self, alerts: AlertsQueryResult[Alert], last_alert_sent_times: Dict[str, str]
+        self,
+        alerts: Union[
+            AlertsQueryResult[TestAlert],
+            AlertsQueryResult[ModelAlert],
+            AlertsQueryResult[SourceFreshnessAlert],
+        ],
+        last_alert_sent_times: Dict[str, str],
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
         for alert in alerts.alerts:
-            id = (
-                alert.test_unique_id
-                if isinstance(alert, TestAlert)
-                else alert.unique_id
-            )
+            unique_id = alert.unique_id
             suppression_interval = alert.alert_suppression_interval
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(id))
-                if last_alert_sent_times.get(id)
+                datetime.fromisoformat(last_alert_sent_times.get(unique_id))
+                if last_alert_sent_times.get(unique_id)
                 else None
             )
             is_alert_in_suppression = (
@@ -131,11 +132,11 @@ class AlertsAPI(APIClient):
                 suppressed_alerts.append(alert.id)
 
         for alert in alerts.malformed_alerts:
-            id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
+            unique_id = alert.data.get("unique_id")
             suppression_interval = alert.data.get("alert_suppression_interval")
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(id))
-                if last_alert_sent_times.get(id)
+                datetime.fromisoformat(last_alert_sent_times.get(unique_id))
+                if last_alert_sent_times.get(unique_id)
                 else None
             )
             is_alert_in_suppression = (
@@ -149,8 +150,11 @@ class AlertsAPI(APIClient):
 
         return suppressed_alerts
 
-    def _skip_alerts(self, alerts_to_skip: List[str], table_name: str):
-        alert_ids_chunks = self._split_list_to_chunks(alerts_to_skip)
+    def skip_alerts(
+        self, alerts_to_skip: List[Union[AlertType, MalformedAlert]], table_name: str
+    ):
+        alert_ids = [alert.id for alert in alerts_to_skip]
+        alert_ids_chunks = self._split_list_to_chunks(alert_ids)
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run_operation(
                 macro_name="update_skipped_alerts",

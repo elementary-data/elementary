@@ -7,6 +7,7 @@ from elementary.clients.slack.slack_message_builder import (
     MAX_ALERT_PREVIEW_BLOCKS,
     SlackMessageBuilder,
 )
+from elementary.monitor.alerts.schema.alert import AlertSuppressionSchema
 from elementary.utils.json_utils import prettify_json_str_set, try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
@@ -18,6 +19,7 @@ class Alert:
     def __init__(
         self,
         id: str,
+        unique_id: str,
         suppression_status: str = None,
         sent_at: str = None,
         detected_at: str = None,
@@ -29,17 +31,17 @@ class Alert:
         status: str = None,
         subscribers: Optional[List[str]] = None,
         slack_channel: Optional[str] = None,
-        alert_suppression_interval: Optional[int] = 0,
+        alert_suppression_interval: int = 0,
         alert_fields: Optional[list] = None,
         timezone: Optional[str] = None,
         meta: Optional[dict] = None,
-        test_meta: Optional[str] = None,
         model_meta: Optional[str] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
         self.id = id
-        self.alert_suppression = dict(
+        self.unique_id = unique_id
+        self.alert_suppression = AlertSuppressionSchema(
             suppression_status=suppression_status,
             sent_at=sent_at,
         )
@@ -60,7 +62,6 @@ class Alert:
         self.owners = owners
         self.tags = tags
         self.meta = meta
-        self.test_meta = try_load_json(test_meta) or {}
         self.model_meta = try_load_json(model_meta) or {}
         self.status = status
         self.subscribers = subscribers
