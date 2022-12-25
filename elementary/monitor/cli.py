@@ -15,75 +15,78 @@ logger = get_logger(__name__)
 
 
 # Displayed in reverse order in --help.
-def common_options(func):
-    func = click.option(
-        "--disable-samples",
-        type=bool,
-        default=False,
-        help="Disable sampling of data. Useful if your data contains PII.",
-    )(func)
-    func = click.option(
-        "--dbt-quoting",
-        "-dq",
-        type=str,
-        default=None,
-        help="Use this variable to override dbt's default quoting behavior for the edr internal dbt package. Can be "
-        "one of the following: (1) all, (2) none, or (3) a combination of database,schema,identifier - for "
-        'example "schema,identifier"',
-    )(func)
-    func = click.option(
-        "--update-dbt-package",
-        "-u",
-        type=bool,
-        default=False,
-        help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
-        "see documentation to learn more).",
-    )(func)
-    func = click.option(
-        "--days-back",
-        "-d",
-        type=int,
-        default=7,
-        help="Set a limit to how far back should edr collect data.",
-    )(func)
-    func = click.option(
-        "--env",
-        type=click.Choice(["dev", "prod"]),
-        default="dev",
-        help="This flag indicates if you are running Elementary in prod or dev environment and will be reflected accordingly in the report.",
-    )(func)
-    func = click.option(
-        "--config-dir",
-        "-c",
-        type=click.Path(),
-        default=Config.DEFAULT_CONFIG_DIR,
-        help="Global settings for edr are configured in a config.yml file in this directory "
-        "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default).",
-    )(func)
-    func = click.option(
-        "--profile-target",
-        "-t",
-        type=str,
-        default=None,
-        help="Which target to load for the given profile. "
-        "If specified, the target will be used for both the 'elementary' profile and your dbt project."
-        "Else, the default target will be used.",
-    )(func)
-    func = click.option(
-        "--profiles-dir",
-        "-p",
-        type=click.Path(exists=True),
-        default=None,
-        help="Which directory to look in for the profiles.yml file. "
-        "If not set, edr will look in the current working directory first, then HOME/.dbt/",
-    )(func)
-    func = click.option(
-        "--project-dir",
-        type=click.Path(exists=True),
-        default=None,
-        help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
-    )(func)
-    return func
+def common_options(days_back=7):
+    def decorator(func):
+        func = click.option(
+            "--disable-samples",
+            type=bool,
+            default=False,
+            help="Disable sampling of data. Useful if your data contains PII.",
+        )(func)
+        func = click.option(
+            "--dbt-quoting",
+            "-dq",
+            type=str,
+            default=None,
+            help="Use this variable to override dbt's default quoting behavior for the edr internal dbt package. Can be "
+            "one of the following: (1) all, (2) none, or (3) a combination of database,schema,identifier - for "
+            'example "schema,identifier"',
+        )(func)
+        func = click.option(
+            "--update-dbt-package",
+            "-u",
+            type=bool,
+            default=False,
+            help="Force downloading the latest version of the edr internal dbt package (usually this is not needed, "
+            "see documentation to learn more).",
+        )(func)
+        func = click.option(
+            "--days-back",
+            "-d",
+            type=int,
+            default=days_back,
+            help="Set a limit to how far back should edr collect data.",
+        )(func)
+        func = click.option(
+            "--env",
+            type=click.Choice(["dev", "prod"]),
+            default="dev",
+            help="This flag indicates if you are running Elementary in prod or dev environment and will be reflected accordingly in the report.",
+        )(func)
+        func = click.option(
+            "--config-dir",
+            "-c",
+            type=click.Path(),
+            default=Config.DEFAULT_CONFIG_DIR,
+            help="Global settings for edr are configured in a config.yml file in this directory "
+            "(if your config dir is ~/.edr, no need to provide this parameter as we use it as default).",
+        )(func)
+        func = click.option(
+            "--profile-target",
+            "-t",
+            type=str,
+            default=None,
+            help="Which target to load for the given profile. "
+            "If specified, the target will be used for both the 'elementary' profile and your dbt project."
+            "Else, the default target will be used.",
+        )(func)
+        func = click.option(
+            "--profiles-dir",
+            "-p",
+            type=click.Path(exists=True),
+            default=None,
+            help="Which directory to look in for the profiles.yml file. "
+            "If not set, edr will look in the current working directory first, then HOME/.dbt/",
+        )(func)
+        func = click.option(
+            "--project-dir",
+            type=click.Path(exists=True),
+            default=None,
+            help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
+        )(func)
+        return func
+
+    return decorator
 
 
 def get_cli_properties() -> dict:
@@ -107,7 +110,7 @@ def get_cli_properties() -> dict:
 
 
 @click.group(invoke_without_command=True)
-@common_options
+@common_options(days_back=2)
 @click.option(
     "--slack-webhook",
     "-s",
@@ -222,7 +225,7 @@ def monitor(
 
 
 @monitor.command()
-@common_options
+@common_options()
 @click.option(
     "--executions-limit",
     "-el",
@@ -320,7 +323,7 @@ def report(
 
 
 @monitor.command()
-@common_options
+@common_options()
 @click.option(
     "--slack-token",
     "-st",
