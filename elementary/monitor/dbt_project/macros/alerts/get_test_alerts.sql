@@ -5,61 +5,67 @@
             select * from {{ ref('alerts') }}
             where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         ),
+
         models as (
             select * from {{ ref('elementary', 'dbt_models') }}
         ),
+
         sources as (
             select * from {{ ref('elementary', 'dbt_sources') }}
         ),
+
         tests as (
             select * from {{ ref('elementary', 'dbt_tests') }}
         ),
+
         artifacts_meta as (
             select unique_id, meta from models
             union all
             select unique_id, meta from sources
+        ),
+
+        extended_alerts as (
+            select 
+                alerts_in_time_limit.alert_id,
+                alerts_in_time_limit.data_issue_id,
+                alerts_in_time_limit.test_execution_id,
+                alerts_in_time_limit.test_unique_id,
+                alerts_in_time_limit.model_unique_id,
+                alerts_in_time_limit.detected_at,
+                alerts_in_time_limit.database_name,
+                alerts_in_time_limit.schema_name,
+                alerts_in_time_limit.table_name,
+                alerts_in_time_limit.column_name,
+                alerts_in_time_limit.alert_type,
+                alerts_in_time_limit.sub_type,
+                alerts_in_time_limit.alert_description,
+                alerts_in_time_limit.owners,
+                alerts_in_time_limit.tags,
+                alerts_in_time_limit.alert_results_query,
+                alerts_in_time_limit.other,
+                alerts_in_time_limit.test_name,
+                alerts_in_time_limit.test_params,
+                alerts_in_time_limit.severity,
+                alerts_in_time_limit.status,
+                alerts_in_time_limit.result_rows,
+                alerts_in_time_limit.test_short_name,
+                {# backwards compatibility #}
+                case
+                    when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = TRUE then 'sent'
+                    when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = FALSE then 'pending'
+                    else suppression_status
+                end as suppression_status,
+                alerts_in_time_limit.sent_at,
+                tests.meta as test_meta,
+                artifacts_meta.meta as model_meta
+            from alerts_in_time_limit
+            left join tests on alerts_in_time_limit.test_unique_id = tests.unique_id
+            left join artifacts_meta on alerts_in_time_limit.model_unique_id = artifacts_meta.unique_id
         )
 
-        select 
-            alerts_in_time_limit.alert_id,
-            alerts_in_time_limit.data_issue_id,
-            alerts_in_time_limit.test_execution_id,
-            alerts_in_time_limit.test_unique_id,
-            alerts_in_time_limit.model_unique_id,
-            alerts_in_time_limit.detected_at,
-            alerts_in_time_limit.database_name,
-            alerts_in_time_limit.schema_name,
-            alerts_in_time_limit.table_name,
-            alerts_in_time_limit.column_name,
-            alerts_in_time_limit.alert_type,
-            alerts_in_time_limit.sub_type,
-            alerts_in_time_limit.alert_description,
-            alerts_in_time_limit.owners,
-            alerts_in_time_limit.tags,
-            alerts_in_time_limit.alert_results_query,
-            alerts_in_time_limit.other,
-            alerts_in_time_limit.test_name,
-            alerts_in_time_limit.test_params,
-            alerts_in_time_limit.severity,
-            alerts_in_time_limit.status,
-            alerts_in_time_limit.result_rows,
-            alerts_in_time_limit.test_short_name,
-            {# backwards compatibility #}
-            case
-                when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = TRUE then 'sent'
-                when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = FALSE then 'pending'
-                else suppression_status
-            end as suppression_status,
-            case 
-                when alerts_in_time_limit.sent_at is NULL then '1970-01-01 00:00:00'
-                else alerts_in_time_limit.sent_at
-            end as sent_at,
-            tests.meta as test_meta,
-            artifacts_meta.meta as model_meta
-        from alerts_in_time_limit
-        left join tests on alerts_in_time_limit.test_unique_id = tests.unique_id
-        left join artifacts_meta on alerts_in_time_limit.model_unique_id = artifacts_meta.unique_id
-        having suppression_status = 'pending'
+        select *
+        from extended_alerts
+        where suppression_status = 'pending'
     {% endset %}
 
     {% set alerts_agate = run_query(select_pending_alerts_query) %}
@@ -122,10 +128,7 @@
                     when suppression_status is NULL and alert_sent = FALSE then 'pending'
                     else suppression_status
                 end as suppression_status,
-                case 
-                    when sent_at is NULL then '1970-01-01 00:00:00'
-                    else sent_at
-                end as sent_at
+                sent_at
             from {{ ref('alerts') }}
             where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         )
