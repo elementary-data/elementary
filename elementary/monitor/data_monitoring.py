@@ -23,7 +23,7 @@ from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
-from elementary.monitor.api.alerts import AlertsAPI
+from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.api.filters.filters import FiltersAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
@@ -138,7 +138,9 @@ class DataMonitoring:
             self.execution_properties["success"] = self.success
             return self.success
 
-        alerts = self.alerts_api.query(days_back, disable_samples=self.disable_samples)
+        alerts = self.alerts_api.get_new_alerts(
+            days_back, disable_samples=self.disable_samples
+        )
         self.execution_properties[
             "elementary_test_count"
         ] = alerts.get_elementary_test_count()
@@ -150,6 +152,7 @@ class DataMonitoring:
         self.execution_properties["has_subscribers"] = any(
             alert.subscribers for alert in alerts.get_all()
         )
+        self._skip_alerts(alerts)
         self._send_alerts(alerts)
         if self.send_test_message_on_success and alerts.count == 0:
             self._send_test_message()
@@ -362,6 +365,18 @@ class DataMonitoring:
             alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
         )
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
+
+    def _skip_alerts(self, alerts: Alerts):
+        self.alerts_api.skip_alerts(
+            alerts.tests.get_alerts_to_skip(), TestAlert.TABLE_NAME
+        )
+        self.alerts_api.skip_alerts(
+            alerts.models.get_alerts_to_skip(), ModelAlert.TABLE_NAME
+        )
+        self.alerts_api.skip_alerts(
+            alerts.source_freshnesses.get_alerts_to_skip(),
+            SourceFreshnessAlert.TABLE_NAME,
+        )
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         return self.lineage_api.get_lineage(exclude_elementary_models)
