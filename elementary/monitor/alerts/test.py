@@ -32,7 +32,7 @@ logger = get_logger(__name__)
 
 class TestAlert(Alert):
     TABLE_NAME = "alerts"
-    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runsapa
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
 
     def __init__(
         self,

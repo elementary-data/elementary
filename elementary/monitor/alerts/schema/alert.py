@@ -1,6 +1,8 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
 class AlertSuppressionSchema(BaseModel):
-    suppression_status: str = None
-    sent_at: str = None
+    suppression_status: Optional[str] = None
+    sent_at: Optional[str] = None
