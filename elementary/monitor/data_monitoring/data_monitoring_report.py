@@ -59,8 +59,8 @@ class DataMonitoringReport(DataMonitoring):
     def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringFilter:
         data_monitoring_filter = DataMonitoringFilter()
         if filter:
-            invocation_id_regex = re.compile(r"invocation_id:\w+")
-            invocation_time_regex = re.compile(r"invocation_time:\w+")
+            invocation_id_regex = re.compile(r"invocation_id:.*")
+            invocation_time_regex = re.compile(r"invocation_time:.*")
             last_invocation_regex = re.compile(r"last_invocation")
 
             invocation_id_match = invocation_id_regex.search(filter)
