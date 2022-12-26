@@ -144,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          path: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          path: ${{ env.TESTS_DIR }}/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Write GCS keyfile
         env:
