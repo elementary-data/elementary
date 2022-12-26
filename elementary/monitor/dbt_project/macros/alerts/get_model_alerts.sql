@@ -51,10 +51,7 @@
                     when alerts_in_time_limit.suppression_status is NULL and alerts_in_time_limit.alert_sent = FALSE then 'pending'
                     else suppression_status
                 end as suppression_status,
-                case 
-                    when alerts_in_time_limit.sent_at is NULL then '1970-01-01 00:00:00'
-                    else alerts_in_time_limit.sent_at
-                end as sent_at,
+                alerts_in_time_limit.sent_at,
                 artifacts_meta.meta as model_meta
             from alerts_in_time_limit
             left join models on alerts_in_time_limit.unique_id = models.unique_id
