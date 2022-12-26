@@ -13,7 +13,7 @@
 {% set schema_changes_relation = adapter.get_relation(this.database, this.schema, 'alerts_schema_changes') %}
 
 with failed_tests as (
-     select * from {{ ref('elementary', 'alerts_dbt_tests') }}
+    select * from {{ ref('elementary', 'alerts_dbt_tests') }}
 
     {% if schema_changes_relation %}
         union all
@@ -33,7 +33,7 @@ select
     *,
     false as alert_sent,  {# backwards compatibility #}
     'pending' as suppression_status,
-    NULL as sent_at
+    {{ elementary.cast_as_string('NULL') }} as sent_at
 from failed_tests
 
 {%- if is_incremental() %}
