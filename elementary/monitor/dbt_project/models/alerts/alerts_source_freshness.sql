@@ -10,7 +10,12 @@
 
 {% set alerts_source_freshness_relation = adapter.get_relation(this.database, this.schema, 'alerts_dbt_source_freshness') %}
 {% if alerts_source_freshness_relation %}
-    select *, false as alert_sent from {{ alerts_source_freshness_relation }}
+    select 
+      *,
+      false as alert_sent,  {# backwards compatibility #}
+      'pending' as suppression_status,
+      NULL as sent_at
+    from {{ alerts_source_freshness_relation }}
     {% if is_incremental() %}
         {{ get_new_alerts_where_clause(this) }}
     {% endif %}
