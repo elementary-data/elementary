@@ -23,8 +23,17 @@ def convert_utc_time_to_timezone(
 ) -> datetime:
     from_zone = tz.tzutc()
     to_zone = tz.gettz(timezone) if timezone else tz.tzlocal()
-    utc_time = utc_time.replace(tzinfo=from_zone)
-    return utc_time.astimezone(to_zone)
+    utc_time_with_timezone = utc_time.replace(tzinfo=from_zone)
+    return utc_time_with_timezone.astimezone(to_zone)
+
+
+def convert_local_time_to_timezone(
+    local_time: datetime, timezone: Optional[str] = None
+) -> datetime:
+    from_zone = tz.tzlocal()
+    to_zone = tz.gettz(timezone) if timezone else tz.tzutc()
+    local_time_with_timezone = local_time.replace(tzinfo=from_zone)
+    return local_time_with_timezone.astimezone(to_zone)
 
 
 def get_now_utc_str(format: str = DATETIME_FORMAT) -> str:
