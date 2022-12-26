@@ -14,7 +14,9 @@
 	  ('status', 'string'),
 	  ('full_refresh', 'boolean'),
 	  ('alert_sent', 'boolean'),
-	  ('original_path', 'string')
+	  ('original_path', 'string'),
+	  ('suppression_status', 'string'),
+	  ('sent_at', 'string')
 	]) }}
 {% endmacro %}
 
@@ -40,6 +42,8 @@
 	  ('owner', 'string'),
 	  ('package_name', 'string'),
 	  ('path', 'string'),
-	  ('alert_sent', 'boolean')
+	  ('alert_sent', 'boolean'),
+	  ('suppression_status', 'string'),
+	  ('sent_at', 'string')
 	]) }}
 {% endmacro %}
