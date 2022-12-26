@@ -3,7 +3,12 @@ import sys
 import click
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.data_monitoring_alerts import (
+    DataMonitoringAlerts,
+)
+from elementary.monitor.data_monitoring.data_monitoring_report import (
+    DataMonitoringReport,
+)
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
@@ -147,10 +152,17 @@ def get_cli_properties() -> dict:
 @common_options(Command.MONITOR)
 @click.option(
     "--slack-webhook",
-    "-s",
+    "-sw",
     type=str,
     default=None,
     help="A slack webhook URL for sending alerts to a specific channel.",
+)
+@click.option(
+    "--deprecated-slack-webhook",
+    "-s",  # Deprecated - will be used for --select in the future
+    type=str,
+    default=None,
+    help="DEPRECATED! - A slack webhook URL for sending alerts to a specific channel.",
 )
 @click.option(
     "--timezone",
@@ -184,6 +196,7 @@ def monitor(
     ctx,
     days_back,
     slack_webhook,
+    deprecated_slack_webhook,
     slack_token,
     slack_channel_name,
     timezone,
@@ -202,9 +215,15 @@ def monitor(
     """
     Monitor your warehouse.
     """
-
     if ctx.invoked_subcommand is not None:
         return
+    if deprecated_slack_webhook is not None:
+        click.secho(
+            f'\n"-s" is deprecated and won\'t be supported in the near future.\n'
+            f'Please use "-sw" or "--slack-webhook" for passing Slack webhook.\n',
+            fg="bright_red",
+        )
+        slack_webhook = deprecated_slack_webhook
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
         config_dir,
@@ -224,7 +243,7 @@ def monitor(
     )
     try:
         config.validate_monitor()
-        data_monitoring = DataMonitoring(
+        data_monitoring = DataMonitoringAlerts(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
@@ -270,6 +289,11 @@ def monitor(
     default=True,
     help="Whether to open the report in the browser.",
 )
+@click.option(
+    "--select",
+    type=str,
+    help="Filter the report by invocation_id / invocation_time / model_tag",
+)
 @click.pass_context
 def report(
     ctx,
@@ -288,6 +312,7 @@ def report(
     disable_samples,
     project_name,
     env,
+    select,
 ):
     """
     Generate a local report of your warehouse.
@@ -301,16 +326,18 @@ def report(
         env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.REPORT, get_cli_properties(), ctx.command.name
     )
     try:
         config.validate_report()
-        data_monitoring = DataMonitoring(
+        data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
+            filter=select,
         )
         generated_report_successfully, _ = data_monitoring.generate_report(
             days_back=days_back,
@@ -403,6 +430,11 @@ def report(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
 )
+@click.option(
+    "--select",
+    type=str,
+    help="Filter the report by invocation_id / invocation_time / model_tag",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -431,6 +463,7 @@ def send_report(
     disable_samples,
     project_name,
     env,
+    select,
 ):
     """
     Send the report to an external platform.
@@ -457,6 +490,7 @@ def send_report(
         env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.SEND_REPORT, get_cli_properties(), ctx.command.name
     )
@@ -469,11 +503,12 @@ def send_report(
             if bucket_file_path
             else slack_file_name
         )
-        data_monitoring = DataMonitoring(
+        data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
+            filter=select,
         )
         command_succeeded = False
         (
