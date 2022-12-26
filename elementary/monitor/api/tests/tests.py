@@ -39,7 +39,7 @@ TEST_INVOCATIONS = "test_invocations"
 class TestsAPI(APIClient):
     def __init__(self, dbt_runner: DbtRunner):
         super().__init__(dbt_runner)
-        self.invocatons_api = InvocationsAPI(dbt_runner)
+        self.invocations_api = InvocationsAPI(dbt_runner)
 
     @staticmethod
     def get_test_sub_type_unique_id(
@@ -74,17 +74,18 @@ class TestsAPI(APIClient):
     def _get_invocation_from_filter(
         self, filter: DataMonitoringFilter
     ) -> Optional[DbtInvocationSchema]:
+        # If none of the following filter options exists, the invocation is empty and there is no filter.
         invocation = DbtInvocationSchema()
         if filter.invocation_id:
-            invocation = self.invocatons_api.get_invocation_by_id(
+            invocation = self.invocations_api.get_invocation_by_id(
                 type="test", invocation_id=filter.invocation_id
             )
         elif filter.invocation_time:
-            invocation = self.invocatons_api.get_invocation_by_time(
+            invocation = self.invocations_api.get_invocation_by_time(
                 type="test", invocation_max_time=filter.invocation_time
             )
         elif filter.last_invocation:
-            invocation = self.invocatons_api.get_last_invocation(type="test")
+            invocation = self.invocations_api.get_last_invocation(type="test")
 
         self.set_run_cache(key=INVOCATION, value=invocation)
         return invocation
@@ -213,7 +214,7 @@ class TestsAPI(APIClient):
         for test_metadata in test_results_metadata:
             test_metadata_dict = dict(test_metadata)
             test_sub_type_unique_id = self.get_test_sub_type_unique_id(
-                **dict(test_metadata_dict)
+                **test_metadata_dict
             )
             test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
             test_result = TestResultSchema(
@@ -242,7 +243,7 @@ class TestsAPI(APIClient):
         for test_metadata in test_results_metadata:
             test_metadata_dict = dict(test_metadata)
             test_sub_type_unique_id = self.get_test_sub_type_unique_id(
-                **dict(test_metadata_dict)
+                **test_metadata_dict
             )
             test_invocations = tests_invocations.get(test_sub_type_unique_id)
             test_run = TestRunSchema(

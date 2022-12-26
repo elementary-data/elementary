@@ -16,7 +16,7 @@
     with elementary_test_results as (
         select * from {{ ref('elementary', 'elementary_test_results') }}
         {% if invocation_id %}
-            where invocation_id = {{ "'" ~ invocation_id ~ "'"}}
+            where invocation_id = {{ "'{}'".format(invocation_id) }}
         {% elif days_back %}
             where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}
@@ -225,7 +225,7 @@
     with elementary_test_results as (
         select * from {{ ref('elementary_test_results') }}
         {% if invocation_id %}
-            where invocation_id = {{ "'" ~ invocation_id ~ "'"}}
+            where invocation_id = {{ "'{}'".format(invocation_id) }}
         {% elif days_back %}
             where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}

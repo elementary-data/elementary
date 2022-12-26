@@ -159,7 +159,7 @@ def get_cli_properties() -> dict:
 )
 @click.option(
     "--deprecated-slack-webhook",
-    "-s",  # Deprecatred - will be used for --select in the future
+    "-s",  # Deprecated - will be used for --select in the future
     type=str,
     default=None,
     help="DEPRECATED! - A slack webhook URL for sending alerts to a specific channel.",
