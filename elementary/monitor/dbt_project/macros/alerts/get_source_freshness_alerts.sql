@@ -102,10 +102,7 @@
                     when suppression_status is NULL and alert_sent = FALSE then 'pending'
                     else suppression_status
                 end as suppression_status,
-                case 
-                    when sent_at is NULL then '1970-01-01 00:00:00'
-                    else sent_at
-                end as sent_at
+                sent_at
             from {{ ref('alerts_source_freshness') }}
             where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         )
