@@ -1,12 +1,23 @@
 {% macro get_tests_sample_data(days_back=7, metrics_sample_limit=5, disable_passed_test_metrics=false) %}
     {% set select_test_results %}
-        with latest_tests_in_the_last_chosen_days as (
-            {{ elementary_internal.latest_tests_in_the_last_chosen_days(days_back=days_back) }}
+        with test_results as (
+            {{ elementary_internal.current_tests_run_results_query(days_back=days_back) }}
+        ),
+
+        tests_in_last_chosen_days as (
+            select *,
+                  row_number() over (partition by test_sub_type_unique_id order by detected_at desc) as row_number
+            from test_results
+        ),
+
+        latest_tests_in_the_last_chosen_days as (
+            select * from tests_in_last_chosen_days where row_number = 1
         )
 
         select 
             model_unique_id,
             test_unique_id,
+            test_sub_type_unique_id,
             test_type,
             test_sub_type,
             column_name,
@@ -66,12 +77,7 @@
                 } %}
             {% endif %}
         {%- endif -%}
-        {% set sub_test_unique_id = get_sub_test_unique_id(
-            model_unique_id=elementary.insensitive_get_dict_value(test, 'model_unique_id'),
-            test_unique_id=elementary.insensitive_get_dict_value(test, 'test_unique_id'),
-            test_sub_type=test_sub_type,
-            column_name=elementary.insensitive_get_dict_value(test, 'column_name'),
-        ) %}
+        {% set sub_test_unique_id = elementary.insensitive_get_dict_value(test, 'test_sub_type_unique_id') %}
         {% do tests_metrics.update({sub_test_unique_id: test_rows_sample}) %}
     {%- endfor -%}
     {% do elementary.edr_log(tojson(tests_metrics)) %}

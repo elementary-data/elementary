@@ -13,6 +13,7 @@ class TestMetadataSchema(BaseModel):
     id: str
     model_unique_id: Optional[ModelUniqueIdType] = None
     test_unique_id: TestUniqueIdType
+    test_sub_type_unique_id: str
     detected_at: str
     database_name: str = None
     schema_name: str
@@ -92,6 +93,7 @@ class InvocationsSchema(BaseModel):
 
 class TestInfoSchema(BaseModel):
     test_unique_id: Optional[str] = None
+    test_sub_type_unique_id: Optional[str] = None
     database_name: Optional[str] = None
     schema_name: Optional[str] = None
     table_name: Optional[str] = None
@@ -118,6 +120,10 @@ class ElementaryTestResultSchema(BaseModel):
     metrics: Optional[Union[list, dict]]
     result_description: str
 
+    # pydantic has a bug with Union fields. This is how to support it.
+    class Config:
+        smart_union = True
+
 
 class DbtTestResultSchema(BaseModel):
     display_name: str
@@ -129,6 +135,10 @@ class DbtTestResultSchema(BaseModel):
 class TestResultSchema(BaseModel):
     metadata: TestInfoSchema
     test_results: Union[dict, list]
+
+    # pydantic has a bug with Union fields. This is how to support it.
+    class Config:
+        smart_union = True
 
 
 class TestRunSchema(BaseModel):

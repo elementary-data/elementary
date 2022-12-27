@@ -188,6 +188,12 @@
 
     select
         test_results.id,
+        case
+            when test_results.test_type = 'schema_change' then test_results.model_unique_id || '.' || test_results.test_unique_id
+            when test_results.test_short_name = 'dimension_anomalies' then test_results.model_unique_id || '.' || test_results.test_unique_id
+            when test_results.column_name is not NULL then test_results.model_unique_id || '.' || test_results.test_unique_id || '.' || test_results.test_sub_type || '.' || test_results.column_name  
+            else test_results.model_unique_id || '.' || test_results.test_unique_id || '.' || test_results.test_sub_type
+        end as test_sub_type_unique_id,
         test_results.invocation_id,
         test_results.data_issue_id,
         test_results.test_execution_id,
@@ -248,6 +254,12 @@
     
     select
         test_results.id,
+        case
+            when test_results.test_type = 'schema_change' then test_results.model_unique_id || '.' || test_results.test_unique_id
+            when test_results.test_name = 'dimension_anomalies' then test_results.model_unique_id || '.' || test_results.test_unique_id
+            when test_results.column_name is not NULL then test_results.model_unique_id || '.' || test_results.test_unique_id || '.' || test_results.test_sub_type || '.' || test_results.column_name  
+            else test_results.model_unique_id || '.' || test_results.test_unique_id || '.' || test_results.test_sub_type
+        end as test_sub_type_unique_id,
         test_results.invocation_id,
         test_results.data_issue_id,
         test_results.test_execution_id,
