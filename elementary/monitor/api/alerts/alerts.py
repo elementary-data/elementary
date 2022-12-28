@@ -154,6 +154,27 @@ class AlertsAPI(APIClient):
                 filtered_alerts.append(alert)
         return filtered_alerts
 
+    def _filter_alerts_by_owner(
+        self,
+        alerts: Union[
+            List[TestAlert],
+            List[ModelAlert],
+            List[SourceFreshnessAlert],
+            List[MalformedAlert],
+        ],
+    ) -> Union[
+        List[TestAlert],
+        List[ModelAlert],
+        List[SourceFreshnessAlert],
+        List[MalformedAlert],
+    ]:
+        filtered_alerts = []
+        for alert in alerts:
+            alert_tags = try_load_json(alert.tags)
+            if alert_tags and self.filter.tag in alert_tags:
+                filtered_alerts.append(alert)
+        return filtered_alerts
+
     def _get_suppressed_alerts(
         self,
         alerts: Union[
