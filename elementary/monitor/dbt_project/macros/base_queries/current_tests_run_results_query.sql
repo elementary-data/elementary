@@ -195,7 +195,7 @@
         case
             when test_results.test_type = 'schema_change' then test_results.model_unique_id || '.' || test_results.test_unique_id
             when test_results.test_short_name = 'dimension_anomalies' then test_results.model_unique_id || '.' || test_results.test_unique_id
-            else test_results.model_unique_id || '.' || test_results.test_unique_id || '.' || coalesce(test_results.test_sub_type, 'None') || '.' || coalesce(test_results.column_name, 'None')  
+            else coalesce(test_results.model_unique_id, 'None') || '.' || coalesce(test_results.test_unique_id, 'None') || '.' || coalesce(test_results.test_sub_type, 'None') || '.' || coalesce(test_results.column_name, 'None')  
         end as test_sub_type_unique_id,
         test_results.invocation_id,
         test_results.data_issue_id,
@@ -264,7 +264,7 @@
         case
             when test_results.test_type = 'schema_change' then test_results.model_unique_id || '.' || test_results.test_unique_id
             when test_results.test_name = 'dimension_anomalies' then test_results.model_unique_id || '.' || test_results.test_unique_id
-            else test_results.model_unique_id || '.' || test_results.test_unique_id || '.' || coalesce(test_results.test_sub_type, 'None') || '.' || coalesce(test_results.column_name, 'None')  
+            else coalesce(test_results.model_unique_id, 'None') || '.' || coalesce(test_results.test_unique_id, 'None') || '.' || coalesce(test_results.test_sub_type, 'None') || '.' || coalesce(test_results.column_name, 'None')  
         end as test_sub_type_unique_id,
         test_results.invocation_id,
         test_results.data_issue_id,
