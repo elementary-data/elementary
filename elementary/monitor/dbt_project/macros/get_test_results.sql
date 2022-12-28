@@ -1,18 +1,7 @@
 {%- macro get_test_results(days_back = 7, results_sample_limit = 5, invocation_id = none) -%}
     {% set select_test_results %}
-        with test_results as (
-            {{ elementary_internal.current_tests_run_results_query(days_back=days_back, invocation_id=invocation_id) }}
-        ),
-
-        tests_in_last_chosen_days as (
-            select *,
-                  {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
-                  row_number() over (partition by test_sub_type_unique_id order by detected_at desc) as row_number
-                from test_results
-        ),
-
-        latest_tests_in_the_last_chosen_days as (
-            select * from tests_in_last_chosen_days where row_number = 1
+        with latest_tests_in_the_last_chosen_days as (
+            {{ elementary_internal.latest_tests_in_the_last_chosen_days(days_back=days_back, invocation_id=invocation_id) }}
         )
 
         select 

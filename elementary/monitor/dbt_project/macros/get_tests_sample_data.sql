@@ -1,17 +1,7 @@
 {% macro get_tests_sample_data(days_back=7, metrics_sample_limit=5, disable_passed_test_metrics=false) %}
     {% set select_test_results %}
-        with test_results as (
-            {{ elementary_internal.current_tests_run_results_query(days_back=days_back) }}
-        ),
-
-        tests_in_last_chosen_days as (
-            select *,
-                  row_number() over (partition by test_sub_type_unique_id order by detected_at desc) as row_number
-            from test_results
-        ),
-
-        latest_tests_in_the_last_chosen_days as (
-            select * from tests_in_last_chosen_days where row_number = 1
+        with latest_tests_in_the_last_chosen_days as (
+            {{ elementary_internal.latest_tests_in_the_last_chosen_days(days_back=days_back) }}
         )
 
         select 

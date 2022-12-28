@@ -21,7 +21,6 @@
             test_execution_id,
             status
         from test_results_in_last_chosen_days
-        where row_number <= {{ invocations_per_test }}
         order by detected_at
     {% endset %}
     {% set tests_invocations_agate = run_query(tests_invocations_query) %}
