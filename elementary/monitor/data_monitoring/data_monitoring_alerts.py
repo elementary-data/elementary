@@ -15,6 +15,7 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
@@ -35,11 +36,39 @@ class DataMonitoringAlerts(DataMonitoring):
         send_test_message_on_success: bool = False,
     ):
         super().__init__(config, tracking, force_update_dbt_package, disable_samples)
+        self.filter = self._parse_filter(self.raw_filter)
         self.alerts_api = AlertsAPI(
             self.internal_dbt_runner, self.config, self.elementary_database_and_schema
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
+
+    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringAlertsFilter:
+        data_monitoring_filter = DataMonitoringAlertsFilter()
+        if filter:
+            tag_regex = re.compile(r"tag:.*")
+            owner_regex = re.compile(r"owner:.*")
+            model_regex = re.compile(r"model:.*")
+
+            tag_match = tag_regex.search(filter)
+            owner_match = owner_regex.search(filter)
+            model_match = model_regex.search(filter)
+
+            if tag_match:
+                data_monitoring_filter = DataMonitoringAlertsFilter(
+                    tag=tag_match.group().split(":", 1)[1]
+                )
+            elif owner_match:
+                data_monitoring_filter = DataMonitoringAlertsFilter(
+                    owner=owner_match.group().split(":", 1)[1]
+                )
+            elif model_match:
+                data_monitoring_filter = DataMonitoringAlertsFilter(
+                    model=model_match.group().split(":", 1)[1]
+                )
+            else:
+                logger.error(f"Could not parse the given -s/--select: {filter}")
+        return data_monitoring_filter
 
     def _parse_emails_to_ids(self, emails: List[str]) -> str:
         def _regex_match_owner_email(potential_email: str) -> bool:

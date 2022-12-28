@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from packaging import version
 
@@ -24,6 +24,7 @@ class DataMonitoring:
         tracking: AnonymousTracking,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
+        filter: Optional[str] = None,
     ):
         self.config = config
         self.tracking = tracking
@@ -67,6 +68,7 @@ class DataMonitoring:
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
         self.disable_samples = disable_samples
+        self.raw_filter = filter
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()

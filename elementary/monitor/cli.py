@@ -123,6 +123,13 @@ def common_options(cmd: str):
             default=None,
             help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
         )(func)
+        func = click.option(
+            "--select",
+            type=str,
+            help="Filter the report by invocation_id / invocation_time / model_tag"
+            if cmd in (Command.REPORT, Command.SEND_REPORT)
+            else "Filter the alerts by tag / owner / model",
+        )(func)
         return func
 
     return decorator
@@ -211,6 +218,7 @@ def monitor(
     test,
     disable_samples,
     env,
+    select,
 ):
     """
     Monitor your warehouse.
@@ -249,6 +257,7 @@ def monitor(
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
             disable_samples=disable_samples,
+            filter=select,
         )
         success = data_monitoring.run_alerts(
             days_back, full_refresh_dbt_package, dbt_vars=vars
@@ -288,11 +297,6 @@ def monitor(
     type=bool,
     default=True,
     help="Whether to open the report in the browser.",
-)
-@click.option(
-    "--select",
-    type=str,
-    help="Filter the report by invocation_id / invocation_time / model_tag",
 )
 @click.pass_context
 def report(
@@ -429,11 +433,6 @@ def report(
     type=bool,
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
-)
-@click.option(
-    "--select",
-    type=str,
-    help="Filter the report by invocation_id / invocation_time / model_tag",
 )
 @click.pass_context
 def send_report(

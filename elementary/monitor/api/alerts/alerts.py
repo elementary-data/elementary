@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -11,6 +11,8 @@ from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
+from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
 
@@ -21,11 +23,16 @@ FALLBACK_TIME = datetime.fromtimestamp(0).strftime(DATETIME_FORMAT)
 
 class AlertsAPI(APIClient):
     def __init__(
-        self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str
+        self,
+        dbt_runner: DbtRunner,
+        config: Config,
+        elementary_database_and_schema: str,
+        filter: Optional[DataMonitoringAlertsFilter] = None,
     ):
         super().__init__(dbt_runner)
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
+        self.filter = filter
 
     def get_new_alerts(self, days_back: int, disable_samples: bool = False) -> Alerts:
         new_test_alerts = self.get_test_alerts(days_back, disable_samples)
@@ -102,6 +109,50 @@ class AlertsAPI(APIClient):
             malformed_alerts=malformed_alerts_to_send,
             alerts_to_skip=alerts_to_skip,
         )
+
+    def _filter_alerts(
+        self,
+        alerts: Union[
+            List[TestAlert],
+            List[ModelAlert],
+            List[SourceFreshnessAlert],
+            List[MalformedAlert],
+        ],
+    ) -> Union[
+        List[TestAlert],
+        List[ModelAlert],
+        List[SourceFreshnessAlert],
+        List[MalformedAlert],
+    ]:
+        filtered_alerts = alerts
+        if self.filter.tag:
+            filtered_alerts = self._filter_alerts_by_tag(alerts)
+        elif self.filter.model:
+            filtered_alerts = self._filter_alerts_by_model(alerts)
+        elif self.filter.owner:
+            filtered_alerts = self._filter_alerts_by_owner(alerts)
+        return filtered_alerts
+
+    def _filter_alerts_by_tag(
+        self,
+        alerts: Union[
+            List[TestAlert],
+            List[ModelAlert],
+            List[SourceFreshnessAlert],
+            List[MalformedAlert],
+        ],
+    ) -> Union[
+        List[TestAlert],
+        List[ModelAlert],
+        List[SourceFreshnessAlert],
+        List[MalformedAlert],
+    ]:
+        filtered_alerts = []
+        for alert in alerts:
+            alert_tags = try_load_json(alert.tags)
+            if alert_tags and self.filter.tag in alert_tags:
+                filtered_alerts.append(alert)
+        return filtered_alerts
 
     def _get_suppressed_alerts(
         self,
