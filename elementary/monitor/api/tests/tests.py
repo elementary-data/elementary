@@ -208,7 +208,7 @@ class TestsAPI(APIClient):
             )
             test_result = TestResultSchema(
                 metadata=self.get_test_info_from_test_metadata(test_metadata),
-                test_results=test_sample_data,
+                test_results=test_metadata.get_test_results(test_sample_data).dict(),
             )
             test_results[test_metadata.model_unique_id].append(test_result)
 
