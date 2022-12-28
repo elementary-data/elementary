@@ -6,11 +6,6 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.monitor.alerts.schema.test import (
-    AnomalyTestConfigurationSchema,
-    DbtTestConfigurationSchema,
-    TestResultSchema,
-)
 from elementary.monitor.api.alerts.normalized_alert import (
     COLUMN_FIELD,
     DESCRIPTION_FIELD,
@@ -47,9 +42,6 @@ class TestAlert(Alert):
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at
-
-    def to_test_alert_api_dict(self) -> dict:
-        raise NotImplementedError
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
@@ -273,54 +265,6 @@ class DbtTestAlert(TestAlert):
             title=title, preview=preview, result=result, configuration=configuration
         )
 
-    def to_test_alert_api_dict(self):
-        configuration = DbtTestConfigurationSchema(
-            test_name=self.test_name, test_params=try_load_json(self.test_params)
-        )
-
-        result = TestResultSchema(
-            result_description=self.test_results_description,
-            result_query=self.test_results_query,
-        )
-
-        test_runs = (
-            {**self.test_runs, "display_name": self.test_display_name}
-            if self.test_runs
-            else {}
-        )
-
-        return {
-            "metadata": {
-                "test_unique_id": self.test_unique_id,
-                "database_name": self.database_name,
-                "schema_name": self.schema_name,
-                "table_name": self.table_name,
-                "column_name": self.column_name,
-                "test_name": self.test_name,
-                "test_display_name": self.test_display_name,
-                "latest_run_time": self.detected_at.isoformat(),
-                "latest_run_time_utc": self.detected_at_utc.isoformat(),
-                "latest_run_status": self.status,
-                "model_unique_id": self.model_unique_id,
-                "table_unique_id": self.table_full_name,
-                "test_type": self.test_type,
-                "test_sub_type": self.test_sub_type,
-                "test_query": self.test_results_query,
-                "test_params": self.test_params,
-                "test_created_at": self.test_created_at,
-                "description": self.test_description,
-                "result": result.dict(),
-                "configuration": configuration.dict(),
-            },
-            "test_results": {
-                "display_name": self.test_display_name + " - failed results sample",
-                "results_sample": self.test_rows_sample,
-                "error_message": self.error_message,
-                "failed_rows_count": self.failed_rows_count,
-            },
-            "test_runs": test_runs,
-        }
-
 
 class ElementaryTestAlert(DbtTestAlert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
@@ -466,71 +410,3 @@ class ElementaryTestAlert(DbtTestAlert):
         return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
-
-    def to_test_alert_api_dict(self):
-        test_params = try_load_json(self.test_params) or {}
-
-        configuration = AnomalyTestConfigurationSchema(
-            test_name=self.test_name,
-            timestamp_column=test_params.get("timestamp_column"),
-            testing_timeframe=test_params.get("timeframe"),
-            anomaly_threshold=test_params.get("sensitivity"),
-        )
-
-        result = TestResultSchema(
-            result_description=self.test_results_description,
-            result_query=self.test_results_query,
-        )
-
-        test_alerts = None
-        if self.test_type == "anomaly_detection":
-            timestamp_column = test_params.get("timestamp_column")
-            sensitivity = test_params.get("sensitivity")
-            test_params = {
-                "timestamp_column": timestamp_column,
-                "anomaly_threshold": sensitivity,
-            }
-            if self.test_rows_sample and self.test_sub_type != "dimension":
-                self.test_rows_sample.sort(key=lambda metric: metric.get("end_time"))
-            test_alerts = {
-                "display_name": self.test_sub_type_display_name,
-                "metrics": self.test_rows_sample,
-                "result_description": self.test_results_description,
-            }
-        elif self.test_type == "schema_change":
-            test_alerts = {
-                "display_name": self.test_sub_type_display_name.lower(),
-                "result_description": self.test_results_description,
-            }
-        test_runs = (
-            {**self.test_runs, "display_name": self.test_sub_type_display_name}
-            if self.test_runs
-            else {}
-        )
-
-        return {
-            "metadata": {
-                "test_unique_id": self.test_unique_id,
-                "database_name": self.database_name,
-                "schema_name": self.schema_name,
-                "table_name": self.table_name,
-                "column_name": self.column_name,
-                "test_name": self.test_name,
-                "test_display_name": self.test_display_name,
-                "latest_run_time": self.detected_at.isoformat(),
-                "latest_run_time_utc": self.detected_at_utc.isoformat(),
-                "latest_run_status": self.status,
-                "model_unique_id": self.model_unique_id,
-                "table_unique_id": self.table_full_name,
-                "test_type": self.test_type,
-                "test_sub_type": self.test_sub_type,
-                "test_query": self.test_results_query,
-                "test_params": test_params,
-                "test_created_at": self.test_created_at,
-                "description": self.test_description,
-                "result": result.dict(),
-                "configuration": configuration.dict(),
-            },
-            "test_results": test_alerts,
-            "test_runs": test_runs,
-        }
