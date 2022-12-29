@@ -105,9 +105,9 @@ class AlertsAPI(APIClient):
                 malformed_alerts_to_send.append(alert)
 
         return AlertsQueryResult(
-            alerts=alerts_to_send,
-            malformed_alerts=malformed_alerts_to_send,
-            alerts_to_skip=alerts_to_skip,
+            alerts=self._filter_alerts(alerts_to_send),
+            malformed_alerts=self._filter_alerts(malformed_alerts_to_send),
+            alerts_to_skip=self._filter_alerts(alerts_to_skip),
         )
 
     def _filter_alerts(
@@ -124,13 +124,18 @@ class AlertsAPI(APIClient):
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ]:
-        filtered_alerts = alerts
+        if self.filter is None:
+            return alerts
+
+        filtered_alerts = []
         if self.filter.tag:
             filtered_alerts = self._filter_alerts_by_tag(alerts)
         elif self.filter.model:
             filtered_alerts = self._filter_alerts_by_model(alerts)
         elif self.filter.owner:
             filtered_alerts = self._filter_alerts_by_owner(alerts)
+        elif self.filter.node_names is not None:
+            filtered_alerts = self._filter_alerts_by_node_names(alerts)
         return filtered_alerts
 
     def _filter_alerts_by_tag(
@@ -149,7 +154,12 @@ class AlertsAPI(APIClient):
     ]:
         filtered_alerts = []
         for alert in alerts:
-            alert_tags = try_load_json(alert.tags)
+            alert_tags = (
+                try_load_json(alert.tags)
+                if not isinstance(alert, MalformedAlert)
+                else try_load_json(alert.data.get("tags"))
+            )
+            breakpoint()
             if alert_tags and self.filter.tag in alert_tags:
                 filtered_alerts.append(alert)
         return filtered_alerts
@@ -170,9 +180,82 @@ class AlertsAPI(APIClient):
     ]:
         filtered_alerts = []
         for alert in alerts:
-            alert_tags = try_load_json(alert.tags)
-            if alert_tags and self.filter.tag in alert_tags:
+            alert_owners = (
+                try_load_json(alert.owners)
+                if not isinstance(alert, MalformedAlert)
+                else try_load_json(alert.data.get("owners"))
+            )
+            if alert_owners and self.filter.owner in alert_owners:
                 filtered_alerts.append(alert)
+        return filtered_alerts
+
+    def _filter_alerts_by_model(
+        self,
+        alerts: Union[
+            List[TestAlert],
+            List[ModelAlert],
+            List[SourceFreshnessAlert],
+            List[MalformedAlert],
+        ],
+    ) -> Union[
+        List[TestAlert],
+        List[ModelAlert],
+        List[SourceFreshnessAlert],
+        List[MalformedAlert],
+    ]:
+        filtered_alerts = []
+        for alert in alerts:
+            alert_model_unique_id = None
+            if isinstance(alert, TestAlert):
+                alert_model_unique_id = alert.model_unique_id
+            elif isinstance(alert, ModelAlert) or isinstance(
+                alert, SourceFreshnessAlert
+            ):
+                alert_model_unique_id = alert.unique_id
+            else:
+                data = alert.data
+                alert_model_unique_id = data.get(
+                    "model_unique_id", data.get("unique_id")
+                )
+            if alert_model_unique_id and self.filter.model.endswith(
+                alert_model_unique_id
+            ):
+                filtered_alerts.append(alert)
+        return filtered_alerts
+
+    def _filter_alerts_by_node_names(
+        self,
+        alerts: Union[
+            List[TestAlert],
+            List[ModelAlert],
+            List[SourceFreshnessAlert],
+            List[MalformedAlert],
+        ],
+    ) -> Union[
+        List[TestAlert],
+        List[ModelAlert],
+        List[SourceFreshnessAlert],
+        List[MalformedAlert],
+    ]:
+        filtered_alerts = []
+        for alert in alerts:
+            alert_node_name = None
+            if isinstance(alert, TestAlert):
+                alert_node_name = alert.test_name
+            elif isinstance(alert, ModelAlert) or isinstance(
+                alert, SourceFreshnessAlert
+            ):
+                alert_node_name = alert.unique_id
+            else:
+                data = alert.data
+                alert_node_name = data.get("test_name", data.get("unique_id"))
+            if alert_node_name:
+                for node_name in self.filter.node_names:
+                    if alert_node_name.endswith(node_name) or node_name.endswith(
+                        alert_node_name
+                    ):
+                        filtered_alerts.append(alert)
+                        break
         return filtered_alerts
 
     def _get_suppressed_alerts(

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
@@ -33,4 +33,5 @@ class DataMonitoringReportFilter(BaseModel):
 class DataMonitoringAlertsFilter(BaseModel):
     tag: Optional[str] = None
     owner: Optional[str] = None
-    model: Optional[bool] = False
+    model: Optional[bool] = None
+    node_names: Optional[List[str]] = None

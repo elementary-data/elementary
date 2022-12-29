@@ -20,7 +20,7 @@ from elementary.monitor.api.tests.schema import (
     TestUniqueIdType,
     TotalsSchema,
 )
-from elementary.monitor.data_monitoring.schema import DataMonitoringFilter
+from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
@@ -72,7 +72,7 @@ class TestsAPI(APIClient):
         return tests_metadata
 
     def _get_invocation_from_filter(
-        self, filter: DataMonitoringFilter
+        self, filter: DataMonitoringReportFilter
     ) -> Optional[DbtInvocationSchema]:
         # If none of the following filter options exists, the invocation is empty and there is no filter.
         invocation = DbtInvocationSchema()
@@ -188,7 +188,7 @@ class TestsAPI(APIClient):
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringFilter] = None,
+        filter: Optional[DataMonitoringReportFilter] = None,
     ) -> Tuple[
         Dict[ModelUniqueIdType, TestResultSchema], Optional[DbtInvocationSchema]
     ]:

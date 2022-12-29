@@ -67,7 +67,7 @@ class SourceFreshnessAlert(Alert):
                 [
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Source:* {self.alias}     |",
+                            f"*Source:* {self.source_name}.{self.identifier}    |",
                             f"*Status:* {self.status}",
                         ],
                     ),

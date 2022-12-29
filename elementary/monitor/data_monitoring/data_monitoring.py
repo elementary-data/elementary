@@ -38,7 +38,7 @@ class DataMonitoring:
             self.user_dbt_runner = DbtRunner(
                 self.config.project_dir,
                 self.config.profiles_dir,
-                self.config.profile_target,
+                self.config.project_profile_target,
                 dbt_env_vars=self.config.dbt_env_vars,
             )
         else:

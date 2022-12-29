@@ -1,5 +1,4 @@
 import json
-import os.path
 import re
 from datetime import datetime
 from typing import List, Optional
@@ -8,12 +7,14 @@ from alive_progress import alive_it
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
+from elementary.exceptions.exceptions import UnsupportedSelectorError
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
+from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -31,44 +32,60 @@ class DataMonitoringAlerts(DataMonitoring):
         self,
         config: Config,
         tracking: AnonymousTracking,
+        filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
     ):
-        super().__init__(config, tracking, force_update_dbt_package, disable_samples)
+        super().__init__(
+            config, tracking, force_update_dbt_package, disable_samples, filter
+        )
         self.filter = self._parse_filter(self.raw_filter)
         self.alerts_api = AlertsAPI(
-            self.internal_dbt_runner, self.config, self.elementary_database_and_schema
+            self.internal_dbt_runner,
+            self.config,
+            self.elementary_database_and_schema,
+            self.filter,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
 
-    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringAlertsFilter:
-        data_monitoring_filter = DataMonitoringAlertsFilter()
+    def _parse_filter(
+        self, filter: Optional[str] = None
+    ) -> Optional[DataMonitoringAlertsFilter]:
         if filter:
-            tag_regex = re.compile(r"tag:.*")
-            owner_regex = re.compile(r"owner:.*")
-            model_regex = re.compile(r"model:.*")
+            if self.user_dbt_runner:
+                selector_api = SelectorAPI(self.user_dbt_runner)
+                node_names = selector_api.get_selector_results(selector=filter)
+                return DataMonitoringAlertsFilter(node_names=node_names)
 
-            tag_match = tag_regex.search(filter)
-            owner_match = owner_regex.search(filter)
-            model_match = model_regex.search(filter)
-
-            if tag_match:
-                data_monitoring_filter = DataMonitoringAlertsFilter(
-                    tag=tag_match.group().split(":", 1)[1]
-                )
-            elif owner_match:
-                data_monitoring_filter = DataMonitoringAlertsFilter(
-                    owner=owner_match.group().split(":", 1)[1]
-                )
-            elif model_match:
-                data_monitoring_filter = DataMonitoringAlertsFilter(
-                    model=model_match.group().split(":", 1)[1]
-                )
             else:
-                logger.error(f"Could not parse the given -s/--select: {filter}")
-        return data_monitoring_filter
+                data_monitoring_filter = DataMonitoringAlertsFilter()
+                tag_regex = re.compile(r"tag:.*")
+                owner_regex = re.compile(r"owner:.*")
+                model_regex = re.compile(r"model:.*")
+
+                tag_match = tag_regex.search(filter)
+                owner_match = owner_regex.search(filter)
+                model_match = model_regex.search(filter)
+
+                if tag_match:
+                    data_monitoring_filter = DataMonitoringAlertsFilter(
+                        tag=tag_match.group().split(":", 1)[1]
+                    )
+                elif owner_match:
+                    data_monitoring_filter = DataMonitoringAlertsFilter(
+                        owner=owner_match.group().split(":", 1)[1]
+                    )
+                elif model_match:
+                    data_monitoring_filter = DataMonitoringAlertsFilter(
+                        model=model_match.group().split(":", 1)[1]
+                    )
+                else:
+                    raise UnsupportedSelectorError(filter)
+                return data_monitoring_filter
+        else:
+            return None
 
     def _parse_emails_to_ids(self, emails: List[str]) -> str:
         def _regex_match_owner_email(potential_email: str) -> bool:
@@ -165,6 +182,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts = self.alerts_api.get_new_alerts(
             days_back, disable_samples=self.disable_samples
         )
+        breakpoint()
         self.execution_properties[
             "elementary_test_count"
         ] = alerts.get_elementary_test_count()

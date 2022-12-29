@@ -124,8 +124,17 @@ def common_options(cmd: str):
             help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
         )(func)
         func = click.option(
+            "--project-profile-target",
+            type=str,
+            default=None,
+            help="Which target to load for the given profile. "
+            "If specified, the target will be used for your dbt project."
+            "Else, the --profile-target will be used.",
+        )(func)
+        func = click.option(
             "--select",
             type=str,
+            default=None,
             help="Filter the report by invocation_id / invocation_time / model_tag"
             if cmd in (Command.REPORT, Command.SEND_REPORT)
             else "Filter the alerts by tag / owner / model",
@@ -214,6 +223,7 @@ def monitor(
     full_refresh_dbt_package,
     dbt_quoting,
     profile_target,
+    project_profile_target,
     dbt_vars,
     test,
     disable_samples,
@@ -238,6 +248,7 @@ def monitor(
         profiles_dir,
         project_dir,
         profile_target,
+        project_profile_target,
         dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
@@ -308,6 +319,7 @@ def report(
     update_dbt_package,
     dbt_quoting,
     profile_target,
+    project_profile_target,
     executions_limit,
     file_path,
     disable_passed_test_metrics,
@@ -326,6 +338,7 @@ def report(
         profiles_dir,
         project_dir,
         profile_target,
+        project_profile_target,
         dbt_quoting=dbt_quoting,
         env=env,
     )
@@ -447,6 +460,7 @@ def send_report(
     slack_channel_name,
     slack_file_name,
     profile_target,
+    project_profile_target,
     executions_limit,
     bucket_file_path,
     disable_passed_test_metrics,
@@ -475,6 +489,7 @@ def send_report(
         profiles_dir,
         project_dir,
         profile_target,
+        project_profile_target,
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,

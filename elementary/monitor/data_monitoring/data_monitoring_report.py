@@ -42,10 +42,13 @@ class DataMonitoringReport(DataMonitoring):
         self,
         config: Config,
         tracking: AnonymousTracking,
+        filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
     ):
-        super().__init__(config, tracking, force_update_dbt_package, disable_samples)
+        super().__init__(
+            config, tracking, force_update_dbt_package, disable_samples, filter
+        )
         self.filter = self._parse_filter(self.raw_filter)
         self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)

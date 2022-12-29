@@ -38,6 +38,7 @@ class Config:
         profiles_dir: str = None,
         project_dir: str = None,
         profile_target: str = None,
+        project_profile_target: str = None,
         dbt_quoting: bool = None,
         update_bucket_website: bool = None,
         slack_webhook: str = None,
@@ -57,6 +58,9 @@ class Config:
         self.profiles_dir = profiles_dir
         self.project_dir = project_dir or self.locate_user_project_dir()
         self.profile_target = profile_target
+        self.project_profile_target = (
+            project_profile_target if project_profile_target else profile_target
+        )
         self.env = env
 
         # Additional env vars supplied to dbt invocations
