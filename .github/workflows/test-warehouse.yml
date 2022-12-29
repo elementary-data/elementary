@@ -104,7 +104,9 @@ jobs:
         run: pip install dbt-core==${{ inputs.dbt-version }} dbt-${{ inputs.warehouse-type }}==${{ inputs.dbt-version }}
 
       - name: Install Elementary
-        run: pip install "./elementary[${{ inputs.warehouse-type }}]"
+        run: |
+          pip install -r ./elementary/dev-requirements.txt
+          pip install "./elementary[${{ inputs.warehouse-type }}]"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
@@ -121,7 +123,7 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
-      - name: Run E2E tests
+      - name: Test dbt package
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
@@ -171,3 +173,6 @@ jobs:
         with:
           name: edr.log
           path: edr.log
+
+      - name: Test Python package
+        run: pytest -v

@@ -31,5 +31,5 @@ def report_data_fixture():
 @report_data_exists_marker()
 def test_totals(report_data, report_data_fixture):
     for key in report_data:
-        if key.endswith("_totals"):
+        if key.endswith("_totals") or key in ["coverages", "lineage"]:
             assert report_data[key] == report_data_fixture[key]
