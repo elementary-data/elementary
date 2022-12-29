@@ -33,5 +33,5 @@ class DataMonitoringReportFilter(BaseModel):
 class DataMonitoringAlertsFilter(BaseModel):
     tag: Optional[str] = None
     owner: Optional[str] = None
-    model: Optional[bool] = None
+    model: Optional[str] = None
     node_names: Optional[List[str]] = None
