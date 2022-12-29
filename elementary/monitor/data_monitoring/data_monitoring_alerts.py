@@ -45,7 +45,6 @@ class DataMonitoringAlerts(DataMonitoring):
             self.internal_dbt_runner,
             self.config,
             self.elementary_database_and_schema,
-            self.filter,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
