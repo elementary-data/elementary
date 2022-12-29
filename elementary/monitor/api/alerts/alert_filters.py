@@ -124,7 +124,7 @@ def _filter_alerts_by_model(
         else:
             data = alert.data
             alert_model_unique_id = data.get("model_unique_id", data.get("unique_id"))
-        if alert_model_unique_id and filter.model.endswith(alert_model_unique_id):
+        if alert_model_unique_id and alert_model_unique_id.endswith(filter.model):
             filtered_alerts.append(alert)
     return filtered_alerts
 

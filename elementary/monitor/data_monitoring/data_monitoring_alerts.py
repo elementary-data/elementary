@@ -179,7 +179,7 @@ class DataMonitoringAlerts(DataMonitoring):
             return self.success
 
         alerts = self.alerts_api.get_new_alerts(
-            days_back, disable_samples=self.disable_samples
+            days_back, disable_samples=self.disable_samples, filter=self.filter
         )
         self.execution_properties[
             "elementary_test_count"
