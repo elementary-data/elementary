@@ -83,7 +83,7 @@ class SourceFreshnessAlert(Alert):
             title.append(
                 self.slack_message_builder.create_context_block(
                     [
-                        f"*Source:* {self.source_name}     |",
+                        f"*Source:* {self.source_name}.{self.identifier}     |",
                         f"*Status:* {self.status}     |"
                         f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
                     ],
