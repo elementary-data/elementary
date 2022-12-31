@@ -2,33 +2,37 @@
 title: "Running Elementary Tests and Generate Reports"
 sidebarTitle: "Generate report"
 ---
-import InstallCLI from "../snippets/install-cli.mdx";
-import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
-import CommunitySupport from "../snippets/support-contact.mdx";
 
 ## Elementary CLI Setup
 
-Elementary's CLI can only be run locally (for now) and requires adjustment to the `profiles.yml`. 
+Elementary's CLI can only be run locally (for now) and requires adjustment to the `profiles.yml`.
 
 The CLI tool allows users to access reports and results based on the tests we just configured. While we have already added the Elementary packages to our dbt project, the Elementary CLI requires a separate installation, as it can only be run locally.
+
 <Warning>
-Important:  Both dbt Cloud and dbt Core users will need to run the Elementary CLI locally. If you are a cloud user, you will need to ensure your configuration has met all the [prerequisites](https://docs.elementary-data.com/tutorial/setup).
+  Important: Both dbt Cloud and dbt Core users will need to run the Elementary
+  CLI locally. If you are a cloud user, you will need to ensure your
+  configuration has met all the
+  [prerequisites](https://docs.elementary-data.com/tutorial/setup).
 </Warning>
+
 <Accordion title="1. Install the Elementary CLI">
-Run one of the following commands based on your platform:
-<InstallCLI />
+  Run one of the following commands based on your platform:
+  <Snippet file="install-cli.mdx" />
 </Accordion>
-<br/>
+<br />
 <Accordion title="2. Creating a Profile for the CLI">
-<AddConnectionProfile />
+  <Snippet file="add-connection-profile.mdx" />
 </Accordion>
-<br/>
+<br />
 ## Running Elementary
 
 Now that we have added Elementary tests to our schemas.yml file, it’s time to run our first tests. We begin by running on a subset of our data that is all valid:
+
 ```shell
 dbt run --vars "{'anomalies': False}"
 ```
+
 <Warning>
 Note: Here we are setting the anomalies flag to False - only seeding valid data to our DWH.
 </Warning>
@@ -67,4 +71,4 @@ edr monitor report
 ## Congratulations!
 Congratulations, you successfully configured Elementary's tests and ran the report!
 
-<CommunitySupport />
+<Snippet file="support-contact.mdx" />
