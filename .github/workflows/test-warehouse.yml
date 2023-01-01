@@ -175,4 +175,4 @@ jobs:
           path: edr.log
 
       - name: Test Python package
-        run: pytest -v
+        run: pytest -vv
