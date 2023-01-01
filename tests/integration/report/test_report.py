@@ -20,5 +20,15 @@ def report_data_fixture():
 def test_totals(report_data_fixture):
     report_data = get_report_data()
     for key in report_data:
-        if key.endswith("_totals") or key in ["coverages", "lineage"]:
+        if key.endswith("_totals"):
             assert report_data[key] == report_data_fixture[key]
+
+
+def test_lineage(report_data_fixture):
+    report_data = get_report_data()
+    assert report_data["lineage"] == report_data_fixture["lineage"]
+
+
+def test_coverage(report_data_fixture):
+    report_data = get_report_data()
+    assert report_data["coverages"] == report_data_fixture["coverages"]
