@@ -257,6 +257,7 @@ def monitor(
         env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.MONITOR, get_cli_properties(), ctx.command.name
     )

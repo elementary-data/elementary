@@ -54,6 +54,7 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> Optional[DataMonitoringAlertsFilter]:
         if filter:
             if self.user_dbt_runner:
+                self.tracking.set_env("select_method", "dbt selector")
                 selector_api = SelectorAPI(self.user_dbt_runner)
                 node_names = selector_api.get_selector_results(selector=filter)
                 return DataMonitoringAlertsFilter(node_names=node_names)
@@ -69,14 +70,17 @@ class DataMonitoringAlerts(DataMonitoring):
                 model_match = model_regex.search(filter)
 
                 if tag_match:
+                    self.tracking.set_env("select_method", "tag")
                     data_monitoring_filter = DataMonitoringAlertsFilter(
                         tag=tag_match.group().split(":", 1)[1]
                     )
                 elif owner_match:
+                    self.tracking.set_env("select_method", "owner")
                     data_monitoring_filter = DataMonitoringAlertsFilter(
                         owner=owner_match.group().split(":", 1)[1]
                     )
                 elif model_match:
+                    self.tracking.set_env("select_method", "model")
                     data_monitoring_filter = DataMonitoringAlertsFilter(
                         model=model_match.group().split(":", 1)[1]
                     )
