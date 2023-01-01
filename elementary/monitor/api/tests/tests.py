@@ -190,7 +190,7 @@ class TestsAPI(APIClient):
         disable_samples: bool = False,
         filter: Optional[DataMonitoringReportFilter] = None,
     ) -> Tuple[
-        Dict[ModelUniqueIdType, TestResultSchema], Optional[DbtInvocationSchema]
+        Dict[ModelUniqueIdType, List[TestResultSchema]], Optional[DbtInvocationSchema]
     ]:
         test_results_metadata = self.get_run_cache(TESTS_METADATA)
         invocation = self._get_invocation_from_filter(filter)
@@ -228,7 +228,7 @@ class TestsAPI(APIClient):
 
     def get_test_runs(
         self, days_back: Optional[int] = 7, invocations_per_test: int = 720
-    ) -> Dict[ModelUniqueIdType, TestRunSchema]:
+    ) -> Dict[ModelUniqueIdType, List[TestRunSchema]]:
         test_results_metadata = self.get_run_cache(TESTS_METADATA)
         if test_results_metadata is None:
             test_results_metadata = self.get_tests_metadata(days_back=days_back)
