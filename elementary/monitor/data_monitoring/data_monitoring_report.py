@@ -155,7 +155,7 @@ class DataMonitoringReport(DataMonitoring):
 
             output_data["models"] = serializable_models
             output_data["sidebars"] = sidebars.dict()
-            output_data["invocation"] = invocation.dict()
+            output_data["invocation"] = dict(invocation)
             output_data["test_results"] = serializable_test_results
             output_data["test_results_totals"] = self._serialize_totals(
                 test_results_totals
@@ -258,7 +258,7 @@ class DataMonitoringReport(DataMonitoring):
             logger.exception(f"Could not get test results and totals - Error: {e}")
             self.tracking.record_cli_internal_exception(e)
             self.success = False
-            return dict(), dict()
+            return dict(), dict(), dict()
 
     def _get_test_runs_and_totals(
         self,
