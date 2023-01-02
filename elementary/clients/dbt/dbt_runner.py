@@ -75,8 +75,10 @@ class DbtRunner:
         success, _ = self._run_command(command_args=["deps"], quiet=quiet)
         return success
 
-    def seed(self, select: Optional[str] = None) -> bool:
+    def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
         command_args = ["seed"]
+        if full_refresh:
+            command_args.append("--full-refresh")
         if select:
             command_args.extend(["-s", select])
         success, _ = self._run_command(command_args)
