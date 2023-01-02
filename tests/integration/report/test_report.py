@@ -28,14 +28,7 @@ def test_distinct_test_results():
     test_result_ids = set()
     for test_results in report_data["test_results"].values():
         for test_result in test_results:
-            metadata = test_result["metadata"]
-            test_result_id = (
-                metadata["test_unique_id"],
-                metadata["table_name"],
-                metadata["column_name"],
-                metadata["test_type"],
-                metadata["test_sub_type"],
-            )
+            test_result_id = get_test_result_id(test_result["metadata"])
             assert test_result_id not in test_result_ids
             test_result_ids.add(test_result_id)
 
@@ -75,6 +68,28 @@ def test_sidebar(report_data_fixture):
         "model.elementary_integration_tests.string_column_anomalies"
         not in report_data["sidebars"]["tags"]["No tags"]
     )
+
+
+def get_test_result_id(test_metadata):
+    test_type_id_map = {
+        "anomaly_detection": (
+            test_metadata["model_unique_id"],
+            test_metadata["column_name"],
+            test_metadata["test_unique_id"],
+            test_metadata["test_sub_type"],
+        ),
+        "schema_change": (
+            test_metadata["model_unique_id"],
+            test_metadata["test_unique_id"],
+        ),
+        "dbt_test": (
+            test_metadata["model_unique_id"],
+            test_metadata["column_name"],
+            test_metadata["test_unique_id"],
+            test_metadata["test_sub_type"],
+        ),
+    }
+    return test_type_id_map[test_metadata["test_type"]]
 
 
 def assert_totals(data_totals: Totals, fixture_totals: Totals):
