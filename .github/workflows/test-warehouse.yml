@@ -108,11 +108,8 @@ jobs:
           pip install -r ./elementary/dev-requirements.txt
           pip install "./elementary[${{ inputs.warehouse-type }}]"
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: elementary/build
+      - name: Run Python package unit tests
+        run: pytest -vv -k unit
 
       - name: Install dbt package
         run: |
@@ -123,7 +120,7 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
-      - name: Test dbt package
+      - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
@@ -174,5 +171,5 @@ jobs:
           name: edr.log
           path: edr.log
 
-      - name: Test Python package
-        run: pytest -vv
+      - name: Run Python package integration tests
+        run: pytest -vv -k integration
