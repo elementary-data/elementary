@@ -24,19 +24,45 @@ def test_totals(report_data_fixture):
             assert_totals(report_data[key], report_data_fixture[key])
 
 
-def test_models(report_data_fixture):
-    assert report_data["models"] == report_data_fixture["models"]
-
-
-def test_lineage(report_data_fixture):
-    assert report_data["lineage"] == report_data_fixture["lineage"]
-
-
-def test_coverage(report_data_fixture):
-    assert report_data["coverages"] == report_data_fixture["coverages"]
+def test_sidebar(report_data_fixture):
+    assert (
+        "model.elementary_integration_tests.error_model"
+        in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["models"][
+            "__files__"
+        ]
+    )
+    assert (
+        "model.elementary_integration_tests.nested"
+        in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["models"][
+            "nested"
+        ]["models"]["tree"]["__files__"]
+    )
+    assert (
+        "source.elementary_integration_tests.training.any_type_column_anomalies_training"
+        in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["sources"][
+            "__files__"
+        ]
+    )
+    assert (
+        "model.elementary_integration_tests.any_type_column_anomalies"
+        in report_data["sidebars"]["owners"]["@edr"]
+    )
+    assert (
+        "model.elementary_integration_tests.any_type_column_anomalies"
+        not in report_data["sidebars"]["owners"]["No owners"]
+    )
+    assert (
+        "model.elementary_integration_tests.string_column_anomalies"
+        in report_data["sidebars"]["tags"]["marketing"]
+    )
+    assert (
+        "model.elementary_integration_tests.string_column_anomalies"
+        not in report_data["sidebars"]["tags"]["No tags"]
+    )
 
 
 def assert_totals(data_totals: Totals, fixture_totals: Totals):
+    assert data_totals.keys() == fixture_totals.keys()
     for total_key in fixture_totals:
         assert_totals_entry(data_totals[total_key], fixture_totals[total_key])
 
