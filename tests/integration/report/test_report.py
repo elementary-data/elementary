@@ -24,6 +24,22 @@ def test_totals(report_data_fixture):
             assert_totals(report_data[key], report_data_fixture[key])
 
 
+def test_distinct_test_results():
+    test_result_ids = set()
+    for test_results in report_data["test_results"].values():
+        for test_result in test_results:
+            metadata = test_result["metadata"]
+            test_result_id = (
+                metadata["test_unique_id"],
+                metadata["table_name"],
+                metadata["column_name"],
+                metadata["test_type"],
+                metadata["test_sub_type"],
+            )
+            assert test_result_id not in test_result_ids
+            test_result_ids.add(test_result_id)
+
+
 def test_sidebar(report_data_fixture):
     assert (
         "model.elementary_integration_tests.error_model"
