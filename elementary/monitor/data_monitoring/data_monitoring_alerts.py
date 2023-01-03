@@ -62,7 +62,7 @@ class DataMonitoringAlerts(DataMonitoring):
             else:
                 data_monitoring_filter = DataMonitoringAlertsFilter()
                 tag_regex = re.compile(r"tag:.*")
-                owner_regex = re.compile(r"owner:.*")
+                owner_regex = re.compile(r"config.meta.owner:.*")
                 model_regex = re.compile(r"model:.*")
                 any_selector = re.compile(r".*:.*")
 
