@@ -60,7 +60,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  TESTS_DIR: dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: dbt-data-reliability/integration_tests
 
 jobs:
   test:
@@ -122,6 +122,7 @@ jobs:
 
       - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
+        working-directory: elementary
         run: |
           dbt deps --project-dir ./dbt-data-reliability/integration_tests
           python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
@@ -130,20 +131,20 @@ jobs:
         run: edr --help
 
       - name: Run monitor
-        working-directory: ${{ env.TESTS_DIR }}
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
         run: edr monitor -t "${{ inputs.warehouse-type }}" --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Run report
-        working-directory: ${{ env.TESTS_DIR }}
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: edr monitor report -t "${{ inputs.warehouse-type }}" --file-path "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          path: ${{ env.TESTS_DIR }}/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          path: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Write GCS keyfile
         env:
@@ -151,7 +152,7 @@ jobs:
         run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
-        working-directory: ${{ env.TESTS_DIR }}
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -172,4 +173,5 @@ jobs:
           path: edr.log
 
       - name: Run Python package integration tests
+        working-directory: elementary
         run: pytest -vv -k integration

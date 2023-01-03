@@ -11,20 +11,21 @@ _REPORT_DATA_PATH = Path(_REPORT_DATA_FILENAME)
 TotalsEntry = Dict[str, int]
 Totals = Dict[str, TotalsEntry]
 
-report_data = json.loads(_REPORT_DATA_PATH.read_text())
-
 
 def test_report_keys(report_data_fixture):
+    report_data = get_report_data()
     assert report_data.keys() == report_data_fixture.keys()
 
 
 def test_totals(report_data_fixture):
+    report_data = get_report_data()
     for key in report_data_fixture:
         if key.endswith("_totals"):
             assert_totals(report_data[key], report_data_fixture[key])
 
 
 def test_sidebar(report_data_fixture):
+    report_data = get_report_data()
     assert (
         "model.elementary_integration_tests.error_model"
         in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["models"][
@@ -77,3 +78,7 @@ def assert_totals_entry(
 @pytest.fixture
 def report_data_fixture():
     return json.loads(_REPORT_DATA_FIXTURE.read_text())
+
+
+def get_report_data():
+    return json.loads(_REPORT_DATA_PATH.read_text())
