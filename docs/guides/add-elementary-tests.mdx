@@ -81,11 +81,14 @@ models:
 
 `elementary.freshness_anomalies`
 
-Monitors the freshness of your table over time.  
-Upon running the test, your data is split into time buckets based on the `time_bucket` field and is limited by
-the `days_back` var. The test then compares the time difference between the last record of the bucket in your data to
-the end of the bucket. If there were any anomalies in the detection period (`backfill_days`) compared to previous time
-buckets, the test will fail.
+Monitors the freshness of your table over time, as the expected time between data updates.
+The test monitors the expected time between data updates during the training period (`days_back`),
+and alert if there are anomalies in the detection period (`backfill_days`).1
+
+The test requires providing a `timestamp_column` - which should be an update timestamp (e.g. `updated_at`).
+
+_Note_: This test is primarily intended for batch processing (e.g. scheduled dbt model runs). For monitoring continuous
+event data, please check the `event_freshness_anomalies` test below.
 
 <CodeGroup>
 
@@ -96,7 +99,7 @@ models:
   - name: < model name >
     tests:
       - elementary.freshness_anomalies:
-          timestamp_column: < timestamp column >
+          timestamp_column: < timestamp column >            # Mandatory
           where_expression: < sql expression >
           time_bucket:
             period: < time period >
@@ -110,7 +113,61 @@ models:
   - name: login_events
     tests:
       - elementary.freshness_anomalies:
-          timestamp_column: 'loaded_at'
+          timestamp_column: 'updated_at'
+          # optional - use tags to run elementary tests on a dedicated run
+          tags: ['elementary']
+          config:
+          # optional - change severity
+            severity: warn
+```
+
+</CodeGroup>
+
+</Accordion>
+
+<Accordion title="elementary.event_freshness_anomalies">
+
+`elementary.event_freshness_anomalies`
+
+Monitors the freshness of event data over time, as the expected time it takes each event to load -
+that is, the time between the when the event acutally occures (the event timestamp), and when it is loaded to the
+database (the update timestamp).
+
+This test compliments the `freshness_anomalies` test and is primarily intended for data that is updated in a
+continuous / streaming fashion.
+
+The test can work in a couple of modes:
+- If only an `event_timestamp_column` is supplied, the test measures over time the difference between the current
+timestamp ("now") and the most recent event timestamp.
+- If both an `event_timestamp_column` and an `update_timestamp_column` are provided, the test will measure over time
+the difference between these two columns.
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    tests:
+      - elementary.freshness_anomalies:
+          event_timestamp_column: < timestamp column >          # Mandatory
+          update_timestamp_column: < timestamp column >         # Optional
+          where_expression: < sql expression >
+          time_bucket:
+            period: < time period >
+            count: < number of periods >
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    tests:
+      - elementary.freshness_anomalies:
+          event_timestamp_column: 'occurred_at'
+          update_timestamp_column: 'updated_at'
           # optional - use tags to run elementary tests on a dedicated run
           tags: ['elementary']
           config:
