@@ -29,6 +29,8 @@ the `days_back` var. The test then compares the row count of the buckets that ar
 period (`backfill_days`) to the row count of all the previous time buckets.
 If there were any anomalies in the detection period, the test will fail.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 
 <CodeGroup>
 
@@ -41,7 +43,7 @@ models:
       - elementary.volume_anomalies:
           timestamp_column: < timestamp column >
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:                # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -90,6 +92,8 @@ The test requires providing a `timestamp_column` - which should be an update tim
 _Note_: This test is primarily intended for batch processing (e.g. scheduled dbt model runs). For monitoring continuous
 event data, please check the `event_freshness_anomalies` test below.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -101,7 +105,7 @@ models:
       - elementary.freshness_anomalies:
           timestamp_column: < timestamp column >            # Mandatory
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -142,6 +146,8 @@ timestamp ("now") and the most recent event timestamp.
 - If both an `event_timestamp_column` and an `update_timestamp_column` are provided, the test will measure over time
 the difference between these two columns.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -154,7 +160,7 @@ models:
           event_timestamp_column: < timestamp column >          # Mandatory
           update_timestamp_column: < timestamp column >         # Optional
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -189,6 +195,8 @@ It is best to configure it on low-cardinality fields.
 The test counts rows grouped by given columns/expressions, and can be configured using the `dimensions`
 and `where_expression` keys.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -204,7 +212,7 @@ models:
           dimensions: < columns or sql expressions of columns >
           # optional - configure a where a expression to accurate the dimension monitoring
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -253,6 +261,8 @@ Executes column level monitors and anomaly detection on all the columns of the t
 are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
 the `all_columns_anomalies` key.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -267,7 +277,7 @@ models:
       - elementary.all_columns_anomalies:
           column_anomalies: < specific monitors, all if null >
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -323,6 +333,8 @@ Executes column level monitors and anomaly detection. Specific monitors
 are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
 the `column_anomalies` key.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -333,11 +345,15 @@ models:
     config:
       elementary:
         timestamp_column: < timestamp column >
-     columns:
+    columns:
       - name: < column name >
         tests:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
+              where_expression: < sql expression >
+              time_bucket:              # Daily by default
+                              period: < time period >
+                              count: < number of periods >
 
   - name: < model name >
     ## if no timestamp is configured, elementary will monitor without time filtering
@@ -347,9 +363,6 @@ models:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
               where_expression: < sql expression >
-              time_bucket:
-                period: < time period >
-                count: < number of periods >
 ```
 
 ```yml Models example
@@ -434,6 +447,8 @@ column (e.g. if your table is partitioned), add the key `freshness_column` to th
 _Note_: This test is deprecated. You should use instead one of the following tests: `volume_anomalies`,
 `freshness_anomalies` or `event_freshness_anomalies`.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -489,10 +504,10 @@ models:
 
 </Accordion>
 
-## How to configure your Elementary tests?
+## Advanced configuration for your elementary tests
 
-Elementary tests are added to models / sources / columns of your dbt project just like the native dbt tests. You can
-configure specific monitors under the relevant keys (otherwise all relevant monitors will run).
+The elementary anomaly detection tests described above can work out-of-the-box with default configuration. However,
+we support additional configuration that can be used to customize their behavior, depending on your needs.
 
 Elementary tests have three levels of configurations:
 
