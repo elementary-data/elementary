@@ -40,7 +40,6 @@ jobs:
 
   build-and-push-docker-image:
     runs-on: ubuntu-latest
-    needs: publish-to-pypi
     permissions:
       contents: read
       packages: write
@@ -72,9 +71,8 @@ jobs:
 
   merge-to-prod:
     runs-on: ubuntu-latest
-    needs: build-and-push-docker-image
-
     steps:
+      - uses: actions/checkout@v3
       - name: PR master to prod
         uses: repo-sync/pull-request@v2
         with:
