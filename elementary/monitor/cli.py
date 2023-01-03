@@ -123,6 +123,22 @@ def common_options(cmd: str):
             default=None,
             help="Which directory to look in for the dbt_project.yml file. Default is the current working directory.",
         )(func)
+        func = click.option(
+            "--project-profile-target",
+            type=str,
+            default=None,
+            help="Which target to load for the given profile. "
+            "If specified, the target will be used for your dbt project."
+            "Else, the --profile-target will be used.",
+        )(func)
+        func = click.option(
+            "--select",
+            type=str,
+            default=None,
+            help="Filter the report by invocation_id / invocation_time / model_tag"
+            if cmd in (Command.REPORT, Command.SEND_REPORT)
+            else "Filter the alerts by tag / owner / model",
+        )(func)
         return func
 
     return decorator
@@ -207,10 +223,12 @@ def monitor(
     full_refresh_dbt_package,
     dbt_quoting,
     profile_target,
+    project_profile_target,
     dbt_vars,
     test,
     disable_samples,
     env,
+    select,
 ):
     """
     Monitor your warehouse.
@@ -230,6 +248,7 @@ def monitor(
         profiles_dir,
         project_dir,
         profile_target,
+        project_profile_target,
         dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
@@ -238,6 +257,7 @@ def monitor(
         env=env,
     )
     anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.MONITOR, get_cli_properties(), ctx.command.name
     )
@@ -249,6 +269,7 @@ def monitor(
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
             disable_samples=disable_samples,
+            filter=select,
         )
         success = data_monitoring.run_alerts(
             days_back, full_refresh_dbt_package, dbt_vars=vars
@@ -289,11 +310,6 @@ def monitor(
     default=True,
     help="Whether to open the report in the browser.",
 )
-@click.option(
-    "--select",
-    type=str,
-    help="Filter the report by invocation_id / invocation_time / model_tag",
-)
 @click.pass_context
 def report(
     ctx,
@@ -304,6 +320,7 @@ def report(
     update_dbt_package,
     dbt_quoting,
     profile_target,
+    project_profile_target,
     executions_limit,
     file_path,
     disable_passed_test_metrics,
@@ -322,6 +339,7 @@ def report(
         profiles_dir,
         project_dir,
         profile_target,
+        project_profile_target,
         dbt_quoting=dbt_quoting,
         env=env,
     )
@@ -430,11 +448,6 @@ def report(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
 )
-@click.option(
-    "--select",
-    type=str,
-    help="Filter the report by invocation_id / invocation_time / model_tag",
-)
 @click.pass_context
 def send_report(
     ctx,
@@ -448,6 +461,7 @@ def send_report(
     slack_channel_name,
     slack_file_name,
     profile_target,
+    project_profile_target,
     executions_limit,
     bucket_file_path,
     disable_passed_test_metrics,
@@ -476,6 +490,7 @@ def send_report(
         profiles_dir,
         project_dir,
         profile_target,
+        project_profile_target,
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,

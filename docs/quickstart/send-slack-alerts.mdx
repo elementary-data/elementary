@@ -61,6 +61,41 @@ Make sure to run the following command after your dbt runs and tests:
 edr monitor
 ```
 
+### Filtering alerts using selector
+
+Elementary supports filtering alerts using a selector.
+Elementry `edr monitor` command will notify only on the selector's matched alerts.
+
+There are 3 selectors supported by elementary:
+
+- tag - Notify on models/sources/tests that are tagged with the provided tag selector (Notice that tests can be matched on their model's/source's tag).
+- owner - Notify on models/sources/tests that their owner is provided owner selector (Notice that tests can be matched on their model's/source's owner).
+- model - Notify on the model/source and its tests.
+
+To filter alerts by tag:
+
+```shell
+edr monitor --select tag:critical
+edr monitor --select tag:finnance
+```
+
+To filter alerts by owner:
+
+```shell
+edr monitor --select config.meta.owner:@jeff
+edr monitor --select config.meta.owner:@jessy
+```
+
+To filter alerts by model:
+
+```shell
+edr monitor --select model:customers
+edr monitor --select model:orders
+
+edr monitor --select customers
+edr monitor --select orders
+```
+
 ---
 
 ## Alert types configuration
