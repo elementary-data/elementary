@@ -67,8 +67,7 @@
                 } %}
             {% endif %}
         {%- endif -%}
-        {% set sub_test_unique_id = elementary.insensitive_get_dict_value(test, 'test_sub_type_unique_id') %}
-        {% do tests_metrics.update({sub_test_unique_id: test_rows_sample}) %}
+        {% do tests_metrics.update({test_unique_id: test_rows_sample}) %}
     {%- endfor -%}
     {% do elementary.edr_log(tojson(tests_metrics)) %}
 {% endmacro %}

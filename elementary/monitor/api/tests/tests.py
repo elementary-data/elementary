@@ -203,9 +203,7 @@ class TestsAPI(APIClient):
 
         test_results = defaultdict(list)
         for test_metadata in test_results_metadata:
-            test_sample_data = tests_sample_data.get(
-                test_metadata.test_sub_type_unique_id
-            )
+            test_sample_data = tests_sample_data.get(test_metadata.test_unique_id)
             test_result = TestResultSchema(
                 metadata=self.get_test_info_from_test_metadata(test_metadata),
                 test_results=test_metadata.get_test_results(test_sample_data).dict(),
@@ -255,9 +253,17 @@ class TestsAPI(APIClient):
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
         grouped_invocations = defaultdict(list)
+        grouped_invocations_ids = defaultdict(list)
         for test_invocation in test_invocation_dicts:
             try:
                 sub_test_unique_id = test_invocation.get("test_sub_type_unique_id")
+                invocation_id = test_invocation.get("invocation_id")
+                # Remove duplicate rows for schema changes test runs
+                if test_invocation.get("test_type") == "schema_change":
+                    if invocation_id in grouped_invocations_ids[sub_test_unique_id]:
+                        continue
+
+                grouped_invocations_ids[sub_test_unique_id].append(invocation_id)
                 grouped_invocations[sub_test_unique_id].append(
                     InvocationSchema(
                         id=test_invocation["test_execution_id"],

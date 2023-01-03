@@ -11,10 +11,12 @@
         )
 
         select
+            invocation_id,
             model_unique_id, 
             test_unique_id,
             test_sub_type_unique_id,
             test_sub_type,
+            test_type,
             column_name,
             detected_at,
             test_results_description,
