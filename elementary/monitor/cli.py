@@ -137,7 +137,7 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by invocation_id / invocation_time / model_tag"
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "Filter the alerts using dbt --select",
+            else "Filter the alerts by tag / owner / model",
         )(func)
         return func
 
