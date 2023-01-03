@@ -174,3 +174,6 @@ class DbtRunner:
     def debug(self, quiet: bool = False) -> bool:
         success, _ = self._run_command(command_args=["debug"], quiet=quiet)
         return success
+
+    def source_freshness(self):
+        self._run_command(command_args=["source", "freshness"])
