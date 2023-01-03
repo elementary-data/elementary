@@ -19,6 +19,7 @@ class S3Client:
             profile_name=config.aws_profile_name,
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
+            endpoint_url=config.s3_endpoint_url
         )
         self.client = aws_session.client("s3")
         self.tracking = tracking
