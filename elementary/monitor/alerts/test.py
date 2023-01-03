@@ -33,6 +33,7 @@ class TestAlert(Alert):
         self,
         model_unique_id: str,
         test_unique_id: str,
+        test_name: Optional[str] = None,
         test_created_at: Optional[str] = None,
         test_meta: Optional[str] = None,
         **kwargs,
@@ -42,6 +43,8 @@ class TestAlert(Alert):
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at
+        self.test_name = test_name
+        self.test_display_name = self.display_name(test_name) if test_name else ""
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
@@ -68,7 +71,6 @@ class DbtTestAlert(TestAlert):
         test_results_query,
         test_rows_sample,
         other,
-        test_name,
         test_params,
         severity,
         test_runs=None,
@@ -82,9 +84,7 @@ class DbtTestAlert(TestAlert):
             name for name in [self.database_name, self.schema_name, table_name] if name
         ]
         self.table_full_name = ".".join(table_full_name_parts).lower()
-        self.test_name = test_name
         self.test_short_name = test_short_name
-        self.test_display_name = self.display_name(test_name) if test_name else ""
         self.other = other
         self.test_sub_type = test_sub_type or ""
         self.test_sub_type_display_name = (

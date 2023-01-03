@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from elementary.clients.api.api import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -10,7 +10,9 @@ from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
+from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
+from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
 
@@ -21,16 +23,26 @@ FALLBACK_TIME = datetime.fromtimestamp(0).strftime(DATETIME_FORMAT)
 
 class AlertsAPI(APIClient):
     def __init__(
-        self, dbt_runner: DbtRunner, config: Config, elementary_database_and_schema: str
+        self,
+        dbt_runner: DbtRunner,
+        config: Config,
+        elementary_database_and_schema: str,
     ):
         super().__init__(dbt_runner)
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
-    def get_new_alerts(self, days_back: int, disable_samples: bool = False) -> Alerts:
-        new_test_alerts = self.get_test_alerts(days_back, disable_samples)
-        new_model_alerts = self.get_model_alerts(days_back)
-        new_source_freshness_alerts = self.get_source_freshness_alerts(days_back)
+    def get_new_alerts(
+        self,
+        days_back: int,
+        disable_samples: bool = False,
+        filter: Optional[DataMonitoringAlertsFilter] = None,
+    ) -> Alerts:
+        new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
+        new_model_alerts = self.get_model_alerts(days_back, filter)
+        new_source_freshness_alerts = self.get_source_freshness_alerts(
+            days_back, filter
+        )
         return Alerts(
             tests=new_test_alerts,
             models=new_model_alerts,
@@ -38,30 +50,43 @@ class AlertsAPI(APIClient):
         )
 
     def get_test_alerts(
-        self, days_back: int, disable_samples: bool = False
+        self,
+        days_back: int,
+        disable_samples: bool = False,
+        filter: Optional[DataMonitoringAlertsFilter] = None,
     ) -> AlertsQueryResult[TestAlert]:
         pending_test_alerts = self._query_pending_test_alerts(
             days_back, disable_samples
         )
         last_alert_sent_times = self._query_last_test_alert_times(days_back)
-        test_alerts = self._sort_alerts(pending_test_alerts, last_alert_sent_times)
+        test_alerts = self._sort_alerts(
+            pending_test_alerts, last_alert_sent_times, filter
+        )
         return test_alerts
 
-    def get_model_alerts(self, days_back: int) -> AlertsQueryResult[ModelAlert]:
+    def get_model_alerts(
+        self,
+        days_back: int,
+        filter: Optional[DataMonitoringAlertsFilter] = None,
+    ) -> AlertsQueryResult[ModelAlert]:
         pending_model_alerts = self._query_pending_model_alerts(days_back)
         last_alert_sent_times = self._query_last_model_alert_times(days_back)
-        model_alerts = self._sort_alerts(pending_model_alerts, last_alert_sent_times)
+        model_alerts = self._sort_alerts(
+            pending_model_alerts, last_alert_sent_times, filter
+        )
         return model_alerts
 
     def get_source_freshness_alerts(
-        self, days_back: int
+        self,
+        days_back: int,
+        filter: Optional[DataMonitoringAlertsFilter] = None,
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
         pending_source_freshness_alerts = self._query_pending_source_freshness_alerts(
             days_back
         )
         last_alert_sent_times = self._query_last_source_freshness_alert_times(days_back)
         source_freshness_alerts = self._sort_alerts(
-            pending_source_freshness_alerts, last_alert_sent_times
+            pending_source_freshness_alerts, last_alert_sent_times, filter
         )
         return source_freshness_alerts
 
@@ -73,6 +98,7 @@ class AlertsAPI(APIClient):
             AlertsQueryResult[SourceFreshnessAlert],
         ],
         last_alert_sent_times: Dict[str, str],
+        filter: Optional[DataMonitoringAlertsFilter] = None,
     ) -> Union[
         AlertsQueryResult[TestAlert],
         AlertsQueryResult[ModelAlert],
@@ -98,9 +124,9 @@ class AlertsAPI(APIClient):
                 malformed_alerts_to_send.append(alert)
 
         return AlertsQueryResult(
-            alerts=alerts_to_send,
-            malformed_alerts=malformed_alerts_to_send,
-            alerts_to_skip=alerts_to_skip,
+            alerts=filter_alerts(alerts_to_send, filter),
+            malformed_alerts=filter_alerts(malformed_alerts_to_send, filter),
+            alerts_to_skip=filter_alerts(alerts_to_skip, filter),
         )
 
     def _get_suppressed_alerts(
