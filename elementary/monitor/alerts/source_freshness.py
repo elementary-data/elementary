@@ -17,7 +17,6 @@ class SourceFreshnessAlert(Alert):
 
     def __init__(
         self,
-        unique_id: str,
         snapshotted_at: Optional[str],
         max_loaded_at: Optional[str],
         max_loaded_at_time_ago_in_s: Optional[float],
@@ -31,7 +30,6 @@ class SourceFreshnessAlert(Alert):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        self.unique_id = unique_id
         self.snapshotted_at = (
             convert_datetime_utc_str_to_timezone_str(snapshotted_at, self.timezone)
             if snapshotted_at
@@ -62,15 +60,35 @@ class SourceFreshnessAlert(Alert):
         title = [
             self.slack_message_builder.create_header_block(
                 f"{icon} dbt source freshness alert"
-            ),
-            self.slack_message_builder.create_context_block(
-                [
-                    f"*Source:* {self.alias}     |",
-                    f"*Status:* {self.status}     |",
-                    f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
-                ],
-            ),
+            )
         ]
+        if self.alert_suppression_interval:
+            title.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Source:* {self.source_name}.{self.identifier}     |",
+                            f"*Status:* {self.status}",
+                        ],
+                    ),
+                    self.slack_message_builder.create_context_block(
+                        [
+                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Suppression interval:* {self.alert_suppression_interval} hours",
+                        ],
+                    ),
+                ]
+            )
+        else:
+            title.append(
+                self.slack_message_builder.create_context_block(
+                    [
+                        f"*Source:* {self.source_name}.{self.identifier}     |",
+                        f"*Status:* {self.status}     |",
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                    ],
+                ),
+            )
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [

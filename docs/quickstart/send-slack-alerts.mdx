@@ -19,6 +19,7 @@ Also, you can add configuration for each test / model in your `.yml` files:
 - dbt Tags - add custom context to the alert
 - Description - add custom description to the alert
 - Alert fields - choose which fields to display in your alert
+- Suppression interval - set a cooldown period which alert won't sent
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
@@ -60,6 +61,41 @@ Make sure to run the following command after your dbt runs and tests:
 edr monitor
 ```
 
+### Filtering alerts using selector
+
+Elementary supports filtering alerts using a selector.
+Elementry `edr monitor` command will notify only on the selector's matched alerts.
+
+There are 3 selectors supported by elementary:
+
+- tag - Notify on models/sources/tests that are tagged with the provided tag selector (Notice that tests can be matched on their model's/source's tag).
+- owner - Notify on models/sources/tests that their owner is provided owner selector (Notice that tests can be matched on their model's/source's owner).
+- model - Notify on the model/source and its tests.
+
+To filter alerts by tag:
+
+```shell
+edr monitor --select tag:critical
+edr monitor --select tag:finnance
+```
+
+To filter alerts by owner:
+
+```shell
+edr monitor --select config.meta.owner:@jeff
+edr monitor --select config.meta.owner:@jessy
+```
+
+To filter alerts by model:
+
+```shell
+edr monitor --select model:customers
+edr monitor --select model:orders
+
+edr monitor --select customers
+edr monitor --select orders
+```
+
 ---
 
 ## Alert types configuration
@@ -86,7 +122,7 @@ By default, alerts are sent on dbt tests, models and snapshots.
 You can also monitor source freshness by running `dbt run-operation upload_source_freshness` right after each execution of `dbt source freshness`.
 This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
 
-## Customize alerts: owners, test descriptions, tags, subscribers and layout
+## Customize alerts: owners, test descriptions, tags, subscribers, layout and suppression
 
 Elementary enriches alerts with dbt model/source/snapshot owners and
 tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
@@ -96,6 +132,7 @@ Also, you can use three custom Elementary fields:
 - Channel: to send the alert to additional Slack channel (only available for Slack token).
 - Description: to add a description to your test and alert.
 - Alert fields: to control which fields to display in your alert.
+- Alert suppression interval: to set a cooldown period which alert won't sent.
 
 <AccordionGroup>
 
@@ -123,7 +160,9 @@ models:
 </Accordion>
 
 <Accordion title="Test descriptions">
-If you want to a description to a test in a slack alert:
+Elementary supports configuring description to tests alerts.
+
+To set it up, simply add the description to your test in the `properties.yml`
 
 ```yml properties.yml
 tests:
@@ -160,13 +199,15 @@ If you want to tag users on a model / test / snapshot failure alert:
 models:
   - name: my_model_name
     meta:
-      subscribers: "@jessica.jones"
+      alerts_config:
+        subscribers: "@jessica.jones"
     columns:
       - name: column_name
         tests:
           - unique:
               meta:
-                subscribers: "@luke.cage"
+                alerts_config:
+                  subscribers: "@luke.cage"
 ```
 
 It is possible to tag multiple subscribers as well:
@@ -175,7 +216,8 @@ It is possible to tag multiple subscribers as well:
 models:
   - name: my_model_name
     meta:
-      subscribers: ["@jessica.jones", "@luke.cage"]
+      alerts_config:
+        subscribers: ["@jessica.jones", "@luke.cage"]
 ```
 
 </Accordion>
@@ -196,7 +238,8 @@ snapshots).
 models:
   - name: marketing_leads
     meta:
-      channel: marketing_data_ops
+      alerts_config:
+        channel: marketing_data_ops
 ```
 
 If your models are in folders by department / team, another useful option is to configure the channel in
@@ -206,7 +249,8 @@ your `dbt_project.yml` file.
 models:
   marketing_bi:
     +meta:
-      channel: marketing_data_ops
+      alerts_config:
+        channel: marketing_data_ops
 ```
 
 You can also configure a custom slack channel for a specific test.
@@ -219,25 +263,8 @@ models:
         tests:
           - unique:
               meta:
-                channel: marketing_data_ops
-```
-
-</Accordion>
-
-<Accordion title="Description">
-Elementary supports configuring description to tests alerts.
-
-To set it up, simply add the description to your test in the `properties.yml`
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    columns:
-      - name: column_name
-        tests:
-          - unique:
-              meta:
-                description: "This is the test description"
+                alerts_config:
+                  channel: marketing_data_ops
 ```
 
 </Accordion>
@@ -272,7 +299,8 @@ To set it up globaly for your project, add the desired alert fields to your mode
 models:
   - name: marketing_leads
     +meta:
-      alert_fields: ["description", "owners", "tags", "subscribers"]
+      alerts_config:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
 ```
 
 To set it up for a model, add the desired alert fields to your model in the properties.yml
@@ -281,7 +309,8 @@ To set it up for a model, add the desired alert fields to your model in the prop
 models:
   - name: marketing_leads
     meta:
-      alert_fields: ["description", "owners", "tags", "subscribers"]
+      alerts_config:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
 ```
 
 You can also configure alert fields for a specific test.
@@ -294,7 +323,52 @@ models:
         tests:
           - unique:
               meta:
-                alert_fields: ["description", "owners", "tags", "subscribers"]
+                alerts_config:
+                  alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+</Accordion>
+
+<Accordion title="Alert suppression interval">
+
+Elementary support configuring suppression interval for alerts.
+By default, the suppression interval for all of the alerts is set to 0.
+An alert that has been generated in the suppression interval won't be sent.
+
+`alert_suppression_interval` can accept values of 0-24 - represents the number of hours for which alerts will be skipped (including unrounded numbers).
+
+To set it up globaly for your project, add the alert suppression interval to your models in the `dbt_project.yml` file.
+
+```yml dbt_project.yml
+models:
+  - name: marketing_leads
+    +meta:
+      alerts_config:
+        alert_suppression_interval: 24
+```
+
+To set it up for a model, add the desired alert suppression interval to your model in the properties.yml
+
+```yml properties.yml
+models:
+  - name: marketing_leads
+    meta:
+      alerts_config:
+        alert_suppression_interval: 24
+```
+
+You can also configure alert suppression interval for a specific test.
+
+```yml properties.yml
+models:
+  - name: marketing_leads
+    columns:
+      - name: column_name
+        tests:
+          - unique:
+              meta:
+                alerts_config:
+                  alert_suppression_interval: 24
 ```
 
 </Accordion>

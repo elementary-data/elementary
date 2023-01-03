@@ -4,7 +4,8 @@ import subprocess
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple
 
-from elementary.exceptions.exceptions import DbtCommandError
+from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -75,8 +76,10 @@ class DbtRunner:
         success, _ = self._run_command(command_args=["deps"], quiet=quiet)
         return success
 
-    def seed(self, select: Optional[str] = None) -> bool:
+    def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
         command_args = ["seed"]
+        if full_refresh:
+            command_args.append("--full-refresh")
         if select:
             command_args.extend(["-s", select])
         success, _ = self._run_command(command_args)
@@ -172,3 +175,32 @@ class DbtRunner:
     def debug(self, quiet: bool = False) -> bool:
         success, _ = self._run_command(command_args=["debug"], quiet=quiet)
         return success
+
+    def ls(self, select: Optional[str] = None) -> list:
+        command_args = ["ls"]
+        if select:
+            command_args.extend(["-s", select])
+        try:
+            success, command_output_string = self._run_command(
+                command_args=command_args, json_logs=True
+            )
+            command_outputs = command_output_string.splitlines()
+            # ls command didn't match nodes.
+            # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.
+            if (
+                len(command_outputs) == 2
+                and try_load_json(command_outputs[0])
+                and try_load_json(command_outputs[1])
+            ):
+                logger.warning(
+                    f"The selection criterion '{select}' does not match any nodes"
+                )
+                return []
+            # When nodes are matched, ls command returns strings of the node names.
+            else:
+                return command_outputs
+        except DbtCommandError:
+            raise DbtLsCommandError(select)
+
+    def source_freshness(self):
+        self._run_command(command_args=["source", "freshness"])

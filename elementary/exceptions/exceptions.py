@@ -1,6 +1,6 @@
 import json
 import subprocess
-from typing import List
+from typing import List, Optional
 
 from elementary.utils.log import get_logger
 
@@ -73,3 +73,53 @@ class DbtCommandError(Error):
             return detailed_command_args
         except Exception as ex:
             logger.error(f"Failed to extract detailed dbt command args, error: {ex}")
+
+
+class DbtLsCommandError(Error):
+    """Exception raised while executing a dbt ls command"""
+
+    def __init__(self, selector: Optional[str] = None):
+        self.selector = selector
+        self.selector_method = self.extract_selector_method(self.selector)
+        super().__init__(
+            f"Failed to run dbt ls - '{self.selector_method}' is not a valid selector method!"
+        )
+
+    @property
+    def anonymous_tracking_context(self):
+        return {
+            "dbt_selector_method": self.selector_method,
+        }
+
+    @staticmethod
+    def extract_selector_method(selector: Optional[str] = None):
+        if selector:
+            try:
+                return selector.split(":", 1)[0]
+            except Exception:
+                logger.error(f"Failed to extract selector method from: '{selector}'")
+
+
+class UnsupportedSelectorError(Error):
+    """Exception raised while executing edr command with unsupported --select method"""
+
+    def __init__(self, selector: Optional[str] = None):
+        self.selector = selector
+        self.selector_method = self.extract_selector_method(self.selector)
+        super().__init__(
+            f"Failed to run edr command with `--select` - '{self.selector_method}' is not a valid selector method!\nFor using all of dbt selector methods, please provide --project-dir!"
+        )
+
+    @property
+    def anonymous_tracking_context(self):
+        return {
+            "edr_selector_method": self.selector_method,
+        }
+
+    @staticmethod
+    def extract_selector_method(selector: Optional[str] = None):
+        if selector:
+            try:
+                return selector.split(":", 1)[0]
+            except Exception:
+                logger.error(f"Failed to extract selector method from: '{selector}'")

@@ -53,4 +53,35 @@ The command will use the provided connection profile to access the data warehous
 
 ---
 
+## Generating a report for single invocation
+
+Elementary support filtering the report by invocation on generation.
+The filtered report will only include data for the seleceted invocation (This applies only on the `Test Results` and `Lineange` screens).
+
+There are 3 ways to filter the report by invocation:
+
+- Last invocation - Filter by the last invocation (`dbt test` \ `dbt build`) that ran.
+- Invocation time - Filter by the closet invocation (`dbt test` \ `dbt build`) to the provided time (the provided time should be in ISO format local time).
+- Invocation id - Filter by the provided invoation (`dbt test` \ `dbt build`) id.
+
+To filter by last invocation:
+
+```shell
+edr monitor report --select last_invocation
+```
+
+To filter by invocation time:
+
+```shell
+edr monitor report --select "invocation_time:2022-12-25 10:10:35"
+```
+
+To filter by invocation id:
+
+```shell
+edr monitor report --select invocation_id:XXXXXXXXXXXXX
+```
+
+---
+
 <ShareReport />
