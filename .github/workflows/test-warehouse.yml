@@ -60,7 +60,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  DBT_PKG_INTEG_TESTS_DIR: dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
 
 jobs:
   test:
@@ -187,4 +187,5 @@ jobs:
           path: edr.log
 
       - name: Run Python package integration tests
+        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: pytest -vv -k integration
