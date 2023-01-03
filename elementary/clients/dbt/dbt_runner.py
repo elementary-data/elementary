@@ -186,7 +186,7 @@ class DbtRunner:
             )
             command_outputs = command_output_string.splitlines()
             # ls command didn't match nodes.
-            # When no node is matched, ls command returns 2 dicts with warning mesaggase that there are no matches.
+            # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.
             if (
                 len(command_outputs) == 2
                 and try_load_json(command_outputs[0])
