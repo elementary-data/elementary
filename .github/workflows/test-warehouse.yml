@@ -122,10 +122,10 @@ jobs:
 
       - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        working-directory: elementary
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
-          dbt deps --project-dir ./dbt-data-reliability/integration_tests
-          python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
+          dbt deps
+          python ./run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
 
       - name: Run help
         run: edr --help
