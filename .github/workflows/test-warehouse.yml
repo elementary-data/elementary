@@ -65,6 +65,9 @@ env:
 jobs:
   test:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: elementary
     concurrency:
       group: tests-${{ inputs.warehouse-type }}-${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
@@ -105,8 +108,8 @@ jobs:
 
       - name: Install Elementary
         run: |
-          pip install -r ./elementary/dev-requirements.txt
-          pip install "./elementary[${{ inputs.warehouse-type }}]"
+          pip install -r dev-requirements.txt
+          pip install ".[${{ inputs.warehouse-type }}]"
 
       - name: Run Python package unit tests
         run: pytest -vv -k unit
@@ -125,26 +128,31 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
-          python ./run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
+          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
 
       - name: Run help
         run: edr --help
 
       - name: Run monitor
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
-        run: edr monitor -t "${{ inputs.warehouse-type }}" --slack-webhook "$SLACK_WEBHOOK"
+        run: >
+          edr monitor 
+          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          -t "${{ inputs.warehouse-type }}"
+          --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Run report
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: edr monitor report -t "${{ inputs.warehouse-type }}" --file-path "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+        run: >
+          edr monitor report
+          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          -t "${{ inputs.warehouse-type }}"
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          path: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          path: elementary_report.html
 
       - name: Write GCS keyfile
         env:
@@ -152,17 +160,23 @@ jobs:
         run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
         run: >
-          edr monitor send-report -t "${{ inputs.warehouse-type }}" --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
-          --slack-token "$SLACK_TOKEN" --slack-channel-name data-ops --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
-          --aws-access-key-id "$AWS_ACCESS_KEY_ID" --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY" --s3-bucket-name elementary-ci-artifacts
-          --google-service-account-path /tmp/gcs_keyfile.json --gcs-bucket-name elementary_ci_artifacts
+          edr monitor send-report 
+          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          -t "${{ inputs.warehouse-type }}"
+          --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          --slack-token "$SLACK_TOKEN"
+          --slack-channel-name data-ops
+          --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          --aws-access-key-id "$AWS_ACCESS_KEY_ID"
+          --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY"
+          --s3-bucket-name elementary-ci-artifacts
+          --google-service-account-path /tmp/gcs_keyfile.json
+          --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
 
       - name: Upload edr log
@@ -173,5 +187,4 @@ jobs:
           path: edr.log
 
       - name: Run Python package integration tests
-        working-directory: elementary
         run: pytest -vv -k integration
