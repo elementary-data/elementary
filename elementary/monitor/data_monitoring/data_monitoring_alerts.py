@@ -64,10 +64,12 @@ class DataMonitoringAlerts(DataMonitoring):
                 tag_regex = re.compile(r"tag:.*")
                 owner_regex = re.compile(r"owner:.*")
                 model_regex = re.compile(r"model:.*")
+                any_selector = re.compile(r".*:.*")
 
                 tag_match = tag_regex.search(filter)
                 owner_match = owner_regex.search(filter)
                 model_match = model_regex.search(filter)
+                any_selector_match = any_selector.search(filter)
 
                 if tag_match:
                     self.tracking.set_env("select_method", "tag")
@@ -84,6 +86,9 @@ class DataMonitoringAlerts(DataMonitoring):
                     data_monitoring_filter = DataMonitoringAlertsFilter(
                         model=model_match.group().split(":", 1)[1]
                     )
+                elif not any_selector_match:
+                    # To support model selectors like `edr monitor -s cutomers`
+                    data_monitoring_filter = DataMonitoringAlertsFilter(model=filter)
                 else:
                     raise UnsupportedSelectorError(filter)
                 return data_monitoring_filter
