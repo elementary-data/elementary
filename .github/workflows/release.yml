@@ -75,11 +75,8 @@ jobs:
     needs: build-and-push-docker-image
 
     steps:
-      - name: Checkout Elementary
-        uses: actions/checkout@v3
-
-      - name: Merge 'master' to 'prod'
-        run: |
-          git checkout prod
-          git merge master
-          git push
+      - name: PR master to prod
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: master
+          destination_branch: prod

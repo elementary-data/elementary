@@ -60,7 +60,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  TESTS_DIR: dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: dbt-data-reliability/integration_tests
 
 jobs:
   test:
@@ -104,13 +104,12 @@ jobs:
         run: pip install dbt-core==${{ inputs.dbt-version }} dbt-${{ inputs.warehouse-type }}==${{ inputs.dbt-version }}
 
       - name: Install Elementary
-        run: pip install "./elementary[${{ inputs.warehouse-type }}]"
+        run: |
+          pip install -r ./elementary/dev-requirements.txt
+          pip install "./elementary[${{ inputs.warehouse-type }}]"
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: elementary/build
+      - name: Run Python package unit tests
+        run: pytest -vv -k unit
 
       - name: Install dbt package
         run: |
@@ -121,30 +120,31 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
-      - name: Run E2E tests
+      - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
-          dbt deps --project-dir ./dbt-data-reliability/integration_tests
-          python ./dbt-data-reliability/integration_tests/run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
+          dbt deps
+          python ./run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
 
       - name: Run help
         run: edr --help
 
       - name: Run monitor
-        working-directory: ${{ env.TESTS_DIR }}
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
         run: edr monitor -t "${{ inputs.warehouse-type }}" --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Run report
-        working-directory: ${{ env.TESTS_DIR }}
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: edr monitor report -t "${{ inputs.warehouse-type }}" --file-path "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          path: ${{ env.TESTS_DIR }}/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          path: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
 
       - name: Write GCS keyfile
         env:
@@ -152,7 +152,7 @@ jobs:
         run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
-        working-directory: ${{ env.TESTS_DIR }}
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -171,3 +171,7 @@ jobs:
         with:
           name: edr.log
           path: edr.log
+
+      - name: Run Python package integration tests
+        working-directory: elementary
+        run: pytest -vv -k integration
