@@ -2,7 +2,7 @@
     In the future we will want to merge between "get_test_results" and "get_tests_sample_data"
     So we currently have a small duplication in "latest_tests_in_the_last_chosen_days" for simplicity 
 #}
-{% macro get_tests_sample_data(days_back=7, metrics_sample_limit=5, disable_passed_test_metrics=false) %}
+{% macro get_tests_sample_data(days_back=7, metrics_sample_limit=5, disable_passed_test_metrics=false, invocation_id = none) %}
     {% set select_test_results %}
         with test_results as (
             {{ elementary_internal.current_tests_run_results_query(days_back=days_back, invocation_id=invocation_id) }}

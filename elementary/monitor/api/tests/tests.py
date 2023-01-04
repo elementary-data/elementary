@@ -86,6 +86,7 @@ class TestsAPI(APIClient):
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
         disable_samples: bool = False,
+        invocation_id: str = None,
     ) -> Dict[TestUniqueIdType, Dict[str, Any]]:
         tests_metrics = {}
         if not disable_samples:
@@ -95,6 +96,7 @@ class TestsAPI(APIClient):
                     days_back=days_back,
                     metrics_sample_limit=metrics_sample_limit,
                     disable_passed_test_metrics=disable_passed_test_metrics,
+                    invocation_id=invocation_id,
                 ),
             )
             tests_metrics = (
@@ -193,7 +195,15 @@ class TestsAPI(APIClient):
             test_results_metadata = self.get_tests_metadata(days_back=days_back)
 
         tests_sample_data = self.get_run_cache(TESTS_SAMPLE_DATA)
-        if tests_sample_data is None:
+        if invocation.invocation_id:
+            tests_sample_data = self.get_tests_sample_data(
+                days_back=days_back,
+                metrics_sample_limit=metrics_sample_limit,
+                disable_passed_test_metrics=disable_passed_test_metrics,
+                disable_samples=disable_samples,
+                invocation_id=invocation.invocation_id,
+            )
+        elif tests_sample_data is None:
             tests_sample_data = self.get_tests_sample_data(
                 days_back=days_back,
                 metrics_sample_limit=metrics_sample_limit,
