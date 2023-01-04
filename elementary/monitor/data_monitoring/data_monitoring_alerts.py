@@ -16,7 +16,7 @@ from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.data_monitoring.schema import AlertsFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
@@ -49,18 +49,55 @@ class DataMonitoringAlerts(DataMonitoring):
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
 
-    def _parse_filter(
-        self, filter: Optional[str] = None
-    ) -> Optional[DataMonitoringAlertsFilter]:
+    def run_alerts(
+        self,
+        days_back: int,
+        dbt_full_refresh: bool = False,
+        dbt_vars: Optional[dict] = None,
+    ) -> bool:
+        logger.info("Running internal dbt run to aggregate alerts")
+        success = self.internal_dbt_runner.run(
+            models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
+        )
+        self.execution_properties["alerts_run_success"] = success
+        if not success:
+            logger.info("Could not aggregate alerts successfully")
+            self.success = False
+            self.execution_properties["success"] = self.success
+            return self.success
+
+        alerts = self.alerts_api.get_new_alerts(
+            days_back, disable_samples=self.disable_samples, filter=self.filter
+        )
+        self.execution_properties[
+            "elementary_test_count"
+        ] = alerts.get_elementary_test_count()
+        self.execution_properties["alert_count"] = alerts.count
+        malformed_alert_count = alerts.malformed_count
+        if malformed_alert_count > 0:
+            self.success = False
+        self.execution_properties["malformed_alert_count"] = malformed_alert_count
+        self.execution_properties["has_subscribers"] = any(
+            alert.subscribers for alert in alerts.get_all()
+        )
+        self._skip_alerts(alerts)
+        self._send_alerts(alerts)
+        if self.send_test_message_on_success and alerts.count == 0:
+            self._send_test_message()
+        self.execution_properties["run_end"] = True
+        self.execution_properties["success"] = self.success
+        return self.success
+
+    def _parse_filter(self, filter: Optional[str] = None) -> Optional[AlertsFilter]:
         if filter:
             if self.user_dbt_runner:
                 self.tracking.set_env("select_method", "dbt selector")
                 selector_api = SelectorAPI(self.user_dbt_runner)
                 node_names = selector_api.get_selector_results(selector=filter)
-                return DataMonitoringAlertsFilter(node_names=node_names)
+                return AlertsFilter(node_names=node_names)
 
             else:
-                data_monitoring_filter = DataMonitoringAlertsFilter()
+                data_monitoring_filter = AlertsFilter()
                 tag_regex = re.compile(r"tag:.*")
                 owner_regex = re.compile(r"config.meta.owner:.*")
                 model_regex = re.compile(r"model:.*")
@@ -73,22 +110,22 @@ class DataMonitoringAlerts(DataMonitoring):
 
                 if tag_match:
                     self.tracking.set_env("select_method", "tag")
-                    data_monitoring_filter = DataMonitoringAlertsFilter(
+                    data_monitoring_filter = AlertsFilter(
                         tag=tag_match.group().split(":", 1)[1]
                     )
                 elif owner_match:
                     self.tracking.set_env("select_method", "owner")
-                    data_monitoring_filter = DataMonitoringAlertsFilter(
+                    data_monitoring_filter = AlertsFilter(
                         owner=owner_match.group().split(":", 1)[1]
                     )
                 elif model_match:
                     self.tracking.set_env("select_method", "model")
-                    data_monitoring_filter = DataMonitoringAlertsFilter(
+                    data_monitoring_filter = AlertsFilter(
                         model=model_match.group().split(":", 1)[1]
                     )
                 elif not any_selector_match:
                     # To support model selectors like `edr monitor -s cutomers`
-                    data_monitoring_filter = DataMonitoringAlertsFilter(model=filter)
+                    data_monitoring_filter = AlertsFilter(model=filter)
                 else:
                     raise UnsupportedSelectorError(filter)
                 return data_monitoring_filter
@@ -169,42 +206,3 @@ class DataMonitoringAlerts(DataMonitoring):
             alerts.source_freshnesses.get_alerts_to_skip(),
             SourceFreshnessAlert.TABLE_NAME,
         )
-
-    def run_alerts(
-        self,
-        days_back: int,
-        dbt_full_refresh: bool = False,
-        dbt_vars: Optional[dict] = None,
-    ) -> bool:
-        logger.info("Running internal dbt run to aggregate alerts")
-        success = self.internal_dbt_runner.run(
-            models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
-        )
-        self.execution_properties["alerts_run_success"] = success
-        if not success:
-            logger.info("Could not aggregate alerts successfully")
-            self.success = False
-            self.execution_properties["success"] = self.success
-            return self.success
-
-        alerts = self.alerts_api.get_new_alerts(
-            days_back, disable_samples=self.disable_samples, filter=self.filter
-        )
-        self.execution_properties[
-            "elementary_test_count"
-        ] = alerts.get_elementary_test_count()
-        self.execution_properties["alert_count"] = alerts.count
-        malformed_alert_count = alerts.malformed_count
-        if malformed_alert_count > 0:
-            self.success = False
-        self.execution_properties["malformed_alert_count"] = malformed_alert_count
-        self.execution_properties["has_subscribers"] = any(
-            alert.subscribers for alert in alerts.get_all()
-        )
-        self._skip_alerts(alerts)
-        self._send_alerts(alerts)
-        if self.send_test_message_on_success and alerts.count == 0:
-            self._send_test_message()
-        self.execution_properties["run_end"] = True
-        self.execution_properties["success"] = self.success
-        return self.success

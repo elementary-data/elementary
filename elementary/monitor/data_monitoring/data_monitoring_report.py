@@ -25,7 +25,7 @@ from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.schema import ReportFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -57,8 +57,8 @@ class DataMonitoringReport(DataMonitoring):
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
-    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringReportFilter:
-        data_monitoring_filter = DataMonitoringReportFilter()
+    def _parse_filter(self, filter: Optional[str] = None) -> ReportFilter:
+        data_monitoring_filter = ReportFilter()
         if filter:
             invocation_id_regex = re.compile(r"invocation_id:.*")
             invocation_time_regex = re.compile(r"invocation_time:.*")
@@ -69,15 +69,13 @@ class DataMonitoringReport(DataMonitoring):
             last_invocation_match = last_invocation_regex.search(filter)
 
             if last_invocation_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    last_invocation=True
-                )
+                data_monitoring_filter = ReportFilter(last_invocation=True)
             elif invocation_id_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
+                data_monitoring_filter = ReportFilter(
                     invocation_id=invocation_id_match.group().split(":", 1)[1]
                 )
             elif invocation_time_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
+                data_monitoring_filter = ReportFilter(
                     invocation_time=invocation_time_match.group().split(":", 1)[1]
                 )
             else:

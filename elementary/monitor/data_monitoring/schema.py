@@ -9,7 +9,7 @@ from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezon
 logger = get_logger(__name__)
 
 
-class DataMonitoringReportFilter(BaseModel):
+class ReportFilter(BaseModel):
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
@@ -30,7 +30,7 @@ class DataMonitoringReportFilter(BaseModel):
         return None
 
 
-class DataMonitoringAlertsFilter(BaseModel):
+class AlertsFilter(BaseModel):
     tag: Optional[str] = None
     owner: Optional[str] = None
     model: Optional[str] = None

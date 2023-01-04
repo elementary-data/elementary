@@ -12,7 +12,7 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.data_monitoring.schema import AlertsFilter
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
 
@@ -36,7 +36,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[AlertsFilter] = None,
     ) -> Alerts:
         new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
         new_model_alerts = self.get_model_alerts(days_back, filter)
@@ -53,7 +53,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[AlertsFilter] = None,
     ) -> AlertsQueryResult[TestAlert]:
         pending_test_alerts = self._query_pending_test_alerts(
             days_back, disable_samples
@@ -67,7 +67,7 @@ class AlertsAPI(APIClient):
     def get_model_alerts(
         self,
         days_back: int,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[AlertsFilter] = None,
     ) -> AlertsQueryResult[ModelAlert]:
         pending_model_alerts = self._query_pending_model_alerts(days_back)
         last_alert_sent_times = self._query_last_model_alert_times(days_back)
@@ -79,7 +79,7 @@ class AlertsAPI(APIClient):
     def get_source_freshness_alerts(
         self,
         days_back: int,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[AlertsFilter] = None,
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
         pending_source_freshness_alerts = self._query_pending_source_freshness_alerts(
             days_back
@@ -98,7 +98,7 @@ class AlertsAPI(APIClient):
             AlertsQueryResult[SourceFreshnessAlert],
         ],
         last_alert_sent_times: Dict[str, str],
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[AlertsFilter] = None,
     ) -> Union[
         AlertsQueryResult[TestAlert],
         AlertsQueryResult[ModelAlert],

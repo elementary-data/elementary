@@ -4,7 +4,7 @@ from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.data_monitoring.schema import AlertsFilter
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
@@ -18,7 +18,7 @@ def filter_alerts(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[DataMonitoringAlertsFilter] = None,
+    filter: Optional[AlertsFilter] = None,
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -46,7 +46,7 @@ def _filter_alerts_by_tag(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[DataMonitoringAlertsFilter],
+    filter: Optional[AlertsFilter],
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -75,7 +75,7 @@ def _filter_alerts_by_owner(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[DataMonitoringAlertsFilter],
+    filter: Optional[AlertsFilter],
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -104,7 +104,7 @@ def _filter_alerts_by_model(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[DataMonitoringAlertsFilter],
+    filter: Optional[AlertsFilter],
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -136,7 +136,7 @@ def _filter_alerts_by_node_names(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[DataMonitoringAlertsFilter],
+    filter: Optional[AlertsFilter],
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
