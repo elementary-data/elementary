@@ -400,6 +400,12 @@ def report(
     help="The secret access key for AWS",
 )
 @click.option(
+    "--s3-endpoint-url",
+    type=str,
+    default=None,
+    help="The endpoint URL of the S3 bucket to upload the report to.",
+)
+@click.option(
     "--s3-bucket-name",
     type=str,
     default=None,
@@ -469,6 +475,7 @@ def send_report(
     aws_profile_name,
     aws_access_key_id,
     aws_secret_access_key,
+    s3_endpoint_url,
     s3_bucket_name,
     google_service_account_path,
     google_project_name,
@@ -498,6 +505,7 @@ def send_report(
         aws_profile_name=aws_profile_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        s3_endpoint_url=s3_endpoint_url,
         s3_bucket_name=s3_bucket_name,
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,

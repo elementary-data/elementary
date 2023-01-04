@@ -48,6 +48,7 @@ class Config:
         aws_profile_name: str = None,
         aws_access_key_id: str = None,
         aws_secret_access_key: str = None,
+        s3_endpoint_url: str = None,
         s3_bucket_name: str = None,
         google_project_name: str = None,
         google_service_account_path: str = None,
@@ -58,9 +59,7 @@ class Config:
         self.profiles_dir = profiles_dir
         self.project_dir = project_dir or self.locate_user_project_dir()
         self.profile_target = profile_target
-        self.project_profile_target = (
-            project_profile_target if project_profile_target else profile_target
-        )
+        self.project_profile_target = project_profile_target or profile_target
         self.env = env
 
         # Additional env vars supplied to dbt invocations
@@ -107,6 +106,9 @@ class Config:
         self.aws_profile_name = self._first_not_none(
             aws_profile_name,
             aws_config.get("profile_name"),
+        )
+        self.s3_endpoint_url = self._first_not_none(
+            s3_endpoint_url, aws_config.get("s3_endpoint_url")
         )
         self.s3_bucket_name = self._first_not_none(
             s3_bucket_name, aws_config.get("s3_bucket_name")
