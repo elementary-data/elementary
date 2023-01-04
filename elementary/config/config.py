@@ -48,6 +48,7 @@ class Config:
         aws_profile_name: str = None,
         aws_access_key_id: str = None,
         aws_secret_access_key: str = None,
+        s3_endpoint_url: str = None,
         s3_bucket_name: str = None,
         google_project_name: str = None,
         google_service_account_path: str = None,
@@ -105,6 +106,9 @@ class Config:
         self.aws_profile_name = self._first_not_none(
             aws_profile_name,
             aws_config.get("profile_name"),
+        )
+        self.s3_endpoint_url = self._first_not_none(
+            s3_endpoint_url, aws_config.get("s3_endpoint_url")
         )
         self.s3_bucket_name = self._first_not_none(
             s3_bucket_name, aws_config.get("s3_bucket_name")
