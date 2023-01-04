@@ -205,7 +205,7 @@ def get_cli_properties() -> dict:
     "--test",
     type=bool,
     default=False,
-    help="Whether to send a test message in case there are no alerts.",
+    help="Whether to send a test message in case there are no alerts.bla",
 )
 @click.pass_context
 def monitor(
