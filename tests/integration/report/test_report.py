@@ -62,6 +62,41 @@ def test_sidebar(report_data_fixture):
     )
 
 
+def test_duplicate_rows_for_latest_run_status(report_data_fixture):
+    # In this test we make sure that we don't have duplicate rows for tests with 2 different status.
+    # For example, if a dimension passed and then failed, we want to see only one row with the latest status.
+    report_data = get_report_data()
+    test_results = report_data.get("test_results")
+    for model_tests in test_results.values():
+        failed_results = []
+        passed_results = []
+        error_results = []
+        warning_results = []
+        for test in model_tests:
+            test_metadata = test.get("metadata")
+            test_status = test_metadata.get("latest_run_status")
+            test_unique_id = test_metadata.get("test_unique_id")
+            if test_status == "fail":
+                failed_results.append(test_unique_id)
+            elif test_status == "pass":
+                passed_results.append(test_unique_id)
+            elif test_status == "error":
+                error_results.append(test_unique_id)
+            elif test_status == "warn":
+                warning_results.append(test_unique_id)
+
+        # Tests like anomaly detection / schema change can have the same test_unique_id for different same status results
+        failed_results = list(set(failed_results))
+        passed_results = list(set(passed_results))
+        error_results = list(set(error_results))
+        warning_results = list(set(warning_results))
+        assert len(
+            failed_results + passed_results + warning_results + error_results
+        ) == len(
+            list(set(failed_results + passed_results + warning_results + error_results))
+        )
+
+
 def assert_totals(data_totals: Totals, fixture_totals: Totals):
     assert data_totals.keys() == fixture_totals.keys()
     for total_key in fixture_totals:

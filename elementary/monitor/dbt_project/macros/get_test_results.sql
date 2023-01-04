@@ -1,6 +1,6 @@
 {# 
     In the future we will want to merge between "get_test_results" and "get_tests_sample_data"
-    So we currently have a small duolication in "latest_tests_in_the_last_chosen_days" for simplicity 
+    So we currently have a small duplication in "latest_tests_in_the_last_chosen_days" for simplicity 
 #}
 {%- macro get_test_results(days_back = 7, results_sample_limit = 5, invocation_id = none) -%}
     {% set select_test_results %}
