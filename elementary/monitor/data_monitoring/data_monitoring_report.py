@@ -13,7 +13,6 @@ from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
 from elementary.monitor.api.filters.filters import FiltersAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
-from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.models.schema import (
     ModelRunsSchema,
@@ -127,7 +126,7 @@ class DataMonitoringReport(DataMonitoring):
             models_runs_dicts, model_runs_totals = self._get_models_runs_and_totals(
                 models_runs
             )
-            lineage = self._get_lineage(exclude_elementary_models)
+            lineage = self.lineage_api.get_lineage(exclude_elementary_models)
             filters = self.filter_api.get_filters(
                 test_results_totals, test_runs_totals, models, sources, models_runs
             )
@@ -234,9 +233,6 @@ class DataMonitoringReport(DataMonitoring):
         self.execution_properties["success"] = self.success
         return self.success
 
-    def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
-        return self.lineage_api.get_lineage(exclude_elementary_models)
-
     def _get_test_results_and_totals(
         self,
         days_back: Optional[int] = None,
@@ -293,7 +289,8 @@ class DataMonitoringReport(DataMonitoring):
             serialized_totals[model_unique_id] = total.dict()
         return serialized_totals
 
-    def _get_models_runs_and_totals(self, models_runs: List[ModelRunsSchema]):
+    @staticmethod
+    def _get_models_runs_and_totals(models_runs: List[ModelRunsSchema]):
         models_runs_dicts = []
         model_runs_totals = {}
         for model_runs in models_runs:
