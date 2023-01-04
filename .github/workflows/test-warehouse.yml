@@ -138,15 +138,17 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
         run: >
           edr monitor 
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           -t "${{ inputs.warehouse-type }}"
+          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Run report
         run: >
           edr monitor report
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           -t "${{ inputs.warehouse-type }}"
+          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-profile-target "${{ inputs.warehouse-type }}"
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v3
@@ -166,8 +168,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: >
           edr monitor send-report 
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           -t "${{ inputs.warehouse-type }}"
+          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
           --slack-token "$SLACK_TOKEN"
           --slack-channel-name data-ops
