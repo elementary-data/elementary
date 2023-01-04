@@ -19,9 +19,8 @@ class S3Client:
             profile_name=config.aws_profile_name,
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
-            endpoint_url=config.s3_endpoint_url
         )
-        self.client = aws_session.client("s3")
+        self.client = aws_session.client("s3", endpoint_url=config.s3_endpoint_url)
         self.tracking = tracking
 
     @classmethod
@@ -38,9 +37,7 @@ class S3Client:
             if remote_bucket_file_path
             else path.basename(local_html_file_path)
         )
-        bucket_report_path = (
-            remote_bucket_file_path if remote_bucket_file_path else report_filename
-        )
+        bucket_report_path = remote_bucket_file_path or report_filename
         logger.info(f'Uploading to S3 bucket "{self.config.s3_bucket_name}"')
         try:
             self.client.upload_file(
