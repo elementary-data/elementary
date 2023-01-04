@@ -39,8 +39,12 @@ class LineageNodeSchema(BaseModel):
 
 
 class LineageSchema(BaseModel):
-    nodes: Optional[List[LineageNodeSchema]] = None
-    edges: Optional[List[Tuple[NodeUniqueIdType, NodeUniqueIdType]]] = None
+    nodes: List[LineageNodeSchema]
+    edges: List[Tuple[NodeUniqueIdType, NodeUniqueIdType]]
+    graph: nx.DiGraph
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @validator("nodes", pre=True, always=True)
     def set_nodes(cls, nodes):
@@ -49,13 +53,3 @@ class LineageSchema(BaseModel):
     @validator("edges", pre=True, always=True)
     def set_edges(cls, edges):
         return edges or []
-
-    def to_graph(self) -> nx.Graph:
-        graph = nx.Graph()
-        graph.add_edges_from(self.edges)
-        return graph
-
-    def to_directed_graph(self) -> nx.DiGraph:
-        graph = nx.DiGraph()
-        graph.add_edges_from(self.edges)
-        return graph

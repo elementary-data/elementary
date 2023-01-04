@@ -27,6 +27,7 @@ class LineageAPI(APIClient):
         return LineageSchema(
             nodes=self._convert_depends_on_node_to_lineage_node(nodes_depends_on_nodes),
             edges=list(lineage_graph.edges),
+            graph=lineage_graph,
         )
 
     def _get_nodes_depends_on_nodes(

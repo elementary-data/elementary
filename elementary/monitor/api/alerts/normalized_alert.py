@@ -1,6 +1,9 @@
 import copy
 from typing import List, Optional
 
+from networkx import NetworkXError
+
+from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
@@ -12,6 +15,7 @@ DESCRIPTION_FIELD = "description"
 OWNERS_FIELD = "owners"
 TAGS_FIELD = "tags"
 SUBSCRIBERS_FIELD = "subscribers"
+EXPOSURES_FIELD = "exposures"
 RESULT_MESSAGE_FIELD = "result_message"
 TEST_PARAMS_FIELD = "test_parameters"
 TEST_QUERY_FIELD = "test_query"
@@ -23,6 +27,7 @@ DEFAULT_ALERT_FIELDS = [
     OWNERS_FIELD,
     TAGS_FIELD,
     SUBSCRIBERS_FIELD,
+    EXPOSURES_FIELD,
     RESULT_MESSAGE_FIELD,
     TEST_PARAMS_FIELD,
     TEST_QUERY_FIELD,
@@ -39,14 +44,14 @@ ALERT_SUPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 
 
 class NormalizedAlert:
-    def __init__(self, alert: dict) -> None:
+    def __init__(self, alert: dict, lineage: LineageSchema) -> None:
         self.alert = alert
         self.test_meta = self._flatten_meta(TEST_META_KEY)
         self.model_meta = self._flatten_meta(MODEL_META_KEY)
-        self.normalized_alert = self._normalize_alert()
+        self.lineage = lineage
 
-    def get_normalized_alert(self) -> dict:
-        return self.normalized_alert
+    def as_dict(self) -> dict:
+        return self._normalize_alert_dict()
 
     def _flatten_meta(self, node_meta_field: str) -> dict:
         # backwards compatibility for alert configuration
@@ -55,21 +60,16 @@ class NormalizedAlert:
         flatten_meta.pop(ALERTS_CONFIG_KEY, None)
         return flatten_meta
 
-    def _normalize_alert(self):
-        try:
-            normalized_alert = copy.deepcopy(self.alert)
-            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_subscribers()
-            normalized_alert["slack_channel"] = self._get_alert_chennel()
-            normalized_alert[
-                ALERT_SUPRESSION_INTERVAL_KEY
-            ] = self._get_alert_suppression_interval()
-            normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
-            return normalized_alert
-        except Exception:
-            logger.error(
-                f"Failed to extract alert subscribers and alert custom slack channel {self.alert.get('id')}. Ignoring it for now and main slack channel will be used"
-            )
-            return self.alert
+    def _normalize_alert_dict(self):
+        normalized_alert = copy.deepcopy(self.alert)
+        normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_subscribers()
+        normalized_alert["slack_channel"] = self._get_alert_chennel()
+        normalized_alert[
+            ALERT_SUPRESSION_INTERVAL_KEY
+        ] = self._get_alert_suppression_interval()
+        normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
+        normalized_alert["affected_exposures"] = self._get_affected_exposures()
+        return normalized_alert
 
     def _get_alert_subscribers(self) -> List[Optional[str]]:
         subscribers = []
@@ -111,6 +111,15 @@ class NormalizedAlert:
         # The fallback is DEFAULT_ALERT_FIELDS.
         return (
             self.test_meta.get(ALERT_FIELDS_KEY)
-            if self.test_meta.get(ALERT_FIELDS_KEY)
-            else self.model_meta.get(ALERT_FIELDS_KEY, DEFAULT_ALERT_FIELDS)
+            or self.model_meta.get(ALERT_FIELDS_KEY)
+            or DEFAULT_ALERT_FIELDS
         )
+
+    def _get_affected_exposures(self) -> List[str]:
+        alert_node = self.alert.get("model_unique_id") or self.alert.get("unique_id")
+        exposures = [node.id for node in self.lineage.nodes if node.type == "exposure"]
+        try:
+            downstream_nodes = self.lineage.graph.predecessors(alert_node)
+        except NetworkXError:
+            return []
+        return list(set(exposures) & set(downstream_nodes))

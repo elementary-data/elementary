@@ -36,6 +36,7 @@ class Alert:
         timezone: Optional[str] = None,
         meta: Optional[dict] = None,
         model_meta: Optional[str] = None,
+        affected_exposures: Optional[List[str]] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
@@ -68,6 +69,7 @@ class Alert:
         self.slack_channel = slack_channel
         self.alert_suppression_interval = alert_suppression_interval
         self.alert_fields = alert_fields
+        self.affected_exposures = affected_exposures
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."

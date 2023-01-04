@@ -12,6 +12,8 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
+from elementary.monitor.api.lineage.lineage import LineageAPI
+from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.data_monitoring.schema import AlertsFilter
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
@@ -31,6 +33,7 @@ class AlertsAPI(APIClient):
         super().__init__(dbt_runner)
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
+        self.lineage_api = LineageAPI(dbt_runner)
 
     def get_new_alerts(
         self,
@@ -38,10 +41,13 @@ class AlertsAPI(APIClient):
         disable_samples: bool = False,
         filter: Optional[AlertsFilter] = None,
     ) -> Alerts:
-        new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
-        new_model_alerts = self.get_model_alerts(days_back, filter)
+        lineage = self.lineage_api.get_lineage()
+        new_test_alerts = self.get_test_alerts(
+            days_back, lineage, disable_samples, filter
+        )
+        new_model_alerts = self.get_model_alerts(days_back, lineage, filter)
         new_source_freshness_alerts = self.get_source_freshness_alerts(
-            days_back, filter
+            days_back, lineage, filter
         )
         return Alerts(
             tests=new_test_alerts,
@@ -52,11 +58,12 @@ class AlertsAPI(APIClient):
     def get_test_alerts(
         self,
         days_back: int,
+        lineage: LineageSchema,
         disable_samples: bool = False,
         filter: Optional[AlertsFilter] = None,
     ) -> AlertsQueryResult[TestAlert]:
         pending_test_alerts = self._query_pending_test_alerts(
-            days_back, disable_samples
+            days_back, lineage, disable_samples
         )
         last_alert_sent_times = self._query_last_test_alert_times(days_back)
         test_alerts = self._sort_alerts(
@@ -67,9 +74,10 @@ class AlertsAPI(APIClient):
     def get_model_alerts(
         self,
         days_back: int,
+        lineage: LineageSchema,
         filter: Optional[AlertsFilter] = None,
     ) -> AlertsQueryResult[ModelAlert]:
-        pending_model_alerts = self._query_pending_model_alerts(days_back)
+        pending_model_alerts = self._query_pending_model_alerts(days_back, lineage)
         last_alert_sent_times = self._query_last_model_alert_times(days_back)
         model_alerts = self._sort_alerts(
             pending_model_alerts, last_alert_sent_times, filter
@@ -79,10 +87,11 @@ class AlertsAPI(APIClient):
     def get_source_freshness_alerts(
         self,
         days_back: int,
+        lineage: LineageSchema,
         filter: Optional[AlertsFilter] = None,
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
         pending_source_freshness_alerts = self._query_pending_source_freshness_alerts(
-            days_back
+            days_back, lineage
         )
         last_alert_sent_times = self._query_last_source_freshness_alert_times(days_back)
         source_freshness_alerts = self._sort_alerts(
@@ -129,8 +138,8 @@ class AlertsAPI(APIClient):
             alerts_to_skip=filter_alerts(alerts_to_skip, filter),
         )
 
+    @staticmethod
     def _get_suppressed_alerts(
-        self,
         alerts: Union[
             AlertsQueryResult[TestAlert],
             AlertsQueryResult[ModelAlert],
@@ -192,7 +201,7 @@ class AlertsAPI(APIClient):
             )
 
     def _query_pending_test_alerts(
-        self, days_back: int, disable_samples: bool = False
+        self, days_back: int, lineage: LineageSchema, disable_samples: bool = False
     ) -> AlertsQueryResult[TestAlert]:
         logger.info("Querying test alerts.")
         return self._query_alert_type(
@@ -204,10 +213,11 @@ class AlertsAPI(APIClient):
                 },
             },
             TestAlert.create_test_alert_from_dict,
+            lineage,
         )
 
     def _query_pending_model_alerts(
-        self, days_back: int
+        self, days_back: int, lineage: LineageSchema
     ) -> AlertsQueryResult[ModelAlert]:
         logger.info("Querying model alerts.")
         return self._query_alert_type(
@@ -216,10 +226,11 @@ class AlertsAPI(APIClient):
                 "macro_args": {"days_back": days_back},
             },
             ModelAlert,
+            lineage,
         )
 
     def _query_pending_source_freshness_alerts(
-        self, days_back: int
+        self, days_back: int, lineage: LineageSchema
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
         logger.info("Querying source freshness alerts.")
         return self._query_alert_type(
@@ -228,6 +239,7 @@ class AlertsAPI(APIClient):
                 "macro_args": {"days_back": days_back},
             },
             SourceFreshnessAlert,
+            lineage,
         )
 
     def _query_last_test_alert_times(self, days_back: int) -> Dict[str, str]:
@@ -257,7 +269,10 @@ class AlertsAPI(APIClient):
         return json.loads(response[0])
 
     def _query_alert_type(
-        self, run_operation_args: dict, alert_factory_func: Callable
+        self,
+        run_operation_args: dict,
+        alert_factory_func: Callable,
+        lineage: LineageSchema,
     ) -> AlertsQueryResult:
         raw_alerts = self.dbt_runner.run_operation(**run_operation_args)
         alerts = []
@@ -265,7 +280,7 @@ class AlertsAPI(APIClient):
         if raw_alerts:
             alert_dicts = json.loads(raw_alerts[0])
             for alert_dict in alert_dicts:
-                normalized_alert = self._normalize_alert(alert=alert_dict)
+                normalized_alert = NormalizedAlert(alert_dict, lineage).as_dict()
                 try:
                     alerts.append(
                         alert_factory_func(
@@ -281,10 +296,6 @@ class AlertsAPI(APIClient):
         if malformed_alerts:
             logger.error("Failed to parse some alerts.")
         return AlertsQueryResult(alerts, malformed_alerts)
-
-    @classmethod
-    def _normalize_alert(cls, alert: dict) -> dict:
-        return NormalizedAlert(alert).get_normalized_alert()
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
