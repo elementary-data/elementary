@@ -97,7 +97,6 @@ class DataMonitoringAlerts(DataMonitoring):
                 return AlertsFilter(node_names=node_names)
 
             else:
-                data_monitoring_filter = AlertsFilter()
                 tag_regex = re.compile(r"tag:.*")
                 owner_regex = re.compile(r"config.meta.owner:.*")
                 model_regex = re.compile(r"model:.*")
