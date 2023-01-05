@@ -283,7 +283,15 @@ class AlertsAPI(APIClient):
         if raw_alerts:
             alert_dicts = json.loads(raw_alerts[0])
             for alert_dict in alert_dicts:
-                normalized_alert = NormalizedAlert(alert_dict, lineage).as_dict()
+                node_unique_id = alert_dict.get("model_unique_id") or alert_dict.get(
+                    "unique_id"
+                )
+                normalized_alert = NormalizedAlert(
+                    alert_dict,
+                    affected_exposures=self.lineage_api.get_downstream_exposures(
+                        node_unique_id, lineage
+                    ),
+                ).as_dict()
                 try:
                     alerts.append(
                         alert_factory_func(

@@ -1,9 +1,6 @@
 import copy
 from typing import List, Optional
 
-from networkx import NetworkXError
-
-from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.schema import NormalizedExposureSchema
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
@@ -45,11 +42,13 @@ ALERT_SUPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 
 
 class NormalizedAlert:
-    def __init__(self, alert: dict, lineage: LineageSchema) -> None:
+    def __init__(
+        self, alert: dict, affected_exposures: List[NormalizedExposureSchema]
+    ) -> None:
         self.alert = alert
         self.test_meta = self._flatten_meta(TEST_META_KEY)
         self.model_meta = self._flatten_meta(MODEL_META_KEY)
-        self.lineage = lineage
+        self.affected_exposures = affected_exposures
 
     def as_dict(self) -> dict:
         return self._normalize_alert_dict()
@@ -69,7 +68,7 @@ class NormalizedAlert:
             ALERT_SUPRESSION_INTERVAL_KEY
         ] = self._get_alert_suppression_interval()
         normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
-        normalized_alert["affected_exposures"] = self._get_affected_exposures()
+        normalized_alert["affected_exposures"] = self.affected_exposures
         return normalized_alert
 
     def _get_alert_subscribers(self) -> List[Optional[str]]:
@@ -115,19 +114,3 @@ class NormalizedAlert:
             or self.model_meta.get(ALERT_FIELDS_KEY)
             or DEFAULT_ALERT_FIELDS
         )
-
-    def _get_affected_exposures(self) -> List[NormalizedExposureSchema]:
-        alert_node = self.alert.get("model_unique_id") or self.alert.get("unique_id")
-        try:
-            downstream_nodes = self.lineage.graph.predecessors(alert_node)
-        except NetworkXError:
-            return []
-
-        exposures = [node for node in self.lineage.nodes if node.type == "exposure"]
-        exposure_ids = [node.id for node in exposures]
-        affected_exposure_ids = list(set(exposure_ids) & set(downstream_nodes))
-        return [
-            exposure.data
-            for exposure in exposures
-            if exposure.id in affected_exposure_ids
-        ]

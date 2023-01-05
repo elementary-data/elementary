@@ -9,7 +9,10 @@ from elementary.monitor.api.lineage.schema import (
     LineageSchema,
     NodeDependsOnNodesSchema,
 )
-from elementary.monitor.api.models.schema import NormalizedArtifactSchema
+from elementary.monitor.api.models.schema import (
+    NormalizedArtifactSchema,
+    NormalizedExposureSchema,
+)
 
 
 class LineageAPI(APIClient):
@@ -63,3 +66,21 @@ class LineageAPI(APIClient):
                     )
                 )
         return nodes_depends_on_nodes
+
+    @staticmethod
+    def get_downstream_exposures(
+        node_unique_id: str, lineage: LineageSchema
+    ) -> List[NormalizedExposureSchema]:
+        try:
+            downstream_nodes = lineage.graph.predecessors(node_unique_id)
+        except nx.NetworkXError:
+            return []
+
+        exposures = [node for node in lineage.nodes if node.type == "exposure"]
+        exposure_ids = [node.id for node in exposures]
+        affected_exposure_ids = list(set(exposure_ids) & set(downstream_nodes))
+        return [
+            exposure.data
+            for exposure in exposures
+            if exposure.id in affected_exposure_ids
+        ]
