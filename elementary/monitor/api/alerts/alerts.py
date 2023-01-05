@@ -14,6 +14,7 @@ from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.lineage.schema import LineageSchema
+from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.data_monitoring.schema import AlertsFilter
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
@@ -34,6 +35,7 @@ class AlertsAPI(APIClient):
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
         self.lineage_api = LineageAPI(dbt_runner)
+        self.models_api = ModelsAPI(dbt_runner)
 
     def get_new_alerts(
         self,
@@ -41,7 +43,8 @@ class AlertsAPI(APIClient):
         disable_samples: bool = False,
         filter: Optional[AlertsFilter] = None,
     ) -> Alerts:
-        lineage = self.lineage_api.get_lineage()
+        exposures = self.models_api.get_exposures()
+        lineage = self.lineage_api.get_lineage(nodes=exposures)
         new_test_alerts = self.get_test_alerts(
             days_back, lineage, disable_samples, filter
         )

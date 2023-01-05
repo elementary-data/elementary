@@ -1,9 +1,11 @@
 import re
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import networkx as nx
 from pydantic import BaseModel, validator
 from pydantic.typing import Literal
+
+from elementary.monitor.api.models.schema import NormalizedExposureSchema
 
 SEED_PATH_PATERN = re.compile(r"^seed\.")
 
@@ -36,6 +38,10 @@ class NodeDependsOnNodesSchema(BaseModel):
 class LineageNodeSchema(BaseModel):
     id: NodeUniqueIdType
     type: NodeType
+    data: Optional[Union[NormalizedExposureSchema]] = None
+
+    class Config:
+        fields = {"data": {"exclude": True}}
 
 
 class LineageSchema(BaseModel):

@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import Dict, List, Optional
 
 import networkx as nx
 
@@ -9,10 +9,15 @@ from elementary.monitor.api.lineage.schema import (
     LineageSchema,
     NodeDependsOnNodesSchema,
 )
+from elementary.monitor.api.models.schema import NormalizedArtifactSchema
 
 
 class LineageAPI(APIClient):
-    def get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
+    def get_lineage(
+        self,
+        exclude_elementary_models: bool = False,
+        nodes: Optional[Dict[str, NormalizedArtifactSchema]] = None,
+    ) -> LineageSchema:
         lineage_graph = nx.DiGraph()
         nodes_depends_on_nodes = self._get_nodes_depends_on_nodes(
             exclude_elementary_models
@@ -25,7 +30,12 @@ class LineageAPI(APIClient):
                 ]
             )
         return LineageSchema(
-            nodes=self._convert_depends_on_node_to_lineage_node(nodes_depends_on_nodes),
+            nodes=[
+                LineageNodeSchema(
+                    type=node.type, id=node.unique_id, data=nodes.get(node.unique_id)
+                )
+                for node in nodes_depends_on_nodes
+            ],
             edges=list(lineage_graph.edges),
             graph=lineage_graph,
         )
@@ -53,12 +63,3 @@ class LineageAPI(APIClient):
                     )
                 )
         return nodes_depends_on_nodes
-
-    @staticmethod
-    def _convert_depends_on_node_to_lineage_node(
-        nodes_depends_on_nodes: List[NodeDependsOnNodesSchema],
-    ) -> List[LineageNodeSchema]:
-        return [
-            LineageNodeSchema(type=node.type, id=node.unique_id)
-            for node in nodes_depends_on_nodes
-        ]

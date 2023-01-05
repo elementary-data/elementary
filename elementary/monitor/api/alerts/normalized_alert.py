@@ -4,6 +4,7 @@ from typing import List, Optional
 from networkx import NetworkXError
 
 from elementary.monitor.api.lineage.schema import LineageSchema
+from elementary.monitor.api.models.schema import NormalizedExposureSchema
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
@@ -115,11 +116,18 @@ class NormalizedAlert:
             or DEFAULT_ALERT_FIELDS
         )
 
-    def _get_affected_exposures(self) -> List[str]:
+    def _get_affected_exposures(self) -> List[NormalizedExposureSchema]:
         alert_node = self.alert.get("model_unique_id") or self.alert.get("unique_id")
-        exposures = [node.id for node in self.lineage.nodes if node.type == "exposure"]
         try:
             downstream_nodes = self.lineage.graph.predecessors(alert_node)
         except NetworkXError:
             return []
-        return list(set(exposures) & set(downstream_nodes))
+
+        exposures = [node for node in self.lineage.nodes if node.type == "exposure"]
+        exposure_ids = [node.id for node in exposures]
+        affected_exposure_ids = list(set(exposure_ids) & set(downstream_nodes))
+        return [
+            exposure.data
+            for exposure in exposures
+            if exposure.id in affected_exposure_ids
+        ]
