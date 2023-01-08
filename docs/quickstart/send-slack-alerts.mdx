@@ -297,7 +297,7 @@ To set it up globaly for your project, add the desired alert fields to your mode
 
 ```yml dbt_project.yml
 models:
-  - name: marketing_leads
+  marketing_leads:
     +meta:
       alerts_config:
         alert_fields: ["description", "owners", "tags", "subscribers"]
@@ -341,7 +341,7 @@ To set it up globaly for your project, add the alert suppression interval to you
 
 ```yml dbt_project.yml
 models:
-  - name: marketing_leads
+  marketing_leads:
     +meta:
       alerts_config:
         alert_suppression_interval: 24

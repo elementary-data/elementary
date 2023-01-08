@@ -72,6 +72,23 @@ Here is a list of all the available options:
 -t, --profile-target <target_name>
 ```
 
+- **Profile target of your dbt project:**
+  Choose a specific target in case you have multiple targets for your dbt project.
+
+```shell
+--project-profile-target <target_name>
+```
+
+- **Select:**
+  Filter the alerts / report using a selector.
+
+  - See all of the alerts supported selector methods [here](https://docs.elementary-data.com/quickstart/send-slack-alerts#filtering-alerts-using-selector).
+  - See all of the report supported selector methods [here](https://docs.elementary-data.com/quickstart/generate-report-ui#generating-a-report-for-single-invocation).
+
+```shell
+--select <selector_method>:<value>
+```
+
 - **Slack webhook URL:**
   Pass the webhook URL of your Slack channel to edr as a parameter.
 
@@ -79,7 +96,7 @@ Here is a list of all the available options:
 -s, --slack-webhook <slack_webhook_url>
 ```
 
-- **Slack token**
+- **Slack token:**
   Pass the Slack token and the Slack channel to edr as parameters.
 
 ```shell
