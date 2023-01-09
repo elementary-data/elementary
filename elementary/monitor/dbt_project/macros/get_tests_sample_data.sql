@@ -40,7 +40,7 @@
         select 
             model_unique_id,
             test_unique_id,
-            test_sub_type_unique_id,
+            elementary_unique_id,
             test_type,
             test_sub_type,
             column_name,
@@ -100,8 +100,8 @@
                 } %}
             {% endif %}
         {%- endif -%}
-        {% set test_sub_type_unique_id = elementary.insensitive_get_dict_value(test, 'test_sub_type_unique_id') %}
-        {% do tests_metrics.update({test_sub_type_unique_id: test_rows_sample}) %}
+        {% set elementary_unique_id = elementary.insensitive_get_dict_value(test, 'elementary_unique_id') %}
+        {% do tests_metrics.update({elementary_unique_id: test_rows_sample}) %}
     {%- endfor -%}
     {% do elementary.edr_log(tojson(tests_metrics)) %}
 {% endmacro %}

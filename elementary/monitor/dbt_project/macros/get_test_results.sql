@@ -41,7 +41,7 @@
             id,
             model_unique_id,
             test_unique_id,
-            test_sub_type_unique_id,
+            elementary_unique_id,
             detected_at,
             database_name,
             schema_name,

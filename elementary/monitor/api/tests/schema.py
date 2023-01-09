@@ -31,7 +31,7 @@ class TestMetadataSchema(BaseModel):
     id: str
     model_unique_id: Optional[ModelUniqueIdType] = None
     test_unique_id: TestUniqueIdType
-    test_sub_type_unique_id: str
+    elementary_unique_id: str
     detected_at: str
     database_name: str = None
     schema_name: str
@@ -155,7 +155,7 @@ class InvocationsSchema(BaseModel):
 
 class TestInfoSchema(BaseModel):
     test_unique_id: Optional[str] = None
-    test_sub_type_unique_id: Optional[str] = None
+    elementary_unique_id: Optional[str] = None
     database_name: Optional[str] = None
     schema_name: Optional[str] = None
     table_name: Optional[str] = None

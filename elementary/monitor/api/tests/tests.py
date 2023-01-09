@@ -126,7 +126,6 @@ class TestsAPI(APIClient):
             if name
         ]
         table_full_name = ".".join(table_full_name_parts).lower()
-        test_params = try_load_json(metadata.test_params) or {}
         test_query = (
             metadata.test_results_query.strip() if metadata.test_results_query else None
         )
@@ -141,19 +140,19 @@ class TestsAPI(APIClient):
         if metadata.test_type == "dbt_test":
             configuration = dict(
                 test_name=metadata.test_name,
-                test_params=try_load_json(metadata.test_params),
+                test_params=metadata.test_params,
             )
         else:
             configuration = dict(
                 test_name=metadata.test_name,
-                timestamp_column=test_params.get("timestamp_column"),
-                testing_timeframe=test_params.get("timeframe"),
-                anomaly_threshold=test_params.get("sensitivity"),
+                timestamp_column=metadata.test_params.get("timestamp_column"),
+                testing_timeframe=metadata.test_params.get("timeframe"),
+                anomaly_threshold=metadata.test_params.get("sensitivity"),
             )
 
         return TestInfoSchema(
             test_unique_id=metadata.test_unique_id,
-            test_sub_type_unique_id=metadata.test_sub_type_unique_id,
+            elementary_unique_id=metadata.elementary_unique_id,
             database_name=metadata.database_name,
             schema_name=metadata.schema_name,
             table_name=metadata.table_name,
@@ -168,7 +167,7 @@ class TestsAPI(APIClient):
             test_type=metadata.test_type,
             test_sub_type=metadata.test_sub_type,
             test_query=test_query,
-            test_params=test_params,
+            test_params=metadata.test_params,
             test_created_at=metadata.test_created_at,
             description=metadata.meta.get("description"),
             result=result,
@@ -213,9 +212,7 @@ class TestsAPI(APIClient):
 
         test_results = defaultdict(list)
         for test_metadata in test_results_metadata:
-            test_sample_data = tests_sample_data.get(
-                test_metadata.test_sub_type_unique_id
-            )
+            test_sample_data = tests_sample_data.get(test_metadata.elementary_unique_id)
             test_result = TestResultSchema(
                 metadata=self.get_test_info_from_test_metadata(test_metadata),
                 test_results=test_metadata.get_test_results(test_sample_data).dict(),
@@ -240,9 +237,7 @@ class TestsAPI(APIClient):
 
         test_runs = defaultdict(list)
         for test_metadata in test_results_metadata:
-            test_invocations = tests_invocations.get(
-                test_metadata.test_sub_type_unique_id
-            )
+            test_invocations = tests_invocations.get(test_metadata.elementary_unique_id)
             test_run = TestRunSchema(
                 metadata=self.get_test_info_from_test_metadata(test_metadata),
                 test_runs=test_invocations,
@@ -267,8 +262,8 @@ class TestsAPI(APIClient):
         grouped_invocations = defaultdict(list)
         for test_invocation in test_invocation_dicts:
             try:
-                sub_test_unique_id = test_invocation.get("test_sub_type_unique_id")
-                grouped_invocations[sub_test_unique_id].append(
+                elementary_unique_id = test_invocation.get("elementary_unique_id")
+                grouped_invocations[elementary_unique_id].append(
                     InvocationSchema(
                         id=test_invocation["test_execution_id"],
                         time_utc=test_invocation["detected_at"],
@@ -356,9 +351,7 @@ class TestsAPI(APIClient):
     ) -> Dict[str, TotalsSchema]:
         totals = dict()
         for test in tests_info:
-            test_invocations = tests_invocations[
-                test.test_sub_type_unique_id
-            ].invocations
+            test_invocations = tests_invocations[test.elementary_unique_id].invocations
             self._update_test_runs_totals(
                 totals_dict=totals, test=test, test_invocations=test_invocations
             )

@@ -6,7 +6,7 @@
 
         test_results_in_last_chosen_days as (
             select *,
-                row_number() over (partition by test_sub_type_unique_id order by detected_at desc) as row_number
+                row_number() over (partition by elementary_unique_id order by detected_at desc) as row_number
             from test_results
         )
 
@@ -14,7 +14,7 @@
             invocation_id,
             model_unique_id, 
             test_unique_id,
-            test_sub_type_unique_id,
+            elementary_unique_id,
             test_sub_type,
             test_type,
             column_name,
