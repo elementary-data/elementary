@@ -27,8 +27,10 @@ class DbtTestResultSchema(BaseModel):
     failed_rows_count: Optional[int] = None
 
 
-class TestMetadataSchema(BaseModel):
+class RawTestResultSchema(BaseModel):
     id: str
+    invocation_id: str = None
+    test_execution_id: str = None
     model_unique_id: Optional[ModelUniqueIdType] = None
     test_unique_id: TestUniqueIdType
     elementary_unique_id: str
@@ -51,6 +53,8 @@ class TestMetadataSchema(BaseModel):
     status: str
     test_created_at: Optional[str] = None
     days_diff: float
+    invocations_order: int
+    sample_data: dict
 
     @validator("detected_at", pre=True)
     def format_detected_at(cls, detected_at):
@@ -153,7 +157,7 @@ class InvocationsSchema(BaseModel):
     description: str
 
 
-class TestInfoSchema(BaseModel):
+class TestMetadataSchema(BaseModel):
     test_unique_id: Optional[str] = None
     elementary_unique_id: Optional[str] = None
     database_name: Optional[str] = None
@@ -178,8 +182,8 @@ class TestInfoSchema(BaseModel):
 
 
 class TestResultSchema(BaseModel):
-    metadata: TestInfoSchema
-    test_results: Union[dict, list]
+    metadata: TestMetadataSchema
+    test_results: Optional[Union[dict, list]] = None
 
     # pydantic has a bug with Union fields. This is how to support it.
     class Config:
@@ -187,5 +191,5 @@ class TestResultSchema(BaseModel):
 
 
 class TestRunSchema(BaseModel):
-    metadata: TestInfoSchema
+    metadata: TestMetadataSchema
     test_runs: InvocationsSchema

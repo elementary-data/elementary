@@ -1,23 +1,21 @@
-{% macro current_tests_run_results_query(days_back = none, invocation_id = none) %}
+{% macro current_tests_run_results_query(days_back = none) %}
     {% set columns = adapter.get_columns_in_relation(ref('elementary', 'elementary_test_results')) %}
     {% set columns_names = [] %}
     {% for column in columns %}
         {% do columns_names.append(column.column | lower) %}
     {% endfor %}
     {% if 'test_short_name' not in columns_names or 'test_alias' not in columns_names %}
-        {{ elementary_internal.current_tests_run_results_backcomp(days_back=days_back, invocation_id=invocation_id) }}
+        {{ elementary_internal.current_tests_run_results_backcomp(days_back=days_back) }}
     {% else %}
-        {{ elementary_internal.current_tests_run_results(days_back=days_back, invocation_id=invocation_id) }}
+        {{ elementary_internal.current_tests_run_results(days_back=days_back) }}
     {% endif %}
 {% endmacro %}
 
 
-{% macro current_tests_run_results(days_back = none, invocation_id = none) %}
+{% macro current_tests_run_results(days_back = none) %}
     with elementary_test_results as (
         select * from {{ ref('elementary', 'elementary_test_results') }}
-        {% if invocation_id %}
-            where invocation_id = {{ "'{}'".format(invocation_id) }}
-        {% elif days_back %}
+        {% if days_back %}
             where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}
     ),
@@ -233,12 +231,10 @@
 
 
 {# The use of this macro is to support old versions of elementary dbt package #}
-{% macro current_tests_run_results_backcomp(days_back = none, invocation_id = none) %}
+{% macro current_tests_run_results_backcomp(days_back = none) %}
     with elementary_test_results as (
         select * from {{ ref('elementary_test_results') }}
-        {% if invocation_id %}
-            where invocation_id = {{ "'{}'".format(invocation_id) }}
-        {% elif days_back %}
+        {% if days_back %}
             where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}
     ),

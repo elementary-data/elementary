@@ -106,7 +106,6 @@ class DataMonitoringReport(DataMonitoring):
             models_runs = self.models_api.get_models_runs(
                 days_back=days_back, exclude_elementary_models=exclude_elementary_models
             )
-            tests_metadata = self.tests_api.get_tests_metadata(days_back=days_back)
 
             (
                 test_results,
@@ -132,14 +131,14 @@ class DataMonitoringReport(DataMonitoring):
                 test_results_totals, test_runs_totals, models, sources, models_runs
             )
 
-            self.execution_properties["elementary_test_count"] = len(
-                [
-                    test_metadata
-                    for test_metadata in tests_metadata
-                    if test_metadata.test_type != "dbt_test"
-                ]
-            )
-            self.execution_properties["test_result_count"] = len(tests_metadata)
+            # self.execution_properties["elementary_test_count"] = len(
+            #     [
+            #         test_metadata
+            #         for test_metadata in tests_metadata
+            #         if test_metadata.test_type != "dbt_test"
+            #     ]
+            # )
+            # self.execution_properties["test_result_count"] = len(tests_metadata)
 
             serializable_test_results = defaultdict(list)
             for model_unique_id, test_result in test_results.items():
