@@ -242,11 +242,17 @@ models:
         channel: marketing_data_ops
 ```
 
-If your models are in folders by department / team, another useful option is to configure the channel in
+If your models / tests are in folders by department / team, another useful option is to configure the channel in
 your `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
+  marketing_bi:
+    +meta:
+      alerts_config:
+        channel: marketing_data_ops
+
+tests:
   marketing_bi:
     +meta:
       alerts_config:
@@ -293,10 +299,16 @@ If you configure alert fields on your dbt project, all the test alerts of all of
 If you configure alert fields for a model, all the test alerts that belong to this model will display only the configured alert fields.
 If you configure alert fields for both a model and a test, the test configured alert fields overrides the model configured alert fields (same as for the dbt project configured alert fields).
 
-To set it up globaly for your project, add the desired alert fields to your models in the `dbt_project.yml` file.
+To set it up globaly for your project, add the desired alert fields to your models and tests in the `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
+  marketing_leads:
+    +meta:
+      alerts_config:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+
+tests:
   marketing_leads:
     +meta:
       alerts_config:
@@ -337,10 +349,17 @@ An alert that has been generated in the suppression interval won't be sent.
 
 `alert_suppression_interval` can accept values of 0-24 - represents the number of hours for which alerts will be skipped (including unrounded numbers).
 
-To set it up globaly for your project, add the alert suppression interval to your models in the `dbt_project.yml` file.
+To set it up globaly for your project, add the alert suppression interval to your models and tests in the `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
+  marketing_leads:
+    +meta:
+      alerts_config:
+        alert_suppression_interval: 24
+
+
+tests:
   marketing_leads:
     +meta:
       alerts_config:
