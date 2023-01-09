@@ -33,7 +33,7 @@ class ElementaryCLI(click.MultiCommand):
         ns = {}
         fn = os.path.join(root_folder, name, "cli.py")
         try:
-            with open(fn) as f:
+            with open(fn, encoding="utf-8") as f:
                 code = compile(f.read(), fn, "exec")
                 eval(code, ns, ns)
         except Exception:
