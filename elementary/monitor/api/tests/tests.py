@@ -290,7 +290,9 @@ class TestsAPI(APIClient):
         for sub_test_unique_id, sub_test_invocations in grouped_invocations.items():
             totals = self._get_test_invocations_totals(sub_test_invocations)
             test_invocations[sub_test_unique_id] = InvocationsSchema(
-                fail_rate=round(totals.errors / len(sub_test_invocations), 2)
+                fail_rate=round(
+                    (totals.errors + totals.failures) / len(sub_test_invocations), 2
+                )
                 if sub_test_invocations
                 else 0,
                 totals=totals,

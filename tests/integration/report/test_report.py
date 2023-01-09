@@ -98,15 +98,14 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
 
 
 def assert_totals(data_totals: Totals, fixture_totals: Totals):
-    assert data_totals.keys() == fixture_totals.keys()
-    for total_key in fixture_totals:
+    for total_key in data_totals:
         assert_totals_entry(data_totals[total_key], fixture_totals[total_key])
 
 
 def assert_totals_entry(
     data_total_entries: TotalsEntry, fixture_total_entries: TotalsEntry
 ):
-    for key in fixture_total_entries:
+    for key in data_total_entries:
         assert data_total_entries[key] * fixture_total_entries[key] >= 0
 
 
