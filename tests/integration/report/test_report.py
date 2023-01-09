@@ -63,38 +63,168 @@ def test_sidebar(report_data_fixture):
 
 
 def test_duplicate_rows_for_latest_run_status(report_data_fixture):
-    # In this test we make sure that we don't have duplicate rows for tests with 2 different status.
-    # For example, if a dimension passed and then failed, we want to see only one row with the latest status.
     report_data = get_report_data()
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="dimension_anomalies",
+        status="fail",
+        expected_ammount=2,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="dimension_anomalies",
+        status="pass",
+        expected_ammount=1,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="groups",
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="stats_players",
+        expected_ammount=3,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="stats_players",
+        column="offsides",
+        expected_ammount=1,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="stats_players",
+        column="red_cards",
+        expected_ammount=1,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="stats_players",
+        column="key_crosses",
+        expected_ammount=1,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="stats_team",
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="string_column_anomalies",
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes",
+        table="numeric_column_anomalies",
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="dbt_test",
+        test_sub_type="singular",
+        status="fail",
+        expected_ammount=4,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="dbt_test",
+        test_sub_type="singular",
+        expected_ammount=4,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes_from_baseline",
+        table="groups",
+        status="fail",
+        expected_ammount=2,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes_from_baseline",
+        table="groups",
+        status="error",
+        expected_ammount=1,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes_from_baseline",
+        table="stats_players",
+        column="goals",
+        expected_ammount=2,
+    )
+    assert_test_counter(
+        report_data=report_data,
+        test_type="schema_change",
+        name="schema_changes_from_baseline",
+        table="stats_players",
+        column="coffee_cups_consumed",
+        expected_ammount=2,
+    )
+
+
+def assert_test_counter(
+    report_data,
+    test_type,
+    table=None,
+    column=None,
+    test_sub_type=None,
+    status=None,
+    name=None,
+    expected_ammount=1,
+):
     test_results = report_data.get("test_results")
-    for model_tests in test_results.values():
-        failed_results = []
-        passed_results = []
-        error_results = []
-        warning_results = []
-        for test in model_tests:
+    tests_found = 0
+    for tests in test_results.values():
+        for test in tests:
             test_metadata = test.get("metadata")
-            test_status = test_metadata.get("latest_run_status")
-            test_unique_id = test_metadata.get("test_unique_id")
-            if test_status == "fail":
-                failed_results.append(test_unique_id)
-            elif test_status == "pass":
-                passed_results.append(test_unique_id)
-            elif test_status == "error":
-                error_results.append(test_unique_id)
-            elif test_status == "warn":
-                warning_results.append(test_unique_id)
-
-        # Tests like anomaly detection / schema change can have the same test_unique_id for different same status results
-        failed_results = list(set(failed_results))
-        passed_results = list(set(passed_results))
-        error_results = list(set(error_results))
-        warning_results = list(set(warning_results))
-
-        # Error results still creates duplicate rows, so we test duplication without it for now.
-        assert len(failed_results + passed_results + warning_results) == len(
-            list(set(failed_results + passed_results + warning_results))
-        )
+            match_test_type = test_metadata.get("test_type") == test_type
+            match_table = (
+                test_metadata.get("table_name", "").lower() == table.lower()
+                if table and test_metadata.get("table_name")
+                else True
+            )
+            match_column = (
+                test_metadata.get("column_name").lower() == column.lower()
+                if column and test_metadata.get("column_name")
+                else True
+            )
+            match_test_sub_type = (
+                test_metadata.get("test_sub_type") == test_sub_type
+                if test_sub_type
+                else True
+            )
+            match_status = (
+                test_metadata.get("latest_run_status") == status if status else True
+            )
+            match_name = test_metadata.get("test_name") == name if name else True
+            if (
+                match_test_type
+                and match_table
+                and match_column
+                and match_test_sub_type
+                and match_status
+                and match_name
+            ):
+                tests_found += 1
+    assert tests_found == expected_ammount
 
 
 def assert_totals(data_totals: Totals, fixture_totals: Totals):
