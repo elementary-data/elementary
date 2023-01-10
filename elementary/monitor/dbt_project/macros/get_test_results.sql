@@ -8,7 +8,7 @@
             select
                 *,
                 {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
-                {# current_tests_run_results_query sets dbt_test_unique_id to be test_unique_id #}
+                {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank #}
                 rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_order
             from test_results
         )
