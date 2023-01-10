@@ -174,4 +174,6 @@ class AnonymousTracking:
             return None
 
     def set_env(self, key: str, value):
+        if key in self._props:
+            raise ValueError(f"Key {key} already exists in tracking props.")
         self._props[key] = value
