@@ -26,14 +26,14 @@ class AnonymousWarehouse(BaseModel):
 
 class AnonymousTracking:
     _ANONYMOUS_USER_ID_FILE = ".user_id"
-    _POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
-
     _INTERNAL_EXCEPTIONS_LIMIT = 5
+
+    POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
 
     def __init__(self, config: Config) -> None:
         self._props = {}
-        self._anonymous_user_id = None
-        self._anonymous_warehouse = None
+        self.anonymous_user_id = None
+        self.anonymous_warehouse = None
         self._config = config
         self._do_not_track = config.anonymous_tracking_enabled is False
         self._run_id = str(uuid.uuid4())
@@ -47,10 +47,10 @@ class AnonymousTracking:
 
     def _init(self):
         try:
-            posthog.project_api_key = self._POSTHOG_PROJECT_API_KEY
+            posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
             self._props["env"] = elementary.tracking.runner.get_props()
-            self._anonymous_user_id = self._get_anonymous_user_id()
-            self._anonymous_warehouse = self._get_anonymous_warehouse()
+            self.anonymous_user_id = self._get_anonymous_user_id()
+            self.anonymous_warehouse = self._get_anonymous_warehouse()
         except Exception:
             logger.debug("Unable to initialize anonymous tracking.", exc_info=True)
 
@@ -78,7 +78,7 @@ class AnonymousTracking:
                 properties = dict()
 
             posthog.capture(
-                distinct_id=self._anonymous_user_id,
+                distinct_id=self.anonymous_user_id,
                 event=name,
                 properties={
                     "run_id": self._run_id,
@@ -86,8 +86,8 @@ class AnonymousTracking:
                     **properties,
                 },
                 groups={
-                    "warehouse": self._anonymous_warehouse.id
-                    if self._anonymous_warehouse
+                    "warehouse": self.anonymous_warehouse.id
+                    if self.anonymous_warehouse
                     else None
                 },
             )
