@@ -86,23 +86,25 @@ class RawTestResultSchema(BaseModel):
         return failed_rows_count
 
     def get_test_results(
-        self, test_sample_data: Dict[str, Any]
+        self,
+        disable_samples: bool = False,
     ) -> Union[DbtTestResultSchema, ElementaryTestResultSchema]:
+        sample_data = self.sample_data if not disable_samples else None
         if self.test_type == "dbt_test":
             test_results = DbtTestResultSchema(
                 display_name=self.test_name,
-                results_sample=test_sample_data,
+                results_sample=sample_data,
                 error_message=self.test_results_description,
                 failed_rows_count=self.get_failed_rows_count(),
             )
         else:
             test_sub_type_display_name = self.test_sub_type.replace("_", " ").title()
             if self.test_type == "anomaly_detection":
-                if test_sample_data and self.test_sub_type != "dimension":
-                    test_sample_data.sort(key=lambda metric: metric.get("end_time"))
+                if sample_data and self.test_sub_type != "dimension":
+                    sample_data.sort(key=lambda metric: metric.get("end_time"))
                 test_results = ElementaryTestResultSchema(
                     display_name=test_sub_type_display_name,
-                    metrics=test_sample_data,
+                    metrics=sample_data,
                     result_description=self.test_results_description,
                 )
             elif self.test_type == "schema_change":

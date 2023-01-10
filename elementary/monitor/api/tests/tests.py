@@ -197,12 +197,11 @@ class TestsAPI(APIClient):
 
         test_results = defaultdict(list)
         for raw_test_result in all_test_results:
-            test_sample_data = (
-                raw_test_result.sample_data if not disable_samples else None
-            )
             test_result = TestResultSchema(
                 metadata=self.get_test_metadata_from_raw_test_result(raw_test_result),
-                test_results=test_sample_data,
+                test_results=raw_test_result.get_test_results(
+                    disable_samples=disable_samples
+                ),
             )
             test_results[raw_test_result.model_unique_id].append(test_result)
 
