@@ -9,7 +9,7 @@
                 *,
                 {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
                 {# current_tests_run_results_query sets dbt_test_unique_id to be test_unique_id #}
-                row_number() over (partition by elementary_unique_id order by detected_at desc) as invocations_order
+                rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_order
             from test_results
         )
 
