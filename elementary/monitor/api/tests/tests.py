@@ -54,7 +54,7 @@ class TestsAPI(APIClient):
             macro_args=dict(
                 days_back=days_back,
                 invocations_per_test=invocations_per_test,
-                results_sample_limit=metrics_sample_limit,
+                metrics_sample_limit=metrics_sample_limit,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             ),
         )
@@ -249,7 +249,8 @@ class TestsAPI(APIClient):
                 elementary_unique_id = raw_test_result.elementary_unique_id
                 grouped_invocations[elementary_unique_id].append(
                     InvocationSchema(
-                        id=raw_test_result.invocation_id,
+                        id=raw_test_result.invocation_id
+                        or raw_test_result.test_execution_id,
                         time_utc=raw_test_result.detected_at,
                         status=raw_test_result.status,
                         affected_rows=self._parse_affected_row(
@@ -259,7 +260,7 @@ class TestsAPI(APIClient):
                 )
             except Exception:
                 logger.error(
-                    f"Could not parse test ({raw_test_result.test_unique_id}) invocation ({raw_test_result.invocation_id}) - continue to the next test"
+                    f"Could not parse test ({raw_test_result.test_unique_id}) invocation ({raw_test_result.invocation_id or raw_test_result.test_execution_id}) - continue to the next test"
                 )
                 continue
 
@@ -315,10 +316,10 @@ class TestsAPI(APIClient):
 
     def get_total_tests_results(
         self,
-        tests_info: Optional[List[TestMetadataSchema]] = None,
+        tests_metadata: Optional[List[TestMetadataSchema]] = None,
     ) -> Dict[str, TotalsSchema]:
         totals = dict()
-        for test in tests_info:
+        for test in tests_metadata:
             self._update_test_results_totals(
                 totals_dict=totals,
                 model_unique_id=test.model_unique_id,
@@ -327,16 +328,17 @@ class TestsAPI(APIClient):
         return totals
 
     def get_total_tests_runs(
-        self,
-        tests_metadata: Optional[List[TestMetadataSchema]] = None,
-        tests_invocations: Optional[Dict[TestUniqueIdType, InvocationsSchema]] = None,
+        self, tests_runs: Dict[ModelUniqueIdType, List[TestRunSchema]]
     ) -> Dict[str, TotalsSchema]:
         totals = dict()
-        for test in tests_metadata:
-            test_invocations = tests_invocations[test.elementary_unique_id].invocations
-            self._update_test_runs_totals(
-                totals_dict=totals, test=test, test_invocations=test_invocations
-            )
+        for test_runs in tests_runs.values():
+            for test_run in test_runs:
+                test_invocations = test_run.test_runs.invocations
+                self._update_test_runs_totals(
+                    totals_dict=totals,
+                    test=test_run.metadata,
+                    test_invocations=test_invocations,
+                )
         return totals
 
     @staticmethod

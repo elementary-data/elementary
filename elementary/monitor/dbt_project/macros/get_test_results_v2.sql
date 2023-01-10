@@ -11,7 +11,7 @@
         test_results_with_ivocations_order as (
             select
                 *,
-                {{ elementary.datediff(elementary.cast_as_timestamp('tests.detected_at'), elementary.current_timestamp(), 'day') }} as days_diff
+                {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
                 {# current_tests_run_results_query sets dbt_test_unique_id to be test_unique_id #}
                 row_number() over (partition by test_unique_id order by detected_at desc) as invocations_order
             from test_results
@@ -49,7 +49,7 @@
         order by elementary_unique_id, invocations_order
     {%- endset -%}
     {% set test_results_agate = run_query(select_test_results) %}
-    {% set tests = elementary.agate_to_dicts(tests_results_agate) %}
+    {% set tests = elementary.agate_to_dicts(test_results_agate) %}
     {%- for test in tests -%}
         {% set test_rows_sample = none %}
         {% if elementary.insensitive_get_dict_value(test, 'invocations_order') == 1 %}
@@ -104,7 +104,6 @@
         {# Adding sample data to test results #}
         {% do test.update({"sample_data": test_rows_sample}) %}
     {%- endfor -%}
-    {% set test_result_dicts_json = elementary.agate_to_json(tests) %}
-    {% do elementary.edr_log(test_result_dicts_json) %}
+    {% do elementary.edr_log(tojson(tests)) %}
 {%- endmacro -%}
 

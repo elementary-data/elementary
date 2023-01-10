@@ -103,10 +103,10 @@ class DataMonitoringReport(DataMonitoring):
             models = self.models_api.get_models(exclude_elementary_models)
             sources = self.models_api.get_sources()
             exposures = self.models_api.get_exposures()
+
             models_runs = self.models_api.get_models_runs(
                 days_back=days_back, exclude_elementary_models=exclude_elementary_models
             )
-
             (
                 test_results,
                 test_results_totals,
@@ -248,10 +248,10 @@ class DataMonitoringReport(DataMonitoring):
                 disable_passed_test_metrics=disable_passed_test_metrics,
                 disable_samples=self.disable_samples,
             )
-            tests_info = []
+            tests_metadata = []
             for test_results in tests_results.values():
-                tests_info.extend([result.metadata for result in test_results])
-            test_results_totals = self.tests_api.get_total_tests_results(tests_info)
+                tests_metadata.extend([result.metadata for result in test_results])
+            test_results_totals = self.tests_api.get_total_tests_results(tests_metadata)
             return tests_results, test_results_totals, invocation
         except Exception as e:
             logger.exception(f"Could not get test results and totals - Error: {e}")
@@ -265,18 +265,12 @@ class DataMonitoringReport(DataMonitoring):
         test_runs_amount: Optional[int] = None,
     ):
         try:
-            invocations = self.tests_api.get_invocations(
-                days_back=days_back, invocations_per_test=test_runs_amount
-            )
             tests_runs = self.tests_api.get_test_runs(
                 invocations_per_test=test_runs_amount,
                 days_back=days_back,
             )
-            tests_info = []
-            for test_runs in tests_runs.values():
-                tests_info.extend([run.metadata for run in test_runs])
             test_runs_totals = self.tests_api.get_total_tests_runs(
-                tests_info=tests_info, tests_invocations=invocations
+                tests_runs=tests_runs
             )
             return tests_runs, test_runs_totals
         except Exception as e:

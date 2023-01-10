@@ -54,7 +54,11 @@ class RawTestResultSchema(BaseModel):
     test_created_at: Optional[str] = None
     days_diff: float
     invocations_order: int
-    sample_data: dict
+    sample_data: Optional[Union[dict, List]] = None
+
+    # pydantic has a bug with Union fields. This is how to support it.
+    class Config:
+        smart_union = True
 
     @validator("detected_at", pre=True)
     def format_detected_at(cls, detected_at):
