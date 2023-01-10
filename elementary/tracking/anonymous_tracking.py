@@ -48,7 +48,7 @@ class AnonymousTracking:
     def _init(self):
         try:
             posthog.project_api_key = self._POSTHOG_PROJECT_API_KEY
-            self._props["runner"] = elementary.tracking.runner.get_props()
+            self._props["env"] = elementary.tracking.runner.get_props()
             self._anonymous_user_id = self._get_anonymous_user_id()
             self._anonymous_warehouse = self._get_anonymous_warehouse()
         except Exception:
@@ -101,7 +101,7 @@ class AnonymousTracking:
             "cli_properties": cli_properties,
             "module_name": module_name,
             "command": command,
-            "env": self._config.env,
+            "env_arg": self._config.env,
             "has_project_dir": bool(self._config.project_dir),
         }
         self._send_event("cli-start", properties=props)
@@ -174,6 +174,4 @@ class AnonymousTracking:
             return None
 
     def set_env(self, key: str, value):
-        if key in self._props:
-            raise ValueError(f"Key {key} already exists in tracking props.")
         self._props[key] = value
