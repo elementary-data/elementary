@@ -101,7 +101,7 @@ class AnonymousTracking:
             "cli_properties": cli_properties,
             "module_name": module_name,
             "command": command,
-            "env_arg": self._config.env,
+            "edr_env": self._config.env,
             "has_project_dir": bool(self._config.project_dir),
         }
         self._send_event("cli-start", properties=props)
