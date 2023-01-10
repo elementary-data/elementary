@@ -168,10 +168,10 @@ class DataMonitoringReport(DataMonitoring):
             output_data["filters"] = filters.dict()
             output_data["lineage"] = lineage.dict()
             output_data["tracking"] = {
-                "posthog_api_key": self.tracking.POSTHOG_PROJECT_API_KEY,
-                "report_generator_anonymous_user_id": self.tracking.anonymous_user_id,
-                "anonymous_warehouse_id": self.tracking.anonymous_warehouse.id
-                if self.tracking.anonymous_warehouse
+                "posthog_api_key": self.tracking._POSTHOG_PROJECT_API_KEY,
+                "report_generator_anonymous_user_id": self.tracking._anonymous_user_id,
+                "anonymous_warehouse_id": self.tracking._anonymous_warehouse.id
+                if self.tracking._anonymous_warehouse
                 else None,
             }
             output_data["env"] = {
