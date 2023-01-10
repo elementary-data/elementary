@@ -57,6 +57,10 @@ on:
         type: boolean
         required: false
         default: true
+      dbt-pre-release:
+        type: boolean
+        required: false
+        default: false
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -101,6 +105,10 @@ jobs:
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
         run: sudo apt-get install python-dev libsasl2-dev gcc
+
+      - name: Install pre-release dbt
+        if: inputs.dbt-pre-release
+        run: pip install --pre dbt-core dbt-${{ inputs.warehouse-type }}
 
       - name: Install dbt
         if: inputs.dbt-version
