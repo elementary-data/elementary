@@ -50,7 +50,7 @@ class TestsAPI(APIClient):
         should_cache: bool = True,
     ) -> List[RawTestResultSchema]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_test_results_v2",
+            macro_name="get_test_results",
             macro_args=dict(
                 days_back=days_back,
                 invocations_per_test=invocations_per_test,
