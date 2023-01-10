@@ -224,9 +224,14 @@ class TestsAPI(APIClient):
             )
 
         tests_invocations = self._get_invocations(all_test_results)
+        latest_test_results = [
+            test_result
+            for test_result in all_test_results
+            if test_result.invocations_order == 1
+        ]
 
         test_runs = defaultdict(list)
-        for raw_test_result in all_test_results:
+        for raw_test_result in latest_test_results:
             test_invocations = tests_invocations.get(
                 raw_test_result.elementary_unique_id
             )
@@ -264,16 +269,14 @@ class TestsAPI(APIClient):
                 continue
 
         test_invocations = dict()
-        for sub_test_unique_id, sub_test_invocations in grouped_invocations.items():
-            totals = self._get_test_invocations_totals(sub_test_invocations)
-            test_invocations[sub_test_unique_id] = InvocationsSchema(
-                fail_rate=round(
-                    (totals.errors + totals.failures) / len(sub_test_invocations), 2
-                )
-                if sub_test_invocations
+        for elementary_unique_id, invocations in grouped_invocations.items():
+            totals = self._get_test_invocations_totals(invocations)
+            test_invocations[elementary_unique_id] = InvocationsSchema(
+                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2)
+                if invocations
                 else 0,
                 totals=totals,
-                invocations=sub_test_invocations,
+                invocations=invocations,
                 description=self._get_invocations_description(totals),
             )
         self.set_run_cache(key=TEST_INVOCATIONS, value=test_invocations)
