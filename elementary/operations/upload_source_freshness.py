@@ -39,7 +39,7 @@ class UploadSourceFreshnessOperation:
             self.config.profile_target,
         )
         dbt_runner.run_operation(
-            "elementary.upload_source_freshness",
+            "elementary_internal.upload_source_freshness",
             macro_args={"results": json.dumps(results)},
             quiet=True,
         )
