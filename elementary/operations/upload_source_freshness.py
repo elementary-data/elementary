@@ -19,7 +19,20 @@ class UploadSourceFreshnessOperation:
             raise click.ClickException(
                 "Could not find a dbt project in the current directory or --project-dir wasn't supplied."
             )
-        results = self.get_source_freshness_results()
+        results = self.get_results()
+        self.upload_results(results)
+        click.echo("Uploaded source freshness results successfully.")
+
+    def get_results(self) -> dict:
+        source_path = self.get_target_path() / "sources.json"
+        if not source_path.exists():
+            raise click.ClickException(
+                f"Could not find sources.json at {source_path}. "
+                "Please run `dbt source freshness` before running this command."
+            )
+        return json.loads(source_path.read_text())["results"]
+
+    def upload_results(self, results: dict):
         dbt_runner = DbtRunner(
             dbt_project_utils.PATH,
             self.config.profiles_dir,
@@ -30,16 +43,6 @@ class UploadSourceFreshnessOperation:
             macro_args={"results": json.dumps(results)},
             quiet=True,
         )
-        click.echo("Uploaded source freshness results successfully.")
-
-    def get_source_freshness_results(self):
-        source_path = self.get_target_path() / "sources.json"
-        if not source_path.exists():
-            raise click.ClickException(
-                f"Could not find sources.json at {source_path}. "
-                "Please run `dbt source freshness` before running this command."
-            )
-        return json.loads(source_path.read_text())["results"]
 
     def get_target_path(self) -> Path:
         env_target_path = os.getenv("DBT_TARGET_PATH")
