@@ -29,4 +29,9 @@ def main(config: Config):
         config.profiles_dir,
         config.profile_target,
     )
-    print(results)
+    dbt_runner.run_operation(
+        "elementary.upload_source_freshness",
+        macro_args={"results": json.dumps(results)},
+        quiet=True,
+    )
+    click.echo("Uploaded source freshness results successfully.")
