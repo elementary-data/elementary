@@ -1,7 +1,7 @@
 import click
 
-import elementary.operations.upload_source_freshness
 from elementary.config.config import Config
+from elementary.operations.upload_source_freshness import UploadSourceFreshnessOperation
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 
 _MODULE_NAME = "run-operation"
@@ -48,5 +48,5 @@ def upload_source_freshness(ctx, **conf):
     config = Config(**conf)
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.track_cli_start(_MODULE_NAME, None, ctx.command.name)
-    elementary.operations.upload_source_freshness.main(config)
+    UploadSourceFreshnessOperation(config).run()
     anonymous_tracking.track_cli_end(_MODULE_NAME, None, ctx.command.name)
