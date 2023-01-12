@@ -19,7 +19,7 @@ Also, you can add configuration for each test / model in your `.yml` files:
 - dbt Tags - add custom context to the alert
 - Description - add custom description to the alert
 - Alert fields - choose which fields to display in your alert
-- Suppression interval - set a cooldown period which alert won't sent
+- Suppression interval - set a cooldown period on which the alert won't be sent
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
@@ -76,7 +76,7 @@ To filter alerts by tag:
 
 ```shell
 edr monitor --select tag:critical
-edr monitor --select tag:finnance
+edr monitor --select tag:finance
 ```
 
 To filter alerts by owner:
