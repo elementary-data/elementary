@@ -186,3 +186,11 @@ Here is a list of all the available options:
 ```shell
 --env [dev|prod]
 ```
+
+- **dbt variables:**
+  The JSON object as string is passed to the `--vars` options of a  dbt command internally executed by Elementary,
+  if you want to pass dbt variables rather than `dbt_project.yml`.
+
+```shell
+--dbt-vars TEXT
+```
