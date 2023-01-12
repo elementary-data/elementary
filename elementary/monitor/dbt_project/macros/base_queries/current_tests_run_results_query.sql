@@ -26,7 +26,7 @@
         select * from {{ ref('elementary', 'dbt_tests') }}
     ),
 
-    dbt_tests_with_dbt_test_unique_id as (
+    dbt_tests_with_test_unique_id as (
         select 
             case
                 {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt)
@@ -35,7 +35,7 @@
                 when (alias = name and alias is not null and test_column_name is not null and short_name is not null) then parent_model_unique_id || '.' || test_column_name || '.' || alias || '.' || short_name
                 when (alias = name and alias is not null and short_name is not null) then parent_model_unique_id || '.' || alias || '.' || short_name
                 else unique_id
-            end as dbt_test_unique_id,
+            end as test_unique_id,
             unique_id,
             database_name,
             schema_name,
@@ -65,17 +65,17 @@
     ),
 
     dbt_tests_with_same_name_count as (
-        select dbt_test_unique_id, count(*) as tests_name_count
-        from dbt_tests_with_dbt_test_unique_id
-        group by dbt_test_unique_id
+        select test_unique_id, count(*) as tests_name_count
+        from dbt_tests_with_test_unique_id
+        group by test_unique_id
     ),
 
     dbt_tests_with_final_unique_id as (
         select 
             case
-                when counter.tests_name_count = 1 then tests.dbt_test_unique_id
+                when counter.tests_name_count = 1 then tests.test_unique_id
                 else tests.unique_id
-            end as dbt_test_unique_id,
+            end as test_unique_id,
             tests.unique_id,
             tests.database_name,
             tests.schema_name,
@@ -101,11 +101,11 @@
             tests.original_path,
             tests.path,
             tests.generated_at
-        from dbt_tests_with_dbt_test_unique_id tests
-        join dbt_tests_with_same_name_count counter on tests.dbt_test_unique_id = counter.dbt_test_unique_id
+        from dbt_tests_with_test_unique_id tests
+        join dbt_tests_with_same_name_count counter on tests.test_unique_id = counter.test_unique_id
     ),
 
-    elementary_test_results_with_dbt_test_unique_id as (
+    elementary_test_results_with_test_unique_id as (
         select
             case
                 {# Currently the same test of schema changes is created with column and without column (depends on the test run resuslt)
@@ -114,12 +114,11 @@
                 when (test_alias = test_name and test_alias is not null and column_name is not null and test_short_name is not null) then model_unique_id || '.' || column_name || '.' || test_alias || '.' || test_short_name
                 when (test_alias = test_name and test_alias is not null and test_short_name is not null) then model_unique_id || '.' || test_alias || '.' || test_short_name
                 else test_unique_id
-            end as dbt_test_unique_id,
+            end as test_unique_id,
             id,
             invocation_id,
             data_issue_id,
             test_execution_id,
-            test_unique_id,
             model_unique_id,
             detected_at,
             database_name,
@@ -146,14 +145,13 @@
     elementary_test_results_with_final_unique_id as (
         select 
             case
-                when counter.tests_name_count = 1 then results.dbt_test_unique_id
+                when counter.tests_name_count = 1 then results.test_unique_id
                 else results.test_unique_id
-            end as dbt_test_unique_id,
+            end as test_unique_id,
             results.id,
             results.invocation_id,
             results.data_issue_id,
             results.test_execution_id,
-            results.test_unique_id,
             results.model_unique_id,
             results.detected_at,
             results.database_name,
@@ -174,16 +172,16 @@
             results.test_short_name,
             results.test_alias,
             results.result_rows
-        from elementary_test_results_with_dbt_test_unique_id results
-        join dbt_tests_with_same_name_count counter on results.dbt_test_unique_id = counter.dbt_test_unique_id
+        from elementary_test_results_with_test_unique_id results
+        join dbt_tests_with_same_name_count counter on results.test_unique_id = counter.test_unique_id
     ),
 
     first_time_test_occurred as (
         select 
             min(detected_at) as first_time_occurred,
-            dbt_test_unique_id
-        from elementary_test_results_with_dbt_test_unique_id
-        group by dbt_test_unique_id
+            test_unique_id
+        from elementary_test_results_with_test_unique_id
+        group by test_unique_id
     )
 
     select
@@ -193,14 +191,14 @@
             we need to calculate different test sub type unique id which is used to identify between different tests.
         #}
         case
-            when test_results.test_type = 'schema_change' then test_results.dbt_test_unique_id
-            when test_results.test_short_name = 'dimension_anomalies' then test_results.dbt_test_unique_id
-            else coalesce(test_results.dbt_test_unique_id, 'None') || '.' || coalesce(test_results.test_sub_type, 'None')
+            when test_results.test_type = 'schema_change' then test_results.test_unique_id
+            when test_results.test_short_name = 'dimension_anomalies' then test_results.test_unique_id
+            else coalesce(test_results.test_unique_id, 'None') || '.' || coalesce(test_results.test_sub_type, 'None')
         end as elementary_unique_id,
         test_results.invocation_id,
         test_results.data_issue_id,
         test_results.test_execution_id,
-        test_results.dbt_test_unique_id as test_unique_id,
+        test_results.test_unique_id,
         test_results.model_unique_id,
         test_results.detected_at,
         test_results.database_name,
@@ -227,8 +225,8 @@
         tests.meta,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results_with_final_unique_id test_results
-    left join first_time_test_occurred first_occurred on test_results.dbt_test_unique_id = first_occurred.dbt_test_unique_id
-    left join dbt_tests_with_final_unique_id tests on test_results.dbt_test_unique_id = tests.dbt_test_unique_id
+    left join first_time_test_occurred first_occurred on test_results.test_unique_id = first_occurred.test_unique_id
+    left join dbt_tests_with_final_unique_id tests on test_results.test_unique_id = tests.test_unique_id
 {% endmacro %}
 
 
@@ -264,7 +262,7 @@
         case
             when test_results.test_type = 'schema_change' then test_results.model_unique_id || '.' || test_results.test_unique_id
             when test_results.test_short_name = 'dimension_anomalies' then test_results.model_unique_id || '.' || test_results.test_unique_id
-            else coalesce(test_results.model_unique_id, 'None') || '.' || coalesce(test_results.test_unique_id, 'None') || '.' || coalesce(test_results.test_sub_type, 'None') || '.' || coalesce(test_results.column_name, 'None')  
+            else coalesce(test_results.test_unique_id, 'None') || '.' || coalesce(test_results.test_sub_type, 'None')
         end as elementary_unique_id,
         test_results.invocation_id,
         test_results.data_issue_id,

@@ -14,7 +14,6 @@
                 invocation_id
             from (
                 select
-                    {# current_tests_run_results_query sets elementary_unique_id to be test_unique_id #}
                     test_unique_id,
                     invocation_id,
                     row_number() over (partition by test_unique_id order by detected_at desc) as row_number
