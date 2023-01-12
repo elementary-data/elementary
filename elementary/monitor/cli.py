@@ -135,9 +135,15 @@ def common_options(cmd: str):
             "--select",
             type=str,
             default=None,
-            help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
+            help="Filter the report by invocation_id / invocation_time / model_tag"
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL>.",
+            else "Filter the alerts by tag / owner / model",
+        )(func)
+        func = click.option(
+            "--dbt-vars",
+            type=str,
+            default=None,
+            help="Specify raw YAML string of your dbt variables.",
         )(func)
         return func
 
@@ -196,12 +202,6 @@ def get_cli_properties() -> dict:
     "see documentation to learn more).",
 )
 @click.option(
-    "--dbt-vars",
-    type=str,
-    default=None,
-    help="Specify raw YAML string of your dbt variables.",
-)
-@click.option(
     "--test",
     type=bool,
     default=False,
@@ -242,7 +242,6 @@ def monitor(
             fg="bright_red",
         )
         slack_webhook = deprecated_slack_webhook
-    vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
         config_dir,
         profiles_dir,
@@ -262,7 +261,8 @@ def monitor(
         Command.MONITOR, get_cli_properties(), ctx.command.name
     )
     try:
-        config.validate_monitor()
+        vars = yaml.loads(dbt_vars) if dbt_vars else None
+        config.validate_monitor(dbt_vars=vars)
         data_monitoring = DataMonitoringAlerts(
             config=config,
             tracking=anonymous_tracking,
@@ -330,6 +330,7 @@ def report(
     project_name,
     env,
     select,
+    dbt_vars,
 ):
     """
     Generate a local report of your warehouse.
@@ -349,7 +350,8 @@ def report(
         Command.REPORT, get_cli_properties(), ctx.command.name
     )
     try:
-        config.validate_report()
+        vars = yaml.loads(dbt_vars) if dbt_vars else None
+        config.validate_report(dbt_vars=vars)
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
@@ -485,6 +487,7 @@ def send_report(
     project_name,
     env,
     select,
+    dbt_vars,
 ):
     """
     Send the report to an external platform.
@@ -518,7 +521,8 @@ def send_report(
         Command.SEND_REPORT, get_cli_properties(), ctx.command.name
     )
     try:
-        config.validate_send_report()
+        vars = yaml.loads(dbt_vars) if dbt_vars else None
+        config.validate_send_report(dbt_vars=vars)
         # bucket-file-path determines the path of the report in the bucket.
         # If this path contains folders we extract the report file name to first save the report locally
         local_file_path = (

@@ -172,17 +172,19 @@ class DbtRunner:
             env.update(self.dbt_env_vars)
         return env
 
-    def debug(self, quiet: bool = False) -> bool:
-        success, _ = self._run_command(command_args=["debug"], quiet=quiet)
+    def debug(self, quiet: bool = False, vars: Optional[dict] = None) -> bool:
+        success, _ = self._run_command(command_args=["debug"], quiet=quiet, vars=vars)
         return success
 
-    def ls(self, select: Optional[str] = None) -> list:
+    def ls(self, select: Optional[str] = None, vars: Optional[dict] = None) -> list:
         command_args = ["ls"]
         if select:
             command_args.extend(["-s", select])
         try:
             success, command_output_string = self._run_command(
-                command_args=command_args, json_logs=True
+                command_args=command_args,
+                json_logs=True,
+                vars=vars,
             )
             command_outputs = command_output_string.splitlines()
             # ls command didn't match nodes.
@@ -202,5 +204,5 @@ class DbtRunner:
         except DbtCommandError:
             raise DbtLsCommandError(select)
 
-    def source_freshness(self):
-        self._run_command(command_args=["source", "freshness"])
+    def source_freshness(self, vars: Optional[dict] = None):
+        self._run_command(command_args=["source", "freshness"], vars=vars)

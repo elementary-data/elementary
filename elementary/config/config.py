@@ -170,7 +170,7 @@ class Config:
     def has_gcs(self):
         return self.gcs_bucket_name and self.has_gcloud
 
-    def validate_monitor(self):
+    def validate_monitor(self, dbt_vars: Optional[dict] = None):
         self._validate_internal_dbt_project()
         self._validate_timezone()
         if not self.has_slack:
@@ -178,17 +178,17 @@ class Config:
                 "Either a Slack token and a channel or a Slack webhook is required."
             )
 
-    def validate_report(self):
-        self._validate_internal_dbt_project()
+    def validate_report(self, dbt_vars: Optional[dict] = None):
+        self._validate_internal_dbt_project(dbt_vars=dbt_vars)
 
-    def validate_send_report(self):
-        self._validate_internal_dbt_project()
+    def validate_send_report(self, dbt_vars: Optional[dict] = None):
+        self._validate_internal_dbt_project(dbt_vars=dbt_vars)
         if not self.has_send_report_platform:
             raise InvalidArgumentsError(
                 "You must provide a platform to upload the report to (Slack token / S3 / GCS)."
             )
 
-    def _validate_internal_dbt_project(self):
+    def _validate_internal_dbt_project(self, dbt_vars: Optional[dict] = None):
         dbt_runner = DbtRunner(
             dbt_project_utils.PATH,
             self.profiles_dir,
