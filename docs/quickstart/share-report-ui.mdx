@@ -2,7 +2,7 @@
 title: "Share observability report"
 ---
 
-Distribute the report by sending it to external platforms using the command `edr monitor send-report`.
+Distribute the report by sending it to external platforms using the command `edr send-report`.
 You can specify more than one platform in the command, and the report will be sent to all.
 All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
@@ -11,10 +11,10 @@ All arguments can be passed either as CLI arguments or in the `config.yml` file.
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
-edr monitor send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 ```
 
-You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr monitor send-report`
+You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr send-report`
 command. Make sure the report name you provided ends with `.html`.
 
 ### Configuration
@@ -38,17 +38,17 @@ a [`~/.aws/credentials`](https://docs.aws.amazon.com/cli/latest/userguide/cli-co
 file, you can run the command and provide only the profile name and the bucket's name:
 
 ```shell
-edr monitor send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME>
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME>
 ```
 
 Alternatively, you can pass the access key ID and secret access key:
 
 ```shell
-edr monitor send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SECRET_ACCESS_KEY> --s3-bucket-name <BUCKET_NAME>
+edr send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SECRET_ACCESS_KEY> --s3-bucket-name <BUCKET_NAME>
 ```
 
 You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
-the `edr monitor send-report` command. Make sure the report's file name ends with `.html`.
+the `edr send-report` command. Make sure the report's file name ends with `.html`.
 
 ### Hosting the report as a website
 
@@ -82,7 +82,7 @@ Once you have it, you'll need to provide one of two ways to authenticate:
 you can send the report to your GCS bucket by running the command:
 
 ```shell
-edr monitor send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
+edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
 ```
 
 ### OAuth using `gcloud`
@@ -90,11 +90,11 @@ edr monitor send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --g
 If you're using OAuth with `gcloud`, simply omit `--google-service-account-path`:
 
 ```shell
-edr monitor send-report --gcs-bucket-name <BUCKET_NAME>
+edr send-report --gcs-bucket-name <BUCKET_NAME>
 ```
 
 You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
-the `edr monitor send-report` command. Make sure the report's file name ends with `.html`.
+the `edr send-report` command. Make sure the report's file name ends with `.html`.
 
 ### Hosting the report as a website
 
