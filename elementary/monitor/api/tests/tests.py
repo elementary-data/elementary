@@ -1,7 +1,7 @@
 import json
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from dateutil import tz
 
@@ -10,11 +10,13 @@ from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.invocations.schema import DbtInvocationSchema
 from elementary.monitor.api.tests.schema import (
+    DbtTestResultSchema,
+    ElementaryTestResultSchema,
     InvocationSchema,
     InvocationsSchema,
     ModelUniqueIdType,
-    RawTestResultSchema,
     TestMetadataSchema,
+    TestResultDBRowSchema,
     TestResultSchema,
     TestRunSchema,
     TestUniqueIdType,
@@ -27,28 +29,18 @@ from elementary.utils.time import convert_utc_iso_format_to_datetime
 logger = get_logger(__name__)
 
 
-ALL_TEST_RESULTS = "all_test_results"
-TEST_RESULTS = "test_results"
-TEST_RUNS = "test_runs"
-TESTS_METADATA = "tests_metadata"
-TESTS_SAMPLE_DATA = "tests_sample_data"
-INVOCATION = "invocation"
-TEST_INVOCATIONS = "test_invocations"
-
-
 class TestsAPI(APIClient):
     def __init__(self, dbt_runner: DbtRunner):
         super().__init__(dbt_runner)
         self.invocations_api = InvocationsAPI(dbt_runner)
 
-    def _get_all_test_results(
+    def get_all_test_results_db_rows(
         self,
         days_back: Optional[int] = 7,
         invocations_per_test: int = 720,
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
-        should_cache: bool = True,
-    ) -> List[RawTestResultSchema]:
+    ) -> List[TestResultDBRowSchema]:
         run_operation_response = self.dbt_runner.run_operation(
             macro_name="get_test_results",
             macro_args=dict(
@@ -62,10 +54,8 @@ class TestsAPI(APIClient):
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
         test_results = [
-            RawTestResultSchema(**test_result) for test_result in test_results
+            TestResultDBRowSchema(**test_result) for test_result in test_results
         ]
-        if should_cache:
-            self.set_run_cache(key=ALL_TEST_RESULTS, value=test_results)
         return test_results
 
     def _get_invocation_from_filter(
@@ -84,187 +74,212 @@ class TestsAPI(APIClient):
         elif filter.last_invocation:
             invocation = self.invocations_api.get_last_invocation(type="test")
 
-        self.set_run_cache(key=INVOCATION, value=invocation)
         return invocation
 
-    def get_test_metadata_from_raw_test_result(
+    def get_test_metadata_from_test_result_db_row(
         self,
-        raw_test_result: RawTestResultSchema,
+        test_result_db_row: TestResultDBRowSchema,
     ) -> TestMetadataSchema:
         test_display_name = (
-            raw_test_result.test_name.replace("_", " ").title()
-            if raw_test_result.test_name
+            test_result_db_row.test_name.replace("_", " ").title()
+            if test_result_db_row.test_name
             else ""
         )
         detected_at_datetime = convert_utc_iso_format_to_datetime(
-            raw_test_result.detected_at
+            test_result_db_row.detected_at
         )
         detected_at_utc = detected_at_datetime
         detected_at = detected_at_datetime.astimezone(tz.tzlocal())
         table_full_name_parts = [
             name
             for name in [
-                raw_test_result.database_name,
-                raw_test_result.schema_name,
-                raw_test_result.table_name,
+                test_result_db_row.database_name,
+                test_result_db_row.schema_name,
+                test_result_db_row.table_name,
             ]
             if name
         ]
         table_full_name = ".".join(table_full_name_parts).lower()
         test_query = (
-            raw_test_result.test_results_query.strip()
-            if raw_test_result.test_results_query
+            test_result_db_row.test_results_query.strip()
+            if test_result_db_row.test_results_query
             else None
         )
 
         result = dict(
-            result_description=raw_test_result.test_results_description,
+            result_description=test_result_db_row.test_results_description,
             result_query=test_query,
         )
 
         configuration = dict()
 
-        if raw_test_result.test_type == "dbt_test":
+        if test_result_db_row.test_type == "dbt_test":
             configuration = dict(
-                test_name=raw_test_result.test_name,
-                test_params=raw_test_result.test_params,
+                test_name=test_result_db_row.test_name,
+                test_params=test_result_db_row.test_params,
             )
         else:
             configuration = dict(
-                test_name=raw_test_result.test_name,
-                timestamp_column=raw_test_result.test_params.get("timestamp_column"),
-                testing_timeframe=raw_test_result.test_params.get("timeframe"),
-                anomaly_threshold=raw_test_result.test_params.get("sensitivity"),
+                test_name=test_result_db_row.test_name,
+                timestamp_column=test_result_db_row.test_params.get("timestamp_column"),
+                testing_timeframe=test_result_db_row.test_params.get("timeframe"),
+                anomaly_threshold=test_result_db_row.test_params.get("sensitivity"),
             )
 
         return TestMetadataSchema(
-            test_unique_id=raw_test_result.test_unique_id,
-            elementary_unique_id=raw_test_result.elementary_unique_id,
-            database_name=raw_test_result.database_name,
-            schema_name=raw_test_result.schema_name,
-            table_name=raw_test_result.table_name,
-            column_name=raw_test_result.column_name,
-            test_name=raw_test_result.test_name,
+            test_unique_id=test_result_db_row.test_unique_id,
+            elementary_unique_id=test_result_db_row.elementary_unique_id,
+            database_name=test_result_db_row.database_name,
+            schema_name=test_result_db_row.schema_name,
+            table_name=test_result_db_row.table_name,
+            column_name=test_result_db_row.column_name,
+            test_name=test_result_db_row.test_name,
             test_display_name=test_display_name,
             latest_run_time=detected_at.isoformat(),
             latest_run_time_utc=detected_at_utc.isoformat(),
-            latest_run_status=raw_test_result.status,
-            model_unique_id=raw_test_result.model_unique_id,
+            latest_run_status=test_result_db_row.status,
+            model_unique_id=test_result_db_row.model_unique_id,
             table_unique_id=table_full_name,
-            test_type=raw_test_result.test_type,
-            test_sub_type=raw_test_result.test_sub_type,
+            test_type=test_result_db_row.test_type,
+            test_sub_type=test_result_db_row.test_sub_type,
             test_query=test_query,
-            test_params=raw_test_result.test_params,
-            test_created_at=raw_test_result.test_created_at,
-            description=raw_test_result.meta.get("description"),
+            test_params=test_result_db_row.test_params,
+            test_created_at=test_result_db_row.test_created_at,
+            description=test_result_db_row.meta.get("description"),
             result=result,
             configuration=configuration,
         )
 
     def get_test_results(
         self,
-        days_back: Optional[int] = 7,
-        metrics_sample_limit: int = 5,
-        invocations_per_test: int = 720,
-        disable_passed_test_metrics: bool = False,
+        test_results_db_rows: List[TestResultDBRowSchema],
         disable_samples: bool = False,
         filter: Optional[DataMonitoringReportFilter] = None,
     ) -> Tuple[
         Dict[ModelUniqueIdType, List[TestResultSchema]], Optional[DbtInvocationSchema]
     ]:
-        all_test_results = self.get_run_cache(ALL_TEST_RESULTS)
-        if all_test_results is None:
-            all_test_results = self._get_all_test_results(
-                days_back=days_back,
-                invocations_per_test=invocations_per_test,
-                metrics_sample_limit=metrics_sample_limit,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-            )
-
+        filtered_test_results_db_rows = test_results_db_rows
         invocation = self._get_invocation_from_filter(filter)
         if invocation.invocation_id:
-            all_test_results = [
+            filtered_test_results_db_rows = [
                 test_result
-                for test_result in all_test_results
+                for test_result in filtered_test_results_db_rows
                 if test_result.invocation_id == invocation.invocation_id
             ]
 
-        all_test_results = [
+        filtered_test_results_db_rows = [
             test_result
-            for test_result in all_test_results
+            for test_result in filtered_test_results_db_rows
             if test_result.invocations_order == 1
         ]
 
         test_results = defaultdict(list)
-        for raw_test_result in all_test_results:
+        for test_result_db_row in filtered_test_results_db_rows:
             test_result = TestResultSchema(
-                metadata=self.get_test_metadata_from_raw_test_result(raw_test_result),
-                test_results=raw_test_result.get_test_results(
-                    disable_samples=disable_samples
+                metadata=self.get_test_metadata_from_test_result_db_row(
+                    test_result_db_row
+                ),
+                test_results=TestsAPI._get_test_result_from_test_result_db_row(
+                    test_result_db_row, disable_samples=disable_samples
                 ),
             )
-            test_results[raw_test_result.model_unique_id].append(test_result)
+            test_results[test_result_db_row.model_unique_id].append(test_result)
 
-        self.set_run_cache(key=TEST_RESULTS, value=test_results)
         return test_results, invocation
 
-    def get_test_runs(
-        self,
-        days_back: Optional[int] = 7,
-        metrics_sample_limit: int = 5,
-        invocations_per_test: int = 720,
-    ) -> Dict[ModelUniqueIdType, List[TestRunSchema]]:
-        all_test_results = self.get_run_cache(ALL_TEST_RESULTS)
-        if all_test_results is None:
-            all_test_results = self._get_all_test_results(
-                days_back=days_back,
-                invocations_per_test=invocations_per_test,
-                metrics_sample_limit=metrics_sample_limit,
-                disable_passed_test_metrics=True,
+    @staticmethod
+    def _get_failed_rows_count(test_result_db_row: TestResultDBRowSchema) -> int:
+        failed_rows_count = -1
+        if (
+            test_result_db_row.status != "pass"
+            and test_result_db_row.test_results_description
+        ):
+            found_rows_number = re.search(
+                r"\d+", test_result_db_row.test_results_description
             )
+            if found_rows_number:
+                found_rows_number = found_rows_number.group()
+                failed_rows_count = int(found_rows_number)
+        return failed_rows_count
 
-        tests_invocations = self._get_invocations(all_test_results)
+    @staticmethod
+    def _get_test_result_from_test_result_db_row(
+        test_result_db_row: TestResultDBRowSchema,
+        disable_samples: bool = False,
+    ) -> Union[DbtTestResultSchema, ElementaryTestResultSchema]:
+        sample_data = test_result_db_row.sample_data if not disable_samples else None
+        if test_result_db_row.test_type == "dbt_test":
+            test_results = DbtTestResultSchema(
+                display_name=test_result_db_row.test_name,
+                results_sample=sample_data,
+                error_message=test_result_db_row.test_results_description,
+                failed_rows_count=TestsAPI._get_failed_rows_count(test_result_db_row),
+            )
+        else:
+            test_sub_type_display_name = test_result_db_row.test_sub_type.replace(
+                "_", " "
+            ).title()
+            if test_result_db_row.test_type == "anomaly_detection":
+                if sample_data and test_result_db_row.test_sub_type != "dimension":
+                    sample_data.sort(key=lambda metric: metric.get("end_time"))
+                test_results = ElementaryTestResultSchema(
+                    display_name=test_sub_type_display_name,
+                    metrics=sample_data,
+                    result_description=test_result_db_row.test_results_description,
+                )
+            elif test_result_db_row.test_type == "schema_change":
+                test_results = ElementaryTestResultSchema(
+                    display_name=test_sub_type_display_name.lower(),
+                    result_description=test_result_db_row.test_results_description,
+                )
+        return test_results
+
+    def get_test_runs(
+        self, test_results_db_rows: List[TestResultDBRowSchema]
+    ) -> Dict[ModelUniqueIdType, List[TestRunSchema]]:
+        tests_invocations = self._get_invocations(test_results_db_rows)
         latest_test_results = [
             test_result
-            for test_result in all_test_results
+            for test_result in test_results_db_rows
             if test_result.invocations_order == 1
         ]
 
         test_runs = defaultdict(list)
-        for raw_test_result in latest_test_results:
+        for test_result_db_row in latest_test_results:
             test_invocations = tests_invocations.get(
-                raw_test_result.elementary_unique_id
+                test_result_db_row.elementary_unique_id
             )
             test_run = TestRunSchema(
-                metadata=self.get_test_metadata_from_raw_test_result(raw_test_result),
+                metadata=self.get_test_metadata_from_test_result_db_row(
+                    test_result_db_row
+                ),
                 test_runs=test_invocations,
             )
-            test_runs[raw_test_result.model_unique_id].append(test_run)
+            test_runs[test_result_db_row.model_unique_id].append(test_run)
 
-        self.set_run_cache(key=TEST_RUNS, value=test_runs)
         return test_runs
 
     def _get_invocations(
-        self, raw_test_results: List[RawTestResultSchema]
+        self, test_result_db_rows: List[TestResultDBRowSchema]
     ) -> Dict[TestUniqueIdType, InvocationsSchema]:
         grouped_invocations = defaultdict(list)
-        for raw_test_result in raw_test_results:
+        for test_result_db_row in test_result_db_rows:
             try:
-                elementary_unique_id = raw_test_result.elementary_unique_id
+                elementary_unique_id = test_result_db_row.elementary_unique_id
                 grouped_invocations[elementary_unique_id].append(
                     InvocationSchema(
-                        id=raw_test_result.invocation_id
-                        or raw_test_result.test_execution_id,
-                        time_utc=raw_test_result.detected_at,
-                        status=raw_test_result.status,
+                        id=test_result_db_row.invocation_id
+                        or test_result_db_row.test_execution_id,
+                        time_utc=test_result_db_row.detected_at,
+                        status=test_result_db_row.status,
                         affected_rows=self._parse_affected_row(
-                            results_description=raw_test_result.test_results_description
+                            results_description=test_result_db_row.test_results_description
                         ),
                     )
                 )
             except Exception:
                 logger.error(
-                    f"Could not parse test ({raw_test_result.test_unique_id}) invocation ({raw_test_result.invocation_id or raw_test_result.test_execution_id}) - continue to the next test"
+                    f"Could not parse test ({test_result_db_row.test_unique_id}) invocation ({test_result_db_row.invocation_id or test_result_db_row.test_execution_id}) - continue to the next test"
                 )
                 continue
 
@@ -279,7 +294,7 @@ class TestsAPI(APIClient):
                 invocations=invocations,
                 description=self._get_invocations_description(totals),
             )
-        self.set_run_cache(key=TEST_INVOCATIONS, value=test_invocations)
+
         return test_invocations
 
     @staticmethod
@@ -318,7 +333,7 @@ class TestsAPI(APIClient):
 
     def get_total_tests_results(
         self,
-        tests_metadata: Optional[List[TestMetadataSchema]] = None,
+        tests_metadata: List[TestMetadataSchema],
     ) -> Dict[str, TotalsSchema]:
         totals = dict()
         for test in tests_metadata:

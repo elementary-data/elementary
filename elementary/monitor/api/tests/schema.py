@@ -1,6 +1,5 @@
 import json
-import re
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, validator
 
@@ -15,7 +14,6 @@ class ElementaryTestResultSchema(BaseModel):
     metrics: Optional[Union[list, dict]]
     result_description: Optional[str] = None
 
-    # pydantic has a bug with Union fields. This is how to support it.
     class Config:
         smart_union = True
 
@@ -27,7 +25,7 @@ class DbtTestResultSchema(BaseModel):
     failed_rows_count: Optional[int] = None
 
 
-class RawTestResultSchema(BaseModel):
+class TestResultDBRowSchema(BaseModel):
     id: str
     invocation_id: str = None
     test_execution_id: str = None
@@ -56,7 +54,6 @@ class RawTestResultSchema(BaseModel):
     invocations_order: int
     sample_data: Optional[Union[dict, List]] = None
 
-    # pydantic has a bug with Union fields. This is how to support it.
     class Config:
         smart_union = True
 
@@ -75,44 +72,6 @@ class RawTestResultSchema(BaseModel):
     @validator("test_results_description", pre=True)
     def load_test_results_description(cls, test_results_description):
         return test_results_description.strip() if test_results_description else None
-
-    def get_failed_rows_count(self):
-        failed_rows_count = -1
-        if self.status != "pass" and self.test_results_description:
-            found_rows_number = re.search(r"\d+", self.test_results_description)
-            if found_rows_number:
-                found_rows_number = found_rows_number.group()
-                failed_rows_count = int(found_rows_number)
-        return failed_rows_count
-
-    def get_test_results(
-        self,
-        disable_samples: bool = False,
-    ) -> Union[DbtTestResultSchema, ElementaryTestResultSchema]:
-        sample_data = self.sample_data if not disable_samples else None
-        if self.test_type == "dbt_test":
-            test_results = DbtTestResultSchema(
-                display_name=self.test_name,
-                results_sample=sample_data,
-                error_message=self.test_results_description,
-                failed_rows_count=self.get_failed_rows_count(),
-            )
-        else:
-            test_sub_type_display_name = self.test_sub_type.replace("_", " ").title()
-            if self.test_type == "anomaly_detection":
-                if sample_data and self.test_sub_type != "dimension":
-                    sample_data.sort(key=lambda metric: metric.get("end_time"))
-                test_results = ElementaryTestResultSchema(
-                    display_name=test_sub_type_display_name,
-                    metrics=sample_data,
-                    result_description=self.test_results_description,
-                )
-            elif self.test_type == "schema_change":
-                test_results = ElementaryTestResultSchema(
-                    display_name=test_sub_type_display_name.lower(),
-                    result_description=self.test_results_description,
-                )
-        return test_results
 
 
 class TotalsSchema(BaseModel):
@@ -191,7 +150,6 @@ class TestResultSchema(BaseModel):
     metadata: TestMetadataSchema
     test_results: Optional[Union[dict, list]] = None
 
-    # pydantic has a bug with Union fields. This is how to support it.
     class Config:
         smart_union = True
 

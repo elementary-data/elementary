@@ -23,7 +23,7 @@ from elementary.monitor.api.models.schema import (
 )
 from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
-from elementary.monitor.api.tests.schema import TotalsSchema
+from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
@@ -107,17 +107,19 @@ class DataMonitoringReport(DataMonitoring):
             models_runs = self.models_api.get_models_runs(
                 days_back=days_back, exclude_elementary_models=exclude_elementary_models
             )
+
+            test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
+                days_back=days_back,
+                invocations_per_test=test_runs_amount,
+                disable_passed_test_metrics=disable_passed_test_metrics,
+            )
             (
                 test_results,
                 test_results_totals,
                 invocation,
-            ) = self._get_test_results_and_totals(
-                days_back=days_back,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-            )
+            ) = self._get_test_results_and_totals(test_results_db_rows)
             test_runs, test_runs_totals = self._get_test_runs_and_totals(
-                days_back=days_back,
-                test_runs_amount=test_runs_amount,
+                test_results_db_rows
             )
             serializable_models, sidebars = self._get_dbt_models_and_sidebars(
                 models, sources, exposures
@@ -131,14 +133,18 @@ class DataMonitoringReport(DataMonitoring):
                 test_results_totals, test_runs_totals, models, sources, models_runs
             )
 
-            # self.execution_properties["elementary_test_count"] = len(
-            #     [
-            #         test_metadata
-            #         for test_metadata in tests_metadata
-            #         if test_metadata.test_type != "dbt_test"
-            #     ]
-            # )
-            # self.execution_properties["test_result_count"] = len(tests_metadata)
+            tests_metadata = []
+            for tests in test_results.values():
+                for test in tests:
+                    tests_metadata.append(test.metadata)
+            self.execution_properties["elementary_test_count"] = len(
+                [
+                    test_metadata
+                    for test_metadata in tests_metadata
+                    if test_metadata.test_type != "dbt_test"
+                ]
+            )
+            self.execution_properties["test_result_count"] = len(tests_metadata)
 
             serializable_test_results = defaultdict(list)
             for model_unique_id, test_result in test_results.items():
@@ -237,15 +243,12 @@ class DataMonitoringReport(DataMonitoring):
         return self.lineage_api.get_lineage(exclude_elementary_models)
 
     def _get_test_results_and_totals(
-        self,
-        days_back: Optional[int] = None,
-        disable_passed_test_metrics: bool = False,
+        self, test_results_db_rows: List[TestResultDBRowSchema]
     ):
         try:
             tests_results, invocation = self.tests_api.get_test_results(
                 filter=self.filter,
-                days_back=days_back,
-                disable_passed_test_metrics=disable_passed_test_metrics,
+                test_results_db_rows=test_results_db_rows,
                 disable_samples=self.disable_samples,
             )
             tests_metadata = []
@@ -260,15 +263,10 @@ class DataMonitoringReport(DataMonitoring):
             return dict(), dict(), dict()
 
     def _get_test_runs_and_totals(
-        self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        self, test_results_db_rows: List[TestResultDBRowSchema]
     ):
         try:
-            tests_runs = self.tests_api.get_test_runs(
-                invocations_per_test=test_runs_amount,
-                days_back=days_back,
-            )
+            tests_runs = self.tests_api.get_test_runs(test_results_db_rows)
             test_runs_totals = self.tests_api.get_total_tests_runs(
                 tests_runs=tests_runs
             )
