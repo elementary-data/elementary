@@ -2,9 +2,6 @@
 title: "dbt core & dbt cloud"
 ---
 
-import ConnectionProfile from "../snippets/faq/question-connection-profile.mdx";
-import ProfilePermissions from "../snippets/faq/question-profile-permissions.mdx";
-
 Elementary integrates with dbt core (1.0.0 and above) and dbt cloud, as long as the data warehouse is supported.
 
 Both dbt core and cloud users need to [deploy the dbt package](/quickstart) first in the monitored project.
@@ -22,6 +19,5 @@ This file contains the connection details for the CLI to access your DWH.
 
 Use to create the profile, [this guide](/quickstart-cli) install the CLI, and run it.
 
-<ConnectionProfile />
-
-<ProfilePermissions />
+<Snippet file="faq/question-connection-profile.mdx" />
+<Snippet file="faq/question-profile-permissions.mdx" />
