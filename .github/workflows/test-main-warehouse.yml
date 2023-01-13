@@ -16,4 +16,5 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: snowflake
+      dbt-version: 1.0.2
     secrets: inherit

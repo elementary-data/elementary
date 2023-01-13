@@ -28,12 +28,12 @@ def get_elementary_alerts(elementary_json_logs: [dict]):
 
 
 def main():
-    with open(sys.argv[1]) as f:
+    with open(sys.argv[1], encoding="utf-8") as f:
         dbt_log = f.read()
     elementary_log_lines = get_elementary_log_lines(dbt_log)
     elementary_json_logs = get_json_logs(elementary_log_lines)
     elementary_alerts = get_elementary_alerts(elementary_json_logs)
-    with open("elementary_alerts.json", "w") as f:
+    with open("elementary_alerts.json", "w", encoding="utf-8") as f:
         f.write(json.dumps(elementary_alerts))
 
 

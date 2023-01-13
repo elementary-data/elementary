@@ -26,7 +26,7 @@ from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import DataMonitoringFilter
+from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -42,12 +42,14 @@ class DataMonitoringReport(DataMonitoring):
         self,
         config: Config,
         tracking: AnonymousTracking,
+        filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
-        filter: Optional[str] = None,
     ):
-        super().__init__(config, tracking, force_update_dbt_package, disable_samples)
-        self.filter = self._parse_filter(filter)
+        super().__init__(
+            config, tracking, force_update_dbt_package, disable_samples, filter
+        )
+        self.filter = self._parse_filter(self.raw_filter)
         self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
         self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
@@ -56,8 +58,8 @@ class DataMonitoringReport(DataMonitoring):
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
-    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringFilter:
-        data_monitoring_filter = DataMonitoringFilter()
+    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringReportFilter:
+        data_monitoring_filter = DataMonitoringReportFilter()
         if filter:
             invocation_id_regex = re.compile(r"invocation_id:.*")
             invocation_time_regex = re.compile(r"invocation_time:.*")
@@ -68,13 +70,15 @@ class DataMonitoringReport(DataMonitoring):
             last_invocation_match = last_invocation_regex.search(filter)
 
             if last_invocation_match:
-                data_monitoring_filter = DataMonitoringFilter(last_invocation=True)
+                data_monitoring_filter = DataMonitoringReportFilter(
+                    last_invocation=True
+                )
             elif invocation_id_match:
-                data_monitoring_filter = DataMonitoringFilter(
+                data_monitoring_filter = DataMonitoringReportFilter(
                     invocation_id=invocation_id_match.group().split(":", 1)[1]
                 )
             elif invocation_time_match:
-                data_monitoring_filter = DataMonitoringFilter(
+                data_monitoring_filter = DataMonitoringReportFilter(
                     invocation_time=invocation_time_match.group().split(":", 1)[1]
                 )
             else:
@@ -93,7 +97,7 @@ class DataMonitoringReport(DataMonitoring):
     ) -> Tuple[bool, str]:
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(file_path)
-        with open(html_path, "w") as html_file:
+        with open(html_path, "w", encoding="utf-8") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
 
             models = self.models_api.get_models(exclude_elementary_models)
@@ -151,7 +155,7 @@ class DataMonitoringReport(DataMonitoring):
 
             output_data["models"] = serializable_models
             output_data["sidebars"] = sidebars.dict()
-            output_data["invocation"] = invocation.dict()
+            output_data["invocation"] = dict(invocation)
             output_data["test_results"] = serializable_test_results
             output_data["test_results_totals"] = self._serialize_totals(
                 test_results_totals
@@ -175,7 +179,7 @@ class DataMonitoringReport(DataMonitoring):
                 "env": self.config.env,
             }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
-            with open(template_html_path, "r") as template_html_file:
+            with open(template_html_path, "r", encoding="utf-8") as template_html_file:
                 template_html_code = template_html_file.read()
                 dumped_output_data = json.dumps(output_data)
                 compiled_output_html = f"""
@@ -186,7 +190,9 @@ class DataMonitoringReport(DataMonitoring):
                     """
                 html_file.write(compiled_output_html)
         with open(
-            os.path.join(self.config.target_dir, "elementary_output.json"), "w"
+            os.path.join(self.config.target_dir, "elementary_output.json"),
+            "w",
+            encoding="utf-8",
         ) as elementary_output_json_file:
             elementary_output_json_file.write(dumped_output_data)
 
@@ -254,7 +260,7 @@ class DataMonitoringReport(DataMonitoring):
             logger.exception(f"Could not get test results and totals - Error: {e}")
             self.tracking.record_cli_internal_exception(e)
             self.success = False
-            return dict(), dict()
+            return dict(), dict(), dict()
 
     def _get_test_runs_and_totals(
         self,

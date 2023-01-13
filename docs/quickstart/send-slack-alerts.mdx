@@ -14,7 +14,7 @@ Also, you can add configuration for each test / model in your `.yml` files:
 - dbt Tags - add custom context to the alert
 - Description - add custom description to the alert
 - Alert fields - choose which fields to display in your alert
-- Suppression interval - set a cooldown period which alert won't sent
+- Suppression interval - set a cooldown period on which the alert won't be sent
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
@@ -54,6 +54,41 @@ Make sure to run the following command after your dbt runs and tests:
 
 ```
 edr monitor
+```
+
+### Filtering alerts using selector
+
+Elementary supports filtering alerts using a selector.
+Elementry `edr monitor` command will notify only on the selector's matched alerts.
+
+There are 3 selectors supported by elementary:
+
+- tag - Notify on models/sources/tests that are tagged with the provided tag selector (Notice that tests can be matched on their model's/source's tag).
+- owner - Notify on models/sources/tests that their owner is provided owner selector (Notice that tests can be matched on their model's/source's owner).
+- model - Notify on the model/source and its tests.
+
+To filter alerts by tag:
+
+```shell
+edr monitor --select tag:critical
+edr monitor --select tag:finance
+```
+
+To filter alerts by owner:
+
+```shell
+edr monitor --select config.meta.owner:@jeff
+edr monitor --select config.meta.owner:@jessy
+```
+
+To filter alerts by model:
+
+```shell
+edr monitor --select model:customers
+edr monitor --select model:orders
+
+edr monitor --select customers
+edr monitor --select orders
 ```
 
 ---
@@ -202,11 +237,17 @@ models:
         channel: marketing_data_ops
 ```
 
-If your models are in folders by department / team, another useful option is to configure the channel in
+If your models / tests are in folders by department / team, another useful option is to configure the channel in
 your `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
+  marketing_bi:
+    +meta:
+      alerts_config:
+        channel: marketing_data_ops
+
+tests:
   marketing_bi:
     +meta:
       alerts_config:
@@ -253,11 +294,17 @@ If you configure alert fields on your dbt project, all the test alerts of all of
 If you configure alert fields for a model, all the test alerts that belong to this model will display only the configured alert fields.
 If you configure alert fields for both a model and a test, the test configured alert fields overrides the model configured alert fields (same as for the dbt project configured alert fields).
 
-To set it up globaly for your project, add the desired alert fields to your models in the `dbt_project.yml` file.
+To set it up globaly for your project, add the desired alert fields to your models and tests in the `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
-  - name: marketing_leads
+  marketing_leads:
+    +meta:
+      alerts_config:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+
+tests:
+  marketing_leads:
     +meta:
       alerts_config:
         alert_fields: ["description", "owners", "tags", "subscribers"]
@@ -297,11 +344,18 @@ An alert that has been generated in the suppression interval won't be sent.
 
 `alert_suppression_interval` can accept values of 0-24 - represents the number of hours for which alerts will be skipped (including unrounded numbers).
 
-To set it up globaly for your project, add the alert suppression interval to your models in the `dbt_project.yml` file.
+To set it up globaly for your project, add the alert suppression interval to your models and tests in the `dbt_project.yml` file.
 
 ```yml dbt_project.yml
 models:
-  - name: marketing_leads
+  marketing_leads:
+    +meta:
+      alerts_config:
+        alert_suppression_interval: 24
+
+
+tests:
+  marketing_leads:
     +meta:
       alerts_config:
         alert_suppression_interval: 24
