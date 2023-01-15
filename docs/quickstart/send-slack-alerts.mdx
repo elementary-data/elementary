@@ -2,11 +2,6 @@
 title: "Send Slack alerts"
 ---
 
-import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
-import InstallCLI from "../snippets/install-cli.mdx";
-import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
-import SetupSlackIntegration from "../snippets/setup-slack-integration.mdx";
-
 Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models and
 snapshots runs, and source freshness.
 
@@ -19,7 +14,7 @@ Also, you can add configuration for each test / model in your `.yml` files:
 - dbt Tags - add custom context to the alert
 - Description - add custom description to the alert
 - Alert fields - choose which fields to display in your alert
-- Suppression interval - set a cooldown period which alert won't sent
+- Suppression interval - set a cooldown period on which the alert won't be sent
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
@@ -33,25 +28,25 @@ This is **required for the alerts to work.**
 
 <Accordion title="dbt package installation">
 
-<InstallDbtPackage />
+<Snippet file="install-dbt-package.mdx" />
 
 </Accordion>
 
 <Accordion title="Configure connection profile">
 
-<AddConnectionProfile />
+<Snippet file="add-connection-profile.mdx" />
 
 </Accordion>
 
 <Accordion title="Install CLI">
 
-<InstallCLI />
+<Snippet file="install-cli.mdx" />
 
 </Accordion>
 
 ## Setup Slack Integration
 
-<SetupSlackIntegration />
+<Snippet file="setup-slack-integration.mdx" />
 
 ## Execute the CLI
 
@@ -76,7 +71,7 @@ To filter alerts by tag:
 
 ```shell
 edr monitor --select tag:critical
-edr monitor --select tag:finnance
+edr monitor --select tag:finance
 ```
 
 To filter alerts by owner:
