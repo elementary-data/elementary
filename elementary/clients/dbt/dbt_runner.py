@@ -113,7 +113,9 @@ class DbtRunner:
             for json_message in json_messages:
                 try:
                     log_message_dict = json.loads(json_message)
-                    log_message_data_dict = log_message_dict.get("data")
+                    log_message_data_dict = log_message_dict.get(
+                        "info"
+                    ) or log_message_dict.get("data")
                     if log_message_data_dict is not None:
                         if log_errors and log_message_dict["level"] == "error":
                             logger.error(log_message_data_dict)
