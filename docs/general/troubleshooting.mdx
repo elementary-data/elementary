@@ -3,7 +3,7 @@ title: "Troubleshooting"
 description: "This section is aimed at collecting common issues users have to provide quick debug solutions."
 ---
 
-<Accordion title="I run `edr report` and get an empty report">
+<Accordion title="I run `edr monitor report` and get an empty report">
   
 If you get an empty report, there are several steps to understand what went wrong and try and fix it.
 
@@ -30,7 +30,7 @@ If you get an empty report, there are several steps to understand what went wron
 
 - **Try to force update the CLI internal packages**
 - Run the CLI with the flag for force updating the packages:
-  `edr report -u true`
+  `edr monitor report -u true`
 
 **3. Validate that the CLI has a working connection profile**
 
@@ -164,7 +164,7 @@ The steps are:
 3. Running the elementary tests again.
 
 If you want the Elementary UI to show data for a longer period of time, use the days-back option of the CLI:
-`edr report --days-back 45`
+`edr monitor report --days-back 45`
 
 </Accordion>
 

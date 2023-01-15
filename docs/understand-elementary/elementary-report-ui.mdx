@@ -12,7 +12,7 @@ the [CLI](/understand-elementary/cli-install) you can generate the Elementary UI
 After installing and configuring the CLI, execute the command:
 
 ```shell
-edr report
+edr monitor report
 ```
 
 The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and
@@ -109,6 +109,6 @@ test failure, for example on an exposure or a dashboard in the data stack.
 ## Configure report sharing
 
 The data tests report UI can be sent via Slack, Google Cloud Storage, or Amazon S3 when you
-run `edr send-report`.
+run `edr monitor send-report`.
 
 Refer to [this guide](/quickstart/share-report-ui) for detailed instructions.
