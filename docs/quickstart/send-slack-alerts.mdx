@@ -120,6 +120,7 @@ vars:
 
 By default, alerts are sent on dbt tests, models and snapshots.
 You can also monitor source freshness by running `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
+Note that it needs to be from the same machine.
 This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
 Please note that this requires [integration with your dbt project](https://docs.elementary-data.com/quickstart-cli).
 
