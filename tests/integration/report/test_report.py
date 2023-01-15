@@ -64,6 +64,7 @@ def test_sidebar(report_data_fixture):
 
 def test_duplicate_rows_for_latest_run_status(report_data_fixture):
     report_data = get_report_data()
+    # e2e contains 2 failed dimension tests and 1 passed
     assert_test_counter(
         report_data=report_data,
         test_type="anomaly_detection",
@@ -78,12 +79,16 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         status="pass",
         expected_ammount=1,
     )
+
+    # e2e contains 1 passed schema change test for groups table
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
         name="schema_changes",
         table="groups",
     )
+
+    # e2e contains 3 failed schema change test for stats_player table
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
@@ -115,24 +120,32 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="key_crosses",
         expected_ammount=1,
     )
+
+    # e2e contains 1 passed schema change test for stats_team table
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
         name="schema_changes",
         table="stats_team",
     )
+
+    # e2e contains 1 passed schema change test for string_column_anomalies table
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
         name="schema_changes",
         table="string_column_anomalies",
     )
+
+    # e2e contains 1 passed schema change test for numeric_column_anomalies table
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
         name="schema_changes",
         table="numeric_column_anomalies",
     )
+
+    # e2e contains only 4 singular failed tests
     assert_test_counter(
         report_data=report_data,
         test_type="dbt_test",
@@ -146,6 +159,8 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         test_sub_type="singular",
         expected_ammount=4,
     )
+
+    # e2e contains 2 failed and 1 error schema changes from baseline tests for groups table
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
@@ -162,6 +177,8 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         status="error",
         expected_ammount=1,
     )
+
+    # e2e contains 2 schema changes from baseline tests for goals column at stats_players table (2 different tests)
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
@@ -170,12 +187,121 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="goals",
         expected_ammount=2,
     )
+
+    # e2e contains 2 schema changes from baseline tests for coffee_cups_consumed column at stats_players table (2 different tests)
     assert_test_counter(
         report_data=report_data,
         test_type="schema_change",
         name="schema_changes_from_baseline",
         table="stats_players",
         column="coffee_cups_consumed",
+        expected_ammount=2,
+    )
+
+    # e2e contains 56 all columns anomalies tests
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        expected_ammount=56,
+    )
+    # All of the tests are defined on the table any_type_column_anomalies
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        expected_ammount=56,
+    )
+    # updated_at column should have 2 passed test results.
+    # 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="updated_at",
+        status="pass",
+        expected_ammount=2,
+    )
+    # null_percent_str column should have 7 test results.
+    # 5 for string type column, 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_str",
+        expected_ammount=7,
+    )
+    # null_percent_int column should have 9 test results.
+    # 7 for numeric type column, 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_int",
+        expected_ammount=9,
+    )
+    # null_percent_float column should have 9 test results.
+    # 7 for numeric type column, 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_float",
+        expected_ammount=9,
+    )
+    # null_percent_bool column should have 2 passed test results.
+    # 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_bool",
+        expected_ammount=2,
+    )
+    # null_count_str column should have 7 test results.
+    # 5 for string type column, 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_str",
+        expected_ammount=7,
+    )
+    # null_count_int column should have 9 test results.
+    # 7 for numeric type column, 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_int",
+        expected_ammount=9,
+    )
+    # null_count_float column should have 9 test results.
+    # 7 for numeric type column, 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_float",
+        expected_ammount=9,
+    )
+    # null_count_bool column should have 2 passed test results.
+    # 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_bool",
         expected_ammount=2,
     )
 
