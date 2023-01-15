@@ -11,6 +11,13 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
+class DbtLog:
+    def __init__(self, log_line: str):
+        log = json.loads(log_line)
+        self.msg = log.get("info", {}).get("msg") or log.get("data", {}).get("msg")
+        self.level = log.get("info", {}).get("level") or log.get("level")
+
+
 class DbtRunner:
     ELEMENTARY_LOG_PREFIX = "Elementary: "
 
@@ -94,7 +101,7 @@ class DbtRunner:
         macro_name: str,
         json_logs: bool = True,
         macro_args: Optional[dict] = None,
-        log_errors: bool = False,
+        log_errors: bool = True,
         vars: Optional[dict] = None,
         quiet: bool = False,
     ) -> list:
@@ -112,21 +119,14 @@ class DbtRunner:
             json_messages = command_output.splitlines()
             for json_message in json_messages:
                 try:
-                    log_message_dict = json.loads(json_message)
-                    log_message_data_dict = log_message_dict.get(
-                        "info"
-                    ) or log_message_dict.get("data")
-                    if log_message_data_dict is not None:
-                        if log_errors and log_message_dict["level"] == "error":
-                            logger.error(log_message_data_dict)
-                            continue
-                        log_message = log_message_data_dict.get("msg")
-                        if log_message is not None and log_message.startswith(
-                            self.ELEMENTARY_LOG_PREFIX
-                        ):
-                            run_operation_results.append(
-                                log_message.replace(self.ELEMENTARY_LOG_PREFIX, "")
-                            )
+                    log = DbtLog(json_message)
+                    if log_errors and log.level == "error":
+                        logger.error(log.msg)
+                        continue
+                    if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
+                        run_operation_results.append(
+                            log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
+                        )
                 except JSONDecodeError:
                     logger.debug(
                         f"Unable to parse run-operation log message: {json_message}",
