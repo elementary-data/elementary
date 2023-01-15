@@ -228,26 +228,30 @@ class MockAlertsAPI(AlertsAPI):
         return pending_model_alerts
 
     def _query_pending_source_freshness_alerts(self, **kwargs):
-        PENDDING_MODEL_ALERTS_MOCK_DATA = [
+        PENDDING_SOURVE_FRESHNESS_ALERTS_MOCK_DATA = [
             # Alert withting suppression interval
             dict(
                 id="alert_id_1",
-                unique_id="model_id_1",
-                alias="model",
-                path="",
-                original_path="",
-                materialization="table",
-                detected_at="2022-10-10 10:00:00",
+                unique_id="source_id_1",
+                detected_at="2022-10-11 10:00:00",
+                snapshotted_at="2022-10-11 10:00:00",
+                max_loaded_at="2022-10-11 10:00:00",
+                max_loaded_at_time_ago_in_s="123123",
                 database_name="test_db",
-                schema_name="test_schema",
-                full_refresh=False,
-                message="",
+                schema_name="test_scehma",
+                source_name="source_1",
+                identifier="identifier",
+                freshness_error_after="10",
+                freshness_warn_after="10",
+                freshness_filter="",
+                status="fail",
                 owners="[]",
+                path="",
+                error="",
                 tags="[]",
                 model_meta='{ "alerts_config": {"alert_suppression_interval": 1} }',
                 suppression_status="pending",
                 sent_at=None,
-                status="error",
             ),
             # Alert after suppression interval
             dict(
