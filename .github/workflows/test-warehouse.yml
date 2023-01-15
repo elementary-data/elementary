@@ -114,6 +114,9 @@ jobs:
       - name: Run Python package unit tests
         run: pytest -vv -k unit
 
+      - name: Run Python package integration tests
+        run: pytest -vv -k integration
+
       - name: Install dbt package
         run: |
           ELEMENTARY_PKG_LOCATION=$(pip show elementary-data | grep -i location | awk '{print $2}')

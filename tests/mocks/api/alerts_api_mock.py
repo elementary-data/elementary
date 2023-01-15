@@ -1,21 +1,35 @@
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from datetime import datetime, timedelta
+
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult, AlertType
+from elementary.monitor.alerts.alerts import AlertsQueryResult
 from elementary.monitor.alerts.model import ModelAlert
-from elementary.monitor.alerts.test import DbtTestAlert, ElementaryTestAlert, TestAlert
+from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
+from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
+from elementary.utils.time import DATETIME_FORMAT
+from tests.mocks.dbt_runner_mock import MockDbtRunner
+
+CURRENT_DATETIME_UTC = datetime.utcnow()
+CURRENT_TIMESTAMP_UTC = CURRENT_DATETIME_UTC.strftime(DATETIME_FORMAT)
 
 
 class MockAlertsAPI(AlertsAPI):
-    def _query_pending_test_alerts(self, **kwargs):
+    def __init__(self):
+        mock_dbt_runner = MockDbtRunner()
+        config = Config()
+        super().__init__(
+            mock_dbt_runner, config, elementary_database_and_schema="test.test"
+        )
+
+    def _query_pending_test_alerts(self, *args, **kwargs):
         PENDDING_TEST_ALERTS_MOCK_DATA = [
-            # Alert withting suppression interval
+            # Alert within suppression interval
             dict(
                 id="alert_id_1",
                 unique_id="test_id_1",
                 test_unique_id="test_id_1",
                 model_unique_id="model_id_1",
-                detected_at="2022-10-10 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 table_name="table",
@@ -32,7 +46,7 @@ class MockAlertsAPI(AlertsAPI):
                 test_short_name="short",
                 test_params="{}",
                 severity="ERROR",
-                test_meta='{ "alerts_config": {"alert_suppression_interval": 1} }',
+                test_meta='{ "alerts_config": {"alert_suppression_interval": 2} }',
                 model_meta="{}",
                 status="fail",
                 suppression_status="pending",
@@ -45,7 +59,7 @@ class MockAlertsAPI(AlertsAPI):
                 unique_id="test_id_1",
                 test_unique_id="test_id_1",
                 model_unique_id="model_id_1",
-                detected_at="2022-10-11 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 table_name="table",
@@ -75,7 +89,7 @@ class MockAlertsAPI(AlertsAPI):
                 unique_id="test_id_2",
                 test_unique_id="test_id_2",
                 model_unique_id="model_id_2",
-                detected_at="2022-10-10 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 table_name="table",
@@ -105,7 +119,7 @@ class MockAlertsAPI(AlertsAPI):
                 unique_id="test_id_3",
                 test_unique_id="test_id_3",
                 model_unique_id="model_id_2",
-                detected_at="2022-10-10 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 table_name="table",
@@ -132,14 +146,16 @@ class MockAlertsAPI(AlertsAPI):
         ]
 
         pending_test_alerts = [
-            TestAlert.create_test_alert_from_dict(**pending_alert)
+            TestAlert.create_test_alert_from_dict(
+                **self._normalize_alert(pending_alert)
+            )
             for pending_alert in PENDDING_TEST_ALERTS_MOCK_DATA
         ]
-        return pending_test_alerts
+        return AlertsQueryResult(alerts=pending_test_alerts, malformed_alerts=[])
 
-    def _query_pending_model_alerts(self, **kwargs):
+    def _query_pending_model_alerts(self, *args, **kwargs):
         PENDDING_MODEL_ALERTS_MOCK_DATA = [
-            # Alert withting suppression interval
+            # Alert within suppression interval
             dict(
                 id="alert_id_1",
                 unique_id="model_id_1",
@@ -147,14 +163,14 @@ class MockAlertsAPI(AlertsAPI):
                 path="",
                 original_path="",
                 materialization="table",
-                detected_at="2022-10-10 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 full_refresh=False,
                 message="",
                 owners="[]",
                 tags="[]",
-                model_meta='{ "alerts_config": {"alert_suppression_interval": 1} }',
+                model_meta='{ "alerts_config": {"alert_suppression_interval": 2} }',
                 suppression_status="pending",
                 sent_at=None,
                 status="error",
@@ -167,7 +183,7 @@ class MockAlertsAPI(AlertsAPI):
                 path="",
                 original_path="",
                 materialization="table",
-                detected_at="2022-10-11 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 full_refresh=False,
@@ -187,7 +203,7 @@ class MockAlertsAPI(AlertsAPI):
                 path="",
                 original_path="",
                 materialization="table",
-                detected_at="2022-10-10 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 full_refresh=False,
@@ -207,7 +223,7 @@ class MockAlertsAPI(AlertsAPI):
                 path="",
                 original_path="",
                 materialization="table",
-                detected_at="2022-10-10 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 database_name="test_db",
                 schema_name="test_schema",
                 full_refresh=False,
@@ -222,18 +238,42 @@ class MockAlertsAPI(AlertsAPI):
         ]
 
         pending_model_alerts = [
-            ModelAlert(**pending_alert)
+            ModelAlert(**self._normalize_alert(pending_alert))
             for pending_alert in PENDDING_MODEL_ALERTS_MOCK_DATA
         ]
-        return pending_model_alerts
+        return AlertsQueryResult(alerts=pending_model_alerts, malformed_alerts=[])
 
-    def _query_pending_source_freshness_alerts(self, **kwargs):
-        PENDDING_SOURVE_FRESHNESS_ALERTS_MOCK_DATA = [
-            # Alert withting suppression interval
+    def _query_pending_source_freshness_alerts(self, *args, **kwargs):
+        PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA = [
+            # Alert within suppression interval
             dict(
                 id="alert_id_1",
                 unique_id="source_id_1",
-                detected_at="2022-10-11 10:00:00",
+                detected_at=CURRENT_TIMESTAMP_UTC,
+                snapshotted_at="2022-10-11 10:00:00",
+                max_loaded_at="2022-10-11 10:00:00",
+                max_loaded_at_time_ago_in_s="123123",
+                database_name="test_db",
+                schema_name="test_scehma",
+                source_name="source_1",
+                identifier="identifier",
+                freshness_error_after="10",
+                freshness_warn_after="10",
+                freshness_filter="",
+                status="fail",
+                owners="[]",
+                path="",
+                error="",
+                tags="[]",
+                model_meta='{ "alerts_config": {"alert_suppression_interval": 2} }',
+                suppression_status="pending",
+                sent_at=None,
+            ),
+            # Alert after suppression interval
+            dict(
+                id="alert_id_2",
+                unique_id="source_id_1",
+                detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
                 max_loaded_at_time_ago_in_s="123123",
@@ -253,86 +293,90 @@ class MockAlertsAPI(AlertsAPI):
                 suppression_status="pending",
                 sent_at=None,
             ),
-            # Alert after suppression interval
-            dict(
-                id="alert_id_2",
-                unique_id="model_id_1",
-                alias="model",
-                path="",
-                original_path="",
-                materialization="table",
-                detected_at="2022-10-11 10:00:00",
-                database_name="test_db",
-                schema_name="test_schema",
-                full_refresh=False,
-                message="",
-                owners="[]",
-                tags="[]",
-                model_meta='{ "alerts_config": {"alert_suppression_interval": 1} }',
-                suppression_status="pending",
-                sent_at=None,
-                status="error",
-            ),
             # Alert without suppression interval
             dict(
                 id="alert_id_3",
-                unique_id="model_id_2",
-                alias="model",
-                path="",
-                original_path="",
-                materialization="table",
-                detected_at="2022-10-10 10:00:00",
+                unique_id="source_id_2",
+                detected_at=CURRENT_TIMESTAMP_UTC,
+                snapshotted_at="2022-10-11 10:00:00",
+                max_loaded_at="2022-10-11 10:00:00",
+                max_loaded_at_time_ago_in_s="123123",
                 database_name="test_db",
-                schema_name="test_schema",
-                full_refresh=False,
-                message="",
+                schema_name="test_scehma",
+                source_name="source_2",
+                identifier="identifier",
+                freshness_error_after="10",
+                freshness_warn_after="10",
+                freshness_filter="",
+                status="fail",
                 owners="[]",
+                path="",
+                error="",
                 tags="[]",
                 model_meta='{ "alerts_config": {"alert_suppression_interval": 0} }',
                 suppression_status="pending",
                 sent_at=None,
-                status="error",
             ),
             # First occurrence alert with suppression interval
             dict(
                 id="alert_id_4",
-                unique_id="model_id_3",
-                alias="model",
-                path="",
-                original_path="",
-                materialization="table",
-                detected_at="2022-10-10 10:00:00",
+                unique_id="source_id_3",
+                detected_at=CURRENT_TIMESTAMP_UTC,
+                snapshotted_at="2022-10-11 10:00:00",
+                max_loaded_at="2022-10-11 10:00:00",
+                max_loaded_at_time_ago_in_s="123123",
                 database_name="test_db",
-                schema_name="test_schema",
-                full_refresh=False,
-                message="",
+                schema_name="test_scehma",
+                source_name="source_3",
+                identifier="identifier",
+                freshness_error_after="10",
+                freshness_warn_after="10",
+                freshness_filter="",
+                status="fail",
                 owners="[]",
+                path="",
+                error="",
                 tags="[]",
                 model_meta='{ "alerts_config": {"alert_suppression_interval": 1} }',
                 suppression_status="pending",
                 sent_at=None,
-                status="error",
             ),
         ]
-        pass
 
-    def _query_last_test_alert_times(self, **kwargs):
-        pass
+        pending_source_freshness_alerts = [
+            SourceFreshnessAlert(**self._normalize_alert(pending_alert))
+            for pending_alert in PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA
+        ]
+        return AlertsQueryResult(
+            alerts=pending_source_freshness_alerts, malformed_alerts=[]
+        )
 
-    def _query_last_model_alert_times(self, **kwargs):
-        pass
+    def _query_last_test_alert_times(self, *args, **kwargs):
+        return dict(
+            test_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
+            test_id_2=(CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
+                DATETIME_FORMAT
+            ),
+        )
 
-    def _query_last_source_freshness_alert_times(self, **kwargs):
-        pass
+    def _query_last_model_alert_times(self, *args, **kwargs):
+        return dict(
+            model_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
+            model_id_2=(CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
+                DATETIME_FORMAT
+            ),
+        )
 
-
-def test_bla():
-    project_dir = "proj_dir"
-    profiles_dir = "prof_dir"
-    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
-    config = Config()
-    api = MockAlertsAPI(
-        dbt_runner=dbt_runner, config=config, elementary_database_and_schema="test.test"
-    )
-    api._query_pending_test_alerts()
-    api._query_pending_model_alerts()
+    def _query_last_source_freshness_alert_times(self, *args, **kwargs):
+        return dict(
+            source_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
+            source_id_2=(CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
+                DATETIME_FORMAT
+            ),
+        )
