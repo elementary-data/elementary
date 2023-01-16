@@ -3,11 +3,7 @@ title: "Quickstart: Data observability"
 sidebarTitle: "Quickstart: dbt package"
 ---
 
-import ChangeElementarySchema from "./snippets/faq/question-change-elementary-schema.mdx";
-import QuickstartPackageInstall from "./snippets/quickstart-package-install.mdx";
-
-<QuickstartPackageInstall />
-
+<Snippet file="quickstart-package-install.mdx" />
 
 ### 5. Run tests
 
@@ -20,8 +16,7 @@ Only tests you run after the installation will show up in the UI.
 
 After you ran your tests, we recommend that you ensure that the results were loaded to `elementary_test_results` table.
 
-<ChangeElementarySchema />
-
+<Snippet file="faq/question-change-elementary-schema.mdx" />
 <Accordion title="Important: Materialization config">
 
 For elementary to work, it needs to create some of the models as incremental tables.

@@ -26,6 +26,8 @@ class DbtTestResultSchema(BaseModel):
 
 
 class TestResultDBRowSchema(BaseModel):
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+
     id: str
     invocation_id: str = None
     test_execution_id: str = None

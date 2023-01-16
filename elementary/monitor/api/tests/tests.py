@@ -100,6 +100,7 @@ class TestsAPI(APIClient):
             if name
         ]
         table_full_name = ".".join(table_full_name_parts).lower()
+        test_params = test_result_db_row.test_params
         test_query = (
             test_result_db_row.test_results_query.strip()
             if test_result_db_row.test_results_query
@@ -116,14 +117,17 @@ class TestsAPI(APIClient):
         if test_result_db_row.test_type == "dbt_test":
             configuration = dict(
                 test_name=test_result_db_row.test_name,
-                test_params=test_result_db_row.test_params,
+                test_params=test_params,
             )
         else:
+            time_bucket_configuration = test_params.get("time_bucket", {})
+            time_bucket_count = time_bucket_configuration.get("count", 1)
+            time_bucket_period = time_bucket_configuration.get("period", "day")
             configuration = dict(
                 test_name=test_result_db_row.test_name,
-                timestamp_column=test_result_db_row.test_params.get("timestamp_column"),
-                testing_timeframe=test_result_db_row.test_params.get("timeframe"),
-                anomaly_threshold=test_result_db_row.test_params.get("sensitivity"),
+                timestamp_column=test_params.get("timestamp_column"),
+                testing_timeframe=f"Every {time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
+                anomaly_threshold=test_params.get("sensitivity"),
             )
 
         return TestMetadataSchema(
