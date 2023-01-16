@@ -4,7 +4,7 @@ from elementary.monitor.api.tests.schema import TestResultDBRowSchema
 from tests.mocks.api.tests_api_mock import MockTestsAPI
 
 
-def test_get_test_info_from_test_metadata(tests_api_mock: MockTestsAPI):
+def test_get_test_metadata_from_test_result_db_row(tests_api_mock: MockTestsAPI):
     elementary_test_result_db_row = TestResultDBRowSchema(
         id="mock_id_1",
         model_unique_id="model_id_1",
