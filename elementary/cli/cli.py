@@ -6,6 +6,8 @@ from pyfiglet import Figlet
 
 import elementary.cli.upgrade
 from elementary.config.config import Config
+from elementary.monitor.cli import monitor, report, send_report
+from elementary.operations.cli import run_operation
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import package
 from elementary.utils.log import get_logger
@@ -14,32 +16,23 @@ f = Figlet(font="slant")
 click.echo(f.renderText("Elementary"))
 elementary.cli.upgrade.recommend_version_upgrade()
 
-root_folder = os.path.join(os.path.dirname(__file__), "..")
-modules = ["monitor"]
-
 logger = get_logger(__name__)
 
 
 class ElementaryCLI(click.MultiCommand):
+    _CMD_MAP = {
+        "monitor": monitor,
+        "report": report,
+        "send-report": send_report,
+        "run-operation": run_operation,
+    }
+
     def list_commands(self, ctx):
-        rv = []
-        for module in modules:
-            rv.append(module)
-        rv.sort()
-        return rv
+        return self._CMD_MAP.keys()
 
     def get_command(self, ctx, name):
         ctx.auto_envvar_prefix = "EDR"
-        ns = {}
-        fn = os.path.join(root_folder, name, "cli.py")
-        try:
-            with open(fn, encoding="utf-8") as f:
-                code = compile(f.read(), fn, "exec")
-                eval(code, ns, ns)
-        except Exception:
-            logger.debug(f'Unable to load the "{name}" module.', exc_info=True)
-            return None
-        return ns[name]
+        return self._CMD_MAP.get(name)
 
     def format_help(self, ctx, formatter):
         try:

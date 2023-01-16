@@ -95,7 +95,10 @@ class AnonymousTracking:
             logger.debug("Unable to send tracking event.", exc_info=True)
 
     def track_cli_start(
-        self, module_name: str, cli_properties: dict, command: str = None
+        self,
+        module_name: str,
+        cli_properties: Optional[dict] = None,
+        command: Optional[str] = None,
     ):
         props = {
             "cli_properties": cli_properties,
@@ -107,7 +110,10 @@ class AnonymousTracking:
         self._send_event("cli-start", properties=props)
 
     def track_cli_end(
-        self, module_name: str, execution_properties: dict, command: str = None
+        self,
+        module_name: str,
+        execution_properties: Optional[dict],
+        command: Optional[str] = None,
     ):
         props = {
             "execution_properties": execution_properties,
