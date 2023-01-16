@@ -99,6 +99,11 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
+      - name: Start Postgres
+        if: inputs.warehouse-type == 'postgres'
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        run: docker-compose up -d postgres
+
       - name: Write dbt profiles
         env:
           PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
@@ -115,11 +120,6 @@ jobs:
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
         run: sudo apt-get install python-dev libsasl2-dev gcc
-
-      - name: Start Postgres
-        if: inputs.warehouse-type == 'postgres'
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: docker-compose up -d postgres
 
       - name: Install pre-release dbt
         if: inputs.dbt-pre-release
