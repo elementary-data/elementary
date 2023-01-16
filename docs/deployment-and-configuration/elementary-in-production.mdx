@@ -2,55 +2,56 @@
 title: "Elementary in production"
 ---
 
-import Schema from "../snippets/faq/question-schema.mdx";
-
 <a href="mailto:team@elementary-data.com?subject=Tell me about Elementary Managed!&body=I'm interested in learning more about the Elementary Managed private beta. Please send me further details.">
-    <img src="/pics/elementary-managed-beta.png"/>
+  <img src="/pics/elementary-managed-beta.png" />
 </a>
 
-Running Elementary in production means to include the dbt package in your production dbt project, 
+Running Elementary in production means to include the dbt package in your production dbt project,
 and setting up an automated manner to run the Elementary CLI.
 
 You can choose any system that allows you to orchestrate a CLI execution, as long as it can meet the following requirements:
-- Full installation of Elementary Python package and dependencies. 
+
+- Full installation of Elementary Python package and dependencies.
 - Network access to the data warehouse.
 - Access to a `profiles.yml` file with `elementary` profile name.
-- Read and write permissions to the Elementary schema.  
+- Read and write permissions to the Elementary schema.
 
-## Elementary production deployment and jobs 
+## Elementary production deployment and jobs
 
 Your deployment of Elementary has two parts:
 
 **Part 1 - Elementary package in your production dbt project**
 
 In your dbt jobs, after you deploy the Elementary dbt package: 
+
 1. **Run and test results** - Collected by default as part of your runs.
 2. **Elementary tests** - Make sure your dbt test runs include elementary tests. 
 3. **Update dbt artifacts** - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models. 
 
-
 **Part 2 - Elementary CLI**
 
 On an orchestration system of your choice, run the CLI to:
+
 1. **Send Slack alerts** - Use the `edr monitor` command and Slack integration.
 2. **Generate a report** - Use the `edr monitor report` or `edr monitor send-report` that has built in support for sending the report to Slack / GCS / S3.
 
-
 ## What permissions Elementary requires?
 
-The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile, 
-and network access to the data warehouse. 
+The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile,
+and network access to the data warehouse.
 
 Also, in the `elementary` profile, the credentials should have permissions to:
-- Read all project schemas 
+
+- Read all project schemas
 - Write to the elementary schema
 
-On your dbt project, make sure that Elementary dbt package can: 
+On your dbt project, make sure that Elementary dbt package can:
+
 - Read all project schemas
 - Write to the elementary schema
 - Create a schema (alternatively, you can create the elementary schema in advance)
 
-<Schema />
+<Snippet file="faq/question-schema.mdx" />
 
 ## When to run Elementary?
 
@@ -65,18 +66,19 @@ If your organization is using dbt-core, it would probably be a good choice to or
 
 Any automation server / orchestration tool supports running a CLI tool like Elementary.
 
-Some options include: 
+Some options include:
 
-1. <a href="mailto:team@elementary-data.com?subject=Tell me about Elementary Managed!&body=I'm interested in learning more about the Elementary Managed private beta. Please send me further details.">Elementary Managed</a>
+1. <a href="mailto:team@elementary-data.com?subject=Tell me about Elementary Managed!&body=I'm interested in learning more about the Elementary Managed private beta. Please send me further details.">
+     Elementary Managed
+   </a>
 2. GitHub Actions - Checkout the [Elementary GitHub Action](https://github.com/elementary-data/run-elementary-action) we created.
 3. [Docker](https://github.com/elementary-data/elementary/pkgs/container/elementary)
 4. Airflow
 5. Prefect
-6. Meltano - Checkout the [custom Elementary integration](https://hub.meltano.com/utilities/elementary) developed by [Stéphane Burwash](https://github.com/SBurwash) - [Potloc](https://www.potloc.com/). 
+6. Meltano - Checkout the [custom Elementary integration](https://hub.meltano.com/utilities/elementary) developed by [Stéphane Burwash](https://github.com/SBurwash) - [Potloc](https://www.potloc.com/).
 7. Using cron
 
 ## Need help?
 
 If you want to consult on production deployment, we would love to help!  
-Please reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), we could talk there or schedule a deployment video call. 
-
+Please reach out to us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), we could talk there or schedule a deployment video call.

@@ -97,7 +97,7 @@ class DataMonitoringReport(DataMonitoring):
     ) -> Tuple[bool, str]:
         now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(file_path)
-        with open(html_path, "w") as html_file:
+        with open(html_path, "w", encoding="utf-8") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
 
             models = self.models_api.get_models(exclude_elementary_models)
@@ -179,7 +179,7 @@ class DataMonitoringReport(DataMonitoring):
                 "env": self.config.env,
             }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
-            with open(template_html_path, "r") as template_html_file:
+            with open(template_html_path, "r", encoding="utf-8") as template_html_file:
                 template_html_code = template_html_file.read()
                 dumped_output_data = json.dumps(output_data)
                 compiled_output_html = f"""
@@ -190,7 +190,9 @@ class DataMonitoringReport(DataMonitoring):
                     """
                 html_file.write(compiled_output_html)
         with open(
-            os.path.join(self.config.target_dir, "elementary_output.json"), "w"
+            os.path.join(self.config.target_dir, "elementary_output.json"),
+            "w",
+            encoding="utf-8",
         ) as elementary_output_json_file:
             elementary_output_json_file.write(dumped_output_data)
 

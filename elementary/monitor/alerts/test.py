@@ -230,7 +230,7 @@ class DbtTestAlert(TestAlert):
                         ["*Test results sample*"]
                     ),
                     self.slack_message_builder.create_text_section_block(
-                        f"`{self.test_rows_sample}`"
+                        f"```{self.test_rows_sample}```"
                     ),
                 ]
             )

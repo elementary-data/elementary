@@ -2,11 +2,6 @@
 title: "Generate observability report"
 ---
 
-import InstallDbtPackage from "../snippets/install-dbt-package.mdx";
-import ShareReport from "../snippets/share-report.mdx";
-import InstallCLI from "../snippets/install-cli.mdx";
-import AddConnectionProfile from "../snippets/add-connection-profile.mdx";
-
 Elementary [data observability report](/understand-elementary/elementary-report-ui) can be used for visualization and exploration of data from the dbt-package tables. That includes dbt test results, Elementary anomaly detection results, dbt artifacts, tests runs, etc.
 
 <Frame>
@@ -23,19 +18,19 @@ This is **required for the report to work.**
 
 <Accordion title="dbt package installation">
 
-<InstallDbtPackage />
+<Snippet file="install-dbt-package.mdx" />
 
 </Accordion>
 
 <Accordion title="Configure connection profile">
 
-<AddConnectionProfile />
+<Snippet file="add-connection-profile.mdx" />
 
 </Accordion>
 
 <Accordion title="Install CLI">
 
-<InstallCLI />
+<Snippet file="install-cli.mdx" />
 
 </Accordion>
 
@@ -60,9 +55,9 @@ The filtered report will only include data for the seleceted invocation (This ap
 
 There are 3 ways to filter the report by invocation:
 
-- Last invocation - Filter by the last invocation (`dbt test` \ `dbt build`) that ran.
-- Invocation time - Filter by the closet invocation (`dbt test` \ `dbt build`) to the provided time (the provided time should be in ISO format local time).
-- Invocation id - Filter by the provided invoation (`dbt test` \ `dbt build`) id.
+- Last invocation - Filter by the last invocation (`dbt test` / `dbt build`) that ran.
+- Invocation time - Filter by the closet invocation (`dbt test` / `dbt build`) to the provided time (the provided time should be in ISO format local time).
+- Invocation id - Filter by the provided invoation (`dbt test` / `dbt build`) id.
 
 To filter by last invocation:
 
@@ -84,4 +79,4 @@ edr monitor report --select invocation_id:XXXXXXXXXXXXX
 
 ---
 
-<ShareReport />
+<Snippet file="share-report.mdx" />

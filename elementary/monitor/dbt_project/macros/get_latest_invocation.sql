@@ -9,6 +9,11 @@
   {% set get_pkg_version_query %}
     select * from {{ invocations_relation }} order by generated_at desc limit 1
   {% endset %}
-  {% set result = elementary.agate_to_json(dbt.run_query(get_pkg_version_query)) %}
-  {% do elementary.edr_log(result or '') %}
+  {% set result = dbt.run_query(get_pkg_version_query) %}
+  {% if not result %}
+    {% do elementary.edr_log('') %}
+    {% do return(none) %}
+  {% endif %}
+
+  {% do elementary.edr_log(elementary.agate_to_json(result)) %}
 {% endmacro %}

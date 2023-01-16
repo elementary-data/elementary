@@ -51,7 +51,7 @@ Here is a list of all the available options:
 ```
 
 - **Profile directory path:**
-  The path of the directory in which your `profiles.yml` file is located. Default is `HOME_DIR/.dbt`
+  The path of the directory in which your `profiles.yml` file is located. Default is `HOME_DIR/.dbt`.
 - This option must be configured together with profile name.
 
 ```shell
@@ -59,14 +59,14 @@ Here is a list of all the available options:
 ```
 
 - **Configuration directory path:**
-  The path of the directory in which your `config.yml` file is located. Default is `HOME_DIR/.edr`
+  The path of the directory in which your `config.yml` file is located. Default is `HOME_DIR/.edr`.
 
 ```shell
 -c, --config-dir <PATH>
 ```
 
 - **Profile target:**
-  Choose a specific target in case you have multiple targets for Elementary
+  Choose a specific target in case you have multiple targets for Elementary.
 
 ```shell
 -t, --profile-target <target_name>
@@ -130,6 +130,13 @@ Here is a list of all the available options:
 
 ```shell
 --file-name TEXT
+```
+
+- **S3 endpoint url:**
+  The endpoint of the S3 bucket when using `send-report` with any S3 compatible cloud storage service.
+
+```shell
+--s3-endpoint-url TEXT
 ```
 
 - **Timezone:**
