@@ -109,7 +109,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.7.5'
+          python-version: "3.7.5"
 
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
@@ -130,6 +130,9 @@ jobs:
 
       - name: Run Python package unit tests
         run: pytest -vv -k unit
+
+      - name: Run Python package integration tests
+        run: pytest -vv -k integration
 
       - name: Install dbt package
         run: |
@@ -206,6 +209,6 @@ jobs:
           name: edr.log
           path: edr.log
 
-      - name: Run Python package integration tests
+      - name: Run Python package e2e tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        run: pytest -vv -k integration
+        run: pytest -vv -k e2e
