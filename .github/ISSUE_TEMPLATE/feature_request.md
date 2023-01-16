@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: Feature request 💡, Product review, linear
+labels: Feature request 💡, Product review
 assignees: ''
 
 ---
