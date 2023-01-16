@@ -48,21 +48,37 @@ def test_update_sent_alerts(mock_subprocess_run, alerts_api_mock: MockAlertsAPI)
     alerts_api_mock.update_sent_alerts(
         alert_ids=mock_alerts_ids_to_update, table_name="mock_table"
     )
-    mock_subprocess_run.assert_called()
-    mock_subprocess_run.asset_has_calls(
-        mock.call(
-            [
-                "dbt",
-                "run-operation",
-                "--project-dir",
-                "proj_dir",
-                "--profiles-dir",
-                "prof_dir",
-            ],
-        )
+
+    # Test that alert ids were split into chunks
+    assert mock_subprocess_run.call_count == 2
+
+    calls_args = mock_subprocess_run.call_args_list
+    for call_args in calls_args:
+        # Test that update_sent_alerts has been called with alert_ids as arguments.
+        assert call_args[0][0][1] == "run-operation"
+        assert call_args[0][0][2] == "update_sent_alerts"
+        assert "alert_ids" in json.loads(call_args[0][0][4])
+
+
+@mock.patch("subprocess.run")
+def test_skip_alerts(mock_subprocess_run, alerts_api_mock: MockAlertsAPI):
+    # Create 80 alerts
+    test_alerts = alerts_api_mock._query_pending_test_alerts()
+    mock_alerts_ids_to_skip = test_alerts.alerts * 20
+
+    alerts_api_mock.skip_alerts(
+        alerts_to_skip=mock_alerts_ids_to_skip, table_name="mock_table"
     )
-    breakpoint()
-    pass
+
+    # Test that alert ids were split into chunks
+    assert mock_subprocess_run.call_count == 2
+
+    calls_args = mock_subprocess_run.call_args_list
+    for call_args in calls_args:
+        # Test that update_skipped_alerts has been called with alert_ids as arguments.
+        assert call_args[0][0][1] == "run-operation"
+        assert call_args[0][0][2] == "update_skipped_alerts"
+        assert "alert_ids" in json.loads(call_args[0][0][4])
 
 
 @pytest.fixture
