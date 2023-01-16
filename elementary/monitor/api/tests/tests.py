@@ -76,8 +76,8 @@ class TestsAPI(APIClient):
 
         return invocation
 
+    @staticmethod
     def get_test_metadata_from_test_result_db_row(
-        self,
         test_result_db_row: TestResultDBRowSchema,
     ) -> TestMetadataSchema:
         test_display_name = (
@@ -111,8 +111,6 @@ class TestsAPI(APIClient):
             result_description=test_result_db_row.test_results_description,
             result_query=test_query,
         )
-
-        configuration = dict()
 
         if test_result_db_row.test_type == "dbt_test":
             configuration = dict(
@@ -160,7 +158,8 @@ class TestsAPI(APIClient):
         disable_samples: bool = False,
         filter: Optional[DataMonitoringReportFilter] = None,
     ) -> Tuple[
-        Dict[ModelUniqueIdType, List[TestResultSchema]], Optional[DbtInvocationSchema]
+        Dict[Optional[ModelUniqueIdType], List[TestResultSchema]],
+        Optional[DbtInvocationSchema],
     ]:
         filtered_test_results_db_rows = test_results_db_rows
         invocation = self._get_invocation_from_filter(filter)
@@ -211,6 +210,7 @@ class TestsAPI(APIClient):
         test_result_db_row: TestResultDBRowSchema,
         disable_samples: bool = False,
     ) -> Union[DbtTestResultSchema, ElementaryTestResultSchema]:
+        test_results = None
         sample_data = test_result_db_row.sample_data if not disable_samples else None
         if test_result_db_row.test_type == "dbt_test":
             test_results = DbtTestResultSchema(
@@ -240,7 +240,7 @@ class TestsAPI(APIClient):
 
     def get_test_runs(
         self, test_results_db_rows: List[TestResultDBRowSchema]
-    ) -> Dict[ModelUniqueIdType, List[TestRunSchema]]:
+    ) -> Dict[Optional[ModelUniqueIdType], List[TestRunSchema]]:
         tests_invocations = self._get_invocations(test_results_db_rows)
         latest_test_results = [
             test_result
@@ -337,10 +337,10 @@ class TestsAPI(APIClient):
 
     def get_total_tests_results(
         self,
-        tests_metadata: List[TestMetadataSchema],
-    ) -> Dict[str, TotalsSchema]:
+        test_metadatas: List[TestMetadataSchema],
+    ) -> Dict[Optional[str], TotalsSchema]:
         totals = dict()
-        for test in tests_metadata:
+        for test in test_metadatas:
             self._update_test_results_totals(
                 totals_dict=totals,
                 model_unique_id=test.model_unique_id,
@@ -349,8 +349,8 @@ class TestsAPI(APIClient):
         return totals
 
     def get_total_tests_runs(
-        self, tests_runs: Dict[ModelUniqueIdType, List[TestRunSchema]]
-    ) -> Dict[str, TotalsSchema]:
+        self, tests_runs: Dict[Optional[ModelUniqueIdType], List[TestRunSchema]]
+    ) -> Dict[Optional[str], TotalsSchema]:
         totals = dict()
         for test_runs in tests_runs.values():
             for test_run in test_runs:

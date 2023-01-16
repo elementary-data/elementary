@@ -4,7 +4,7 @@
             {{ elementary_internal.current_tests_run_results_query(days_back=days_back) }}
         ),
 
-        test_results_with_ivocations_order as (
+        ordered_test_results as (
             select
                 *,
                 {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
@@ -40,7 +40,7 @@
             days_diff,
             invocations_order,
             result_rows
-        from test_results_with_ivocations_order
+        from ordered_test_results
         where invocations_order <= {{ invocations_per_test }}
         order by elementary_unique_id, invocations_order
     {%- endset -%}
