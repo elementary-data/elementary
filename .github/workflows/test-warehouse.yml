@@ -177,7 +177,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          path: elementary_report.html
+          path: elementary/elementary_report.html
 
       - name: Write GCS keyfile
         env:
@@ -210,7 +210,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: edr.log
-          path: edr.log
+          path: elementary/edr.log
 
       - name: Run Python package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
