@@ -41,16 +41,6 @@ class TestsAPI(APIClient):
         super().__init__(dbt_runner)
         self.invocations_api = InvocationsAPI(dbt_runner)
 
-    @staticmethod
-    def get_test_sub_type_unique_id(
-        model_unique_id: str,
-        test_unique_id: str,
-        column_name: Optional[str] = None,
-        test_sub_type: Optional[str] = None,
-        **kwargs,
-    ) -> str:
-        return f"{model_unique_id}.{test_unique_id}.{column_name if column_name else 'None'}.{test_sub_type if test_sub_type else 'None'}"
-
     def get_tests_metadata(
         self,
         days_back: Optional[int] = 7,
@@ -96,6 +86,7 @@ class TestsAPI(APIClient):
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
         disable_samples: bool = False,
+        invocation_id: str = None,
     ) -> Dict[TestUniqueIdType, Dict[str, Any]]:
         tests_metrics = {}
         if not disable_samples:
@@ -105,6 +96,7 @@ class TestsAPI(APIClient):
                     days_back=days_back,
                     metrics_sample_limit=metrics_sample_limit,
                     disable_passed_test_metrics=disable_passed_test_metrics,
+                    invocation_id=invocation_id,
                 ),
             )
             tests_metrics = (
@@ -164,6 +156,7 @@ class TestsAPI(APIClient):
 
         return TestInfoSchema(
             test_unique_id=metadata.test_unique_id,
+            elementary_unique_id=metadata.elementary_unique_id,
             database_name=metadata.database_name,
             schema_name=metadata.schema_name,
             table_name=metadata.table_name,
@@ -178,7 +171,7 @@ class TestsAPI(APIClient):
             test_type=metadata.test_type,
             test_sub_type=metadata.test_sub_type,
             test_query=test_query,
-            test_params=test_params,
+            test_params=metadata.test_params,
             test_created_at=metadata.test_created_at,
             description=metadata.meta.get("description"),
             result=result,
@@ -205,7 +198,15 @@ class TestsAPI(APIClient):
             test_results_metadata = self.get_tests_metadata(days_back=days_back)
 
         tests_sample_data = self.get_run_cache(TESTS_SAMPLE_DATA)
-        if tests_sample_data is None:
+        if invocation.invocation_id:
+            tests_sample_data = self.get_tests_sample_data(
+                days_back=days_back,
+                metrics_sample_limit=metrics_sample_limit,
+                disable_passed_test_metrics=disable_passed_test_metrics,
+                disable_samples=disable_samples,
+                invocation_id=invocation.invocation_id,
+            )
+        elif tests_sample_data is None:
             tests_sample_data = self.get_tests_sample_data(
                 days_back=days_back,
                 metrics_sample_limit=metrics_sample_limit,
@@ -215,11 +216,7 @@ class TestsAPI(APIClient):
 
         test_results = defaultdict(list)
         for test_metadata in test_results_metadata:
-            test_metadata_dict = dict(test_metadata)
-            test_sub_type_unique_id = self.get_test_sub_type_unique_id(
-                **test_metadata_dict
-            )
-            test_sample_data = tests_sample_data.get(test_sub_type_unique_id)
+            test_sample_data = tests_sample_data.get(test_metadata.elementary_unique_id)
             test_result = TestResultSchema(
                 metadata=self.get_test_info_from_test_metadata(test_metadata),
                 test_results=test_metadata.get_test_results(test_sample_data).dict(),
@@ -244,11 +241,7 @@ class TestsAPI(APIClient):
 
         test_runs = defaultdict(list)
         for test_metadata in test_results_metadata:
-            test_metadata_dict = dict(test_metadata)
-            test_sub_type_unique_id = self.get_test_sub_type_unique_id(
-                **test_metadata_dict
-            )
-            test_invocations = tests_invocations.get(test_sub_type_unique_id)
+            test_invocations = tests_invocations.get(test_metadata.elementary_unique_id)
             test_run = TestRunSchema(
                 metadata=self.get_test_info_from_test_metadata(test_metadata),
                 test_runs=test_invocations,
@@ -273,8 +266,8 @@ class TestsAPI(APIClient):
         grouped_invocations = defaultdict(list)
         for test_invocation in test_invocation_dicts:
             try:
-                sub_test_unique_id = self.get_test_sub_type_unique_id(**test_invocation)
-                grouped_invocations[sub_test_unique_id].append(
+                elementary_unique_id = test_invocation.get("elementary_unique_id")
+                grouped_invocations[elementary_unique_id].append(
                     InvocationSchema(
                         id=test_invocation["test_execution_id"],
                         time_utc=test_invocation["detected_at"],
@@ -288,7 +281,7 @@ class TestsAPI(APIClient):
                 )
             except Exception:
                 logger.error(
-                    f"Could not parse test ({test_invocation.get('test_unique_id')}) invocation ({test_invocation.get('test_execution_id')})- continue to the next test"
+                    f"Could not parse test ({test_invocation.get('test_unique_id')}) invocation ({test_invocation.get('test_execution_id')}) - continue to the next test"
                 )
                 continue
 
@@ -362,8 +355,7 @@ class TestsAPI(APIClient):
     ) -> Dict[str, TotalsSchema]:
         totals = dict()
         for test in tests_info:
-            test_sub_type_unique_id = self.get_test_sub_type_unique_id(**dict(test))
-            test_invocations = tests_invocations[test_sub_type_unique_id].invocations
+            test_invocations = tests_invocations[test.elementary_unique_id].invocations
             self._update_test_runs_totals(
                 totals_dict=totals, test=test, test_invocations=test_invocations
             )
