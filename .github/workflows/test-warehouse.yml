@@ -151,7 +151,7 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
+          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.warehouse-type == 'postgres' || inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
 
       - name: Run help
         run: edr --help
