@@ -28,6 +28,8 @@ class DbtTestResultSchema(BaseModel):
 
 
 class TestMetadataSchema(BaseModel):
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+    
     id: str
     model_unique_id: Optional[ModelUniqueIdType] = None
     test_unique_id: TestUniqueIdType
