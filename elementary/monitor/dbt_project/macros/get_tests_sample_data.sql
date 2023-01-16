@@ -18,7 +18,7 @@
                     invocation_id,
                     row_number() over (partition by test_unique_id order by detected_at desc) as row_number
                 from test_results
-            )
+            ) results
             where row_number = 1
         ),
 
