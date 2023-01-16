@@ -7,6 +7,7 @@ on:
         required: true
         description: Type of warehouse platform
         options:
+          - postgres
           - snowflake
           - bigquery
           - redshift
@@ -98,6 +99,11 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
+      - name: Start Postgres
+        if: inputs.warehouse-type == 'postgres'
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        run: docker-compose up -d postgres
+
       - name: Write dbt profiles
         env:
           PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
@@ -148,7 +154,7 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
+          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.warehouse-type == 'postgres' || inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
 
       - name: Run help
         run: edr --help
@@ -174,7 +180,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
-          path: elementary_report.html
+          path: elementary/elementary_report.html
 
       - name: Write GCS keyfile
         env:
@@ -207,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: edr.log
-          path: edr.log
+          path: elementary/edr.log
 
       - name: Run Python package e2e tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests

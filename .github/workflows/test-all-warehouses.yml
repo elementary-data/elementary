@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        warehouse-type: [ snowflake, bigquery, redshift, databricks ]
+        warehouse-type: [ postgres, snowflake, bigquery, redshift, databricks ]
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
