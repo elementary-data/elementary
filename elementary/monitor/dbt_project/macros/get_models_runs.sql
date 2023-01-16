@@ -12,7 +12,7 @@
             status,
             case
                 when status != 'success' then 0
-                else round(execution_time, 1)
+                else round({{ elementary.cast_as_numeric('execution_time') }}, 1)
             end as execution_time,
             full_refresh,
             materialization,

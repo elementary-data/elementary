@@ -15,6 +15,6 @@ jobs:
   test:
     uses: ./.github/workflows/test-warehouse.yml
     with:
-      warehouse-type: snowflake
+      warehouse-type: postgres
       dbt-version: 1.0.2
     secrets: inherit
