@@ -224,6 +224,14 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         status="pass",
         expected_ammount=2,
     )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="updated_at",
+        test_sub_types=["null_count", "null_percent"],
+    )
     # null_percent_str column should have 7 test results.
     # 5 for string type column, 2 for any type column
     assert_test_counter(
@@ -233,6 +241,22 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         table="any_type_column_anomalies",
         column="null_percent_str",
         expected_ammount=7,
+    )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_str",
+        test_sub_types=[
+            "null_count",
+            "null_percent",
+            "min_length",
+            "max_length",
+            "average_length",
+            "missing_count",
+            "missing_percent",
+        ],
     )
     # null_percent_int column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
@@ -244,6 +268,24 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="null_percent_int",
         expected_ammount=9,
     )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_int",
+        test_sub_types=[
+            "null_count",
+            "null_percent",
+            "min",
+            "max",
+            "zero_count",
+            "zero_percent",
+            "standard_deviation",
+            "variance",
+            "average",
+        ],
+    )
     # null_percent_float column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
     assert_test_counter(
@@ -253,6 +295,24 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         table="any_type_column_anomalies",
         column="null_percent_float",
         expected_ammount=9,
+    )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_float",
+        test_sub_types=[
+            "null_count",
+            "null_percent",
+            "min",
+            "max",
+            "zero_count",
+            "zero_percent",
+            "standard_deviation",
+            "variance",
+            "average",
+        ],
     )
     # null_percent_bool column should have 2 passed test results.
     # 2 for any type column
@@ -264,6 +324,14 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="null_percent_bool",
         expected_ammount=2,
     )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_percent_bool",
+        test_sub_types=["null_count", "null_percent"],
+    )
     # null_count_str column should have 7 test results.
     # 5 for string type column, 2 for any type column
     assert_test_counter(
@@ -273,6 +341,22 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         table="any_type_column_anomalies",
         column="null_count_str",
         expected_ammount=7,
+    )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_str",
+        test_sub_types=[
+            "null_count",
+            "null_percent",
+            "min_length",
+            "max_length",
+            "average_length",
+            "missing_count",
+            "missing_percent",
+        ],
     )
     # null_count_int column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
@@ -284,6 +368,24 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="null_count_int",
         expected_ammount=9,
     )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_int",
+        test_sub_types=[
+            "null_count",
+            "null_percent",
+            "min",
+            "max",
+            "zero_count",
+            "zero_percent",
+            "standard_deviation",
+            "variance",
+            "average",
+        ],
+    )
     # null_count_float column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
     assert_test_counter(
@@ -294,6 +396,24 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="null_count_float",
         expected_ammount=9,
     )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_float",
+        test_sub_types=[
+            "null_count",
+            "null_percent",
+            "min",
+            "max",
+            "zero_count",
+            "zero_percent",
+            "standard_deviation",
+            "variance",
+            "average",
+        ],
+    )
     # null_count_bool column should have 2 passed test results.
     # 2 for any type column
     assert_test_counter(
@@ -303,6 +423,14 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         table="any_type_column_anomalies",
         column="null_count_bool",
         expected_ammount=2,
+    )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="null_count_bool",
+        test_sub_types=["null_count", "null_percent"],
     )
 
 
@@ -351,6 +479,21 @@ def assert_test_counter(
             ):
                 tests_found += 1
     assert tests_found == expected_ammount
+
+
+def assert_test_sub_types_occurre_only_once(
+    report_data, test_type, test_sub_types, table=None, column=None, name=None
+):
+    for sub_type in test_sub_types:
+        assert_test_counter(
+            report_data=report_data,
+            test_sub_type=sub_type,
+            test_type=test_type,
+            table=table,
+            column=column,
+            name=name,
+            expected_ammount=1,
+        )
 
 
 def assert_totals(data_totals: Totals, fixture_totals: Totals):
