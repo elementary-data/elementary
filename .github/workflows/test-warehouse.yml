@@ -34,6 +34,11 @@ on:
         required: false
         default: true
         description: Whether to clean test environment
+      generate-data:
+        type: boolean
+        required: false
+        default: false
+        description: Whether to generate new data
 
   workflow_call:
     inputs:
@@ -57,6 +62,14 @@ on:
         type: boolean
         required: false
         default: true
+      dbt-pre-release:
+        type: boolean
+        required: false
+        default: false
+      generate-data:
+        type: boolean
+        required: false
+        default: false
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -102,9 +115,13 @@ jobs:
         if: inputs.warehouse-type == 'spark'
         run: sudo apt-get install python-dev libsasl2-dev gcc
 
+      - name: Install pre-release dbt
+        if: inputs.dbt-pre-release
+        run: pip install --pre dbt-core dbt-${{ inputs.warehouse-type }}
+
       - name: Install dbt
         if: inputs.dbt-version
-        run: pip install dbt-core==${{ inputs.dbt-version }} dbt-${{ inputs.warehouse-type }}==${{ inputs.dbt-version }}
+        run: pip install "dbt-core==${{ inputs.dbt-version }}" "dbt-${{ inputs.warehouse-type }}<=${{ inputs.dbt-version }}"
 
       - name: Install Elementary
         run: |
@@ -131,7 +148,7 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" --clear-tests "${{ inputs.clear-tests }}"
+          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
 
       - name: Run help
         run: edr --help

@@ -1,7 +1,6 @@
 ---
 title: "dbt package"
 ---
-import SchemaNoAccordion from "../../snippets/faq/question-schema-no-accordion.mdx";
 
 For the data monitoring and dbt artifacts collection, edr executes a dbt package we developed.
 The package adds modles, macros, and Elementary monitors as dbt tests to your project.
@@ -22,7 +21,7 @@ The code of the Elementary dbt package can be found here: [https://github.com/el
 
 # Elementary dbt package schema
 
-<SchemaNoAccordion />
+<Snippet file="faq/question-schema-no-accordion.mdx" />
 
 # Elementary schema and full refresh
 
@@ -32,6 +31,7 @@ the models of your main dbt project.
 
 However, if you wish to change this behavior and include Elementary models as a part of the full refresh, you can set
 the following var:
+
 ```yaml
 vars:
   elementary_full_refresh: true
