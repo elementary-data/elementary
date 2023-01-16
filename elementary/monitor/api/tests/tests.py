@@ -126,7 +126,7 @@ class TestsAPI(APIClient):
             configuration = dict(
                 test_name=test_result_db_row.test_name,
                 timestamp_column=test_params.get("timestamp_column"),
-                testing_timeframe=f"Every {time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
+                testing_timeframe=f"{time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
                 anomaly_threshold=test_params.get("sensitivity"),
             )
 

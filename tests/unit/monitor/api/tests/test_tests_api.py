@@ -1,11 +1,11 @@
 import pytest
 
-from elementary.monitor.api.tests.schema import TestMetadataSchema
+from elementary.monitor.api.tests.schema import TestResultDBRowSchema
 from tests.mocks.api.tests_api_mock import MockTestsAPI
 
 
 def test_get_test_info_from_test_metadata(tests_api_mock: MockTestsAPI):
-    elementary_test_metadata = TestMetadataSchema(
+    elementary_test_result_db_row = TestResultDBRowSchema(
         id="mock_id_1",
         model_unique_id="model_id_1",
         test_unique_id="test_id_1",
@@ -29,8 +29,9 @@ def test_get_test_info_from_test_metadata(tests_api_mock: MockTestsAPI):
         status="fail",
         test_created_at="2023-01-01 09:00:00",
         days_diff=1,
+        invocations_order=1,
     )
-    dbt_test_metadata = TestMetadataSchema(
+    dbt_test_result_db_row = TestResultDBRowSchema(
         id="mock_id_2",
         model_unique_id="model_id_1",
         test_unique_id="test_id_2",
@@ -54,30 +55,37 @@ def test_get_test_info_from_test_metadata(tests_api_mock: MockTestsAPI):
         status="fail",
         test_created_at="2023-01-01 09:00:00",
         days_diff=1,
+        invocations_order=1,
     )
 
-    elementary_test_info = tests_api_mock.get_test_info_from_test_metadata(
-        elementary_test_metadata
+    elementary_test_metadata = tests_api_mock.get_test_metadata_from_test_result_db_row(
+        elementary_test_result_db_row
     )
-    dbt_test_info = tests_api_mock.get_test_info_from_test_metadata(dbt_test_metadata)
+    dbt_test_metadata = tests_api_mock.get_test_metadata_from_test_result_db_row(
+        dbt_test_result_db_row
+    )
 
     # Test elementary test configuration generated correctly
     assert (
-        elementary_test_info.configuration.get("test_name")
-        == elementary_test_metadata.test_name
+        elementary_test_metadata.configuration.get("test_name")
+        == elementary_test_result_db_row.test_name
     )
-    assert elementary_test_info.configuration.get(
+    assert elementary_test_metadata.configuration.get(
         "timestamp_column"
-    ) == elementary_test_metadata.test_params.get("timestamp_column")
-    assert elementary_test_info.configuration.get("testing_timeframe") == "Every 1 hour"
-    assert elementary_test_info.configuration.get(
+    ) == elementary_test_result_db_row.test_params.get("timestamp_column")
+    assert elementary_test_metadata.configuration.get("testing_timeframe") == "1 hour"
+    assert elementary_test_metadata.configuration.get(
         "anomaly_threshold"
-    ) == elementary_test_metadata.test_params.get("sensitivity")
+    ) == elementary_test_result_db_row.test_params.get("sensitivity")
 
     # Test dbt test configuration generated correctly
-    assert dbt_test_info.configuration.get("test_name") == dbt_test_metadata.test_name
     assert (
-        dbt_test_info.configuration.get("test_params") == dbt_test_metadata.test_params
+        dbt_test_metadata.configuration.get("test_name")
+        == dbt_test_result_db_row.test_name
+    )
+    assert (
+        dbt_test_metadata.configuration.get("test_params")
+        == dbt_test_result_db_row.test_params
     )
 
 
