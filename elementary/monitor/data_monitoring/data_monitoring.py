@@ -44,7 +44,7 @@ class DataMonitoring:
         else:
             self.user_dbt_runner = None
         if self.user_dbt_runner:
-            self.run_elementary_models()
+            self.run_artifacts_models()
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -123,6 +123,6 @@ class DataMonitoring:
                 "Please upgrade the major and minor versions to align.\n",
             )
 
-    def run_elementary_models(self):
+    def run_artifacts_models(self):
         logger.info("Syncing with dbt project to its latest state.")
         self.user_dbt_runner.run("edr.dbt_artifacts")
