@@ -23,10 +23,14 @@ from elementary.monitor.api.models.schema import (
 )
 from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
-from elementary.monitor.api.tests.schema import TotalsSchema
+from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.schema import (
+    DataMonitoringReportFilter,
+    DataMonitoringReportTestResultsSchema,
+    DataMonitoringReportTestRunsSchema,
+)
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -103,23 +107,18 @@ class DataMonitoringReport(DataMonitoring):
             models = self.models_api.get_models(exclude_elementary_models)
             sources = self.models_api.get_sources()
             exposures = self.models_api.get_exposures()
+
             models_runs = self.models_api.get_models_runs(
                 days_back=days_back, exclude_elementary_models=exclude_elementary_models
             )
-            tests_metadata = self.tests_api.get_tests_metadata(days_back=days_back)
 
-            (
-                test_results,
-                test_results_totals,
-                invocation,
-            ) = self._get_test_results_and_totals(
+            test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
                 days_back=days_back,
+                invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
-            test_runs, test_runs_totals = self._get_test_runs_and_totals(
-                days_back=days_back,
-                test_runs_amount=test_runs_amount,
-            )
+            test_results = self._get_test_results_and_totals(test_results_db_rows)
+            test_runs = self._get_test_runs_and_totals(test_results_db_rows)
             serializable_models, sidebars = self._get_dbt_models_and_sidebars(
                 models, sources, exposures
             )
@@ -129,39 +128,43 @@ class DataMonitoringReport(DataMonitoring):
             )
             lineage = self._get_lineage(exclude_elementary_models)
             filters = self.filter_api.get_filters(
-                test_results_totals, test_runs_totals, models, sources, models_runs
+                test_results.totals, test_runs.totals, models, sources, models_runs
             )
 
+            test_metadatas = []
+            for tests in test_results.results.values():
+                for test in tests:
+                    test_metadatas.append(test.metadata)
             self.execution_properties["elementary_test_count"] = len(
                 [
                     test_metadata
-                    for test_metadata in tests_metadata
+                    for test_metadata in test_metadatas
                     if test_metadata.test_type != "dbt_test"
                 ]
             )
-            self.execution_properties["test_result_count"] = len(tests_metadata)
+            self.execution_properties["test_result_count"] = len(test_metadatas)
 
             serializable_test_results = defaultdict(list)
-            for model_unique_id, test_result in test_results.items():
+            for model_unique_id, test_result in test_results.results.items():
                 serializable_test_results[model_unique_id].extend(
                     [result.dict() for result in test_result]
                 )
 
             serializable_test_runs = defaultdict(list)
-            for model_unique_id, test_run in test_runs.items():
+            for model_unique_id, test_run in test_runs.runs.items():
                 serializable_test_runs[model_unique_id].extend(
                     [run.dict() for run in test_run]
                 )
 
             output_data["models"] = serializable_models
             output_data["sidebars"] = sidebars.dict()
-            output_data["invocation"] = dict(invocation)
+            output_data["invocation"] = dict(test_results.invocation)
             output_data["test_results"] = serializable_test_results
             output_data["test_results_totals"] = self._serialize_totals(
-                test_results_totals
+                test_results.totals
             )
             output_data["test_runs"] = serializable_test_runs
-            output_data["test_runs_totals"] = self._serialize_totals(test_runs_totals)
+            output_data["test_runs_totals"] = self._serialize_totals(test_runs.totals)
             output_data["coverages"] = models_coverages
             output_data["model_runs"] = models_runs_dicts
             output_data["model_runs_totals"] = model_runs_totals
@@ -240,53 +243,45 @@ class DataMonitoringReport(DataMonitoring):
         return self.lineage_api.get_lineage(exclude_elementary_models)
 
     def _get_test_results_and_totals(
-        self,
-        days_back: Optional[int] = None,
-        disable_passed_test_metrics: bool = False,
-    ):
+        self, test_results_db_rows: List[TestResultDBRowSchema]
+    ) -> DataMonitoringReportTestResultsSchema:
         try:
             tests_results, invocation = self.tests_api.get_test_results(
                 filter=self.filter,
-                days_back=days_back,
-                disable_passed_test_metrics=disable_passed_test_metrics,
+                test_results_db_rows=test_results_db_rows,
                 disable_samples=self.disable_samples,
             )
-            tests_info = []
+            test_metadatas = []
             for test_results in tests_results.values():
-                tests_info.extend([result.metadata for result in test_results])
-            test_results_totals = self.tests_api.get_total_tests_results(tests_info)
-            return tests_results, test_results_totals, invocation
+                test_metadatas.extend([result.metadata for result in test_results])
+            test_results_totals = self.tests_api.get_total_tests_results(test_metadatas)
+            return DataMonitoringReportTestResultsSchema(
+                results=tests_results,
+                totals=test_results_totals,
+                invocation=invocation,
+            )
         except Exception as e:
             logger.exception(f"Could not get test results and totals - Error: {e}")
             self.tracking.record_cli_internal_exception(e)
             self.success = False
-            return dict(), dict(), dict()
+            return DataMonitoringReportTestResultsSchema()
 
     def _get_test_runs_and_totals(
-        self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
-    ):
+        self, test_results_db_rows: List[TestResultDBRowSchema]
+    ) -> DataMonitoringReportTestRunsSchema:
         try:
-            invocations = self.tests_api.get_invocations(
-                days_back=days_back, invocations_per_test=test_runs_amount
-            )
-            tests_runs = self.tests_api.get_test_runs(
-                invocations_per_test=test_runs_amount,
-                days_back=days_back,
-            )
-            tests_info = []
-            for test_runs in tests_runs.values():
-                tests_info.extend([run.metadata for run in test_runs])
+            tests_runs = self.tests_api.get_test_runs(test_results_db_rows)
             test_runs_totals = self.tests_api.get_total_tests_runs(
-                tests_info=tests_info, tests_invocations=invocations
+                tests_runs=tests_runs
             )
-            return tests_runs, test_runs_totals
+            return DataMonitoringReportTestRunsSchema(
+                runs=tests_runs, totals=test_runs_totals
+            )
         except Exception as e:
             logger.exception(f"Could not get test runs and totals - Error: {e}")
             self.tracking.record_cli_internal_exception(e)
             self.success = False
-            return dict(), dict()
+            return DataMonitoringReportTestRunsSchema()
 
     @staticmethod
     def _serialize_totals(totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
