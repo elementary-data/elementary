@@ -19,7 +19,7 @@ edr monitor
 Read from the test results table and generate the [Elementary UI](/understand-elementary/elementary-report-ui):
 
 ```shell
-edr monitor report
+edr report
 ```
 
 Read from the test results table and generate the [Elementary UI](/understand-elementary/elementary-report-ui) and send
@@ -27,7 +27,7 @@ it to external
 platforms such as Slack, S3, GCS:
 
 ```shell
-edr monitor send-report
+edr send-report
 ```
 
 ## CLI Options
@@ -36,9 +36,9 @@ You can define options either via the CLI or using environment variables in the 
 format: `EDR_<COMMAND>_<OPTION>=<VALUE>`.
 
 ```shell
-export EDR_MONITOR_REPORT_FILE_PATH="my_report.html"
-edr monitor report
-# Equivalent to: edr monitor report --file-path "my_report.html"
+export EDR_REPORT_FILE_PATH="my_report.html"
+edr report
+# Equivalent to: edr report --file-path "my_report.html"
 ```
 
 Here is a list of all the available options:

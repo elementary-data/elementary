@@ -57,7 +57,7 @@ class Config:
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
-        self.project_dir = project_dir or self.locate_user_project_dir()
+        self.project_dir = project_dir
         self.profile_target = profile_target
         self.project_profile_target = project_profile_target
         self.env = env

@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        warehouse-type: [ snowflake, bigquery, redshift, databricks ]
+        warehouse-type: [ postgres, snowflake, bigquery, redshift, databricks ]
     needs: get-latest-release-tags
     uses: ./.github/workflows/test-warehouse.yml
     with:

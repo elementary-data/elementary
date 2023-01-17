@@ -36,12 +36,12 @@ This is **required for the report to work.**
 
 ## Generate Tests Report UI
 
-### Execute `edr monitor report` in your terminal
+### Execute `edr report` in your terminal
 
 After installing and configuring the CLI, execute the command:
 
 ```shell
-edr monitor report
+edr report
 ```
 
 The command will use the provided connection profile to access the data warehouse, read from the Elementary tables, and generate the report as an HTML file.
@@ -62,19 +62,19 @@ There are 3 ways to filter the report by invocation:
 To filter by last invocation:
 
 ```shell
-edr monitor report --select last_invocation
+edr report --select last_invocation
 ```
 
 To filter by invocation time:
 
 ```shell
-edr monitor report --select "invocation_time:2022-12-25 10:10:35"
+edr report --select "invocation_time:2022-12-25 10:10:35"
 ```
 
 To filter by invocation id:
 
 ```shell
-edr monitor report --select invocation_id:XXXXXXXXXXXXX
+edr report --select invocation_id:XXXXXXXXXXXXX
 ```
 
 ---

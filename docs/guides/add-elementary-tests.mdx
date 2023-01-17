@@ -23,11 +23,16 @@ Anomaly detection tests are not yet supported on Databricks in dbt Cloud.
 
 <Accordion title="elementary.volume_anomalies">
 
-Monitors the row count of your table over time.  
-Upon running the test, your data is split into time buckets based on the `time_bucket` field and is limited by
-the `days_back` var. The test then compares the row count of the buckets that are within the detection
-period (`backfill_days`) to the row count of all the previous time buckets.
-If there were any anomalies in the detection period, the test will fail.
+Monitors the row count of your table over time.
+
+Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
+field), and then we compute the row count per bucket for the last `days_back` days (by default 14).
+
+The test then compares the row count of buckets within the detection period (last 2 days by default, controlled by the
+`days_back` var), and compares it with the row count of the previous time buckets.
+If there were any anomalies during the detection period, the test will fail.
+
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
 
 
 <CodeGroup>
@@ -41,7 +46,7 @@ models:
       - elementary.volume_anomalies:
           timestamp_column: < timestamp column >
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:                # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -81,11 +86,16 @@ models:
 
 `elementary.freshness_anomalies`
 
-Monitors the freshness of your table over time.  
-Upon running the test, your data is split into time buckets based on the `time_bucket` field and is limited by
-the `days_back` var. The test then compares the time difference between the last record of the bucket in your data to
-the end of the bucket. If there were any anomalies in the detection period (`backfill_days`) compared to previous time
-buckets, the test will fail.
+Monitors the freshness of your table over time, as the expected time between data updates.
+
+Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
+field), and then we compute the maximum freshness value per bucket for the last `days_back` days (by default 14).
+
+The test then compares the freshness of buckets within the detection period (last 2 days by default, controlled by the
+`days_back` var), and compares it with the freshness of the previous time buckets.
+If there were any anomalies during the detection period, the test will fail.
+
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
 
 <CodeGroup>
 
@@ -96,9 +106,9 @@ models:
   - name: < model name >
     tests:
       - elementary.freshness_anomalies:
-          timestamp_column: < timestamp column >
+          timestamp_column: < timestamp column >            # Mandatory
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -110,7 +120,7 @@ models:
   - name: login_events
     tests:
       - elementary.freshness_anomalies:
-          timestamp_column: 'loaded_at'
+          timestamp_column: 'updated_at'
           # optional - use tags to run elementary tests on a dedicated run
           tags: ['elementary']
           config:
@@ -122,15 +132,24 @@ models:
 
 </Accordion>
 
-<Accordion title="elementary.table_anomalies">
+<Accordion title="elementary.event_freshness_anomalies">
 
-`elementary.table_anomalies`
+`elementary.event_freshness_anomalies`
 
-Executes table level monitors and anomaly detection. Specific monitors
-are [detailed here](/data-anomaly-detection#tests-and-monitors-types) and can be configured using the `table_anomalies`
-key.
-By default, the freshness test will use the `timestamp_column` provided. If you need to test for freshness by another
-column (e.g. if your table is partitioned), add the key `freshness_column` to the test.
+Monitors the freshness of event data over time, as the expected time it takes each event to load -
+that is, the time between the when the event acutally occures (the event timestamp), and when it is loaded to the
+database (the update timestamp).
+
+This test compliments the `freshness_anomalies` test and is primarily intended for data that is updated in a
+continuous / streaming fashion.
+
+The test can work in a couple of modes:
+- If only an `event_timestamp_column` is supplied, the test measures over time the difference between the current
+timestamp ("now") and the most recent event timestamp.
+- If both an `event_timestamp_column` and an `update_timestamp_column` are provided, the test will measure over time
+the difference between these two columns.
+
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
 
 <CodeGroup>
 
@@ -139,16 +158,12 @@ version: 2
 
 models:
   - name: < model name >
-    config:
-      elementary:
-        timestamp_column: < timestamp column >
     tests:
-      - elementary.table_anomalies:
-          table_anomalies: < specific monitors, all if null >
-          # optional - configure different freshness column than timestamp column
-          freshness_column: < freshness_column >
+      - elementary.freshness_anomalies:
+          event_timestamp_column: < timestamp column >          # Mandatory
+          update_timestamp_column: < timestamp column >         # Optional
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -158,29 +173,15 @@ version: 2
 
 models:
   - name: login_events
-    config:
-      elementary:
-        timestamp_column: 'loaded_at'
     tests:
-      - elementary.table_anomalies:
-          table_anomalies:
-            - row_count
-            - freshness
-          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+      - elementary.freshness_anomalies:
+          event_timestamp_column: 'occurred_at'
+          update_timestamp_column: 'updated_at'
           # optional - use tags to run elementary tests on a dedicated run
-          time_bucket:
-            period: hour
-            count: 4
           tags: ['elementary']
           config:
           # optional - change severity
             severity: warn
-
-  - name: users
-    # if no timestamp is configured, elementary will monitor without time filtering
-    tests:
-      - elementary.table_anomalies:
-          tags: ['elementary']
 ```
 
 </CodeGroup>
@@ -197,6 +198,8 @@ It is best to configure it on low-cardinality fields.
 The test counts rows grouped by given columns/expressions, and can be configured using the `dimensions`
 and `where_expression` keys.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -212,7 +215,7 @@ models:
           dimensions: < columns or sql expressions of columns >
           # optional - configure a where a expression to accurate the dimension monitoring
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -261,6 +264,8 @@ Executes column level monitors and anomaly detection on all the columns of the t
 are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
 the `all_columns_anomalies` key.
 
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+
 <CodeGroup>
 
 ```yml Models
@@ -275,7 +280,7 @@ models:
       - elementary.all_columns_anomalies:
           column_anomalies: < specific monitors, all if null >
           where_expression: < sql expression >
-          time_bucket:
+          time_bucket:              # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -321,7 +326,7 @@ models:
 
 </Accordion>
 
-### Column test
+### Column tests
 
 <Accordion title="elementary.column_anomalies">
 
@@ -330,6 +335,8 @@ models:
 Executes column level monitors and anomaly detection. Specific monitors
 are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
 the `column_anomalies` key.
+
+For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
 
 <CodeGroup>
 
@@ -341,11 +348,15 @@ models:
     config:
       elementary:
         timestamp_column: < timestamp column >
-     columns:
+    columns:
       - name: < column name >
         tests:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
+              where_expression: < sql expression >
+              time_bucket:              # Daily by default
+                              period: < time period >
+                              count: < number of periods >
 
   - name: < model name >
     ## if no timestamp is configured, elementary will monitor without time filtering
@@ -355,9 +366,6 @@ models:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
               where_expression: < sql expression >
-              time_bucket:
-                period: < time period >
-                count: < number of periods >
 ```
 
 ```yml Models example
@@ -427,10 +435,10 @@ models:
 
 </Accordion>
 
-## How to configure your Elementary tests?
+## Advanced configuration for your elementary tests
 
-Elementary tests are added to models / sources / columns of your dbt project just like the native dbt tests. You can
-configure specific monitors under the relevant keys (otherwise all relevant monitors will run).
+The elementary anomaly detection tests described above can work out-of-the-box with default configuration. However,
+we support additional configuration that can be used to customize their behavior, depending on your needs.
 
 Elementary tests have three levels of configurations:
 

@@ -91,6 +91,7 @@ For additional information and help, you can use one of these channels:
 * [x] **BigQuery**  ![](static/bigquery-16.svg) 
 * [x] **Redshift**  ![](static/redshift-16.png)
 * [x] **Databricks SQL**  ![](static/databricks-16.png)
+* [x] **Postgres**  ![](static/postgres-16.png)
 
 **Operations:**
 
@@ -160,6 +161,8 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/esenilsson"><img src="https://avatars.githubusercontent.com/u/2824187?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/pratik60"><img src="https://avatars.githubusercontent.com/u/2249430?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/benoit-tropos-io"><img src="https://avatars.githubusercontent.com/u/79080900?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/kouridis"><img src="https://avatars.githubusercontent.com/u/11500822?v=4" width="50" height="50" alt=""/></a>
+
 
 
 <!-- markdownlint-restore -->
