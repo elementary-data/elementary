@@ -23,11 +23,14 @@ Anomaly detection tests are not yet supported on Databricks in dbt Cloud.
 
 <Accordion title="elementary.volume_anomalies">
 
-Monitors the row count of your table over time.  
-Upon running the test, your data is split into time buckets based on the `time_bucket` field and is limited by
-the `days_back` var. The test then compares the row count of the buckets that are within the detection
-period (`backfill_days`) to the row count of all the previous time buckets.
-If there were any anomalies in the detection period, the test will fail.
+Monitors the row count of your table over time.
+
+Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
+field), and then we compute the row count per bucket for the last `days_back` days (by default 14).
+
+The test then compares the row count of buckets within the detection period (last 2 days by default, controlled by the
+`days_back` var), and compares it with the row count of the previous time buckets.
+If there were any anomalies during the detection period, the test will fail.
 
 For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
 
@@ -84,13 +87,13 @@ models:
 `elementary.freshness_anomalies`
 
 Monitors the freshness of your table over time, as the expected time between data updates.
-The test monitors the expected time between data updates during the training period (`days_back`),
-and alert if there are anomalies in the detection period (`backfill_days`).1
 
-The test requires providing a `timestamp_column` - which should be an update timestamp (e.g. `updated_at`).
+Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
+field), and then we compute the maximum freshness value per bucket for the last `days_back` days (by default 14).
 
-_Note_: This test is primarily intended for batch processing (e.g. scheduled dbt model runs). For monitoring continuous
-event data, please check the `event_freshness_anomalies` test below.
+The test then compares the freshness of buckets within the detection period (last 2 days by default, controlled by the
+`days_back` var), and compares it with the freshness of the previous time buckets.
+If there were any anomalies during the detection period, the test will fail.
 
 For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
 
