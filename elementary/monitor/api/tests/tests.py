@@ -173,7 +173,7 @@ class TestsAPI(APIClient):
         filtered_test_results_db_rows = [
             test_result
             for test_result in filtered_test_results_db_rows
-            if test_result.invocations_order == 1
+            if test_result.invocations_rank_index == 1
         ]
 
         test_results = defaultdict(list)
@@ -245,7 +245,7 @@ class TestsAPI(APIClient):
         latest_test_results = [
             test_result
             for test_result in test_results_db_rows
-            if test_result.invocations_order == 1
+            if test_result.invocations_rank_index == 1
         ]
 
         test_runs = defaultdict(list)

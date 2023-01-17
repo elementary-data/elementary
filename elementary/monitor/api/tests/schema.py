@@ -53,7 +53,7 @@ class TestResultDBRowSchema(BaseModel):
     status: str
     test_created_at: Optional[str] = None
     days_diff: float
-    invocations_order: int
+    invocations_rank_index: int
     sample_data: Optional[Union[dict, List]] = None
 
     class Config:

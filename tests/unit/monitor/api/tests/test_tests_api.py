@@ -29,7 +29,7 @@ def test_get_test_metadata_from_test_result_db_row(tests_api_mock: MockTestsAPI)
         status="fail",
         test_created_at="2023-01-01 09:00:00",
         days_diff=1,
-        invocations_order=1,
+        invocations_rank_index=1,
     )
     dbt_test_result_db_row = TestResultDBRowSchema(
         id="mock_id_2",
@@ -55,7 +55,7 @@ def test_get_test_metadata_from_test_result_db_row(tests_api_mock: MockTestsAPI)
         status="fail",
         test_created_at="2023-01-01 09:00:00",
         days_diff=1,
-        invocations_order=1,
+        invocations_rank_index=1,
     )
 
     elementary_test_metadata = tests_api_mock.get_test_metadata_from_test_result_db_row(
