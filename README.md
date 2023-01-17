@@ -91,6 +91,7 @@ For additional information and help, you can use one of these channels:
 * [x] **BigQuery**  ![](static/bigquery-16.svg) 
 * [x] **Redshift**  ![](static/redshift-16.png)
 * [x] **Databricks SQL**  ![](static/databricks-16.png)
+* [x] **Postgres**  ![](static/postgres-16.png)
 
 **Operations:**
 
