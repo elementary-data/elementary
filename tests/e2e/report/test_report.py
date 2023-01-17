@@ -200,12 +200,12 @@ def test_duplicate_rows_for_latest_run_status(warehouse_type):
         expected_ammount=4,
     )
 
-    # e2e contains 56 all columns anomalies tests
+    # e2e contains 58 all columns anomalies tests
     assert_test_counter(
         report_data=report_data,
         test_type="anomaly_detection",
         name="all_columns_anomalies",
-        expected_ammount=56,
+        expected_ammount=58,
     )
 
     # All of the tests are defined on the table any_type_column_anomalies
@@ -214,7 +214,27 @@ def test_duplicate_rows_for_latest_run_status(warehouse_type):
         test_type="anomaly_detection",
         name="all_columns_anomalies",
         table="any_type_column_anomalies",
-        expected_ammount=56,
+        expected_ammount=58,
+    )
+
+    # occurred_at column should have 2 passed test results.
+    # 2 for any type column
+    assert_test_counter(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="occurred_at",
+        status="pass",
+        expected_ammount=2,
+    )
+    assert_test_sub_types_occurre_only_once(
+        report_data=report_data,
+        test_type="anomaly_detection",
+        name="all_columns_anomalies",
+        table="any_type_column_anomalies",
+        column="occurred_at",
+        test_sub_types=["null_count", "null_percent"],
     )
 
     # updated_at column should have 2 passed test results.
