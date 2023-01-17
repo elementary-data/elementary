@@ -160,6 +160,8 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/esenilsson"><img src="https://avatars.githubusercontent.com/u/2824187?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/pratik60"><img src="https://avatars.githubusercontent.com/u/2249430?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/benoit-tropos-io"><img src="https://avatars.githubusercontent.com/u/79080900?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/kouridis"><img src="https://avatars.githubusercontent.com/u/11500822?v=4" width="50" height="50" alt=""/></a>
+
 
 
 <!-- markdownlint-restore -->
