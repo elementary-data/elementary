@@ -24,7 +24,7 @@ def test_totals(report_data_fixture):
             assert_totals(report_data[key], report_data_fixture[key])
 
 
-def test_sidebar(report_data_fixture):
+def test_sidebar():
     report_data = get_report_data()
     assert (
         "model.elementary_integration_tests.error_model"
@@ -62,7 +62,7 @@ def test_sidebar(report_data_fixture):
     )
 
 
-def test_duplicate_rows_for_latest_run_status(report_data_fixture):
+def test_duplicate_rows_for_latest_run_status(warehouse_type):
     report_data = get_report_data()
     # e2e contains 2 failed dimension tests and 1 passed
     assert_test_counter(
@@ -80,70 +80,110 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         expected_ammount=1,
     )
 
-    # e2e contains 1 passed schema change test for groups table
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="groups",
-    )
+    # Currently scehma changes tests are not supported at databricks
+    if warehouse_type != "databricks":
+        # e2e contains 1 passed schema change test for groups table
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="groups",
+        )
 
-    # e2e contains 3 failed schema change test for stats_player table
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="stats_players",
-        expected_ammount=3,
-    )
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="stats_players",
-        column="offsides",
-        expected_ammount=1,
-    )
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="stats_players",
-        column="red_cards",
-        expected_ammount=1,
-    )
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="stats_players",
-        column="key_crosses",
-        expected_ammount=1,
-    )
+        # e2e contains 3 failed schema change test for stats_player table
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="stats_players",
+            expected_ammount=3,
+        )
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="stats_players",
+            column="offsides",
+            expected_ammount=1,
+        )
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="stats_players",
+            column="red_cards",
+            expected_ammount=1,
+        )
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="stats_players",
+            column="key_crosses",
+            expected_ammount=1,
+        )
 
-    # e2e contains 1 passed schema change test for stats_team table
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="stats_team",
-    )
+        # e2e contains 1 passed schema change test for stats_team table
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="stats_team",
+        )
 
-    # e2e contains 1 passed schema change test for string_column_anomalies table
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="string_column_anomalies",
-    )
+        # e2e contains 1 passed schema change test for string_column_anomalies table
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="string_column_anomalies",
+        )
 
-    # e2e contains 1 passed schema change test for numeric_column_anomalies table
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes",
-        table="numeric_column_anomalies",
-    )
+        # e2e contains 1 passed schema change test for numeric_column_anomalies table
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes",
+            table="numeric_column_anomalies",
+        )
+
+        # e2e contains 2 failed and 1 error schema changes from baseline tests for groups table
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes_from_baseline",
+            table="groups",
+            status="fail",
+            expected_ammount=2,
+        )
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes_from_baseline",
+            table="groups",
+            status="error",
+            expected_ammount=1,
+        )
+
+        # e2e contains 2 schema changes from baseline tests for goals column at stats_players table (2 different tests)
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes_from_baseline",
+            table="stats_players",
+            column="goals",
+            expected_ammount=2,
+        )
+
+        # e2e contains 2 schema changes from baseline tests for coffee_cups_consumed column at stats_players table (2 different tests)
+        assert_test_counter(
+            report_data=report_data,
+            test_type="schema_change",
+            name="schema_changes_from_baseline",
+            table="stats_players",
+            column="coffee_cups_consumed",
+            expected_ammount=2,
+        )
 
     # e2e contains only 4 singular failed tests
     assert_test_counter(
@@ -160,44 +200,6 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         expected_ammount=4,
     )
 
-    # e2e contains 2 failed and 1 error schema changes from baseline tests for groups table
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes_from_baseline",
-        table="groups",
-        status="fail",
-        expected_ammount=2,
-    )
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes_from_baseline",
-        table="groups",
-        status="error",
-        expected_ammount=1,
-    )
-
-    # e2e contains 2 schema changes from baseline tests for goals column at stats_players table (2 different tests)
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes_from_baseline",
-        table="stats_players",
-        column="goals",
-        expected_ammount=2,
-    )
-
-    # e2e contains 2 schema changes from baseline tests for coffee_cups_consumed column at stats_players table (2 different tests)
-    assert_test_counter(
-        report_data=report_data,
-        test_type="schema_change",
-        name="schema_changes_from_baseline",
-        table="stats_players",
-        column="coffee_cups_consumed",
-        expected_ammount=2,
-    )
-
     # e2e contains 56 all columns anomalies tests
     assert_test_counter(
         report_data=report_data,
@@ -205,6 +207,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         name="all_columns_anomalies",
         expected_ammount=56,
     )
+
     # All of the tests are defined on the table any_type_column_anomalies
     assert_test_counter(
         report_data=report_data,
@@ -213,6 +216,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         table="any_type_column_anomalies",
         expected_ammount=56,
     )
+
     # updated_at column should have 2 passed test results.
     # 2 for any type column
     assert_test_counter(
@@ -232,6 +236,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="updated_at",
         test_sub_types=["null_count", "null_percent"],
     )
+
     # null_percent_str column should have 7 test results.
     # 5 for string type column, 2 for any type column
     assert_test_counter(
@@ -258,6 +263,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
             "missing_percent",
         ],
     )
+
     # null_percent_int column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
     assert_test_counter(
@@ -286,6 +292,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
             "average",
         ],
     )
+
     # null_percent_float column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
     assert_test_counter(
@@ -314,6 +321,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
             "average",
         ],
     )
+
     # null_percent_bool column should have 2 passed test results.
     # 2 for any type column
     assert_test_counter(
@@ -332,6 +340,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
         column="null_percent_bool",
         test_sub_types=["null_count", "null_percent"],
     )
+
     # null_count_str column should have 7 test results.
     # 5 for string type column, 2 for any type column
     assert_test_counter(
@@ -358,6 +367,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
             "missing_percent",
         ],
     )
+
     # null_count_int column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
     assert_test_counter(
@@ -386,6 +396,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
             "average",
         ],
     )
+
     # null_count_float column should have 9 test results.
     # 7 for numeric type column, 2 for any type column
     assert_test_counter(
@@ -414,6 +425,7 @@ def test_duplicate_rows_for_latest_run_status(report_data_fixture):
             "average",
         ],
     )
+
     # null_count_bool column should have 2 passed test results.
     # 2 for any type column
     assert_test_counter(
@@ -515,3 +527,9 @@ def report_data_fixture():
 
 def get_report_data():
     return json.loads(_REPORT_DATA_PATH.read_text())
+
+
+# A fixture that returns the value of "--warehouse-type" pytest cli arg.
+@pytest.fixture(scope="session")
+def warehouse_type(pytestconfig):
+    return pytestconfig.getoption("warehouse_type")

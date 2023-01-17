@@ -135,10 +135,10 @@ jobs:
           pip install ".[${{ inputs.warehouse-type }}]"
 
       - name: Run Python package unit tests
-        run: pytest -vv tests/unit
+        run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}
 
       - name: Run Python package integration tests
-        run: pytest -vv tests/integration
+        run: pytest -vv tests/integration --warehouse-type ${{ inputs.warehouse-type }}
 
       - name: Install dbt package
         run: |
@@ -217,4 +217,4 @@ jobs:
 
       - name: Run Python package e2e tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        run: pytest -vv tests/e2e
+        run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
