@@ -43,6 +43,26 @@ If undefined, default is null (no time buckets).
 
 </Accordion>
 
+<Accordion title="time_buckets">
+```
+time_bucket:
+  period: < time period >
+  count: < number of periods >
+```
+
+This field controls the cadence in which we monitor metrics during the training period (the `days_back` parameter). By
+default, the time bucket is daily (period=`day`, count=`1`) - meaning we calculate a metric value per day and use the
+resulting values for anomaly calculation (for example, daily volume / row count).
+
+Depending on the nature of your data, it may make sense to modify this parameter. For example, if you wish to have
+hourly cadence for a volume anomalies test, it may make sense to set the time bucket to period=`hour` and count=`1`.
+
+_Note_ - you should only decrease the size of the time buckets if this value is expected to be stable during the
+period of choosing (for example - if row count tends to be stable on a daily level, but changes dramatically between
+different hours, avoid setting an hourly time bucket)
+
+</Accordion>
+
 <Accordion title="sensitivity">
 `sensitivity`: [int]
 
