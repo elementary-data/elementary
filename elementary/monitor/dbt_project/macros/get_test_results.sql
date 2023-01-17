@@ -9,7 +9,7 @@
                 *,
                 {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
                 {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank. #}
-                rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_order
+                rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_rank_index
             from test_results
         )
 
@@ -38,17 +38,17 @@
             severity,
             status,
             days_diff,
-            invocations_order,
+            invocations_rank_index,
             result_rows
         from ordered_test_results
-        where invocations_order <= {{ invocations_per_test }}
-        order by elementary_unique_id, invocations_order
+        where invocations_rank_index <= {{ invocations_per_test }}
+        order by elementary_unique_id, invocations_rank_index
     {%- endset -%}
     {% set test_results_agate = run_query(select_test_results) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
     {%- for test in tests -%}
         {% set test_rows_sample = none %}
-        {% if elementary.insensitive_get_dict_value(test, 'invocations_order') == 1 %}
+        {% if elementary.insensitive_get_dict_value(test, 'invocations_rank_index') == 1 %}
             {% set test_unique_id = elementary.insensitive_get_dict_value(test, 'test_unique_id') %}
             {% set test_results_query = elementary.insensitive_get_dict_value(test, 'test_results_query') %}
             {% set test_type = elementary.insensitive_get_dict_value(test, 'test_type') %}
