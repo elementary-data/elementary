@@ -125,4 +125,4 @@ class DataMonitoring:
 
     def run_elementary_models(self):
         logger.info("Syncing with dbt project to its latest state.")
-        self.user_dbt_runner.run("edr.dbt_artifacts")
+        self.user_dbt_runner.run("elementary")
