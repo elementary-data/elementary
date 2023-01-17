@@ -43,11 +43,6 @@ class DataMonitoring:
             )
         else:
             self.user_dbt_runner = None
-            logger.warning(
-                "Please run edr from your dbt project directory or specify --project-dir. "
-                "Not doing so might result in out-of-date data. "
-                "This will be required on following versions."
-            )
         if self.user_dbt_runner:
             self.run_elementary_models()
         self.execution_properties = {}
@@ -130,4 +125,4 @@ class DataMonitoring:
 
     def run_elementary_models(self):
         logger.info("Syncing with dbt project to its latest state.")
-        self.user_dbt_runner.run("elementary")
+        self.user_dbt_runner.run("edr.dbt_artifacts")
