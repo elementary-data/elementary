@@ -42,7 +42,7 @@
             result_rows
         from ordered_test_results
         where invocations_rank_index <= {{ invocations_per_test }}
-        order by elementary_unique_id, invocations_rank_index
+        order by elementary_unique_id, invocations_rank_index desc
     {%- endset -%}
     {% set test_results_agate = run_query(select_test_results) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
