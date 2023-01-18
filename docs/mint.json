@@ -113,7 +113,8 @@
         "integrations/snowflake",
         "integrations/bigquery",
         "integrations/redshift",
-        "integrations/databricks"
+        "integrations/databricks",
+        "integrations/postgres"
       ]
     },
     {
