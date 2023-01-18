@@ -73,6 +73,21 @@ def test_duplicate_test_runs():
             assert len(invocation_ids) == len(set(invocation_ids))
 
 
+def test_test_runs_are_sorted():
+    report_data = get_report_data()
+    test_runs = report_data.get("test_runs")
+    for tests in test_runs.values():
+        for test in tests:
+            runs = test.get("test_runs")
+            invocations = runs.get("invocations")
+            invocation_times = [
+                invocation.get("time_utc") for invocation in invocations
+            ]
+            sorted_invocation_times = [*invocation_times]
+            sorted_invocation_times.sort()
+            assert invocation_times == sorted_invocation_times
+
+
 def test_duplicate_rows_for_latest_run_status(warehouse_type):
     report_data = get_report_data()
     # e2e contains 2 failed dimension tests and 1 passed
