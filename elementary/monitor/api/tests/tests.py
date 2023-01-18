@@ -275,7 +275,7 @@ class TestsAPI(APIClient):
                     test_result_db_row.invocation_id
                     or test_result_db_row.test_execution_id
                 )
-                # Currently the way we flat test results causing that there is suplication in test incovation for each test.
+                # Currently the way we flat test results causing that there is duplication in test invocation for each test.
                 # This if statement checks if the invocation is already counted or not.
                 if invocation_id not in grouped_invocation_ids[elementary_unique_id]:
                     grouped_invocation_ids[elementary_unique_id].append(invocation_id)
