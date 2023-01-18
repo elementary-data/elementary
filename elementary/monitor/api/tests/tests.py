@@ -267,20 +267,28 @@ class TestsAPI(APIClient):
         self, test_result_db_rows: List[TestResultDBRowSchema]
     ) -> Dict[TestUniqueIdType, InvocationsSchema]:
         grouped_invocations = defaultdict(list)
+        grouped_invocation_ids = defaultdict(list)
         for test_result_db_row in test_result_db_rows:
             try:
                 elementary_unique_id = test_result_db_row.elementary_unique_id
-                grouped_invocations[elementary_unique_id].append(
-                    InvocationSchema(
-                        id=test_result_db_row.invocation_id
-                        or test_result_db_row.test_execution_id,
-                        time_utc=test_result_db_row.detected_at,
-                        status=test_result_db_row.status,
-                        affected_rows=self._parse_affected_row(
-                            results_description=test_result_db_row.test_results_description
-                        ),
-                    )
+                invocation_id = (
+                    test_result_db_row.invocation_id
+                    or test_result_db_row.test_execution_id
                 )
+                # Currently the way we flat test results causing that there is duplication in test invocation for each test.
+                # This if statement checks if the invocation is already counted or not.
+                if invocation_id not in grouped_invocation_ids[elementary_unique_id]:
+                    grouped_invocation_ids[elementary_unique_id].append(invocation_id)
+                    grouped_invocations[elementary_unique_id].append(
+                        InvocationSchema(
+                            id=invocation_id,
+                            time_utc=test_result_db_row.detected_at,
+                            status=test_result_db_row.status,
+                            affected_rows=self._parse_affected_row(
+                                results_description=test_result_db_row.test_results_description
+                            ),
+                        )
+                    )
             except Exception:
                 logger.error(
                     f"Could not parse test ({test_result_db_row.test_unique_id}) invocation ({test_result_db_row.invocation_id or test_result_db_row.test_execution_id}) - continue to the next test"
