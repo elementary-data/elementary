@@ -6,10 +6,10 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
+      permissions: read-all|write-all
       - uses: wow-actions/auto-comment@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            permissions: read-all|write-all
           pullRequestOpened: |
             👋 @{{ author }}
             Thank you for raising your pull request.
