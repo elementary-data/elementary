@@ -1,7 +1,7 @@
 # Contributing guidelines
 
 _Note_: This document is for the Python package (`edr`).
-For the dbt package, refer to the [dbt package contributing guidelines](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md)
+For the dbt package, refer to the [dbt package contributing guidelines](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md).
 
 ## Getting started with development
 
@@ -52,8 +52,8 @@ to ask for help.
 ## Submitting changes
 
 Even more excellent than a good bug report is a fix for a bug, or the
-implementation of a much-needed new feature. We'd love to have
-your contributions.
+implementation of a much-needed new feature.
+We'd love to have your contributions.
 
 We use the usual GitHub pull-request flow, which may be familiar to
 you if you've contributed to other projects on GitHub. For the mechanics,
