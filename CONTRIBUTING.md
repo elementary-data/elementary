@@ -1,7 +1,7 @@
 # Contributing guidelines
 
-_Note_: This document is for the Python package (`edr`), for the dbt package, refer to
-the [dbt package contributing guidelines](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md)
+_Note_: This document is for the Python package (`edr`).
+For the dbt package, refer to the [dbt package contributing guidelines](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md)
 
 ## Getting started with development
 
