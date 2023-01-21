@@ -99,7 +99,7 @@ class ModelAlert(Alert):
         configuration = []
         if self.materialization:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Materialization*"])
+                self.slack_message_builder.create_context_block(["*Materialization*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
@@ -108,7 +108,7 @@ class ModelAlert(Alert):
             )
         if self.full_refresh:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Full refresh*"])
+                self.slack_message_builder.create_context_block(["*Full refresh*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
@@ -117,7 +117,7 @@ class ModelAlert(Alert):
             )
         if self.path:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Path*"])
+                self.slack_message_builder.create_context_block(["*Path*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(f"`{self.path}`")
@@ -190,7 +190,7 @@ class ModelAlert(Alert):
         configuration = []
         if self.original_path:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Path*"])
+                self.slack_message_builder.create_context_block(["*Path*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(

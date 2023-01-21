@@ -237,8 +237,8 @@ def monitor(
         return
     if deprecated_slack_webhook is not None:
         click.secho(
-            f'\n"-s" is deprecated and won\'t be supported in the near future.\n'
-            f'Please use "-sw" or "--slack-webhook" for passing Slack webhook.\n',
+            '\n"-s" is deprecated and won\'t be supported in the near future.\n'
+            'Please use "-sw" or "--slack-webhook" for passing Slack webhook.\n',
             fg="bright_red",
         )
         slack_webhook = deprecated_slack_webhook

@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from elementary.clients.api.api import APIClient
 from elementary.utils.log import get_logger

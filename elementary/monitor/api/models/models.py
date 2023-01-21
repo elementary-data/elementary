@@ -195,7 +195,7 @@ class ModelsAPI(APIClient):
         # If source, change models directory into sources and file extension from .yml to .sql
         if isinstance(artifact, SourceSchema):
             if splited_artifact_path[0] == "models":
-                splited_artifact_path[0] = f"sources"
+                splited_artifact_path[0] = "sources"
             if artifact_file_name.endswith(YAML_FILE_EXTENSION):
                 head, _sep, tail = artifact_file_name.rpartition(YAML_FILE_EXTENSION)
                 splited_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail

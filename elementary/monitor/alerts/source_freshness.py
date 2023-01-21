@@ -125,7 +125,7 @@ class SourceFreshnessAlert(Alert):
         configuration = []
         if self.freshness_error_after:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Error after*"])
+                self.slack_message_builder.create_context_block(["*Error after*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
@@ -134,7 +134,7 @@ class SourceFreshnessAlert(Alert):
             )
         if self.freshness_warn_after:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Warn after*"])
+                self.slack_message_builder.create_context_block(["*Warn after*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
@@ -143,7 +143,7 @@ class SourceFreshnessAlert(Alert):
             )
         if self.freshness_filter:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Filter*"])
+                self.slack_message_builder.create_context_block(["*Filter*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
@@ -152,7 +152,7 @@ class SourceFreshnessAlert(Alert):
             )
         if self.path:
             configuration.append(
-                self.slack_message_builder.create_context_block([f"*Path*"])
+                self.slack_message_builder.create_context_block(["*Path*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(f"`{self.path}`")

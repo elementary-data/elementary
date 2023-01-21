@@ -337,6 +337,6 @@ class DataMonitoringReport(DataMonitoring):
         return os.path.abspath(
             os.path.join(
                 self.config.target_dir,
-                f"elementary_report.html",
+                "elementary_report.html",
             )
         )
