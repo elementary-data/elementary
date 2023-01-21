@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-import yaml
+from elementary.utils.ordered_yaml import OrderedYaml
 
 _MONITOR_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -46,16 +46,13 @@ def get_installed_dbt_package_version() -> Optional[str]:
     if not os.path.exists(package_path):
         return None
 
-    with open(project_path, encoding="utf-8") as project_file:
-        project_yaml_dict = yaml.load(project_file.read(), yaml.FullLoader)
-
+    project_yaml_dict = OrderedYaml().load(project_path)
     return project_yaml_dict["version"]
 
 
 def get_required_dbt_package_version() -> Optional[str]:
     packages_file_path = os.path.join(PATH, _PACKAGES_FILENAME)
-    with open(packages_file_path, encoding="utf-8") as packages_file:
-        packages_yaml = yaml.load(packages_file.read(), yaml.FullLoader)
+    packages_yaml = OrderedYaml().load(packages_file_path)
 
     for requirement in packages_yaml["packages"]:
         package_name = requirement["package"].split("/")[-1]
