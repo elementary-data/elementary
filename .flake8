@@ -1,8 +1,6 @@
 [flake8]
 ignore =
     W503
-    W504
     E203
-    E741
     E501
 
