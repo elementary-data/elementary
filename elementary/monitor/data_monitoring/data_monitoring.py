@@ -66,12 +66,14 @@ class DataMonitoring:
         self.raw_filter = filter
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_exists = dbt_project_utils.dbt_package_exists()
-        self.execution_properties["dbt_package_exists"] = internal_dbt_package_exists
+        internal_dbt_package_up_to_date = dbt_project_utils.dbt_package_up_to_date()
+        self.execution_properties[
+            "dbt_package_up_to_date"
+        ] = internal_dbt_package_up_to_date
         self.execution_properties[
             "force_update_dbt_packages"
         ] = force_update_dbt_packages
-        if not internal_dbt_package_exists or force_update_dbt_packages:
+        if not internal_dbt_package_up_to_date or force_update_dbt_packages:
             logger.info("Downloading edr internal dbt package")
             package_downloaded = self.internal_dbt_runner.deps()
             self.execution_properties["package_downloaded"] = package_downloaded
