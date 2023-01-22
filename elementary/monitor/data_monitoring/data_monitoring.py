@@ -66,7 +66,7 @@ class DataMonitoring:
         self.raw_filter = filter
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_up_to_date = dbt_project_utils.dbt_package_up_to_date()
+        internal_dbt_package_up_to_date = dbt_project_utils.is_dbt_package_up_to_date()
         self.execution_properties[
             "dbt_package_up_to_date"
         ] = internal_dbt_package_up_to_date

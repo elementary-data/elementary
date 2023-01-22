@@ -28,7 +28,7 @@ def get_elementary_package_path():
     return None
 
 
-def dbt_package_up_to_date() -> bool:
+def is_dbt_package_up_to_date() -> bool:
     installed_version = get_installed_dbt_package_version()
     if installed_version is None:
         return False

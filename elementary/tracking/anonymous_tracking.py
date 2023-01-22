@@ -159,7 +159,7 @@ class AnonymousTracking:
                 self._config.profile_target,
                 dbt_env_vars=self._config.dbt_env_vars,
             )
-            if not dbt_project_utils.dbt_package_up_to_date():
+            if not dbt_project_utils.is_dbt_package_up_to_date():
                 logger.info("Downloading edr internal dbt package")
                 dbt_runner.deps(quiet=True)
 
