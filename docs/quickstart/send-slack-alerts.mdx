@@ -53,8 +53,11 @@ This is **required for the alerts to work.**
 Make sure to run the following command after your dbt runs and tests:
 
 ```
-edr monitor
+edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
 ```
+
+Or just `edr monitor` if you used `config.yml`.
+
 
 ### Filtering alerts using selector
 
