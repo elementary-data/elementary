@@ -159,7 +159,7 @@ version: 2
 models:
   - name: < model name >
     tests:
-      - elementary.freshness_anomalies:
+      - elementary.event_freshness_anomalies:
           event_timestamp_column: < timestamp column >          # Mandatory
           update_timestamp_column: < timestamp column >         # Optional
           where_expression: < sql expression >
@@ -174,7 +174,7 @@ version: 2
 models:
   - name: login_events
     tests:
-      - elementary.freshness_anomalies:
+      - elementary.event_freshness_anomalies:
           event_timestamp_column: 'occurred_at'
           update_timestamp_column: 'updated_at'
           # optional - use tags to run elementary tests on a dedicated run
