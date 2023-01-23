@@ -15,7 +15,8 @@ These tests are configured and executed like any other tests in your dbt project
 `elementary.schema_changes`
 
 Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
-
+Snowflake note: snowflake has "synonym" data types, for example tables created with a `VARCHAR` column would be shown
+in the information schema as having `TEXT` column. Types are converted internally to deal with this.
 _Not supported in Databricks._
 
 <CodeGroup>
