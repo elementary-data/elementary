@@ -35,11 +35,6 @@ on:
         required: false
         default: true
         description: Whether to clean test environment
-      dbt-pre-release:
-        type: boolean
-        required: false
-        default: false
-        description: Whether to allow dbt pre-releases
       generate-data:
         type: boolean
         required: false
@@ -68,10 +63,6 @@ on:
         type: boolean
         required: false
         default: true
-      dbt-pre-release:
-        type: boolean
-        required: false
-        default: false
       generate-data:
         type: boolean
         required: false
@@ -128,8 +119,7 @@ jobs:
 
       - name: Install dbt
         run:
-          pip install
-          ${{ inputs.dbt-pre-release && '--pre' }}
+          pip install --pre
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-${{ inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 

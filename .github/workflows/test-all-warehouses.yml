@@ -13,5 +13,4 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
-      dbt-pre-release: true
     secrets: inherit
