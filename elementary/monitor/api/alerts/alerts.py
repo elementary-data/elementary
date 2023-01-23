@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
@@ -175,6 +176,56 @@ class AlertsAPI(APIClient):
                 suppressed_alerts.append(alert.id)
 
         return suppressed_alerts
+
+    def _get_latest_alerts(
+        self,
+        alerts: Union[
+            AlertsQueryResult[TestAlert],
+            AlertsQueryResult[ModelAlert],
+            AlertsQueryResult[SourceFreshnessAlert],
+        ],
+    ) -> List[str]:
+        alert_last_times = defaultdict(lambda: None)
+        latest_alert_ids = []
+        for alert in alerts.alerts:
+            id = (
+                alert.test_unique_id
+                if isinstance(alert, TestAlert)
+                else alert.unique_id
+            )
+            current_last_alert = alert_last_times[id]
+            alert_detected_at = alert.detected_at.strftime(DATETIME_FORMAT)
+            if not current_last_alert:
+                alert_last_times[id] = dict(
+                    alert_id=alert.id, detected_at=alert_detected_at
+                )
+            elif current_last_alert["detected_at"] < alert_detected_at:
+                alert_last_times[id] = dict(
+                    alert_id=alert.id, detected_at=alert_detected_at
+                )
+
+        for alert in alerts.malformed_alerts:
+            id = alert.data.get("unique_id") or alert.data.get("test_unique_id")
+            current_last_alert = alert_last_times[id]
+            alert_detected_at = alert.data.get("detected_at").strftime(DATETIME_FORMAT)
+            if not current_last_alert:
+                alert_last_times[id] = dict(
+                    alert_id=alert.id, detected_at=alert_detected_at
+                )
+            elif current_last_alert["detected_at"] < alert_detected_at:
+                alert_last_times[id] = dict(
+                    alert_id=alert.id, detected_at=alert_detected_at
+                )
+
+        for alert_last_time in alert_last_times.values():
+            latest_alert_ids.append(alert_last_time.get("alert_id"))
+        return latest_alert_ids
+
+    def _get_elementary_unique_id_of_alert(
+        alert: Union[TestAlert, ModelAlert, SourceFreshnessAlert]
+    ) -> str:
+        if isinstance(alert, TestAlert):
+            pass
 
     def skip_alerts(
         self, alerts_to_skip: List[Union[AlertType, MalformedAlert]], table_name: str
