@@ -26,10 +26,13 @@ from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import (
+from elementary.monitor.data_monitoring.report.schema import (
     DataMonitoringReportFilter,
     DataMonitoringReportTestResultsSchema,
     DataMonitoringReportTestRunsSchema,
+)
+from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
+    SlackReportSummaryMessageBuilder,
 )
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
@@ -212,14 +215,6 @@ class DataMonitoringReport(DataMonitoring):
     def send_report(
         self, local_html_path: str, remote_file_path: Optional[str] = None
     ) -> bool:
-        if self.slack_client:
-            send_succeded = self.slack_client.send_report(
-                self.config.slack_channel_name, local_html_path
-            )
-            self.execution_properties["sent_to_slack_successfully"] = send_succeded
-            if not send_succeded:
-                self.success = False
-
         if self.s3_client:
             send_succeded = self.s3_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
@@ -236,8 +231,45 @@ class DataMonitoringReport(DataMonitoring):
             if not send_succeded:
                 self.success = False
 
+        if self.slack_client:
+            send_succeded = self.slack_client.send_report(
+                self.config.slack_channel_name, local_html_path
+            )
+            self.execution_properties["sent_to_slack_successfully"] = send_succeded
+            if not send_succeded:
+                self.success = False
+
         self.execution_properties["success"] = self.success
         return self.success
+
+    def send_test_results_summary(
+        self,
+        days_back: Optional[int] = None,
+        test_runs_amount: Optional[int] = None,
+        disable_passed_test_metrics: bool = False,
+    ) -> bool:
+        bucket_website_url = None
+        if self.s3_client:
+            bucket_website_url = self.s3_client.get_bucket_website_url()
+
+        if self.gcs_client:
+            bucket_website_url = None
+
+        test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+        summary_test_results = self.tests_api.get_test_restuls_summary(
+            test_results_db_rows
+        )
+        self.slack_client.send_message(
+            channel_name=self.config.slack_channel_name,
+            message=SlackReportSummaryMessageBuilder().get_slack_message(
+                test_results=summary_test_results,
+                bucket_website_url=bucket_website_url,
+            ),
+        )
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         return self.lineage_api.get_lineage(exclude_elementary_models)

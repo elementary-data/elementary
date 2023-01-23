@@ -18,11 +18,12 @@ from elementary.monitor.api.tests.schema import (
     TestMetadataSchema,
     TestResultDBRowSchema,
     TestResultSchema,
+    TestResultSummarySchema,
     TestRunSchema,
     TestUniqueIdType,
     TotalsSchema,
 )
-from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.report.schema import DataMonitoringReportFilter
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -57,6 +58,51 @@ class TestsAPI(APIClient):
             TestResultDBRowSchema(**test_result) for test_result in test_results
         ]
         return test_results
+
+    def get_test_restuls_summary(
+        self,
+        test_results_db_rows: List[TestResultDBRowSchema],
+    ) -> List[TestResultSummarySchema]:
+        filtered_test_results_db_rows = test_results_db_rows
+        filtered_test_results_db_rows = [
+            test_result
+            for test_result in filtered_test_results_db_rows
+            if test_result.invocations_rank_index == 1
+        ]
+
+        return [
+            TestResultSummarySchema(
+                table_name=test_result.table_name,
+                column_name=test_result.column_name,
+                test_type=test_result.test_type,
+                test_sub_type=test_result.test_sub_type,
+                owners=test_result.owners,
+                tags=test_result.tags,
+                subscribers=self._get_test_subscribers(
+                    test_meta=test_result.meta, model_meta=test_result.model_meta
+                ),
+                description=test_result.meta.get("description"),
+                test_name=test_result.test_name,
+                status=test_result.status,
+            )
+            for test_result in filtered_test_results_db_rows
+        ]
+
+    @staticmethod
+    def _get_test_subscribers(test_meta: dict, model_meta: dict) -> List[Optional[str]]:
+        subscribers = []
+        test_subscribers = test_meta.get("subscribers", [])
+        model_subscribers = model_meta.get("subscribers", [])
+        if isinstance(test_subscribers, list):
+            subscribers.extend(test_subscribers)
+        else:
+            subscribers.append(test_subscribers)
+
+        if isinstance(model_subscribers, list):
+            subscribers.extend(model_subscribers)
+        else:
+            subscribers.append(model_subscribers)
+        return subscribers
 
     def _get_invocation_from_filter(
         self, filter: DataMonitoringReportFilter

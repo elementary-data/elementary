@@ -60,3 +60,15 @@ class S3Client:
                 self.tracking.record_cli_internal_exception(ex)
             return False
         return True
+
+    def get_bucket_website_url(self) -> Optional[str]:
+        try:
+            bucket_name = self.config.s3_bucket_name
+            bucket_location = self.client.get_bucket_location(Bucket=bucket_name)[
+                "LocationConstraint"
+            ]
+            return f"{bucket_name}.s3-website.{bucket_location}.amazonaws.com"
+
+        except Exception as ex:
+            logger.warning(f"Unable to get bucket website URL: {ex}.")
+            return None

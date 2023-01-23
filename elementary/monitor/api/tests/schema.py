@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, validator
 
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 TestUniqueIdType = str
@@ -42,9 +43,10 @@ class TestResultDBRowSchema(BaseModel):
     test_type: str
     test_sub_type: str
     test_results_description: Optional[str]
-    owners: Optional[str]
-    tags: Optional[str]
+    owners: Optional[List[str]]
+    tags: Optional[List[str]]
     meta: Optional[dict]
+    model_meta: Optional[dict]
     test_results_query: Optional[str] = None
     other: Optional[str]
     test_name: str
@@ -67,6 +69,10 @@ class TestResultDBRowSchema(BaseModel):
     def load_meta(cls, meta):
         return json.loads(meta) if meta else {}
 
+    @validator("model_meta", pre=True)
+    def load_model_meta(cls, model_meta):
+        return json.loads(model_meta) if model_meta else {}
+
     @validator("test_params", pre=True)
     def load_test_params(cls, test_params):
         return json.loads(test_params) if test_params else {}
@@ -74,6 +80,16 @@ class TestResultDBRowSchema(BaseModel):
     @validator("test_results_description", pre=True)
     def load_test_results_description(cls, test_results_description):
         return test_results_description.strip() if test_results_description else None
+
+    @validator("tags", pre=True)
+    def load_tags(cls, tags):
+        formatted_tags = try_load_json(tags)
+        return formatted_tags if formatted_tags else []
+
+    @validator("owners", pre=True)
+    def load_owners(cls, owners):
+        formatted_owners = try_load_json(owners)
+        return formatted_owners if formatted_owners else []
 
 
 class TotalsSchema(BaseModel):
@@ -159,3 +175,18 @@ class TestResultSchema(BaseModel):
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
     test_runs: InvocationsSchema
+
+
+class TestResultSummarySchema(BaseModel):
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+
+    table_name: Optional[str] = None
+    column_name: Optional[str] = None
+    test_type: str
+    test_sub_type: str
+    owners: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    subscribers: Optional[List[str]] = None
+    description: Optional[str] = None
+    test_name: str
+    status: str

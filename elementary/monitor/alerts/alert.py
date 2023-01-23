@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from dateutil import tz
 
@@ -8,7 +8,7 @@ from elementary.clients.slack.slack_message_builder import (
     SlackMessageBuilder,
 )
 from elementary.monitor.alerts.schema.alert import AlertSuppressionSchema
-from elementary.utils.json_utils import prettify_json_str_set, try_load_json
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -171,16 +171,3 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
 
         else:
             return preview_blocks
-
-    @staticmethod
-    def prettify_and_dedup_list(
-        list_variation: Union[List[str], str]
-    ) -> Union[List[str], str]:
-        if isinstance(list_variation, str):
-            return prettify_json_str_set(list_variation)
-
-        elif isinstance(list_variation, list):
-            return ", ".join(set(list_variation))
-
-        else:
-            return list_variation

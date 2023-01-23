@@ -6,7 +6,7 @@ from elementary.config.config import Config
 from elementary.monitor.data_monitoring.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
-from elementary.monitor.data_monitoring.data_monitoring_report import (
+from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -552,6 +552,13 @@ def send_report(
             )
         anonymous_tracking.track_cli_end(
             Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name
+        )
+
+        command_succeeded = True
+        data_monitoring.send_test_results_summary(
+            days_back=days_back,
+            test_runs_amount=executions_limit,
+            disable_passed_test_metrics=disable_passed_test_metrics,
         )
         if not command_succeeded:
             sys.exit(1)

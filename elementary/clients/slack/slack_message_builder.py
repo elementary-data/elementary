@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
+from elementary.utils.json_utils import prettify_json_str_set
 
 LONGEST_MARKDOWN_SUFFIX_LEN = 3
 CONTINUATION_SYMBOL = "..."
@@ -136,3 +137,16 @@ class SlackMessageBuilder:
 
     def get_slack_message(self) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
+
+    @staticmethod
+    def prettify_and_dedup_list(
+        list_variation: Union[List[str], str]
+    ) -> Union[List[str], str]:
+        if isinstance(list_variation, str):
+            return prettify_json_str_set(list_variation)
+
+        elif isinstance(list_variation, list):
+            return ", ".join(set(list_variation))
+
+        else:
+            return list_variation
