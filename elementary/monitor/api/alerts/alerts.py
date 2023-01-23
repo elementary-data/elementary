@@ -142,26 +142,17 @@ class AlertsAPI(APIClient):
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
-        for alert in alerts.alerts:
-            unique_id = alert.unique_id
-            suppression_interval = alert.alert_suppression_interval
-            last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(unique_id))
-                if last_alert_sent_times.get(unique_id)
-                else None
+        for alert in [*alerts.alerts, *alerts.malformed_alerts]:
+            unique_id = (
+                alert.data.get("unique_id")
+                if isinstance(alert, MalformedAlert)
+                else alert.unique_id
             )
-            is_alert_in_suppression = (
-                (current_time_utc - last_sent_time).seconds / 3600
-                <= suppression_interval
-                if last_sent_time
-                else False
+            suppression_interval = (
+                alert.data.get("alert_suppression_interval")
+                if isinstance(alert, MalformedAlert)
+                else alert.alert_suppression_interval
             )
-            if is_alert_in_suppression:
-                suppressed_alerts.append(alert.id)
-
-        for alert in alerts.malformed_alerts:
-            unique_id = alert.data.get("unique_id")
-            suppression_interval = alert.data.get("alert_suppression_interval")
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times.get(unique_id))
                 if last_alert_sent_times.get(unique_id)
@@ -188,23 +179,19 @@ class AlertsAPI(APIClient):
     ) -> List[str]:
         alert_last_times = defaultdict(lambda: None)
         latest_alert_ids = []
-        for alert in alerts.alerts:
-            id = alert.unique_id
+        for alert in [*alerts.alerts, *alerts.malformed_alerts]:
+            id = (
+                alert.data.get("unique_id")
+                if isinstance(alert, MalformedAlert)
+                else alert.unique_id
+            )
             current_last_alert = alert_last_times[id]
-            alert_detected_at = alert.detected_at.strftime(DATETIME_FORMAT)
-            if not current_last_alert:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-            elif current_last_alert["detected_at"] < alert_detected_at:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-
-        for alert in alerts.malformed_alerts:
-            id = alert.data.get("unique_id")
-            current_last_alert = alert_last_times[id]
-            alert_detected_at = alert.data.get("detected_at").strftime(DATETIME_FORMAT)
+            detected_at = (
+                alert.data.get("detected_at")
+                if isinstance(alert, MalformedAlert)
+                else alert.detected_at
+            )
+            alert_detected_at = detected_at.strftime(DATETIME_FORMAT)
             if not current_last_alert:
                 alert_last_times[id] = dict(
                     alert_id=alert.id, detected_at=alert_detected_at
