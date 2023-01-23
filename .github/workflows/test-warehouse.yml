@@ -35,6 +35,11 @@ on:
         required: false
         default: true
         description: Whether to clean test environment
+      dbt-pre-release:
+        type: boolean
+        required: false
+        default: false
+        description: Whether to allow dbt pre-releases
       generate-data:
         type: boolean
         required: false
