@@ -125,7 +125,7 @@
         with alerts_in_time_limit as (
             select
                 {# Generate elementary unique id which is used to identify between tests, and set it as unique_id #}
-                coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(test_sub_type, 'None') as unique_id,
+                coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(sub_type, 'None') as unique_id,
                 case
                     when suppression_status is NULL and alert_sent = TRUE then 'sent'
                     when suppression_status is NULL and alert_sent = FALSE then 'pending'
