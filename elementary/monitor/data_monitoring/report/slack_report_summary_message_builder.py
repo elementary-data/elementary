@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.api.tests.schema import TestResultSummarySchema
-from elementary.utils.time import DATETIME_FORMAT, convert_utc_time_to_timezone
+from elementary.utils.time import convert_utc_time_to_timezone
 
 
 class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
@@ -28,11 +28,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         bucket_website_url: Optional[str] = None,
     ):
         current_time = convert_utc_time_to_timezone(datetime.utcnow()).strftime(
-            DATETIME_FORMAT
+            "%Y-%m-%d | %H:%M"
         )
         title_blocks = [
-            self.create_header_block(":mag: Elementary monitoring report summary"),
-            self.create_text_section_block(f"Generated at {current_time}"),
+            self.create_header_block(
+                f":mag: Elementary monitoring report summary ({current_time})"
+            ),
         ]
 
         if bucket_website_url:
@@ -84,13 +85,13 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         schema_changes_tests_details = []
         for test in test_results:
             if test.test_type == "schema_change" and test.status != "pass":
-                schema_changes_tests_details.append(
+                schema_changes_tests_details.extend(
                     self._get_test_result_details_block(test)
                 )
             elif test.status in ["error", "fail"]:
-                failed_tests_details.append(self._get_test_result_details_block(test))
+                failed_tests_details.extend(self._get_test_result_details_block(test))
             else:
-                warning_tests_details.append(self._get_test_result_details_block(test))
+                warning_tests_details.extend(self._get_test_result_details_block(test))
 
         details_blocks = []
         if failed_tests_details:
@@ -118,15 +119,19 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
 
     def _get_test_result_details_block(
         self, test_result: TestResultSummarySchema
-    ) -> dict:
+    ) -> List[dict]:
         test_name_text = f"{test_result.table_name.lower() if test_result.table_name else ''}{f' ({test_result.column_name.lower()})' if test_result.column_name else ''}"
         test_type_text = f"{test_result.test_name}{f' - {test_result.test_sub_type}' if test_result.test_sub_type != 'generic' else ''}"
-        test_description_text = (
-            f"\n - {test_result.description}" if test_result.description else ""
-        )
-        return self.create_text_section_block(
-            f"{f'*{test_name_text}* | ' if test_name_text else ''}{test_type_text}{test_description_text}"
-        )
+        details_blocks = [
+            self.create_text_section_block(
+                f"{f'*{test_name_text}* | ' if test_name_text else ''}{test_type_text}"
+            )
+        ]
+        if test_result.description:
+            details_blocks.append(
+                self.create_context_block([f"_Description:_ {test_result.description}"])
+            )
+        return details_blocks
 
     @staticmethod
     def _get_test_results_totals(

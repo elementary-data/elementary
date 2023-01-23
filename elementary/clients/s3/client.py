@@ -67,7 +67,7 @@ class S3Client:
             bucket_location = self.client.get_bucket_location(Bucket=bucket_name)[
                 "LocationConstraint"
             ]
-            return f"{bucket_name}.s3-website.{bucket_location}.amazonaws.com"
+            return f"http://{bucket_name}.s3-website.{bucket_location}.amazonaws.com"
 
         except Exception as ex:
             logger.warning(f"Unable to get bucket website URL: {ex}.")
