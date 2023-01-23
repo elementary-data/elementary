@@ -533,7 +533,6 @@ def send_report(
             disable_samples=disable_samples,
             filter=select,
         )
-        command_succeeded = False
         (
             generated_report_successfully,
             elementary_html_path,
@@ -547,20 +546,27 @@ def send_report(
             project_name=project_name,
         )
         if generated_report_successfully and elementary_html_path:
-            command_succeeded = data_monitoring.send_report(
+            upload_report_succeeded = data_monitoring.upload_report(
                 elementary_html_path, remote_file_path=bucket_file_path
             )
+            send_test_results_summary_succeeded = (
+                data_monitoring.send_test_results_summary(
+                    days_back=days_back,
+                    test_runs_amount=executions_limit,
+                    disable_passed_test_metrics=disable_passed_test_metrics,
+                )
+            )
+            send_report_succeeded = data_monitoring.send_report(elementary_html_path)
+
         anonymous_tracking.track_cli_end(
             Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name
         )
 
-        command_succeeded = True
-        data_monitoring.send_test_results_summary(
-            days_back=days_back,
-            test_runs_amount=executions_limit,
-            disable_passed_test_metrics=disable_passed_test_metrics,
-        )
-        if not command_succeeded:
+        if not (
+            upload_report_succeeded
+            and send_report_succeeded
+            and send_test_results_summary_succeeded
+        ):
             sys.exit(1)
 
     except Exception as exc:

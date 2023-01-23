@@ -212,7 +212,19 @@ class DataMonitoringReport(DataMonitoring):
         self.execution_properties["success"] = self.success
         return self.success, html_path
 
-    def send_report(
+    def send_report(self, local_html_path: str) -> bool:
+        if self.slack_client:
+            send_succeded = self.slack_client.send_report(
+                self.config.slack_channel_name, local_html_path
+            )
+            self.execution_properties["sent_to_slack_successfully"] = send_succeded
+            if not send_succeded:
+                self.success = False
+
+        self.execution_properties["success"] = self.success
+        return self.success
+
+    def upload_report(
         self, local_html_path: str, remote_file_path: Optional[str] = None
     ) -> bool:
         if self.s3_client:
@@ -228,14 +240,6 @@ class DataMonitoringReport(DataMonitoring):
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
             self.execution_properties["sent_to_gcs_successfully"] = send_succeded
-            if not send_succeded:
-                self.success = False
-
-        if self.slack_client:
-            send_succeded = self.slack_client.send_report(
-                self.config.slack_channel_name, local_html_path
-            )
-            self.execution_properties["sent_to_slack_successfully"] = send_succeded
             if not send_succeded:
                 self.success = False
 
@@ -263,13 +267,22 @@ class DataMonitoringReport(DataMonitoring):
         summary_test_results = self.tests_api.get_test_restuls_summary(
             test_results_db_rows
         )
-        self.slack_client.send_message(
+        send_succeded = self.slack_client.send_message(
             channel_name=self.config.slack_channel_name,
             message=SlackReportSummaryMessageBuilder().get_slack_message(
                 test_results=summary_test_results,
                 bucket_website_url=bucket_website_url,
             ),
         )
+
+        self.execution_properties[
+            "sent_test_results_summary_succesfully"
+        ] = send_succeded
+        if not send_succeded:
+            self.success = False
+
+        self.execution_properties["success"] = self.success
+        return self.success
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         return self.lineage_api.get_lineage(exclude_elementary_models)
