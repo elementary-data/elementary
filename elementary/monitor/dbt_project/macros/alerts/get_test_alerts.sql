@@ -28,7 +28,7 @@
             select 
                 alerts_in_time_limit.alert_id,
                 {# Generate elementary unique id which is used to identify between tests, and set it as unique_id #}
-                coalesce(alerts_in_time_limit.test_unique_id, 'None') || '.' || coalesce(alerts_in_time_limit.column_name, 'None') || '.' || coalesce(alerts_in_time_limit.test_sub_type, 'None') as unique_id,
+                coalesce(alerts_in_time_limit.test_unique_id, 'None') || '.' || coalesce(alerts_in_time_limit.column_name, 'None') || '.' || coalesce(alerts_in_time_limit.sub_type, 'None') as unique_id,
                 alerts_in_time_limit.data_issue_id,
                 alerts_in_time_limit.test_execution_id,
                 alerts_in_time_limit.test_unique_id,
