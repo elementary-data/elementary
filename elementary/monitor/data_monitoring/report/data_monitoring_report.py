@@ -223,6 +223,7 @@ class DataMonitoringReport(DataMonitoring):
         project_name: Optional[str] = None,
         remote_file_path: Optional[str] = None,
         disable_html_attachment: Optional[bool] = False,
+        include_description: Optional[bool] = False,
     ):
         # Generate the report
         generated_report_successfully, local_html_path = self.generate_report(
@@ -251,6 +252,7 @@ class DataMonitoringReport(DataMonitoring):
                 test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
                 bucket_website_url=bucket_website_url,
+                include_description=include_description,
             )
 
         # If only a slack client is provided,
@@ -261,6 +263,7 @@ class DataMonitoringReport(DataMonitoring):
                 days_back=days_back,
                 test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
+                include_description=include_description,
             )
             if not disable_html_attachment:
                 self.send_report_attachment(local_html_path=local_html_path)
@@ -307,6 +310,7 @@ class DataMonitoringReport(DataMonitoring):
         test_runs_amount: Optional[int] = None,
         disable_passed_test_metrics: bool = False,
         bucket_website_url: Optional[str] = None,
+        include_description: bool = False,
     ) -> bool:
         if self.slack_client:
             test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
@@ -322,6 +326,7 @@ class DataMonitoringReport(DataMonitoring):
                 message=SlackReportSummaryMessageBuilder().get_slack_message(
                     test_results=summary_test_results,
                     bucket_website_url=bucket_website_url,
+                    include_description=include_description,
                 ),
             )
 

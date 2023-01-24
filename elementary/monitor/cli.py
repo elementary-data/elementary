@@ -460,6 +460,12 @@ def report(
     default=None,
     help='Disable functualities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
 )
+@click.option(
+    "--include",
+    type=str,
+    default=None,
+    help="Include additional information at the test results summary message.\nCurrently only --include descriptions is supported.",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -492,6 +498,7 @@ def send_report(
     env,
     select,
     disable,
+    include,
 ):
     """
     Send the report to an external platform.
@@ -550,6 +557,7 @@ def send_report(
             project_name=project_name,
             remote_file_path=bucket_file_path,
             disable_html_attachment=(disable == "html_attachment"),
+            include_description=(include == "description"),
         )
 
         anonymous_tracking.track_cli_end(

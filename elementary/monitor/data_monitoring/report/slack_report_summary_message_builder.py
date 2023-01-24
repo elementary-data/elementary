@@ -15,11 +15,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         self,
         test_results: List[TestResultSummarySchema],
         bucket_website_url: Optional[str] = None,
+        include_description: bool = False,
     ) -> SlackMessageSchema:
         totals = self._get_test_results_totals(test_results)
         self._add_title_to_slack_alert(totals, bucket_website_url)
         self._add_preview_to_slack_alert(test_results)
-        self._add_details_to_slack_alert(test_results)
+        self._add_details_to_slack_alert(test_results, include_description)
         return super().get_slack_message()
 
     def _add_title_to_slack_alert(
@@ -79,14 +80,18 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         if preview_blocks:
             self._add_blocks_as_attachments(preview_blocks)
 
-    def _add_details_to_slack_alert(self, test_results: List[TestResultSummarySchema]):
+    def _add_details_to_slack_alert(
+        self,
+        test_results: List[TestResultSummarySchema],
+        include_description: bool = False,
+    ):
         failed_tests_details = []
         warning_tests_details = []
         schema_changes_tests_details = []
         for test in test_results:
             if test.test_type == "schema_change" and test.status != "pass":
                 schema_changes_tests_details.extend(
-                    self._get_test_result_details_block(test)
+                    self._get_test_result_details_block(test, include_description)
                 )
             elif test.status in ["error", "fail"]:
                 failed_tests_details.extend(self._get_test_result_details_block(test))
@@ -118,7 +123,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             self._add_blocks_as_attachments(details_blocks)
 
     def _get_test_result_details_block(
-        self, test_result: TestResultSummarySchema
+        self, test_result: TestResultSummarySchema, include_description: bool = False
     ) -> List[dict]:
         test_name_text = f"{test_result.table_name.lower() if test_result.table_name else ''}{f' ({test_result.column_name.lower()})' if test_result.column_name else ''}"
         test_type_text = f"{test_result.test_name}{f' - {test_result.test_sub_type}' if test_result.test_sub_type != 'generic' else ''}"
@@ -127,7 +132,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
                 f"{f'*{test_name_text}* | ' if test_name_text else ''}{test_type_text}"
             )
         ]
-        if test_result.description:
+        if include_description and test_result.description:
             details_blocks.append(
                 self.create_context_block([f"_Description:_ {test_result.description}"])
             )
