@@ -202,6 +202,11 @@ jobs:
           --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
 
+      - name: Run upload source freshness operation
+        run: |
+          dbt source freshness --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          edr run-operation upload-source-freshness --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+
       - name: Upload edr log
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
