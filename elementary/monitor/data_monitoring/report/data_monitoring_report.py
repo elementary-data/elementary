@@ -21,6 +21,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
 )
+from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
@@ -68,28 +69,56 @@ class DataMonitoringReport(DataMonitoring):
     def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringReportFilter:
         data_monitoring_filter = DataMonitoringReportFilter()
         if filter:
-            invocation_id_regex = re.compile(r"invocation_id:.*")
-            invocation_time_regex = re.compile(r"invocation_time:.*")
-            last_invocation_regex = re.compile(r"last_invocation")
-
-            invocation_id_match = invocation_id_regex.search(filter)
-            invocation_time_match = invocation_time_regex.search(filter)
-            last_invocation_match = last_invocation_regex.search(filter)
-
-            if last_invocation_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    last_invocation=True
-                )
-            elif invocation_id_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    invocation_id=invocation_id_match.group().split(":", 1)[1]
-                )
-            elif invocation_time_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    invocation_time=invocation_time_match.group().split(":", 1)[1]
-                )
+            if self.user_dbt_runner:
+                self.tracking.set_env("select_method", "dbt selector")
+                selector_api = SelectorAPI(self.user_dbt_runner)
+                node_names = selector_api.get_selector_results(selector=filter)
+                return DataMonitoringReportFilter(node_names=node_names)
             else:
-                logger.error(f"Could not parse the given -s/--select: {filter}")
+
+                invocation_id_regex = re.compile(r"invocation_id:.*")
+                invocation_time_regex = re.compile(r"invocation_time:.*")
+                last_invocation_regex = re.compile(r"last_invocation")
+                tag_regex = re.compile(r"tag:.*")
+                owner_regex = re.compile(r"config.meta.owner:.*")
+                model_regex = re.compile(r"model:.*")
+
+                invocation_id_match = invocation_id_regex.search(filter)
+                invocation_time_match = invocation_time_regex.search(filter)
+                last_invocation_match = last_invocation_regex.search(filter)
+                tag_match = tag_regex.search(filter)
+                owner_match = owner_regex.search(filter)
+                model_match = model_regex.search(filter)
+
+                if last_invocation_match:
+                    data_monitoring_filter = DataMonitoringReportFilter(
+                        last_invocation=True
+                    )
+                elif invocation_id_match:
+                    data_monitoring_filter = DataMonitoringReportFilter(
+                        invocation_id=invocation_id_match.group().split(":", 1)[1]
+                    )
+                elif invocation_time_match:
+                    data_monitoring_filter = DataMonitoringReportFilter(
+                        invocation_time=invocation_time_match.group().split(":", 1)[1]
+                    )
+                elif tag_match:
+                    self.tracking.set_env("select_method", "tag")
+                    data_monitoring_filter = DataMonitoringReportFilter(
+                        tag=tag_match.group().split(":", 1)[1]
+                    )
+                elif owner_match:
+                    self.tracking.set_env("select_method", "owner")
+                    data_monitoring_filter = DataMonitoringReportFilter(
+                        owner=owner_match.group().split(":", 1)[1]
+                    )
+                elif model_match:
+                    self.tracking.set_env("select_method", "model")
+                    data_monitoring_filter = DataMonitoringReportFilter(
+                        model=model_match.group().split(":", 1)[1]
+                    )
+                else:
+                    logger.error(f"Could not parse the given -s/--select: {filter}")
         return data_monitoring_filter
 
     def generate_report(
@@ -319,7 +348,7 @@ class DataMonitoringReport(DataMonitoring):
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
             summary_test_results = self.tests_api.get_test_restuls_summary(
-                test_results_db_rows
+                test_results_db_rows=test_results_db_rows, filter=self.filter
             )
             send_succeeded = self.slack_client.send_message(
                 channel_name=self.config.slack_channel_name,

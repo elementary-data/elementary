@@ -20,6 +20,10 @@ class DataMonitoringReportFilter(BaseModel):
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
+    tag: Optional[str] = None
+    owner: Optional[str] = None
+    model: Optional[str] = None
+    node_names: Optional[List[str]] = None
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time):

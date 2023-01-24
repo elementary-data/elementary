@@ -62,8 +62,31 @@ class TestsAPI(APIClient):
     def get_test_restuls_summary(
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
+        filter: Optional[DataMonitoringReportFilter] = None,
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = test_results_db_rows
+        if filter.tag:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if (filter.tag in test_result.tags)
+            ]
+        elif filter.owner:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if (filter.owner in test_result.owners)
+            ]
+        elif filter.model:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if (
+                    test_result.model_unique_id
+                    and test_result.model_unique_id.endswith(filter.model)
+                )
+            ]
+
         filtered_test_results_db_rows = [
             test_result
             for test_result in filtered_test_results_db_rows
