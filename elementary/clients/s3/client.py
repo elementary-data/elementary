@@ -1,5 +1,5 @@
 from os import path
-from typing import Optional
+from typing import Optional, Tuple
 
 import boto3
 import botocore.exceptions
@@ -31,13 +31,14 @@ class S3Client:
 
     def send_report(
         self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
-    ) -> bool:
+    ) -> Tuple[bool, Optional[str]]:
         report_filename = (
             bucket_path.basename(remote_bucket_file_path)
             if remote_bucket_file_path
             else path.basename(local_html_file_path)
         )
         bucket_report_path = remote_bucket_file_path or report_filename
+        bucket_website_url = None
         logger.info(f'Uploading to S3 bucket "{self.config.s3_bucket_name}"')
         try:
             self.client.upload_file(
@@ -53,22 +54,66 @@ class S3Client:
                     # We use report_filename because a path can not be an IndexDocument Suffix.
                     WebsiteConfiguration={"IndexDocument": {"Suffix": report_filename}},
                 )
+                bucket_website_url = self.get_bucket_website_url()
                 logger.info("Updated S3 bucket's website.")
         except botocore.exceptions.ClientError as ex:
             logger.exception("Failed to upload report to S3.")
             if self.tracking:
                 self.tracking.record_cli_internal_exception(ex)
-            return False
-        return True
+            return False, bucket_website_url
+        return True, bucket_website_url
 
     def get_bucket_website_url(self) -> Optional[str]:
-        try:
-            bucket_name = self.config.s3_bucket_name
-            bucket_location = self.client.get_bucket_location(Bucket=bucket_name)[
-                "LocationConstraint"
-            ]
-            return f"http://{bucket_name}.s3-website.{bucket_location}.amazonaws.com"
+        if self.config.update_bucket_website:
+            try:
+                bucket_name = self.config.s3_bucket_name
+                bucket_location = self.client.get_bucket_location(Bucket=bucket_name)[
+                    "LocationConstraint"
+                ]
+                aws_s3_website_url = self._get_aws_s3_website_url_from_location(
+                    bucket_location
+                )
+                return f"http://{bucket_name}.{aws_s3_website_url}"
 
-        except Exception as ex:
-            logger.warning(f"Unable to get bucket website URL: {ex}.")
+            except Exception as ex:
+                logger.warning(f"Unable to get bucket website URL: {ex}.")
+                return None
+        else:
             return None
+
+    @staticmethod
+    def _get_aws_s3_website_url_from_location(location: str) -> str:
+        location_to_website_url_map = {
+            "us-east-2": "s3-website.us-east-2.amazonaws.com",
+            "us-east-1": "s3-website-us-east-1.amazonaws.com",
+            "us-west-1": "s3-website-us-west-1.amazonaws.com",
+            "us-west-2": "s3-website-us-west-2.amazonaws.com",
+            "af-south-1": "s3-website.af-south-1.amazonaws.com",
+            "ap-east-1": "s3-website.ap-east-1.amazonaws.com",
+            "ap-south-2": "s3-website.ap-south-2.amazonaws.com",
+            "ap-southeast-3": "s3-website.ap-southeast-3.amazonaws.com",
+            "ap-south-1": "s3-website.ap-south-1.amazonaws.com",
+            "ap-northeast-3": "s3-website.ap-northeast-3.amazonaws.com",
+            "ap-northeast-2": "s3-website.ap-northeast-2.amazonaws.com",
+            "ap-southeast-1": "s3-website-ap-southeast-1.amazonaws.com",
+            "ap-southeast-2": "s3-website-ap-southeast-2.amazonaws.com",
+            "ap-northeast-1": "s3-website-ap-northeast-1.amazonaws.com",
+            "ca-central-1": "s3-website.ca-central-1.amazonaws.com",
+            "cn-northwest-1": "s3-website.cn-northwest-1.amazonaws.com",
+            "eu-central-1": "s3-website.eu-central-1.amazonaws.com",
+            "eu-west-1": "s3-website-eu-west-1.amazonaws.com",
+            "eu-west-2": "s3-website.eu-west-2.amazonaws.com",
+            "eu-south-1": "s3-website.eu-south-1.amazonaws.com",
+            "eu-west-3": "s3-website.eu-west-3.amazonaws.com",
+            "eu-north-1": "s3-website.eu-north-1.amazonaws.com",
+            "eu-south-2": "s3-website.eu-south-2.amazonaws.com",
+            "eu-central-2": "s3-website.eu-central-2.amazonaws.com",
+            "me-south-1": "s3-website.me-south-1.amazonaws.com",
+            "me-central-1": "s3-website.me-central-1.amazonaws.com",
+            "sa-east-1": "s3-website-sa-east-1.amazonaws.com",
+            "us-gov-east-1": "s3-website.us-gov-east-1.amazonaws.com",
+            "us-gov-west-1": "s3-website-us-gov-west-1.amazonaws.com",
+        }
+        return location_to_website_url_map.get(
+            location, f"s3-website.{location}.amazonaws.com"
+        )

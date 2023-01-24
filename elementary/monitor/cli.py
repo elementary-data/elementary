@@ -454,6 +454,12 @@ def report(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
 )
+@click.option(
+    "--disable",
+    type=str,
+    default=None,
+    help='Disable functualities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -485,6 +491,7 @@ def send_report(
     project_name,
     env,
     select,
+    disable,
 ):
     """
     Send the report to an external platform.
@@ -533,10 +540,7 @@ def send_report(
             disable_samples=disable_samples,
             filter=select,
         )
-        (
-            generated_report_successfully,
-            elementary_html_path,
-        ) = data_monitoring.generate_report(
+        sent_report_successfully = data_monitoring.send_report(
             days_back=days_back,
             test_runs_amount=executions_limit,
             disable_passed_test_metrics=disable_passed_test_metrics,
@@ -544,29 +548,15 @@ def send_report(
             should_open_browser=False,
             exclude_elementary_models=exclude_elementary_models,
             project_name=project_name,
+            remote_file_path=bucket_file_path,
+            disable_html_attachment=(disable == "html_attachment"),
         )
-        if generated_report_successfully and elementary_html_path:
-            upload_report_succeeded = data_monitoring.upload_report(
-                elementary_html_path, remote_file_path=bucket_file_path
-            )
-            send_test_results_summary_succeeded = (
-                data_monitoring.send_test_results_summary(
-                    days_back=days_back,
-                    test_runs_amount=executions_limit,
-                    disable_passed_test_metrics=disable_passed_test_metrics,
-                )
-            )
-            send_report_succeeded = data_monitoring.send_report(elementary_html_path)
 
         anonymous_tracking.track_cli_end(
             Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name
         )
 
-        if not (
-            upload_report_succeeded
-            and send_report_succeeded
-            and send_test_results_summary_succeeded
-        ):
+        if not sent_report_successfully:
             sys.exit(1)
 
     except Exception as exc:
