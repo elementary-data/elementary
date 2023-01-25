@@ -45,7 +45,7 @@
     {%- endset -%}
 
     {% set test_results_agate = run_query(select_test_results) %}
-    {% set test_result_rows_agate = run_query(elementary.get_test_result_rows_query(days_back)).group_by("test_execution_id").select("result_row") %}
+    {% set test_result_rows_agate = run_query(elementary_internal.get_test_result_rows_query(days_back)).group_by("elementary_test_results_id").select("result_row") %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
     {%- for test in tests -%}
         {% set test_rows_sample = none %}
@@ -60,7 +60,7 @@
             {% if not disable_passed_test_metrics %}
                 {% do elementary_tests_allowlist_status.append('pass') %}
             {% endif %}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, test_result_rows_agate, test_type, metrics_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, "id", test_result_rows_agate, test_type, metrics_sample_limit) %}
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}

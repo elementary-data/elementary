@@ -56,12 +56,10 @@
                 end as suppression_status,
                 alerts_in_time_limit.sent_at,
                 tests.meta as test_meta,
-                artifacts_meta.meta as model_meta,
-                test_result_rows.result_row as result_rows
+                artifacts_meta.meta as model_meta
             from alerts_in_time_limit
             left join tests on alerts_in_time_limit.test_unique_id = tests.unique_id
             left join artifacts_meta on alerts_in_time_limit.model_unique_id = artifacts_meta.unique_id
-            left join test_result_rows on alerts_in_time_limit.test_execution_id = test_result_rows.test_execution_id
         )
 
         select *
@@ -70,7 +68,7 @@
     {% endset %}
 
     {% set alerts_agate = run_query(select_pending_alerts_query) %}
-    {% set test_result_rows_agate = run_query(elementary.get_test_result_rows_query(days_back)).group_by("test_execution_id").select("result_row") %}
+    {% set test_result_rows_agate = run_query(elementary_internal.get_test_result_rows_query(days_back)).group_by("elementary_test_results_id").select("result_row") %}
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set pending_alerts = [] %}
     {% for test_result_alert_dict in test_result_alert_dicts %}
@@ -80,7 +78,7 @@
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, test_result_rows_agate, test_type, metrics_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_alert_dict, "alert_id", test_result_rows_agate, test_type, results_sample_limit) %}
         {%- endif -%}
 
         {% set test_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_meta') %}
