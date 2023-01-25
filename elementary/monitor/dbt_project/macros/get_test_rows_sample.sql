@@ -1,18 +1,15 @@
-{%- macro get_test_rows_sample(test, test_results_query, test_type, results_sample_limit = 5) -%}
-    {% set result_rows = test.result_rows %}
-    {% if result_rows is defined and result_rows is not none %}
-      {% do return(fromjson(result_rows)) %}
-    {% endif %}
-
-    {% set test_rows_sample = none %}
-    {% if test_results_query %}
-        {% set test_rows_sample_query = test_results_query %}
+{%- macro get_test_rows_sample(test, test_result_rows_agate, test_type, results_sample_limit = 5) -%}
+    {% set test_rows_sample = [] %}
+    {% set test_execution_id = elementary.insensitive_get_dict_value(test, 'test_execution_id') %}
+    {% set result_rows_agate = test_result_rows_agate.get(test_execution_id) %}
+    {% if result_rows_agate %}
+        {% set result_row_column = result_rows_agate.columns[0] %}
         {% if test_type == 'dbt_test' %}
-            {% set test_rows_sample_query = test_rows_sample_query ~ ' limit ' ~ results_sample_limit %}
+          {% set result_row_column = result_row_column[:results_sample_limit] %}
         {% endif %}
-
-        {% set test_rows_sample_agate = run_query(test_rows_sample_query) %}
-        {% set test_rows_sample = elementary.agate_to_dicts(test_rows_sample_agate) %}
+        {% for result_row in result_row_column %}
+          {% do test_rows_sample.append(fromjson(result_row)) %}
+        {% endfor %}
     {% endif %}
-    {{- return(test_rows_sample) -}}
+    {{ return(test_rows_sample) }}
 {%- endmacro -%}

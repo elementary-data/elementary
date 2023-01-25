@@ -57,7 +57,6 @@
         {# In old versions of elementary, elementary_test_results doesn't contain test_short_name, so we use dbt_test short_name. #}
         dbt_tests.short_name,
         elementary_test_results.test_alias,
-        elementary_test_results.result_rows,
         dbt_tests.meta,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results
