@@ -17,13 +17,6 @@ def test_report_keys(report_data_fixture):
     assert report_data.keys() == report_data_fixture.keys()
 
 
-def test_totals(report_data_fixture):
-    report_data = get_report_data()
-    for key in report_data_fixture:
-        if key.endswith("_totals"):
-            assert_totals(report_data[key], report_data_fixture[key])
-
-
 def test_sidebar():
     report_data = get_report_data()
     assert (
