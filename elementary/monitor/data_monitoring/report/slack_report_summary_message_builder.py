@@ -45,8 +45,14 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
 
         title_blocks.append(
-            self.create_text_section_block(
-                f":white_check_mark: Passed: {totals.get('passed', 0)}      |     :x: Failed: {totals.get('failed', 0)}   |     :Warning: Warning: {totals.get('warning', 0)}    |   :wrench: Schema changes: {totals.get('schema_changes', 0)}"
+            self.create_fields_section_block(
+                [
+                    f":white_check_mark: Passed: {totals.get('passed', 0)}",
+                    f":wrench: Schema changes: {totals.get('schema_changes', 0)}",
+                    f":small_red_triangle: Failed: {totals.get('failed', 0)}",
+                    f":exclamation: Errors: {totals.get('error', 0)}",
+                    f":Warning: Warning: {totals.get('warning', 0)}",
+                ]
             )
         )
 
@@ -85,6 +91,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         test_results: List[TestResultSummarySchema],
         include_description: bool = False,
     ):
+        error_tests_details = []
         failed_tests_details = []
         warning_tests_details = []
         schema_changes_tests_details = []
@@ -93,14 +100,18 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
                 schema_changes_tests_details.extend(
                     self._get_test_result_details_block(test, include_description)
                 )
-            elif test.status in ["error", "fail"]:
+            elif test.status == "error":
+                error_tests_details.extend(self._get_test_result_details_block(test))
+            elif test.status == "fail":
                 failed_tests_details.extend(self._get_test_result_details_block(test))
             else:
                 warning_tests_details.extend(self._get_test_result_details_block(test))
 
         details_blocks = []
         if failed_tests_details:
-            details_blocks.append(self.create_text_section_block(":X: *Failed tests*"))
+            details_blocks.append(
+                self.create_text_section_block(":small_red_triangle: *Failed tests*")
+            )
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(failed_tests_details)
             details_blocks.append(self.create_empty_section_block())
@@ -117,6 +128,14 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(schema_changes_tests_details)
+            details_blocks.append(self.create_empty_section_block())
+
+        if error_tests_details:
+            details_blocks.append(
+                self.create_text_section_block(":exclamation: *Error*")
+            )
+            details_blocks.append(self.create_divider_block())
+            details_blocks.extend(error_tests_details)
             details_blocks.append(self.create_empty_section_block())
 
         if details_blocks:
@@ -142,13 +161,15 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     def _get_test_results_totals(
         test_results: List[TestResultSummarySchema],
     ) -> Dict[str, int]:
-        totals = dict(passed=0, failed=0, warning=0, schema_changes=0)
+        totals = dict(passed=0, failed=0, error=0, warning=0, schema_changes=0)
         for test in test_results:
             if test.test_type == "schema_change" and test.status != "pass":
                 totals["schema_changes"] += 1
             elif test.status == "pass":
                 totals["passed"] += 1
-            elif test.status in ["error", "fail"]:
+            elif test.status == "error":
+                totals["error"] += 1
+            elif test.status == "fail":
                 totals["failed"] += 1
             else:
                 totals["warning"] += 1
