@@ -3,14 +3,15 @@ on:
   schedule:
     - cron: '0 */8 * * *'
   workflow_dispatch:
-    elementary-ref:
-      type: string
-      required: false
-      description: Branch or tag to checkout for 'elementary' repository
-    dbt-data-reliability-ref:
-      type: string
-      required: false
-      description: Branch or tag to checkout for 'dbt-data-reliability' repository
+    inputs:
+      elementary-ref:
+        type: string
+        required: false
+        description: Branch or tag to checkout for 'elementary' repository
+      dbt-data-reliability-ref:
+        type: string
+        required: false
+        description: Branch or tag to checkout for 'dbt-data-reliability' repository
 
 jobs:
   test:
