@@ -56,7 +56,7 @@ class Alert:
                 tz.gettz(timezone) if timezone else tz.tzlocal()
             )
         except Exception:
-            logger.error(f'Failed to parse "detected_at" field.')
+            logger.error('Failed to parse "detected_at" field.')
         self.database_name = database_name
         self.schema_name = schema_name
         self.owners = owners

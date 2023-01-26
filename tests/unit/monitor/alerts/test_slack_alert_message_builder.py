@@ -83,8 +83,8 @@ def test_validate_preview_blocks():
     )
 
     # over 5 blocks
-    with pytest.raises(PreviewIsTooLongError) as preview_is_too_long_error:
-        validated_preview_blocks = message_builder._validate_preview_blocks(
+    with pytest.raises(PreviewIsTooLongError):
+        message_builder._validate_preview_blocks(
             [block, block, block, block, block, block]
         )
 

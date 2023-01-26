@@ -63,10 +63,6 @@ on:
         type: boolean
         required: false
         default: true
-      dbt-pre-release:
-        type: boolean
-        required: false
-        default: false
       generate-data:
         type: boolean
         required: false
@@ -121,13 +117,11 @@ jobs:
         if: inputs.warehouse-type == 'spark'
         run: sudo apt-get install python-dev libsasl2-dev gcc
 
-      - name: Install pre-release dbt
-        if: inputs.dbt-pre-release
-        run: pip install --pre dbt-core dbt-${{ inputs.warehouse-type }}
-
       - name: Install dbt
-        if: inputs.dbt-version
-        run: pip install "dbt-core==${{ inputs.dbt-version }}" "dbt-${{ inputs.warehouse-type }}<=${{ inputs.dbt-version }}"
+        run:
+          pip install --pre
+          "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
+          "dbt-${{ inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
@@ -207,6 +201,11 @@ jobs:
           --google-service-account-path /tmp/gcs_keyfile.json
           --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
+
+      - name: Run upload source freshness operation
+        run: |
+          dbt source freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}" || true
+          edr run-operation upload-source-freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
 
       - name: Upload edr log
         if: ${{ always() }}

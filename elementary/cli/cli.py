@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 import click
@@ -47,8 +46,8 @@ class ElementaryCLI(click.MultiCommand):
 
     def invoke(self, ctx: click.Context) -> Any:
         click.echo(
-            f"Any feedback and suggestions are welcomed! join our community here - "
-            f"https://bit.ly/slack-elementary\n"
+            "Any feedback and suggestions are welcomed! join our community here - "
+            "https://bit.ly/slack-elementary\n"
         )
         logger.info(f"Running with edr={package.get_package_version()}")
         return super().invoke(ctx)

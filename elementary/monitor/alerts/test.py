@@ -273,10 +273,8 @@ class ElementaryTestAlert(DbtTestAlert):
         anomalous_value = None
         if self.test_type == "schema_change":
             alert_title = "Schema change detected"
-            sub_type_title = "Change Type"
         elif self.test_type == "anomaly_detection":
             alert_title = "Data anomaly detected"
-            sub_type_title = "Anomaly Type"
             anomalous_value = self.other if self.other else None
         else:
             raise ValueError("Invalid test type.", self.test_type)

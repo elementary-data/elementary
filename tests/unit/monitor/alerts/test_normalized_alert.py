@@ -159,7 +159,7 @@ def test_get_alert_chennel():
         model_meta=json.dumps(dict()),
     )
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_chennel() == None
+    assert normalized_alert._get_alert_chennel() is None
 
 
 def test_get_alert_suppression_interval():
