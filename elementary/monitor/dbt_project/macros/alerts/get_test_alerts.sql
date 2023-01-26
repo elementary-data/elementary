@@ -72,20 +72,21 @@
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set pending_alerts = [] %}
     {% for test_result_alert_dict in test_result_alert_dicts %}
+        {% set alert_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id') %}
         {% set test_results_query = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_results_query') %}
         {% set test_type = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_type') %}
         {% set status = elementary.insensitive_get_dict_value(test_result_alert_dict, 'status') | lower %}
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_alert_dict, "alert_id", test_result_rows_agate, test_type, results_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(alert_id), test_type, results_sample_limit) %}
         {%- endif -%}
 
         {% set test_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_meta') %}
         {% set model_unique_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_unique_id') %}
         {% set model_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_meta') %}
 
-        {% set pending_alert_dict = {'id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id'),
+        {% set pending_alert_dict = {'id': alert_id,
                                  'unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
                                  'model_unique_id': model_unique_id,
                                  'test_unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
