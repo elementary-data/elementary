@@ -3,6 +3,14 @@ on:
   schedule:
     - cron: '0 */8 * * *'
   workflow_dispatch:
+    elementary-ref:
+      type: string
+      required: false
+      description: Branch or tag to checkout for 'elementary' repository
+    dbt-data-reliability-ref:
+      type: string
+      required: false
+      description: Branch or tag to checkout for 'dbt-data-reliability' repository
 
 jobs:
   test:
@@ -13,4 +21,6 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
+      elementary-ref: ${{ inputs.elementary-ref }}
+      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
     secrets: inherit
