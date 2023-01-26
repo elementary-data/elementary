@@ -62,13 +62,15 @@ jobs:
         run: |
           sed -i 's/version="[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version="${{ inputs.cli-version }}"/' ./setup.py
       - name: Bump version for package (using input)
-        if: ${{ steps.validate-cli-input.outputs.validated-dbt-package-version != ''}}
+        if: ${{ needs.validate-version.outputs.validated-dbt-package-version != ''}}
         run: |
           sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.validated-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
+          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.validated-dbt-package-version }}/' ./docs/_snippets/quickstart-package-install.mdx
       - name: Bump version for package (using default)
-        if: ${{ steps.validate-cli-input.outputs.validated-dbt-package-version == ''}}
+        if: ${{ needs.validate-version.outputs.validated-dbt-package-version == ''}}
         run: |
           sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.default-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
+          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.default-dbt-package-version }}/' ./docs/_snippets/quickstart-package-install.mdx
       - name: Commit changes
         run: git commit -am "release v${{ inputs.cli-version }}"
       - name: Push code
