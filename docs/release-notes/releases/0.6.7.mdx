@@ -1,0 +1,38 @@
+---
+title: "Elementary 0.6.7"
+sidebarTitle: "0.6.7"
+description: "Python v0.6.7, dbt package v0.6.11"
+---
+
+### 🔥 What's new?
+
+- **Postgres integration** 🆕
+  - Elementary now supports Postgres! Thank you [Tasos Kouridis](https://github.com/kouridis) for this meaningful contribution!
+  - [Docs here](/integrations/postgres) 
+  
+- **Freshness anomalies monitoring improvements** 🥬
+  - We have split our freshness anomalies test into two different tests to better handle two common different use cases:
+    - `freshness_anomalies` - monitors anomalies in the frequency of updates. Imagine a table that is being updated hourly and then all of a sudden this table wasn't updated for 4 hours. Here you would probably use the `updated_at`/`inserted_at` column as an input for this test.
+    - `event_freshness_anomalies` - monitors that the underlying data is up to date. Imagine an events table that is being updated hourly correctly but the events themselves are coming with a delay of 2 days from your production databases. Here, you would probably use the `event_timestamp` column as an input for this test.
+  - [Docs here](guides/add-elementary-tests#table-model-source-tests)
+
+### 💫 More changes
+
+- Added compatibility with dbt's upcoming release (1.4.0).
+- Following the breaking change we experienced in dbt 1.3.2, we've re-added the source freshness test support.
+- Added a few safety measures to make sure concurrent runs are always supported.
+- Thank you [Emil Nilsson](https://github.com/esenilsson) for adding the ability to choose a custom S3 endpoint to host the report when using edr cli (`--s3-endpoint-url TEXT`).
+- We updated the `schema_changes_from_baseline` test comparison to be case-insensitive. Thanks Manish Ramrakhiani for bringing this up! 
+- Thank you [Pratik Bothra](https://github.com/pratik60), [Clinton Adams](https://github.com/clad) and [Benoit Turbang](https://github.com/benoit-tropos-io) for helping us keep our documentation up to date and typos free 😊
+
+### 🐞 Bug fixes
+- Resolved a race condition that sometimes caused a run failure (caused `TestRunSchema.test_runs: None is not an allowed value error`).
+- Fixed a bug where a test that always failed has the value 0% for ‘Fail Rate’. Thanks Jon Simpson for bringing this up!
+- Fixed a bug where `where_expression` was only implemented when a timestamp was defined. Thanks Ran Tibi for bringing this up!
+- Fixed `UnicodeDecodeError` error in Windows due to their default encoding. 
+
+As part of this version, we've invested in our testing infrastructure to ensure we're able to keep moving fast and providing valuable features! 💪⚡ 
+
+### Github links:
+- [v0.6.7 Python](https://github.com/elementary-data/elementary/releases/tag/v0.6.7)
+- [v0.6.11 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.6.11)

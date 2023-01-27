@@ -110,11 +110,16 @@
       "pages": [
         "integrations/dbt",
         "integrations/slack",
-        "integrations/snowflake",
-        "integrations/bigquery",
-        "integrations/redshift",
-        "integrations/databricks",
-        "integrations/postgres"
+        {
+          "group": "Data Warehouses",
+          "pages": [
+            "integrations/snowflake",
+            "integrations/bigquery",
+            "integrations/redshift",
+            "integrations/databricks",
+            "integrations/postgres"
+          ]
+        }
       ]
     },
     {
@@ -124,6 +129,19 @@
         "general/faq",
         "general/contributions",
         "general/community-and-support"
+      ]
+    },
+    {
+      "group": "Release Notes",
+      "pages": [
+        "release-notes/upgrading-elementary",
+        {
+          "group": "Releases",
+          "pages": [
+            "release-notes/releases/0.6.7",
+            "release-notes/releases/0.6.5"
+          ]
+        }
       ]
     }
   ],
