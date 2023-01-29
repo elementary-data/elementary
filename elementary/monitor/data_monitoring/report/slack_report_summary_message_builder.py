@@ -107,9 +107,10 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         tags = []
         subscribers = []
         for test in test_results:
-            owners.extend(test.owners)
-            tags.extend(test.tags)
-            subscribers.extend(test.subscribers)
+            if test.status != "pass":
+                owners.extend(test.owners)
+                tags.extend(test.tags)
+                subscribers.extend(test.subscribers)
 
         tags_text = self.prettify_and_dedup_list(tags) if tags else "_No tags_"
         owners_text = self.prettify_and_dedup_list(owners) if owners else "_No owners_"
