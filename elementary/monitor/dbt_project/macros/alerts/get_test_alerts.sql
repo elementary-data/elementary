@@ -27,8 +27,8 @@
         extended_alerts as (
             select 
                 alerts_in_time_limit.alert_id,
-                {# Generate elementary unique id which is used to identify between tests, and set it as unique_id #}
-                coalesce(alerts_in_time_limit.test_unique_id, 'None') || '.' || coalesce(alerts_in_time_limit.column_name, 'None') || '.' || coalesce(alerts_in_time_limit.sub_type, 'None') as unique_id,
+                {# Generate elementary unique id which is used to identify between tests, and set it as alert_class_id #}
+                coalesce(alerts_in_time_limit.test_unique_id, 'None') || '.' || coalesce(alerts_in_time_limit.column_name, 'None') || '.' || coalesce(alerts_in_time_limit.sub_type, 'None') as alert_class_id,
                 alerts_in_time_limit.data_issue_id,
                 alerts_in_time_limit.test_execution_id,
                 alerts_in_time_limit.test_unique_id,
@@ -88,7 +88,7 @@
         {% set model_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_meta') %}
 
         {% set pending_alert_dict = {'id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id'),
-                                 'unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'unique_id'),
+                                 'alert_class_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_class_id'),
                                  'model_unique_id': model_unique_id,
                                  'test_unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
                                  'detected_at': elementary.insensitive_get_dict_value(test_result_alert_dict, 'detected_at'),
@@ -124,8 +124,8 @@
     {% set select_last_alert_sent_times_query %}
         with alerts_in_time_limit as (
             select
-                {# Generate elementary unique id which is used to identify between tests, and set it as unique_id #}
-                coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(sub_type, 'None') as unique_id,
+                {# Generate elementary unique id which is used to identify between tests, and set it as alert_class_id #}
+                coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(sub_type, 'None') as alert_class_id,
                 case
                     when suppression_status is NULL and alert_sent = TRUE then 'sent'
                     when suppression_status is NULL and alert_sent = FALSE then 'pending'
@@ -137,11 +137,11 @@
         )
 
         select 
-            unique_id,
+            alert_class_id,
             max(sent_at) as last_sent_at
         from alerts_in_time_limit
         where suppression_status = 'sent'
-        group by unique_id
+        group by alert_class_id
     {% endset %}
 
     {% set alerts_agate = run_query(select_last_alert_sent_times_query) %}
@@ -149,7 +149,7 @@
     {% set last_alert_times = {} %}
     {% for last_alert_sent_time_result_dict in last_alert_sent_time_result_dicts %}
         {% do last_alert_times.update({
-            last_alert_sent_time_result_dict.get('unique_id'): last_alert_sent_time_result_dict.get('last_sent_at')
+            last_alert_sent_time_result_dict.get('alert_class_id'): last_alert_sent_time_result_dict.get('last_sent_at')
         }) %}
     {% endfor %}
     {% do elementary.edr_log(tojson(last_alert_times)) %}

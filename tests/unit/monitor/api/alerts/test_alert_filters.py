@@ -14,7 +14,7 @@ def initial_alerts():
     test_alerts = [
         TestAlert(
             id="1",
-            unique_id="test_id_1",
+            alert_class_id="test_id_1",
             model_unique_id="elementary.model_id_1",
             test_unique_id="test_id_1",
             test_name="test_1",
@@ -24,7 +24,7 @@ def initial_alerts():
         ),
         TestAlert(
             id="2",
-            unique_id="test_id_2",
+            alert_class_id="test_id_2",
             model_unique_id="elementary.model_id_1",
             test_unique_id="test_id_2",
             test_name="test_2",
@@ -34,7 +34,7 @@ def initial_alerts():
         ),
         TestAlert(
             id="3",
-            unique_id="test_id_3",
+            alert_class_id="test_id_3",
             model_unique_id="elementary.model_id_2",
             test_unique_id="test_id_3",
             test_name="test_3",
@@ -45,7 +45,7 @@ def initial_alerts():
         ),
         TestAlert(
             id="4",
-            unique_id="test_id_4",
+            alert_class_id="test_id_4",
             model_unique_id="elementary.model_id_2",
             test_unique_id="test_id_4",
             test_name="test_4",
@@ -57,7 +57,7 @@ def initial_alerts():
     model_alerts = [
         ModelAlert(
             id="1",
-            unique_id="elementary.model_id_1",
+            alert_class_id="elementary.model_id_1",
             alias="modely",
             path="my/path",
             original_path="",
@@ -71,7 +71,7 @@ def initial_alerts():
         ),
         ModelAlert(
             id="2",
-            unique_id="elementary.model_id_1",
+            alert_class_id="elementary.model_id_1",
             alias="modely",
             path="my/path",
             original_path="",
@@ -85,7 +85,7 @@ def initial_alerts():
         ),
         ModelAlert(
             id="3",
-            unique_id="elementary.model_id_2",
+            alert_class_id="elementary.model_id_2",
             alias="model2",
             path="my/path2",
             original_path="",
@@ -103,7 +103,7 @@ def initial_alerts():
             id="1",
             data=dict(
                 id="1",
-                unique_id="test_id_1",
+                alert_class_id="test_id_1",
                 model_unique_id="elementary.model_id_1",
                 test_unique_id="test_id_1",
                 test_name="test_1",
@@ -116,7 +116,7 @@ def initial_alerts():
             id="2",
             data=dict(
                 id="2",
-                unique_id="elementary.model_id_1",
+                alert_class_id="elementary.model_id_1",
                 alias="modely",
                 path="my/path",
                 original_path="",

@@ -108,19 +108,19 @@ class AlertsAPI(APIClient):
         suppressed_alerts = self._get_suppressed_alerts(
             pending_alerts, last_alert_sent_times
         )
-        latest_alerts_id = self._get_latest_alerts(pending_alerts)
+        latest_alert_ids = self._get_latest_alerts(pending_alerts)
         alerts_to_skip = []
         alerts_to_send = []
         malformed_alerts_to_send = []
 
         for alert in pending_alerts.alerts:
-            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts or alert.id not in latest_alert_ids:
                 alerts_to_skip.append(alert)
             else:
                 alerts_to_send.append(alert)
 
         for alert in pending_alerts.malformed_alerts:
-            if alert.id in suppressed_alerts or alert.id not in latest_alerts_id:
+            if alert.id in suppressed_alerts or alert.id not in latest_alert_ids:
                 alerts_to_skip.append(alert)
             else:
                 malformed_alerts_to_send.append(alert)
@@ -143,10 +143,10 @@ class AlertsAPI(APIClient):
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
         for alert in [*alerts.alerts, *alerts.malformed_alerts]:
-            unique_id = (
-                alert.data.get("unique_id")
+            alert_class_id = (
+                alert.data.get("alert_class_id")
                 if isinstance(alert, MalformedAlert)
-                else alert.unique_id
+                else alert.alert_class_id
             )
             suppression_interval = (
                 alert.data.get("alert_suppression_interval")
@@ -154,8 +154,8 @@ class AlertsAPI(APIClient):
                 else alert.alert_suppression_interval
             )
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(unique_id))
-                if last_alert_sent_times.get(unique_id)
+                datetime.fromisoformat(last_alert_sent_times.get(alert_class_id))
+                if last_alert_sent_times.get(alert_class_id)
                 else None
             )
             is_alert_in_suppression = (
@@ -181,9 +181,9 @@ class AlertsAPI(APIClient):
         latest_alert_ids = []
         for alert in [*alerts.alerts, *alerts.malformed_alerts]:
             id = (
-                alert.data.get("unique_id")
+                alert.data.get("alert_class_id")
                 if isinstance(alert, MalformedAlert)
-                else alert.unique_id
+                else alert.alert_class_id
             )
             current_last_alert = alert_last_times[id]
             detected_at = (
@@ -192,11 +192,10 @@ class AlertsAPI(APIClient):
                 else alert.detected_at
             )
             alert_detected_at = detected_at.strftime(DATETIME_FORMAT)
-            if not current_last_alert:
-                alert_last_times[id] = dict(
-                    alert_id=alert.id, detected_at=alert_detected_at
-                )
-            elif current_last_alert["detected_at"] < alert_detected_at:
+            if (
+                not current_last_alert
+                or current_last_alert["detected_at"] < alert_detected_at
+            ):
                 alert_last_times[id] = dict(
                     alert_id=alert.id, detected_at=alert_detected_at
                 )

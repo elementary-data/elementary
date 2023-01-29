@@ -29,7 +29,7 @@
                 alerts_in_time_limit.max_loaded_at_time_ago_in_s,
                 alerts_in_time_limit.status,
                 alerts_in_time_limit.error,
-                alerts_in_time_limit.unique_id,
+                alerts_in_time_limit.unique_id as alert_class_id,
                 alerts_in_time_limit.database_name,
                 alerts_in_time_limit.schema_name,
                 alerts_in_time_limit.source_name,
@@ -64,7 +64,7 @@
     {% set pending_alerts = [] %}
     {% for alert_dict in alerts_dicts %}
         {% set pending_alert_dict = {'id': alert_dict.get('alert_id'),
-                                 'unique_id': alert_dict.get('unique_id'),
+                                 'alert_class_id': alert_dict.get('alert_class_id'),
                                  'detected_at': alert_dict.get('detected_at'),
                                  'snapshotted_at': alert_dict.get('snapshotted_at'),
                                  'max_loaded_at': alert_dict.get('max_loaded_at'),
@@ -96,7 +96,7 @@
     {% set select_last_alert_sent_times_query %}
         with alerts_in_time_limit as (
             select
-                unique_id,
+                unique_id as alert_class_id,
                 case
                     when suppression_status is NULL and alert_sent = TRUE then 'sent'
                     when suppression_status is NULL and alert_sent = FALSE then 'pending'
@@ -108,11 +108,11 @@
         )
 
         select 
-            unique_id,
+            alert_class_id,
             max(sent_at) as last_sent_at
         from alerts_in_time_limit
         where suppression_status = 'sent'
-        group by unique_id
+        group by alert_class_id
     {% endset %}
 
     {% set alerts_agate = run_query(select_last_alert_sent_times_query) %}
@@ -120,7 +120,7 @@
     {% set last_alert_times = {} %}
     {% for last_alert_sent_time_result_dict in last_alert_sent_time_result_dicts %}
         {% do last_alert_times.update({
-            last_alert_sent_time_result_dict.get('unique_id'): last_alert_sent_time_result_dict.get('last_sent_at')
+            last_alert_sent_time_result_dict.get('alert_class_id'): last_alert_sent_time_result_dict.get('last_sent_at')
         }) %}
     {% endfor %}
     {% do elementary.edr_log(tojson(last_alert_times)) %}

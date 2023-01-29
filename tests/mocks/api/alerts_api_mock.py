@@ -26,7 +26,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert within suppression interval
             dict(
                 id="alert_id_1",
-                unique_id="test_id_1.column.generic",
+                alert_class_id="test_id_1.column.generic",
                 test_unique_id="test_id_1",
                 model_unique_id="model_id_1",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -56,7 +56,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert after suppression interval
             dict(
                 id="alert_id_2",
-                unique_id="test_id_4.column.generic",
+                alert_class_id="test_id_4.column.generic",
                 test_unique_id="test_id_4",
                 model_unique_id="model_id_1",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -86,7 +86,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert without suppression interval
             dict(
                 id="alert_id_3",
-                unique_id="test_id_2.column.row_count",
+                alert_class_id="test_id_2.column.row_count",
                 test_unique_id="test_id_2",
                 model_unique_id="model_id_2",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -116,7 +116,7 @@ class MockAlertsAPI(AlertsAPI):
             # First occurrence alert with suppression interval
             dict(
                 id="alert_id_4",
-                unique_id="test_id_3.column.row_count",
+                alert_class_id="test_id_3.column.row_count",
                 test_unique_id="test_id_3",
                 model_unique_id="model_id_2",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -146,7 +146,7 @@ class MockAlertsAPI(AlertsAPI):
             # Duplicated alert that should be deduped
             dict(
                 id="alert_id_5",
-                unique_id="test_id_3.column.row_count",
+                alert_class_id="test_id_3.column.row_count",
                 test_unique_id="test_id_3",
                 model_unique_id="model_id_2",
                 detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(
@@ -190,7 +190,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert within suppression interval
             dict(
                 id="alert_id_1",
-                unique_id="model_id_1",
+                alert_class_id="model_id_1",
                 alias="model",
                 path="",
                 original_path="",
@@ -210,7 +210,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert after suppression interval
             dict(
                 id="alert_id_2",
-                unique_id="model_id_4",
+                alert_class_id="model_id_4",
                 alias="model",
                 path="",
                 original_path="",
@@ -230,7 +230,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert without suppression interval
             dict(
                 id="alert_id_3",
-                unique_id="model_id_2",
+                alert_class_id="model_id_2",
                 alias="model",
                 path="",
                 original_path="",
@@ -250,7 +250,7 @@ class MockAlertsAPI(AlertsAPI):
             # First occurrence alert with suppression interval
             dict(
                 id="alert_id_4",
-                unique_id="model_id_3",
+                alert_class_id="model_id_3",
                 alias="model",
                 path="",
                 original_path="",
@@ -270,7 +270,7 @@ class MockAlertsAPI(AlertsAPI):
             # Duplicated alert that should be deduped
             dict(
                 id="alert_id_5",
-                unique_id="model_id_3",
+                alert_class_id="model_id_3",
                 alias="model",
                 path="",
                 original_path="",
@@ -302,7 +302,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert within suppression interval
             dict(
                 id="alert_id_1",
-                unique_id="source_id_1",
+                alert_class_id="source_id_1",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -326,7 +326,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert after suppression interval
             dict(
                 id="alert_id_2",
-                unique_id="source_id_4",
+                alert_class_id="source_id_4",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -350,7 +350,7 @@ class MockAlertsAPI(AlertsAPI):
             # Alert without suppression interval
             dict(
                 id="alert_id_3",
-                unique_id="source_id_2",
+                alert_class_id="source_id_2",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -374,7 +374,7 @@ class MockAlertsAPI(AlertsAPI):
             # First occurrence alert with suppression interval
             dict(
                 id="alert_id_4",
-                unique_id="source_id_3",
+                alert_class_id="source_id_3",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -398,7 +398,7 @@ class MockAlertsAPI(AlertsAPI):
             # Duplicated alert that should be deduped
             dict(
                 id="alert_id_5",
-                unique_id="source_id_3",
+                alert_class_id="source_id_3",
                 detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(
                     DATETIME_FORMAT
                 ),
