@@ -56,7 +56,9 @@ class GCSClient:
                     destination_bucket=bucket,
                     new_name=bucket_name,
                 )
-                bucket_website_url = self.get_bucket_website_url(bucket_name)
+                bucket_website_url = self.get_bucket_website_url(
+                    destination_bucket=bucket, bucket_name=bucket_name
+                )
                 logger.info("Updated GCS bucket's website.")
         except google.cloud.exceptions.GoogleCloudError as ex:
             logger.exception("Failed to upload report to GCS.")
@@ -65,9 +67,16 @@ class GCSClient:
             return False, bucket_website_url
         return True, bucket_website_url
 
-    def get_bucket_website_url(self, bucket_name: str) -> Optional[str]:
+    def get_bucket_website_url(
+        self, bucket_name: str, destination_bucket: Optional[str] = None
+    ) -> Optional[str]:
         if self.config.update_bucket_website:
-            return f"https://storage.googleapis.com/{bucket_name}"
+            full_bucket_path = (
+                f"{destination_bucket}/{bucket_name}"
+                if destination_bucket
+                else bucket_name
+            )
+            return f"https://storage.googleapis.com/{full_bucket_path}"
 
     def get_client(self, config: Config):
         creds = self.get_credentials(config)
