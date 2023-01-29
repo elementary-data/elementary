@@ -89,4 +89,30 @@ elementary:
       threads: [number of threads like 8]
 ```
 
+```yml Postgres
+## POSTGRES ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: postgres
+      host: [hostname]
+      user: [username]
+      password: [password]
+      port: [port]
+      dbname: [database name]
+      schema: [schema name]  # elementary schema, usually [schema name]_elementary
+      threads: [1 or more] 
+      keepalives_idle: 0 # default 0 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      # role: [optional, set the role dbt assumes when executing queries]
+      # sslmode: [optional, set the sslmode used to connect to the database]
+
+
+```
+
 </CodeGroup>
