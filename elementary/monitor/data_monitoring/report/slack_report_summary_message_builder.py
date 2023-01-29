@@ -29,7 +29,11 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             filter=filter,
         )
         self._add_preview_to_slack_alert(test_results)
-        self._add_details_to_slack_alert(test_results, include_description)
+        self._add_details_to_slack_alert(
+            test_results=test_results,
+            include_description=include_description,
+            bucket_website_url=bucket_website_url,
+        )
         return super().get_slack_message()
 
     def _add_title_to_slack_alert(
@@ -116,10 +120,10 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         )
 
         preview_blocks = [
+            self.create_text_section_block(":mega: *Attention required* :mega:"),
             self.create_text_section_block(f"*Tags:* {tags_text}"),
             self.create_text_section_block(f"*Owners:* {owners_text}"),
             self.create_text_section_block(f"*Subscribers:* {subscribers_text}"),
-            self.create_empty_section_block(),
             self.create_empty_section_block(),
         ]
         if preview_blocks:
@@ -129,6 +133,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         self,
         test_results: List[TestResultSummarySchema],
         include_description: bool = False,
+        bucket_website_url: Optional[str] = None,
     ):
         error_tests_details = []
         failed_tests_details = []
@@ -153,13 +158,11 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(failed_tests_details)
-            details_blocks.append(self.create_empty_section_block())
 
         if warning_tests_details:
             details_blocks.append(self.create_text_section_block(":warning: *Warning*"))
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(warning_tests_details)
-            details_blocks.append(self.create_empty_section_block())
 
         if schema_changes_tests_details:
             details_blocks.append(
@@ -167,7 +170,6 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(schema_changes_tests_details)
-            details_blocks.append(self.create_empty_section_block())
 
         if error_tests_details:
             details_blocks.append(
@@ -175,10 +177,21 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(error_tests_details)
-            details_blocks.append(self.create_empty_section_block())
 
-        if details_blocks:
+        ammount_of_details_blocks = len(details_blocks)
+        if (
+            details_blocks
+            and ammount_of_details_blocks <= self._MAX_AMMOUNT_OF_ATTACHMENTS
+        ):
             self._add_blocks_as_attachments(details_blocks)
+        elif (
+            details_blocks
+            and ammount_of_details_blocks > self._MAX_AMMOUNT_OF_ATTACHMENTS
+        ):
+            too_many_test_results_message = f"_The amount of results exceeded Slack’s limitation. Please {f'<{bucket_website_url}|visit the report>' if bucket_website_url else 'check out the attached report'} to see result’s details{'._' if bucket_website_url else '_ :point_down:'}"
+            self._add_blocks_as_attachments(
+                [self.create_text_section_block(too_many_test_results_message)]
+            )
 
     def _get_test_result_details_block(
         self, test_result: TestResultSummarySchema, include_description: bool = False
