@@ -57,7 +57,8 @@ class GCSClient:
                     new_name=bucket_name,
                 )
                 bucket_website_url = self.get_bucket_website_url(
-                    destination_bucket=bucket, bucket_name=bucket_name
+                    destination_bucket=self.config.gcs_bucket_name,
+                    bucket_name=bucket_name,
                 )
                 logger.info("Updated GCS bucket's website.")
         except google.cloud.exceptions.GoogleCloudError as ex:
