@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.api.tests.schema import TestResultSummarySchema
-from elementary.monitor.data_monitoring.report.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
 from elementary.utils.time import convert_utc_time_to_timezone
 
 
@@ -15,16 +15,17 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     def get_slack_message(
         self,
         test_results: List[TestResultSummarySchema],
+        env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
-        filter: Optional[DataMonitoringReportFilter] = None,
+        filter: Optional[DataMonitoringFilterSchema] = None,
         include_description: bool = False,
     ) -> SlackMessageSchema:
-        totals = self._get_test_results_totals(test_results)
         self._add_title_to_slack_alert(
-            totals=totals,
+            test_results=test_results,
             bucket_website_url=bucket_website_url,
             days_back=days_back,
+            env=env,
             filter=filter,
         )
         self._add_preview_to_slack_alert(test_results)
@@ -33,18 +34,26 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
 
     def _add_title_to_slack_alert(
         self,
-        totals: Dict[str, int],
+        test_results: List[TestResultSummarySchema],
+        env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
-        filter: Optional[DataMonitoringReportFilter] = None,
+        filter: Optional[DataMonitoringFilterSchema] = None,
     ):
         current_time = convert_utc_time_to_timezone(datetime.utcnow()).strftime(
             "%Y-%m-%d | %H:%M"
         )
+        env_text = (
+            ":construction: Development"
+            if env == "dev"
+            else ":large_green_circle: Production"
+        )
         summary_filter_text = self._get_summary_filter_text(days_back, filter)
+        totals = self._get_test_results_totals(test_results)
+
         title_blocks = [
             self.create_header_block(
-                f":mag: Elementary monitoring report summary ({current_time})"
+                f":mag: Monitoring summary ({current_time} | {env_text})"
             ),
             self.create_text_section_block(summary_filter_text),
         ]
@@ -74,7 +83,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     @staticmethod
     def _get_summary_filter_text(
         days_back: int,
-        filter: Optional[DataMonitoringReportFilter] = None,
+        filter: Optional[DataMonitoringFilterSchema] = None,
     ) -> str:
         selector_text = None
         if filter and filter.tag:
@@ -176,14 +185,14 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     ) -> List[dict]:
         test_name_text = f"{test_result.table_name.lower() if test_result.table_name else ''}{f' ({test_result.column_name.lower()})' if test_result.column_name else ''}"
         test_type_text = f"{test_result.test_name}{f' - {test_result.test_sub_type}' if test_result.test_sub_type != 'generic' else ''}"
-        test_affected_records_text = (
-            f"({test_result.affected_records} record{'s' if test_result.affected_records > 1 else ''})"
-            if test_result.affected_records
+        test_results_counter_text = (
+            f"({test_result.results_counter} result{'s' if test_result.results_counter > 1 else ''})"
+            if test_result.results_counter
             else ""
         )
         details_blocks = [
             self.create_text_section_block(
-                f"{f'*{test_name_text}* | ' if test_name_text else ''}{test_type_text}{f' {test_affected_records_text}' if test_affected_records_text else ''}"
+                f"{f'*{test_name_text}* | ' if test_name_text else ''}{test_type_text}{f' {test_results_counter_text}' if test_results_counter_text else ''}"
             )
         ]
         if include_description and test_result.description:

@@ -1,7 +1,6 @@
 import json
 import os
 import os.path
-import re
 import webbrowser
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
@@ -21,19 +20,20 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
 )
-from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.report.schema import (
-    DataMonitoringReportFilter,
-    DataMonitoringReportTestResultsSchema,
-    DataMonitoringReportTestRunsSchema,
+from elementary.monitor.data_monitoring.data_monitoring_filter import (
+    DataMonitoringFilter,
 )
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
+)
+from elementary.monitor.data_monitoring.schema import (
+    DataMonitoringReportTestResultsSchema,
+    DataMonitoringReportTestRunsSchema,
 )
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
@@ -57,7 +57,12 @@ class DataMonitoringReport(DataMonitoring):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
-        self.filter = self._parse_filter(self.raw_filter)
+        self.filter = DataMonitoringFilter(
+            tracking=tracking,
+            internal_dbt_runner=self.internal_dbt_runner,
+            user_dbt_runner=self.user_dbt_runner,
+            selector=self.raw_filter,
+        )
         self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
         self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
@@ -65,61 +70,6 @@ class DataMonitoringReport(DataMonitoring):
         self.filter_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-
-    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringReportFilter:
-        data_monitoring_filter = DataMonitoringReportFilter()
-        if filter:
-            if self.user_dbt_runner:
-                self.tracking.set_env("select_method", "dbt selector")
-                selector_api = SelectorAPI(self.user_dbt_runner)
-                node_names = selector_api.get_selector_results(selector=filter)
-                return DataMonitoringReportFilter(node_names=node_names)
-            else:
-
-                invocation_id_regex = re.compile(r"invocation_id:.*")
-                invocation_time_regex = re.compile(r"invocation_time:.*")
-                last_invocation_regex = re.compile(r"last_invocation")
-                tag_regex = re.compile(r"tag:.*")
-                owner_regex = re.compile(r"config.meta.owner:.*")
-                model_regex = re.compile(r"model:.*")
-
-                invocation_id_match = invocation_id_regex.search(filter)
-                invocation_time_match = invocation_time_regex.search(filter)
-                last_invocation_match = last_invocation_regex.search(filter)
-                tag_match = tag_regex.search(filter)
-                owner_match = owner_regex.search(filter)
-                model_match = model_regex.search(filter)
-
-                if last_invocation_match:
-                    data_monitoring_filter = DataMonitoringReportFilter(
-                        last_invocation=True
-                    )
-                elif invocation_id_match:
-                    data_monitoring_filter = DataMonitoringReportFilter(
-                        invocation_id=invocation_id_match.group().split(":", 1)[1]
-                    )
-                elif invocation_time_match:
-                    data_monitoring_filter = DataMonitoringReportFilter(
-                        invocation_time=invocation_time_match.group().split(":", 1)[1]
-                    )
-                elif tag_match:
-                    self.tracking.set_env("select_method", "tag")
-                    data_monitoring_filter = DataMonitoringReportFilter(
-                        tag=tag_match.group().split(":", 1)[1]
-                    )
-                elif owner_match:
-                    self.tracking.set_env("select_method", "owner")
-                    data_monitoring_filter = DataMonitoringReportFilter(
-                        owner=owner_match.group().split(":", 1)[1]
-                    )
-                elif model_match:
-                    self.tracking.set_env("select_method", "model")
-                    data_monitoring_filter = DataMonitoringReportFilter(
-                        model=model_match.group().split(":", 1)[1]
-                    )
-                else:
-                    logger.error(f"Could not parse the given -s/--select: {filter}")
-        return data_monitoring_filter
 
     def generate_report(
         self,
@@ -348,7 +298,8 @@ class DataMonitoringReport(DataMonitoring):
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
             summary_test_results = self.tests_api.get_test_restuls_summary(
-                test_results_db_rows=test_results_db_rows, filter=self.filter
+                test_results_db_rows=test_results_db_rows,
+                filter=self.filter.get_filter(),
             )
             send_succeeded = self.slack_client.send_message(
                 channel_name=self.config.slack_channel_name,
@@ -356,8 +307,9 @@ class DataMonitoringReport(DataMonitoring):
                     test_results=summary_test_results,
                     bucket_website_url=bucket_website_url,
                     include_description=include_description,
-                    filter=self.filter,
+                    filter=self.filter.get_filter(),
                     days_back=days_back,
+                    env=self.config.env,
                 ),
             )
 
@@ -380,7 +332,7 @@ class DataMonitoringReport(DataMonitoring):
     ) -> DataMonitoringReportTestResultsSchema:
         try:
             tests_results, invocation = self.tests_api.get_test_results(
-                filter=self.filter,
+                filter=self.filter.get_filter(),
                 test_results_db_rows=test_results_db_rows,
                 disable_samples=self.disable_samples,
             )

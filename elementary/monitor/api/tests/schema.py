@@ -197,4 +197,4 @@ class TestResultSummarySchema(BaseModel):
     description: Optional[str] = None
     test_name: str
     status: str
-    affected_records: Optional[int] = None
+    results_counter: Optional[int] = None

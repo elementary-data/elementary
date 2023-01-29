@@ -7,7 +7,7 @@ from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_owner,
     _filter_alerts_by_tag,
 )
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
 
 
 def initial_alerts():
@@ -136,7 +136,7 @@ def initial_alerts():
 def test_filter_alerts_by_tag():
     test_alerts, model_alerts, malformed_alerts = initial_alerts()
 
-    filter = DataMonitoringAlertsFilter(tag="one")
+    filter = DataMonitoringFilterSchema(tag="one")
     filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_tag(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_tag(malformed_alerts, filter)
@@ -147,7 +147,7 @@ def test_filter_alerts_by_tag():
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "1"
 
-    filter = DataMonitoringAlertsFilter(tag="three")
+    filter = DataMonitoringFilterSchema(tag="three")
     filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_tag(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_tag(malformed_alerts, filter)
@@ -160,7 +160,7 @@ def test_filter_alerts_by_tag():
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "2"
 
-    filter = DataMonitoringAlertsFilter(tag="four")
+    filter = DataMonitoringFilterSchema(tag="four")
     filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_tag(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_tag(malformed_alerts, filter)
@@ -174,7 +174,7 @@ def test_filter_alerts_by_tag():
 def test_filter_alerts_by_owner():
     test_alerts, model_alerts, malformed_alerts = initial_alerts()
 
-    filter = DataMonitoringAlertsFilter(owner="jeff")
+    filter = DataMonitoringFilterSchema(owner="jeff")
     filter_test_alerts = _filter_alerts_by_owner(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_owner(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_owner(malformed_alerts, filter)
@@ -188,7 +188,7 @@ def test_filter_alerts_by_owner():
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "1"
 
-    filter = DataMonitoringAlertsFilter(owner="john")
+    filter = DataMonitoringFilterSchema(owner="john")
     filter_test_alerts = _filter_alerts_by_owner(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_owner(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_owner(malformed_alerts, filter)
@@ -207,7 +207,7 @@ def test_filter_alerts_by_owner():
 def test_filter_alerts_by_model():
     test_alerts, model_alerts, malformed_alerts = initial_alerts()
 
-    filter = DataMonitoringAlertsFilter(model="model_id_1")
+    filter = DataMonitoringFilterSchema(model="model_id_1")
     filter_test_alerts = _filter_alerts_by_model(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_model(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_model(malformed_alerts, filter)
@@ -221,7 +221,7 @@ def test_filter_alerts_by_model():
     assert filter_malformed_alerts[0].id == "1"
     assert filter_malformed_alerts[1].id == "2"
 
-    filter = DataMonitoringAlertsFilter(model="model_id_2")
+    filter = DataMonitoringFilterSchema(model="model_id_2")
     filter_test_alerts = _filter_alerts_by_model(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_model(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_model(malformed_alerts, filter)
@@ -236,7 +236,7 @@ def test_filter_alerts_by_model():
 def test_filter_alerts_by_node_names():
     test_alerts, model_alerts, malformed_alerts = initial_alerts()
 
-    filter = DataMonitoringAlertsFilter(node_names=["test_3", "model_id_1"])
+    filter = DataMonitoringFilterSchema(node_names=["test_3", "model_id_1"])
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_node_names(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_node_names(malformed_alerts, filter)
@@ -248,7 +248,7 @@ def test_filter_alerts_by_node_names():
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "2"
 
-    filter = DataMonitoringAlertsFilter(node_names=["model_id_2"])
+    filter = DataMonitoringFilterSchema(node_names=["model_id_2"])
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_node_names(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_node_names(malformed_alerts, filter)
@@ -257,7 +257,7 @@ def test_filter_alerts_by_node_names():
     assert filter_model_alerts[0].id == "3"
     assert len(filter_malformed_alerts) == 0
 
-    filter = DataMonitoringAlertsFilter(node_names=["model_id_3"])
+    filter = DataMonitoringFilterSchema(node_names=["model_id_3"])
     filter_malformed_alerts = _filter_alerts_by_node_names(malformed_alerts, filter)
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_node_names(model_alerts, filter)
@@ -265,7 +265,7 @@ def test_filter_alerts_by_node_names():
     assert len(filter_model_alerts) == 0
     assert len(filter_malformed_alerts) == 0
 
-    filter = DataMonitoringAlertsFilter(node_names=["test_1"])
+    filter = DataMonitoringFilterSchema(node_names=["test_1"])
     filter_malformed_alerts = _filter_alerts_by_node_names(malformed_alerts, filter)
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "1"

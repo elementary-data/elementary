@@ -23,7 +23,7 @@ from elementary.monitor.api.tests.schema import (
     TestUniqueIdType,
     TotalsSchema,
 )
-from elementary.monitor.data_monitoring.report.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -62,7 +62,7 @@ class TestsAPI(APIClient):
     def get_test_restuls_summary(
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
-        filter: Optional[DataMonitoringReportFilter] = None,
+        filter: Optional[DataMonitoringFilterSchema] = None,
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = test_results_db_rows
         if filter and filter.tag:
@@ -107,7 +107,7 @@ class TestsAPI(APIClient):
                 description=test_result.meta.get("description"),
                 test_name=test_result.test_name,
                 status=test_result.status,
-                affected_records=test_result.failures,
+                results_counter=test_result.failures,
             )
             for test_result in filtered_test_results_db_rows
         ]
@@ -129,7 +129,7 @@ class TestsAPI(APIClient):
         return subscribers
 
     def _get_invocation_from_filter(
-        self, filter: DataMonitoringReportFilter
+        self, filter: DataMonitoringFilterSchema
     ) -> Optional[DbtInvocationSchema]:
         # If none of the following filter options exists, the invocation is empty and there is no filter.
         invocation = DbtInvocationSchema()
@@ -226,7 +226,7 @@ class TestsAPI(APIClient):
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringReportFilter] = None,
+        filter: Optional[DataMonitoringFilterSchema] = None,
     ) -> Tuple[
         Dict[Optional[ModelUniqueIdType], List[TestResultSchema]],
         Optional[DbtInvocationSchema],
