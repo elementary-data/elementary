@@ -62,6 +62,7 @@
         dbt_tests.short_name,
         elementary_test_results.test_alias,
         elementary_test_results.result_rows,
+        elementary_test_results.failures,
         dbt_tests.meta,
         dbt_models.meta as model_meta,
         dbt_models.tags as model_tags,

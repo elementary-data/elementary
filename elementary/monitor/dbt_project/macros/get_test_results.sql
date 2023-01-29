@@ -42,7 +42,8 @@
             status,
             days_diff,
             invocations_rank_index,
-            result_rows
+            result_rows,
+            failures
         from ordered_test_results
         where invocations_rank_index <= {{ invocations_per_test }}
         order by elementary_unique_id, invocations_rank_index desc

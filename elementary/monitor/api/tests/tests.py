@@ -65,19 +65,19 @@ class TestsAPI(APIClient):
         filter: Optional[DataMonitoringReportFilter] = None,
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = test_results_db_rows
-        if filter.tag:
+        if filter and filter.tag:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
                 if (filter.tag in test_result.tags)
             ]
-        elif filter.owner:
+        elif filter and filter.owner:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
                 if (filter.owner in test_result.owners)
             ]
-        elif filter.model:
+        elif filter and filter.model:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
@@ -107,6 +107,7 @@ class TestsAPI(APIClient):
                 description=test_result.meta.get("description"),
                 test_name=test_result.test_name,
                 status=test_result.status,
+                affected_records=test_result.failures,
             )
             for test_result in filtered_test_results_db_rows
         ]

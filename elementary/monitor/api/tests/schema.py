@@ -57,6 +57,7 @@ class TestResultDBRowSchema(BaseModel):
     days_diff: float
     invocations_rank_index: int
     sample_data: Optional[Union[dict, List]] = None
+    failures: Optional[int] = None
 
     class Config:
         smart_union = True
@@ -90,6 +91,12 @@ class TestResultDBRowSchema(BaseModel):
     def load_owners(cls, owners):
         formatted_owners = try_load_json(owners)
         return formatted_owners if formatted_owners else []
+
+    @validator("failures", pre=True)
+    def parse_failures(cls, failures, values):
+        test_type = values.get("test_type")
+        # Elementary's tests dosen't return correct failures.
+        return failures or None if test_type == "dbt_test" else None
 
 
 class TotalsSchema(BaseModel):
@@ -190,3 +197,4 @@ class TestResultSummarySchema(BaseModel):
     description: Optional[str] = None
     test_name: str
     status: str
+    affected_records: Optional[int] = None

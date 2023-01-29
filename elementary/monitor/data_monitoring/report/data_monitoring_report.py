@@ -356,6 +356,8 @@ class DataMonitoringReport(DataMonitoring):
                     test_results=summary_test_results,
                     bucket_website_url=bucket_website_url,
                     include_description=include_description,
+                    filter=self.filter,
+                    days_back=days_back,
                 ),
             )
 
