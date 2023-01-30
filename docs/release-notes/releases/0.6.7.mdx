@@ -27,6 +27,7 @@ _January 19, 2023: [v0.6.7 Python](https://github.com/elementary-data/elementary
 - Thank you [Pratik Bothra](https://github.com/pratik60), [Clinton Adams](https://github.com/clad) and [Benoit Turbang](https://github.com/benoit-tropos-io) for helping us keep our documentation up to date and typos free 😊
 
 ### 🐞 Bug fixes
+
 - Resolved a race condition that sometimes caused a run failure (caused `TestRunSchema.test_runs: None is not an allowed value error`).
 - Fixed a bug where a test that always failed has the value 0% for ‘Fail Rate’. Thanks Jon Simpson for bringing this up!
 - Fixed a bug where `where_expression` was only implemented when a timestamp was defined. Thanks Ran Tibi for bringing this up!
