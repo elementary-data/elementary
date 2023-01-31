@@ -68,7 +68,7 @@
     {% endset %}
 
     {% set alerts_agate = run_query(select_pending_alerts_query) %}
-    {% set test_result_rows_agate = run_query(elementary_internal.get_test_result_rows_query(days_back)).group_by("elementary_test_results_id").select("result_row") %}
+    {% set test_result_rows_agate = elementary_internal.get_result_rows_agate(days_back) %}
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set pending_alerts = [] %}
     {% for test_result_alert_dict in test_result_alert_dicts %}

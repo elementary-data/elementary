@@ -45,7 +45,7 @@
     {%- endset -%}
 
     {% set test_results_agate = run_query(select_test_results) %}
-    {% set test_result_rows_agate = run_query(elementary_internal.get_test_result_rows_query(days_back)).group_by("elementary_test_results_id").select("result_row") %}
+    {% set test_result_rows_agate = elementary_internal.get_result_rows_agate(days_back) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
     {%- for test in tests -%}
         {% set test_rows_sample = none %}
