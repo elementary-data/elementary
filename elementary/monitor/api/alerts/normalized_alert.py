@@ -85,7 +85,7 @@ class NormalizedAlert:
             members.extend(model_members)
         else:
             members.append(model_members)
-        return list(set(members))
+        return members
 
     def _get_alert_chennel(self) -> Optional[str]:
         model_slack_channel = self.model_meta.get(CHANNEL_KEY)

@@ -50,7 +50,7 @@ def test_flatten_meta():
     )
 
 
-def test_get_alert_subscribers():
+def test_get_alert_members():
     # Subscribers both for the test and the model
     alert = {
         TEST_META_KEY: json.dumps(
@@ -69,7 +69,11 @@ def test_get_alert_subscribers():
         ),
     }
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_subscribers() == ["freddie", "dredd", "nick"]
+    assert normalized_alert._get_alert_members(SUBSCRIBERS_KEY) == [
+        "freddie",
+        "dredd",
+        "nick",
+    ]
 
     # Only test subscribers
     alert = {
@@ -82,7 +86,7 @@ def test_get_alert_subscribers():
         )
     }
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_subscribers() == ["freddie", "dredd"]
+    assert normalized_alert._get_alert_members(SUBSCRIBERS_KEY) == ["freddie", "dredd"]
 
     # Only model subscribers
     alert = {
@@ -95,7 +99,7 @@ def test_get_alert_subscribers():
         ),
     }
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_subscribers() == ["nick"]
+    assert normalized_alert._get_alert_members(SUBSCRIBERS_KEY) == ["nick"]
 
     # No subscribers
     alert = dict(
@@ -103,7 +107,7 @@ def test_get_alert_subscribers():
         model_meta=json.dumps(dict()),
     )
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_subscribers() == []
+    assert normalized_alert._get_alert_members(SUBSCRIBERS_KEY) == []
 
 
 def test_get_alert_chennel():
