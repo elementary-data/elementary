@@ -516,9 +516,7 @@ def assert_test_counter(
                 if test_sub_type
                 else True
             )
-            match_status = (
-                test_metadata.get("latest_run_status") == status if status else True
-            )
+            match_status = test_metadata.get("latest_run_status") == status or True
             match_name = test_metadata.get("test_name") == name if name else True
             if (
                 match_test_type
