@@ -58,7 +58,8 @@ class NormalizedAlert:
     def _normalize_alert(self):
         try:
             normalized_alert = copy.deepcopy(self.alert)
-            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_subscribers()
+            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_members(SUBSCRIBERS_KEY)
+            normalized_alert["owners"] = self._get_alert_members("owner")
             normalized_alert["slack_channel"] = self._get_alert_chennel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
@@ -71,20 +72,20 @@ class NormalizedAlert:
             )
             return self.alert
 
-    def _get_alert_subscribers(self) -> List[Optional[str]]:
-        subscribers = []
-        test_subscribers = self.test_meta.get(SUBSCRIBERS_KEY, [])
-        model_subscribers = self.model_meta.get(SUBSCRIBERS_KEY, [])
-        if isinstance(test_subscribers, list):
-            subscribers.extend(test_subscribers)
+    def _get_alert_members(self, meta_key: str) -> List[Optional[str]]:
+        members = []
+        test_members = self.test_meta.get(meta_key, [])
+        model_members = self.model_meta.get(meta_key, [])
+        if isinstance(test_members, list):
+            members.extend(test_members)
         else:
-            subscribers.append(test_subscribers)
+            members.append(test_members)
 
-        if isinstance(model_subscribers, list):
-            subscribers.extend(model_subscribers)
+        if isinstance(model_members, list):
+            members.extend(model_members)
         else:
-            subscribers.append(model_subscribers)
-        return subscribers
+            members.append(model_members)
+        return list(set(members))
 
     def _get_alert_chennel(self) -> Optional[str]:
         model_slack_channel = self.model_meta.get(CHANNEL_KEY)
@@ -111,6 +112,6 @@ class NormalizedAlert:
         # The fallback is DEFAULT_ALERT_FIELDS.
         return (
             self.test_meta.get(ALERT_FIELDS_KEY)
-            if self.test_meta.get(ALERT_FIELDS_KEY)
-            else self.model_meta.get(ALERT_FIELDS_KEY, DEFAULT_ALERT_FIELDS)
+            or self.model_meta.get(ALERT_FIELDS_KEY)
+            or DEFAULT_ALERT_FIELDS
         )
