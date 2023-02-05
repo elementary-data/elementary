@@ -20,7 +20,7 @@ class MalformedAlert(Alert):
         )
 
     # We use getattribute and not getattr because "Alert" set some attributes to None if not given which skip the self.data.get(_name)
-    # For example - tags ate set to None, so getattr for tags will return None although data contains it.
+    # For example - tags is set to None, so getattr for tags will return None although data contains it.
     def __getattribute__(self, __name: str) -> Any:
         try:
             return super().__getattribute__(__name) or self.data.get(__name)
