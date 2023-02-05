@@ -67,50 +67,44 @@
         where suppression_status = 'pending'
     {% endset %}
 
-    {% set alerts_agate = run_query(select_pending_alerts_query) %}
+    {% set alerts_agate = elementary.run_query(select_pending_alerts_query) %}
     {% set test_result_rows_agate = elementary_internal.get_result_rows_agate(days_back) %}
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set pending_alerts = [] %}
-    {% for test_result_alert_dict in test_result_alert_dicts %}
-        {% set alert_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_id') %}
-        {% set test_results_query = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_results_query') %}
-        {% set test_type = elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_type') %}
-        {% set status = elementary.insensitive_get_dict_value(test_result_alert_dict, 'status') | lower %}
+    {% for alert in test_result_alert_dicts %}
+        {% set test_type = alert.alert_type %}
+        {% set status = alert.status | lower %}
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(alert_id), test_type, results_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(alert.alert_id), test_type, results_sample_limit) %}
         {%- endif -%}
 
-        {% set test_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_meta') %}
-        {% set model_unique_id = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_unique_id') %}
-        {% set model_meta = elementary.insensitive_get_dict_value(test_result_alert_dict, 'model_meta') %}
-
-        {% set pending_alert_dict = {'id': alert_id,
-                                 'unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
-                                 'model_unique_id': model_unique_id,
-                                 'test_unique_id': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_unique_id'),
-                                 'detected_at': elementary.insensitive_get_dict_value(test_result_alert_dict, 'detected_at'),
-                                 'database_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'database_name'),
-                                 'schema_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'schema_name'),
-                                 'table_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'table_name'),
-                                 'column_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'column_name'),
+        {% set pending_alert_dict = {'id': alert.alert_id,
+                                 'unique_id': alert.test_unique_id,
+                                 'model_unique_id': alert.model_unique_id,
+                                 'test_unique_id': alert.test_unique_id,
+                                 'detected_at': alert.detected_at,
+                                 'database_name': alert.database_name,
+                                 'schema_name': alert.schema_name,
+                                 'table_name': alert.table_name,
+                                 'column_name': alert.column_name,
                                  'test_type': test_type,
-                                 'test_sub_type': elementary.insensitive_get_dict_value(test_result_alert_dict, 'sub_type'),
-                                 'test_results_description': elementary.insensitive_get_dict_value(test_result_alert_dict, 'alert_description'),
-                                 'owners': elementary.insensitive_get_dict_value(test_result_alert_dict, 'owners'),
-                                 'tags': elementary.insensitive_get_dict_value(test_result_alert_dict, 'tags'),
-                                 'test_results_query': test_results_query,
+                                 'test_sub_type': alert.sub_type,
+                                 'test_results_description': alert.alert_description,
+                                 'owners': alert.owners,
+                                 'tags': alert.tags,
+                                 'test_results_query': alert.test_results_query,
                                  'test_rows_sample': test_rows_sample,
-                                 'other': elementary.insensitive_get_dict_value(test_result_alert_dict, 'other'),
-                                 'test_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_name'),
-                                 'test_short_name': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_short_name'),
-                                 'test_params': elementary.insensitive_get_dict_value(test_result_alert_dict, 'test_params'),
-                                 'severity': elementary.insensitive_get_dict_value(test_result_alert_dict, 'severity'),
-                                 'test_meta': test_meta,
-                                 'model_meta': model_meta,
-                                 'suppression_status': elementary.insensitive_get_dict_value(test_result_alert_dict, 'suppression_status'),
-                                 'sent_at': elementary.insensitive_get_dict_value(test_result_alert_dict, 'sent_at'),
+                                 'other': alert.other,
+                                 'test_name': alert.test_name,
+                                 'test_short_name': alert.test_short_name,
+                                 'test_params': alert.test_params,
+                                 'severity': alert.severity,
+                                 'test_meta': alert.test_meta,
+                                 'model_meta': alert.model_meta,
+                                 'suppression_status': alert.suppression_status,
+                                 'sent_at': alert.sent_at,
                                  'status': status} %}
         {% do pending_alerts.append(pending_alert_dict) %}
     {% endfor %}
