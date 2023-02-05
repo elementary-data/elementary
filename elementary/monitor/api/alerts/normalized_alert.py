@@ -32,6 +32,7 @@ DEFAULT_ALERT_FIELDS = [
 TEST_META_KEY = "test_meta"
 MODEL_META_KEY = "model_meta"
 ALERTS_CONFIG_KEY = "alerts_config"
+OWNERS_KEY = "owners"
 SUBSCRIBERS_KEY = "subscribers"
 CHANNEL_KEY = "channel"
 ALERT_FIELDS_KEY = "alert_fields"
@@ -58,8 +59,10 @@ class NormalizedAlert:
     def _normalize_alert(self):
         try:
             normalized_alert = copy.deepcopy(self.alert)
-            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_members(SUBSCRIBERS_KEY)
-            normalized_alert["owners"] = self._get_alert_members("owner")
+            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_meta_attrs(
+                SUBSCRIBERS_KEY
+            )
+            normalized_alert[OWNERS_KEY] = self._get_alert_meta_attrs("owner")
             normalized_alert["slack_channel"] = self._get_alert_chennel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
@@ -72,20 +75,20 @@ class NormalizedAlert:
             )
             return self.alert
 
-    def _get_alert_members(self, meta_key: str) -> List[Optional[str]]:
-        members = []
-        test_members = self.test_meta.get(meta_key, [])
-        model_members = self.model_meta.get(meta_key, [])
-        if isinstance(test_members, list):
-            members.extend(test_members)
+    def _get_alert_meta_attrs(self, meta_key: str) -> List[Optional[str]]:
+        attrs = []
+        test_attrs = self.test_meta.get(meta_key, [])
+        model_attrs = self.model_meta.get(meta_key, [])
+        if isinstance(test_attrs, list):
+            attrs.extend(test_attrs)
         else:
-            members.append(test_members)
+            attrs.append(test_attrs)
 
-        if isinstance(model_members, list):
-            members.extend(model_members)
+        if isinstance(model_attrs, list):
+            attrs.extend(model_attrs)
         else:
-            members.append(model_members)
-        return members
+            attrs.append(model_attrs)
+        return attrs
 
     def _get_alert_chennel(self) -> Optional[str]:
         model_slack_channel = self.model_meta.get(CHANNEL_KEY)
