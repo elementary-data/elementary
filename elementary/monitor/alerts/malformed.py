@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
@@ -17,3 +18,6 @@ class MalformedAlert(Alert):
                 f"```{json.dumps(self.data, indent=2)}```"
             )
         )
+
+    def __getattr__(self, attr) -> Any:
+        return self.data.get(attr)

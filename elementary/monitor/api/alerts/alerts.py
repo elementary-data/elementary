@@ -143,16 +143,8 @@ class AlertsAPI(APIClient):
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
         for alert in [*alerts.alerts, *alerts.malformed_alerts]:
-            alert_class_id = (
-                alert.data.get("alert_class_id")
-                if isinstance(alert, MalformedAlert)
-                else alert.alert_class_id
-            )
-            suppression_interval = (
-                alert.data.get("alert_suppression_interval")
-                if isinstance(alert, MalformedAlert)
-                else alert.alert_suppression_interval
-            )
+            alert_class_id = alert.alert_class_id
+            suppression_interval = alert.alert_suppression_interval
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times.get(alert_class_id))
                 if last_alert_sent_times.get(alert_class_id)
@@ -180,23 +172,14 @@ class AlertsAPI(APIClient):
         alert_last_times = defaultdict(lambda: None)
         latest_alert_ids = []
         for alert in [*alerts.alerts, *alerts.malformed_alerts]:
-            id = (
-                alert.data.get("alert_class_id")
-                if isinstance(alert, MalformedAlert)
-                else alert.alert_class_id
-            )
-            current_last_alert = alert_last_times[id]
-            detected_at = (
-                alert.data.get("detected_at")
-                if isinstance(alert, MalformedAlert)
-                else alert.detected_at
-            )
-            alert_detected_at = detected_at.strftime(DATETIME_FORMAT)
+            alert_class_id = alert.alert_class_id
+            current_last_alert = alert_last_times[alert_class_id]
+            alert_detected_at = alert.detected_at.strftime(DATETIME_FORMAT)
             if (
                 not current_last_alert
                 or current_last_alert["detected_at"] < alert_detected_at
             ):
-                alert_last_times[id] = dict(
+                alert_last_times[alert_class_id] = dict(
                     alert_id=alert.id, detected_at=alert_detected_at
                 )
 
