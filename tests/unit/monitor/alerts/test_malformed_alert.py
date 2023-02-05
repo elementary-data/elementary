@@ -25,7 +25,7 @@ def test_to_slack():
     assert json.dumps(malformed_alert.data, indent=2) in slack_message.text
 
 
-def test_malformed_alert_getattr():
+def test_malformed_alert_getattribute():
     malformed_alert = MOCK_MALFORMED_ALERT
     assert malformed_alert.alert_class_id == "test_id_1"
     assert malformed_alert.unique_id is None
