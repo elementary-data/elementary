@@ -63,7 +63,7 @@ class NormalizedAlert:
             normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_meta_attrs(
                 SUBSCRIBERS_KEY
             )
-            normalized_alert[OWNERS_KEY] = json.loads(self.alert["owners"])
+            normalized_alert[OWNERS_KEY] = json.loads(self.alert[OWNERS_KEY])
             normalized_alert["slack_channel"] = self._get_alert_chennel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
