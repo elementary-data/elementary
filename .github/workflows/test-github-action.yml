@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > ~/.dbt/profiles.yml
-          echo "content=$(echo '$PROFILES_YML' | base64 -d | sed 's/<SCHEMA_NAME>/test_github_action/g')" >> $GITHUB_OUTPUT
+          echo "content=$(cat ~/.dbt/profiles.yml" >> $GITHUB_OUTPUT
 
       - name: Echo profiles
         run: |
