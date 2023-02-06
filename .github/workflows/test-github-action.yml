@@ -84,10 +84,10 @@ jobs:
           python run_e2e_tests.py -t "postgres" -g "True" --clear-tests "True"
 
       - name: Run Elementary
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         uses: elementary-data/run-elementary-action@v1.8
         with:
           warehouse-type: postgres
+          project-dir: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
           profiles-yml: ${{ secrets.CI_PROFILES_YML }}
           edr-command: edr monitor -t "postgres"
             &&
