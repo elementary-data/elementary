@@ -17,6 +17,7 @@ class SourceFreshnessAlert(Alert):
 
     def __init__(
         self,
+        model_unique_id: str,
         snapshotted_at: Optional[str],
         max_loaded_at: Optional[str],
         max_loaded_at_time_ago_in_s: Optional[float],
@@ -30,6 +31,7 @@ class SourceFreshnessAlert(Alert):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.model_unique_id = model_unique_id
         self.snapshotted_at = (
             convert_datetime_utc_str_to_timezone_str(snapshotted_at, self.timezone)
             if snapshotted_at

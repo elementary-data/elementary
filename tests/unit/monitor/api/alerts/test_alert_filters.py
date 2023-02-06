@@ -58,6 +58,7 @@ def initial_alerts():
         ModelAlert(
             id="1",
             alert_class_id="elementary.model_id_1",
+            model_unique_id="elementary.model_id_1",
             alias="modely",
             path="my/path",
             original_path="",
@@ -72,6 +73,7 @@ def initial_alerts():
         ModelAlert(
             id="2",
             alert_class_id="elementary.model_id_1",
+            model_unique_id="elementary.model_id_1",
             alias="modely",
             path="my/path",
             original_path="",
@@ -86,6 +88,7 @@ def initial_alerts():
         ModelAlert(
             id="3",
             alert_class_id="elementary.model_id_2",
+            model_unique_id="elementary.model_id_2",
             alias="model2",
             path="my/path2",
             original_path="",
@@ -117,6 +120,7 @@ def initial_alerts():
             data=dict(
                 id="2",
                 alert_class_id="elementary.model_id_1",
+                model_unique_id="elementary.model_id_1",
                 alias="modely",
                 path="my/path",
                 original_path="",

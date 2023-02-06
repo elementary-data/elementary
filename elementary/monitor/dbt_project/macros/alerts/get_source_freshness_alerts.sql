@@ -29,6 +29,8 @@
                 alerts_in_time_limit.max_loaded_at_time_ago_in_s,
                 alerts_in_time_limit.status,
                 alerts_in_time_limit.error,
+                alerts_in_time_limit.unique_id,
+                {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
                 alerts_in_time_limit.unique_id as alert_class_id,
                 alerts_in_time_limit.database_name,
                 alerts_in_time_limit.schema_name,
@@ -64,6 +66,7 @@
     {% set pending_alerts = [] %}
     {% for alert_dict in alerts_dicts %}
         {% set pending_alert_dict = {'id': alert_dict.get('alert_id'),
+                                 'model_unique_id': alert_dict.get('unique_id'),
                                  'alert_class_id': alert_dict.get('alert_class_id'),
                                  'detected_at': alert_dict.get('detected_at'),
                                  'snapshotted_at': alert_dict.get('snapshotted_at'),

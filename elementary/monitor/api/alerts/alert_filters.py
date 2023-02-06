@@ -120,12 +120,10 @@ def _filter_alerts_by_model(
         if isinstance(alert, TestAlert):
             alert_model_unique_id = alert.model_unique_id
         elif isinstance(alert, ModelAlert) or isinstance(alert, SourceFreshnessAlert):
-            alert_model_unique_id = alert.alert_class_id
+            alert_model_unique_id = alert.model_unique_id
         else:
             data = alert.data
-            alert_model_unique_id = data.get(
-                "model_unique_id", data.get("alert_class_id")
-            )
+            alert_model_unique_id = data.get("model_unique_id", data.get("unique_id"))
         if alert_model_unique_id and alert_model_unique_id.endswith(filter.model):
             filtered_alerts.append(alert)
     return filtered_alerts
@@ -154,7 +152,7 @@ def _filter_alerts_by_node_names(
         if isinstance(alert, TestAlert):
             alert_node_name = alert.test_name
         elif isinstance(alert, ModelAlert) or isinstance(alert, SourceFreshnessAlert):
-            alert_node_name = alert.alert_class_id
+            alert_node_name = alert.model_unique_id
         else:
             data = alert.data
             alert_node_name = data.get("test_name", data.get("alert_class_id"))

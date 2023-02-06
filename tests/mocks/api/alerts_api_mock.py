@@ -191,6 +191,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_1",
                 alert_class_id="model_id_1",
+                model_unique_id="model_id_1",
                 alias="model",
                 path="",
                 original_path="",
@@ -211,6 +212,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_2",
                 alert_class_id="model_id_4",
+                model_unique_id="model_id_4",
                 alias="model",
                 path="",
                 original_path="",
@@ -231,6 +233,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_3",
                 alert_class_id="model_id_2",
+                model_unique_id="model_id_2",
                 alias="model",
                 path="",
                 original_path="",
@@ -251,6 +254,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_4",
                 alert_class_id="model_id_3",
+                model_unique_id="model_id_3",
                 alias="model",
                 path="",
                 original_path="",
@@ -271,6 +275,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_5",
                 alert_class_id="model_id_3",
+                model_unique_id="model_id_3",
                 alias="model",
                 path="",
                 original_path="",
@@ -303,6 +308,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_1",
                 alert_class_id="source_id_1",
+                model_unique_id="source_id_1",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -327,6 +333,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_2",
                 alert_class_id="source_id_4",
+                model_unique_id="source_id_4",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -351,6 +358,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_3",
                 alert_class_id="source_id_2",
+                model_unique_id="source_id_2",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -375,6 +383,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_4",
                 alert_class_id="source_id_3",
+                model_unique_id="source_id_3",
                 detected_at=CURRENT_TIMESTAMP_UTC,
                 snapshotted_at="2022-10-11 10:00:00",
                 max_loaded_at="2022-10-11 10:00:00",
@@ -399,6 +408,7 @@ class MockAlertsAPI(AlertsAPI):
             dict(
                 id="alert_id_5",
                 alert_class_id="source_id_3",
+                model_unique_id="source_id_3",
                 detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(
                     DATETIME_FORMAT
                 ),

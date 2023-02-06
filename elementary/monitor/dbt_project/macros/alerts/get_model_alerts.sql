@@ -32,6 +32,8 @@
         extended_alerts as (
             select
                 alerts_in_time_limit.alert_id,
+                alerts_in_time_limit.unique_id,
+                {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
                 alerts_in_time_limit.unique_id as alert_class_id,
                 alerts_in_time_limit.detected_at,
                 alerts_in_time_limit.database_name,
@@ -69,6 +71,7 @@
     {% for model_result_alert_dict in model_result_alert_dicts %}
         {% set status = elementary.insensitive_get_dict_value(model_result_alert_dict, 'status') | lower %}
         {% set pending_alert_dict = {'id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_id'),
+                                 'model_unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
                                  'alert_class_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_class_id'),
                                  'alias': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alias'),
                                  'path': elementary.insensitive_get_dict_value(model_result_alert_dict, 'path'),
