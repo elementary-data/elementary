@@ -19,7 +19,7 @@ class Alert:
     def __init__(
         self,
         id: str,
-        unique_id: str = None,
+        alert_class_id: str = None,
         suppression_status: str = None,
         sent_at: str = None,
         detected_at: str = None,
@@ -40,7 +40,7 @@ class Alert:
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
         self.id = id
-        self.unique_id = unique_id
+        self.alert_class_id = alert_class_id
         self.alert_suppression = AlertSuppressionSchema(
             suppression_status=suppression_status,
             sent_at=sent_at,

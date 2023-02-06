@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
@@ -17,3 +18,11 @@ class MalformedAlert(Alert):
                 f"```{json.dumps(self.data, indent=2)}```"
             )
         )
+
+    # We use getattribute and not getattr because "Alert" set some attributes to None if not given which skip the self.data.get(_name)
+    # For example - tags is set to None, so getattr for tags will return None although data contains it.
+    def __getattribute__(self, __name: str) -> Any:
+        try:
+            return super().__getattribute__(__name) or self.data.get(__name)
+        except AttributeError:
+            return self.data.get(__name)

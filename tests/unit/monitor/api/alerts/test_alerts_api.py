@@ -28,6 +28,23 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     )
 
 
+def test_get_latest_alerts(alerts_api_mock: MockAlertsAPI):
+    test_alerts = alerts_api_mock._query_pending_test_alerts()
+    model_alerts = alerts_api_mock._query_pending_model_alerts()
+
+    latest_test_alerts = alerts_api_mock._get_latest_alerts(test_alerts)
+    latest_model_alerts = alerts_api_mock._get_latest_alerts(model_alerts)
+
+    # Only alert_id_5 is a duplicate alert (of alert_id_4)
+    assert json.dumps(latest_test_alerts, sort_keys=True) == json.dumps(
+        ["alert_id_1", "alert_id_2", "alert_id_3", "alert_id_4"], sort_keys=True
+    )
+    # Only alert_id_5 is a duplicate alert (of alert_id_4)
+    assert json.dumps(latest_model_alerts, sort_keys=True) == json.dumps(
+        ["alert_id_1", "alert_id_2", "alert_id_3", "alert_id_4"], sort_keys=True
+    )
+
+
 def test_split_list_to_chunks(alerts_api_mock: MockAlertsAPI):
     mock_list = [None] * 150
 
@@ -62,7 +79,7 @@ def test_update_sent_alerts(mock_subprocess_run, alerts_api_mock: MockAlertsAPI)
 
 @mock.patch("subprocess.run")
 def test_skip_alerts(mock_subprocess_run, alerts_api_mock: MockAlertsAPI):
-    # Create 80 alerts
+    # Create 100 alerts
     test_alerts = alerts_api_mock._query_pending_test_alerts()
     mock_alerts_ids_to_skip = test_alerts.alerts * 20
 

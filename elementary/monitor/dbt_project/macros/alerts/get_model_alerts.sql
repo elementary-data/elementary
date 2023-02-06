@@ -33,6 +33,8 @@
             select
                 alerts_in_time_limit.alert_id,
                 alerts_in_time_limit.unique_id,
+                {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
+                alerts_in_time_limit.unique_id as alert_class_id,
                 alerts_in_time_limit.detected_at,
                 alerts_in_time_limit.database_name,
                 alerts_in_time_limit.materialization,
@@ -69,7 +71,8 @@
     {% for model_result_alert_dict in model_result_alert_dicts %}
         {% set status = elementary.insensitive_get_dict_value(model_result_alert_dict, 'status') | lower %}
         {% set pending_alert_dict = {'id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_id'),
-                                 'unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
+                                 'model_unique_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'unique_id'),
+                                 'alert_class_id': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alert_class_id'),
                                  'alias': elementary.insensitive_get_dict_value(model_result_alert_dict, 'alias'),
                                  'path': elementary.insensitive_get_dict_value(model_result_alert_dict, 'path'),
                                  'original_path': elementary.insensitive_get_dict_value(model_result_alert_dict, 'original_path'),
@@ -96,7 +99,7 @@
     {% set select_last_alert_sent_times_query %}
         with alerts_in_time_limit as (
             select
-                unique_id,
+                unique_id as alert_class_id,
                 case
                     when suppression_status is NULL and alert_sent = TRUE then 'sent'
                     when suppression_status is NULL and alert_sent = FALSE then 'pending'
@@ -108,11 +111,11 @@
         )
 
         select 
-            unique_id,
+            alert_class_id,
             max(sent_at) as last_sent_at
         from alerts_in_time_limit
         where suppression_status = 'sent'
-        group by unique_id
+        group by alert_class_id
     {% endset %}
 
     {% set alerts_agate = run_query(select_last_alert_sent_times_query) %}
@@ -120,7 +123,7 @@
     {% set last_alert_times = {} %}
     {% for last_alert_sent_time_result_dict in last_alert_sent_time_result_dicts %}
         {% do last_alert_times.update({
-            last_alert_sent_time_result_dict.get('unique_id'): last_alert_sent_time_result_dict.get('last_sent_at')
+            last_alert_sent_time_result_dict.get('alert_class_id'): last_alert_sent_time_result_dict.get('last_sent_at')
         }) %}
     {% endfor %}
     {% do elementary.edr_log(tojson(last_alert_times)) %}
