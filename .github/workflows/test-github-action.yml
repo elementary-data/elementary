@@ -87,7 +87,6 @@ jobs:
         uses: elementary-data/run-elementary-action@v1.8
         with:
           warehouse-type: postgres
-          project-dir: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
           edr-command: edr monitor -t "postgres"
             &&
             edr report
