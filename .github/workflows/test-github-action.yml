@@ -83,7 +83,8 @@ jobs:
         with:
           warehouse-type: snowflake
           profiles-yml: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
-          edr-command: edr monitor -t "snowflake"
+          edr-command:
+            edr monitor -t "snowflake" --slack-token "${{ secrets.CI_SLACK_TOKEN }}"
             &&
             edr report
             --file-path "report.html"
