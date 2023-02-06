@@ -1,7 +1,7 @@
 name: Test elementary GitHub action
 on:
   schedule:
-    - cron: "0 */8 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       elementary-ref:
@@ -50,8 +50,7 @@ jobs:
           PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
         run: |
           mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
+          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > profiles.yml
 
       - name: Setup Python
         uses: actions/setup-python@v4
