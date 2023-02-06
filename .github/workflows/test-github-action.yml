@@ -1,0 +1,106 @@
+name: Test elementary GitHub action
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      elementary-ref:
+        type: string
+        required: false
+        description: Branch or tag to checkout for 'elementary' repository
+      dbt-data-reliability-ref:
+        type: string
+        required: false
+        description: Branch or tag to checkout for 'dbt-data-reliability' repository
+      dbt-version:
+        type: string
+        required: false
+        description: dbt's version to test with
+
+env:
+  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: elementary
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v3
+        with:
+          path: elementary
+          ref: ${{ inputs.elementary-ref }}
+
+      - name: Checkout dbt package
+        uses: actions/checkout@v3
+        with:
+          repository: elementary-data/dbt-data-reliability
+          path: dbt-data-reliability
+          ref: ${{ inputs.dbt-data-reliability-ref }}
+
+      - name: Start Postgres
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        run: docker-compose up -d postgres
+
+      - name: Write dbt profiles
+        id: profiles
+        env:
+          PROFILES_YML: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
+        run: |
+          mkdir -p ~/.dbt
+          echo "$PROFILES_YML" > ~/.dbt/profiles.yml
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.7.5"
+
+      - name: Install dbt
+        run: pip install --pre
+          "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
+          "dbt-postgres${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
+
+      - name: Install Elementary
+        run: |
+          pip install -r dev-requirements.txt
+          pip install ".[postgres]"
+
+      - name: Install dbt package
+        run: |
+          ELEMENTARY_PKG_LOCATION=$(pip show elementary-data | grep -i location | awk '{print $2}')
+          DBT_PROJECT_PATH="$ELEMENTARY_PKG_LOCATION/elementary/monitor/dbt_project"
+          DBT_PKGS_PATH="$DBT_PROJECT_PATH/dbt_packages"
+          dbt deps --project-dir "$DBT_PROJECT_PATH"
+          rm -rf "$DBT_PKGS_PATH/elementary"
+          ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
+
+      - name: Run dbt package integration tests
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        run: |
+          dbt deps
+          python run_e2e_tests.py -t "postgres" -g "True" --clear-tests "True" -e "regular"
+
+      - name: Run Elementary
+        uses: elementary-data/run-elementary-action@v1.8
+        with:
+          warehouse-type: postgres
+          profiles-yml: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
+          edr-command: edr monitor -t "postgres"
+            &&
+            edr report
+            --file-path "report.html"
+
+      - name: Upload report
+        uses: actions/upload-artifact@v3
+        with:
+          name: report.html
+          path: report.html
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: edr.log
+          path: edr.log
