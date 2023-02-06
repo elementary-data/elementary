@@ -88,7 +88,6 @@ jobs:
         with:
           warehouse-type: postgres
           project-dir: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-          profiles-yml: ${{ secrets.CI_PROFILES_YML }}
           edr-command: edr monitor -t "postgres"
             &&
             edr report
