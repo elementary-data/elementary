@@ -15,11 +15,9 @@ from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
 from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
 from elementary.utils.log import get_logger
-from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
+from elementary.utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
-
-FALLBACK_TIME = datetime.fromtimestamp(0).strftime(DATETIME_FORMAT)
 
 
 class AlertsAPI(APIClient):
