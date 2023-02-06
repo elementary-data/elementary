@@ -18,6 +18,7 @@ on:
         description: dbt's version to test with
 
 env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
 
 jobs:
@@ -45,11 +46,17 @@ jobs:
         run: docker-compose up -d postgres
 
       - name: Write dbt profiles
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         env:
           PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
         run: |
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > profiles.yml
+          mkdir -p ~/.dbt
+          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > ~/.dbt/profiles.yml
+
+      - name: Read profiles.yml
+        id: profiles
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ~/.dbt/profiles.yml
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -82,10 +89,10 @@ jobs:
           python run_e2e_tests.py -t "postgres" -g "True" --clear-tests "True" -e "regular"
 
       - name: Run Elementary
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         uses: elementary-data/run-elementary-action@v1.8
         with:
           warehouse-type: postgres
+          profiles-yml: ${{ steps.profiles.outputs.content }}
           edr-command: edr monitor -t "postgres"
             &&
             edr report
