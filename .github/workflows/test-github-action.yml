@@ -53,6 +53,10 @@ jobs:
           echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > ~/.dbt/profiles.yml
           echo "content=$(echo '$PROFILES_YML' | base64 -d | sed 's/<SCHEMA_NAME>/test_github_action/g')" >> $GITHUB_OUTPUT
 
+      - name: Echo profiles
+        run: |
+          echo "profiles: ${{ steps.profiles.outputs.content }}"
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
