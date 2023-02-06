@@ -174,7 +174,7 @@ class AlertsAPI(APIClient):
         for alert in [*alerts.alerts, *alerts.malformed_alerts]:
             alert_class_id = alert.alert_class_id
             current_last_alert = alert_last_times[alert_class_id]
-            alert_detected_at = alert.detected_at.strftime(DATETIME_FORMAT)
+            alert_detected_at = alert.detected_at
             if (
                 not current_last_alert
                 or current_last_alert["detected_at"] < alert_detected_at
