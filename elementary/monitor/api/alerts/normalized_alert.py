@@ -1,5 +1,4 @@
 import copy
-import json
 from typing import List, Optional
 
 from elementary.utils.json_utils import try_load_json
@@ -63,7 +62,7 @@ class NormalizedAlert:
             normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_meta_attrs(
                 SUBSCRIBERS_KEY
             )
-            normalized_alert[OWNERS_KEY] = json.loads(self.alert[OWNERS_KEY])
+            normalized_alert[OWNERS_KEY] = self._get_alert_meta_attrs("owner")
             normalized_alert["slack_channel"] = self._get_alert_chennel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
