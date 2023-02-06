@@ -47,17 +47,10 @@ jobs:
       - name: Write dbt profiles
         id: profiles
         env:
-          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
+          PROFILES_YML: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
         run: |
           mkdir -p ~/.dbt
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > ~/.dbt/profiles.yml
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ~/.dbt/profiles.yml)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Echo profiles
-        run: |
-          echo "profiles: ${{ steps.profiles.outputs.content }}"
+          echo "$PROFILES_YML" > ~/.dbt/profiles.yml
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -93,7 +86,7 @@ jobs:
         uses: elementary-data/run-elementary-action@v1.8
         with:
           warehouse-type: postgres
-          profiles-yml: ${{ steps.profiles.outputs.content }}
+          profiles-yml: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
           edr-command: edr monitor -t "postgres"
             &&
             edr report
