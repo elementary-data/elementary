@@ -26,13 +26,13 @@
         elementary_test_results.id,
         {#
             Due to inconsistency test sub type and column name in some of elementary's tests
-            we need to calculate different test sub type unique id which is used to identify between different tests.
+            we need to calculate different elementary unique id which is used to identify between different tests.
         #}
         case
             when elementary_test_results.test_type = 'schema_change' then elementary_test_results.test_unique_id
             {# In old versions of elementary, elementary_test_results doesn't contain test_short_name, so we use dbt_test short_name. #}
             when dbt_tests.short_name = 'dimension_anomalies' then elementary_test_results.test_unique_id
-            else coalesce(elementary_test_results.test_unique_id, 'None') || '.' || coalesce(elementary_test_results.test_sub_type, 'None')
+            else coalesce(elementary_test_results.test_unique_id, 'None') || '.' || coalesce(elementary_test_results.column_name, 'None') || '.' || coalesce(elementary_test_results.test_sub_type, 'None')
         end as elementary_unique_id,
         elementary_test_results.invocation_id,
         elementary_test_results.data_issue_id,

@@ -17,6 +17,7 @@ class SourceFreshnessAlert(Alert):
 
     def __init__(
         self,
+        model_unique_id: str,
         snapshotted_at: Optional[str],
         max_loaded_at: Optional[str],
         max_loaded_at_time_ago_in_s: Optional[float],
@@ -30,6 +31,7 @@ class SourceFreshnessAlert(Alert):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.model_unique_id = model_unique_id
         self.snapshotted_at = (
             convert_datetime_utc_str_to_timezone_str(snapshotted_at, self.timezone)
             if snapshotted_at
@@ -92,9 +94,9 @@ class SourceFreshnessAlert(Alert):
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Tags*\n{tags if tags else '_No tags_'}",
-                f"*Owners*\n{owners if owners else '_No owners_'}",
-                f"*Subscribers*\n{subscribers if subscribers else '_No subscribers_'}",
+                f"*Tags*\n{tags or '_No tags_'}",
+                f"*Owners*\n{owners or '_No owners_'}",
+                f"*Subscribers*\n{subscribers or '_No subscribers_'}",
             ]
         )
 

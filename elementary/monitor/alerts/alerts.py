@@ -25,7 +25,7 @@ class AlertsQueryResult(Generic[AlertType]):
         return self.alerts + self.malformed_alerts
 
     def get_alerts_to_skip(self) -> List[Optional[Union[AlertType, MalformedAlert]]]:
-        return self.alerts_to_skip if self.alerts_to_skip else []
+        return self.alerts_to_skip or []
 
 
 @dataclass

@@ -34,10 +34,8 @@ class GCSClient:
             if remote_bucket_file_path
             else path.basename(local_html_file_path)
         )
-        bucket_report_path = (
-            remote_bucket_file_path if remote_bucket_file_path else report_filename
-        )
         bucket_website_url = None
+        bucket_report_path = remote_bucket_file_path or report_filename
         logger.info(f'Uploading to GCS bucket "{self.config.gcs_bucket_name}"')
         try:
             bucket = self.client.get_bucket(self.config.gcs_bucket_name)

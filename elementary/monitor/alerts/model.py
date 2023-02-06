@@ -13,6 +13,7 @@ class ModelAlert(Alert):
 
     def __init__(
         self,
+        model_unique_id: str,
         alias: str,
         path: str,
         original_path: str,
@@ -22,6 +23,7 @@ class ModelAlert(Alert):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.model_unique_id = model_unique_id
         self.alias = alias
         self.path = path
         self.original_path = original_path
@@ -77,9 +79,9 @@ class ModelAlert(Alert):
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Tags*\n{tags if tags else '_No tags_'}",
-                f"*Owners*\n{owners if owners else '_No owners_'}",
-                f"*Subscribers*\n{subscribers if subscribers else '_No subscribers_'}",
+                f"*Tags*\n{tags or '_No tags_'}",
+                f"*Owners*\n{owners or '_No owners_'}",
+                f"*Subscribers*\n{subscribers or '_No subscribers_'}",
             ]
         )
 
@@ -168,9 +170,9 @@ class ModelAlert(Alert):
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
-                f"*Tags*\n{tags if tags else '_No tags_'}",
-                f"*Owners*\n{owners if owners else '_No owners_'}",
-                f"*Subscribers*\n{subscribers if subscribers else '_No subscribers_'}",
+                f"*Tags*\n{tags or '_No tags_'}",
+                f"*Owners*\n{owners or '_No owners_'}",
+                f"*Subscribers*\n{subscribers or '_No subscribers_'}",
             ]
         )
 

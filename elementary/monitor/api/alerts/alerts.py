@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
@@ -14,11 +15,9 @@ from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.normalized_alert import NormalizedAlert
 from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
 from elementary.utils.log import get_logger
-from elementary.utils.time import DATETIME_FORMAT, get_now_utc_str
+from elementary.utils.time import get_now_utc_str
 
 logger = get_logger(__name__)
-
-FALLBACK_TIME = datetime.fromtimestamp(0).strftime(DATETIME_FORMAT)
 
 
 class AlertsAPI(APIClient):
@@ -107,18 +106,19 @@ class AlertsAPI(APIClient):
         suppressed_alerts = self._get_suppressed_alerts(
             pending_alerts, last_alert_sent_times
         )
+        latest_alert_ids = self._get_latest_alerts(pending_alerts)
         alerts_to_skip = []
         alerts_to_send = []
         malformed_alerts_to_send = []
 
         for alert in pending_alerts.alerts:
-            if alert.id in suppressed_alerts:
+            if alert.id in suppressed_alerts or alert.id not in latest_alert_ids:
                 alerts_to_skip.append(alert)
             else:
                 alerts_to_send.append(alert)
 
         for alert in pending_alerts.malformed_alerts:
-            if alert.id in suppressed_alerts:
+            if alert.id in suppressed_alerts or alert.id not in latest_alert_ids:
                 alerts_to_skip.append(alert)
             else:
                 malformed_alerts_to_send.append(alert)
@@ -140,29 +140,12 @@ class AlertsAPI(APIClient):
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
-        for alert in alerts.alerts:
-            unique_id = alert.unique_id
+        for alert in [*alerts.alerts, *alerts.malformed_alerts]:
+            alert_class_id = alert.alert_class_id
             suppression_interval = alert.alert_suppression_interval
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(unique_id))
-                if last_alert_sent_times.get(unique_id)
-                else None
-            )
-            is_alert_in_suppression = (
-                (current_time_utc - last_sent_time).seconds / 3600
-                <= suppression_interval
-                if last_sent_time
-                else False
-            )
-            if is_alert_in_suppression:
-                suppressed_alerts.append(alert.id)
-
-        for alert in alerts.malformed_alerts:
-            unique_id = alert.data.get("unique_id")
-            suppression_interval = alert.data.get("alert_suppression_interval")
-            last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(unique_id))
-                if last_alert_sent_times.get(unique_id)
+                datetime.fromisoformat(last_alert_sent_times.get(alert_class_id))
+                if last_alert_sent_times.get(alert_class_id)
                 else None
             )
             is_alert_in_suppression = (
@@ -175,6 +158,32 @@ class AlertsAPI(APIClient):
                 suppressed_alerts.append(alert.id)
 
         return suppressed_alerts
+
+    def _get_latest_alerts(
+        self,
+        alerts: Union[
+            AlertsQueryResult[TestAlert],
+            AlertsQueryResult[ModelAlert],
+            AlertsQueryResult[SourceFreshnessAlert],
+        ],
+    ) -> List[str]:
+        alert_last_times = defaultdict(lambda: None)
+        latest_alert_ids = []
+        for alert in [*alerts.alerts, *alerts.malformed_alerts]:
+            alert_class_id = alert.alert_class_id
+            current_last_alert = alert_last_times[alert_class_id]
+            alert_detected_at = alert.detected_at
+            if (
+                not current_last_alert
+                or current_last_alert["detected_at"] < alert_detected_at
+            ):
+                alert_last_times[alert_class_id] = dict(
+                    alert_id=alert.id, detected_at=alert_detected_at
+                )
+
+        for alert_last_time in alert_last_times.values():
+            latest_alert_ids.append(alert_last_time.get("alert_id"))
+        return latest_alert_ids
 
     def skip_alerts(
         self, alerts_to_skip: List[Union[AlertType, MalformedAlert]], table_name: str
