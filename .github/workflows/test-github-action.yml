@@ -1,4 +1,4 @@
-name: Test elementary's GitHub action
+name: Test elementary GitHub action
 on:
   schedule:
     - cron: "0 */8 * * *"
