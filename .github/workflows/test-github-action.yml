@@ -1,7 +1,7 @@
 name: Test elementary GitHub action
 on:
   schedule:
-    - cron: "0 */8 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       elementary-ref:
@@ -18,7 +18,6 @@ on:
         description: dbt's version to test with
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
 
 jobs:
@@ -41,17 +40,13 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
-      - name: Start Postgres
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: docker-compose up -d postgres
-
       - name: Write dbt profiles
+        id: profiles
         env:
-          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
+          PROFILES_YML: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
         run: |
           mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | sed "s/-/_/g")
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
+          echo "$PROFILES_YML" > ~/.dbt/profiles.yml
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -61,12 +56,12 @@ jobs:
       - name: Install dbt
         run: pip install --pre
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          "dbt-postgres${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
+          "dbt-snowflake${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
           pip install -r dev-requirements.txt
-          pip install ".[postgres]"
+          pip install ".[snowflake]"
 
       - name: Install dbt package
         run: |
@@ -81,14 +76,15 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "postgres" -g "True" --clear-tests "True"
+          python run_e2e_tests.py -t "snowflake" --clear-tests "True" -e "regular"
 
       - name: Run Elementary
         uses: elementary-data/run-elementary-action@v1.8
         with:
-          warehouse-type: postgres
-          project-dir: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-          edr-command: edr monitor -t "postgres"
+          warehouse-type: snowflake
+          profiles-yml: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
+          edr-command:
+            edr monitor -t "snowflake" --slack-token "${{ secrets.CI_SLACK_TOKEN }}" --slack-channel-name data-ops
             &&
             edr report
             --file-path "report.html"
