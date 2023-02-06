@@ -80,7 +80,7 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "postgres" -g "True" --clear-tests "True"
+          python run_e2e_tests.py -t "postgres" -g "True" --clear-tests "True" -e "regular"
 
       - name: Run Elementary
         uses: elementary-data/run-elementary-action@v1.8
