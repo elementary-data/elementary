@@ -95,7 +95,7 @@
                                  'test_results_description': alert.alert_description,
                                  'owners': alert.owners,
                                  'tags': alert.tags,
-                                 'test_results_query': alert.test_results_query,
+                                 'test_results_query': alert.alert_results_query,
                                  'test_rows_sample': test_rows_sample,
                                  'other': alert.other,
                                  'test_name': alert.test_name,
