@@ -43,8 +43,6 @@ class DataMonitoring:
             )
         else:
             self.user_dbt_runner = None
-        if self.user_dbt_runner:
-            self.run_elementary_models()
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -124,7 +122,3 @@ class DataMonitoring:
                 f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
                 "Please upgrade the major and minor versions to align.\n",
             )
-
-    def run_elementary_models(self):
-        logger.info("Syncing with dbt project to its latest state.")
-        self.user_dbt_runner.run("elementary")
