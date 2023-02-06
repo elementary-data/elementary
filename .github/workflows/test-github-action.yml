@@ -18,7 +18,6 @@ on:
         description: dbt's version to test with
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
 
 jobs:
@@ -46,17 +45,13 @@ jobs:
         run: docker-compose up -d postgres
 
       - name: Write dbt profiles
+        id: profiles
         env:
           PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
         run: |
           mkdir -p ~/.dbt
           echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/test_github_action/g" > ~/.dbt/profiles.yml
-
-      - name: Read profiles.yml
-        id: profiles
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ~/.dbt/profiles.yml
+          echo "content=$(echo "$PROFILES_YML" | base64 -d | sed 's/<SCHEMA_NAME>/test_github_action/g')" >> $GITHUB_OUTPUT
 
       - name: Setup Python
         uses: actions/setup-python@v4
