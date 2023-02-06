@@ -231,7 +231,7 @@ def monitor(
     select,
 ):
     """
-    Monitor your warehouse.
+    Get alerts on failures in dbt jobs.
     """
     if ctx.invoked_subcommand is not None:
         return
@@ -332,7 +332,7 @@ def report(
     select,
 ):
     """
-    Generate a local report of your warehouse.
+    Generate a local observability report of your warehouse.
     """
     config = Config(
         config_dir,
@@ -487,7 +487,7 @@ def send_report(
     select,
 ):
     """
-    Send the report to an external platform.
+    Generate and send the report to an external platform.
     The current options are Slack, AWS S3, and Google Cloud Storage.
     Each specified platform will be sent a report.
     """

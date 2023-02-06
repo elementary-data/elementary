@@ -13,6 +13,7 @@ class ModelAlert(Alert):
 
     def __init__(
         self,
+        model_unique_id: str,
         alias: str,
         path: str,
         original_path: str,
@@ -22,6 +23,7 @@ class ModelAlert(Alert):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.model_unique_id = model_unique_id
         self.alias = alias
         self.path = path
         self.original_path = original_path
