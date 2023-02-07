@@ -18,9 +18,9 @@ def gen_report(json_output_path: str):
 
 
 def main():
-    json_output_path = sys.argv[1]
-    if not json_output_path:
+    if len(sys.argv) < 2:
         raise ValueError("Please provide the JSON output file path as an argument.")
+    json_output_path = sys.argv[1]
     gen_report(json_output_path)
 
 
