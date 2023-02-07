@@ -16,7 +16,7 @@ dbt run-operation elementary.generate_elementary_cli_profile
 ```
 
 The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
-[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile#authentication-methods)
+[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-setups/redshift-setup#authentication-methods)
 in the output and copy it to `~/.dbt/profiles.yml`.
 
 The `profiles.yml` file to connect to Redshift should contain a profile in the following format:
@@ -48,5 +48,5 @@ elementary:
 ```
 
 We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
-dbt's documentation of [Redshift profile](https://docs.getdbt.com/reference/warehouse-profiles/redshift-profile) for
+dbt's documentation of [Redshift profile](https://docs.getdbt.com/reference/warehouse-setups/redshift-setup) for
 further details.
