@@ -9,7 +9,7 @@
   {% set get_pkg_version_query %}
     select * from {{ invocations_relation }} order by generated_at desc limit 1
   {% endset %}
-  {% set result = dbt.run_query(get_pkg_version_query) %}
+  {% set result = elementary.run_query(get_pkg_version_query) %}
   {% if not result %}
     {% do elementary.edr_log('') %}
     {% do return(none) %}
