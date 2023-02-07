@@ -38,14 +38,15 @@ class DbtRunner:
     def _run_command(
         self,
         command_args: List[str],
-        json_logs: bool = False,
+        capture_output: bool = False,
+        log_format: str = "json",
         vars: Optional[dict] = None,
         quiet: bool = False,
     ) -> Tuple[bool, str]:
         dbt_command = ["dbt"]
         json_output = False
-        if json_logs:
-            dbt_command.extend(["--log-format", "json"])
+        if capture_output:
+            dbt_command.extend(["--log-format", log_format])
             json_output = True
         dbt_command.extend(command_args)
         dbt_command.extend(["--project-dir", self.project_dir])
@@ -99,7 +100,7 @@ class DbtRunner:
     def run_operation(
         self,
         macro_name: str,
-        json_logs: bool = True,
+        capture_output: bool = True,
         macro_args: Optional[dict] = None,
         log_errors: bool = True,
         vars: Optional[dict] = None,
@@ -110,12 +111,15 @@ class DbtRunner:
             json_args = json.dumps(macro_args)
             command_args.extend(["--args", json_args])
         success, command_output = self._run_command(
-            command_args=command_args, json_logs=json_logs, vars=vars, quiet=quiet
+            command_args=command_args,
+            capture_output=capture_output,
+            vars=vars,
+            quiet=quiet,
         )
         if log_errors and not success:
             logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
-        if json_logs:
+        if capture_output:
             json_messages = command_output.splitlines()
             for json_message in json_messages:
                 try:
@@ -184,7 +188,7 @@ class DbtRunner:
             command_args.extend(["-s", select])
         try:
             success, command_output_string = self._run_command(
-                command_args=command_args, json_logs=True
+                command_args=command_args, capture_output=True, log_format="text"
             )
             command_outputs = command_output_string.splitlines()
             # ls command didn't match nodes.
