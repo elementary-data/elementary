@@ -84,7 +84,7 @@
         "deployment-and-configuration/elementary-in-production",
         "deployment-and-configuration/docker",
         "deployment-and-configuration/github-actions",
-        "deployment-and-configuration/gitlab",
+        "deployment-and-configuration/gitlab-ci",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"
       ]
