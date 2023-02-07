@@ -26,12 +26,12 @@ In order to setup the Elementary pipeline in your GitLab repository, you'll need
 
 ```yml
 image:
-  name: ghcr.io/elementary-data/elementary:latest
+  name: ghcr.io/elementary-data/elementary:<TAG> # Replace <TAG> with edr's version.
   entrypoint: [""]
 
 elementary:
   script:
-    - mkdir -p ~/.dbt && echo "$PROFILES_YML" > ~/.dbt/profiles.yml # Only required if `profiles.yml` doesn't exist in repository and using `PROFILES_YML` secret.
+    - echo "$PROFILES_YML" > profiles.yml # Only required if `profiles.yml` doesn't exist in repository and using `PROFILES_YML` secret.
     - edr monitor --slack-webhook "$SLACK_WEBHOOK"
     - edr send-report --aws-access-key-id "$AWS_ACCESS_KEY_ID" --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY" --s3-bucket-name "$S3_BUCKET_NAME"
 ```
