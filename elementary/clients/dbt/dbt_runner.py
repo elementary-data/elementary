@@ -183,7 +183,7 @@ class DbtRunner:
         return success
 
     def ls(self, select: Optional[str] = None) -> list:
-        command_args = ["ls"]
+        command_args = ["-q", "ls"]
         if select:
             command_args.extend(["-s", select])
         try:
