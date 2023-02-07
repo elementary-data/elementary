@@ -61,7 +61,6 @@
         {# In old versions of elementary, elementary_test_results doesn't contain test_short_name, so we use dbt_test short_name. #}
         dbt_tests.short_name,
         elementary_test_results.test_alias,
-        elementary_test_results.result_rows,
         elementary_test_results.failures,
         dbt_tests.meta,
         dbt_models.meta as model_meta,

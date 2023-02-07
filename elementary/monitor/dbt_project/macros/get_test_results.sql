@@ -42,32 +42,30 @@
             status,
             days_diff,
             invocations_rank_index,
-            result_rows,
             failures
         from ordered_test_results
         where invocations_rank_index <= {{ invocations_per_test }}
         order by elementary_unique_id, invocations_rank_index desc
     {%- endset -%}
-    {% set test_results_agate = run_query(select_test_results) %}
+
+    {% set test_results_agate = elementary.run_query(select_test_results) %}
+    {% set test_result_rows_agate = elementary_internal.get_result_rows_agate(days_back) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
     {%- for test in tests -%}
         {% set test_rows_sample = none %}
-        {% if elementary.insensitive_get_dict_value(test, 'invocations_rank_index') == 1 %}
-            {% set test_unique_id = elementary.insensitive_get_dict_value(test, 'test_unique_id') %}
-            {% set test_results_query = elementary.insensitive_get_dict_value(test, 'test_results_query') %}
-            {% set test_type = elementary.insensitive_get_dict_value(test, 'test_type') %}
-            {% set test_sub_type = elementary.insensitive_get_dict_value(test, 'test_sub_type') %}
-            {% set status = elementary.insensitive_get_dict_value(test, 'status') | lower %}
+        {% if test.invocations_rank_index == 1 %}
+            {% set test_type = test.test_type %}
+            {% set status = test.status | lower %}
 
             {% set elementary_tests_allowlist_status = ['fail', 'warn']  %}
             {% if not disable_passed_test_metrics %}
                 {% do elementary_tests_allowlist_status.append('pass') %}
             {% endif %}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test, test_results_query, test_type, metrics_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(test.id), test_type, metrics_sample_limit) %}
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
-                {% if test_sub_type == 'dimension' %}
+                {% if test.test_sub_type == 'dimension' %}
                     {% set anomalous_rows = [] %}
                     {% set headers = [{'id': 'anomalous_value_timestamp', 'display_name': 'timestamp', 'type': 'date'}] %}
                     {% for row in test_rows_sample %}
@@ -106,4 +104,3 @@
     {%- endfor -%}
     {% do elementary.edr_log(tojson(tests)) %}
 {%- endmacro -%}
-
