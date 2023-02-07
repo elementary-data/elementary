@@ -197,7 +197,7 @@ class AlertsAPI(APIClient):
                     "alert_ids": alert_ids_chunk,
                     "table_name": table_name,
                 },
-                json_logs=False,
+                capture_output=False,
             )
 
     def _query_pending_test_alerts(
@@ -305,7 +305,7 @@ class AlertsAPI(APIClient):
                     "sent_at": get_now_utc_str(),
                     "table_name": table_name,
                 },
-                json_logs=False,
+                capture_output=False,
             )
 
     @staticmethod
