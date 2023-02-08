@@ -27,12 +27,12 @@ docker pull ghcr.io/elementary-data/elementary:v0.6.3
 ### Running Elementary Docker image in a container
 
 The `ENTRYPOINT` for Elementary Docker image is the command `edr`.
-You can bind-mount your project to `/app` and use `edr` as normal:
+You can bind-mount your project to `/usr/app` and use `edr` as normal:
 
 ```shell
 docker run \
---mount type=bind,source=path/to/project,target=/app \
---mount type=bind,source=path/to/profiles-dir,target=/root/.dbt/ \
+--mount type=bind,source=<path/to/project>,target=/usr/app \
+--mount type=bind,source=<path/to/profiles-dir>,target=/home/elementary/.dbt/ \
 ghcr.io/elementary-data/elementary \
 monitor
 ```
