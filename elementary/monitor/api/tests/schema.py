@@ -3,7 +3,6 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, validator
 
-from elementary.utils.json_utils import try_load_json
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 TestUniqueIdType = str
@@ -45,12 +44,12 @@ class TestResultDBRowSchema(BaseModel):
     test_results_description: Optional[str]
     owners: Optional[List[str]]
     tags: Optional[List[str]]
-    meta: Optional[dict]
-    model_meta: Optional[dict]
+    meta: dict
+    model_meta: dict
     test_results_query: Optional[str] = None
     other: Optional[str]
     test_name: str
-    test_params: Optional[dict]
+    test_params: dict
     severity: str
     status: str
     test_created_at: Optional[str] = None
@@ -68,15 +67,15 @@ class TestResultDBRowSchema(BaseModel):
 
     @validator("meta", pre=True)
     def load_meta(cls, meta):
-        return json.loads(meta) if meta else {}
+        return cls._load_var_to_dict(meta)
 
     @validator("model_meta", pre=True)
     def load_model_meta(cls, model_meta):
-        return json.loads(model_meta) if model_meta else {}
+        return cls._load_var_to_dict(model_meta)
 
     @validator("test_params", pre=True)
     def load_test_params(cls, test_params):
-        return json.loads(test_params) if test_params else {}
+        return cls._load_var_to_dict(test_params)
 
     @validator("test_results_description", pre=True)
     def load_test_results_description(cls, test_results_description):
@@ -84,19 +83,35 @@ class TestResultDBRowSchema(BaseModel):
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):
-        formatted_tags = try_load_json(tags)
-        return formatted_tags if formatted_tags else []
+        return cls._load_var_to_list(tags)
 
     @validator("owners", pre=True)
     def load_owners(cls, owners):
-        formatted_owners = try_load_json(owners)
-        return formatted_owners if formatted_owners else []
+        return cls._load_var_to_list(owners)
 
     @validator("failures", pre=True)
     def parse_failures(cls, failures, values):
         test_type = values.get("test_type")
         # Elementary's tests dosen't return correct failures.
         return failures or None if test_type == "dbt_test" else None
+
+    @staticmethod
+    def _load_var_to_dict(var: Union[str, dict]) -> dict:
+        if not var:
+            return {}
+        elif isinstance(var, dict):
+            return var
+        elif isinstance(var, str):
+            return json.loads(var)
+
+    @staticmethod
+    def _load_var_to_list(var: Union[str, list]) -> list:
+        if not var:
+            return []
+        elif isinstance(var, list):
+            return []
+        elif isinstance(var, str):
+            return json.loads(var)
 
 
 class TotalsSchema(BaseModel):
@@ -187,6 +202,8 @@ class TestRunSchema(BaseModel):
 class TestResultSummarySchema(BaseModel):
     __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
 
+    test_unique_id: str
+    elementary_unique_id: str
     table_name: Optional[str] = None
     column_name: Optional[str] = None
     test_type: str

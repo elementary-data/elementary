@@ -92,9 +92,10 @@ class TestsAPI(APIClient):
             for test_result in filtered_test_results_db_rows
             if test_result.invocations_rank_index == 1
         ]
-
         return [
             TestResultSummarySchema(
+                test_unique_id=test_result.test_unique_id,
+                elementary_unique_id=test_result.elementary_unique_id,
                 table_name=test_result.table_name,
                 column_name=test_result.column_name,
                 test_type=test_result.test_type,

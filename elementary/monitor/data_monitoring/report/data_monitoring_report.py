@@ -25,9 +25,6 @@ from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.data_monitoring_filter import (
-    DataMonitoringFilter,
-)
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
@@ -56,12 +53,6 @@ class DataMonitoringReport(DataMonitoring):
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
-        )
-        self.filter = DataMonitoringFilter(
-            tracking=tracking,
-            internal_dbt_runner=self.internal_dbt_runner,
-            user_dbt_runner=self.user_dbt_runner,
-            selector=self.raw_filter,
         )
         self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
         self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)

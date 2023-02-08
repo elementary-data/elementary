@@ -14,14 +14,12 @@ class DataMonitoringFilter:
     def __init__(
         self,
         tracking: AnonymousTracking,
-        internal_dbt_runner: DbtRunner,
         user_dbt_runner: Optional[DbtRunner] = None,
         selector: Optional[str] = None,
     ) -> None:
         self.tracking = tracking
-        self.internal_dbt_runner = internal_dbt_runner
-        self.user_dbt_runner = user_dbt_runner
         self.selector = selector
+        self.selector_api = SelectorAPI(user_dbt_runner) if user_dbt_runner else None
         self.filter = self._parse_selector(self.selector)
 
     def _parse_selector(
@@ -29,10 +27,9 @@ class DataMonitoringFilter:
     ) -> DataMonitoringFilterSchema:
         data_monitoring_filter = DataMonitoringFilterSchema()
         if selector:
-            if self.user_dbt_runner:
+            if self.selector_api:
                 self.tracking.set_env("select_method", "dbt selector")
-                selector_api = SelectorAPI(self.user_dbt_runner)
-                node_names = selector_api.get_selector_results(selector=selector)
+                node_names = self.selector_api.get_selector_results(selector=selector)
                 return DataMonitoringFilterSchema(
                     node_names=node_names, selector=selector
                 )
