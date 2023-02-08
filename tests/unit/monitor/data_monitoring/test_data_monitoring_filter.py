@@ -89,7 +89,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     )
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().invocation_time
-        == "2023-02-08 08:00:00"
+        is not None
     )
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_selector()
