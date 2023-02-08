@@ -18,7 +18,7 @@ dbt run-operation elementary.generate_elementary_cli_profile
 ```
 
 The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
-[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-profiles/bigquery-profile#authentication-methods)
+[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-setups/bigquery-setup#authentication-methods)
 in the output and copy it to `~/.dbt/profiles.yml`.
 
 The `profiles.yml` file to connect to BigQuery should contain a profile in the following format:
@@ -46,7 +46,7 @@ elementary:
 ```
 
 We support the same format and connection methods as dbt. Please refer to dbt's documentation
-of [BigQuery](https://docs.getdbt.com/reference/warehouse-profiles/bigquery-profile) for further details.
+of [BigQuery](https://docs.getdbt.com/reference/warehouse-setups/bigquery-setup) for further details.
 
 ## Create BigQuery service account
 

@@ -22,11 +22,11 @@ Your deployment of Elementary has two parts:
 
 **Part 1 - Elementary package in your production dbt project**
 
-In your dbt jobs, after you deploy the Elementary dbt package: 
+In your dbt jobs, after you deploy the Elementary dbt package:
 
 1. **Run and test results** - Collected by default as part of your runs.
-2. **Elementary tests** - Make sure your dbt test runs include elementary tests. 
-3. **Update dbt artifacts** - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models. 
+2. **Elementary tests** - Make sure your dbt test runs include elementary tests.
+3. **Update dbt artifacts** - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models.
 
 **Part 2 - Elementary CLI**
 
@@ -72,11 +72,12 @@ Some options include:
      Elementary Managed
    </a>
 2. GitHub Actions - Checkout the [Elementary GitHub Action](https://github.com/elementary-data/run-elementary-action) we created.
-3. [Docker](https://github.com/elementary-data/elementary/pkgs/container/elementary)
-4. Airflow
-5. Prefect
-6. Meltano - Checkout the [custom Elementary integration](https://hub.meltano.com/utilities/elementary) developed by [Stéphane Burwash](https://github.com/SBurwash) - [Potloc](https://www.potloc.com/).
-7. Using cron
+3. [Docker](/deployment-and-configuration/docker)
+4. [GitLab CI](/deployment-and-configuration/gitlab-ci)
+5. Airflow
+6. Prefect
+7. Meltano - Checkout the [custom Elementary integration](https://hub.meltano.com/utilities/elementary) developed by [Stéphane Burwash](https://github.com/SBurwash) - [Potloc](https://www.potloc.com/).
+8. Using cron
 
 ## Need help?
 

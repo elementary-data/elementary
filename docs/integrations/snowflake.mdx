@@ -18,7 +18,7 @@ dbt run-operation elementary.generate_elementary_cli_profile
 ```
 
 The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
-[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile#authentication-methods)
+[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-setups/snowflake-setup#authentication-methods)
 in the output and copy it to `~/.dbt/profiles.yml`.
 
 ```yml Snowflake
@@ -46,7 +46,7 @@ elementary:
 ```
 
 We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
-dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-profiles/snowflake-profile) for
+dbt's documentation of [Snowflake profile](https://docs.getdbt.com/reference/warehouse-setups/snowflake-setup) for
 further details.
 
 ### Have a question?

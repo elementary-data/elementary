@@ -1,0 +1,43 @@
+---
+title: "Elementary 0.6.1"
+sidebarTitle: "0.6.1"
+---
+
+_November 28, 2022: [v0.6.1 Python](https://github.com/elementary-data/elementary/releases/tag/v0.6.1), [v0.6.1 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.6.1)_
+
+
+### 🔥 What's new?
+
+- **Elementary is 10x Faster!!!** ⚡️🏃‍
+  - **Report generation 10x Faster** 💪
+    - We improved our mechanism of collecting test samples, greatly reducing the time it takes to run a report!
+  - **Lineage screen 10x Faster** 💪
+    - Major improvements for large graphs!
+  - **On-run-end hook 10x Faster** 💪
+    - We now cache collected dbt artifacts locally and only upload them if they changed from the last run.
+
+- **Support for showing test descriptions** in both reports and alerts! 📃
+- 
+
+### 💫 More changes
+
+- **Test schema is no longer needed** (e.g. the `__tests` schema is now optional).
+- AWS credentials for S3 automatically detected (via `boto3`) - Contributed by [Por Heng](https://github.com/pei0804)! 🎉
+- Added query ID to `dbt_run_results`, `model_run_results`, and `snapshot_run_results` (currently supported for Snowflake only) - Contributed by [Prabahar Kamatchirajan](https://github.com/kkprab)! 🎉
+- Added a flag of whether the invocation was the first or last of the day to `model_run_results` - Contributed by [Ekaterina Khrushch](https://github.com/eKatia)! 🎉
+- Added a `--quoting` flag to the CLI to allow overriding the default dbt quoting settings in the CLI's internal dbt package - Thanks [Daniel Gaimster](https://github.com/gtmehrer) for reporting!
+
+
+### 🐞 Bug fixes
+
+- Reduced the maximum query size on BigQuery to avoid "query too big" errors.
+- Fixed a bug that caused uploading the dbt invocations to crash.
+- Evaluate config args correctly by hierarchy even when they are False.
+
+
+### ⭐️ Contributions & Acknowledgements
+
+- Thanks [@Nabeel Zewail](https://github.com/nzewail) for making a first contribution, with the removal of `compiled_code` change.
+- Thanks [@Rochelle Smits](https://github.com/smitsrr) for making a first contribution, adding the documentation for `dbt_invocations`.
+- Thanks [@Wojciech Kopacki](https://github.com/kopackiw) for making a first contribution, with the documentation fix regarding running elementary's models.
+- Thanks [@Stéphane Burwash](https://github.com/SBurwash) for making a first contribution, and developing an **Elementary extension for Meltano!**
