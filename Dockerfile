@@ -9,8 +9,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 USER $USERNAME
 
+ENV PATH="$PATH:/home/$USERNAME/.local/bin"
+
 WORKDIR /app
 COPY --chown=$USER_UID:$USER_GID . .
-RUN pip install  --user ".[postgres, snowflake, bigquery, redshift, databricks]"
+RUN pip install --user ".[postgres, snowflake, bigquery, redshift, databricks]"
 ENTRYPOINT ["edr"]
-
