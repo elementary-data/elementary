@@ -35,7 +35,7 @@ class MockTestsAPI(TestsAPI):
                 status="fail",
                 test_created_at="2023-01-01 09:00:00",
                 days_diff=1,
-                invocations_rank_index=1,
+                invocations_rank_index=2,
             ),
             TestResultDBRowSchema(
                 id="mock_id_2",
@@ -145,7 +145,7 @@ class MockTestsAPI(TestsAPI):
                 status="fail",
                 test_created_at="2023-01-01 09:00:00",
                 days_diff=1,
-                invocations_rank_index=1,
+                invocations_rank_index=2,
             ),
             TestResultDBRowSchema(
                 id="mock_id_6",

@@ -11,7 +11,8 @@ def test_get_test_restuls_summary():
     test_results_summary = api.get_test_restuls_summary(
         test_results_db_rows=test_result_db_rows
     )
-    assert len(test_results_summary) == 6
+    # No duplicate tests - only latest results
+    assert len(test_results_summary) == 4
     for result_summary in test_results_summary:
         assert isinstance(result_summary, TestResultSummarySchema)
 
@@ -20,7 +21,7 @@ def test_get_test_restuls_summary():
         test_results_db_rows=test_result_db_rows,
         filter=DataMonitoringFilterSchema(tag="awesome-o"),
     )
-    assert len(test_results_summary) == 4
+    assert len(test_results_summary) == 2
     for result_summary in test_results_summary:
         assert isinstance(result_summary, TestResultSummarySchema)
     elementary_unique_ids = [
@@ -28,8 +29,6 @@ def test_get_test_restuls_summary():
     ]
     assert elementary_unique_ids == [
         "test_id_1.row_count",
-        "test_id_1.row_count",
-        "test_id_4.generic",
         "test_id_4.generic",
     ]
 
@@ -38,14 +37,13 @@ def test_get_test_restuls_summary():
         test_results_db_rows=test_result_db_rows,
         filter=DataMonitoringFilterSchema(tag="awesome"),
     )
-    assert len(test_results_summary) == 3
+    assert len(test_results_summary) == 2
     for result_summary in test_results_summary:
         assert isinstance(result_summary, TestResultSummarySchema)
     elementary_unique_ids = [
         result_summary.elementary_unique_id for result_summary in test_results_summary
     ]
     assert elementary_unique_ids == [
-        "test_id_1.row_count",
         "test_id_1.row_count",
         "test_id_3.row_count",
     ]
@@ -62,7 +60,7 @@ def test_get_test_restuls_summary():
         test_results_db_rows=test_result_db_rows,
         filter=DataMonitoringFilterSchema(owner="Jeff"),
     )
-    assert len(test_results_summary) == 4
+    assert len(test_results_summary) == 2
     for result_summary in test_results_summary:
         assert isinstance(result_summary, TestResultSummarySchema)
     elementary_unique_ids = [
@@ -70,8 +68,6 @@ def test_get_test_restuls_summary():
     ]
     assert elementary_unique_ids == [
         "test_id_1.row_count",
-        "test_id_1.row_count",
-        "test_id_4.generic",
         "test_id_4.generic",
     ]
 
@@ -80,14 +76,13 @@ def test_get_test_restuls_summary():
         test_results_db_rows=test_result_db_rows,
         filter=DataMonitoringFilterSchema(owner="Joe"),
     )
-    assert len(test_results_summary) == 3
+    assert len(test_results_summary) == 2
     for result_summary in test_results_summary:
         assert isinstance(result_summary, TestResultSummarySchema)
     elementary_unique_ids = [
         result_summary.elementary_unique_id for result_summary in test_results_summary
     ]
     assert elementary_unique_ids == [
-        "test_id_1.row_count",
         "test_id_1.row_count",
         "test_id_2.freshness",
     ]
@@ -97,7 +92,7 @@ def test_get_test_restuls_summary():
         test_results_db_rows=test_result_db_rows,
         filter=DataMonitoringFilterSchema(model="model_id_1"),
     )
-    assert len(test_results_summary) == 4
+    assert len(test_results_summary) == 2
     for result_summary in test_results_summary:
         assert isinstance(result_summary, TestResultSummarySchema)
     elementary_unique_ids = [
@@ -105,8 +100,6 @@ def test_get_test_restuls_summary():
     ]
     assert elementary_unique_ids == [
         "test_id_1.row_count",
-        "test_id_1.row_count",
-        "test_id_4.generic",
         "test_id_4.generic",
     ]
 
