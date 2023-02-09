@@ -99,89 +99,15 @@ class DataMonitoringReport(DataMonitoring):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ) -> Tuple[bool, str]:
-        now_utc = get_now_utc_iso_format()
         html_path = self._get_report_file_path(file_path)
         with open(html_path, "w", encoding="utf-8") as html_file:
-            output_data = {"creation_time": now_utc, "days_back": days_back}
-
-            models = self.models_api.get_models(exclude_elementary_models)
-            sources = self.models_api.get_sources()
-            exposures = self.models_api.get_exposures()
-
-            models_runs = self.models_api.get_models_runs(
-                days_back=days_back, exclude_elementary_models=exclude_elementary_models
-            )
-
-            test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
+            output_data = self.get_report_data(
                 days_back=days_back,
-                invocations_per_test=test_runs_amount,
+                test_runs_amount=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
+                exclude_elementary_models=exclude_elementary_models,
+                project_name=project_name,
             )
-            test_results = self._get_test_results_and_totals(test_results_db_rows)
-            test_runs = self._get_test_runs_and_totals(test_results_db_rows)
-            serializable_models, sidebars = self._get_dbt_models_and_sidebars(
-                models, sources, exposures
-            )
-            models_coverages = self._get_dbt_models_test_coverages()
-            models_runs_dicts, model_runs_totals = self._get_models_runs_and_totals(
-                models_runs
-            )
-            lineage = self._get_lineage(exclude_elementary_models)
-            filters = self.filter_api.get_filters(
-                test_results.totals, test_runs.totals, models, sources, models_runs
-            )
-
-            test_metadatas = []
-            for tests in test_results.results.values():
-                for test in tests:
-                    test_metadatas.append(test.metadata)
-            self.execution_properties["elementary_test_count"] = len(
-                [
-                    test_metadata
-                    for test_metadata in test_metadatas
-                    if test_metadata.test_type != "dbt_test"
-                ]
-            )
-            self.execution_properties["test_result_count"] = len(test_metadatas)
-
-            serializable_test_results = defaultdict(list)
-            for model_unique_id, test_result in test_results.results.items():
-                serializable_test_results[model_unique_id].extend(
-                    [result.dict() for result in test_result]
-                )
-
-            serializable_test_runs = defaultdict(list)
-            for model_unique_id, test_run in test_runs.runs.items():
-                serializable_test_runs[model_unique_id].extend(
-                    [run.dict() for run in test_run]
-                )
-
-            output_data["models"] = serializable_models
-            output_data["sidebars"] = sidebars.dict()
-            output_data["invocation"] = dict(test_results.invocation)
-            output_data["test_results"] = serializable_test_results
-            output_data["test_results_totals"] = self._serialize_totals(
-                test_results.totals
-            )
-            output_data["test_runs"] = serializable_test_runs
-            output_data["test_runs_totals"] = self._serialize_totals(test_runs.totals)
-            output_data["coverages"] = models_coverages
-            output_data["model_runs"] = models_runs_dicts
-            output_data["model_runs_totals"] = model_runs_totals
-            output_data["filters"] = filters.dict()
-            output_data["lineage"] = lineage.dict()
-            if self.config.anonymous_tracking_enabled:
-                output_data["tracking"] = {
-                    "posthog_api_key": self.tracking.POSTHOG_PROJECT_API_KEY,
-                    "report_generator_anonymous_user_id": self.tracking.anonymous_user_id,
-                    "anonymous_warehouse_id": self.tracking.anonymous_warehouse.id
-                    if self.tracking.anonymous_warehouse
-                    else None,
-                }
-            output_data["env"] = {
-                "project_name": project_name or self.project_name,
-                "env": self.config.env,
-            }
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, "r", encoding="utf-8") as template_html_file:
                 template_html_code = template_html_file.read()
@@ -209,6 +135,100 @@ class DataMonitoringReport(DataMonitoring):
         self.execution_properties["report_end"] = True
         self.execution_properties["success"] = self.success
         return self.success, html_path
+
+    def get_report_data(
+        self,
+        days_back: Optional[int] = None,
+        test_runs_amount: Optional[int] = None,
+        disable_passed_test_metrics: bool = False,
+        exclude_elementary_models: bool = False,
+        project_name: Optional[str] = None,
+    ):
+        report_data = {
+            "creation_time": get_now_utc_iso_format(),
+            "days_back": days_back,
+        }
+
+        models = self.models_api.get_models(exclude_elementary_models)
+        sources = self.models_api.get_sources()
+        exposures = self.models_api.get_exposures()
+
+        models_runs = self.models_api.get_models_runs(
+            days_back=days_back, exclude_elementary_models=exclude_elementary_models
+        )
+
+        test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+        test_results = self._get_test_results_and_totals(test_results_db_rows)
+        test_runs = self._get_test_runs_and_totals(test_results_db_rows)
+        serializable_models, sidebars = self._get_dbt_models_and_sidebars(
+            models, sources, exposures
+        )
+        models_coverages = self._get_dbt_models_test_coverages()
+        models_runs_dicts, model_runs_totals = self._get_models_runs_and_totals(
+            models_runs
+        )
+        lineage = self._get_lineage(exclude_elementary_models)
+        filters = self.filter_api.get_filters(
+            test_results.totals, test_runs.totals, models, sources, models_runs
+        )
+
+        test_metadatas = []
+        for tests in test_results.results.values():
+            for test in tests:
+                test_metadatas.append(test.metadata)
+        self.execution_properties["elementary_test_count"] = len(
+            [
+                test_metadata
+                for test_metadata in test_metadatas
+                if test_metadata.test_type != "dbt_test"
+            ]
+        )
+        self.execution_properties["test_result_count"] = len(test_metadatas)
+
+        serializable_test_results = defaultdict(list)
+        for model_unique_id, test_result in test_results.results.items():
+            serializable_test_results[model_unique_id].extend(
+                [result.dict() for result in test_result]
+            )
+
+        serializable_test_runs = defaultdict(list)
+        for model_unique_id, test_run in test_runs.runs.items():
+            serializable_test_runs[model_unique_id].extend(
+                [run.dict() for run in test_run]
+            )
+
+        report_data = dict(
+            models=serializable_models,
+            sidebars=sidebars.dict(),
+            invocations=dict(test_results.invocation),
+            test_results=serializable_test_results,
+            test_results_totals=self._serialize_totals(test_results.totals),
+            test_run=serializable_test_runs,
+            test_runs_totals=self._serialize_totals(test_runs.totals),
+            coverages=models_coverages,
+            model_runs=models_runs_dicts,
+            model_runs_totals=model_runs_totals,
+            filters=filters.dict(),
+            lineage=lineage.dict(),
+            env=dict(
+                project_name=project_name or self.project_name, env=self.config.env
+            ),
+        )
+
+        if self.config.anonymous_tracking_enabled:
+            report_data["tracking"] = dict(
+                posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
+                report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
+                anonymous_warehouse_id=self.tracking.anonymous_warehouse.id
+                if self.tracking.anonymous_warehouse
+                else None,
+            )
+
+        return report_data
 
     def send_report(
         self, local_html_path: str, remote_file_path: Optional[str] = None
