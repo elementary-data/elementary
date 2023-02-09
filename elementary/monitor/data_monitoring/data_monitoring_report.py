@@ -28,9 +28,9 @@ from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import (
     DataMonitoringReportFilter,
-    DataMonitoringReportTestResultsSchema,
     DataMonitoringReportTestRunsSchema,
 )
+from elementary.monitor.fetchers.tests.tests_fetcher import TestsFetcher
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -144,6 +144,13 @@ class DataMonitoringReport(DataMonitoring):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ):
+        tests_fetcher = TestsFetcher(
+            dbt_runner=self.internal_dbt_runner,
+            days_back=days_back,
+            invocations_per_test=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+
         models = self.models_api.get_models(exclude_elementary_models)
         sources = self.models_api.get_sources()
         exposures = self.models_api.get_exposures()
@@ -157,7 +164,9 @@ class DataMonitoringReport(DataMonitoring):
             invocations_per_test=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
         )
-        test_results = self._get_test_results_and_totals(test_results_db_rows)
+        test_results = tests_fetcher.get_test_results(
+            filter=self.filter, disable_samples=self.disable_samples
+        )
         test_runs = self._get_test_runs_and_totals(test_results_db_rows)
         serializable_models, sidebars = self._get_dbt_models_and_sidebars(
             models, sources, exposures
@@ -259,30 +268,6 @@ class DataMonitoringReport(DataMonitoring):
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         return self.lineage_api.get_lineage(exclude_elementary_models)
-
-    def _get_test_results_and_totals(
-        self, test_results_db_rows: List[TestResultDBRowSchema]
-    ) -> DataMonitoringReportTestResultsSchema:
-        try:
-            tests_results, invocation = self.tests_api.get_test_results(
-                filter=self.filter,
-                test_results_db_rows=test_results_db_rows,
-                disable_samples=self.disable_samples,
-            )
-            test_metadatas = []
-            for test_results in tests_results.values():
-                test_metadatas.extend([result.metadata for result in test_results])
-            test_results_totals = self.tests_api.get_total_tests_results(test_metadatas)
-            return DataMonitoringReportTestResultsSchema(
-                results=tests_results,
-                totals=test_results_totals,
-                invocation=invocation,
-            )
-        except Exception as e:
-            logger.exception(f"Could not get test results and totals - Error: {e}")
-            self.tracking.record_cli_internal_exception(e)
-            self.success = False
-            return DataMonitoringReportTestResultsSchema()
 
     def _get_test_runs_and_totals(
         self, test_results_db_rows: List[TestResultDBRowSchema]
