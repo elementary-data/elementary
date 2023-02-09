@@ -144,11 +144,6 @@ class DataMonitoringReport(DataMonitoring):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ):
-        report_data = {
-            "creation_time": get_now_utc_iso_format(),
-            "days_back": days_back,
-        }
-
         models = self.models_api.get_models(exclude_elementary_models)
         sources = self.models_api.get_sources()
         exposures = self.models_api.get_exposures()
@@ -202,6 +197,8 @@ class DataMonitoringReport(DataMonitoring):
             )
 
         report_data = dict(
+            creation_time=get_now_utc_iso_format(),
+            days_back=days_back,
             models=serializable_models,
             sidebars=sidebars.dict(),
             invocations=dict(test_results.invocation),
