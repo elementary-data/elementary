@@ -204,7 +204,7 @@ class DataMonitoringReport(DataMonitoring):
             invocations=dict(test_results.invocation),
             test_results=serializable_test_results,
             test_results_totals=self._serialize_totals(test_results.totals),
-            test_run=serializable_test_runs,
+            test_runs=serializable_test_runs,
             test_runs_totals=self._serialize_totals(test_runs.totals),
             coverages=models_coverages,
             model_runs=models_runs_dicts,
