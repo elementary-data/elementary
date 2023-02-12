@@ -284,12 +284,12 @@ class DataMonitoringReport(DataMonitoring):
         include_description: bool = False,
     ) -> bool:
         if self.slack_client:
-            test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
+            test_results_db_rows = self.tests_fetcher.get_all_test_results_db_rows(
                 days_back=days_back,
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
-            summary_test_results = self.tests_api.get_test_restuls_summary(
+            summary_test_results = self.tests_fetcher.get_test_restuls_summary(
                 test_results_db_rows=test_results_db_rows,
                 filter=self.filter.get_filter(),
             )
