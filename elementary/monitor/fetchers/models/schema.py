@@ -64,6 +64,6 @@ class ExposureSchema(ArtifactSchema):
 
 
 class ModelTestCoverage(ExtendedBaseModel):
-    model_unique_id: str
+    model_unique_id: Optional[str] = None
     column_tests: int = 0
     table_tests: int = 0
