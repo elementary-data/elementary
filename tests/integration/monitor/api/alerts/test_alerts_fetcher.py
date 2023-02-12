@@ -1,29 +1,29 @@
 import json
 
-from tests.mocks.fetchers.alerts_fetcher_mock import MockAlertsFetcher
+from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 
 
 def test_get_test_alerts():
-    fetcher = MockAlertsFetcher()
-    test_alerts = fetcher.get_test_alerts(days_back=1)
+    api = MockAlertsAPI()
+    test_alerts = api.get_test_alerts(days_back=1)
     assert_new_alerts(test_alerts)
 
 
 def test_get_model_alerts():
-    fetcher = MockAlertsFetcher()
-    model_alerts = fetcher.get_model_alerts(days_back=1)
+    api = MockAlertsAPI()
+    model_alerts = api.get_model_alerts(days_back=1)
     assert_new_alerts(model_alerts)
 
 
 def test_get_source_freshness_alerts():
-    fetcher = MockAlertsFetcher()
-    source_freshness_alerts = fetcher.get_source_freshness_alerts(days_back=1)
+    api = MockAlertsAPI()
+    source_freshness_alerts = api.get_source_freshness_alerts(days_back=1)
     assert_new_alerts(source_freshness_alerts)
 
 
 def test_get_new_alerts():
-    fetcher = MockAlertsFetcher()
-    alerts = fetcher.get_new_alerts(days_back=1)
+    api = MockAlertsAPI()
+    alerts = api.get_new_alerts(days_back=1)
     test_alerts = alerts.tests
     model_alerts = alerts.models
     source_freshness_alerts = alerts.source_freshnesses

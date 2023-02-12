@@ -6,45 +6,6 @@ import pytest
 from tests.mocks.fetchers.alerts_fetcher_mock import MockAlertsFetcher
 
 
-def test_get_suppressed_alerts(alerts_fetcher_mock: MockAlertsFetcher):
-    last_test_alert_sent_times = alerts_fetcher_mock._query_last_test_alert_times()
-    last_model_alert_sent_times = alerts_fetcher_mock._query_last_model_alert_times()
-
-    test_alerts = alerts_fetcher_mock._query_pending_test_alerts()
-    model_alerts = alerts_fetcher_mock._query_pending_model_alerts()
-
-    suppressed_test_alerts = alerts_fetcher_mock._get_suppressed_alerts(
-        test_alerts, last_test_alert_sent_times
-    )
-    suppressed_model_alerts = alerts_fetcher_mock._get_suppressed_alerts(
-        model_alerts, last_model_alert_sent_times
-    )
-
-    assert json.dumps(suppressed_test_alerts, sort_keys=True) == json.dumps(
-        ["alert_id_1"], sort_keys=True
-    )
-    assert json.dumps(suppressed_model_alerts, sort_keys=True) == json.dumps(
-        ["alert_id_1"], sort_keys=True
-    )
-
-
-def test_get_latest_alerts(alerts_fetcher_mock: MockAlertsFetcher):
-    test_alerts = alerts_fetcher_mock._query_pending_test_alerts()
-    model_alerts = alerts_fetcher_mock._query_pending_model_alerts()
-
-    latest_test_alerts = alerts_fetcher_mock._get_latest_alerts(test_alerts)
-    latest_model_alerts = alerts_fetcher_mock._get_latest_alerts(model_alerts)
-
-    # Only alert_id_5 is a duplicate alert (of alert_id_4)
-    assert json.dumps(latest_test_alerts, sort_keys=True) == json.dumps(
-        ["alert_id_1", "alert_id_2", "alert_id_3", "alert_id_4"], sort_keys=True
-    )
-    # Only alert_id_5 is a duplicate alert (of alert_id_4)
-    assert json.dumps(latest_model_alerts, sort_keys=True) == json.dumps(
-        ["alert_id_1", "alert_id_2", "alert_id_3", "alert_id_4"], sort_keys=True
-    )
-
-
 def test_split_list_to_chunks(alerts_fetcher_mock: MockAlertsFetcher):
     mock_list = [None] * 150
 
@@ -82,7 +43,7 @@ def test_update_sent_alerts(
 @mock.patch("subprocess.run")
 def test_skip_alerts(mock_subprocess_run, alerts_fetcher_mock: MockAlertsFetcher):
     # Create 100 alerts
-    test_alerts = alerts_fetcher_mock._query_pending_test_alerts()
+    test_alerts = alerts_fetcher_mock.query_pending_test_alerts()
     mock_alerts_ids_to_skip = test_alerts.alerts * 20
 
     alerts_fetcher_mock.skip_alerts(
