@@ -5,7 +5,8 @@ from typing import Dict, List, Optional, Union
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult
+from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult, AlertType
+from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
@@ -96,6 +97,18 @@ class AlertsAPI(APIClient):
             pending_source_freshness_alerts, last_alert_sent_times, filter
         )
         return source_freshness_alerts
+
+    def skip_alerts(
+        self, alerts_to_skip: List[Union[AlertType, MalformedAlert]], table_name: str
+    ) -> None:
+        self.alerts_fetcher.skip_alerts(
+            alerts_to_skip=alerts_to_skip, table_name=table_name
+        )
+
+    def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
+        self.alerts_fetcher.update_sent_alerts(
+            alert_ids=alert_ids, table_name=table_name
+        )
 
     def _sort_alerts(
         self,

@@ -13,10 +13,10 @@ from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
+from elementary.monitor.api.alerts.alerts import AlertsAPI
+from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
-from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
-from elementary.monitor.fetchers.selector.selector import SelectorFetcher
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
@@ -41,7 +41,7 @@ class DataMonitoringAlerts(DataMonitoring):
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
         self.filter = self._parse_filter(self.raw_filter)
-        self.alerts_fetcher = AlertsFetcher(
+        self.alerts_api = AlertsAPI(
             self.internal_dbt_runner,
             self.config,
             self.elementary_database_and_schema,
@@ -55,8 +55,10 @@ class DataMonitoringAlerts(DataMonitoring):
         if filter:
             if self.user_dbt_runner:
                 self.tracking.set_env("select_method", "dbt selector")
-                selector_fetcher = SelectorFetcher(self.user_dbt_runner)
-                node_names = selector_fetcher.get_selector_results(selector=filter)
+                selector_api = SelectorAPI(self.user_dbt_runner)
+                node_names = selector_api.get_selector_results(
+                    selector=filter
+                ).selector_results
                 return DataMonitoringAlertsFilter(node_names=node_names)
 
             else:
@@ -138,7 +140,7 @@ class DataMonitoringAlerts(DataMonitoring):
                     f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
                 )
                 self.success = False
-        self.alerts_fetcher.update_sent_alerts(sent_alert_ids, alerts_table_name)
+        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
         self.sent_alert_count += len(sent_alert_ids)
 
     def _send_test_message(self):
@@ -159,13 +161,13 @@ class DataMonitoringAlerts(DataMonitoring):
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: Alerts):
-        self.alerts_fetcher.skip_alerts(
+        self.alerts_api.skip_alerts(
             alerts.tests.get_alerts_to_skip(), TestAlert.TABLE_NAME
         )
-        self.alerts_fetcher.skip_alerts(
+        self.alerts_api.skip_alerts(
             alerts.models.get_alerts_to_skip(), ModelAlert.TABLE_NAME
         )
-        self.alerts_fetcher.skip_alerts(
+        self.alerts_api.skip_alerts(
             alerts.source_freshnesses.get_alerts_to_skip(),
             SourceFreshnessAlert.TABLE_NAME,
         )
@@ -187,7 +189,7 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["success"] = self.success
             return self.success
 
-        alerts = self.alerts_fetcher.get_new_alerts(
+        alerts = self.alerts_api.get_new_alerts(
             days_back, disable_samples=self.disable_samples, filter=self.filter
         )
         self.execution_properties[
