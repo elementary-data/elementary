@@ -3,6 +3,8 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from elementary.utils.json_utils import try_load_json
+
 
 class ExtendedBaseModel(BaseModel):
     @staticmethod
@@ -21,4 +23,7 @@ class ExtendedBaseModel(BaseModel):
         elif isinstance(var, list):
             return var
         elif isinstance(var, str):
-            return json.loads(var)
+            loaded_var = try_load_json(var)
+            if loaded_var is None:
+                loaded_var = [var]
+            return loaded_var
