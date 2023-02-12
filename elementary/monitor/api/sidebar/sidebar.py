@@ -2,14 +2,14 @@ import os
 from collections import defaultdict
 from typing import List, Union
 
-from elementary.clients.api.api import APIClient
-from elementary.monitor.api.models.schema import NormalizedModelSchema
+from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.sidebar.schema import (
     DbtSidebarSchema,
     OwnersSidebarSchema,
     SidebarsSchema,
     TagsSidebarSchema,
 )
+from elementary.monitor.fetchers.models.schema import NormalizedModelSchema
 
 SIDEBAR_FILES_KEYWORD = "__files__"
 NO_TAGS_DEFAULT_TREE = "No tags"

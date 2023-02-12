@@ -2,39 +2,16 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
+from elementary.monitor.fetchers.models.schema import (
+    ExposureSchema,
+    ModelSchema,
+    SourceSchema,
+)
+from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
-class ArtifactSchema(BaseModel):
-    name: str
-    unique_id: str
-    owners: Optional[str]
-    tags: Optional[str]
-    package_name: Optional[str]
-    description: Optional[str]
-    full_path: str
-
-
-class ModelSchema(ArtifactSchema):
-    database_name: str = None
-    schema_name: str
-    table_name: str
-
-
-class SourceSchema(ArtifactSchema):
-    database_name: str = None
-    schema_name: str
-    table_name: str
-
-
-class ExposureSchema(ArtifactSchema):
-    url: Optional[str]
-    type: Optional[str]
-    maturity: Optional[str]
-    owner_email: Optional[str]
-
-
-class NormalizedArtifactSchema(BaseModel):
+class NormalizedArtifactSchema(ExtendedBaseModel):
     owners: Optional[List[str]] = []
     tags: Optional[List[str]] = []
     # Should be changed to artifact_name.
@@ -42,13 +19,13 @@ class NormalizedArtifactSchema(BaseModel):
     model_name: str
     normalized_full_path: str
 
-    @validator("owners", pre=True, always=True)
-    def set_owners(cls, owners):
-        return owners or []
+    @validator("tags", pre=True)
+    def load_tags(cls, tags):
+        return cls._load_var_to_list(tags)
 
-    @validator("tags", pre=True, always=True)
-    def set_tags(cls, tags):
-        return tags or []
+    @validator("owners", pre=True)
+    def load_owners(cls, owners):
+        return cls._load_var_to_list(owners)
 
 
 # NormalizedArtifactSchema must be first in the inheritance order

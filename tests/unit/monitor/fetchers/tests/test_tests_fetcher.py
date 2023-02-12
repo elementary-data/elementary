@@ -1,10 +1,12 @@
 import pytest
 
-from elementary.monitor.api.tests.schema import TestResultDBRowSchema
-from tests.mocks.api.tests_api_mock import MockTestsAPI
+from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from tests.mocks.fetchers.tests_fetcher_mock import MockTestsFetcher
 
 
-def test_get_test_metadata_from_test_result_db_row(tests_api_mock: MockTestsAPI):
+def test_get_test_metadata_from_test_result_db_row(
+    tests_fetcher_mock: MockTestsFetcher,
+):
     elementary_test_result_db_row = TestResultDBRowSchema(
         id="mock_id_1",
         model_unique_id="model_id_1",
@@ -58,10 +60,12 @@ def test_get_test_metadata_from_test_result_db_row(tests_api_mock: MockTestsAPI)
         invocations_rank_index=1,
     )
 
-    elementary_test_metadata = tests_api_mock.get_test_metadata_from_test_result_db_row(
-        elementary_test_result_db_row
+    elementary_test_metadata = (
+        tests_fetcher_mock.get_test_metadata_from_test_result_db_row(
+            elementary_test_result_db_row
+        )
     )
-    dbt_test_metadata = tests_api_mock.get_test_metadata_from_test_result_db_row(
+    dbt_test_metadata = tests_fetcher_mock.get_test_metadata_from_test_result_db_row(
         dbt_test_result_db_row
     )
 
@@ -90,5 +94,5 @@ def test_get_test_metadata_from_test_result_db_row(tests_api_mock: MockTestsAPI)
 
 
 @pytest.fixture
-def tests_api_mock() -> MockTestsAPI:
-    return MockTestsAPI()
+def tests_fetcher_mock() -> MockTestsFetcher:
+    return MockTestsFetcher()

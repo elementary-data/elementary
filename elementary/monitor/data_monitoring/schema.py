@@ -3,13 +3,12 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.api.invocations.schema import DbtInvocationSchema
 from elementary.monitor.api.tests.schema import (
-    ModelUniqueIdType,
     TestResultSchema,
     TestRunSchema,
     TotalsSchema,
 )
+from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
@@ -45,11 +44,11 @@ class DataMonitoringAlertsFilter(BaseModel):
 
 
 class DataMonitoringReportTestResultsSchema(BaseModel):
-    results: Dict[Optional[ModelUniqueIdType], List[TestResultSchema]] = dict()
+    results: Dict[Optional[str], List[TestResultSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
     invocation: DbtInvocationSchema = dict()
 
 
 class DataMonitoringReportTestRunsSchema(BaseModel):
-    runs: Dict[Optional[ModelUniqueIdType], List[TestRunSchema]] = dict()
+    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()

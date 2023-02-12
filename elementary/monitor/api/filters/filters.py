@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from elementary.clients.api.api import APIClient
+from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.schema import FilterSchema, FiltersSchema
 from elementary.monitor.api.models.schema import (
     ModelRunsSchema,

@@ -1,28 +1,30 @@
-import json
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 from dateutil import tz
 
-from elementary.clients.api.api import APIClient
+from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
-from elementary.monitor.api.invocations.schema import DbtInvocationSchema
 from elementary.monitor.api.tests.schema import (
     DbtTestResultSchema,
     ElementaryTestResultSchema,
     InvocationSchema,
     InvocationsSchema,
-    ModelUniqueIdType,
     TestMetadataSchema,
-    TestResultDBRowSchema,
     TestResultSchema,
     TestRunSchema,
-    TestUniqueIdType,
     TotalsSchema,
 )
-from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.schema import (
+    DataMonitoringReportFilter,
+    DataMonitoringReportTestResultsSchema,
+    DataMonitoringReportTestRunsSchema,
+)
+from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
+from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -30,33 +32,171 @@ logger = get_logger(__name__)
 
 
 class TestsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(
+        self,
+        dbt_runner: DbtRunner,
+        days_back: Optional[int] = 7,
+        invocations_per_test: int = 720,
+        metrics_sample_limit: int = 5,
+        disable_passed_test_metrics: bool = False,
+    ):
         super().__init__(dbt_runner)
+        self.tests_fetcher = TestsFetcher(dbt_runner=self.dbt_runner)
         self.invocations_api = InvocationsAPI(dbt_runner)
+        self.test_results_db_rows = self._get_test_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=invocations_per_test,
+            metrics_sample_limit=metrics_sample_limit,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
 
-    def get_all_test_results_db_rows(
+    def _get_test_results_db_rows(
         self,
         days_back: Optional[int] = 7,
         invocations_per_test: int = 720,
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
     ) -> List[TestResultDBRowSchema]:
-        run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_test_results",
-            macro_args=dict(
-                days_back=days_back,
-                invocations_per_test=invocations_per_test,
-                metrics_sample_limit=metrics_sample_limit,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-            ),
+        return self.tests_fetcher.get_all_test_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=invocations_per_test,
+            metrics_sample_limit=metrics_sample_limit,
+            disable_passed_test_metrics=disable_passed_test_metrics,
         )
-        test_results = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
-        test_results = [
-            TestResultDBRowSchema(**test_result) for test_result in test_results
+
+    def get_test_results(
+        self,
+        filter: Optional[DataMonitoringReportFilter],
+        disable_samples: bool = False,
+    ):
+        filtered_test_results_db_rows = self.test_results_db_rows
+        invocation = self._get_invocation_from_filter(filter)
+        if invocation.invocation_id:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if test_result.invocation_id == invocation.invocation_id
+            ]
+
+        filtered_test_results_db_rows = [
+            test_result
+            for test_result in filtered_test_results_db_rows
+            if test_result.invocations_rank_index == 1
         ]
-        return test_results
+
+        tests_results = defaultdict(list)
+        for test_result_db_row in filtered_test_results_db_rows:
+            test_result = TestResultSchema(
+                metadata=self._get_test_metadata_from_test_result_db_row(
+                    test_result_db_row
+                ),
+                test_results=self._get_test_result_from_test_result_db_row(
+                    test_result_db_row, disable_samples=disable_samples
+                ),
+            )
+            tests_results[test_result_db_row.model_unique_id].append(test_result)
+
+        test_metadatas = []
+        for test_results in tests_results.values():
+            test_metadatas.extend([result.metadata for result in test_results])
+        test_results_totals = self._get_total_tests_results(test_metadatas)
+        return DataMonitoringReportTestResultsSchema(
+            results=tests_results,
+            totals=test_results_totals,
+            invocation=invocation,
+        )
+
+    def get_test_runs(self) -> DataMonitoringReportTestRunsSchema:
+        tests_invocations = self._get_invocations(self.test_results_db_rows)
+        latest_test_results = [
+            test_result
+            for test_result in self.test_results_db_rows
+            if test_result.invocations_rank_index == 1
+        ]
+
+        test_runs = defaultdict(list)
+        for test_result_db_row in latest_test_results:
+            test_invocations = tests_invocations.get(
+                test_result_db_row.elementary_unique_id
+            )
+            test_run = TestRunSchema(
+                metadata=self._get_test_metadata_from_test_result_db_row(
+                    test_result_db_row
+                ),
+                test_runs=test_invocations,
+            )
+            test_runs[test_result_db_row.model_unique_id].append(test_run)
+        test_runs_totals = self._get_total_tests_runs(tests_runs=test_runs)
+        return DataMonitoringReportTestRunsSchema(
+            runs=test_runs, totals=test_runs_totals
+        )
+
+    def _get_invocations(
+        self, test_result_db_rows: List[TestResultDBRowSchema]
+    ) -> Dict[str, InvocationsSchema]:
+        grouped_invocations = defaultdict(list)
+        grouped_invocation_ids = defaultdict(list)
+        for test_result_db_row in test_result_db_rows:
+            try:
+                elementary_unique_id = test_result_db_row.elementary_unique_id
+                invocation_id = (
+                    test_result_db_row.invocation_id
+                    or test_result_db_row.test_execution_id
+                )
+                # Currently the way we flat test results causing that there is duplication in test invocation for each test.
+                # This if statement checks if the invocation is already counted or not.
+                if invocation_id not in grouped_invocation_ids[elementary_unique_id]:
+                    grouped_invocation_ids[elementary_unique_id].append(invocation_id)
+                    grouped_invocations[elementary_unique_id].append(
+                        InvocationSchema(
+                            id=invocation_id,
+                            time_utc=test_result_db_row.detected_at,
+                            status=test_result_db_row.status,
+                            affected_rows=self._parse_affected_row(
+                                results_description=test_result_db_row.test_results_description
+                            ),
+                        )
+                    )
+            except Exception:
+                logger.error(
+                    f"Could not parse test ({test_result_db_row.test_unique_id}) invocation ({test_result_db_row.invocation_id or test_result_db_row.test_execution_id}) - continue to the next test"
+                )
+                continue
+
+        test_invocations = dict()
+        for elementary_unique_id, invocations in grouped_invocations.items():
+            totals = self._get_test_invocations_totals(invocations)
+            test_invocations[elementary_unique_id] = InvocationsSchema(
+                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2)
+                if invocations
+                else 0,
+                totals=totals,
+                invocations=invocations,
+                description=self._get_invocations_description(totals),
+            )
+
+        return test_invocations
+
+    @staticmethod
+    def _get_test_invocations_totals(
+        invocations: List[InvocationSchema],
+    ) -> TotalsSchema:
+        totals = TotalsSchema()
+        for invocation in invocations:
+            totals.add_total(invocation.status)
+        return totals
+
+    @staticmethod
+    def _get_invocations_description(
+        invocations_totals: TotalsSchema,
+    ) -> str:
+        all_invocations_count = (
+            invocations_totals.errors
+            + invocations_totals.warnings
+            + invocations_totals.passed
+            + invocations_totals.failures
+        )
+        return f"There were {invocations_totals.failures or 'no'} failures, {invocations_totals.errors or 'no'} errors and {invocations_totals.warnings or 'no'} warnings on the last {all_invocations_count} test runs."
 
     def _get_invocation_from_filter(
         self, filter: DataMonitoringReportFilter
@@ -77,7 +217,7 @@ class TestsAPI(APIClient):
         return invocation
 
     @staticmethod
-    def get_test_metadata_from_test_result_db_row(
+    def _get_test_metadata_from_test_result_db_row(
         test_result_db_row: TestResultDBRowSchema,
     ) -> TestMetadataSchema:
         test_display_name = (
@@ -152,59 +292,6 @@ class TestsAPI(APIClient):
             configuration=configuration,
         )
 
-    def get_test_results(
-        self,
-        test_results_db_rows: List[TestResultDBRowSchema],
-        disable_samples: bool = False,
-        filter: Optional[DataMonitoringReportFilter] = None,
-    ) -> Tuple[
-        Dict[Optional[ModelUniqueIdType], List[TestResultSchema]],
-        Optional[DbtInvocationSchema],
-    ]:
-        filtered_test_results_db_rows = test_results_db_rows
-        invocation = self._get_invocation_from_filter(filter)
-        if invocation.invocation_id:
-            filtered_test_results_db_rows = [
-                test_result
-                for test_result in filtered_test_results_db_rows
-                if test_result.invocation_id == invocation.invocation_id
-            ]
-
-        filtered_test_results_db_rows = [
-            test_result
-            for test_result in filtered_test_results_db_rows
-            if test_result.invocations_rank_index == 1
-        ]
-
-        test_results = defaultdict(list)
-        for test_result_db_row in filtered_test_results_db_rows:
-            test_result = TestResultSchema(
-                metadata=self.get_test_metadata_from_test_result_db_row(
-                    test_result_db_row
-                ),
-                test_results=TestsAPI._get_test_result_from_test_result_db_row(
-                    test_result_db_row, disable_samples=disable_samples
-                ),
-            )
-            test_results[test_result_db_row.model_unique_id].append(test_result)
-
-        return test_results, invocation
-
-    @staticmethod
-    def _get_failed_rows_count(test_result_db_row: TestResultDBRowSchema) -> int:
-        failed_rows_count = -1
-        if (
-            test_result_db_row.status != "pass"
-            and test_result_db_row.test_results_description
-        ):
-            found_rows_number = re.search(
-                r"\d+", test_result_db_row.test_results_description
-            )
-            if found_rows_number:
-                found_rows_number = found_rows_number.group()
-                failed_rows_count = int(found_rows_number)
-        return failed_rows_count
-
     @staticmethod
     def _get_test_result_from_test_result_db_row(
         test_result_db_row: TestResultDBRowSchema,
@@ -238,112 +325,22 @@ class TestsAPI(APIClient):
                 )
         return test_results
 
-    def get_test_runs(
-        self, test_results_db_rows: List[TestResultDBRowSchema]
-    ) -> Dict[Optional[ModelUniqueIdType], List[TestRunSchema]]:
-        tests_invocations = self._get_invocations(test_results_db_rows)
-        latest_test_results = [
-            test_result
-            for test_result in test_results_db_rows
-            if test_result.invocations_rank_index == 1
-        ]
-
-        test_runs = defaultdict(list)
-        for test_result_db_row in latest_test_results:
-            test_invocations = tests_invocations.get(
-                test_result_db_row.elementary_unique_id
-            )
-            test_run = TestRunSchema(
-                metadata=self.get_test_metadata_from_test_result_db_row(
-                    test_result_db_row
-                ),
-                test_runs=test_invocations,
-            )
-            test_runs[test_result_db_row.model_unique_id].append(test_run)
-
-        return test_runs
-
-    def _get_invocations(
-        self, test_result_db_rows: List[TestResultDBRowSchema]
-    ) -> Dict[TestUniqueIdType, InvocationsSchema]:
-        grouped_invocations = defaultdict(list)
-        grouped_invocation_ids = defaultdict(list)
-        for test_result_db_row in test_result_db_rows:
-            try:
-                elementary_unique_id = test_result_db_row.elementary_unique_id
-                invocation_id = (
-                    test_result_db_row.invocation_id
-                    or test_result_db_row.test_execution_id
-                )
-                # Currently the way we flat test results causing that there is duplication in test invocation for each test.
-                # This if statement checks if the invocation is already counted or not.
-                if invocation_id not in grouped_invocation_ids[elementary_unique_id]:
-                    grouped_invocation_ids[elementary_unique_id].append(invocation_id)
-                    grouped_invocations[elementary_unique_id].append(
-                        InvocationSchema(
-                            id=invocation_id,
-                            time_utc=test_result_db_row.detected_at,
-                            status=test_result_db_row.status,
-                            affected_rows=self._parse_affected_row(
-                                results_description=test_result_db_row.test_results_description
-                            ),
-                        )
-                    )
-            except Exception:
-                logger.error(
-                    f"Could not parse test ({test_result_db_row.test_unique_id}) invocation ({test_result_db_row.invocation_id or test_result_db_row.test_execution_id}) - continue to the next test"
-                )
-                continue
-
-        test_invocations = dict()
-        for elementary_unique_id, invocations in grouped_invocations.items():
-            totals = self._get_test_invocations_totals(invocations)
-            test_invocations[elementary_unique_id] = InvocationsSchema(
-                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2)
-                if invocations
-                else 0,
-                totals=totals,
-                invocations=invocations,
-                description=self._get_invocations_description(totals),
-            )
-
-        return test_invocations
-
     @staticmethod
-    def _get_test_invocations_totals(
-        invocations: List[InvocationSchema],
-    ) -> TotalsSchema:
-        totals = TotalsSchema()
-        for invocation in invocations:
-            totals.add_total(invocation.status)
-        return totals
+    def _get_failed_rows_count(test_result_db_row: TestResultDBRowSchema) -> int:
+        failed_rows_count = -1
+        if (
+            test_result_db_row.status != "pass"
+            and test_result_db_row.test_results_description
+        ):
+            found_rows_number = re.search(
+                r"\d+", test_result_db_row.test_results_description
+            )
+            if found_rows_number:
+                found_rows_number = found_rows_number.group()
+                failed_rows_count = int(found_rows_number)
+        return failed_rows_count
 
-    @staticmethod
-    def _get_invocations_description(
-        invocations_totals: TotalsSchema,
-    ) -> str:
-        all_invocations_count = (
-            invocations_totals.errors
-            + invocations_totals.warnings
-            + invocations_totals.passed
-            + invocations_totals.failures
-        )
-        return f"There were {invocations_totals.failures or 'no'} failures, {invocations_totals.errors or 'no'} errors and {invocations_totals.warnings or 'no'} warnings on the last {all_invocations_count} test runs."
-
-    @staticmethod
-    def _parse_affected_row(results_description: str) -> Optional[int]:
-        affected_rows_pattern = re.compile(r"^Got\s\d+\sresult")
-        number_pattern = re.compile(r"\d+")
-        try:
-            matches_affected_rows_string = re.findall(
-                affected_rows_pattern, results_description
-            )[0]
-            affected_rows = re.findall(number_pattern, matches_affected_rows_string)[0]
-            return int(affected_rows)
-        except Exception:
-            return None
-
-    def get_total_tests_results(
+    def _get_total_tests_results(
         self,
         test_metadatas: List[TestMetadataSchema],
     ) -> Dict[Optional[str], TotalsSchema]:
@@ -356,8 +353,8 @@ class TestsAPI(APIClient):
             )
         return totals
 
-    def get_total_tests_runs(
-        self, tests_runs: Dict[Optional[ModelUniqueIdType], List[TestRunSchema]]
+    def _get_total_tests_runs(
+        self, tests_runs: Dict[Optional[str], List[TestRunSchema]]
     ) -> Dict[Optional[str], TotalsSchema]:
         totals = dict()
         for test_runs in tests_runs.values():

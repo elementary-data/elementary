@@ -5,7 +5,7 @@ from elementary.monitor.alerts.alerts import AlertsQueryResult
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.monitor.api.alerts.alerts import AlertsAPI
+from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.utils.time import DATETIME_FORMAT
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
@@ -13,7 +13,7 @@ CURRENT_DATETIME_UTC = datetime.utcnow()
 CURRENT_TIMESTAMP_UTC = CURRENT_DATETIME_UTC.strftime(DATETIME_FORMAT)
 
 
-class MockAlertsAPI(AlertsAPI):
+class MockAlertsFetcher(AlertsFetcher):
     def __init__(self):
         mock_dbt_runner = MockDbtRunner()
         config = Config()

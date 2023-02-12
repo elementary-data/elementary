@@ -1,13 +1,13 @@
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.monitor.api.alerts.alert_filters import (
+from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.fetchers.alerts.alert_filters import (
     _filter_alerts_by_model,
     _filter_alerts_by_node_names,
     _filter_alerts_by_owner,
     _filter_alerts_by_tag,
 )
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
 
 
 def initial_alerts():

@@ -23,14 +23,10 @@ from elementary.monitor.api.models.schema import (
 )
 from elementary.monitor.api.sidebar.schema import SidebarsSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
-from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
+from elementary.monitor.api.tests.schema import TotalsSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import (
-    DataMonitoringReportFilter,
-    DataMonitoringReportTestRunsSchema,
-)
-from elementary.monitor.fetchers.tests.tests_fetcher import TestsFetcher
+from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -58,7 +54,7 @@ class DataMonitoringReport(DataMonitoring):
         self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
         self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
         self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
-        self.filter_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
+        self.filters_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
@@ -144,13 +140,6 @@ class DataMonitoringReport(DataMonitoring):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ):
-        tests_fetcher = TestsFetcher(
-            dbt_runner=self.internal_dbt_runner,
-            days_back=days_back,
-            invocations_per_test=test_runs_amount,
-            disable_passed_test_metrics=disable_passed_test_metrics,
-        )
-
         models = self.models_api.get_models(exclude_elementary_models)
         sources = self.models_api.get_sources()
         exposures = self.models_api.get_exposures()
@@ -159,15 +148,10 @@ class DataMonitoringReport(DataMonitoring):
             days_back=days_back, exclude_elementary_models=exclude_elementary_models
         )
 
-        test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
-            days_back=days_back,
-            invocations_per_test=test_runs_amount,
-            disable_passed_test_metrics=disable_passed_test_metrics,
-        )
-        test_results = tests_fetcher.get_test_results(
+        test_results = self.tests_api.get_test_results(
             filter=self.filter, disable_samples=self.disable_samples
         )
-        test_runs = self._get_test_runs_and_totals(test_results_db_rows)
+        test_runs = self.tests_api.get_test_runs()
         serializable_models, sidebars = self._get_dbt_models_and_sidebars(
             models, sources, exposures
         )
@@ -176,7 +160,7 @@ class DataMonitoringReport(DataMonitoring):
             models_runs
         )
         lineage = self._get_lineage(exclude_elementary_models)
-        filters = self.filter_api.get_filters(
+        filters = self.filters_api.get_filters(
             test_results.totals, test_runs.totals, models, sources, models_runs
         )
 
@@ -268,23 +252,6 @@ class DataMonitoringReport(DataMonitoring):
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         return self.lineage_api.get_lineage(exclude_elementary_models)
-
-    def _get_test_runs_and_totals(
-        self, test_results_db_rows: List[TestResultDBRowSchema]
-    ) -> DataMonitoringReportTestRunsSchema:
-        try:
-            tests_runs = self.tests_api.get_test_runs(test_results_db_rows)
-            test_runs_totals = self.tests_api.get_total_tests_runs(
-                tests_runs=tests_runs
-            )
-            return DataMonitoringReportTestRunsSchema(
-                runs=tests_runs, totals=test_runs_totals
-            )
-        except Exception as e:
-            logger.exception(f"Could not get test runs and totals - Error: {e}")
-            self.tracking.record_cli_internal_exception(e)
-            self.success = False
-            return DataMonitoringReportTestRunsSchema()
 
     @staticmethod
     def _serialize_totals(totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
