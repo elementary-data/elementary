@@ -1,14 +1,8 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.api.tests.schema import (
-    TestResultSchema,
-    TestRunSchema,
-    TotalsSchema,
-)
-from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
@@ -41,14 +35,3 @@ class DataMonitoringAlertsFilter(BaseModel):
     owner: Optional[str] = None
     model: Optional[str] = None
     node_names: Optional[List[str]] = None
-
-
-class DataMonitoringReportTestResultsSchema(BaseModel):
-    results: Dict[Optional[str], List[TestResultSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
-    invocation: DbtInvocationSchema = dict()
-
-
-class DataMonitoringReportTestRunsSchema(BaseModel):
-    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()

@@ -14,14 +14,12 @@ from elementary.monitor.api.tests.schema import (
     InvocationsSchema,
     TestMetadataSchema,
     TestResultSchema,
+    TestResultsWithTotalsSchema,
     TestRunSchema,
+    TestRunsWithTotalsSchema,
     TotalsSchema,
 )
-from elementary.monitor.data_monitoring.schema import (
-    DataMonitoringReportFilter,
-    DataMonitoringReportTestResultsSchema,
-    DataMonitoringReportTestRunsSchema,
-)
+from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
@@ -68,7 +66,7 @@ class TestsAPI(APIClient):
         self,
         filter: Optional[DataMonitoringReportFilter],
         disable_samples: bool = False,
-    ):
+    ) -> TestResultsWithTotalsSchema:
         filtered_test_results_db_rows = self.test_results_db_rows
         invocation = self._get_invocation_from_filter(filter)
         if invocation.invocation_id:
@@ -100,13 +98,13 @@ class TestsAPI(APIClient):
         for test_results in tests_results.values():
             test_metadatas.extend([result.metadata for result in test_results])
         test_results_totals = self._get_total_tests_results(test_metadatas)
-        return DataMonitoringReportTestResultsSchema(
+        return TestResultsWithTotalsSchema(
             results=tests_results,
             totals=test_results_totals,
             invocation=invocation,
         )
 
-    def get_test_runs(self) -> DataMonitoringReportTestRunsSchema:
+    def get_test_runs(self) -> TestRunsWithTotalsSchema:
         tests_invocations = self._get_invocations(self.test_results_db_rows)
         latest_test_results = [
             test_result
@@ -127,9 +125,7 @@ class TestsAPI(APIClient):
             )
             test_runs[test_result_db_row.model_unique_id].append(test_run)
         test_runs_totals = self._get_total_tests_runs(tests_runs=test_runs)
-        return DataMonitoringReportTestRunsSchema(
-            runs=test_runs, totals=test_runs_totals
-        )
+        return TestRunsWithTotalsSchema(runs=test_runs, totals=test_runs_totals)
 
     def _get_invocations(
         self, test_result_db_rows: List[TestResultDBRowSchema]

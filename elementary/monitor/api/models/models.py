@@ -10,6 +10,7 @@ from elementary.monitor.api.models.schema import (
     ModelCoverageSchema,
     ModelRunSchema,
     ModelRunsSchema,
+    ModelRunsWithTotalsSchema,
     NormalizedExposureSchema,
     NormalizedModelSchema,
     NormalizedSourceSchema,
@@ -36,7 +37,7 @@ class ModelsAPI(APIClient):
 
     def get_models_runs(
         self, days_back: Optional[int] = 7, exclude_elementary_models: bool = False
-    ) -> List[ModelRunsSchema]:
+    ) -> ModelRunsWithTotalsSchema:
         model_runs_results = self.models_fetcher.get_models_runs(
             days_back=days_back, exclude_elementary_models=exclude_elementary_models
         )
@@ -89,7 +90,18 @@ class ModelsAPI(APIClient):
                     runs=runs,
                 )
             )
-        return aggregated_models_runs
+
+        model_runs_totals = {}
+        for model_runs in aggregated_models_runs:
+            model_runs_totals[model_runs.unique_id] = {
+                "errors": model_runs.totals.errors,
+                "warnings": 0,
+                "failures": 0,
+                "passed": model_runs.totals.success,
+            }
+        return ModelRunsWithTotalsSchema(
+            runs=aggregated_models_runs, totals=model_runs_totals
+        )
 
     @staticmethod
     def _get_model_runs_totals(

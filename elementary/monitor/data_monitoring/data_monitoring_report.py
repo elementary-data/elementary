@@ -3,33 +3,19 @@ import os
 import os.path
 import re
 import webbrowser
-from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Optional, Tuple
 
 import pkg_resources
 
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
-from elementary.monitor.api.filters.filters import FiltersAPI
-from elementary.monitor.api.lineage.lineage import LineageAPI
-from elementary.monitor.api.lineage.schema import LineageSchema
-from elementary.monitor.api.models.models import ModelsAPI
-from elementary.monitor.api.models.schema import (
-    ModelRunsSchema,
-    NormalizedExposureSchema,
-    NormalizedModelSchema,
-    NormalizedSourceSchema,
-)
-from elementary.monitor.api.sidebar.schema import SidebarsSchema
-from elementary.monitor.api.sidebar.sidebar import SidebarAPI
-from elementary.monitor.api.tests.schema import TotalsSchema
-from elementary.monitor.api.tests.tests import TestsAPI
+from elementary.monitor.api.report.report import ReportAPI
+from elementary.monitor.api.report.schema import ReportDataSchema
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
-from elementary.utils.time import get_now_utc_iso_format
 
 logger = get_logger(__name__)
 
@@ -135,96 +121,45 @@ class DataMonitoringReport(DataMonitoring):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ):
-        self.tests_api = TestsAPI(
-            dbt_runner=self.internal_dbt_runner,
+        report_api = ReportAPI(self.internal_dbt_runner)
+        report_data = report_api.get_report_data(
             days_back=days_back,
-            invocations_per_test=test_runs_amount,
+            test_runs_amount=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
+            exclude_elementary_models=exclude_elementary_models,
+            disable_samples=self.disable_samples,
+            project_name=project_name or self.project_name,
+            filter=self.filter,
+            env=self.config.env,
         )
-        self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
-        self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
-        self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
-        self.filters_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
+        self._add_report_tracking(report_data)
+        report_data_dict = report_data.dict()
 
-        models = self.models_api.get_models(exclude_elementary_models)
-        sources = self.models_api.get_sources()
-        exposures = self.models_api.get_exposures()
+        return report_data_dict
 
-        models_runs = self.models_api.get_models_runs(
-            days_back=days_back, exclude_elementary_models=exclude_elementary_models
-        )
-
-        test_results = self.tests_api.get_test_results(
-            filter=self.filter, disable_samples=self.disable_samples
-        )
-        test_runs = self.tests_api.get_test_runs()
-        serializable_models, sidebars = self._get_dbt_models_and_sidebars(
-            models, sources, exposures
-        )
-        models_coverages = self._get_dbt_models_test_coverages()
-        models_runs_dicts, model_runs_totals = self._get_models_runs_and_totals(
-            models_runs
-        )
-        lineage = self._get_lineage(exclude_elementary_models)
-        filters = self.filters_api.get_filters(
-            test_results.totals, test_runs.totals, models, sources, models_runs
-        )
-
+    def _add_report_tracking(self, report_data: ReportDataSchema):
         test_metadatas = []
-        for tests in test_results.results.values():
+        for tests in report_data.test_results.values():
             for test in tests:
-                test_metadatas.append(test.metadata)
+                test_metadatas.append(test.get("metadata"))
+
         self.execution_properties["elementary_test_count"] = len(
             [
                 test_metadata
                 for test_metadata in test_metadatas
-                if test_metadata.test_type != "dbt_test"
+                if test_metadata.get("test_type") != "dbt_test"
             ]
         )
         self.execution_properties["test_result_count"] = len(test_metadatas)
 
-        serializable_test_results = defaultdict(list)
-        for model_unique_id, test_result in test_results.results.items():
-            serializable_test_results[model_unique_id].extend(
-                [result.dict() for result in test_result]
-            )
-
-        serializable_test_runs = defaultdict(list)
-        for model_unique_id, test_run in test_runs.runs.items():
-            serializable_test_runs[model_unique_id].extend(
-                [run.dict() for run in test_run]
-            )
-
-        report_data = dict(
-            creation_time=get_now_utc_iso_format(),
-            days_back=days_back,
-            models=serializable_models,
-            sidebars=sidebars.dict(),
-            invocations=dict(test_results.invocation),
-            test_results=serializable_test_results,
-            test_results_totals=self._serialize_totals(test_results.totals),
-            test_runs=serializable_test_runs,
-            test_runs_totals=self._serialize_totals(test_runs.totals),
-            coverages=models_coverages,
-            model_runs=models_runs_dicts,
-            model_runs_totals=model_runs_totals,
-            filters=filters.dict(),
-            lineage=lineage.dict(),
-            env=dict(
-                project_name=project_name or self.project_name, env=self.config.env
-            ),
-        )
-
         if self.config.anonymous_tracking_enabled:
-            report_data["tracking"] = dict(
+            report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
                 anonymous_warehouse_id=self.tracking.anonymous_warehouse.id
                 if self.tracking.anonymous_warehouse
                 else None,
             )
-
-        return report_data
 
     def send_report(
         self, local_html_path: str, remote_file_path: Optional[str] = None
@@ -255,55 +190,6 @@ class DataMonitoringReport(DataMonitoring):
 
         self.execution_properties["success"] = self.success
         return self.success
-
-    def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
-        return self.lineage_api.get_lineage(exclude_elementary_models)
-
-    @staticmethod
-    def _serialize_totals(totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
-        serialized_totals = dict()
-        for model_unique_id, total in totals.items():
-            serialized_totals[model_unique_id] = total.dict()
-        return serialized_totals
-
-    def _get_models_runs_and_totals(self, models_runs: List[ModelRunsSchema]):
-        models_runs_dicts = []
-        model_runs_totals = {}
-        for model_runs in models_runs:
-            models_runs_dicts.append(model_runs.dict(by_alias=True))
-            model_runs_totals[model_runs.unique_id] = {
-                "errors": model_runs.totals.errors,
-                "warnings": 0,
-                "failures": 0,
-                "passed": model_runs.totals.success,
-            }
-        return models_runs_dicts, model_runs_totals
-
-    def _get_dbt_models_and_sidebars(
-        self,
-        models: Dict[str, NormalizedModelSchema],
-        sources: Dict[str, NormalizedSourceSchema],
-        exposures: Dict[str, NormalizedExposureSchema],
-    ) -> Tuple[Dict, SidebarsSchema]:
-        self.execution_properties["model_count"] = len(models)
-        self.execution_properties["source_count"] = len(sources)
-        self.execution_properties["exposure_count"] = len(exposures)
-
-        nodes = dict(**models, **sources, **exposures)
-        serializable_nodes = dict()
-        for key in nodes.keys():
-            serializable_nodes[key] = dict(nodes[key])
-
-        # Currently we don't show exposures as part of the sidebar
-        sidebars = self.sidebar_api.get_sidebars(
-            artifacts=[*models.values(), *sources.values()]
-        )
-
-        return serializable_nodes, sidebars
-
-    def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
-        coverages = self.models_api.get_test_coverages()
-        return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
     def _get_report_file_path(self, file_path: Optional[str] = None) -> str:
         if file_path:
