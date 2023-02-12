@@ -2,8 +2,8 @@ import re
 from typing import Optional
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
+from elementary.monitor.fetchers.selector.selector import SelectorFetcher
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 
@@ -19,7 +19,9 @@ class DataMonitoringFilter:
     ) -> None:
         self.tracking = tracking
         self.selector = selector
-        self.selector_api = SelectorAPI(user_dbt_runner) if user_dbt_runner else None
+        self.selector_fetcher = (
+            SelectorFetcher(user_dbt_runner) if user_dbt_runner else None
+        )
         self.filter = self._parse_selector(self.selector)
 
     def _parse_selector(
@@ -27,9 +29,11 @@ class DataMonitoringFilter:
     ) -> DataMonitoringFilterSchema:
         data_monitoring_filter = DataMonitoringFilterSchema()
         if selector:
-            if self.selector_api:
+            if self.selector_fetcher:
                 self.tracking.set_env("select_method", "dbt selector")
-                node_names = self.selector_api.get_selector_results(selector=selector)
+                node_names = self.selector_fetcher.get_selector_results(
+                    selector=selector
+                )
                 return DataMonitoringFilterSchema(
                     node_names=node_names, selector=selector
                 )

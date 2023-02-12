@@ -3,10 +3,10 @@ from typing import List
 
 import pytest
 
-from elementary.monitor.api.tests.schema import TestResultSummarySchema
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
+from elementary.monitor.fetchers.tests.schema import TestResultSummarySchema
 
 
 def test_get_test_results_totals(test_results_summary):
