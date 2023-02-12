@@ -1,6 +1,6 @@
 import json
 
-from elementary.monitor.api.alerts.normalized_alert import (
+from elementary.monitor.fetchers.alerts.normalized_alert import (
     ALERT_FIELDS_KEY,
     ALERT_SUPRESSION_INTERVAL_KEY,
     ALERTS_CONFIG_KEY,
