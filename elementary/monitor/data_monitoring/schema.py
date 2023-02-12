@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.api.invocations.schema import DbtInvocationSchema
-from elementary.monitor.api.tests.schema import (
+from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
+from elementary.monitor.fetchers.tests.schema import (
     ModelUniqueIdType,
     TestResultSchema,
     TestRunSchema,
