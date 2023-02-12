@@ -10,20 +10,6 @@ import pkg_resources
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
-from elementary.monitor.api.filters.filters import FiltersAPI
-from elementary.monitor.api.lineage.lineage import LineageAPI
-from elementary.monitor.api.lineage.schema import LineageSchema
-from elementary.monitor.api.models.models import ModelsAPI
-from elementary.monitor.api.models.schema import (
-    ModelRunsSchema,
-    NormalizedExposureSchema,
-    NormalizedModelSchema,
-    NormalizedSourceSchema,
-)
-from elementary.monitor.api.sidebar.schema import SidebarsSchema
-from elementary.monitor.api.sidebar.sidebar import SidebarAPI
-from elementary.monitor.api.tests.schema import TestResultDBRowSchema, TotalsSchema
-from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
@@ -32,6 +18,20 @@ from elementary.monitor.data_monitoring.schema import (
     DataMonitoringReportTestResultsSchema,
     DataMonitoringReportTestRunsSchema,
 )
+from elementary.monitor.fetchers.filters.filters import FiltersFetcher
+from elementary.monitor.fetchers.lineage.lineage import LineageFetcher
+from elementary.monitor.fetchers.lineage.schema import LineageSchema
+from elementary.monitor.fetchers.models.models import ModelsFetcher
+from elementary.monitor.fetchers.models.schema import (
+    ModelRunsSchema,
+    NormalizedExposureSchema,
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+)
+from elementary.monitor.fetchers.sidebar.schema import SidebarsSchema
+from elementary.monitor.fetchers.sidebar.sidebar import SidebarFetcher
+from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema, TotalsSchema
+from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -54,11 +54,11 @@ class DataMonitoringReport(DataMonitoring):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
-        self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
-        self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
-        self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
-        self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
-        self.filter_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
+        self.tests_fetcher = TestsFetcher(dbt_runner=self.internal_dbt_runner)
+        self.models_fetcher = ModelsFetcher(dbt_runner=self.internal_dbt_runner)
+        self.sidebar_fetcher = SidebarFetcher(dbt_runner=self.internal_dbt_runner)
+        self.lineage_fetcher = LineageFetcher(dbt_runner=self.internal_dbt_runner)
+        self.filter_fetcher = FiltersFetcher(dbt_runner=self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
@@ -77,15 +77,15 @@ class DataMonitoringReport(DataMonitoring):
         with open(html_path, "w", encoding="utf-8") as html_file:
             output_data = {"creation_time": now_utc, "days_back": days_back}
 
-            models = self.models_api.get_models(exclude_elementary_models)
-            sources = self.models_api.get_sources()
-            exposures = self.models_api.get_exposures()
+            models = self.models_fetcher.get_models(exclude_elementary_models)
+            sources = self.models_fetcher.get_sources()
+            exposures = self.models_fetcher.get_exposures()
 
-            models_runs = self.models_api.get_models_runs(
+            models_runs = self.models_fetcher.get_models_runs(
                 days_back=days_back, exclude_elementary_models=exclude_elementary_models
             )
 
-            test_results_db_rows = self.tests_api.get_all_test_results_db_rows(
+            test_results_db_rows = self.tests_fetcher.get_all_test_results_db_rows(
                 days_back=days_back,
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
@@ -100,7 +100,7 @@ class DataMonitoringReport(DataMonitoring):
                 models_runs
             )
             lineage = self._get_lineage(exclude_elementary_models)
-            filters = self.filter_api.get_filters(
+            filters = self.filter_fetcher.get_filters(
                 test_results.totals, test_runs.totals, models, sources, models_runs
             )
 
@@ -317,13 +317,13 @@ class DataMonitoringReport(DataMonitoring):
         return self.success
 
     def _get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
-        return self.lineage_api.get_lineage(exclude_elementary_models)
+        return self.lineage_fetcher.get_lineage(exclude_elementary_models)
 
     def _get_test_results_and_totals(
         self, test_results_db_rows: List[TestResultDBRowSchema]
     ) -> DataMonitoringReportTestResultsSchema:
         try:
-            tests_results, invocation = self.tests_api.get_test_results(
+            tests_results, invocation = self.tests_fetcher.get_test_results(
                 filter=self.filter.get_filter(),
                 test_results_db_rows=test_results_db_rows,
                 disable_samples=self.disable_samples,
@@ -331,7 +331,9 @@ class DataMonitoringReport(DataMonitoring):
             test_metadatas = []
             for test_results in tests_results.values():
                 test_metadatas.extend([result.metadata for result in test_results])
-            test_results_totals = self.tests_api.get_total_tests_results(test_metadatas)
+            test_results_totals = self.tests_fetcher.get_total_tests_results(
+                test_metadatas
+            )
             return DataMonitoringReportTestResultsSchema(
                 results=tests_results,
                 totals=test_results_totals,
@@ -347,8 +349,8 @@ class DataMonitoringReport(DataMonitoring):
         self, test_results_db_rows: List[TestResultDBRowSchema]
     ) -> DataMonitoringReportTestRunsSchema:
         try:
-            tests_runs = self.tests_api.get_test_runs(test_results_db_rows)
-            test_runs_totals = self.tests_api.get_total_tests_runs(
+            tests_runs = self.tests_fetcher.get_test_runs(test_results_db_rows)
+            test_runs_totals = self.tests_fetcher.get_total_tests_runs(
                 tests_runs=tests_runs
             )
             return DataMonitoringReportTestRunsSchema(
@@ -396,14 +398,14 @@ class DataMonitoringReport(DataMonitoring):
             serializable_nodes[key] = dict(nodes[key])
 
         # Currently we don't show exposures as part of the sidebar
-        sidebars = self.sidebar_api.get_sidebars(
+        sidebars = self.sidebar_fetcher.get_sidebars(
             artifacts=[*models.values(), *sources.values()]
         )
 
         return serializable_nodes, sidebars
 
     def _get_dbt_models_test_coverages(self) -> Dict[str, Dict[str, int]]:
-        coverages = self.models_api.get_test_coverages()
+        coverages = self.models_fetcher.get_test_coverages()
         return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
     def _get_report_file_path(self, file_path: Optional[str] = None) -> str:
