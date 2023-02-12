@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import List, Optional
 
-from pydantic import validator
+from pydantic import Field, validator
 
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
@@ -10,7 +10,7 @@ class ModelRunSchema(ExtendedBaseModel):
     unique_id: str
     invocation_id: str
     name: str
-    schema: Optional[str] = None
+    schema_name: Optional[str] = Field(alias="schema", default=None)
     status: str
     execution_time: float
     full_refresh: Optional[bool] = None
@@ -25,8 +25,8 @@ class ModelRunSchema(ExtendedBaseModel):
 class ArtifactSchema(ExtendedBaseModel):
     name: str
     unique_id: str
-    owners: Optional[str]
-    tags: Optional[str]
+    owners: List[str]
+    tags: List[str]
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
@@ -57,6 +57,10 @@ class ExposureSchema(ArtifactSchema):
     type: Optional[str]
     maturity: Optional[str]
     owner_email: Optional[str]
+
+    @validator("owners", pre=True)
+    def load_owners(cls, owners):
+        return [owners]
 
 
 class ModelTestCoverage(ExtendedBaseModel):

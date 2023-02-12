@@ -21,7 +21,6 @@ from elementary.monitor.fetchers.models.schema import (
     ModelRunSchema as FetcherModelRunSchema,
 )
 from elementary.monitor.fetchers.models.schema import ModelSchema, SourceSchema
-from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -80,7 +79,7 @@ class ModelsAPI(APIClient):
             aggregated_models_runs.append(
                 ModelRunsSchema(
                     unique_id=model_unique_id,
-                    schema=last_model_run.schema,
+                    schema=last_model_run.schema_name,
                     name=last_model_run.name,
                     status=last_model_run.status,
                     last_exec_time=last_model_run.execution_time,
@@ -154,26 +153,7 @@ class ModelsAPI(APIClient):
             SourceSchema: NormalizedSourceSchema,
         }
         artifact_name = artifact.name
-
-        owners = artifact.owners
-        if owners:
-            loaded_owners = try_load_json(owners)
-            if loaded_owners is not None:
-                owners = loaded_owners
-            else:
-                owners = [owners]
-
-        tags = artifact.tags
-        if tags:
-            loaded_tags = try_load_json(tags)
-            if loaded_tags is not None:
-                tags = loaded_tags
-            else:
-                tags = [tags]
-
         normalized_artifact = json.loads(artifact.json())
-        normalized_artifact["owners"] = owners
-        normalized_artifact["tags"] = tags
         normalized_artifact["model_name"] = artifact_name
         normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(
             artifact

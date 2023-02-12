@@ -50,11 +50,6 @@ class DataMonitoringReport(DataMonitoring):
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
         self.filter = self._parse_filter(self.raw_filter)
-        self.tests_api = TestsAPI(dbt_runner=self.internal_dbt_runner)
-        self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
-        self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
-        self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
-        self.filters_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
@@ -140,6 +135,17 @@ class DataMonitoringReport(DataMonitoring):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
     ):
+        self.tests_api = TestsAPI(
+            dbt_runner=self.internal_dbt_runner,
+            days_back=days_back,
+            invocations_per_test=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+        self.models_api = ModelsAPI(dbt_runner=self.internal_dbt_runner)
+        self.sidebar_api = SidebarAPI(dbt_runner=self.internal_dbt_runner)
+        self.lineage_api = LineageAPI(dbt_runner=self.internal_dbt_runner)
+        self.filters_api = FiltersAPI(dbt_runner=self.internal_dbt_runner)
+
         models = self.models_api.get_models(exclude_elementary_models)
         sources = self.models_api.get_sources()
         exposures = self.models_api.get_exposures()

@@ -198,6 +198,19 @@ class TestsAPI(APIClient):
         )
         return f"There were {invocations_totals.failures or 'no'} failures, {invocations_totals.errors or 'no'} errors and {invocations_totals.warnings or 'no'} warnings on the last {all_invocations_count} test runs."
 
+    @staticmethod
+    def _parse_affected_row(results_description: str) -> Optional[int]:
+        affected_rows_pattern = re.compile(r"^Got\s\d+\sresult")
+        number_pattern = re.compile(r"\d+")
+        try:
+            matches_affected_rows_string = re.findall(
+                affected_rows_pattern, results_description
+            )[0]
+            affected_rows = re.findall(number_pattern, matches_affected_rows_string)[0]
+            return int(affected_rows)
+        except Exception:
+            return None
+
     def _get_invocation_from_filter(
         self, filter: DataMonitoringReportFilter
     ) -> Optional[DbtInvocationSchema]:

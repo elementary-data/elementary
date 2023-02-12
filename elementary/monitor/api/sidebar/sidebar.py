@@ -3,13 +3,16 @@ from collections import defaultdict
 from typing import List, Union
 
 from elementary.clients.api.api_client import APIClient
+from elementary.monitor.api.models.schema import (
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+)
 from elementary.monitor.api.sidebar.schema import (
     DbtSidebarSchema,
     OwnersSidebarSchema,
     SidebarsSchema,
     TagsSidebarSchema,
 )
-from elementary.monitor.fetchers.models.schema import NormalizedModelSchema
 
 SIDEBAR_FILES_KEYWORD = "__files__"
 NO_TAGS_DEFAULT_TREE = "No tags"
@@ -18,7 +21,7 @@ NO_OWNERS_DEFAULT_TREE = "No owners"
 
 class SidebarAPI(APIClient):
     def get_sidebars(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> SidebarsSchema:
         dbt_sidebar = self.get_dbt_sidebar(artifacts)
         tags_sidebar = self.get_tags_sidebar(artifacts)
@@ -26,7 +29,7 @@ class SidebarAPI(APIClient):
         return SidebarsSchema(dbt=dbt_sidebar, tags=tags_sidebar, owners=owners_sidebar)
 
     def get_dbt_sidebar(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> DbtSidebarSchema:
         sidebar = dict()
         for artifact in artifacts:
@@ -57,7 +60,7 @@ class SidebarAPI(APIClient):
                 dbt_sidebar = dbt_sidebar[part]
 
     def get_tags_sidebar(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> TagsSidebarSchema:
         sidebar = defaultdict(list)
         for artifact in artifacts:

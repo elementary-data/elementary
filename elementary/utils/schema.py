@@ -19,6 +19,6 @@ class ExtendedBaseModel(BaseModel):
         if not var:
             return []
         elif isinstance(var, list):
-            return []
+            return var
         elif isinstance(var, str):
             return json.loads(var)
