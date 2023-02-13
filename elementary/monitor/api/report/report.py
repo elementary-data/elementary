@@ -84,7 +84,7 @@ class ReportAPI(APIClient):
             )
             serializable_test_runs = self._serilize_test_runs(test_runs.runs)
             serializable_test_runs_totals = self._serialize_totals(test_runs.totals)
-            serializable_invocations = test_results.invocation.dict()
+            serializable_invocation = test_results.invocation.dict()
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
 
@@ -93,7 +93,7 @@ class ReportAPI(APIClient):
                 days_back=days_back,
                 models=serializable_models,
                 sidebars=serializable_sidebar,
-                invocations=serializable_invocations,
+                invocation=serializable_invocation,
                 test_results=serializable_test_results,
                 test_results_totals=serializable_test_restuls_totals,
                 test_runs=serializable_test_runs,

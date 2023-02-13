@@ -8,7 +8,7 @@ class ReportDataSchema(BaseModel):
     days_back: Optional[int] = None
     models: dict = dict()
     sidebars: dict = dict()
-    invocations: dict = dict()
+    invocation: dict = dict()
     test_results: dict = dict()
     test_results_totals: dict = dict()
     test_runs: dict = dict()
