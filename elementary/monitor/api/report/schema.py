@@ -4,19 +4,19 @@ from pydantic import BaseModel
 
 
 class ReportDataSchema(BaseModel):
-    creation_time: str
-    days_back: int
-    models: dict
-    sidebars: dict
-    invocations: dict
-    test_results: dict
-    test_results_totals: dict
-    test_runs: dict
-    test_runs_totals: dict
-    coverages: dict
-    model_runs: list
-    model_runs_totals: dict
-    filters: dict
-    lineage: dict
-    env: Optional[dict]
-    tracking: Optional[dict]
+    creation_time: Optional[str] = None
+    days_back: Optional[int] = None
+    models: dict = dict()
+    sidebars: dict = dict()
+    invocations: dict = dict()
+    test_results: dict = dict()
+    test_results_totals: dict = dict()
+    test_runs: dict = dict()
+    test_runs_totals: dict = dict()
+    coverages: dict = dict()
+    model_runs: list = list()
+    model_runs_totals: dict = dict()
+    filters: dict = dict()
+    lineage: dict = dict()
+    env: dict = dict()
+    tracking: Optional[dict] = None

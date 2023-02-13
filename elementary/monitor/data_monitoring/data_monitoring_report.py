@@ -122,7 +122,7 @@ class DataMonitoringReport(DataMonitoring):
         project_name: Optional[str] = None,
     ):
         report_api = ReportAPI(self.internal_dbt_runner)
-        report_data = report_api.get_report_data(
+        report_data, error = report_api.get_report_data(
             days_back=days_back,
             test_runs_amount=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
@@ -132,12 +132,20 @@ class DataMonitoringReport(DataMonitoring):
             filter=self.filter,
             env=self.config.env,
         )
-        self._add_report_tracking(report_data)
-        report_data_dict = report_data.dict()
+        self._add_report_tracking(report_data, error)
+        if error:
+            self.success = False
 
+        report_data_dict = report_data.dict()
         return report_data_dict
 
-    def _add_report_tracking(self, report_data: ReportDataSchema):
+    def _add_report_tracking(
+        self, report_data: ReportDataSchema, error: Optional[Exception] = None
+    ):
+        if error:
+            self.tracking.record_cli_internal_exception(error)
+            return
+
         test_metadatas = []
         for tests in report_data.test_results.values():
             for test in tests:
