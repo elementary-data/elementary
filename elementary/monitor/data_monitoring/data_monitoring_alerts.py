@@ -143,9 +143,7 @@ class DataMonitoringAlerts(DataMonitoring):
             disable_samples=self.disable_samples,
             filter=self.filter.get_filter(),
         )
-        self.execution_properties[
-            "elementary_test_count"
-        ] = alerts.get_elementary_test_count()
+        self.execution_properties["elementary_test_count"] = alerts.get_elementary_test_count()
         self.execution_properties["alert_count"] = alerts.count
         malformed_alert_count = alerts.malformed_count
         if malformed_alert_count > 0:

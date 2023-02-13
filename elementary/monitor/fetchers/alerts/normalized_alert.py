@@ -63,7 +63,7 @@ class NormalizedAlert:
                 SUBSCRIBERS_KEY
             )
             normalized_alert[OWNERS_KEY] = self._get_alert_meta_attrs("owner")
-            normalized_alert["slack_channel"] = self._get_alert_chennel()
+            normalized_alert["slack_channel"] = self._get_alert_channel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
             ] = self._get_alert_suppression_interval()
@@ -90,7 +90,7 @@ class NormalizedAlert:
             attrs.append(model_attrs)
         return attrs
 
-    def _get_alert_chennel(self) -> Optional[str]:
+    def _get_alert_channel(self) -> Optional[str]:
         model_slack_channel = self.model_meta.get(CHANNEL_KEY)
         test_slack_channel = self.test_meta.get(CHANNEL_KEY)
         return test_slack_channel or model_slack_channel
