@@ -14,9 +14,7 @@ Totals = Dict[str, TotalsEntry]
 
 def test_report_keys(report_data_fixture):
     report_data = get_report_data()
-    assert json.dumps(list(report_data.keys()), sort_keys=True) == json.dumps(
-        list(report_data_fixture.keys()), sort_keys=True
-    )
+    assert sorted(list(report_data.keys())) == sorted(list(report_data_fixture.keys()))
 
 
 def test_sidebar():
