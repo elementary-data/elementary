@@ -71,7 +71,7 @@ class ReportAPI(APIClient):
                 test_results.totals, test_runs.totals, models, sources, models_runs.runs
             )
 
-            serializable_sidebar = sidebars.dict()
+            serializable_sidebars = sidebars.dict()
             serializable_models = self._serilize_models(models, sources, exposures)
             serializable_model_runs = self._serilize_models_runs(models_runs.runs)
             serializable_model_runs_totals = models_runs.totals.dict()
@@ -92,7 +92,7 @@ class ReportAPI(APIClient):
                 creation_time=get_now_utc_iso_format(),
                 days_back=days_back,
                 models=serializable_models,
-                sidebars=serializable_sidebar,
+                sidebars=serializable_sidebars,
                 invocation=serializable_invocation,
                 test_results=serializable_test_results,
                 test_results_totals=serializable_test_restuls_totals,
