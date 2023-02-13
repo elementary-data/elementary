@@ -23,10 +23,16 @@ class SidebarAPI(APIClient):
     def get_sidebars(
         self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> SidebarsSchema:
-        dbt_sidebar = self.get_dbt_sidebar(artifacts)
-        tags_sidebar = self.get_tags_sidebar(artifacts)
-        owners_sidebar = self.get_owners_sidebar(artifacts)
-        return SidebarsSchema(dbt=dbt_sidebar, tags=tags_sidebar, owners=owners_sidebar)
+        try:
+            dbt_sidebar = self.get_dbt_sidebar(artifacts)
+            tags_sidebar = self.get_tags_sidebar(artifacts)
+            owners_sidebar = self.get_owners_sidebar(artifacts)
+            return SidebarsSchema(
+                dbt=dbt_sidebar, tags=tags_sidebar, owners=owners_sidebar
+            )
+        except Exception as e:
+            self.append_error(error=e, api_method="get_sidebars")
+            return SidebarsSchema()
 
     def get_dbt_sidebar(
         self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]

@@ -110,5 +110,5 @@ class TotalsSchema(BaseModel):
 
 
 class ModelRunsWithTotalsSchema(BaseModel):
-    runs: List[ModelRunsSchema]
-    totals: TotalsSchema
+    runs: List[ModelRunsSchema] = list()
+    totals: TotalsSchema = dict()

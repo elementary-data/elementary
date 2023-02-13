@@ -16,21 +16,27 @@ class LineageAPI(APIClient):
         self.lineage_fetcher = LineageFetcher(dbt_runner=self.dbt_runner)
 
     def get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
-        lineage_graph = nx.DiGraph()
-        nodes_depends_on_nodes = self.lineage_fetcher.get_nodes_depends_on_nodes(
-            exclude_elementary_models
-        )
-        for node_depends_on_nodes in nodes_depends_on_nodes:
-            lineage_graph.add_edges_from(
-                [
-                    (node_depends_on_nodes.unique_id, depends_on_node)
-                    for depends_on_node in node_depends_on_nodes.depends_on_nodes
-                ]
+        try:
+            lineage_graph = nx.DiGraph()
+            nodes_depends_on_nodes = self.lineage_fetcher.get_nodes_depends_on_nodes(
+                exclude_elementary_models
             )
-        return LineageSchema(
-            nodes=self._convert_depends_on_node_to_lineage_node(nodes_depends_on_nodes),
-            edges=list(lineage_graph.edges),
-        )
+            for node_depends_on_nodes in nodes_depends_on_nodes:
+                lineage_graph.add_edges_from(
+                    [
+                        (node_depends_on_nodes.unique_id, depends_on_node)
+                        for depends_on_node in node_depends_on_nodes.depends_on_nodes
+                    ]
+                )
+            return LineageSchema(
+                nodes=self._convert_depends_on_node_to_lineage_node(
+                    nodes_depends_on_nodes
+                ),
+                edges=list(lineage_graph.edges),
+            )
+        except Exception as e:
+            self.append_error(error=e, api_method="get_lineage")
+            return LineageSchema()
 
     def get_dags(self) -> List[LineageSchema]:
         nodes_to_depends_map = defaultdict(list)

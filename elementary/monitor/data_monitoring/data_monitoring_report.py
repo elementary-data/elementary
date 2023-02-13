@@ -3,7 +3,7 @@ import os
 import os.path
 import re
 import webbrowser
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pkg_resources
 
@@ -122,7 +122,7 @@ class DataMonitoringReport(DataMonitoring):
         project_name: Optional[str] = None,
     ):
         report_api = ReportAPI(self.internal_dbt_runner)
-        report_data, error = report_api.get_report_data(
+        report_data = report_api.get_report_data(
             days_back=days_back,
             test_runs_amount=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
@@ -132,18 +132,21 @@ class DataMonitoringReport(DataMonitoring):
             filter=self.filter,
             env=self.config.env,
         )
-        self._add_report_tracking(report_data, error)
-        if error:
+        errors = report_api.errors
+        self._add_report_tracking(report_data, errors)
+        if errors:
+            report_api.log_errors()
             self.success = False
 
         report_data_dict = report_data.dict()
         return report_data_dict
 
     def _add_report_tracking(
-        self, report_data: ReportDataSchema, error: Optional[Exception] = None
+        self, report_data: ReportDataSchema, errors: List[str] = None
     ):
-        if error:
-            self.tracking.record_cli_internal_exception(error)
+        if errors:
+            for error in errors:
+                self.tracking.record_cli_internal_exception(error)
             return
 
         test_metadatas = []

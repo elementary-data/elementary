@@ -8,6 +8,6 @@ OwnersSidebarSchema = Dict[str, List[str]]
 
 
 class SidebarsSchema(BaseModel):
-    dbt: DbtSidebarSchema
-    tags: TagsSidebarSchema
-    owners: OwnersSidebarSchema
+    dbt: DbtSidebarSchema = dict()
+    tags: TagsSidebarSchema = dict()
+    owners: OwnersSidebarSchema = dict()

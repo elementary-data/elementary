@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
@@ -18,10 +18,7 @@ from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
-from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
-
-logger = get_logger(__name__)
 
 
 class ReportAPI(APIClient):
@@ -35,40 +32,50 @@ class ReportAPI(APIClient):
         disable_samples: bool = False,
         filter: DataMonitoringReportFilter = DataMonitoringReportFilter(),
         env: Optional[str] = None,
-    ) -> Tuple[ReportDataSchema, Exception]:
+    ) -> ReportDataSchema:
         try:
-            self.tests_api = TestsAPI(
+            tests_api = TestsAPI(
                 dbt_runner=self.dbt_runner,
                 days_back=days_back,
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
-            self.models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-            self.sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
-            self.lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
-            self.filters_api = FiltersAPI(dbt_runner=self.dbt_runner)
+            models_api = ModelsAPI(dbt_runner=self.dbt_runner)
+            sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
+            lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
+            filters_api = FiltersAPI(dbt_runner=self.dbt_runner)
 
-            models = self.models_api.get_models(exclude_elementary_models)
-            sources = self.models_api.get_sources()
-            exposures = self.models_api.get_exposures()
+            models = models_api.get_models(exclude_elementary_models)
+            sources = models_api.get_sources()
+            exposures = models_api.get_exposures()
 
-            sidebars = self.sidebar_api.get_sidebars(
+            sidebars = sidebar_api.get_sidebars(
                 artifacts=[*models.values(), *sources.values()]
             )
 
-            models_runs = self.models_api.get_models_runs(
+            models_runs = models_api.get_models_runs(
                 days_back=days_back, exclude_elementary_models=exclude_elementary_models
             )
-            coverages = self.models_api.get_test_coverages()
+            coverages = models_api.get_test_coverages()
 
-            test_results = self.tests_api.get_test_results(
+            test_results = tests_api.get_test_results(
                 filter=filter, disable_samples=disable_samples
             )
-            test_runs = self.tests_api.get_test_runs()
+            test_runs = tests_api.get_test_runs()
 
-            lineage = self.lineage_api.get_lineage(exclude_elementary_models)
-            filters = self.filters_api.get_filters(
+            lineage = lineage_api.get_lineage(exclude_elementary_models)
+            filters = filters_api.get_filters(
                 test_results.totals, test_runs.totals, models, sources, models_runs.runs
+            )
+
+            self.errors.extend(
+                [
+                    *tests_api.errors,
+                    *models_api.errors,
+                    *sidebar_api.errors,
+                    *lineage_api.errors,
+                    *filters_api.errors,
+                ]
             )
 
             serializable_sidebars = sidebars.dict()
@@ -105,58 +112,79 @@ class ReportAPI(APIClient):
                 lineage=serializable_lineage,
                 env=dict(project_name=project_name, env=env),
             )
-            return report_data, None
+            return report_data
         except Exception as e:
-            logger.exception(f"Failed to generate the report data - Error: {e}")
-            return ReportDataSchema(), e
+            self.append_error(error=e, api_method="get_report_data")
+            return ReportDataSchema()
 
-    @staticmethod
     def _serilize_models(
+        self,
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
         exposures: Dict[str, NormalizedExposureSchema],
     ) -> Dict[str, dict]:
-        nodes = dict(**models, **sources, **exposures)
-        serializable_nodes = dict()
-        for key in nodes.keys():
-            serializable_nodes[key] = dict(nodes[key])
-        return serializable_nodes
+        try:
+            nodes = dict(**models, **sources, **exposures)
+            serializable_nodes = dict()
+            for key in nodes.keys():
+                serializable_nodes[key] = dict(nodes[key])
+            return serializable_nodes
+        except Exception as e:
+            self.append_error(error=e, api_method="_serilize_models")
+            return dict()
 
-    @staticmethod
     def _serilize_coverages(
-        coverages: Dict[str, ModelCoverageSchema]
+        self, coverages: Dict[str, ModelCoverageSchema]
     ) -> Dict[str, dict]:
-        return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
+        try:
+            return {
+                model_id: dict(coverage) for model_id, coverage in coverages.items()
+            }
+        except Exception as e:
+            self.append_error(error=e, api_method="_serilize_coverages")
+            return dict()
 
-    @staticmethod
-    def _serilize_models_runs(models_runs: List[ModelRunsSchema]) -> List[dict]:
-        return [model_runs.dict(by_alias=True) for model_runs in models_runs]
+    def _serilize_models_runs(self, models_runs: List[ModelRunsSchema]) -> List[dict]:
+        try:
+            return [model_runs.dict(by_alias=True) for model_runs in models_runs]
+        except Exception as e:
+            self.append_error(error=e, api_method="_serilize_models_runs")
+            return list()
 
-    @staticmethod
     def _serilize_test_results(
-        test_results: Dict[Optional[str], List[TestResultSchema]]
+        self, test_results: Dict[Optional[str], List[TestResultSchema]]
     ) -> Dict[str, List[dict]]:
-        serializable_test_results = defaultdict(list)
-        for model_unique_id, test_result in test_results.items():
-            serializable_test_results[model_unique_id].extend(
-                [result.dict() for result in test_result]
-            )
-        return serializable_test_results
+        try:
+            serializable_test_results = defaultdict(list)
+            for model_unique_id, test_result in test_results.items():
+                serializable_test_results[model_unique_id].extend(
+                    [result.dict() for result in test_result]
+                )
+            return serializable_test_results
+        except Exception as e:
+            self.append_error(error=e, api_method="_serilize_test_results")
+            return dict()
 
-    @staticmethod
     def _serilize_test_runs(
-        test_runs: Dict[Optional[str], List[TestRunSchema]]
+        self, test_runs: Dict[Optional[str], List[TestRunSchema]]
     ) -> Dict[str, List[dict]]:
-        serializable_test_runs = defaultdict(list)
-        for model_unique_id, test_run in test_runs.items():
-            serializable_test_runs[model_unique_id].extend(
-                [run.dict() for run in test_run]
-            )
-        return serializable_test_runs
+        try:
+            serializable_test_runs = defaultdict(list)
+            for model_unique_id, test_run in test_runs.items():
+                serializable_test_runs[model_unique_id].extend(
+                    [run.dict() for run in test_run]
+                )
+            return serializable_test_runs
+        except Exception as e:
+            self.append_error(error=e, api_method="_serilize_test_runs")
+            return dict()
 
-    @staticmethod
-    def _serialize_totals(totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
-        serialized_totals = dict()
-        for model_unique_id, total in totals.items():
-            serialized_totals[model_unique_id] = total.dict()
-        return serialized_totals
+    def _serialize_totals(self, totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
+        try:
+            serialized_totals = dict()
+            for model_unique_id, total in totals.items():
+                serialized_totals[model_unique_id] = total.dict()
+            return serialized_totals
+        except Exception as e:
+            self.append_error(error=e, api_method="_serialize_totals")
+            return dict()
