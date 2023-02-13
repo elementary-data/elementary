@@ -38,7 +38,8 @@
             severity,
             status,
             days_diff,
-            invocations_rank_index
+            invocations_rank_index,
+            result_rows
         from ordered_test_results
         where invocations_rank_index <= {{ invocations_per_test }}
         order by elementary_unique_id, invocations_rank_index desc
@@ -57,7 +58,7 @@
             {% if not disable_passed_test_metrics %}
                 {% do elementary_tests_allowlist_status.append('pass') %}
             {% endif %}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(test.id), test_type, metrics_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id), test_type, test.test_results_query, metrics_sample_limit) %}
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
