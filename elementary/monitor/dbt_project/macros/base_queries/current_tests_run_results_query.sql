@@ -2,7 +2,7 @@
     with elementary_test_results as (
         select * from {{ ref('elementary', 'elementary_test_results') }}
         {% if days_back %}
-            where {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
+            where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}
     ),
 
