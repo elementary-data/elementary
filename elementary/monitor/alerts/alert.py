@@ -158,7 +158,9 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         :param preview_blocks:
         :return:
         """
-        if not preview_blocks:  # this condition captures case of Null and also of a list with legnth 0
+        if (
+            not preview_blocks
+        ):  # this condition captures case of Null and also of a list with legnth 0
             return
 
         preview_blocks_count = len(preview_blocks)
@@ -170,7 +172,9 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
             return preview_blocks
 
         padded_preview_blocks = [*preview_blocks]
-        padding_length = SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
+        padding_length = (
+            SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
+        )
         padding = [cls.create_empty_section_block() for i in range(padding_length)]
         padded_preview_blocks.extend(padding)
         return padded_preview_blocks
