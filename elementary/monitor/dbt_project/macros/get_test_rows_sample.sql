@@ -25,7 +25,7 @@
     with test_results as (
       {{ test_query }}
     )
-    select * from test_results {% if should_limit_sample %} limit {{ sample_limit }} {% endif %}
+    select * from test_results {% if should_limit_sample %} limit {{ results_sample_limit }} {% endif %}
   {% endset %}
   {% do return(elementary.agate_to_dicts(elementary.run_query(query))) %}
 {%- endmacro -%}
