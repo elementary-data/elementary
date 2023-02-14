@@ -33,7 +33,7 @@ select
     *,
     false as alert_sent,  {# backwards compatibility #}
     'pending' as suppression_status,
-    {{ elementary.cast_as_string('NULL') }} as sent_at
+    {{ elementary.edr_cast_as_string('NULL') }} as sent_at
 from failed_tests
 
 {%- if is_incremental() %}

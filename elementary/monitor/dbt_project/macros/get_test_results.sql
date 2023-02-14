@@ -7,7 +7,7 @@
         ordered_test_results as (
             select
                 *,
-                {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
+                {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} as days_diff,
                 {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank. #}
                 rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_rank_index
             from test_results
