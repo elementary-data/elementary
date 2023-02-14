@@ -1,3 +1,8 @@
+{#
+  Sources of parameters:
+  legacy_result_rows: elementary_test_results.result_rows
+  result_rows_agate: test_result_rows
+#}
 {%- macro get_test_rows_sample(legacy_result_rows, result_rows_agate, test_type, test_query, results_sample_limit=5) -%}
     {% set should_limit_sample = test_type == 'dbt_test' %}
 
