@@ -16,7 +16,7 @@ from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezon
 logger = get_logger(__name__)
 
 
-class DataMonitoringFilterSchema(BaseModel):
+class SelectorFilterSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None

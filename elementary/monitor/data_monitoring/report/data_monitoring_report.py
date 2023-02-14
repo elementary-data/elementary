@@ -212,12 +212,21 @@ class DataMonitoringReport(DataMonitoring):
             self.execution_properties["success"] = self.success
             return self.success
 
-        # If an s3 client or a gcs client is provided, we want to upload the report to the bucket,
-        # and send the test results summary message.
+        bucket_website_url = None
+        # If we upload the report to a bucket, we don't want to share it via Slack.
+        should_send_report_over_slack = not (
+            disable_html_attachment or self.s3_client or self.gcs_client
+        )
+
+        # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
         if self.s3_client or self.gcs_client:
             upload_succeeded, bucket_website_url = self.upload_report(
                 local_html_path=local_html_path, remote_file_path=remote_file_path
             )
+
+        # If a Slack client is provided, we want send a results summary and attachment of the report if needed.
+        if self.slack_client:
+            # Send test results summary
             self.send_test_results_summary(
                 days_back=days_back,
                 test_runs_amount=test_runs_amount,
@@ -225,18 +234,7 @@ class DataMonitoringReport(DataMonitoring):
                 bucket_website_url=bucket_website_url,
                 include_description=include_description,
             )
-
-        # If only a slack client is provided,
-        # We want to send the test results summary with the report heml attachment (if not disabled)
-        elif self.slack_client:
-            # Send test results summary
-            self.send_test_results_summary(
-                days_back=days_back,
-                test_runs_amount=test_runs_amount,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-                include_description=include_description,
-            )
-            if not disable_html_attachment:
+            if should_send_report_over_slack:
                 self.send_report_attachment(local_html_path=local_html_path)
 
         return self.success
@@ -283,35 +281,34 @@ class DataMonitoringReport(DataMonitoring):
         bucket_website_url: Optional[str] = None,
         include_description: bool = False,
     ) -> bool:
-        if self.slack_client:
-            test_results_db_rows = self.tests_fetcher.get_all_test_results_db_rows(
-                days_back=days_back,
-                invocations_per_test=test_runs_amount,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-            )
-            summary_test_results = self.tests_fetcher.get_test_restuls_summary(
-                test_results_db_rows=test_results_db_rows,
+        test_results_db_rows = self.tests_fetcher.get_all_test_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+        summary_test_results = self.tests_fetcher.get_test_results_summary(
+            test_results_db_rows=test_results_db_rows,
+            filter=self.filter.get_filter(),
+        )
+        send_succeeded = self.slack_client.send_message(
+            channel_name=self.config.slack_channel_name,
+            message=SlackReportSummaryMessageBuilder().get_slack_message(
+                test_results=summary_test_results,
+                bucket_website_url=bucket_website_url,
+                include_description=include_description,
                 filter=self.filter.get_filter(),
-            )
-            send_succeeded = self.slack_client.send_message(
-                channel_name=self.config.slack_channel_name,
-                message=SlackReportSummaryMessageBuilder().get_slack_message(
-                    test_results=summary_test_results,
-                    bucket_website_url=bucket_website_url,
-                    include_description=include_description,
-                    filter=self.filter.get_filter(),
-                    days_back=days_back,
-                    env=self.config.env,
-                ),
-            )
+                days_back=days_back,
+                env=self.config.env,
+            ),
+        )
 
-            self.execution_properties[
-                "sent_test_results_summary_succesfully"
-            ] = send_succeeded
-            self.success = send_succeeded
+        self.execution_properties[
+            "sent_test_results_summary_succesfully"
+        ] = send_succeeded
+        self.success = send_succeeded
 
-            if send_succeeded:
-                logger.info("Sent test results summary to Slack")
+        if send_succeeded:
+            logger.info("Sent test results summary to Slack")
 
         self.execution_properties["success"] = self.success
         return self.success

@@ -2,7 +2,7 @@ import re
 from typing import Optional
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.selector.selector import SelectorFetcher
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.log import get_logger
@@ -10,7 +10,7 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class DataMonitoringFilter:
+class SelectorFilter:
     def __init__(
         self,
         tracking: AnonymousTracking,
@@ -24,19 +24,15 @@ class DataMonitoringFilter:
         )
         self.filter = self._parse_selector(self.selector)
 
-    def _parse_selector(
-        self, selector: Optional[str] = None
-    ) -> DataMonitoringFilterSchema:
-        data_monitoring_filter = DataMonitoringFilterSchema()
+    def _parse_selector(self, selector: Optional[str] = None) -> SelectorFilterSchema:
+        data_monitoring_filter = SelectorFilterSchema()
         if selector:
             if self.selector_fetcher:
                 self.tracking.set_env("select_method", "dbt selector")
                 node_names = self.selector_fetcher.get_selector_results(
                     selector=selector
                 )
-                return DataMonitoringFilterSchema(
-                    node_names=node_names, selector=selector
-                )
+                return SelectorFilterSchema(node_names=node_names, selector=selector)
             else:
 
                 invocation_id_regex = re.compile(r"invocation_id:.*")
@@ -54,39 +50,39 @@ class DataMonitoringFilter:
                 model_match = model_regex.search(selector)
 
                 if last_invocation_match:
-                    data_monitoring_filter = DataMonitoringFilterSchema(
+                    data_monitoring_filter = SelectorFilterSchema(
                         last_invocation=True, selector=selector
                     )
                 elif invocation_id_match:
-                    data_monitoring_filter = DataMonitoringFilterSchema(
+                    data_monitoring_filter = SelectorFilterSchema(
                         invocation_id=invocation_id_match.group().split(":", 1)[1],
                         selector=selector,
                     )
                 elif invocation_time_match:
-                    data_monitoring_filter = DataMonitoringFilterSchema(
+                    data_monitoring_filter = SelectorFilterSchema(
                         invocation_time=invocation_time_match.group().split(":", 1)[1],
                         selector=selector,
                     )
                 elif tag_match:
                     self.tracking.set_env("select_method", "tag")
-                    data_monitoring_filter = DataMonitoringFilterSchema(
+                    data_monitoring_filter = SelectorFilterSchema(
                         tag=tag_match.group().split(":", 1)[1], selector=selector
                     )
                 elif owner_match:
                     self.tracking.set_env("select_method", "owner")
-                    data_monitoring_filter = DataMonitoringFilterSchema(
+                    data_monitoring_filter = SelectorFilterSchema(
                         owner=owner_match.group().split(":", 1)[1], selector=selector
                     )
                 elif model_match:
                     self.tracking.set_env("select_method", "model")
-                    data_monitoring_filter = DataMonitoringFilterSchema(
+                    data_monitoring_filter = SelectorFilterSchema(
                         model=model_match.group().split(":", 1)[1], selector=selector
                     )
                 else:
                     logger.error(f"Could not parse the given -s/--select: {selector}")
         return data_monitoring_filter
 
-    def get_filter(self) -> DataMonitoringFilterSchema:
+    def get_filter(self) -> SelectorFilterSchema:
         return self.filter
 
     def get_selector(self) -> Optional[str]:

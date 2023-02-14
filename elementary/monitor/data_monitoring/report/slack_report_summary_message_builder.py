@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
-from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.tests.schema import TestResultSummarySchema
 from elementary.utils.time import convert_utc_time_to_timezone
 
@@ -18,7 +18,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
-        filter: Optional[DataMonitoringFilterSchema] = None,
+        filter: Optional[SelectorFilterSchema] = None,
         include_description: bool = False,
     ) -> SlackMessageSchema:
         self._add_title_to_slack_alert(
@@ -42,7 +42,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
-        filter: Optional[DataMonitoringFilterSchema] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ):
         current_time = convert_utc_time_to_timezone(datetime.utcnow()).strftime(
             "%Y-%m-%d | %H:%M"
@@ -87,7 +87,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     @staticmethod
     def _get_summary_filter_text(
         days_back: int,
-        filter: Optional[DataMonitoringFilterSchema] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> str:
         selector_text = None
         if filter and filter.tag:

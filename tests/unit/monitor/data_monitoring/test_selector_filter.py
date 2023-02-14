@@ -2,16 +2,14 @@ from unittest import mock
 
 import pytest
 
-from elementary.monitor.data_monitoring.data_monitoring_filter import (
-    DataMonitoringFilter,
-)
+from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from tests.mocks.anonymous_tracking_mock import MockAnonymousTracking
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
 
 def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking_mock):
     dbt_runner_mock.ls = mock.Mock(return_value=[])
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         user_dbt_runner=dbt_runner_mock,
         selector="mock:selector",
@@ -21,7 +19,7 @@ def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking
     assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "mock:selector"
 
     dbt_runner_mock.ls = mock.Mock(return_value=["node_name_1", "node_name_2"])
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         user_dbt_runner=dbt_runner_mock,
         selector="mock:selector",
@@ -36,7 +34,7 @@ def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking
 
 def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     # tag selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="tag:mock_tag",
     )
@@ -44,7 +42,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "tag:mock_tag"
 
     # owner selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="config.meta.owner:mock_owner",
     )
@@ -57,7 +55,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     )
 
     # model selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="model:mock_model",
     )
@@ -69,7 +67,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     )
 
     # invocation_id selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="invocation_id:mock_invocation_id",
     )
@@ -83,7 +81,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     )
 
     # invocation_time selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="invocation_time:2023-02-08 10:00:00",
     )
@@ -98,13 +96,13 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # invalid_invocation_time selector
     with pytest.raises(ValueError):
-        data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+        data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
             tracking=anonymous_tracking_mock,
             selector="invocation_time:2023-32-32",
         )
 
     # last_invocation selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="last_invocation",
     )
@@ -116,7 +114,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     )
 
     # unsupported selector
-    data_monitoring_filter_with_user_dbt_runner = DataMonitoringFilter(
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
         selector="blabla:blublu",
     )

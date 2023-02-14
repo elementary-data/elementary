@@ -7,7 +7,7 @@ from dateutil import tz
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
-from elementary.monitor.data_monitoring.schema import DataMonitoringFilterSchema
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.invocations.invocations import InvocationsFetcher
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import (
@@ -59,10 +59,10 @@ class TestsFetcher(FetcherClient):
         ]
         return test_results
 
-    def get_test_restuls_summary(
+    def get_test_results_summary(
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
-        filter: Optional[DataMonitoringFilterSchema] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = test_results_db_rows
         if filter and filter.tag:
@@ -130,7 +130,7 @@ class TestsFetcher(FetcherClient):
         return subscribers
 
     def _get_invocation_from_filter(
-        self, filter: DataMonitoringFilterSchema
+        self, filter: SelectorFilterSchema
     ) -> Optional[DbtInvocationSchema]:
         # If none of the following filter options exists, the invocation is empty and there is no filter.
         invocation = DbtInvocationSchema()
@@ -227,7 +227,7 @@ class TestsFetcher(FetcherClient):
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringFilterSchema] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> Tuple[
         Dict[Optional[ModelUniqueIdType], List[TestResultSchema]],
         Optional[DbtInvocationSchema],
