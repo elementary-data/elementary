@@ -29,8 +29,11 @@
             test_sub_type,
             test_results_description,
             owners,
+            model_owner,
             tags,
+            model_tags,
             meta,
+            model_meta,
             test_results_query,
             other,
             test_name,
@@ -39,6 +42,7 @@
             status,
             days_diff,
             invocations_rank_index,
+            failures,
             result_rows
         from ordered_test_results
         where invocations_rank_index <= {{ invocations_per_test }}

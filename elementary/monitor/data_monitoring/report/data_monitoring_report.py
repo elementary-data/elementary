@@ -1,7 +1,6 @@
 import json
 import os
 import os.path
-import re
 import webbrowser
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
@@ -12,8 +11,10 @@ from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
+    SlackReportSummaryMessageBuilder,
+)
 from elementary.monitor.data_monitoring.schema import (
-    DataMonitoringReportFilter,
     DataMonitoringReportTestResultsSchema,
     DataMonitoringReportTestRunsSchema,
 )
@@ -53,7 +54,6 @@ class DataMonitoringReport(DataMonitoring):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
-        self.filter = self._parse_filter(self.raw_filter)
         self.tests_fetcher = TestsFetcher(dbt_runner=self.internal_dbt_runner)
         self.models_fetcher = ModelsFetcher(dbt_runner=self.internal_dbt_runner)
         self.sidebar_fetcher = SidebarFetcher(dbt_runner=self.internal_dbt_runner)
@@ -61,33 +61,6 @@ class DataMonitoringReport(DataMonitoring):
         self.filter_fetcher = FiltersFetcher(dbt_runner=self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-
-    def _parse_filter(self, filter: Optional[str] = None) -> DataMonitoringReportFilter:
-        data_monitoring_filter = DataMonitoringReportFilter()
-        if filter:
-            invocation_id_regex = re.compile(r"invocation_id:.*")
-            invocation_time_regex = re.compile(r"invocation_time:.*")
-            last_invocation_regex = re.compile(r"last_invocation")
-
-            invocation_id_match = invocation_id_regex.search(filter)
-            invocation_time_match = invocation_time_regex.search(filter)
-            last_invocation_match = last_invocation_regex.search(filter)
-
-            if last_invocation_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    last_invocation=True
-                )
-            elif invocation_id_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    invocation_id=invocation_id_match.group().split(":", 1)[1]
-                )
-            elif invocation_time_match:
-                data_monitoring_filter = DataMonitoringReportFilter(
-                    invocation_time=invocation_time_match.group().split(":", 1)[1]
-                )
-            else:
-                logger.error(f"Could not parse the given -s/--select: {filter}")
-        return data_monitoring_filter
 
     def generate_report(
         self,
@@ -211,8 +184,62 @@ class DataMonitoringReport(DataMonitoring):
         return self.success, html_path
 
     def send_report(
-        self, local_html_path: str, remote_file_path: Optional[str] = None
-    ) -> bool:
+        self,
+        days_back: Optional[int] = None,
+        test_runs_amount: Optional[int] = None,
+        file_path: Optional[str] = None,
+        disable_passed_test_metrics: bool = False,
+        should_open_browser: bool = False,
+        exclude_elementary_models: bool = False,
+        project_name: Optional[str] = None,
+        remote_file_path: Optional[str] = None,
+        disable_html_attachment: Optional[bool] = False,
+        include_description: Optional[bool] = False,
+    ):
+        # Generate the report
+        generated_report_successfully, local_html_path = self.generate_report(
+            days_back=days_back,
+            test_runs_amount=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+            file_path=file_path,
+            should_open_browser=should_open_browser,
+            exclude_elementary_models=exclude_elementary_models,
+            project_name=project_name,
+        )
+
+        if not generated_report_successfully:
+            self.success = False
+            self.execution_properties["success"] = self.success
+            return self.success
+
+        bucket_website_url = None
+        # If we upload the report to a bucket, we don't want to share it via Slack.
+        should_send_report_over_slack = not (
+            disable_html_attachment or self.s3_client or self.gcs_client
+        )
+
+        # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
+        if self.s3_client or self.gcs_client:
+            upload_succeeded, bucket_website_url = self.upload_report(
+                local_html_path=local_html_path, remote_file_path=remote_file_path
+            )
+
+        # If a Slack client is provided, we want send a results summary and attachment of the report if needed.
+        if self.slack_client:
+            # Send test results summary
+            self.send_test_results_summary(
+                days_back=days_back,
+                test_runs_amount=test_runs_amount,
+                disable_passed_test_metrics=disable_passed_test_metrics,
+                bucket_website_url=bucket_website_url,
+                include_description=include_description,
+            )
+            if should_send_report_over_slack:
+                self.send_report_attachment(local_html_path=local_html_path)
+
+        return self.success
+
+    def send_report_attachment(self, local_html_path: str) -> bool:
         if self.slack_client:
             send_succeded = self.slack_client.send_report(
                 self.config.slack_channel_name, local_html_path
@@ -221,21 +248,67 @@ class DataMonitoringReport(DataMonitoring):
             if not send_succeded:
                 self.success = False
 
+        self.execution_properties["success"] = self.success
+        return self.success
+
+    def upload_report(
+        self, local_html_path: str, remote_file_path: Optional[str] = None
+    ) -> Tuple[bool, Optional[str]]:
+        if self.gcs_client:
+            send_succeded, bucket_website_url = self.gcs_client.send_report(
+                local_html_path, remote_bucket_file_path=remote_file_path
+            )
+            self.execution_properties["sent_to_gcs_successfully"] = send_succeded
+            if not send_succeded:
+                self.success = False
+
         if self.s3_client:
-            send_succeded = self.s3_client.send_report(
+            send_succeded, bucket_website_url = self.s3_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
             self.execution_properties["sent_to_s3_successfully"] = send_succeded
             if not send_succeded:
                 self.success = False
 
-        if self.gcs_client:
-            send_succeded = self.gcs_client.send_report(
-                local_html_path, remote_bucket_file_path=remote_file_path
-            )
-            self.execution_properties["sent_to_gcs_successfully"] = send_succeded
-            if not send_succeded:
-                self.success = False
+        self.execution_properties["success"] = self.success
+        return self.success, bucket_website_url
+
+    def send_test_results_summary(
+        self,
+        days_back: Optional[int] = None,
+        test_runs_amount: Optional[int] = None,
+        disable_passed_test_metrics: bool = False,
+        bucket_website_url: Optional[str] = None,
+        include_description: bool = False,
+    ) -> bool:
+        test_results_db_rows = self.tests_fetcher.get_all_test_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+        summary_test_results = self.tests_fetcher.get_test_results_summary(
+            test_results_db_rows=test_results_db_rows,
+            filter=self.filter.get_filter(),
+        )
+        send_succeeded = self.slack_client.send_message(
+            channel_name=self.config.slack_channel_name,
+            message=SlackReportSummaryMessageBuilder().get_slack_message(
+                test_results=summary_test_results,
+                bucket_website_url=bucket_website_url,
+                include_description=include_description,
+                filter=self.filter.get_filter(),
+                days_back=days_back,
+                env=self.config.env,
+            ),
+        )
+
+        self.execution_properties[
+            "sent_test_results_summary_succesfully"
+        ] = send_succeeded
+        self.success = send_succeeded
+
+        if send_succeeded:
+            logger.info("Sent test results summary to Slack")
 
         self.execution_properties["success"] = self.success
         return self.success
@@ -248,7 +321,7 @@ class DataMonitoringReport(DataMonitoring):
     ) -> DataMonitoringReportTestResultsSchema:
         try:
             tests_results, invocation = self.tests_fetcher.get_test_results(
-                filter=self.filter,
+                filter=self.filter.get_filter(),
                 test_results_db_rows=test_results_db_rows,
                 disable_samples=self.disable_samples,
             )

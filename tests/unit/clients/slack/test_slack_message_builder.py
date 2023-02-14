@@ -301,3 +301,76 @@ def test_get_limited_markdown_msg():
     assert markdown_short_message == short_message
     assert len(markdown_long_message) == SectionBlock.text_max_length
     assert markdown_long_message.endswith("...age")
+
+
+@pytest.mark.parametrize(
+    "text, url",
+    [
+        ("first", "https://example1.com"),
+        ("second", "https://example2.com"),
+        ("third", "https://example3.com"),
+    ],
+)
+def test_create_button_action_block(text, url):
+    button_action_block = SlackMessageBuilder.create_button_action_block(
+        text=text, url=url
+    )
+    assert json.dumps(button_action_block, sort_keys=True) == json.dumps(
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": text, "emoji": True},
+                    "value": text,
+                    "url": url,
+                }
+            ],
+        },
+        sort_keys=True,
+    )
+
+
+def test_prettify_and_dedup_list():
+    message_builder = SlackMessageBuilder()
+    list_prettified = message_builder.prettify_and_dedup_list(
+        ["name1", "name2", "name2"]
+    )
+    assert list_prettified == "name1, name2" or list_prettified == "name2, name1"
+
+    assert (
+        message_builder.prettify_and_dedup_list("name1, name2, name2")
+        == "name1, name2, name2"
+    )
+
+    string_of_list_prettified = message_builder.prettify_and_dedup_list(
+        '["name1", "name2", "name2"]'
+    )
+    assert (
+        string_of_list_prettified == "name1, name2"
+        or string_of_list_prettified == "name2, name1"
+    )
+
+    assert message_builder.prettify_and_dedup_list({}) == {}
+    assert message_builder.prettify_and_dedup_list(123) == 123
+
+
+def test_slack_message_attachments_limit():
+    very_short_attachments = ["attachment"] * (
+        SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS - 1
+    )
+    short_attachments = ["attachment"] * SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS
+    long_attachments = ["attachment"] * (
+        SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS + 1
+    )
+
+    assert (
+        SlackMessageSchema(attachments=very_short_attachments).attachments
+        == very_short_attachments
+    )
+    assert (
+        SlackMessageSchema(attachments=short_attachments).attachments
+        == short_attachments
+    )
+    assert SlackMessageSchema(attachments=long_attachments).attachments is None
+    assert SlackMessageSchema(attachments=[]).attachments == []

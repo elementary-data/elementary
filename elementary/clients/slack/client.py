@@ -89,13 +89,16 @@ class SlackWebClient(SlackClient):
             return False
 
     def send_file(
-        self, channel_name: str, file_path: str, message: SlackMessageSchema
+        self,
+        channel_name: str,
+        file_path: str,
+        message: Optional[SlackMessageSchema] = None,
     ) -> bool:
         channel_id = self._get_channel_id(channel_name)
         try:
             self.client.files_upload_v2(
                 channel=channel_id,
-                initial_comment=message.text,
+                initial_comment=message.text if message else None,
                 file=file_path,
                 request_file_info=False,
             )
@@ -106,11 +109,7 @@ class SlackWebClient(SlackClient):
             return False
 
     def send_report(self, channel: str, report_file_path: str):
-        send_succeed = self.send_file(
-            channel_name=channel,
-            file_path=report_file_path,
-            message=SlackMessageSchema(text="Elementary monitoring report"),
-        )
+        send_succeed = self.send_file(channel_name=channel, file_path=report_file_path)
         if send_succeed:
             logger.info("Sent report to Slack.")
         else:
