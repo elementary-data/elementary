@@ -44,10 +44,8 @@ class DbtRunner:
         quiet: bool = False,
     ) -> Tuple[bool, str]:
         dbt_command = ["dbt"]
-        json_output = False
         if capture_output:
             dbt_command.extend(["--log-format", log_format])
-            json_output = True
         dbt_command.extend(command_args)
         dbt_command.extend(["--project-dir", self.project_dir])
         if self.profiles_dir:
@@ -66,18 +64,17 @@ class DbtRunner:
             result = subprocess.run(
                 dbt_command,
                 check=self.raise_on_failure,
-                capture_output=(json_output or quiet),
+                capture_output=(capture_output or quiet),
                 env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
             raise DbtCommandError(err, command_args)
         output = None
-        if json_output:
+        if capture_output:
             output = result.stdout.decode("utf-8")
             logger.debug(f"Output: {output}")
         if result.returncode != 0:
             return False, output
-
         return True, output
 
     def deps(self, quiet: bool = False) -> bool:
