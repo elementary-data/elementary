@@ -12,13 +12,13 @@
             status,
             case
                 when status != 'success' then 0
-                else round({{ elementary.cast_as_numeric('execution_time') }}, 1)
+                else round({{ elementary.edr_cast_as_numeric('execution_time') }}, 1)
             end as execution_time,
             full_refresh,
             materialization,
             generated_at
         from model_runs
-        where {{ elementary.datediff(elementary.cast_as_timestamp('generated_at'), elementary.current_timestamp(), 'day') }} < {{ days_back }}
+        where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
         {% if exclude_elementary %}
           and unique_id not like 'model.elementary.%'
         {% endif %}

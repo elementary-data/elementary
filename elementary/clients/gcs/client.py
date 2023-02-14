@@ -1,5 +1,5 @@
 from os import path
-from typing import Optional
+from typing import Optional, Tuple
 
 import google
 from google.auth.credentials import Credentials
@@ -28,12 +28,13 @@ class GCSClient:
 
     def send_report(
         self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
-    ) -> bool:
+    ) -> Tuple[bool, Optional[str]]:
         report_filename = (
             bucket_path.basename(remote_bucket_file_path)
             if remote_bucket_file_path
             else path.basename(local_html_file_path)
         )
+        bucket_website_url = None
         bucket_report_path = remote_bucket_file_path or report_filename
         logger.info(f'Uploading to GCS bucket "{self.config.gcs_bucket_name}"')
         try:
@@ -43,22 +44,40 @@ class GCSClient:
             logger.info("Uploaded report to GCS.")
             if self.config.update_bucket_website:
                 bucket_report_folder_path = bucket_path.dirname(bucket_report_path)
+                bucket_name = (
+                    bucket_path.join_path([bucket_report_folder_path, "index.html"])
+                    if bucket_report_folder_path
+                    else "index.html"
+                )
                 bucket.copy_blob(
                     blob=blob,
                     destination_bucket=bucket,
-                    new_name=bucket_path.join_path(
-                        [bucket_report_folder_path, "index.html"]
-                    )
-                    if bucket_report_folder_path
-                    else "index.html",
+                    new_name=bucket_name,
+                )
+                bucket_website_url = self.get_bucket_website_url(
+                    destination_bucket=self.config.gcs_bucket_name,
+                    bucket_name=bucket_name,
                 )
                 logger.info("Updated GCS bucket's website.")
         except google.cloud.exceptions.GoogleCloudError as ex:
             logger.exception("Failed to upload report to GCS.")
             if self.tracking:
                 self.tracking.record_cli_internal_exception(ex)
-            return False
-        return True
+            return False, bucket_website_url
+        return True, bucket_website_url
+
+    def get_bucket_website_url(
+        self, bucket_name: str, destination_bucket: Optional[str] = None
+    ) -> Optional[str]:
+        bucket_website_url = None
+        if self.config.update_bucket_website:
+            full_bucket_path = (
+                f"{destination_bucket}/{bucket_name}"
+                if destination_bucket
+                else bucket_name
+            )
+            bucket_website_url = f"https://storage.googleapis.com/{full_bucket_path}"
+        return bucket_website_url
 
     def get_client(self, config: Config):
         creds = self.get_credentials(config)

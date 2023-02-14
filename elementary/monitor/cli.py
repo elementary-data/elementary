@@ -6,7 +6,7 @@ from elementary.config.config import Config
 from elementary.monitor.data_monitoring.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
-from elementary.monitor.data_monitoring.data_monitoring_report import (
+from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -135,7 +135,7 @@ def common_options(cmd: str):
             "--select",
             type=str,
             default=None,
-            help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
+            help="Filter the report by tag:<TAG> / owner:<OWNER> / model:<MODEL> / last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
             else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL>.",
         )(func)
@@ -454,6 +454,18 @@ def report(
     default=False,
     help="If set to true elementary report won't show data metrics for passed tests (this can improve report creation time).",
 )
+@click.option(
+    "--disable",
+    type=str,
+    default=None,
+    help='Disable functualities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
+)
+@click.option(
+    "--include",
+    type=str,
+    default=None,
+    help="Include additional information at the test results summary message.\nCurrently only --include descriptions is supported.",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -485,13 +497,14 @@ def send_report(
     project_name,
     env,
     select,
+    disable,
+    include,
 ):
     """
     Generate and send the report to an external platform.
     The current options are Slack, AWS S3, and Google Cloud Storage.
     Each specified platform will be sent a report.
     """
-
     config = Config(
         config_dir,
         profiles_dir,
@@ -533,11 +546,7 @@ def send_report(
             disable_samples=disable_samples,
             filter=select,
         )
-        command_succeeded = False
-        (
-            generated_report_successfully,
-            elementary_html_path,
-        ) = data_monitoring.generate_report(
+        sent_report_successfully = data_monitoring.send_report(
             days_back=days_back,
             test_runs_amount=executions_limit,
             disable_passed_test_metrics=disable_passed_test_metrics,
@@ -545,15 +554,16 @@ def send_report(
             should_open_browser=False,
             exclude_elementary_models=exclude_elementary_models,
             project_name=project_name,
+            remote_file_path=bucket_file_path,
+            disable_html_attachment=(disable == "html_attachment"),
+            include_description=(include == "description"),
         )
-        if generated_report_successfully and elementary_html_path:
-            command_succeeded = data_monitoring.send_report(
-                elementary_html_path, remote_file_path=bucket_file_path
-            )
+
         anonymous_tracking.track_cli_end(
             Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name
         )
-        if not command_succeeded:
+
+        if not sent_report_successfully:
             sys.exit(1)
 
     except Exception as exc:
