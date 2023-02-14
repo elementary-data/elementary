@@ -36,6 +36,8 @@ def filter_alerts(
         filtered_alerts = _filter_alerts_by_owner(alerts, filter)
     elif filter.node_names is not None:
         filtered_alerts = _filter_alerts_by_node_names(alerts, filter)
+    else:
+        filtered_alerts = alerts
     return filtered_alerts
 
 
