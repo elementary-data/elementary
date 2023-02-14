@@ -1,7 +1,7 @@
-{%- macro get_test_rows_sample(result_rows, result_rows_agate, test_type, test_query, results_sample_limit=5) -%}
+{%- macro get_test_rows_sample(legacy_result_rows, result_rows_agate, test_type, test_query, results_sample_limit=5) -%}
     {% set should_limit_sample = test_type == 'dbt_test' %}
 
-    {% if result_rows is defined and result_rows is not none %}
+    {% if legacy_result_rows is defined and legacy_result_rows is not none %}
         {% set result_rows = fromjson(result_rows) %}
         {% if should_limit_sample %}
             {% do return(result_rows[:results_sample_limit]) %}
