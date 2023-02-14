@@ -7,7 +7,7 @@
     {% set should_limit_sample = test_type == 'dbt_test' %}
 
     {% if legacy_result_rows is defined and legacy_result_rows is not none %}
-        {% set result_rows = fromjson(result_rows) %}
+        {% set result_rows = fromjson(legacy_result_rows) %}
         {% if should_limit_sample %}
             {% do return(result_rows[:results_sample_limit]) %}
         {% endif %}
