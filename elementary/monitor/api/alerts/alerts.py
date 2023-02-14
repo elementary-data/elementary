@@ -11,7 +11,7 @@ from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alert_filters import filter_alerts
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.utils.log import get_logger
 
@@ -38,7 +38,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> Alerts:
         new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
         new_model_alerts = self.get_model_alerts(days_back, filter)
@@ -55,7 +55,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> AlertsQueryResult[TestAlert]:
         pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(
             days_back, disable_samples
@@ -71,7 +71,7 @@ class AlertsAPI(APIClient):
     def get_model_alerts(
         self,
         days_back: int,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> AlertsQueryResult[ModelAlert]:
         pending_model_alerts = self.alerts_fetcher.query_pending_model_alerts(days_back)
         last_alert_sent_times = self.alerts_fetcher.query_last_model_alert_times(
@@ -85,7 +85,7 @@ class AlertsAPI(APIClient):
     def get_source_freshness_alerts(
         self,
         days_back: int,
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
         pending_source_freshness_alerts = (
             self.alerts_fetcher.query_pending_source_freshness_alerts(days_back)
@@ -118,7 +118,7 @@ class AlertsAPI(APIClient):
             AlertsQueryResult[SourceFreshnessAlert],
         ],
         last_alert_sent_times: Dict[str, str],
-        filter: Optional[DataMonitoringAlertsFilter] = None,
+        filter: Optional[SelectorFilterSchema] = None,
     ) -> Union[
         AlertsQueryResult[TestAlert],
         AlertsQueryResult[ModelAlert],

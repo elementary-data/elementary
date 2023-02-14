@@ -234,27 +234,3 @@ def test_add_details_to_slack_alert():
         },
         sort_keys=True,
     )
-
-
-def test_prettify_and_dedup_list():
-    message_builder = SlackAlertMessageBuilder()
-    list_prettified = message_builder.prettify_and_dedup_list(
-        ["name1", "name2", "name2"]
-    )
-    assert list_prettified == "name1, name2" or list_prettified == "name2, name1"
-
-    assert (
-        message_builder.prettify_and_dedup_list("name1, name2, name2")
-        == "name1, name2, name2"
-    )
-
-    string_of_list_prettified = message_builder.prettify_and_dedup_list(
-        '["name1", "name2", "name2"]'
-    )
-    assert (
-        string_of_list_prettified == "name1, name2"
-        or string_of_list_prettified == "name2, name1"
-    )
-
-    assert message_builder.prettify_and_dedup_list({}) == {}
-    assert message_builder.prettify_and_dedup_list(123) == 123

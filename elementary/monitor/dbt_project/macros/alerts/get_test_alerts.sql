@@ -49,6 +49,7 @@
                 alerts_in_time_limit.test_params,
                 alerts_in_time_limit.severity,
                 alerts_in_time_limit.status,
+                alerts_in_time_limit.result_rows,
                 alerts_in_time_limit.test_short_name,
                 {# backwards compatibility #}
                 case
@@ -79,7 +80,7 @@
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(alert.alert_id), test_type, results_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(alert.result_rows, test_result_rows_agate.get(alert.alert_id), test_type, alert.alert_results_query, results_sample_limit) %}
         {%- endif -%}
         {% set pending_alert_dict = {'id': alert.alert_id,
                                  'alert_class_id': alert.alert_class_id,

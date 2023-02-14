@@ -1,16 +1,18 @@
-from typing import List
+from typing import List, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
-
-LONGEST_MARKDOWN_SUFFIX_LEN = 3
-CONTINUATION_SYMBOL = "..."
-MAX_SLACK_SECTION_SIZE = 2
-MAX_ALERT_PREVIEW_BLOCKS = 5
+from elementary.utils.json_utils import prettify_json_str_set
 
 
 class SlackMessageBuilder:
+    _LONGEST_MARKDOWN_SUFFIX_LEN = 3
+    _CONTINUATION_SYMBOL = "..."
+    _MAX_SLACK_SECTION_SIZE = 2
+    _MAX_ALERT_PREVIEW_BLOCKS = 5
+    _MAX_AMMOUNT_OF_ATTACHMENTS = 50
+
     def __init__(self) -> None:
         self.slack_message = self._initial_slack_message()
 
@@ -35,11 +37,11 @@ class SlackMessageBuilder:
         return (
             section_msg[
                 : SectionBlock.text_max_length
-                - len(CONTINUATION_SYMBOL)
-                - LONGEST_MARKDOWN_SUFFIX_LEN
+                - len(SlackMessageBuilder._CONTINUATION_SYMBOL)
+                - SlackMessageBuilder._LONGEST_MARKDOWN_SUFFIX_LEN
             ]
-            + CONTINUATION_SYMBOL
-            + section_msg[-LONGEST_MARKDOWN_SUFFIX_LEN:]
+            + SlackMessageBuilder._CONTINUATION_SYMBOL
+            + section_msg[-SlackMessageBuilder._LONGEST_MARKDOWN_SUFFIX_LEN :]
         )
 
     @staticmethod
@@ -103,6 +105,20 @@ class SlackMessageBuilder:
         }
 
     @staticmethod
+    def create_button_action_block(text: str, url: str) -> dict:
+        return {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": text, "emoji": True},
+                    "value": text,
+                    "url": url,
+                }
+            ],
+        }
+
+    @staticmethod
     def create_compacted_sections_blocks(section_msgs: list) -> List[dict]:
         # Compacting sections into attachments.
         # Each section can contian _MAX_SLACK_SECTION_SIZE fields.
@@ -114,7 +130,7 @@ class SlackMessageBuilder:
                 "type": "mrkdwn",
                 "text": SlackMessageBuilder.get_limited_markdown_msg(section_msg),
             }
-            if len(section_fields) < MAX_SLACK_SECTION_SIZE:
+            if len(section_fields) < SlackMessageBuilder._MAX_SLACK_SECTION_SIZE:
                 section_fields.append(section_field)
             else:
                 attachment = {"type": "section", "fields": section_fields}
@@ -136,3 +152,16 @@ class SlackMessageBuilder:
 
     def get_slack_message(self) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
+
+    @staticmethod
+    def prettify_and_dedup_list(
+        list_variation: Union[List[str], str]
+    ) -> Union[List[str], str]:
+        if isinstance(list_variation, str):
+            return prettify_json_str_set(list_variation)
+
+        elif isinstance(list_variation, list):
+            return ", ".join(set(list_variation))
+
+        else:
+            return list_variation

@@ -1,18 +1,30 @@
+from ast import Dict
 from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
+from elementary.monitor.api.tests.schema import (
+    InvocationSchema,
+    TestResultSchema,
+    TestRunSchema,
+    TotalsSchema,
+)
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
 logger = get_logger(__name__)
 
 
-class DataMonitoringReportFilter(BaseModel):
+class SelectorFilterSchema(BaseModel):
+    selector: Optional[str] = None
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
+    tag: Optional[str] = None
+    owner: Optional[str] = None
+    model: Optional[str] = None
+    node_names: Optional[List[str]] = None
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time):
@@ -30,8 +42,12 @@ class DataMonitoringReportFilter(BaseModel):
         return None
 
 
-class DataMonitoringAlertsFilter(BaseModel):
-    tag: Optional[str] = None
-    owner: Optional[str] = None
-    model: Optional[str] = None
-    node_names: Optional[List[str]] = None
+class DataMonitoringReportTestResultsSchema(BaseModel):
+    results: Dict[Optional[str], List[TestResultSchema]] = dict()
+    totals: Dict[Optional[str], TotalsSchema] = dict()
+    invocation: InvocationSchema = dict()
+
+
+class DataMonitoringReportTestRunsSchema(BaseModel):
+    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
+    totals: Dict[Optional[str], TotalsSchema] = dict()

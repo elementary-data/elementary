@@ -17,7 +17,7 @@ from elementary.monitor.api.report.schema import ReportDataSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
-from elementary.monitor.data_monitoring.schema import DataMonitoringReportFilter
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.utils.time import get_now_utc_iso_format
 
 
@@ -30,7 +30,7 @@ class ReportAPI(APIClient):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
         disable_samples: bool = False,
-        filter: DataMonitoringReportFilter = DataMonitoringReportFilter(),
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
     ) -> ReportDataSchema:
         try:

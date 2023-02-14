@@ -1,14 +1,11 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from dateutil import tz
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
-from elementary.clients.slack.slack_message_builder import (
-    MAX_ALERT_PREVIEW_BLOCKS,
-    SlackMessageBuilder,
-)
+from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.alerts.schema.alert import AlertSuppressionSchema
-from elementary.utils.json_utils import prettify_json_str_set, try_load_json
+from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
 
@@ -80,7 +77,7 @@ class PreviewIsTooLongError(Exception):
     def __init__(
         self,
         preview_blocks: SlackBlocksType,
-        message: str = f"There are too many blocks at the preview section of the alert (more than {MAX_ALERT_PREVIEW_BLOCKS})",
+        message: str = f"There are too many blocks at the preview section of the alert (more than {SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS})",
     ) -> None:
         self.preview_blocks = preview_blocks
         self.message = message
@@ -156,31 +153,19 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
             return
 
         preview_blocks_count = len(preview_blocks)
-        if preview_blocks_count > MAX_ALERT_PREVIEW_BLOCKS:
+        if preview_blocks_count > SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS:
             raise PreviewIsTooLongError(preview_blocks)
 
         elif (
-            preview_blocks_count < MAX_ALERT_PREVIEW_BLOCKS and preview_blocks_count > 0
+            preview_blocks_count < SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS
+            and preview_blocks_count > 0
         ):
             padded_preview_blocks = [*preview_blocks]
             blocks_counter = preview_blocks_count
-            while blocks_counter < MAX_ALERT_PREVIEW_BLOCKS:
+            while blocks_counter < SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS:
                 padded_preview_blocks.append(cls.create_empty_section_block())
                 blocks_counter += 1
             return padded_preview_blocks
 
         else:
             return preview_blocks
-
-    @staticmethod
-    def prettify_and_dedup_list(
-        list_variation: Union[List[str], str]
-    ) -> Union[List[str], str]:
-        if isinstance(list_variation, str):
-            return prettify_json_str_set(list_variation)
-
-        elif isinstance(list_variation, list):
-            return ", ".join(set(list_variation))
-
-        else:
-            return list_variation

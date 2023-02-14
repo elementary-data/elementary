@@ -116,3 +116,21 @@ class TestRunSchema(BaseModel):
 class TestRunsWithTotalsSchema(BaseModel):
     runs: Dict[Optional[str], List[TestRunSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
+
+
+class TestResultSummarySchema(BaseModel):
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+
+    test_unique_id: str
+    elementary_unique_id: str
+    table_name: Optional[str] = None
+    column_name: Optional[str] = None
+    test_type: str
+    test_sub_type: str
+    owners: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    subscribers: Optional[List[str]] = None
+    description: Optional[str] = None
+    test_name: str
+    status: str
+    results_counter: Optional[int] = None
