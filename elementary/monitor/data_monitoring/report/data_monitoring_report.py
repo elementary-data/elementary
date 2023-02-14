@@ -104,7 +104,7 @@ class DataMonitoringReport(DataMonitoring):
             exclude_elementary_models=exclude_elementary_models,
             disable_samples=self.disable_samples,
             project_name=project_name or self.project_name,
-            filter=self.filter,
+            filter=self.filter.get_filter(),
             env=self.config.env,
         )
         errors = report_api.errors
