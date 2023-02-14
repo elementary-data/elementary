@@ -8,7 +8,7 @@ def test_get_test_metadata_from_test_result_db_row(
 ):
     test_result_db_rows = tests_api_mock.tests_fetcher.get_all_test_results_db_rows()
     elementary_test_result_db_row = test_result_db_rows[0]
-    dbt_test_result_db_row = test_result_db_rows[1]
+    dbt_test_result_db_row = test_result_db_rows[-1]
 
     elementary_test_metadata = (
         tests_api_mock._get_test_metadata_from_test_result_db_row(

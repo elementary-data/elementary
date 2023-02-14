@@ -65,10 +65,9 @@ class TestsAPI(APIClient):
 
     def get_test_results_summary(
         self,
-        test_results_db_rows: List[TestResultDBRowSchema],
         filter: Optional[SelectorFilterSchema] = None,
     ) -> List[TestResultSummarySchema]:
-        filtered_test_results_db_rows = test_results_db_rows
+        filtered_test_results_db_rows = self.test_results_db_rows
         if filter and filter.tag:
             filtered_test_results_db_rows = [
                 test_result
@@ -116,6 +115,22 @@ class TestsAPI(APIClient):
             )
             for test_result in filtered_test_results_db_rows
         ]
+
+    @staticmethod
+    def _get_test_subscribers(test_meta: dict, model_meta: dict) -> List[Optional[str]]:
+        subscribers = []
+        test_subscribers = test_meta.get("subscribers", [])
+        model_subscribers = model_meta.get("subscribers", [])
+        if isinstance(test_subscribers, list):
+            subscribers.extend(test_subscribers)
+        else:
+            subscribers.append(test_subscribers)
+
+        if isinstance(model_subscribers, list):
+            subscribers.extend(model_subscribers)
+        else:
+            subscribers.append(model_subscribers)
+        return subscribers
 
     def get_test_results(
         self,

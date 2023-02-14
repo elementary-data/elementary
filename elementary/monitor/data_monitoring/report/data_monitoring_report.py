@@ -11,6 +11,7 @@ from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
 from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
+from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
@@ -36,6 +37,7 @@ class DataMonitoringReport(DataMonitoring):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
+        self.report_api = ReportAPI(self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
 
@@ -243,13 +245,13 @@ class DataMonitoringReport(DataMonitoring):
         bucket_website_url: Optional[str] = None,
         include_description: bool = False,
     ) -> bool:
-        test_results_db_rows = self.tests_fetcher.get_all_test_results_db_rows(
+        tests_api = TestsAPI(
+            dbt_runner=self.internal_dbt_runner,
             days_back=days_back,
             invocations_per_test=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
         )
-        summary_test_results = self.tests_fetcher.get_test_results_summary(
-            test_results_db_rows=test_results_db_rows,
+        summary_test_results = tests_api.get_test_results_summary(
             filter=self.filter.get_filter(),
         )
         send_succeeded = self.slack_client.send_message(
