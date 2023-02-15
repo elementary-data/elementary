@@ -34,12 +34,16 @@ elementary:
     - echo "$PROFILES_YML" > profiles.yml # Only required if `profiles.yml` doesn't exist in repository and using `PROFILES_YML` secret.
     - edr monitor --slack-webhook "$SLACK_WEBHOOK"
     - edr send-report --aws-access-key-id "$AWS_ACCESS_KEY_ID" --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY" --s3-bucket-name "$S3_BUCKET_NAME"
+  artifacts:
+    paths:
+      - edr.log
 ```
 
 The `image` property defines the Docker image to be used within the pipeline.
 In this case, we'll be using [Elementary's official Docker image](/deployment-and-configuration/docker).
 
 The `elementary` property defines the job and the `edr` commands that will be ran.
+It also uploads the `edr.log` as a [job artifact](https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html) which can be useful for debugging purposes.
 
 Feel free to edit the `.gitlab-ci.yml` to your liking and make sure to add the required variables when doing so.
 

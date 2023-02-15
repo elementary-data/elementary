@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.api.invocations.schema import DbtInvocationSchema
-from elementary.monitor.api.tests.schema import (
+from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
+from elementary.monitor.fetchers.tests.schema import (
     ModelUniqueIdType,
     TestResultSchema,
     TestRunSchema,
@@ -16,10 +16,15 @@ from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezon
 logger = get_logger(__name__)
 
 
-class DataMonitoringReportFilter(BaseModel):
+class SelectorFilterSchema(BaseModel):
+    selector: Optional[str] = None
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
+    tag: Optional[str] = None
+    owner: Optional[str] = None
+    model: Optional[str] = None
+    node_names: Optional[List[str]] = None
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time):
@@ -35,13 +40,6 @@ class DataMonitoringReportFilter(BaseModel):
                 )
                 raise
         return None
-
-
-class DataMonitoringAlertsFilter(BaseModel):
-    tag: Optional[str] = None
-    owner: Optional[str] = None
-    model: Optional[str] = None
-    node_names: Optional[List[str]] = None
 
 
 class DataMonitoringReportTestResultsSchema(BaseModel):

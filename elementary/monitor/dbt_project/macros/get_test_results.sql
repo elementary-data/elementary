@@ -7,7 +7,7 @@
         ordered_test_results as (
             select
                 *,
-                {{ elementary.datediff(elementary.cast_as_timestamp('detected_at'), elementary.current_timestamp(), 'day') }} as days_diff,
+                {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} as days_diff,
                 {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank. #}
                 rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_rank_index
             from test_results
@@ -29,8 +29,11 @@
             test_sub_type,
             test_results_description,
             owners,
+            model_owner,
             tags,
+            model_tags,
             meta,
+            model_meta,
             test_results_query,
             other,
             test_name,
@@ -38,7 +41,9 @@
             severity,
             status,
             days_diff,
-            invocations_rank_index
+            invocations_rank_index,
+            failures,
+            result_rows
         from ordered_test_results
         where invocations_rank_index <= {{ invocations_per_test }}
         order by elementary_unique_id, invocations_rank_index desc
@@ -57,8 +62,8 @@
             {% if not disable_passed_test_metrics %}
                 {% do elementary_tests_allowlist_status.append('pass') %}
             {% endif %}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(test_result_rows_agate.get(test.id), test_type, metrics_sample_limit) %}
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
+                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id), test_type, test.test_results_query, metrics_sample_limit) %}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
                 {% if test.test_sub_type == 'dimension' %}

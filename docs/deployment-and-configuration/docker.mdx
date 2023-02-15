@@ -31,8 +31,8 @@ You can bind-mount your project to `/app` and use `edr` as normal:
 
 ```shell
 docker run \
---mount type=bind,source=path/to/project,target=/app \
---mount type=bind,source=path/to/profiles-dir,target=/root/.dbt/ \
+--mount type=bind,source=<path/to/project>,target=/usr/app \
+--mount type=bind,source=<path/to/profiles-dir>,target=/root/.dbt/ \
 ghcr.io/elementary-data/elementary \
 monitor
 ```

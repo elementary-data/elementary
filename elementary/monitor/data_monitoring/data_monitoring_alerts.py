@@ -7,16 +7,13 @@ from alive_progress import alive_it
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
-from elementary.exceptions.exceptions import UnsupportedSelectorError
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.monitor.api.alerts.alerts import AlertsAPI
-from elementary.monitor.api.selector.selector import SelectorAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import DataMonitoringAlertsFilter
+from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
@@ -40,60 +37,14 @@ class DataMonitoringAlerts(DataMonitoring):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
-        self.filter = self._parse_filter(self.raw_filter)
-        self.alerts_api = AlertsAPI(
+
+        self.alerts_fetcher = AlertsFetcher(
             self.internal_dbt_runner,
             self.config,
             self.elementary_database_and_schema,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
-
-    def _parse_filter(
-        self, filter: Optional[str] = None
-    ) -> Optional[DataMonitoringAlertsFilter]:
-        if filter:
-            if self.user_dbt_runner:
-                self.tracking.set_env("select_method", "dbt selector")
-                selector_api = SelectorAPI(self.user_dbt_runner)
-                node_names = selector_api.get_selector_results(selector=filter)
-                return DataMonitoringAlertsFilter(node_names=node_names)
-
-            else:
-                data_monitoring_filter = DataMonitoringAlertsFilter()
-                tag_regex = re.compile(r"tag:.*")
-                owner_regex = re.compile(r"config.meta.owner:.*")
-                model_regex = re.compile(r"model:.*")
-                any_selector = re.compile(r".*:.*")
-
-                tag_match = tag_regex.search(filter)
-                owner_match = owner_regex.search(filter)
-                model_match = model_regex.search(filter)
-                any_selector_match = any_selector.search(filter)
-
-                if tag_match:
-                    self.tracking.set_env("select_method", "tag")
-                    data_monitoring_filter = DataMonitoringAlertsFilter(
-                        tag=tag_match.group().split(":", 1)[1]
-                    )
-                elif owner_match:
-                    self.tracking.set_env("select_method", "owner")
-                    data_monitoring_filter = DataMonitoringAlertsFilter(
-                        owner=owner_match.group().split(":", 1)[1]
-                    )
-                elif model_match:
-                    self.tracking.set_env("select_method", "model")
-                    data_monitoring_filter = DataMonitoringAlertsFilter(
-                        model=model_match.group().split(":", 1)[1]
-                    )
-                elif not any_selector_match:
-                    # To support model selectors like `edr monitor -s cutomers`
-                    data_monitoring_filter = DataMonitoringAlertsFilter(model=filter)
-                else:
-                    raise UnsupportedSelectorError(filter)
-                return data_monitoring_filter
-        else:
-            return None
 
     def _parse_emails_to_ids(self, emails: List[str]) -> str:
         def _regex_match_owner_email(potential_email: str) -> bool:
@@ -138,7 +89,7 @@ class DataMonitoringAlerts(DataMonitoring):
                     f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
                 )
                 self.success = False
-        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
+        self.alerts_fetcher.update_sent_alerts(sent_alert_ids, alerts_table_name)
         self.sent_alert_count += len(sent_alert_ids)
 
     def _send_test_message(self):
@@ -159,13 +110,13 @@ class DataMonitoringAlerts(DataMonitoring):
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: Alerts):
-        self.alerts_api.skip_alerts(
+        self.alerts_fetcher.skip_alerts(
             alerts.tests.get_alerts_to_skip(), TestAlert.TABLE_NAME
         )
-        self.alerts_api.skip_alerts(
+        self.alerts_fetcher.skip_alerts(
             alerts.models.get_alerts_to_skip(), ModelAlert.TABLE_NAME
         )
-        self.alerts_api.skip_alerts(
+        self.alerts_fetcher.skip_alerts(
             alerts.source_freshnesses.get_alerts_to_skip(),
             SourceFreshnessAlert.TABLE_NAME,
         )
@@ -187,8 +138,10 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["success"] = self.success
             return self.success
 
-        alerts = self.alerts_api.get_new_alerts(
-            days_back, disable_samples=self.disable_samples, filter=self.filter
+        alerts = self.alerts_fetcher.get_new_alerts(
+            days_back,
+            disable_samples=self.disable_samples,
+            filter=self.filter.get_filter(),
         )
         self.execution_properties[
             "elementary_test_count"

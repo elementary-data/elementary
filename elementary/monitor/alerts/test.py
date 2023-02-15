@@ -6,7 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.monitor.api.alerts.normalized_alert import (
+from elementary.monitor.fetchers.alerts.normalized_alert import (
     COLUMN_FIELD,
     DESCRIPTION_FIELD,
     OWNERS_FIELD,

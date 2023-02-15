@@ -1,7 +1,7 @@
 {% macro get_new_alerts_where_clause(alerts_model_relation) %}
 
     {% set last_alert_time_with_backfill_query %}
-        {% set backfill_detected_at = elementary.timeadd('day', '-2', 'max(detected_at)') %}
+        {% set backfill_detected_at = elementary.edr_timeadd('day', '-2', 'max(detected_at)') %}
         select {{ backfill_detected_at }} from {{ alerts_model_relation }}
     {% endset %}
 

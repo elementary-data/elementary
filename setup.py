@@ -11,7 +11,7 @@ README = (HERE / "README.md").read_text()
 setup(
     name="elementary-data",
     description="Data monitoring and lineage",
-    version="0.6.9",
+    version="0.7.1",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.6.2",
@@ -27,7 +27,7 @@ setup(
         "click>=7.0,<9",
         "pyfiglet",
         "dbt-core>=0.20,<2.0.0",
-        "requests<3.0.0",
+        "requests>=2.28.1,<3.0.0",
         "beautifulsoup4<5.0.0",
         "posthog<3.0.0",
         "boto3<2.0.0",
