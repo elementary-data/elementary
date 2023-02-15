@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -38,7 +38,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> Alerts:
         new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
         new_model_alerts = self.get_model_alerts(days_back, filter)
@@ -55,7 +55,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[TestAlert]:
         pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(
             days_back, disable_samples
@@ -71,7 +71,7 @@ class AlertsAPI(APIClient):
     def get_model_alerts(
         self,
         days_back: int,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[ModelAlert]:
         pending_model_alerts = self.alerts_fetcher.query_pending_model_alerts(days_back)
         last_alert_sent_times = self.alerts_fetcher.query_last_model_alert_times(
@@ -85,7 +85,7 @@ class AlertsAPI(APIClient):
     def get_source_freshness_alerts(
         self,
         days_back: int,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[SourceFreshnessAlert]:
         pending_source_freshness_alerts = (
             self.alerts_fetcher.query_pending_source_freshness_alerts(days_back)
@@ -118,7 +118,7 @@ class AlertsAPI(APIClient):
             AlertsQueryResult[SourceFreshnessAlert],
         ],
         last_alert_sent_times: Dict[str, str],
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> Union[
         AlertsQueryResult[TestAlert],
         AlertsQueryResult[ModelAlert],

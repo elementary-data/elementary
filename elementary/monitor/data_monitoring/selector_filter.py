@@ -87,3 +87,10 @@ class SelectorFilter:
 
     def get_selector(self) -> Optional[str]:
         return self.selector
+
+    def is_empty(self) -> bool:
+        if self.selector:
+            for selector, value in dict(self.filter).items():
+                if value and selector != "selector":
+                    return False
+        return True

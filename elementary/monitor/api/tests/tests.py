@@ -65,22 +65,22 @@ class TestsAPI(APIClient):
 
     def get_test_results_summary(
         self,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = self.test_results_db_rows
-        if filter and filter.tag:
+        if filter.tag:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
                 if (filter.tag in test_result.tags)
             ]
-        elif filter and filter.owner:
+        elif filter.owner:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
                 if (filter.owner in test_result.owners)
             ]
-        elif filter and filter.model:
+        elif filter.model:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
@@ -134,7 +134,7 @@ class TestsAPI(APIClient):
 
     def get_test_results(
         self,
-        filter: Optional[SelectorFilterSchema],
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
         disable_samples: bool = False,
     ) -> TestResultsWithTotalsSchema:
         try:
