@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
@@ -18,17 +18,18 @@ def filter_alerts(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[SelectorFilterSchema] = None,
+    filter: SelectorFilterSchema = SelectorFilterSchema(),
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
     List[SourceFreshnessAlert],
     List[MalformedAlert],
 ]:
-    if filter is None:
-        return alerts
     filtered_alerts = []
-    if filter.tag:
+    # If the filter is empty, we want to return all of the alerts
+    if not filter.selector:
+        filtered_alerts = alerts
+    elif filter.tag:
         filtered_alerts = _filter_alerts_by_tag(alerts, filter)
     elif filter.model:
         filtered_alerts = _filter_alerts_by_model(alerts, filter)
@@ -36,6 +37,11 @@ def filter_alerts(
         filtered_alerts = _filter_alerts_by_owner(alerts, filter)
     elif filter.node_names is not None:
         filtered_alerts = _filter_alerts_by_node_names(alerts, filter)
+    # If the filter contains a filter that we don't support, we want to return an empty list of alerts
+    elif filter.selector:
+        logger.error(
+            f"An unsupported alerts selector has been provided - {filter.selector}!\nNo alert has been sent!"
+        )
     return filtered_alerts
 
 
@@ -46,7 +52,7 @@ def _filter_alerts_by_tag(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[SelectorFilterSchema],
+    filter: SelectorFilterSchema,
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -75,7 +81,7 @@ def _filter_alerts_by_owner(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[SelectorFilterSchema],
+    filter: SelectorFilterSchema,
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -104,7 +110,7 @@ def _filter_alerts_by_model(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[SelectorFilterSchema],
+    filter: SelectorFilterSchema,
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],
@@ -129,7 +135,7 @@ def _filter_alerts_by_node_names(
         List[SourceFreshnessAlert],
         List[MalformedAlert],
     ],
-    filter: Optional[SelectorFilterSchema],
+    filter: SelectorFilterSchema,
 ) -> Union[
     List[TestAlert],
     List[ModelAlert],

@@ -62,22 +62,22 @@ class TestsFetcher(FetcherClient):
     def get_test_results_summary(
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = test_results_db_rows
-        if filter and filter.tag:
+        if filter.tag:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
                 if (filter.tag in test_result.tags)
             ]
-        elif filter and filter.owner:
+        elif filter.owner:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
                 if (filter.owner in test_result.owners)
             ]
-        elif filter and filter.model:
+        elif filter.model:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
@@ -227,7 +227,7 @@ class TestsFetcher(FetcherClient):
         self,
         test_results_db_rows: List[TestResultDBRowSchema],
         disable_samples: bool = False,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> Tuple[
         Dict[Optional[ModelUniqueIdType], List[TestResultSchema]],
         Optional[DbtInvocationSchema],

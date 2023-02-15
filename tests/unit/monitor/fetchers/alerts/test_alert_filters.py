@@ -7,6 +7,7 @@ from elementary.monitor.fetchers.alerts.alert_filters import (
     _filter_alerts_by_node_names,
     _filter_alerts_by_owner,
     _filter_alerts_by_tag,
+    filter_alerts,
 )
 
 
@@ -135,6 +136,36 @@ def initial_alerts():
         ),
     ]
     return test_alerts, model_alerts, malformed_alerts
+
+
+def test_filter_alerts():
+    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+
+    # Test that empty filter returns all of the alerts.
+    filter = SelectorFilterSchema()
+    filter_test_alerts = filter_alerts(test_alerts, filter)
+    filter_model_alerts = filter_alerts(model_alerts, filter)
+    filter_malformed_alerts = filter_alerts(malformed_alerts, filter)
+    assert len(filter_test_alerts) == len(test_alerts)
+    assert len(filter_model_alerts) == len(model_alerts)
+    assert len(filter_malformed_alerts) == len(malformed_alerts)
+
+    # Test that passing no filter returns all of the alerts.
+    filter_test_alerts = filter_alerts(test_alerts)
+    filter_model_alerts = filter_alerts(model_alerts)
+    filter_malformed_alerts = filter_alerts(malformed_alerts)
+    assert len(filter_test_alerts) == len(test_alerts)
+    assert len(filter_model_alerts) == len(model_alerts)
+    assert len(filter_malformed_alerts) == len(malformed_alerts)
+
+    # Test that filter with unsupported selector returns no alert
+    filter = SelectorFilterSchema(last_invocation=True, selector="last_invocation")
+    filter_test_alerts = filter_alerts(test_alerts, filter)
+    filter_model_alerts = filter_alerts(model_alerts, filter)
+    filter_malformed_alerts = filter_alerts(malformed_alerts, filter)
+    assert len(filter_test_alerts) == 0
+    assert len(filter_model_alerts) == 0
+    assert len(filter_malformed_alerts) == 0
 
 
 def test_filter_alerts_by_tag():

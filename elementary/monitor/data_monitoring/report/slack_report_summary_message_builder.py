@@ -18,7 +18,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
         include_description: bool = False,
     ) -> SlackMessageSchema:
         self._add_title_to_slack_alert(
@@ -42,7 +42,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ):
         current_time = convert_utc_time_to_timezone(datetime.utcnow()).strftime(
             "%Y-%m-%d | %H:%M"
@@ -87,14 +87,14 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     @staticmethod
     def _get_summary_filter_text(
         days_back: int,
-        filter: Optional[SelectorFilterSchema] = None,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> str:
         selector_text = None
-        if filter and filter.tag:
+        if filter.tag:
             selector_text = f"tag: {filter.tag}"
-        elif filter and filter.model:
+        elif filter.model:
             selector_text = f"model: {filter.model}"
-        elif filter and filter.owner:
+        elif filter.owner:
             selector_text = f"owner: {filter.owner}"
         days_back_text = (
             f"timeframe: {days_back} day{'s' if days_back > 1 else ''} back"
