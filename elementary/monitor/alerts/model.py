@@ -30,6 +30,7 @@ class ModelAlert(Alert):
         self.materialization = materialization
         self.message = message
         self.full_refresh = full_refresh
+        self.alerts_table = ModelAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         if is_slack_workflow:

@@ -1,14 +1,15 @@
 import json
 import re
+from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from alive_progress import alive_it
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.alert import Alert
-from elementary.monitor.alerts.alerts import Alerts
+from elementary.monitor.alerts.alerts import Alerts, GroupOfAlerts, GroupingType
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
@@ -26,13 +27,13 @@ SQL_FILE_EXTENSION = ".sql"
 
 class DataMonitoringAlerts(DataMonitoring):
     def __init__(
-        self,
-        config: Config,
-        tracking: AnonymousTracking,
-        filter: Optional[str] = None,
-        force_update_dbt_package: bool = False,
-        disable_samples: bool = False,
-        send_test_message_on_success: bool = False,
+            self,
+            config: Config,
+            tracking: AnonymousTracking,
+            filter: Optional[str] = None,
+            force_update_dbt_package: bool = False,
+            disable_samples: bool = False,
+            send_test_message_on_success: bool = False,
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
@@ -66,31 +67,43 @@ class DataMonitoringAlerts(DataMonitoring):
         else:
             return prettify_json_str_set(emails)
 
-    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
-        if not alerts:
-            return
-
-        sent_alert_ids = []
-        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
-        for alert in alerts_with_progress_bar:
+    def _fix_owners_and_subscribers(self, group_alert: GroupOfAlerts):
+        """
+        goes to the slack API and gets back the handle for owners, subscribers.
+        :param group_alert:
+        :return:
+        """
+        for alert in group_alert.alerts:
             alert.owners = self._parse_emails_to_ids(alert.owners)
             alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
-            alert_msg = alert.to_slack()
-            sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel
-                if alert.slack_channel
-                else self.config.slack_channel_name,
-                message=alert_msg,
-            )
-            if sent_successfully:
-                sent_alert_ids.append(alert.id)
-            else:
-                logger.error(
-                    f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
-                )
-                self.success = False
-        self.alerts_fetcher.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        self.sent_alert_count += len(sent_alert_ids)
+        all_owners = set([])
+        all_subscribers = set([])
+        for alert in group_alert.alerts:
+            all_owners.update(alert.owners)
+            all_subscribers.update(alert.subscribers)
+        group_alert.owners = all_owners
+        group_alert.subscribers = all_subscribers
+
+    def _group_alerts_per_config(self, alerts: List[Alert]) -> List[GroupOfAlerts]:
+        """
+        reads self.config and alerts' config, and groups alerts in a smart way
+        TODO - add business logic
+
+        :param alerts:
+        :return:
+        """
+        return [GroupOfAlerts(alerts=[al],
+                              grouping_type=GroupingType.BY_ALERT,
+                              owners=al.owners if al.owners else [],
+                              subscribers=al.subscribers if al.subscribers else [],
+                              channel_destination=self.config.slack_channel_name,
+                              )
+                for al in alerts]
+
+    def _alert_group_to_message(self, alert_group: GroupOfAlerts):
+        if alert_group.grouping_type == GroupingType.BY_ALERT:
+            return alert_group.alerts[0].to_slack()
+        raise NotImplementedError  # TODO implement ...
 
     def _send_test_message(self):
         self.slack_client.send_message(
@@ -101,12 +114,42 @@ class DataMonitoringAlerts(DataMonitoring):
         )
         logger.info("Sent the test message.")
 
-    def _send_alerts(self, alerts: Alerts):
-        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
-        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        self._send_alerts_to_slack(
-            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
-        )
+    def _send_alerts(self, alerts: Alerts, dont_update_as_sent=True):
+        all_alerts_to_send = alerts.get_all()
+        # TODO when pushing this to master, dont_update_as_sent should default to FALSE
+        if not all_alerts_to_send:
+            self.execution_properties["sent_alert_count"] = self.sent_alert_count
+            return
+
+        sent_alert_ids_and_tables: List[Tuple[str, str]] = []
+
+        alerts_groups: List[GroupOfAlerts] = self._group_alerts_per_config(all_alerts_to_send)
+        alerts_with_progress_bar = alive_it(alerts_groups, title="Sending alerts")
+        for alert_group in alerts_with_progress_bar:
+            self._fix_owners_and_subscribers(alert_group)
+
+            alert_msg = self._alert_group_to_message(alert_group)
+            sent_successfully = self.slack_client.send_message(
+                channel_name=alert_group.channel_destination,
+                message=alert_msg,
+            )
+            alerts_ids_and_tables = [(alert.id, alert.alerts_table) for alert in alert_group.alerts]
+            if sent_successfully:
+                sent_alert_ids_and_tables.extend(alerts_ids_and_tables)
+            else:
+                logger.error(
+                    f"Could not send the alert[s] - {[alert_id_and_table[0] for alert_id_and_table in alerts_ids_and_tables]}. Full alert: {json.dumps(dict(alert_msg))}"
+                )
+                self.success = False
+        if not dont_update_as_sent:
+            table_name_to_alert_ids = defaultdict(lambda: [])
+            for alert_id, table_name in sent_alert_ids_and_tables:
+                table_name_to_alert_ids[table_name].append(alert_id)
+
+            for table_name, alert_ids in table_name_to_alert_ids.items():
+                self.alerts_fetcher.update_sent_alerts(alert_ids, table_name)
+        self.sent_alert_count += len(sent_alert_ids_and_tables)
+
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: Alerts):
@@ -122,12 +165,13 @@ class DataMonitoringAlerts(DataMonitoring):
         )
 
     def run_alerts(
-        self,
-        days_back: int,
-        dbt_full_refresh: bool = False,
-        dbt_vars: Optional[dict] = None,
+            self,
+            days_back: int,
+            dbt_full_refresh: bool = False,
+            dbt_vars: Optional[dict] = None,
     ) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
+        # import pdb; pdb.set_trace()
         success = self.internal_dbt_runner.run(
             models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
         )
@@ -143,6 +187,8 @@ class DataMonitoringAlerts(DataMonitoring):
             disable_samples=self.disable_samples,
             filter=self.filter.get_filter(),
         )
+        import pdb;
+        pdb.set_trace()
         self.execution_properties[
             "elementary_test_count"
         ] = alerts.get_elementary_test_count()

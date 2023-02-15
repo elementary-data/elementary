@@ -33,6 +33,7 @@ class Alert:
         timezone: Optional[str] = None,
         meta: Optional[dict] = None,
         model_meta: Optional[str] = None,
+        alerts_table: Optional[str] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()

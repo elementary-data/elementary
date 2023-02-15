@@ -45,6 +45,7 @@ class TestAlert(Alert):
         self.test_created_at = test_created_at
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ""
+        self.alerts_table = TestAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
