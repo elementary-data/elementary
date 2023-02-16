@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
+from elementary.monitor.api.tests.schema import TestResultSummarySchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.fetchers.tests.schema import TestResultSummarySchema
 from elementary.utils.time import convert_utc_time_to_timezone
 
 

@@ -14,6 +14,6 @@ class FilterSchema(BaseModel):
 
 
 class FiltersSchema(BaseModel):
-    test_results: List[FilterSchema]
-    test_runs: List[FilterSchema]
-    model_runs: List[FilterSchema]
+    test_results: List[FilterSchema] = list()
+    test_runs: List[FilterSchema] = list()
+    model_runs: List[FilterSchema] = list()

@@ -1,25 +1,21 @@
 import pytest
 
-from tests.mocks.fetchers.tests_fetcher_mock import MockTestsFetcher
+from tests.mocks.api.tests_api_mock import MockTestsAPI
 
 
 def test_get_test_metadata_from_test_result_db_row(
-    tests_fetcher_mock: MockTestsFetcher,
+    tests_api_mock: MockTestsAPI,
 ):
-    test_result_db_rows = tests_fetcher_mock.get_all_test_results_db_rows()
-    elementary_test_result_db_row = [
-        db_row for db_row in test_result_db_rows if db_row.test_type != "dbt_test"
-    ][0]
-    dbt_test_result_db_row = [
-        db_row for db_row in test_result_db_rows if db_row.test_type == "dbt_test"
-    ][0]
+    test_result_db_rows = tests_api_mock.tests_fetcher.get_all_test_results_db_rows()
+    elementary_test_result_db_row = test_result_db_rows[0]
+    dbt_test_result_db_row = test_result_db_rows[-1]
 
     elementary_test_metadata = (
-        tests_fetcher_mock.get_test_metadata_from_test_result_db_row(
+        tests_api_mock._get_test_metadata_from_test_result_db_row(
             elementary_test_result_db_row
         )
     )
-    dbt_test_metadata = tests_fetcher_mock.get_test_metadata_from_test_result_db_row(
+    dbt_test_metadata = tests_api_mock._get_test_metadata_from_test_result_db_row(
         dbt_test_result_db_row
     )
 
@@ -48,5 +44,5 @@ def test_get_test_metadata_from_test_result_db_row(
 
 
 @pytest.fixture
-def tests_fetcher_mock() -> MockTestsFetcher:
-    return MockTestsFetcher()
+def tests_api_mock() -> MockTestsAPI:
+    return MockTestsAPI()

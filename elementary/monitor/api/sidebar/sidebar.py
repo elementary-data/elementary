@@ -2,9 +2,12 @@ import posixpath
 from collections import defaultdict
 from typing import List, Union
 
-from elementary.clients.fetcher.fetcher import FetcherClient
-from elementary.monitor.fetchers.models.schema import NormalizedModelSchema
-from elementary.monitor.fetchers.sidebar.schema import (
+from elementary.clients.api.api_client import APIClient
+from elementary.monitor.api.models.schema import (
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+)
+from elementary.monitor.api.sidebar.schema import (
     DbtSidebarSchema,
     OwnersSidebarSchema,
     SidebarsSchema,
@@ -16,9 +19,9 @@ NO_TAGS_DEFAULT_TREE = "No tags"
 NO_OWNERS_DEFAULT_TREE = "No owners"
 
 
-class SidebarFetcher(FetcherClient):
+class SidebarAPI(APIClient):
     def get_sidebars(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> SidebarsSchema:
         dbt_sidebar = self.get_dbt_sidebar(artifacts)
         tags_sidebar = self.get_tags_sidebar(artifacts)
@@ -26,7 +29,7 @@ class SidebarFetcher(FetcherClient):
         return SidebarsSchema(dbt=dbt_sidebar, tags=tags_sidebar, owners=owners_sidebar)
 
     def get_dbt_sidebar(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> DbtSidebarSchema:
         sidebar = dict()
         for artifact in artifacts:
@@ -57,7 +60,7 @@ class SidebarFetcher(FetcherClient):
                 dbt_sidebar = dbt_sidebar[part]
 
     def get_tags_sidebar(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> TagsSidebarSchema:
         sidebar = defaultdict(list)
         for artifact in artifacts:

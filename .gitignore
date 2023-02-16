@@ -96,7 +96,7 @@ venv/
 # vscode
 .vscode/
 
-# edr artifacts
+# elementary outputs
 elementary_output.json
 elementary_report.html
 edr.log

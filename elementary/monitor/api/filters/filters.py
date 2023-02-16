@@ -1,13 +1,13 @@
 from typing import Dict, List
 
-from elementary.clients.fetcher.fetcher import FetcherClient
-from elementary.monitor.fetchers.filters.schema import FilterSchema, FiltersSchema
-from elementary.monitor.fetchers.models.schema import (
+from elementary.clients.api.api_client import APIClient
+from elementary.monitor.api.filters.schema import FilterSchema, FiltersSchema
+from elementary.monitor.api.models.schema import (
     ModelRunsSchema,
     NormalizedModelSchema,
     NormalizedSourceSchema,
 )
-from elementary.monitor.fetchers.tests.schema import TotalsSchema
+from elementary.monitor.api.tests.schema import TotalsSchema
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -16,7 +16,7 @@ YAML_FILE_EXTENSION = ".yml"
 SQL_FILE_EXTENSION = ".sql"
 
 
-class FiltersFetcher(FetcherClient):
+class FiltersAPI(APIClient):
     def get_filters(
         self,
         test_results_totals: Dict[str, TotalsSchema],
