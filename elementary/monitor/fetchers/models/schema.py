@@ -1,3 +1,5 @@
+import os
+import posixpath
 from typing import List, Optional
 
 from pydantic import Field, validator
@@ -39,6 +41,10 @@ class ArtifactSchema(ExtendedBaseModel):
     def load_owners(cls, owners):
         return cls._load_var_to_list(owners)
 
+    @validator("full_path", pre=True)
+    def format_full_path_sep(cls, full_path: str) -> str:
+        return posixpath.sep.join(full_path.split(os.path.sep))
+
 
 class ModelSchema(ArtifactSchema):
     database_name: str = None
@@ -57,10 +63,6 @@ class ExposureSchema(ArtifactSchema):
     type: Optional[str]
     maturity: Optional[str]
     owner_email: Optional[str]
-
-    @validator("owners", pre=True)
-    def load_owners(cls, owners):
-        return [owners]
 
 
 class ModelTestCoverage(ExtendedBaseModel):

@@ -1,3 +1,5 @@
+import os
+import posixpath
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
@@ -26,6 +28,10 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     @validator("owners", pre=True)
     def load_owners(cls, owners):
         return cls._load_var_to_list(owners)
+
+    @validator("normalized_full_path", pre=True)
+    def format_normalized_full_path_sep(cls, normalized_full_path: str) -> str:
+        return posixpath.sep.join(normalized_full_path.split(os.path.sep))
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
