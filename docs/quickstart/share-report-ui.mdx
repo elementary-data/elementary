@@ -2,11 +2,13 @@
 title: "Share observability report"
 ---
 
+## Distribute
+
 Generate and distribute the report to external platforms by using the command `edr send-report`.
 You can specify more than one platform in the command, and the report will be sent to all.
 All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
-## Slack
+### Send over Slack
 
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
@@ -17,7 +19,7 @@ edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr send-report`
 command. Make sure the report name you provided ends with `.html`.
 
-### Configuration
+#### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
 
@@ -27,7 +29,9 @@ slack:
   channel_name: [Slack channel]
 ```
 
-## Amazon S3
+### Host
+
+<Accordion title="Amazon S3">
 
 The prerequisites are to
 have [AWS access keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html) and
@@ -50,7 +54,7 @@ edr send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SEC
 You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
 the `edr send-report` command. Make sure the report's file name ends with `.html`.
 
-### Hosting the report as a website
+#### Hosting the report as a website
 
 You can host the report as the bucket's website so that you can browse to it with a constant URL
 like `https://<Elementary-Report-Bucket>.s3-website.<Region>.amazonaws.com`.
@@ -60,7 +64,7 @@ guide.
 After you've completed it, pass `--update-bucket-website true` to `send-report` in order to update the main page of
 the bucket's website.
 
-### Configuration
+#### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
 
@@ -72,12 +76,14 @@ aws:
 update_bucket_website: [true | false]
 ```
 
-## Google Cloud Storage (GCS)
+</Accordion>
+
+<Accordion title="Google Cloud Storage (GCS)">
 
 The prerequisite is to have a [GCS bucket](https://cloud.google.com/storage/docs/creating-buckets).  
 Once you have it, you'll need to provide one of two ways to authenticate:
 
-### [Service Account](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) (Recommended)
+#### [Service Account](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) (Recommended)
 
 you can send the report to your GCS bucket by running the command:
 
@@ -85,7 +91,7 @@ you can send the report to your GCS bucket by running the command:
 edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
 ```
 
-### OAuth using `gcloud`
+#### OAuth using `gcloud`
 
 If you're using OAuth with `gcloud`, simply omit `--google-service-account-path`:
 
@@ -96,7 +102,7 @@ edr send-report --gcs-bucket-name <BUCKET_NAME>
 You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
 the `edr send-report` command. Make sure the report's file name ends with `.html`.
 
-### Hosting the report as a website
+#### Hosting the report as a website
 
 You can host the report as the bucket's website so that you can browse to it with a constant URL
 like `https://storage.googleapis.com/<Elementary-Report-Bucket>/index.html`.
@@ -107,7 +113,7 @@ the bucket.
 _Note_: You might want to [limit or grant access](https://cloud.google.com/storage/docs/access-control) to your reports
 bucket to certain users.
 
-### Configuration
+#### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
 
@@ -117,6 +123,60 @@ google:
   gcs_bucket_name: [GCS bucket name]
 
 update_bucket_website: [true | false]
+```
+
+</Accordion>
+
+## Test results summary
+
+When distributing the report to external platforms, elementary generates a summary of the report's test results.
+The test results summary can only be distributed using Slack.
+To enable distribution of the test results summary when distributing the report, please follow the following steps:
+
+### Send over Slack
+
+Supported automaticaly.
+
+### Host
+
+To enable distributing the test results summary, you need to config Slack platform as well.
+After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
+
+<Accordion title="Amazon S3">
+
+```shell
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+</Accordion>
+
+<Accordion title="Google Cloud Storage (GCS)">
+
+```shell
+edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+</Accordion>
+
+### Configuration
+
+Possible configurations:
+
+#### Disable HTML attachment
+
+If you wish to share only the test results summary, you can disable the report attachment using `disable` config:
+
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --disable html_attachment
+```
+
+#### Include descriptions
+
+By default the test results summary does not include the discriptions of test.
+You can include them using `include` config:
+
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --include descriptions
 ```
 
 ## Missing something?
