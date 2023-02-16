@@ -8,7 +8,7 @@ All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
 ### Share via Slack
 
-You can share the report via Slack as an html attachement. The slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-results-summary ---possible-configurations)).
+You can share the report via Slack as an html attachement. The slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-results-summary-possible-configurations)).
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
@@ -29,9 +29,6 @@ slack:
 ```
 
 ### Host the report
-
-You can host the report on AWS or GCP. The slack notification will also include a summary of the test results.
-After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 <Accordion title="Amazon S3">
 
@@ -145,11 +142,13 @@ update_bucket_website: [true | false]
 
 </Accordion>
 
-### Slack results summary - possible configurations
+### Slack summary configurations
+
+The following configurations allow you to adjust our Slack test result summary. 
 
 #### Filter results summary 
 
-You can filter your results summary by a specific tag, owner or model as can be seen below.
+You can filter your results summary by a specific tag, owner or model.
 
 To filter by tag:
 ```shell
@@ -170,9 +169,9 @@ edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> 
 
 #### Include test descriptions
 
-By default the test results summary does not include the tests discriptions to avoid reaching Slack's rows limit. 
-You can choose to include the test descriptions as part of your summary however, it is reccomonded only if you have a small number of failures.
-You can add the descriptions by using the following `include` config:
+For a quick high level overview and to avoid reaching Slack's row limit, the default test results summary does not include test descriptions.
+The test descriptions can be included in your summary, but it is only recommended if you have a small number of failures. 
+The following include configuration will allow you to add descriptions:
 
 ```shell
 edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --include descriptions
