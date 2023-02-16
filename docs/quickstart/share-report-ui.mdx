@@ -29,7 +29,7 @@ slack:
   channel_name: [Slack channel]
 ```
 
-If you wish share only the test results summary (without the attached report) - you can disable the report attachment using `disable` config:
+If you wish to share only the test results summary (without the attached report) - you can disable the report attachment using the `disable` config:
 
 ```shell
 edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --disable html_attachment
@@ -151,7 +151,7 @@ update_bucket_website: [true | false]
 
 ### Slack summary configurations
 
-The following configurations allow you to adjust our Slack test result summary. 
+The following configurations allow you to adjust the Slack test result summary. 
 
 #### Filter results summary 
 
@@ -178,7 +178,8 @@ edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> 
 
 For a quick high level overview and to avoid reaching Slack's row limit, the default test results summary does not include test descriptions.
 The test descriptions can be included in your summary, but it is only recommended if you have a small number of failures. 
-The following include configuration will allow you to add descriptions:
+
+The following `include` configuration will allow you to add descriptions:
 
 ```shell
 edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --include descriptions
