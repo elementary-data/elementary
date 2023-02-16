@@ -1,3 +1,5 @@
+import os
+import posixpath
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
@@ -13,6 +15,10 @@ class ArtifactSchema(BaseModel):
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
+
+    @validator("full_path", pre=True)
+    def format_full_path_sep(cls, full_path: str) -> str:
+        return _format_path_sep(full_path)
 
 
 class ModelSchema(ArtifactSchema):
@@ -49,6 +55,10 @@ class NormalizedArtifactSchema(BaseModel):
     @validator("tags", pre=True, always=True)
     def set_tags(cls, tags):
         return tags or []
+
+    @validator("normalized_full_path", pre=True)
+    def format_normalized_full_path_sep(cls, normalized_full_path: str) -> str:
+        return _format_path_sep(normalized_full_path)
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
@@ -100,3 +110,7 @@ class ModelRunsSchema(BaseModel):
     exec_time_change_rate: float
     totals: TotalsModelRunsSchema
     runs: List[ModelRunSchema]
+
+
+def _format_path_sep(path: str) -> str:
+    return posixpath.sep.join(path.split(os.path.sep))

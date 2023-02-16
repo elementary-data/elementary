@@ -1,4 +1,4 @@
-import os
+import posixpath
 from collections import defaultdict
 from typing import List, Union
 
@@ -43,7 +43,7 @@ class SidebarFetcher(FetcherClient):
     ) -> None:
         if artifact_unique_id is None or artifact_full_path is None:
             return
-        artifact_full_path_split = artifact_full_path.split(os.path.sep)
+        artifact_full_path_split = artifact_full_path.split(posixpath.sep)
         for part in artifact_full_path_split:
             if part.endswith(".sql"):
                 if SIDEBAR_FILES_KEYWORD in dbt_sidebar:
