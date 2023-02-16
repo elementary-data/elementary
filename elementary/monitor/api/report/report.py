@@ -102,7 +102,7 @@ class ReportAPI(APIClient):
                 lineage=serializable_lineage,
                 env=dict(project_name=project_name, env=env),
             )
-            return report_data
+            return report_data, None
         except Exception as error:
             return ReportDataSchema(), error
 
