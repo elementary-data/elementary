@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
@@ -32,7 +32,7 @@ class ReportAPI(APIClient):
         disable_samples: bool = False,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
-    ) -> ReportDataSchema:
+    ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         try:
             tests_api = TestsAPI(
                 dbt_runner=self.dbt_runner,
@@ -66,16 +66,6 @@ class ReportAPI(APIClient):
             lineage = lineage_api.get_lineage(exclude_elementary_models)
             filters = filters_api.get_filters(
                 test_results.totals, test_runs.totals, models, sources, models_runs.runs
-            )
-
-            self.errors.extend(
-                [
-                    *tests_api.errors,
-                    *models_api.errors,
-                    *sidebar_api.errors,
-                    *lineage_api.errors,
-                    *filters_api.errors,
-                ]
             )
 
             serializable_sidebars = sidebars.dict()
@@ -113,9 +103,8 @@ class ReportAPI(APIClient):
                 env=dict(project_name=project_name, env=env),
             )
             return report_data
-        except Exception as e:
-            self.append_error(error=e, api_method="get_report_data")
-            return ReportDataSchema()
+        except Exception as error:
+            return ReportDataSchema(), error
 
     def _serilize_models(
         self,
@@ -123,68 +112,42 @@ class ReportAPI(APIClient):
         sources: Dict[str, NormalizedSourceSchema],
         exposures: Dict[str, NormalizedExposureSchema],
     ) -> Dict[str, dict]:
-        try:
-            nodes = dict(**models, **sources, **exposures)
-            serializable_nodes = dict()
-            for key in nodes.keys():
-                serializable_nodes[key] = dict(nodes[key])
-            return serializable_nodes
-        except Exception as e:
-            self.append_error(error=e, api_method="_serilize_models")
-            return dict()
+        nodes = dict(**models, **sources, **exposures)
+        serializable_nodes = dict()
+        for key in nodes.keys():
+            serializable_nodes[key] = dict(nodes[key])
+        return serializable_nodes
 
     def _serilize_coverages(
         self, coverages: Dict[str, ModelCoverageSchema]
     ) -> Dict[str, dict]:
-        try:
-            return {
-                model_id: dict(coverage) for model_id, coverage in coverages.items()
-            }
-        except Exception as e:
-            self.append_error(error=e, api_method="_serilize_coverages")
-            return dict()
+        return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
     def _serilize_models_runs(self, models_runs: List[ModelRunsSchema]) -> List[dict]:
-        try:
-            return [model_runs.dict(by_alias=True) for model_runs in models_runs]
-        except Exception as e:
-            self.append_error(error=e, api_method="_serilize_models_runs")
-            return list()
+        return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
     def _serilize_test_results(
         self, test_results: Dict[Optional[str], List[TestResultSchema]]
     ) -> Dict[str, List[dict]]:
-        try:
-            serializable_test_results = defaultdict(list)
-            for model_unique_id, test_result in test_results.items():
-                serializable_test_results[model_unique_id].extend(
-                    [result.dict() for result in test_result]
-                )
-            return serializable_test_results
-        except Exception as e:
-            self.append_error(error=e, api_method="_serilize_test_results")
-            return dict()
+        serializable_test_results = defaultdict(list)
+        for model_unique_id, test_result in test_results.items():
+            serializable_test_results[model_unique_id].extend(
+                [result.dict() for result in test_result]
+            )
+        return serializable_test_results
 
     def _serilize_test_runs(
         self, test_runs: Dict[Optional[str], List[TestRunSchema]]
     ) -> Dict[str, List[dict]]:
-        try:
-            serializable_test_runs = defaultdict(list)
-            for model_unique_id, test_run in test_runs.items():
-                serializable_test_runs[model_unique_id].extend(
-                    [run.dict() for run in test_run]
-                )
-            return serializable_test_runs
-        except Exception as e:
-            self.append_error(error=e, api_method="_serilize_test_runs")
-            return dict()
+        serializable_test_runs = defaultdict(list)
+        for model_unique_id, test_run in test_runs.items():
+            serializable_test_runs[model_unique_id].extend(
+                [run.dict() for run in test_run]
+            )
+        return serializable_test_runs
 
     def _serialize_totals(self, totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
-        try:
-            serialized_totals = dict()
-            for model_unique_id, total in totals.items():
-                serialized_totals[model_unique_id] = total.dict()
-            return serialized_totals
-        except Exception as e:
-            self.append_error(error=e, api_method="_serialize_totals")
-            return dict()
+        serialized_totals = dict()
+        for model_unique_id, total in totals.items():
+            serialized_totals[model_unique_id] = total.dict()
+        return serialized_totals

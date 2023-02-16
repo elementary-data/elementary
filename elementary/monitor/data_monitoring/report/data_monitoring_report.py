@@ -2,7 +2,7 @@ import json
 import os
 import os.path
 import webbrowser
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import pkg_resources
 
@@ -97,7 +97,7 @@ class DataMonitoringReport(DataMonitoring):
         project_name: Optional[str] = None,
     ):
         report_api = ReportAPI(self.internal_dbt_runner)
-        report_data = report_api.get_report_data(
+        report_data, error = report_api.get_report_data(
             days_back=days_back,
             test_runs_amount=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
@@ -107,21 +107,21 @@ class DataMonitoringReport(DataMonitoring):
             filter=self.filter.get_filter(),
             env=self.config.env,
         )
-        errors = report_api.errors
-        self._add_report_tracking(report_data, errors)
-        if errors:
-            report_api.log_errors()
+        self._add_report_tracking(report_data, error)
+        if error:
+            logger.exception(
+                f"Could not generate the report - Error: {error}\nPlease reach out to our community for help with this issue."
+            )
             self.success = False
 
         report_data_dict = report_data.dict()
         return report_data_dict
 
     def _add_report_tracking(
-        self, report_data: ReportDataSchema, errors: List[str] = None
+        self, report_data: ReportDataSchema, error: Exception = None
     ):
-        if errors:
-            for error in errors:
-                self.tracking.record_cli_internal_exception(error)
+        if error:
+            self.tracking.record_cli_internal_exception(error)
             return
 
         test_metadatas = []

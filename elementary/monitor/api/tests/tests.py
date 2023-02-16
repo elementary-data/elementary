@@ -137,73 +137,65 @@ class TestsAPI(APIClient):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         disable_samples: bool = False,
     ) -> TestResultsWithTotalsSchema:
-        try:
-            filtered_test_results_db_rows = self.test_results_db_rows
-            invocation = self._get_invocation_from_filter(filter)
-            if invocation.invocation_id:
-                filtered_test_results_db_rows = [
-                    test_result
-                    for test_result in filtered_test_results_db_rows
-                    if test_result.invocation_id == invocation.invocation_id
-                ]
-
+        filtered_test_results_db_rows = self.test_results_db_rows
+        invocation = self._get_invocation_from_filter(filter)
+        if invocation.invocation_id:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
-                if test_result.invocations_rank_index == 1
+                if test_result.invocation_id == invocation.invocation_id
             ]
 
-            tests_results = defaultdict(list)
-            for test_result_db_row in filtered_test_results_db_rows:
-                test_result = TestResultSchema(
-                    metadata=self._get_test_metadata_from_test_result_db_row(
-                        test_result_db_row
-                    ),
-                    test_results=self._get_test_result_from_test_result_db_row(
-                        test_result_db_row, disable_samples=disable_samples
-                    ),
-                )
-                tests_results[test_result_db_row.model_unique_id].append(test_result)
+        filtered_test_results_db_rows = [
+            test_result
+            for test_result in filtered_test_results_db_rows
+            if test_result.invocations_rank_index == 1
+        ]
 
-            test_metadatas = []
-            for test_results in tests_results.values():
-                test_metadatas.extend([result.metadata for result in test_results])
-            test_results_totals = self._get_total_tests_results(test_metadatas)
-            return TestResultsWithTotalsSchema(
-                results=tests_results,
-                totals=test_results_totals,
-                invocation=invocation,
+        tests_results = defaultdict(list)
+        for test_result_db_row in filtered_test_results_db_rows:
+            test_result = TestResultSchema(
+                metadata=self._get_test_metadata_from_test_result_db_row(
+                    test_result_db_row
+                ),
+                test_results=self._get_test_result_from_test_result_db_row(
+                    test_result_db_row, disable_samples=disable_samples
+                ),
             )
-        except Exception as e:
-            self.append_error(error=e, api_method="get_test_results")
-            return TestResultsWithTotalsSchema()
+            tests_results[test_result_db_row.model_unique_id].append(test_result)
+
+        test_metadatas = []
+        for test_results in tests_results.values():
+            test_metadatas.extend([result.metadata for result in test_results])
+        test_results_totals = self._get_total_tests_results(test_metadatas)
+        return TestResultsWithTotalsSchema(
+            results=tests_results,
+            totals=test_results_totals,
+            invocation=invocation,
+        )
 
     def get_test_runs(self) -> TestRunsWithTotalsSchema:
-        try:
-            tests_invocations = self._get_invocations(self.test_results_db_rows)
-            latest_test_results = [
-                test_result
-                for test_result in self.test_results_db_rows
-                if test_result.invocations_rank_index == 1
-            ]
+        tests_invocations = self._get_invocations(self.test_results_db_rows)
+        latest_test_results = [
+            test_result
+            for test_result in self.test_results_db_rows
+            if test_result.invocations_rank_index == 1
+        ]
 
-            test_runs = defaultdict(list)
-            for test_result_db_row in latest_test_results:
-                test_invocations = tests_invocations.get(
-                    test_result_db_row.elementary_unique_id
-                )
-                test_run = TestRunSchema(
-                    metadata=self._get_test_metadata_from_test_result_db_row(
-                        test_result_db_row
-                    ),
-                    test_runs=test_invocations,
-                )
-                test_runs[test_result_db_row.model_unique_id].append(test_run)
-            test_runs_totals = self._get_total_tests_runs(tests_runs=test_runs)
-            return TestRunsWithTotalsSchema(runs=test_runs, totals=test_runs_totals)
-        except Exception as e:
-            self.append_error(error=e, api_method="get_test_runs")
-            return TestRunsWithTotalsSchema()
+        test_runs = defaultdict(list)
+        for test_result_db_row in latest_test_results:
+            test_invocations = tests_invocations.get(
+                test_result_db_row.elementary_unique_id
+            )
+            test_run = TestRunSchema(
+                metadata=self._get_test_metadata_from_test_result_db_row(
+                    test_result_db_row
+                ),
+                test_runs=test_invocations,
+            )
+            test_runs[test_result_db_row.model_unique_id].append(test_run)
+        test_runs_totals = self._get_total_tests_runs(tests_runs=test_runs)
+        return TestRunsWithTotalsSchema(runs=test_runs, totals=test_runs_totals)
 
     def _get_invocations(
         self, test_result_db_rows: List[TestResultDBRowSchema]

@@ -25,22 +25,16 @@ class FiltersAPI(APIClient):
         sources: Dict[str, NormalizedSourceSchema],
         models_runs: List[ModelRunsSchema],
     ) -> FiltersSchema:
-        try:
-            test_results_filters = self._get_test_filters(
-                test_results_totals, models, sources
-            )
-            test_runs_filters = self._get_test_filters(
-                test_runs_totals, models, sources
-            )
-            model_runs_filters = self._get_model_runs_filters(models_runs)
-            return FiltersSchema(
-                test_results=test_results_filters,
-                test_runs=test_runs_filters,
-                model_runs=model_runs_filters,
-            )
-        except Exception as e:
-            self.append_error(error=e, api_method="get_filters")
-            return FiltersSchema()
+        test_results_filters = self._get_test_filters(
+            test_results_totals, models, sources
+        )
+        test_runs_filters = self._get_test_filters(test_runs_totals, models, sources)
+        model_runs_filters = self._get_model_runs_filters(models_runs)
+        return FiltersSchema(
+            test_results=test_results_filters,
+            test_runs=test_runs_filters,
+            model_runs=model_runs_filters,
+        )
 
     @staticmethod
     def _get_test_filters(
