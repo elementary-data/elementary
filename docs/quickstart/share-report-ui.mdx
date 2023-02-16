@@ -2,12 +2,13 @@
 title: "Share observability report"
 ---
 
-Generate and distribute the report to external platforms by using the command `edr send-report`.
+Generate and distribute the report to external platforms by using the command `edr send-report`. 
 You can specify more than one platform in the command, and the report will be sent to all.
 All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
-## Slack
+### Share via Slack
 
+You can share the report via Slack as an html attachement. The slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-summary-configurations)).
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
@@ -17,7 +18,8 @@ edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr send-report`
 command. Make sure the report name you provided ends with `.html`.
 
-### Configuration
+
+#### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
 
@@ -27,7 +29,15 @@ slack:
   channel_name: [Slack channel]
 ```
 
-## Amazon S3
+If you wish to share only the test results summary (without the attached report) - you can disable the report attachment using the `disable` config:
+
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --disable html_attachment
+```
+
+### Host the report
+
+<Accordion title="Amazon S3">
 
 The prerequisites are to
 have [AWS access keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html) and
@@ -50,7 +60,15 @@ edr send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SEC
 You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
 the `edr send-report` command. Make sure the report's file name ends with `.html`.
 
-### Hosting the report as a website
+#### Sharing results summary via Slack
+To enable the Slack results summary when hosting the report, you will need to configure the Slack platform as well.
+After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the following command:
+
+```shell
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+#### Hosting the report as a website
 
 You can host the report as the bucket's website so that you can browse to it with a constant URL
 like `https://<Elementary-Report-Bucket>.s3-website.<Region>.amazonaws.com`.
@@ -60,7 +78,7 @@ guide.
 After you've completed it, pass `--update-bucket-website true` to `send-report` in order to update the main page of
 the bucket's website.
 
-### Configuration
+#### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
 
@@ -72,12 +90,14 @@ aws:
 update_bucket_website: [true | false]
 ```
 
-## Google Cloud Storage (GCS)
+</Accordion>
+
+<Accordion title="Google Cloud Storage (GCS)">
 
 The prerequisite is to have a [GCS bucket](https://cloud.google.com/storage/docs/creating-buckets).  
 Once you have it, you'll need to provide one of two ways to authenticate:
 
-### [Service Account](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) (Recommended)
+#### [Service Account](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) (Recommended)
 
 you can send the report to your GCS bucket by running the command:
 
@@ -85,7 +105,7 @@ you can send the report to your GCS bucket by running the command:
 edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME>
 ```
 
-### OAuth using `gcloud`
+#### OAuth using `gcloud`
 
 If you're using OAuth with `gcloud`, simply omit `--google-service-account-path`:
 
@@ -96,7 +116,15 @@ edr send-report --gcs-bucket-name <BUCKET_NAME>
 You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` to
 the `edr send-report` command. Make sure the report's file name ends with `.html`.
 
-### Hosting the report as a website
+#### Sharing results summary via Slack
+To enable the Slack results summary when hosting the report, you will need to configure the Slack platform as well.
+After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the following command:
+
+```shell
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+#### Hosting the report as a website
 
 You can host the report as the bucket's website so that you can browse to it with a constant URL
 like `https://storage.googleapis.com/<Elementary-Report-Bucket>/index.html`.
@@ -107,7 +135,7 @@ the bucket.
 _Note_: You might want to [limit or grant access](https://cloud.google.com/storage/docs/access-control) to your reports
 bucket to certain users.
 
-### Configuration
+#### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
 
@@ -117,6 +145,44 @@ google:
   gcs_bucket_name: [GCS bucket name]
 
 update_bucket_website: [true | false]
+```
+
+</Accordion>
+
+### Slack summary configurations
+
+The following configurations allow you to adjust the Slack test result summary. 
+
+#### Filter results summary 
+
+You can filter your results summary by a specific tag, owner or model.
+
+To filter by tag:
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --select tag:finance
+```
+
+To filter by owner:
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --select config.meta.owner:@jeff
+```
+
+To filter by model:
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --select model:customers
+
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --select customers
+```
+
+#### Include test descriptions
+
+For a quick high level overview and to avoid reaching Slack's row limit, the default test results summary does not include test descriptions.
+The test descriptions can be included in your summary, but it is only recommended if you have a small number of failures. 
+
+The following `include` configuration will allow you to add descriptions:
+
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --include descriptions
 ```
 
 ## Missing something?
