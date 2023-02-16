@@ -18,6 +18,7 @@ edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 You can control the name of the report by providing `--slack-file-name <REPORT_NAME>` to the `edr send-report`
 command. Make sure the report name you provided ends with `.html`.
 
+
 #### Configuration
 
 If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
@@ -26,6 +27,12 @@ If you prefer to use `config.yml` file, you can add the following configuration 
 slack:
   token: [Slack token]
   channel_name: [Slack channel]
+```
+
+If you wish share only the test results summary (without the attached report) - you can disable the report attachment using `disable` config:
+
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --disable html_attachment
 ```
 
 ### Host the report
