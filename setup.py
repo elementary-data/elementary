@@ -29,6 +29,7 @@ setup(
         "dbt-core>=0.20,<2.0.0",
         "requests>=2.28.1,<3.0.0",
         "beautifulsoup4<5.0.0",
+        "ratelimit",
         "posthog<3.0.0",
         "boto3<2.0.0",
         "google-cloud-storage<3.0.0",

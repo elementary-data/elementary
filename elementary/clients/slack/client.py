@@ -2,6 +2,8 @@ import json
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from ratelimit import limits, sleep_and_retry
+
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
@@ -14,7 +16,7 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 OK_STATUS_CODE = 200
-
+ONE_MINUTE = 60
 
 class SlackClient(ABC):
     def __init__(
@@ -69,6 +71,8 @@ class SlackWebClient(SlackClient):
     def _initial_client(self):
         return WebClient(token=self.token)
 
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
     def send_message(
         self, channel_name: str, message: SlackMessageSchema, **kwargs
     ) -> bool:
@@ -88,6 +92,8 @@ class SlackWebClient(SlackClient):
             self.tracking.record_cli_internal_exception(err)
             return False
 
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
     def send_file(
         self,
         channel_name: str,
@@ -108,6 +114,8 @@ class SlackWebClient(SlackClient):
                 return self.send_file(channel_name, file_path, message)
             return False
 
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
     def send_report(self, channel: str, report_file_path: str):
         send_succeed = self.send_file(channel_name=channel, file_path=report_file_path)
         if send_succeed:
@@ -116,6 +124,8 @@ class SlackWebClient(SlackClient):
             logger.error("Failed to send report to Slack.")
         return send_succeed
 
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
     def get_user_id_from_email(self, email: str) -> Optional[str]:
         try:
             if email not in self.email_to_user_id_cache:
@@ -177,6 +187,8 @@ class SlackWebhookClient(SlackClient):
             url=self.webhook, default_headers={"Content-type": "application/json"}
         )
 
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
         response = self.client.send(
             text=message.text, blocks=message.blocks, attachments=message.attachments
