@@ -34,6 +34,7 @@ class Alert:
         meta: Optional[dict] = None,
         model_meta: Optional[str] = None,
         alerts_table: Optional[str] = None,
+        slack_group_alerts_by: Optional[str] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
@@ -66,6 +67,7 @@ class Alert:
         self.slack_channel = slack_channel
         self.alert_suppression_interval = alert_suppression_interval
         self.alert_fields = alert_fields
+        self.slack_group_alerts_by = slack_group_alerts_by
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."

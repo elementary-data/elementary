@@ -1,5 +1,6 @@
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from attrs import define, field
 from enum import Enum
 from typing import Generic, List, Optional, TypeVar, Union
 
@@ -68,25 +69,40 @@ class GroupingType(Enum):
     ALL = "all"
 
 
-@dataclass
-class GroupOfAlerts:
-    alerts: List[Alert]
-    grouping_type: GroupingType
-    owners: List[List[str] | str]
-    subscribers: List[List[str] | str]
-    channel_destination: str
-    errors: List[Alert] = field(init=False)
-    warnings: List[Alert] = field(init=False)
-    failures: List[Alert] = field(init=False)
 
-    def __post_init__(self):
+class GroupOfAlerts:
+    # alerts: List[Alert]
+    # grouping_type: GroupingType
+    # channel_destination: str
+    # owners: List[str]
+    # subscribers: List[str]
+    # errors: List[Alert]
+    # warnings: List[Alert]
+    # failures: List[Alert]
+
+    def __init__(self,
+                 alerts: List[Alert],
+                 grouping_type: GroupingType,
+                 default_channel_destination: str):
+
+        self.alerts = alerts
+        self.grouping_type = grouping_type
+
+        # sort out model unique id - for groupby table:
+        if self.grouping_type == GroupingType.BY_TABLE:
+            models = set([al.model_unique_id for al in alerts])
+            if len(models) != 1:
+                raise ValueError(f"failed initializing a GroupOfAlerts grouped by table, for alerts with mutliple models: {list(models)}")
+
         # sort out dest_channels: we get the default value, but if we have one other channel configured we switch to it.
         dest_channels = set([alert.slack_channel for alert in self.alerts])
+        dest_channels.remove(None)  # no point in counting them, and no point in sending to a None channel
         if len(dest_channels) > 1:
-            raise ValueError("Failed initializing a Group of Alerts with alerts that has different slack channel dest")
-        if len(dest_channels) == 0:
+            raise ValueError(f"Failed initializing a Group of Alerts with alerts that has different slack channel dest: {list(dest_channels)}")
+        if len(dest_channels) == 1:
             self.channel_destination = list(dest_channels)[0]
-
+        else:
+            self.channel_destination = default_channel_destination
 
         # sort out errors / warnings / failures
         self.errors = []
@@ -100,4 +116,24 @@ class GroupOfAlerts:
             else:
                 self.failures.append(alert)
 
+        # sort out owners and subscribers
+        owners = set([])
+        subscribers = set([])
+        for al in self.alerts:
+            if al.owners is not None:
+                if isinstance(al.owners, list):
+                    owners.update(al.owners)
+                else:  # it's a string
+                    owners.add(al.owners)
+            if al.subscribers is not None:
+                if isinstance(al.subscribers, list):
+                    subscribers.update(al.subscribers)
+                else:  # it's a string
+                    subscribers.add(al.subscribers)
+        self.owners = list(owners)
+        self.subscribers = list(subscribers)
 
+    def to_slack(self):
+        if self.grouping_type == GroupingType.BY_ALERT:
+            return self.alerts[0].to_slack()
+        raise NotImplementedError

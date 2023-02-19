@@ -68,7 +68,7 @@ class AlertsFetcher(FetcherClient):
         days_back: int,
         filter: Optional[DataMonitoringFilterSchema] = None,
     ) -> AlertsQueryResult[ModelAlert]:
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         pending_model_alerts = self._query_pending_model_alerts(days_back)
         last_alert_sent_times = self._query_last_model_alert_times(days_back)
         model_alerts = self._sort_alerts(
