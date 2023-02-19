@@ -8,7 +8,7 @@ All arguments can be passed either as CLI arguments or in the `config.yml` file.
 
 ### Share via Slack
 
-You can share the report via Slack as an html attachement. The slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-summary-configurations)).
+You can share the report via Slack as an html attachement. The slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-summary-configuration)).
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
@@ -121,7 +121,7 @@ To enable the Slack results summary when hosting the report, you will need to co
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the following command:
 
 ```shell
-edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 ```
 
 #### Hosting the report as a website
@@ -149,9 +149,23 @@ update_bucket_website: [true | false]
 
 </Accordion>
 
-### Slack summary configurations
+### Slack summary configuration
 
-The following configurations allow you to adjust the Slack test result summary. 
+If you share the report via Slack, the Slack notification will also include a summary of the test results by default. 
+If you host the report, you will need to configure the Slack platform as well in order to enable the Slack results summary. A link to the hosted report is included in the summary, which can be accessed based on the permissions you have set on your hosting platform (AWS/GCS).   
+After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the following command:
+
+  
+AWS S3:  
+```shell
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+  
+GCS: 
+```shell  
+edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>  
+```  
+  
 
 #### Filter results summary 
 
