@@ -1,0 +1,43 @@
+---
+title: "Elementary 0.7.2"
+sidebarTitle: "0.7.2"
+---
+
+_February 16, 2023: [v0.7.2 Python](https://github.com/elementary-data/elementary/releases/tag/v0.7.2), [v0.7.1 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.7.1)_
+
+### 🔥 What's new?
+
+- **Report Summary Slack Message** 🆕🔔
+  - When you generate a new report and using `send-report`, you can also trigger a Slack notification summary of the report.
+  - This is useful for you and your team members to understand quickly if there is something in the new report you should address.
+  - [Docs here](/quickstart/share-report-ui#slack-summary-configurations).
+
+- **Dashboard graphs are now clickable** #️⃣📊
+  - You can click on graphs and the dashboard, and you will be redirected to the relevant set of results.
+  - This means you can quickly navigate from the dashboard to a deep dive on the details.
+
+- **Config changes reset anomaly detection tests** 🔄
+  - When you change the configuration of an Elementary test, the metrics for the tests will be automatically re-calculated according to the new configuration.
+  - This improves the accuracy of the tests, so changes you make will affect immediately and not only after days of accumulating new data.
+
+
+### 💫 More changes
+- Added a deployment guide for [Gitlab CI](/deployment-and-configuration/gitlab-ci). Thank you [@Clinton Adams](https://elementary-community.slack.com/team/U04JFRG5N2J) for your help! 🤩 
+- Added Spark time related macros, thanks [@Matias Stanislavsky](https://elementary-community.slack.com/team/U04MC30PLK0) for the help! 🤩
+- Changed lineage layout to reduce "spaghettiness" - Looking forward for your feedback on it [@Gautier De Peyronnet](https://elementary-community.slack.com/team/U044ZCCNQ6T)! 🍝 
+
+
+### 🐞 Bug fixes
+- Fix the `DBT_ORCHESTRATOR` env var not being used - Thanks [Andre Augusto](https://github.com/andreqaugusto) for contributing! 🤩
+- Fixed long Windows paths error which failed deployment for several users.
+- Fixed Windows folder paths in the report appear empty - Thanks [@Tasos Kouridis](https://elementary-community.slack.com/team/U0486T1TD38) for reporting!
+- Changed macro names to prevent collision with other dbt packages - Thanks [@Tiphaine Castel](https://elementary-community.slack.com/team/U04NWKLR8CE) for reporting!
+
+
+
+<Frame>
+  <img
+    src="/pics/report_slack_summary.png"
+    alt="Demo"
+  />
+</Frame>
