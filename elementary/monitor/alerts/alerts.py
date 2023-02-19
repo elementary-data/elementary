@@ -1,5 +1,5 @@
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Generic, List, Optional, TypeVar, Union
 
@@ -42,16 +42,16 @@ class Alerts:
     @property
     def malformed_count(self):
         return (
-            len(self.models.malformed_alerts)
-            + len(self.tests.malformed_alerts)
-            + len(self.source_freshnesses.malformed_alerts)
+                len(self.models.malformed_alerts)
+                + len(self.tests.malformed_alerts)
+                + len(self.source_freshnesses.malformed_alerts)
         )
 
     def get_all(self) -> List[Alert]:
         return (
-            self.models.get_all()
-            + self.tests.get_all()
-            + self.source_freshnesses.get_all()
+                self.models.get_all()
+                + self.tests.get_all()
+                + self.source_freshnesses.get_all()
         )
 
     def get_elementary_test_count(self):
@@ -75,12 +75,29 @@ class GroupOfAlerts:
     owners: List[List[str] | str]
     subscribers: List[List[str] | str]
     channel_destination: str
+    errors: List[Alert] = field(init=False)
+    warnings: List[Alert] = field(init=False)
+    failures: List[Alert] = field(init=False)
 
     def __post_init__(self):
+        # sort out dest_channels: we get the default value, but if we have one other channel configured we switch to it.
         dest_channels = set([alert.slack_channel for alert in self.alerts])
         if len(dest_channels) > 1:
             raise ValueError("Failed initializing a Group of Alerts with alerts that has different slack channel dest")
         if len(dest_channels) == 0:
             self.channel_destination = list(dest_channels)[0]
+
+
+        # sort out errors / warnings / failures
+        self.errors = []
+        self.warnings = []
+        self.failures = []
+        for alert in self.alerts:
+            if isinstance(alert, ModelAlert) or alert.status == "error":
+                self.errors.append(alert)
+            elif alert.status == "warn":
+                self.warnings.append(alert)
+            else:
+                self.failures.append(alert)
 
 
