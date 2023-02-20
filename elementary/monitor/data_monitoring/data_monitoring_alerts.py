@@ -95,7 +95,7 @@ class DataMonitoringAlerts(DataMonitoring):
         :param alerts:
         :return:
         """
-
+        #import pdb; pdb.set_trace()
         default_alerts_group_by_strategy = GroupingType(self.config.slack_group_alerts_by)
         alerts_by_grouping_mechanism = defaultdict(lambda: [])
         for al in alerts:
@@ -131,7 +131,7 @@ class DataMonitoringAlerts(DataMonitoring):
                                         grouping_type=GroupingType.BY_ALERT,
                                         default_channel_destination=self.config.slack_channel_name
                                         )
-                          for al in alerts]
+                          for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]]
         return alls_group + by_table_group + by_alert_group
 
 
@@ -154,7 +154,7 @@ class DataMonitoringAlerts(DataMonitoring):
         sent_alert_ids_and_tables: List[Tuple[str, str]] = []
 
         alerts_groups: List[GroupOfAlerts] = self._group_alerts_per_config(all_alerts_to_send)
-        import pdb;pdb.set_trace()
+        #import pdb;pdb.set_trace()
         alerts_with_progress_bar = alive_it(alerts_groups, title="Sending alerts")
         for alert_group in alerts_with_progress_bar:
             self._fix_owners_and_subscribers(alert_group)

@@ -9,6 +9,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor import dbt_project_utils
+from elementary.monitor.alerts.alerts import GroupingType
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
@@ -105,8 +106,7 @@ class Config:
         self.slack_group_alerts_by = self._first_not_none(
             slack_group_alerts_by,
             slack_config.get("group_alerts_by"),
-            "by_alert",  # TODO consult Idan:
-            # Should we import the GroupingType Enum and use it here ? what do we do with Configs that are Enums?
+            GroupingType.BY_ALERT.value
         )
 
         aws_config = config.get(self._AWS, {})

@@ -18,6 +18,7 @@ logger = get_logger(__name__)
 OK_STATUS_CODE = 200
 ONE_MINUTE = 60
 
+
 class SlackClient(ABC):
     def __init__(
         self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None
