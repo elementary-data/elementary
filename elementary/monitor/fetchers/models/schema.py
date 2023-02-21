@@ -1,18 +1,49 @@
+import os
+import posixpath
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
 
+from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
-class ArtifactSchema(BaseModel):
+class ModelRunSchema(ExtendedBaseModel):
+    unique_id: str
+    invocation_id: str
+    name: str
+    schema_name: Optional[str] = Field(alias="schema", default=None)
+    status: str
+    execution_time: float
+    full_refresh: Optional[bool] = None
+    materialization: Optional[str] = None
+    generated_at: str
+
+    @validator("generated_at", pre=True)
+    def format_generated_at(cls, generated_at):
+        return convert_partial_iso_format_to_full_iso_format(generated_at)
+
+
+class ArtifactSchema(ExtendedBaseModel):
     name: str
     unique_id: str
-    owners: Optional[str]
-    tags: Optional[str]
+    owners: List[str]
+    tags: List[str]
     package_name: Optional[str]
     description: Optional[str]
     full_path: str
+
+    @validator("tags", pre=True)
+    def load_tags(cls, tags):
+        return cls._load_var_to_list(tags)
+
+    @validator("owners", pre=True)
+    def load_owners(cls, owners):
+        return cls._load_var_to_list(owners)
+
+    @validator("full_path", pre=True)
+    def format_full_path_sep(cls, full_path: str) -> str:
+        return posixpath.sep.join(full_path.split(os.path.sep))
 
 
 class ModelSchema(ArtifactSchema):
@@ -34,69 +65,7 @@ class ExposureSchema(ArtifactSchema):
     owner_email: Optional[str]
 
 
-class NormalizedArtifactSchema(BaseModel):
-    owners: Optional[List[str]] = []
-    tags: Optional[List[str]] = []
-    # Should be changed to artifact_name.
-    # Currently its model_name to match the CLI UI.
-    model_name: str
-    normalized_full_path: str
-
-    @validator("owners", pre=True, always=True)
-    def set_owners(cls, owners):
-        return owners or []
-
-    @validator("tags", pre=True, always=True)
-    def set_tags(cls, tags):
-        return tags or []
-
-
-# NormalizedArtifactSchema must be first in the inheritance order
-class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
-    pass
-
-
-# NormalizedArtifactSchema must be first in the inheritance order
-class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
-    pass
-
-
-# NormalizedArtifactSchema must be first in the inheritance order
-class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
-    pass
-
-
-class ModelCoverageSchema(BaseModel):
-    table_tests: int
-    column_tests: int
-
-
-class ModelRunSchema(BaseModel):
-    id: str
-    time_utc: str
-    status: str
-    full_refresh: bool
-    materialization: str
-    execution_time: float
-
-    @validator("time_utc", pre=True)
-    def format_time_utc(cls, time_utc):
-        return convert_partial_iso_format_to_full_iso_format(time_utc)
-
-
-class TotalsModelRunsSchema(BaseModel):
-    errors: Optional[int] = 0
-    success: Optional[int] = 0
-
-
-class ModelRunsSchema(BaseModel):
-    unique_id: str
-    # schema is a saved name, so we use alias
-    schema_name: str = Field(alias="schema")
-    name: str
-    status: str
-    last_exec_time: float
-    median_exec_time: float
-    exec_time_change_rate: float
-    totals: TotalsModelRunsSchema
-    runs: List[ModelRunSchema]
+class ModelTestCoverage(ExtendedBaseModel):
+    model_unique_id: Optional[str] = None
+    column_tests: int = 0
+    table_tests: int = 0

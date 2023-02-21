@@ -69,13 +69,15 @@ class GCSClient:
     def get_bucket_website_url(
         self, bucket_name: str, destination_bucket: Optional[str] = None
     ) -> Optional[str]:
+        bucket_website_url = None
         if self.config.update_bucket_website:
             full_bucket_path = (
                 f"{destination_bucket}/{bucket_name}"
                 if destination_bucket
                 else bucket_name
             )
-            return f"https://storage.googleapis.com/{full_bucket_path}"
+            bucket_website_url = f"https://storage.googleapis.com/{full_bucket_path}"
+        return bucket_website_url
 
     def get_client(self, config: Config):
         creds = self.get_credentials(config)

@@ -8,7 +8,7 @@
         with alerts_in_time_limit as (
             select *
             from {{ ref('alerts_models') }}
-            where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
+            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         ),
 
         models as (
@@ -107,7 +107,7 @@
                 end as suppression_status,
                 sent_at
             from {{ ref('alerts_models') }}
-            where {{ elementary.cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
+            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
         )
 
         select 
