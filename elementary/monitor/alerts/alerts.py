@@ -12,6 +12,7 @@ from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
+from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
 from elementary.utils.json_utils import try_load_json
 
 AlertType = TypeVar("AlertType")
@@ -100,15 +101,8 @@ class GroupOfAlerts:
                     f"failed initializing a GroupOfAlerts grouped by table, for alerts with mutliple models: {list(models)}")
 
         # sort out dest_channels: we get the default value, but if we have one other channel configured we switch to it.
-        dest_channels = set([alert.slack_channel for alert in self.alerts])
-        dest_channels.remove(None)  # no point in counting them, and no point in sending to a None channel
-        if len(dest_channels) > 1:
-            raise ValueError( #TODO don't merge without changing in here.
-                f"Failed initializing a Group of Alerts with alerts that has different slack channel dest: {list(dest_channels)}")
-        if len(dest_channels) == 1:
-            self.channel_destination = list(dest_channels)[0]
-        else:
-            self.channel_destination = default_channel_destination
+        self._sort_channel_destination(default_channel=default_channel_destination)
+
 
         # sort out errors / warnings / failures
         self.errors = []
@@ -160,16 +154,75 @@ class GroupOfAlerts:
 
         self.tags = ", ".join(formatted_tags)
 
-    def to_slack(self, is_slack_workflow=False):
+    def _sort_channel_destination(self, default_channel):
+        """
+        where do we send a group of alerts to?
+        Definitions:
+        1. "default_channel" is the project yaml level definition, over-rided by CLI if given
+        2. "per alert" is the definition for tests (if exists), or for the related model (if exists).
+        Sorting out:
+        if grouping is "all", send it to the default_channel
+        if grouping is "by alert", test definition or model definition or CLI if given or project-yaml definition
+        if grouping is "by table", and some tests on the model has specific channels configured:
+            if all tests that have specific configurations agree, all the group should be sent to that channel
+            if not all tests that have specific configurations agree, and a model definition for a channel exists, all the group should be sent to that channel
+            if not all tests agree and no model definition - send it to the default channle
+        add Routing information banner in the last two cases.
+        :param default_channel:
+        :return:
+        """
+
+        if self.grouping_type == GroupingType.BY_ALERT:
+            if self.alerts[0].slack_channel:
+                self.channel_destination = self.alerts[0].slack_channel
+                self.channel_banner = None
+            else:
+                self.channel_destination = default_channel
+                self.channel_banner = None
+            return
+        if self.grouping_type == GroupingType.ALL:
+            self.channel_destination = default_channel
+            self.channel_banner = None
+            return
+        dest_channels = set([alert.slack_channel for alert in self.alerts])
+        dest_channels.remove(None)  # no point in counting them, and no point in sending to a None channel
+        if len(dest_channels) == 0:
+            self.channel_destination = default_channel
+            self.channel_banner = None
+            return
+        if len(dest_channels) == 1:
+            self.channel_destination = list(dest_channels)[0]
+            self.channel_banner = None
+            return
+        # not all tests with specific configurations agree. Check for a model level configuration.
+        model_specific_channel_config = None
+        for alert in self.alerts:
+            if isinstance(alert, ModelAlert):
+                if alert.slack_channel:
+                    model_specific_channel_config = alert.slack_channel
+                    break
+            model_meta_data = try_load_json(alert.model_meta)
+            if model_meta_data and isinstance(model_meta_data, dict):
+                model_specific_channel_config = model_meta_data.get(CHANNEL_KEY)
+        if model_specific_channel_config:
+            self.channel_banner = f"There was a conflict of configured slack channels, alerting on the model's configured channel"
+            self.channel_destination = model_specific_channel_config
+            return
+        self.channel_banner = f"There was a conflict of configured slack channels, alerting on the default channel"
+        self.channel_destination = default_channel
+
+    def to_slack(self):
         if self.grouping_type == GroupingType.BY_ALERT:
             return self.alerts[0].to_slack()
 
-        # title, number of passed or failed,
+        # title, [channel banner], number of passed or failed,
         title_block = self._title_block()
         number_of_failed_error_block = self._number_of_failed_block()
-        self.slack_message_builder._add_title_to_slack_alert(
-            title_blocks=[title_block,
-                          number_of_failed_error_block])
+        title_blocks = [title_block, number_of_failed_error_block]
+        if self.channel_banner:
+            channel_banner_block = self._channel_banner_block()
+            title_blocks = [title_block, channel_banner_block, number_of_failed_error_block]
+        self.slack_message_builder._add_title_to_slack_alert(title_blocks=title_blocks)
 
         # attention required : tags, owners, subscribers
         attention_required_blocks = self._attention_required_blocks()
@@ -208,6 +261,8 @@ class GroupOfAlerts:
             ]
         )
 
+    def _channel_banner_block(self):
+        return self.slack_message_builder.create_text_section_block(f"_{self.channel_banner}_")
     def _attention_required_blocks(self):
         tags_text = "_No Tags_" if not self.tags else self.tags
         owners_text = "_No Owners_" if not self.owners else ", ".join(self.owners)
@@ -236,27 +291,31 @@ class GroupOfAlerts:
                 ret.append(f"{al.model_unique_id} | {alert_to_concise_name(al)}")
         elif self.grouping_type == GroupingType.BY_TABLE:
             for al in al_list:
-                ret.append(f"{alert_to_concise_name(al)} | {al.detected_at}")
+                detected_at = al.detected_at
+                idx = detected_at.rfind("+")
+                if idx > 0:
+                    detected_at = detected_at[:idx]
+                ret.append(f"{alert_to_concise_name(al)} | {detected_at}")
         return "\n".join(ret)
 
 # TODO if we want to not have "\n".join but seperate blocks, we can just do self.slack_message_builder.create_text_section_block() for each part.
 
-
-class SlackMessageBuilder:
-    pass
-
-class SlackMessageThatInvolveMultipleRunResultsBuider(SlackMessageBuilder)
-
-class ReportSummarySlackMessageBuilder(SlackMessageThatInvolveMultipleRunResultsBuider):
-    pass
-
-class GeneralGroupOfAlerts(SlackMessageThatInvolveMultipleRunResultsBuider):
-    pass
-class ByTableGroupOfAlert(GeneralGroupOfAlerts)
-    pass
-
-class ByAllGroupOfAlert(GeneralGroupOfAlerts)
-    pass
+#
+# class SlackMessageBuilder:
+#     pass
+#
+# class SlackMessageThatInvolveMultipleRunResultsBuilder(SlackMessageBuilder)
+#
+# class ReportSummarySlackMessageBuilder(SlackMessageThatInvolveMultipleRunResultsBuilder):
+#     pass
+#
+# class GeneralGroupOfAlerts(SlackMessageThatInvolveMultipleRunResultsBuilder):
+#     pass
+# class ByTableGroupOfAlert(GeneralGroupOfAlerts)
+#     pass
+#
+# class ByAllGroupOfAlert(GeneralGroupOfAlerts)
+#     pass
 
 
 
@@ -267,7 +326,11 @@ Stuff to test:
 - business logic of _group_alerts_per_config 
 - manually play a bit with overriding configs in the project level
 - 
-
+TODO
+- remove +0200 from slack date-time
+- add to execution properties some indicators for
+    - group by config
+    - if there was a channel clash in the configs
 
 """
 
