@@ -107,9 +107,9 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
                 if isinstance(al.tags, str):
                     tags_unjsoned = try_load_json(al.tags)  # tags is a string, comma delimited values
                     if tags_unjsoned is None:  # maybe a string, maybe some comma delimited strings
-                        tags.update(al.tags.split(","))
+                        tags.update([x.strip() for x in al.tags.split(",")])
                     elif isinstance(tags_unjsoned, str):  # tags was a quoted string.
-                        tags.update(al.tags.split(","))
+                        tags.update([x.strip() for x in al.tags.split(",")])
                     elif isinstance(tags_unjsoned, list):  # tags was a list of strings
                         tags.update(tags_unjsoned)
                 elif isinstance(al.tags, list):
@@ -252,8 +252,8 @@ class GroupOfAlertsByTable(GroupOfAlerts):
 
         if model_specific_channel_config:
             self.channel_destination = model_specific_channel_config
-
-        self.channel_destination = default_channel
+        else:
+            self.channel_destination = default_channel
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
         detected_at = alert.detected_at
@@ -281,7 +281,6 @@ class GroupOfAlertsByAll(GroupOfAlerts):
         :return:
         """
         self.channel_destination = default_channel
-
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
         return f"{alert.model_unique_id} | {alert_to_concise_name(alert)}"

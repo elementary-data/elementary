@@ -20,4 +20,5 @@ def alert_to_concise_name(alert):
         else:
             text = "model"
         return f"dbt {text} alert - {alert.alias}"
+    return "Alert"  # used only in Unit Tests
 
