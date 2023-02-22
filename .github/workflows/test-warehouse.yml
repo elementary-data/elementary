@@ -123,6 +123,22 @@ jobs:
           pip install -r dev-requirements.txt
           pip install ".[${{ inputs.warehouse-type }}]"
 
+      - name: Install dbt package
+        run: |
+          ELEMENTARY_PKG_LOCATION=$(pip show elementary-data | grep -i location | awk '{print $2}')
+          DBT_PROJECT_PATH="$ELEMENTARY_PKG_LOCATION/elementary/monitor/dbt_project"
+          DBT_PKGS_PATH="$DBT_PROJECT_PATH/dbt_packages"
+          dbt deps --project-dir "$DBT_PROJECT_PATH"
+          rm -rf "$DBT_PKGS_PATH/elementary"
+          ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
+
+      - name: Run dbt package integration tests
+        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
+        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        run: |
+          dbt deps
+          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.warehouse-type == 'postgres' || inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
+
       - name: Run upload source freshness operation
         run: |
           dbt source freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}" || true
