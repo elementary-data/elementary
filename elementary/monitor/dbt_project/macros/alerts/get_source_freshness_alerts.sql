@@ -90,7 +90,7 @@
                                 } %}
         {% do pending_alerts.append(pending_alert_dict) %}
     {% endfor %}
-    {% do elementary.edr_log(tojson(pending_alerts)) %}
+    {% do return(pending_alerts) %}
 {% endmacro %}
 
 
@@ -126,5 +126,5 @@
             last_alert_sent_time_result_dict.get('alert_class_id'): last_alert_sent_time_result_dict.get('last_sent_at')
         }) %}
     {% endfor %}
-    {% do elementary.edr_log(tojson(last_alert_times)) %}
+    {% do return(last_alert_times) %}
 {% endmacro %}

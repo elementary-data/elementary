@@ -103,5 +103,5 @@
         {# Adding sample data to test results #}
         {% do test.update({"sample_data": test_rows_sample}) %}
     {%- endfor -%}
-    {% do elementary.edr_log(tojson(tests)) %}
+    {% do return(tests) %}
 {%- endmacro -%}

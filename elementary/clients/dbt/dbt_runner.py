@@ -4,6 +4,7 @@ import subprocess
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple
 
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
@@ -18,7 +19,7 @@ class DbtLog:
         self.level = log.get("info", {}).get("level") or log.get("level")
 
 
-class DbtRunner:
+class DbtRunner(BaseDbtRunner):
     ELEMENTARY_LOG_PREFIX = "Elementary: "
 
     def __init__(
@@ -29,9 +30,7 @@ class DbtRunner:
         raise_on_failure: bool = True,
         dbt_env_vars: Optional[Dict[str, str]] = None,
     ) -> None:
-        self.project_dir = project_dir
-        self.profiles_dir = profiles_dir
-        self.target = target
+        super().__init__(project_dir, profiles_dir, target)
         self.raise_on_failure = raise_on_failure
         self.dbt_env_vars = dbt_env_vars
 
@@ -103,10 +102,13 @@ class DbtRunner:
         vars: Optional[dict] = None,
         quiet: bool = False,
     ) -> list:
-        command_args = ["run-operation", macro_name]
-        if macro_args:
-            json_args = json.dumps(macro_args)
-            command_args.extend(["--args", json_args])
+        log_macro_results_wrapper_macro = "log_macro_results"
+        wrapper_macro_args = dict(
+            macro_name=macro_name, macro_args=macro_args if macro_args else dict()
+        )
+        command_args = ["run-operation", log_macro_results_wrapper_macro]
+        json_args = json.dumps(wrapper_macro_args)
+        command_args.extend(["--args", json_args])
         success, command_output = self._run_command(
             command_args=command_args,
             capture_output=capture_output,

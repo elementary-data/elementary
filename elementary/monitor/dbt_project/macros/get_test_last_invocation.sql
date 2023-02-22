@@ -38,6 +38,5 @@
             from test_invocation
         {% endif %}
     {% endset %}
-    {% set result = elementary.agate_to_json(elementary.run_query(last_invocation_query)) %}
-    {% do elementary.edr_log(result) %}
+    {% do return(elementary.agate_to_dicts(elementary.run_query(last_invocation_query))) %}
 {% endmacro %}
