@@ -106,7 +106,7 @@ class DbtRunner(BaseDbtRunner):
         macro_to_run = macro_name
         macro_to_run_args = macro_args if macro_args else dict()
         if should_log:
-            macro_to_run = "log_macro_results"
+            macro_to_run = "elementary.log_macro_results"
             macro_to_run_args = dict(
                 macro_name=macro_name, macro_args=macro_args if macro_args else dict()
             )
@@ -120,7 +120,9 @@ class DbtRunner(BaseDbtRunner):
             quiet=quiet,
         )
         if log_errors and not success:
-            logger.error(f'Failed to run macro: "{macro_name}"')
+            logger.error(
+                f'Failed to run macro: "{macro_name}"\nRun output: {command_output}'
+            )
         run_operation_results = []
         if capture_output:
             json_messages = command_output.splitlines()
