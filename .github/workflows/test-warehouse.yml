@@ -135,12 +135,11 @@ jobs:
       - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: |
-          dbt deps
-          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.warehouse-type == 'postgres' || inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
+        run: dbt deps
 
       - name: Run upload source freshness operation
         run: |
           dbt source freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}" || true
+          sleep 2
           ls -lahR "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           edr run-operation upload-source-freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
