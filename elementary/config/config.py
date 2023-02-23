@@ -34,28 +34,28 @@ class Config:
     DEFAULT_CONFIG_DIR = str(Path.home() / ".edr")
 
     def __init__(
-            self,
-            config_dir: str = DEFAULT_CONFIG_DIR,
-            profiles_dir: str = None,
-            project_dir: str = None,
-            profile_target: str = None,
-            project_profile_target: str = None,
-            dbt_quoting: bool = None,
-            update_bucket_website: bool = None,
-            slack_webhook: str = None,
-            slack_token: str = None,
-            slack_channel_name: str = None,
-            slack_group_alerts_by: str = None,
-            timezone: str = None,
-            aws_profile_name: str = None,
-            aws_access_key_id: str = None,
-            aws_secret_access_key: str = None,
-            s3_endpoint_url: str = None,
-            s3_bucket_name: str = None,
-            google_project_name: str = None,
-            google_service_account_path: str = None,
-            gcs_bucket_name: str = None,
-            env: str = None,
+        self,
+        config_dir: str = DEFAULT_CONFIG_DIR,
+        profiles_dir: str = None,
+        project_dir: str = None,
+        profile_target: str = None,
+        project_profile_target: str = None,
+        dbt_quoting: bool = None,
+        update_bucket_website: bool = None,
+        slack_webhook: str = None,
+        slack_token: str = None,
+        slack_channel_name: str = None,
+        slack_group_alerts_by: str = None,
+        timezone: str = None,
+        aws_profile_name: str = None,
+        aws_access_key_id: str = None,
+        aws_secret_access_key: str = None,
+        s3_endpoint_url: str = None,
+        s3_bucket_name: str = None,
+        google_project_name: str = None,
+        google_service_account_path: str = None,
+        gcs_bucket_name: str = None,
+        env: str = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -106,7 +106,7 @@ class Config:
         self.slack_group_alerts_by = self._first_not_none(
             slack_group_alerts_by,
             slack_config.get("group_alerts_by"),
-            GroupingType.BY_ALERT.value
+            GroupingType.BY_ALERT.value,
         )
 
         aws_config = config.get(self._AWS, {})
@@ -150,9 +150,9 @@ class Config:
     @property
     def has_send_report_platform(self):
         return (
-                (self.slack_token and self.slack_channel_name)
-                or self.has_s3
-                or self.has_gcs
+            (self.slack_token and self.slack_channel_name)
+            or self.has_s3
+            or self.has_gcs
         )
 
     @property

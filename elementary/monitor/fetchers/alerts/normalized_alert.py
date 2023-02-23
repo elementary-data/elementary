@@ -39,6 +39,7 @@ ALERT_FIELDS_KEY = "alert_fields"
 ALERT_SUPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 SLACK_GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
 
+
 class NormalizedAlert:
     def __init__(self, alert: dict) -> None:
         self.alert = alert
@@ -69,7 +70,6 @@ class NormalizedAlert:
         :return:
         """
 
-
         try:
             normalized_alert = copy.deepcopy(self.alert)
             normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_meta_attrs(
@@ -82,7 +82,9 @@ class NormalizedAlert:
             ] = self._get_alert_suppression_interval()
             normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
 
-            normalized_alert[SLACK_GROUP_ALERTS_BY_KEY] = self._get_field_from_test_meta_or_model_meta_or_default(key="group")
+            normalized_alert[
+                SLACK_GROUP_ALERTS_BY_KEY
+            ] = self._get_field_from_test_meta_or_model_meta_or_default(key="group")
 
             return normalized_alert
         except Exception:
@@ -110,19 +112,19 @@ class NormalizedAlert:
         return self._get_field_from_test_meta_or_model_meta_or_default(key=CHANNEL_KEY)
 
     def _get_alert_suppression_interval(self) -> int:
-        return self._get_field_from_test_meta_or_model_meta_or_default(key=ALERT_SUPRESSION_INTERVAL_KEY,
-                                                                       default_val=0)
+        return self._get_field_from_test_meta_or_model_meta_or_default(
+            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=0
+        )
 
     def _get_alert_fields(self) -> Optional[List[str]]:
         # If there is no alerts_fields in the test meta object,
         # we return the model alerts_fields from the model meta object.
         # The fallback is DEFAULT_ALERT_FIELDS.
-        return self._get_field_from_test_meta_or_model_meta_or_default(key=ALERT_FIELDS_KEY,
-                                                                       default_val=DEFAULT_ALERT_FIELDS)
-
-    def _get_field_from_test_meta_or_model_meta_or_default(self, key: str, default_val=None):
-        return (
-                self.test_meta.get(key)
-                or self.model_meta.get(key)
-                or default_val
+        return self._get_field_from_test_meta_or_model_meta_or_default(
+            key=ALERT_FIELDS_KEY, default_val=DEFAULT_ALERT_FIELDS
         )
+
+    def _get_field_from_test_meta_or_model_meta_or_default(
+        self, key: str, default_val=None
+    ):
+        return self.test_meta.get(key) or self.model_meta.get(key) or default_val

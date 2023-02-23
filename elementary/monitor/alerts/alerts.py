@@ -1,6 +1,5 @@
 from collections import defaultdict
 from dataclasses import dataclass
-
 from typing import Generic, List, Optional, TypeVar, Union
 
 from elementary.monitor.alerts.alert import Alert
@@ -42,16 +41,16 @@ class Alerts:
     @property
     def malformed_count(self):
         return (
-                len(self.models.malformed_alerts)
-                + len(self.tests.malformed_alerts)
-                + len(self.source_freshnesses.malformed_alerts)
+            len(self.models.malformed_alerts)
+            + len(self.tests.malformed_alerts)
+            + len(self.source_freshnesses.malformed_alerts)
         )
 
     def get_all(self) -> List[Alert]:
         return (
-                self.models.get_all()
-                + self.tests.get_all()
-                + self.source_freshnesses.get_all()
+            self.models.get_all()
+            + self.tests.get_all()
+            + self.source_freshnesses.get_all()
         )
 
     def get_elementary_test_count(self):
@@ -60,21 +59,3 @@ class Alerts:
             if isinstance(test_result, ElementaryTestAlert):
                 elementary_test_count[test_result.test_name] += 1
         return elementary_test_count
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

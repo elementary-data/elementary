@@ -7,7 +7,8 @@ def get_shortened_model_name(model):
     if model is None:
         # this can happen for example when a Singular test is failing for having no refs.
         return None
-    return model.split('.')[-1]
+    return model.split(".")[-1]
+
 
 def alert_to_concise_name(alert):
     if isinstance(alert, TestAlert):
@@ -21,4 +22,3 @@ def alert_to_concise_name(alert):
             text = "model"
         return f"dbt {text} alert - {alert.alias}"
     return "Alert"  # used only in Unit Tests
-

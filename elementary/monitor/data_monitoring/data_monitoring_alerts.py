@@ -10,8 +10,13 @@ from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
-from elementary.monitor.alerts.group_of_alerts import GroupingType, GroupOfAlerts, GroupOfAlertsByAll, \
-    GroupOfAlertsByTable, GroupOfAlertsBySingleAlert
+from elementary.monitor.alerts.group_of_alerts import (
+    GroupingType,
+    GroupOfAlerts,
+    GroupOfAlertsByAll,
+    GroupOfAlertsBySingleAlert,
+    GroupOfAlertsByTable,
+)
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
@@ -97,18 +102,24 @@ class DataMonitoringAlerts(DataMonitoring):
         :param alerts:
         :return:
         """
-        #import pdb; pdb.set_trace()
-        default_alerts_group_by_strategy = GroupingType(self.config.slack_group_alerts_by)
+        # import pdb; pdb.set_trace()
+        default_alerts_group_by_strategy = GroupingType(
+            self.config.slack_group_alerts_by
+        )
         alerts_by_grouping_mechanism = defaultdict(lambda: [])
         for al in alerts:
             if not al.slack_group_alerts_by:
-                alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(al)
+                alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
+                    al
+                )
                 continue
             try:
                 t = GroupingType(al.slack_group_alerts_by)
                 alerts_by_grouping_mechanism[t].append(al)
             except ValueError:
-                alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(al)
+                alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
+                    al
+                )
                 logger.error(
                     f"Failed to extract value as a group-by config: '{al.slack_group_alerts_by}'. Allowed Values: {list(GroupingType.__members__.keys())} Ignoring it for now and default grouping strategy will be used"
                 )
@@ -119,26 +130,33 @@ class DataMonitoringAlerts(DataMonitoring):
         if len(alerts_by_grouping_mechanism[GroupingType.ALL]) == 0:
             alls_group = []
         else:
-            alls_group = [GroupOfAlertsByAll(alerts=alerts_by_grouping_mechanism[GroupingType.ALL],
-                                             default_channel_destination=self.config.slack_channel_name
-                                             )]
+            alls_group = [
+                GroupOfAlertsByAll(
+                    alerts=alerts_by_grouping_mechanism[GroupingType.ALL],
+                    default_channel_destination=self.config.slack_channel_name,
+                )
+            ]
 
-        by_table_group = [GroupOfAlertsByTable(alerts=table_to_alerts[model_unique_id],
-                                               default_channel_destination=self.config.slack_channel_name
-                                               )
-                          for model_unique_id in table_to_alerts.keys()]
+        by_table_group = [
+            GroupOfAlertsByTable(
+                alerts=table_to_alerts[model_unique_id],
+                default_channel_destination=self.config.slack_channel_name,
+            )
+            for model_unique_id in table_to_alerts.keys()
+        ]
 
-        by_alert_group = [GroupOfAlertsBySingleAlert(alerts=[al],
-                                                     default_channel_destination=self.config.slack_channel_name
-                                                     )
-                          for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]]
+        by_alert_group = [
+            GroupOfAlertsBySingleAlert(
+                alerts=[al], default_channel_destination=self.config.slack_channel_name
+            )
+            for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]
+        ]
 
-        self.execution_properties["had_group_by_all"] = (len(alls_group) > 0)
-        self.execution_properties["had_group_by_table"] = (len(by_table_group) > 0)
-        self.execution_properties["had_group_by_alert"] = (len(by_alert_group) > 0)
+        self.execution_properties["had_group_by_all"] = len(alls_group) > 0
+        self.execution_properties["had_group_by_table"] = len(by_table_group) > 0
+        self.execution_properties["had_group_by_alert"] = len(by_alert_group) > 0
 
         return alls_group + by_table_group + by_alert_group
-
 
     def _send_test_message(self):
         self.slack_client.send_message(
@@ -158,7 +176,9 @@ class DataMonitoringAlerts(DataMonitoring):
 
         sent_alert_ids_and_tables: List[Tuple[str, str]] = []
 
-        alerts_groups: List[GroupOfAlerts] = self._group_alerts_per_config(all_alerts_to_send)
+        alerts_groups: List[GroupOfAlerts] = self._group_alerts_per_config(
+            all_alerts_to_send
+        )
         alerts_with_progress_bar = alive_it(alerts_groups, title="Sending alerts")
         for alert_group in alerts_with_progress_bar:
             self._fix_owners_and_subscribers(alert_group)
@@ -167,7 +187,9 @@ class DataMonitoringAlerts(DataMonitoring):
                 channel_name=alert_group.channel_destination,
                 message=alert_msg,
             )
-            alerts_ids_and_tables = [(alert.id, alert.alerts_table) for alert in alert_group.alerts]
+            alerts_ids_and_tables = [
+                (alert.id, alert.alerts_table) for alert in alert_group.alerts
+            ]
             if sent_successfully:
                 sent_alert_ids_and_tables.extend(alerts_ids_and_tables)
             else:
@@ -185,8 +207,6 @@ class DataMonitoringAlerts(DataMonitoring):
         self.sent_alert_count += len(sent_alert_ids_and_tables)
 
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
-
-
 
     def _skip_alerts(self, alerts: Alerts):
         self.alerts_api.skip_alerts(

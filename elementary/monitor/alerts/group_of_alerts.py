@@ -1,28 +1,30 @@
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
-from typing import List, Dict
+from typing import Dict, List
 
 from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
-from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
 from elementary.utils.json_utils import try_load_json
-from elementary.utils.models import get_shortened_model_name, alert_to_concise_name
-
+from elementary.utils.models import alert_to_concise_name, get_shortened_model_name
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 class GroupingType(Enum):
     BY_ALERT = "by_alert"
     BY_TABLE = "by_table"
     ALL = "all"
 
-@dataclass(frozen=True, eq=True) # frozen+eq defined so we can use it as a dict key. Also, it's all Strings
+
+@dataclass(
+    frozen=True, eq=True
+)  # frozen+eq defined so we can use it as a dict key. Also, it's all Strings
 class NotificationComponent:
     name_in_summary: str
     empty_section_content: str
+
 
 @dataclass(frozen=True, eq=True)
 class AlertGroupComponent(NotificationComponent):
@@ -31,36 +33,44 @@ class AlertGroupComponent(NotificationComponent):
     emoji_in_full: str
 
 
-ErrorComponent = AlertGroupComponent(name_in_summary="Errors",
-                                     emoji_in_summary="exclamation",
-                                     name_in_full="Error",
-                                     emoji_in_full="exclamation",
-                                     empty_section_content="No Errors")
+ErrorComponent = AlertGroupComponent(
+    name_in_summary="Errors",
+    emoji_in_summary="exclamation",
+    name_in_full="Error",
+    emoji_in_full="exclamation",
+    empty_section_content="No Errors",
+)
 
-WarningComponent = AlertGroupComponent(name_in_summary="Warning",
-                                     emoji_in_summary="warning",
-                                     name_in_full="Warning",
-                                     emoji_in_full="warning",
-                                     empty_section_content="No Warnings")
+WarningComponent = AlertGroupComponent(
+    name_in_summary="Warning",
+    emoji_in_summary="warning",
+    name_in_full="Warning",
+    emoji_in_full="warning",
+    empty_section_content="No Warnings",
+)
 
-FailureComponent = AlertGroupComponent(name_in_summary="Failed",
-                                     emoji_in_summary="small_red_triangle",
-                                     name_in_full="Failed tests",
-                                     emoji_in_full="X",
-                                     empty_section_content="No Failures")
+FailureComponent = AlertGroupComponent(
+    name_in_summary="Failed",
+    emoji_in_summary="small_red_triangle",
+    name_in_full="Failed tests",
+    emoji_in_full="X",
+    empty_section_content="No Failures",
+)
 
 
-TagsComponent = NotificationComponent(name_in_summary="Tags",
-                                      empty_section_content="No Tags")
-OwnersComponent = NotificationComponent(name_in_summary="Owners",
-                                        empty_section_content="No Owners")
-SubsComponent = NotificationComponent(name_in_summary="Subscribers",
-                                      empty_section_content="No Subscribers")
+TagsComponent = NotificationComponent(
+    name_in_summary="Tags", empty_section_content="No Tags"
+)
+OwnersComponent = NotificationComponent(
+    name_in_summary="Owners", empty_section_content="No Owners"
+)
+SubsComponent = NotificationComponent(
+    name_in_summary="Subscribers", empty_section_content="No Subscribers"
+)
+
 
 class GroupOfAlerts(SlackAlertMessageBuilder):
-    def __init__(self,
-                 alerts: List[Alert],
-                 default_channel_destination: str):
+    def __init__(self, alerts: List[Alert], default_channel_destination: str):
 
         self.alerts = alerts
 
@@ -68,17 +78,21 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         self._fill_components_to_alerts(alerts)
 
         tags = self._fill_and_dedup_tags(alerts)
-        self._components_to_attn_required:Dict[NotificationComponent, str] = {TagsComponent: tags}
+        self._components_to_attn_required: Dict[NotificationComponent, str] = {
+            TagsComponent: tags
+        }
         # self_components_to_attn_required is a magic dict that maps:
         #   OwnersComponent -> ", ".join(self.owners) ,
         #   SubsComponent -> self.subscribers .
         #   magic is enforced in self.__setattr__ .
-        self._fill_and_dedup_owners_and_subs(alerts) # we have to hold owners and subscribers explicitly to let DataMonitoring call the slackAPI with them.
+        self._fill_and_dedup_owners_and_subs(
+            alerts
+        )  # we have to hold owners and subscribers explicitly to let DataMonitoring call the slackAPI with them.
         super().__init__()
 
     def __setattr__(self, key, value):
         if key == "owners":
-            self._components_to_attn_required[OwnersComponent]= ", ".join(value)
+            self._components_to_attn_required[OwnersComponent] = ", ".join(value)
         if key == "subscribers":
             self._components_to_attn_required[SubsComponent] = ", ".join(value)
         return super().__setattr__(key, value)
@@ -105,8 +119,12 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         for al in alerts:
             if al.tags is not None:
                 if isinstance(al.tags, str):
-                    tags_unjsoned = try_load_json(al.tags)  # tags is a string, comma delimited values
-                    if tags_unjsoned is None:  # maybe a string, maybe some comma delimited strings
+                    tags_unjsoned = try_load_json(
+                        al.tags
+                    )  # tags is a string, comma delimited values
+                    if (
+                        tags_unjsoned is None
+                    ):  # maybe a string, maybe some comma delimited strings
                         tags.update([x.strip() for x in al.tags.split(",")])
                     elif isinstance(tags_unjsoned, str):  # tags was a quoted string.
                         tags.update([x.strip() for x in al.tags.split(",")])
@@ -116,8 +134,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
                     tags.update(al.tags)
         TAG_PREFIX = "#"
         formatted_tags = [
-            tag if tag.startswith(TAG_PREFIX) else f"{TAG_PREFIX}{tag}"
-            for tag in tags
+            tag if tag.startswith(TAG_PREFIX) else f"{TAG_PREFIX}{tag}" for tag in tags
         ]
         return ", ".join(formatted_tags)
 
@@ -135,9 +152,11 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
                 warnings.append(alert)
             else:
                 failures.append(alert)
-        self._components_to_alerts:Dict[AlertGroupComponent, List[Alert]] = {FailureComponent: failures,
-                                                                              WarningComponent: warnings,
-                                                                              ErrorComponent: errors}
+        self._components_to_alerts: Dict[AlertGroupComponent, List[Alert]] = {
+            FailureComponent: failures,
+            WarningComponent: warnings,
+            ErrorComponent: errors,
+        }
 
     def to_slack(self):
         title_blocks = []  # title, [banner], number of passed or failed,
@@ -149,12 +168,16 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         self._add_title_to_slack_alert(title_blocks=title_blocks)
 
         # attention required : tags, owners, subscribers
-        self._add_preview_to_slack_alert(preview_blocks=self._attention_required_blocks())
+        self._add_preview_to_slack_alert(
+            preview_blocks=self._attention_required_blocks()
+        )
 
         details_blocks = []
         for component, alerts_list in self._components_to_alerts.items():
             details_blocks.append(
-                self.create_text_section_block(f":{component.emoji_in_summary}: *{component.name_in_summary}*")
+                self.create_text_section_block(
+                    f":{component.emoji_in_summary}: *{component.name_in_summary}*"
+                )
             )
             details_blocks.append(self.create_divider_block())
             if len(alerts_list) == 0:
@@ -177,9 +200,15 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         all_components = list(self._components_to_alerts.items())
         all_components_but_last = all_components[:-1]
         for component, al_list in all_components_but_last:
-            fields.append(f":{component.emoji_in_summary}: {component.name_in_summary}: {len(al_list)}    |")
+            fields.append(
+                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(al_list)}    |"
+            )
         component, al_list = all_components[-1]
-        fields.append((f":{component.emoji_in_summary}: {component.name_in_summary}: {len(al_list)}"))
+        fields.append(
+            (
+                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(al_list)}"
+            )
+        )
 
         return self.create_context_block(fields)
 
@@ -193,7 +222,9 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
 
         for component, val in self._components_to_attn_required.items():
             text = f"_{component.empty_section_content}_" if not val else val
-            preview_blocks.append(self.create_text_section_block(f"*{component.name_in_summary}*: {text}"))
+            preview_blocks.append(
+                self.create_text_section_block(f"*{component.name_in_summary}*: {text}")
+            )
 
         preview_blocks.append(self.create_empty_section_block())
 
@@ -210,16 +241,17 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
 
     def _had_channel_clashes(self):
         return False
+
+
 class GroupOfAlertsByTable(GroupOfAlerts):
-    def __init__(self,
-                 alerts: List[Alert],
-                 default_channel_destination: str):
+    def __init__(self, alerts: List[Alert], default_channel_destination: str):
 
         # sort out model unique id
         models = set([al.model_unique_id for al in alerts])
         if len(models) != 1:
             raise ValueError(
-                f"failed initializing a GroupOfAlertsByTable, for alerts with multiple models: {list(models)}")
+                f"failed initializing a GroupOfAlertsByTable, for alerts with multiple models: {list(models)}"
+            )
         self._model = list(models)[0]
         self._title = get_shortened_model_name(self._model)
         super().__init__(alerts, default_channel_destination)
@@ -268,7 +300,6 @@ class GroupOfAlertsByTable(GroupOfAlerts):
 
 
 class GroupOfAlertsByAll(GroupOfAlerts):
-
     def __init__(self, alerts: List[Alert], default_channel_destination: str):
         self._title = "Alerts Summary"
         super().__init__(alerts, default_channel_destination)
@@ -284,6 +315,8 @@ class GroupOfAlertsByAll(GroupOfAlerts):
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
         return f"{alert.model_unique_id} | {alert_to_concise_name(alert)}"
+
+
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):
     def _sort_channel_destination(self, default_channel):
         """
@@ -304,7 +337,6 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
         return self.alerts[0].to_slack()
 
 
-
 #
 # class SlackMessageBuilder:
 #     pass
@@ -321,7 +353,6 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
 #
 # class ByAllGroupOfAlert(GeneralGroupOfAlerts)
 #     pass
-
 
 
 """

@@ -211,7 +211,7 @@ def get_cli_properties() -> dict:
     "--group",
     type=str,
     default="by_alert",
-    help="Wether to group alerts 'by_alert', 'by_table', or 'all'"
+    help="Wether to group alerts 'by_alert', 'by_table', or 'all'",
 )
 @click.pass_context
 def monitor(
@@ -235,7 +235,7 @@ def monitor(
     disable_samples,
     env,
     select,
-    group
+    group,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -262,7 +262,7 @@ def monitor(
         slack_channel_name=slack_channel_name,
         timezone=timezone,
         env=env,
-        slack_group_alerts_by=group
+        slack_group_alerts_by=group,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))

@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from ratelimit import limits, sleep_and_retry
-
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
