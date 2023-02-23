@@ -335,31 +335,3 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
 
     def to_slack(self):
         return self.alerts[0].to_slack()
-
-
-#
-# class SlackMessageBuilder:
-#     pass
-#
-# class SlackMessageThatInvolveMultipleRunResultsBuilder(SlackMessageBuilder)
-#
-# class ReportSummarySlackMessageBuilder(SlackMessageThatInvolveMultipleRunResultsBuilder):
-#     pass
-#
-# class GeneralGroupOfAlerts(SlackMessageThatInvolveMultipleRunResultsBuilder):
-#     pass
-# class ByTableGroupOfAlert(GeneralGroupOfAlerts)
-#     pass
-#
-# class ByAllGroupOfAlert(GeneralGroupOfAlerts)
-#     pass
-
-
-"""
-Stuff to test:
-- business logic of getting the config
-    - mock some test_meta and model_meta 
-- business logic of _group_alerts_per_config 
-- manually play a bit with overriding configs in the project level
-
-"""
