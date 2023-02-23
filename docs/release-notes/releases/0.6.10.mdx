@@ -1,0 +1,43 @@
+---
+title: "Elementary 0.6.10"
+sidebarTitle: "0.6.10"
+---
+
+_January 19, 2023: [v0.6.10 Python](https://github.com/elementary-data/elementary/releases/tag/v0.6.10), [v0.6.13 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.6.13)_
+
+### 🔥 What's new?
+
+- **Dashboard screen** 📊👀
+    - **We added a new dashboard screen to the UI!**
+    - See a breakdown of your test results, tables health, monitored tables.
+    - Understand the high level status and the trends over time.
+    - You can also filter by tag / owner and get a dashboard view only of the tables that are relevant to you!
+    - [You can play with it in the demo](https://storage.googleapis.com/elementary_static/elementary_demo.html#/dashboard).
+        - Already working on making the graphs clickable to enable drill down (in the next version) 💪
+
+- **Major `on-run-end` performance improvement** ⚡️
+    - We invested in reducing even more the impact of artifacts uploading on your runs.
+    - The improvement is achieved with caching we implemented, to only upload artifacts if there is a change from the last run.
+    - *Note that this only works for dbt 1.4.0 and above (we made a contribution to dbt-core to support this).*
+
+- **dbt artifacts additions** ➕
+    - New table `dbt_seeds` - A contribution by [Franny Delaney](https://github.com/frannydelaney), thank you so much 🤩
+    - `thread_id` was added to run results tables, and `dbt_user` env var was added to dbt_invocations - Thank you [Elias Gryp](https://github.com/eliasgeee) and [Ayal Alon](https://github.com/ayalalo) for suggesting these!
+
+
+### 🐞 Bug fixes
+
+- Fixed alerts duplications issue and email owners in Slack alerts - Thanks [Josh Elston-Green](https://elementary-community.slack.com/team/U04CSH84TBN) for reporting both!
+- Fixed events tracking from the report are not disabled - Thanks [Bendik Nesbo](https://elementary-community.slack.com/team/U04LZ1T7DR6) for reporting!
+- Fixed synonymous data types bug in schema changes from baseline test - Thanks [Manish Ramrakhiani](https://elementary-community.slack.com/team/U04GACNBRDM) for reporting!
+- Fixed `insert_rows` failures on anomaly tests with small time buckets - Thanks [Noam Moskowitz](https://elementary-community.slack.com/team/U035FGRPXQX) for reporting!
+- Fixed truncate param in CLI causing failures - Thank you [Chintan Patel](https://elementary-community.slack.com/team/U04B51NEJKC) for contributing!
+- Fixes to our docs by [Ed Bizarro](https://elementary-community.slack.com/team/U04757V137A) and [Oskar Elvkull](https://elementary-community.slack.com/team/U04KFB4F7EJ) - Thank you for contributing!
+
+
+<Frame>
+  <img
+    src="/pics/dashboard.png"
+    alt="Demo"
+  />
+</Frame>
