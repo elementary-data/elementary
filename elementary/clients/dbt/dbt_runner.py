@@ -104,7 +104,7 @@ class DbtRunner(BaseDbtRunner):
         should_log: bool = True,
     ) -> list:
         macro_to_run = macro_name
-        macro_to_run_args = macro_args
+        macro_to_run_args = macro_args if macro_args else dict()
         if should_log:
             macro_to_run = "log_macro_results"
             macro_to_run_args = dict(

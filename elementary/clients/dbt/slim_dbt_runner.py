@@ -4,6 +4,7 @@ from typing import Optional
 
 import dbt.adapters.factory
 
+# IMPORTANT: This must be kept before the rest of the dbt imports
 dbt.adapters.factory.get_adapter = lambda config: config.adapter
 
 from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
