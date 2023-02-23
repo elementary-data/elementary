@@ -41,9 +41,7 @@ class DbtCommandError(Error):
         self, err: subprocess.CalledProcessError, base_command_args: List[str]
     ):
         super().__init__(f"Failed to run dbt command - {vars(err)}")
-
-        # Command args sent to _run_command (without additional user-specific args it as such as projects / profiles
-        # dir)
+        self.err = err
         self.base_command_args = base_command_args
         self.return_code = err.returncode
 

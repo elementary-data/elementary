@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 from json import JSONDecodeError
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.utils.json_utils import try_load_json
@@ -26,13 +26,11 @@ class DbtRunner:
         project_dir: str,
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
-        raise_on_failure: bool = True,
         dbt_env_vars: Optional[Dict[str, str]] = None,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
-        self.raise_on_failure = raise_on_failure
         self.dbt_env_vars = dbt_env_vars
 
     def _run_command(
@@ -42,7 +40,7 @@ class DbtRunner:
         log_format: str = "json",
         vars: Optional[dict] = None,
         quiet: bool = False,
-    ) -> Tuple[bool, str]:
+    ) -> Optional[str]:
         dbt_command = ["dbt"]
         if capture_output:
             dbt_command.extend(["--log-format", log_format])
@@ -63,7 +61,7 @@ class DbtRunner:
         try:
             result = subprocess.run(
                 dbt_command,
-                check=self.raise_on_failure,
+                check=True,
                 capture_output=(capture_output or quiet),
                 env=self._get_command_env(),
             )
@@ -73,26 +71,21 @@ class DbtRunner:
         if capture_output:
             output = result.stdout.decode("utf-8")
             logger.debug(f"Output: {output}")
-        if result.returncode != 0:
-            return False, output
-        return True, output
+        return output
 
-    def deps(self, quiet: bool = False) -> bool:
-        success, _ = self._run_command(command_args=["deps"], quiet=quiet)
-        return success
+    def deps(self, quiet: bool = False):
+        self._run_command(command_args=["deps"], quiet=quiet)
 
-    def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
+    def seed(self, select: Optional[str] = None, full_refresh: bool = False):
         command_args = ["seed"]
         if full_refresh:
             command_args.append("--full-refresh")
         if select:
             command_args.extend(["-s", select])
-        success, _ = self._run_command(command_args)
-        return success
+        self._run_command(command_args)
 
-    def snapshot(self) -> bool:
-        success, _ = self._run_command(["snapshot"])
-        return success
+    def snapshot(self):
+        self._run_command(["snapshot"])
 
     def run_operation(
         self,
@@ -107,17 +100,15 @@ class DbtRunner:
         if macro_args:
             json_args = json.dumps(macro_args)
             command_args.extend(["--args", json_args])
-        success, command_output = self._run_command(
+        output = self._run_command(
             command_args=command_args,
             capture_output=capture_output,
             vars=vars,
             quiet=quiet,
         )
-        if log_errors and not success:
-            logger.error(f'Failed to run macro: "{macro_name}"')
         run_operation_results = []
-        if capture_output:
-            json_messages = command_output.splitlines()
+        if capture_output and output:
+            json_messages = output.splitlines()
             for json_message in json_messages:
                 try:
                     log = DbtLog(json_message)
@@ -139,10 +130,12 @@ class DbtRunner:
         self,
         models: Optional[str] = None,
         select: Optional[str] = None,
+        exclude: Optional[str] = None,
         full_refresh: bool = False,
         vars: Optional[dict] = None,
+        capture_output: bool = False,
         quiet: bool = False,
-    ) -> bool:
+    ) -> Optional[str]:
         command_args = ["run"]
         if full_refresh:
             command_args.append("--full-refresh")
@@ -150,50 +143,51 @@ class DbtRunner:
             command_args.extend(["-m", models])
         if select:
             command_args.extend(["-s", select])
-        success, _ = self._run_command(
-            command_args=command_args, vars=vars, quiet=quiet
+        if exclude:
+            command_args.extend(["--exclude", exclude])
+        output = self._run_command(
+            command_args=command_args,
+            vars=vars,
+            quiet=quiet,
+            capture_output=capture_output,
         )
-        return success
+        return output
 
     def test(
         self,
         select: Optional[str] = None,
         vars: Optional[dict] = None,
         quiet: bool = False,
-    ) -> bool:
+        capture_output: bool = False,
+    ) -> Optional[str]:
         command_args = ["test"]
         if select:
             command_args.extend(["-s", select])
-        success, _ = self._run_command(
-            command_args=command_args, vars=vars, quiet=quiet
+        output = self._run_command(
+            command_args=command_args,
+            vars=vars,
+            quiet=quiet,
+            capture_output=capture_output,
         )
-        return success
+        return output
 
-    def _get_command_env(self):
-        env = os.environ.copy()
-        if self.dbt_env_vars is not None:
-            env.update(self.dbt_env_vars)
-        return env
+    def debug(self, quiet: bool = False):
+        self._run_command(command_args=["debug"], quiet=quiet)
 
-    def debug(self, quiet: bool = False) -> bool:
-        success, _ = self._run_command(command_args=["debug"], quiet=quiet)
-        return success
-
-    def ls(self, select: Optional[str] = None) -> list:
+    def ls(self, select: Optional[str] = None) -> List[str]:
         command_args = ["-q", "ls"]
         if select:
             command_args.extend(["-s", select])
         try:
-            success, command_output_string = self._run_command(
+            output = self._run_command(
                 command_args=command_args, capture_output=True, log_format="text"
-            )
-            command_outputs = command_output_string.splitlines()
+            ).splitlines()
             # ls command didn't match nodes.
             # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.
             if (
-                len(command_outputs) == 2
-                and try_load_json(command_outputs[0])
-                and try_load_json(command_outputs[1])
+                len(output) == 2
+                and try_load_json(output[0])
+                and try_load_json(output[1])
             ):
                 logger.warning(
                     f"The selection criterion '{select}' does not match any nodes"
@@ -201,9 +195,15 @@ class DbtRunner:
                 return []
             # When nodes are matched, ls command returns strings of the node names.
             else:
-                return command_outputs
+                return output
         except DbtCommandError:
             raise DbtLsCommandError(select)
 
     def source_freshness(self):
         self._run_command(command_args=["source", "freshness"])
+
+    def _get_command_env(self):
+        env = os.environ.copy()
+        if self.dbt_env_vars is not None:
+            env.update(self.dbt_env_vars)
+        return env
