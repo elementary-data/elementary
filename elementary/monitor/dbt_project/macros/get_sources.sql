@@ -22,7 +22,6 @@
             select * from dbt_artifacts_sources
         {% endset %}
         {% set sources_agate = run_query(get_sources_query) %}
-        {% set sources_json = elementary.agate_to_json(sources_agate) %}
-        {% do elementary.edr_log(sources_json) %}
+        {% do return(elementary.agate_to_dicts(sources_agate)) %}
     {%- endif -%}
 {% endmacro %}

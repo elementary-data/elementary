@@ -22,7 +22,6 @@
              select * from dbt_artifacts_exposures
         {% endset %}
         {% set exposures_agate = run_query(get_exposures_query) %}
-        {% set exposures_json = elementary.agate_to_json(exposures_agate) %}
-        {% do elementary.edr_log(exposures_json) %}
+        {% do return(elementary.agate_to_dicts(exposures_agate)) %}
     {%- endif -%}
 {% endmacro %}
