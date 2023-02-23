@@ -122,6 +122,7 @@ Here is the format in the yml itself:
 slack:
   token: <your_slack_token>
   channel_name: <slack_channel_to_post_at>
+  group_alerts_by: <"by_table"> or <"by_alert">
 
 # optional #
 timezone: <optional_timezone_for_timestamps>
@@ -132,6 +133,7 @@ timezone: <optional_timezone_for_timestamps>
 ```yml config.yml
 slack:
   notification_webhook: <your_slack_webhook_url>
+  group_alerts_by: <"by_table"> or <"by_alert">
   # optional #
   workflows: false
 

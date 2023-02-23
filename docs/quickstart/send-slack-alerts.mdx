@@ -15,6 +15,7 @@ Also, you can add configuration for each test / model in your `.yml` files:
 - Description - add custom description to the alert
 - Alert fields - choose which fields to display in your alert
 - Suppression interval - set a cooldown period on which the alert won't be sent
+- Grouping - group all alerts that relate to one model into a single Slack message
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
@@ -53,46 +54,14 @@ This is **required for the alerts to work.**
 Make sure to run the following command after your dbt runs and tests:
 
 ```
-edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at>
+edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at> --group [by_table | by_alert]
 ```
 
 Or just `edr monitor` if you used `config.yml`.
 
 
-### Filtering alerts using selector
 
-Elementary supports filtering alerts using a selector.
-Elementry `edr monitor` command will notify only on the selector's matched alerts.
 
-There are 3 selectors supported by elementary:
-
-- tag - Notify on models/sources/tests that are tagged with the provided tag selector (Notice that tests can be matched on their model's/source's tag).
-- owner - Notify on models/sources/tests that their owner is provided owner selector (Notice that tests can be matched on their model's/source's owner).
-- model - Notify on the model/source and its tests.
-
-To filter alerts by tag:
-
-```shell
-edr monitor --select tag:critical
-edr monitor --select tag:finance
-```
-
-To filter alerts by owner:
-
-```shell
-edr monitor --select config.meta.owner:@jeff
-edr monitor --select config.meta.owner:@jessy
-```
-
-To filter alerts by model:
-
-```shell
-edr monitor --select model:customers
-edr monitor --select model:orders
-
-edr monitor --select customers
-edr monitor --select orders
-```
 
 ---
 
@@ -122,7 +91,7 @@ Note that it needs to be from the same machine.
 This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
 Please note that this requires integration with your dbt project using the `--project-dir` argument.
 
-## Customize alerts: owners, test descriptions, tags, subscribers, layout and suppression
+## Customize alerts: owners, test descriptions, tags, subscribers and layout
 
 Elementary enriches alerts with dbt model/source/snapshot owners and
 tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
@@ -222,58 +191,6 @@ models:
 
 </Accordion>
 
-<Accordion title="Custom Slack channel">
-By default Elementary uses the Slack channel that was configured in the Slack integration.
-Elementary supports configuring custom slack channels that are configured on your models / sources / tests and snapshots.
-If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel.
-If you configure a custom slack channel for both a model and a test, the test channel overrides the model channel.
-
-For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops
-channel.
-
-To set it up, simply add the relevant channel to your models in the `properties.yml` (can be done also for sources and
-snapshots).
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    meta:
-      alerts_config:
-        channel: marketing_data_ops
-```
-
-If your models / tests are in folders by department / team, another useful option is to configure the channel in
-your `dbt_project.yml` file.
-
-```yml dbt_project.yml
-models:
-  marketing_bi:
-    +meta:
-      alerts_config:
-        channel: marketing_data_ops
-
-tests:
-  marketing_bi:
-    +meta:
-      alerts_config:
-        channel: marketing_data_ops
-```
-
-You can also configure a custom slack channel for a specific test.
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    columns:
-      - name: column_name
-        tests:
-          - unique:
-              meta:
-                alerts_config:
-                  channel: marketing_data_ops
-```
-
-</Accordion>
 
 <Accordion title="Alert fields">
 <Warning>
@@ -341,6 +258,49 @@ models:
 
 </Accordion>
 
+</AccordionGroup>
+
+## Notification settings: grouping mutliple alerts to one slack message, customizing slack channel, alert suppression and filtering
+
+
+<AccordionGroup>
+
+<Accordion title="Grouping Alerts by table">
+Elementary supports grouping alerts by table, or by alert.
+Elementry `edr monitor --group by_table` command will group all alerts related to a Errors in a model and to tests on that model to one message.
+Elementry `edr monitor --group all` command will group all alerts to one message.
+
+
+There are 3 Grouping options supported by elementary:
+
+- by_alert - That's the default. Notify on each model / test / source freshness as a seperate Slack message.
+- by_table - Notify in one message on all test warning/errors/failures that relates to a model, as well as that model's errors. The created message will do a union of the owners, tags and subscribers of all Test fails in it.
+- all - Notify in one message on all the Errors/ Failures/ Warning in your project. The created message will do a union of the owners, tags and subscribers of all alerts.
+
+To group alerts by table:
+
+```shell
+edr monitor --group by_table
+```
+
+To group all alerts together:
+
+```shell
+edr monitor --group all
+```
+
+To group alerts by alert:
+
+```shell
+edr monitor
+```
+Or Alternatively
+```shell
+edr monitor --group by_alert
+```
+
+</Accordion>
+
 <Accordion title="Alert suppression interval">
 
 Elementary support configuring suppression interval for alerts.
@@ -391,6 +351,97 @@ models:
 ```
 
 </Accordion>
+
+<Accordion title="Filtering alerts using selector">
+
+Elementary supports filtering alerts using a selector.
+Elementry `edr monitor` command will notify only on the selector's matched alerts.
+
+There are 3 selectors supported by elementary:
+
+- tag - Notify on models/sources/tests that are tagged with the provided tag selector (Notice that tests can be matched on their model's/source's tag).
+- owner - Notify on models/sources/tests that their owner is provided owner selector (Notice that tests can be matched on their model's/source's owner).
+- model - Notify on the model/source and its tests.
+
+To filter alerts by tag:
+
+```shell
+edr monitor --select tag:critical
+edr monitor --select tag:finance
+```
+
+To filter alerts by owner:
+
+```shell
+edr monitor --select config.meta.owner:@jeff
+edr monitor --select config.meta.owner:@jessy
+```
+
+To filter alerts by model:
+
+```shell
+edr monitor --select model:customers
+edr monitor --select model:orders
+
+edr monitor --select customers
+edr monitor --select orders
+```
+</Accordion>
+
+
+<Accordion title="Custom Slack channel">
+By default Elementary uses the Slack channel that was configured in the Slack integration.
+Elementary supports configuring custom slack channels that are configured on your models / sources / tests and snapshots.
+If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel.
+If you configure a custom slack channel for both a model and a test, the test channel overrides the model channel.
+
+For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops
+channel.
+
+To set it up, simply add the relevant channel to your models in the `properties.yml` (can be done also for sources and
+snapshots).
+
+```yml properties.yml
+models:
+  - name: marketing_leads
+    meta:
+      alerts_config:
+        channel: marketing_data_ops
+```
+
+If your models / tests are in folders by department / team, another useful option is to configure the channel in
+your `dbt_project.yml` file.
+
+```yml dbt_project.yml
+models:
+  marketing_bi:
+    +meta:
+      alerts_config:
+        channel: marketing_data_ops
+
+tests:
+  marketing_bi:
+    +meta:
+      alerts_config:
+        channel: marketing_data_ops
+```
+
+You can also configure a custom slack channel for a specific test.
+
+```yml properties.yml
+models:
+  - name: marketing_leads
+    columns:
+      - name: column_name
+        tests:
+          - unique:
+              meta:
+                alerts_config:
+                  channel: marketing_data_ops
+```
+
+</Accordion>
+
 
 </AccordionGroup>
 
