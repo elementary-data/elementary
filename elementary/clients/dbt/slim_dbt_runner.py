@@ -4,8 +4,6 @@ from typing import Optional
 
 import dbt.adapters.factory
 
-from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-
 dbt.adapters.factory.get_adapter = lambda config: config.adapter
 
 from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
@@ -14,18 +12,13 @@ from dbt.flags import set_from_args
 from dbt.parser.manifest import ManifestLoader
 from dbt.tracking import disable_tracking
 from dbt.version import __version__
-from packaging import version
 from pydantic import BaseModel, validator
 
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-
-dbt_version = version.parse(__version__)
-COMPILED_CODE = (
-    "compiled_code" if dbt_version >= version.parse("1.3.0") else "compiled_sql"
-)
 
 # Disable dbt tracking
 disable_tracking()
@@ -45,13 +38,6 @@ class ConfigArgs(BaseModel):
         if not vars:
             return DEFAULT_VARS
         return vars
-
-
-class DbtLog:
-    def __init__(self, log_line: str):
-        log = json.loads(log_line)
-        self.msg = log.get("info", {}).get("msg") or log.get("data", {}).get("msg")
-        self.level = log.get("info", {}).get("level") or log.get("level")
 
 
 class SlimDbtRunner(BaseDbtRunner):

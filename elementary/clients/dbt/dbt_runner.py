@@ -101,13 +101,17 @@ class DbtRunner(BaseDbtRunner):
         log_errors: bool = True,
         vars: Optional[dict] = None,
         quiet: bool = False,
+        should_log: bool = True,
     ) -> list:
-        log_macro_results_wrapper_macro = "log_macro_results"
-        wrapper_macro_args = dict(
-            macro_name=macro_name, macro_args=macro_args if macro_args else dict()
-        )
-        command_args = ["run-operation", log_macro_results_wrapper_macro]
-        json_args = json.dumps(wrapper_macro_args)
+        macro_to_run = macro_name
+        macro_to_run_args = macro_args
+        if should_log:
+            macro_to_run = "log_macro_results"
+            macro_to_run_args = dict(
+                macro_name=macro_name, macro_args=macro_args if macro_args else dict()
+            )
+        command_args = ["run-operation", macro_to_run]
+        json_args = json.dumps(macro_to_run_args)
         command_args.extend(["--args", json_args])
         success, command_output = self._run_command(
             command_args=command_args,
