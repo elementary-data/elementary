@@ -1,0 +1,10 @@
+<Accordion title="How to run full-refresh / truncate Elementary's incremental models?">
+
+Elementary’s incremental models aren’t truncated by the standard full refresh flag. This is because generally you wouldn’t want those models to truncate
+
+To run full-refresh, use the `elementary_full_refresh` var like this:
+```shell
+dbt run --select elementary --vars '{"elementary_full_refresh": "true"}
+```
+
+</Accordion>
