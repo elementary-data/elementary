@@ -85,38 +85,38 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
     def _fill_and_dedup_owners_and_subs(self, alerts):
         owners = set([])
         subscribers = set([])
-        for al in alerts:
-            if al.owners:
-                if isinstance(al.owners, list):
-                    owners.update(al.owners)
+        for alert in alerts:
+            if alert.owners:
+                if isinstance(alert.owners, list):
+                    owners.update(alert.owners)
                 else:  # it's a string. could be comma delimited.
-                    owners.update(al.owners.split(","))
-            if al.subscribers:
-                if isinstance(al.subscribers, list):
-                    subscribers.update(al.subscribers)
+                    owners.update(alert.owners.split(","))
+            if alert.subscribers:
+                if isinstance(alert.subscribers, list):
+                    subscribers.update(alert.subscribers)
                 else:  # it's a string. could be comma delimited.
-                    subscribers.update(al.subscribers.split(","))
+                    subscribers.update(alert.subscribers.split(","))
         self.owners = list(owners)
         self.subscribers = list(subscribers)
 
     def _fill_and_dedup_tags(self, alerts):
         tags = set([])
-        for al in alerts:
-            if al.tags:
-                if isinstance(al.tags, str):
+        for alert in alerts:
+            if alert.tags:
+                if isinstance(alert.tags, str):
                     tags_unjsoned = try_load_json(
-                        al.tags
+                        alert.tags
                     )  # tags is a string, comma delimited values
                     if (
                         tags_unjsoned is None
                     ):  # maybe a string, maybe some comma delimited strings
-                        tags.update([x.strip() for x in al.tags.split(",")])
+                        tags.update([x.strip() for x in alert.tags.split(",")])
                     elif isinstance(tags_unjsoned, str):  # tags was a quoted string.
-                        tags.update([x.strip() for x in al.tags.split(",")])
+                        tags.update([x.strip() for x in alert.tags.split(",")])
                     elif isinstance(tags_unjsoned, list):  # tags was a list of strings
                         tags.update(tags_unjsoned)
-                elif isinstance(al.tags, list):
-                    tags.update(al.tags)
+                elif isinstance(alert.tags, list):
+                    tags.update(alert.tags)
         TAG_PREFIX = "#"
         formatted_tags = [
             tag if tag.startswith(TAG_PREFIX) else f"{TAG_PREFIX}{tag}" for tag in tags
@@ -232,7 +232,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
     def __init__(self, alerts: List[Alert], default_channel_destination: str):
 
         # sort out model unique id
-        models = set([al.model_unique_id for al in alerts])
+        models = set([alert.model_unique_id for alert in alerts])
         if len(models) != 1:
             raise ValueError(
                 f"failed initializing a GroupOfAlertsByTable, for alerts with multiple models: {list(models)}"
