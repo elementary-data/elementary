@@ -107,25 +107,25 @@ class DataMonitoringAlerts(DataMonitoring):
             self.config.slack_group_alerts_by
         )
         alerts_by_grouping_mechanism = defaultdict(lambda: [])
-        for al in alerts:
-            if not al.slack_group_alerts_by:
+        for alert in alerts:
+            if not alert.slack_group_alerts_by:
                 alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
-                    al
+                    alert
                 )
                 continue
             try:
-                grouping_type = GroupingType(al.slack_group_alerts_by)
-                alerts_by_grouping_mechanism[grouping_type].append(al)
+                grouping_type = GroupingType(alert.slack_group_alerts_by)
+                alerts_by_grouping_mechanism[grouping_type].append(alert)
             except ValueError:
                 alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
-                    al
+                    alert
                 )
                 logger.error(
-                    f"Failed to extract value as a group-by config: '{al.slack_group_alerts_by}'. Allowed Values: {list(GroupingType.__members__.keys())} Ignoring it for now and default grouping strategy will be used"
+                    f"Failed to extract value as a group-by config: '{alert.slack_group_alerts_by}'. Allowed Values: {list(GroupingType.__members__.keys())} Ignoring it for now and default grouping strategy will be used"
                 )
         table_to_alerts = defaultdict(lambda: [])
-        for al in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
-            table_to_alerts[al.model_unique_id].append(al)
+        for alert in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
+            table_to_alerts[alert.model_unique_id].append(alert)
 
         if len(alerts_by_grouping_mechanism[GroupingType.ALL]) == 0:
             alls_group = []
