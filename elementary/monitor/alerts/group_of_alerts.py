@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List
 
 from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.schema.alert_group_component import NotificationComponent, AlertGroupComponent
 from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.models import alert_to_concise_name, get_shortened_model_name
@@ -16,21 +16,6 @@ class GroupingType(Enum):
     BY_ALERT = "alert"
     BY_TABLE = "table"
     ALL = "all"
-
-
-@dataclass(
-    frozen=True, eq=True
-)  # frozen+eq defined so we can use it as a dict key. Also, it's all Strings
-class NotificationComponent:
-    name_in_summary: str
-    empty_section_content: str
-
-
-@dataclass(frozen=True, eq=True)
-class AlertGroupComponent(NotificationComponent):
-    emoji_in_summary: str
-    name_in_full: str
-    emoji_in_full: str
 
 
 ErrorComponent = AlertGroupComponent(
@@ -101,12 +86,12 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         owners = set([])
         subscribers = set([])
         for al in alerts:
-            if al.owners is not None:
+            if al.owners:
                 if isinstance(al.owners, list):
                     owners.update(al.owners)
                 else:  # it's a string. could be comma delimited.
                     owners.update(al.owners.split(","))
-            if al.subscribers is not None:
+            if al.subscribers:
                 if isinstance(al.subscribers, list):
                     subscribers.update(al.subscribers)
                 else:  # it's a string. could be comma delimited.
@@ -117,7 +102,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
     def _fill_and_dedup_tags(self, alerts):
         tags = set([])
         for al in alerts:
-            if al.tags is not None:
+            if al.tags:
                 if isinstance(al.tags, str):
                     tags_unjsoned = try_load_json(
                         al.tags
