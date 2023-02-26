@@ -1,5 +1,5 @@
 {% macro get_adapter_type_and_unique_id() %}
-    {{ elementary.edr_log(tojson([target.type, adapter.dispatch('get_adapter_unique_id')()])) }}
+    {% do return([target.type, adapter.dispatch('get_adapter_unique_id')()]) %}
 {%- endmacro %}
 
 {% macro default__get_adapter_unique_id() %}

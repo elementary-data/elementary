@@ -40,6 +40,7 @@ class AlertsFetcher(FetcherClient):
                     "table_name": table_name,
                 },
                 capture_output=False,
+                should_log=False,
             )
 
     def query_pending_test_alerts(
@@ -146,6 +147,7 @@ class AlertsFetcher(FetcherClient):
                     "table_name": table_name,
                 },
                 capture_output=False,
+                should_log=False,
             )
 
     @staticmethod

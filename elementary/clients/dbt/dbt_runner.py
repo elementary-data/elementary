@@ -4,6 +4,7 @@ import subprocess
 from json import JSONDecodeError
 from typing import Dict, List, Optional
 
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
@@ -18,7 +19,7 @@ class DbtLog:
         self.level = log.get("info", {}).get("level") or log.get("level")
 
 
-class DbtRunner:
+class DbtRunner(BaseDbtRunner):
     ELEMENTARY_LOG_PREFIX = "Elementary: "
 
     def __init__(
@@ -28,9 +29,7 @@ class DbtRunner:
         target: Optional[str] = None,
         dbt_env_vars: Optional[Dict[str, str]] = None,
     ) -> None:
-        self.project_dir = project_dir
-        self.profiles_dir = profiles_dir
-        self.target = target
+        super().__init__(project_dir, profiles_dir, target)
         self.dbt_env_vars = dbt_env_vars
 
     def _run_command(
@@ -95,17 +94,26 @@ class DbtRunner:
         log_errors: bool = True,
         vars: Optional[dict] = None,
         quiet: bool = False,
+        should_log: bool = True,
     ) -> list:
-        command_args = ["run-operation", macro_name]
-        if macro_args:
-            json_args = json.dumps(macro_args)
-            command_args.extend(["--args", json_args])
+        macro_to_run = macro_name
+        macro_to_run_args = macro_args if macro_args else dict()
+        if should_log:
+            macro_to_run = "elementary.log_macro_results"
+            macro_to_run_args = dict(
+                macro_name=macro_name, macro_args=macro_args if macro_args else dict()
+            )
+        command_args = ["run-operation", macro_to_run]
+        json_args = json.dumps(macro_to_run_args)
+        command_args.extend(["--args", json_args])
         output = self._run_command(
             command_args=command_args,
             capture_output=capture_output,
             vars=vars,
             quiet=quiet,
         )
+        if log_errors:
+            logger.error(f'Failed to run macro: "{macro_name}"\nRun output: {output}')
         run_operation_results = []
         if capture_output and output:
             json_messages = output.splitlines()

@@ -5,10 +5,11 @@ title: "Share observability report"
 Generate and distribute the report to external platforms by using the command `edr send-report`. 
 You can specify more than one platform in the command, and the report will be sent to all.
 All arguments can be passed either as CLI arguments or in the `config.yml` file.
+You can also customize a [Slack report summary](/quickstart/share-report-ui#slack-summary-configuration) (relevant to all distribution platforms). 
 
 ### Share via Slack
 
-You can share the report via Slack as an html attachement. The slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-summary-configuration)).
+You can share the report via Slack as an html attachement. Slack notification will also include a summary of the test results (see [possible configurations below](/quickstart/share-report-ui#slack-summary-configuration)).
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the command:
 
 ```shell
