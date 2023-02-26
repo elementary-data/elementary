@@ -167,9 +167,9 @@ class DataMonitoringAlerts(DataMonitoring):
         )
         logger.info("Sent the test message.")
 
-    def _send_alerts(self, alerts: Alerts, dont_update_as_sent=True):
+    def _send_alerts(self, alerts: Alerts, dont_update_as_sent=False):
         all_alerts_to_send = alerts.get_all()
-        # TODO when pushing this to master, dont_update_as_sent should default to FALSE
+        # when working locally, dont_update_as_sent can be set to default True for easier dev
         if not all_alerts_to_send:
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
