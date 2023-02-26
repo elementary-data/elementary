@@ -167,9 +167,8 @@ class DataMonitoringAlerts(DataMonitoring):
         )
         logger.info("Sent the test message.")
 
-    def _send_alerts(self, alerts: Alerts, dont_update_as_sent=False):
+    def _send_alerts(self, alerts: Alerts):
         all_alerts_to_send = alerts.get_all()
-        # when working locally, dont_update_as_sent can be set to default True for easier dev
         if not all_alerts_to_send:
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
@@ -197,15 +196,17 @@ class DataMonitoringAlerts(DataMonitoring):
                     f"Could not send the alert[s] - {[alert_id_and_table[0] for alert_id_and_table in alerts_ids_and_tables]}. Full alert: {json.dumps(dict(alert_msg))}"
                 )
                 self.success = False
-        if not dont_update_as_sent:
-            table_name_to_alert_ids = defaultdict(lambda: [])
-            for alert_id, table_name in sent_alert_ids_and_tables:
-                table_name_to_alert_ids[table_name].append(alert_id)
 
-            for table_name, alert_ids in table_name_to_alert_ids.items():
-                self.alerts_api.update_sent_alerts(alert_ids, table_name)
+        # Now update as sent:
+        table_name_to_alert_ids = defaultdict(lambda: [])
+        for alert_id, table_name in sent_alert_ids_and_tables:
+            table_name_to_alert_ids[table_name].append(alert_id)
+
+        for table_name, alert_ids in table_name_to_alert_ids.items():
+            self.alerts_api.update_sent_alerts(alert_ids, table_name)
+
+        # Now update sent alerts counter:
         self.sent_alert_count += len(sent_alert_ids_and_tables)
-
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: Alerts):
