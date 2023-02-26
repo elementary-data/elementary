@@ -1,15 +1,11 @@
 import json
 from typing import List
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.lineage.schema import NodeDependsOnNodesSchema
 
 
 class LineageFetcher(FetcherClient):
-    def __init__(self, dbt_runner: DbtRunner):
-        super().__init__(dbt_runner)
-
     def get_nodes_depends_on_nodes(
         self, exclude_elementary_models: bool = False
     ) -> List[NodeDependsOnNodesSchema]:

@@ -25,7 +25,6 @@
              select * from dbt_artifacts_models
         {% endset %}
         {% set models_agate = run_query(get_models_query) %}
-        {% set models_json = elementary.agate_to_json(models_agate) %}
-        {% do elementary.edr_log(models_json) %}
+        {% do return(elementary.agate_to_dicts(models_agate)) %}
     {%- endif -%}
 {% endmacro %}

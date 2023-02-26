@@ -24,6 +24,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_sub_type: str
     test_results_description: Optional[str]
     owners: Optional[List[str]]
+    model_owner: Optional[List[str]]
     tags: Optional[List[str]]
     meta: dict
     model_meta: dict
@@ -69,6 +70,10 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     @validator("owners", pre=True)
     def load_owners(cls, owners):
         return cls._load_var_to_list(owners)
+
+    @validator("model_owner", pre=True)
+    def load_model_owner(cls, model_owner):
+        return cls._load_var_to_list(model_owner)
 
     @validator("failures", pre=True)
     def parse_failures(cls, failures, values):

@@ -36,17 +36,17 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
-    pass
+    artifact_type: str = Field("model", const=True)
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
-    pass
+    artifact_type: str = Field("source", const=True)
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
-    pass
+    artifact_type: str = Field("exposure", const=True)
 
 
 class ModelCoverageSchema(BaseModel):

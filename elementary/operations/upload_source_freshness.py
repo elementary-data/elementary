@@ -17,7 +17,7 @@ class UploadSourceFreshnessOperation:
     def run(self):
         if not self.config.project_dir:
             raise click.ClickException(
-                "Path to dbt project wasn't supplied with `--project-dir`."
+                "Path to dbt project is missing. Please run the command with `--project-dir <DBT_PROJECT_DIR>`."
             )
         results = self.get_results()
         self.upload_results(results)

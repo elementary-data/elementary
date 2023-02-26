@@ -103,7 +103,7 @@ class TestsAPI(APIClient):
                 column_name=test_result.column_name,
                 test_type=test_result.test_type,
                 test_sub_type=test_result.test_sub_type,
-                owners=test_result.owners,
+                owners=test_result.model_owner,
                 tags=test_result.tags,
                 subscribers=self._get_test_subscribers(
                     test_meta=test_result.meta, model_meta=test_result.model_meta

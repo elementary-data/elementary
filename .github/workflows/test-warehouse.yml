@@ -118,7 +118,7 @@ jobs:
         run: sudo apt-get install python-dev libsasl2-dev gcc
 
       - name: Install dbt
-        run:
+        run: >
           pip install --pre
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-${{ inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
@@ -201,11 +201,6 @@ jobs:
           --google-service-account-path /tmp/gcs_keyfile.json
           --gcs-bucket-name elementary_ci_artifacts
           --update-bucket-website true
-
-      - name: Run upload source freshness operation
-        run: |
-          dbt source freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}" || true
-          edr run-operation upload-source-freshness -t "${{ inputs.warehouse-type }}" --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
 
       - name: Upload edr log
         if: ${{ always() }}

@@ -25,6 +25,5 @@
         order by generated_at
     {% endset %}
     {% set models_runs_agate = run_query(models_runs_query) %}
-    {% set models_runs_results = elementary.agate_to_json(models_runs_agate) %}
-    {% do elementary.edr_log(models_runs_results) %}
+    {% do return(elementary.agate_to_dicts(models_runs_agate)) %}
 {%- endmacro -%}
