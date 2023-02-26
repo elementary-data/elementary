@@ -235,7 +235,7 @@ def monitor(
     disable_samples,
     env,
     select,
-    group,
+    group_by,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -262,7 +262,7 @@ def monitor(
         slack_channel_name=slack_channel_name,
         timezone=timezone,
         env=env,
-        slack_group_alerts_by=group,
+        slack_group_alerts_by=group_by,
     )
     anonymous_tracking = AnonymousTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
