@@ -1,5 +1,5 @@
 import copy
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
@@ -126,5 +126,5 @@ class NormalizedAlert:
 
     def _get_field_from_test_meta_or_model_meta_or_default(
         self, key: str, default_val=None
-    ):
+    ) -> Any:
         return self.test_meta.get(key) or self.model_meta.get(key) or default_val

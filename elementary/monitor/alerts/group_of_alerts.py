@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List
 
+from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.schema.alert_group_component import NotificationComponent, AlertGroupComponent
@@ -60,7 +61,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         self.alerts = alerts
 
         self._sort_channel_destination(default_channel=default_channel_destination)
-        self._fill_components_to_alerts(alerts)
+        self._fill_components_to_alerts()
 
         tags = self._fill_and_dedup_tags(alerts)
         self._components_to_attention_required: Dict[NotificationComponent, str] = {
@@ -126,7 +127,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
     def _sort_channel_destination(self, default_channel):
         raise NotImplementedError
 
-    def _fill_components_to_alerts(self, alerts):
+    def _fill_components_to_alerts(self):
         errors = []
         warnings = []
         failures = []
@@ -143,7 +144,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
             ErrorComponent: errors,
         }
 
-    def to_slack(self):
+    def to_slack(self) -> SlackMessageSchema:
         title_blocks = []  # title, [banner], number of passed or failed,
         title_blocks.append(self._title_block())
         banner_block = self._get_banner_block()
