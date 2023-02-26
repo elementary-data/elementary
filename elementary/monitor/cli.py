@@ -211,7 +211,7 @@ def get_cli_properties() -> dict:
     "--group-by",
     type=str,
     default="alert",
-    help="Whether to group alerts by 'alert' or by 'table'"
+    help="Whether to group alerts by 'alert' or by 'table'",
 )
 @click.pass_context
 def monitor(
