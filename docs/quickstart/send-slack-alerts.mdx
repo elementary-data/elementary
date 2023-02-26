@@ -427,7 +427,7 @@ models:
 <Accordion title="Group alerts by table">
 By default, Elementary sends a single alert to notify on each failure. When using single alerts, the alert will include extensive information for fast triage.
   
-Elementary also supports grouping alerts by table. In this case, a single Slack notification will be generated that will contain all the test warning/errors/failures that relates to a model, as well as that model's errors. The created message will do a union of the relevant owners, tags and subscribers.
+Elementary also supports grouping alerts by table. In this case, a single Slack notification will be generated containing all test warnings/failures/errors as well as the errors associated with the model. The created notification will contain a union of the relevant owners, tags and subscribers.
   
 To group alerts by table:
 
@@ -435,6 +435,24 @@ To group alerts by table:
 edr monitor --group_by table
 ```
 
+Grouping can also be configured through the yml files. To set it up globaly for your project, add the configuration to your models in the dbt_project.yml file:  
+  
+ ```yml dbt_project.yml
+ADD EXAMPLE
+```  
+  
+To set it up for a model, add the configuration to your model in the properties.yml:
+  
+ ```yml properties.yml
+ADD EXAMPLE
+```   
+  
+Grouping by table can be configured globally (in the dbt_project.yml) but if you wish to override it for a specific model where you want a single alert for each failure, you can add the configuration to your model in the properties.yml:
+
+ ```yml properties.yml
+ADD EXAMPLE
+```   
+  
 </Accordion>  
 
 
