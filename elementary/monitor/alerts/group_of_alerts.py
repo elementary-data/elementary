@@ -13,8 +13,8 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class GroupingType(Enum):
-    BY_ALERT = "by_alert"
-    BY_TABLE = "by_table"
+    BY_ALERT = "alert"
+    BY_TABLE = "table"
     ALL = "all"
 
 

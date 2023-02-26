@@ -39,7 +39,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 @Parametrization.autodetect_parameters()
 @Parametrization.default_parameters(
     default_channel=DEFAULT_CHANNEL,
-    default_grouping="by_alert",
+    default_grouping="alert",
     expected_execution_properties=None,
 )
 @Parametrization.case(
@@ -85,7 +85,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 )
 @Parametrization.case(
     name="one_fail_one_warn_same_model_group_by_table_groups_them_together",
-    default_grouping="by_table",
+    default_grouping="table",
     list_of_alerts=[
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
@@ -107,7 +107,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 )
 @Parametrization.case(
     name="one_fail_one_warn_same_table_one_other_table_group_by_table_groups_them_to_2_groups",
-    default_grouping="by_table",
+    default_grouping="table",
     list_of_alerts=[
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
@@ -134,7 +134,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 )
 @Parametrization.case(
     name="two_alerts_on_model_1_two_alerts_on_model_2_default_grouping_is_by_table_by_one_alert_has_group_by_alert",
-    default_grouping="by_table",
+    default_grouping="table",
     list_of_alerts=[
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,

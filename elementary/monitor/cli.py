@@ -208,10 +208,10 @@ def get_cli_properties() -> dict:
     help="Whether to send a test message in case there are no alerts.",
 )
 @click.option(
-    "--group",
+    "--group-by",
     type=str,
-    default="by_alert",
-    help="Wether to group alerts 'by_alert', 'by_table', or 'all'",
+    default="alert",
+    help="Whether to group alerts by 'alert' or by 'table'"
 )
 @click.pass_context
 def monitor(

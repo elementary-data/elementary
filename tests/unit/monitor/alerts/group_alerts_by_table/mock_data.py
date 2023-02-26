@@ -52,7 +52,7 @@ AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING = MockAlert(
 )
 AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT = MockAlert(
     status="fail",
-    slack_group_alerts_by="by_alert",
+    slack_group_alerts_by="alert",
     model_unique_id=MODEL_2,
     slack_channel=None,
     detected_at=DETECTED_AT,
@@ -63,7 +63,7 @@ AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT = MockAlert(
 )
 AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE = MockAlert(
     status="fail",
-    slack_group_alerts_by="by_table",
+    slack_group_alerts_by="table",
     model_unique_id=MODEL_2,
     slack_channel=None,
     detected_at=DETECTED_AT,
@@ -74,7 +74,7 @@ AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE = MockAlert(
 )
 AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE = MockAlert(
     status="error",
-    slack_group_alerts_by="by_table",
+    slack_group_alerts_by="table",
     model_unique_id=MODEL_2,
     slack_channel=None,
     detected_at=DETECTED_AT,
@@ -85,7 +85,7 @@ AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE = MockAlert(
 )
 AL_ERROR_MODEL3_NO_CHANNEL_WITH_GROUPING_BY_ALERT = MockAlert(
     status="error",
-    slack_group_alerts_by="by_alert",
+    slack_group_alerts_by="alert",
     model_unique_id=MODEL_3,
     slack_channel=None,
     detected_at=DETECTED_AT,
