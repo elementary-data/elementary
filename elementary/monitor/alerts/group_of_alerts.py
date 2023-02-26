@@ -191,7 +191,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
 
     def _title_block(self):
         return self.create_header_block(
-            f":small_red_triangle_down: {self._title} ({len(self.alerts)} alerts)"
+            f":small_red_triangle: {self._title} ({len(self.alerts)} alerts)"
         )
 
     def _number_of_failed_block(self):
