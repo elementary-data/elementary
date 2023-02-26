@@ -1,4 +1,5 @@
 import json
+import os
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -20,7 +21,7 @@ ONE_MINUTE = 60
 
 class SlackClient(ABC):
     def __init__(
-        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None
+        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None, local_messages_dir=None
     ) -> None:
         self.token = token
         self.webhook = webhook
@@ -210,3 +211,97 @@ class SlackWebhookClient(SlackClient):
 
     def get_user_id_from_email(self, email: str) -> Optional[str]:
         return None
+
+
+class SlackWebClientWithFileBackup(SlackWebClient):
+    """
+    The usual functionality of the Slack Web Client, with backing up all messages sent to a local file, for E2E tests.
+    """
+    def __init__(
+        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None, local_messages_dir=None
+    ) -> None:
+        self._local_messages_dir = local_messages_dir
+        os.makedirs(self._local_messages_dir, exist_ok=True)
+        self._messages_index = 0
+        super().__init__(token, webhook, tracking, local_messages_dir)
+
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
+    def send_message(
+        self, channel_name: str, message: SlackMessageSchema, **kwargs
+    ) -> bool:
+        try:
+            self.client.chat_postMessage(
+                channel=channel_name,
+                text=message.text,
+                blocks=json.dumps(message.blocks) if message.blocks else None,
+                attachments=json.dumps(message.attachments)
+                if message.attachments
+                else None,
+            )
+            dest_path = os.path.join(self._local_messages_dir, f"message_{self._messages_index}.raw")
+            with open(dest_path, "w") as dest_file:
+                dest_file.writelines([message.text]+message.blocks+message.attachments)
+                self._messages_index += 1
+            return True
+        except SlackApiError as err:
+            if self._handle_send_err(err, channel_name):
+                return self.send_message(channel_name, message)
+            self.tracking.record_cli_internal_exception(err)
+            return False
+
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
+    def send_file(
+        self,
+        channel_name: str,
+        file_path: str,
+        message: Optional[SlackMessageSchema] = None,
+    ) -> bool:
+        channel_id = self._get_channel_id(channel_name)
+        try:
+            self.client.files_upload_v2(
+                channel=channel_id,
+                initial_comment=message.text if message else None,
+                file=file_path,
+                request_file_info=False,
+            )
+            dest_path = os.path.join(self._local_messages_dir, f"file_{self._messages_index}.raw")
+            with open(dest_path, "w") as dest_file:
+                with open(file_path, "r") as src_file:
+                    dest_file.write(src_file.read())
+                    self._messages_index += 1
+            return True
+        except SlackApiError as err:
+            if self._handle_send_err(err, channel_name):
+                return self.send_file(channel_name, file_path, message)
+            return False
+
+
+class SlackWebhookClientWithFileBackup(SlackWebhookClient):
+
+    def __init__(
+        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None, local_messages_dir=None
+    ) -> None:
+        self._local_messages_dir = local_messages_dir
+        os.makedirs(self._local_messages_dir, exist_ok=True)
+        self._messages_index = 0
+        super().__init__(token, webhook, tracking, local_messages_dir)
+    @sleep_and_retry
+    @limits(calls=50, period=ONE_MINUTE)
+    def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
+        response = self.client.send(
+            text=message.text, blocks=message.blocks, attachments=message.attachments
+        )
+        if response.status_code == OK_STATUS_CODE:
+            dest_path = os.path.join(self._local_messages_dir, f"message_{self._messages_index}.raw")
+            with open(dest_path, "w") as dest_file:
+                dest_file.writelines([message.text]+message.blocks+message.attachments)
+                self._messages_index += 1
+            return True
+
+        else:
+            logger.error(
+                f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}"
+            )
+            return False
