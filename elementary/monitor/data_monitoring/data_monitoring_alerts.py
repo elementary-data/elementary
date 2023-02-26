@@ -114,8 +114,8 @@ class DataMonitoringAlerts(DataMonitoring):
                 )
                 continue
             try:
-                t = GroupingType(al.slack_group_alerts_by)
-                alerts_by_grouping_mechanism[t].append(al)
+                grouping_type = GroupingType(al.slack_group_alerts_by)
+                alerts_by_grouping_mechanism[grouping_type].append(al)
             except ValueError:
                 alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
                     al
