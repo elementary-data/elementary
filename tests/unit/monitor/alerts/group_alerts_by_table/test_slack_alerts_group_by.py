@@ -339,20 +339,20 @@ def test_alert_group_construction(
     # assertions
     if expected_owners is not None:
         assert sorted(
-            alerts_group._components_to_attn_required[OwnersComponent].split(", ")
+            alerts_group._components_to_attention_required[OwnersComponent].split(", ")
         ) == sorted(expected_owners)
     if expected_tags is not None:
         assert sorted(
             [
                 x.replace("#", "")
-                for x in alerts_group._components_to_attn_required[TagsComponent].split(
+                for x in alerts_group._components_to_attention_required[TagsComponent].split(
                     ", "
                 )
             ]
         ) == sorted(expected_tags.split(", "))
     if expected_subs is not None:
         assert sorted(
-            alerts_group._components_to_attn_required[SubsComponent]
+            alerts_group._components_to_attention_required[SubsComponent]
         ) == sorted(expected_subs)
     if expected_errors is not None:
         assert alerts_group._components_to_alerts[ErrorComponent] == expected_errors

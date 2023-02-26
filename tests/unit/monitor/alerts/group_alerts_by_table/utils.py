@@ -12,7 +12,7 @@ def check_eq_group_alerts(grp1: GroupOfAlerts, grp2: GroupOfAlerts):
     ret = grp1.alerts == grp2.alerts  # same alerts
     ret &= grp1._components_to_alerts == grp2._components_to_alerts  # same mappings
     ret &= (
-        grp1._components_to_attn_required == grp2._components_to_attn_required
+            grp1._components_to_attention_required == grp2._components_to_attention_required
     )  # same owners, tags, subscribers
 
     return ret

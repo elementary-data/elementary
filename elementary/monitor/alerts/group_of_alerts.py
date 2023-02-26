@@ -63,7 +63,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         self._fill_components_to_alerts(alerts)
 
         tags = self._fill_and_dedup_tags(alerts)
-        self._components_to_attn_required: Dict[NotificationComponent, str] = {
+        self._components_to_attention_required: Dict[NotificationComponent, str] = {
             TagsComponent: tags
         }
         # self_components_to_attn_required is a magic dict that maps:
@@ -77,9 +77,9 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
 
     def __setattr__(self, key, value):
         if key == "owners":
-            self._components_to_attn_required[OwnersComponent] = ", ".join(value)
+            self._components_to_attention_required[OwnersComponent] = ", ".join(value)
         if key == "subscribers":
-            self._components_to_attn_required[SubsComponent] = ", ".join(value)
+            self._components_to_attention_required[SubsComponent] = ", ".join(value)
         return super().__setattr__(key, value)
 
     def _fill_and_dedup_owners_and_subs(self, alerts):
@@ -205,7 +205,7 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
             self.create_text_section_block(":mega: *Attention required* :mega:")
         ]
 
-        for component, val in self._components_to_attn_required.items():
+        for component, val in self._components_to_attention_required.items():
             text = f"_{component.empty_section_content}_" if not val else val
             preview_blocks.append(
                 self.create_text_section_block(f"*{component.name_in_summary}*: {text}")
