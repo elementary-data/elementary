@@ -2,7 +2,6 @@ from os import path
 from typing import Optional, Tuple
 
 import boto3
-import botocore.exceptions
 
 from elementary.config.config import Config
 from elementary.tracking.anonymous_tracking import AnonymousTracking
@@ -40,27 +39,21 @@ class S3Client:
         bucket_report_path = remote_bucket_file_path or report_filename
         bucket_website_url = None
         logger.info(f'Uploading to S3 bucket "{self.config.s3_bucket_name}"')
-        try:
-            self.client.upload_file(
-                local_html_file_path,
-                self.config.s3_bucket_name,
-                bucket_report_path,
-                ExtraArgs={"ContentType": "text/html"},
+        self.client.upload_file(
+            local_html_file_path,
+            self.config.s3_bucket_name,
+            bucket_report_path,
+            ExtraArgs={"ContentType": "text/html"},
+        )
+        logger.info("Uploaded report to S3.")
+        if self.config.update_bucket_website:
+            self.client.put_bucket_website(
+                Bucket=self.config.s3_bucket_name,
+                # We use report_filename because a path can not be an IndexDocument Suffix.
+                WebsiteConfiguration={"IndexDocument": {"Suffix": report_filename}},
             )
-            logger.info("Uploaded report to S3.")
-            if self.config.update_bucket_website:
-                self.client.put_bucket_website(
-                    Bucket=self.config.s3_bucket_name,
-                    # We use report_filename because a path can not be an IndexDocument Suffix.
-                    WebsiteConfiguration={"IndexDocument": {"Suffix": report_filename}},
-                )
-                bucket_website_url = self.get_bucket_website_url()
-                logger.info("Updated S3 bucket's website.")
-        except botocore.exceptions.ClientError as ex:
-            logger.exception("Failed to upload report to S3.")
-            if self.tracking:
-                self.tracking.record_cli_internal_exception(ex)
-            return False, bucket_website_url
+            bucket_website_url = self.get_bucket_website_url()
+            logger.info("Updated S3 bucket's website.")
         return True, bucket_website_url
 
     def get_bucket_website_url(self) -> Optional[str]:
