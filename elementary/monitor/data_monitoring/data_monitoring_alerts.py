@@ -89,8 +89,8 @@ class DataMonitoringAlerts(DataMonitoring):
         for alert in group_alert.alerts:
             all_owners.update(alert.owners)
             all_subscribers.update(alert.subscribers)
-        group_alert.owners = all_owners
-        group_alert.subscribers = all_subscribers
+        group_alert.set_owners(all_owners)
+        group_alert.set_subscribers(all_subscribers)
 
     def _group_alerts_per_config(self, alerts: List[Alert]) -> List[GroupOfAlerts]:
         """
@@ -102,7 +102,6 @@ class DataMonitoringAlerts(DataMonitoring):
         :param alerts:
         :return:
         """
-        # import pdb; pdb.set_trace()
         default_alerts_group_by_strategy = GroupingType(
             self.config.slack_group_alerts_by
         )

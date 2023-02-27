@@ -83,6 +83,14 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
             self._components_to_attention_required[SubsComponent] = ", ".join(value)
         return super().__setattr__(key, value)
 
+    def set_owners(self, owners):
+        self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
+        self.owners = owners
+
+    def set_subscribers(self, subscribers):
+        self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
+        self.subscribers = subscribers
+
     def _fill_and_dedup_owners_and_subs(self, alerts):
         owners = set([])
         subscribers = set([])
