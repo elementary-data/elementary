@@ -3,13 +3,12 @@ from parametrization import Parametrization
 from elementary.monitor.alerts.group_of_alerts import (
     ErrorComponent,
     FailureComponent,
-    GroupOfAlertsByAll,
     GroupOfAlertsBySingleAlert,
     GroupOfAlertsByTable,
     OwnersComponent,
     SubsComponent,
     TagsComponent,
-    WarningComponent,
+    WarningComponent, GroupingType,
 )
 from elementary.monitor.data_monitoring.data_monitoring_alerts import (
     DataMonitoringAlerts,
@@ -65,15 +64,14 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     expected_execution_properties={
         "had_group_by_alert": True,
         "had_group_by_table": False,
-        "had_group_by_all": False,
     },
 )
 @Parametrization.case(
-    name="one_fail_group_by_all_channel_selection_is_default",
-    default_grouping="all",
+    name="one_fail_group_by_all_channel_selection_when_alert_is_not_a_model_is_default",
+    default_grouping=GroupingType.BY_TABLE.value,
     list_of_alerts=[AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING],
     expected_alert_groups=[
-        GroupOfAlertsByAll(
+        GroupOfAlertsByTable(
             alerts=[AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING],
             default_channel_destination=DEFAULT_CHANNEL,
         )
@@ -81,7 +79,6 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     expected_execution_properties={
         "had_group_by_alert": False,
         "had_group_by_table": False,
-        "had_group_by_all": True,
     },
 )
 @Parametrization.case(
@@ -103,7 +100,6 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     expected_execution_properties={
         "had_group_by_alert": False,
         "had_group_by_table": True,
-        "had_group_by_all": False,
     },
 )
 @Parametrization.case(
@@ -130,7 +126,6 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     expected_execution_properties={
         "had_group_by_alert": False,
         "had_group_by_table": True,
-        "had_group_by_all": False,
     },
 )
 @Parametrization.case(
@@ -162,7 +157,6 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     expected_execution_properties={
         "had_group_by_alert": True,
         "had_group_by_table": True,
-        "had_group_by_all": False,
     },
 )
 @Parametrization.case(

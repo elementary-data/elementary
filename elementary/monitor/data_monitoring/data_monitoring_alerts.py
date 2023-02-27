@@ -126,15 +126,6 @@ class DataMonitoringAlerts(DataMonitoring):
         for alert in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
             table_to_alerts[alert.model_unique_id].append(alert)
 
-        if len(alerts_by_grouping_mechanism[GroupingType.ALL]) == 0:
-            alls_group = []
-        else:
-            alls_group = [
-                GroupOfAlertsByAll(
-                    alerts=alerts_by_grouping_mechanism[GroupingType.ALL],
-                    default_channel_destination=self.config.slack_channel_name,
-                )
-            ]
 
         by_table_group = [
             GroupOfAlertsByTable(
@@ -151,11 +142,10 @@ class DataMonitoringAlerts(DataMonitoring):
             for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]
         ]
 
-        self.execution_properties["had_group_by_all"] = len(alls_group) > 0
         self.execution_properties["had_group_by_table"] = len(by_table_group) > 0
         self.execution_properties["had_group_by_alert"] = len(by_alert_group) > 0
 
-        return alls_group + by_table_group + by_alert_group
+        return by_table_group + by_alert_group
 
     def _send_test_message(self):
         self.slack_client.send_message(

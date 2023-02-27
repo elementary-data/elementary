@@ -17,7 +17,6 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 class GroupingType(Enum):
     BY_ALERT = "alert"
     BY_TABLE = "table"
-    ALL = "all"
 
 
 ErrorComponent = AlertGroupComponent(
@@ -237,24 +236,6 @@ class GroupOfAlertsByTable(GroupOfAlerts):
             detected_at = detected_at.strftime(DATETIME_FORMAT)
 
         return f"{alert_to_concise_name(alert)} | {detected_at}"
-
-
-class GroupOfAlertsByAll(GroupOfAlerts):
-    def __init__(self, alerts: List[Alert], default_channel_destination: str):
-        self._title = "Alerts Summary"
-        super().__init__(alerts, default_channel_destination)
-
-    def _sort_channel_destination(self, default_channel):
-        """
-        where do we send a group of alerts to?
-        Definitions:
-        1. "default_channel" is the project yaml level definition, over-rided by CLI if given
-        :return:
-        """
-        self.channel_destination = default_channel
-
-    def _get_tabulated_row_from_alert(self, alert: Alert):
-        return f"{alert.model_unique_id} | {alert_to_concise_name(alert)}"
 
 
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):
