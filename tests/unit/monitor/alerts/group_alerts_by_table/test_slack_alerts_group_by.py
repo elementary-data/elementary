@@ -41,6 +41,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 @Parametrization.default_parameters(
     default_channel=DEFAULT_CHANNEL,
     default_grouping=GroupingType.BY_ALERT.value,
+    default_env="dev",
     expected_execution_properties=None,
 )
 @Parametrization.case(
@@ -204,13 +205,14 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 def test_grouping_logic(
     default_channel,
     default_grouping,
+    default_env,
     list_of_alerts,
     expected_alert_groups,
     expected_execution_properties,
 ):
     # init
     conf = MockConfig(
-        slack_group_alerts_by=default_grouping, slack_channel_name=default_channel
+        slack_group_alerts_by=default_grouping, slack_channel_name=default_channel,env=default_env
     )
     data_monitoring_alerts = mock_data_monitoring_alerts(conf)
 
@@ -221,8 +223,7 @@ def test_grouping_logic(
 
     # assertions
     if expected_alert_groups is not None:
-        if len(list_of_groups) != len(expected_alert_groups):
-            assert False
+        assert len(list_of_groups) == len(expected_alert_groups)
         for grp1, grp2 in zip(list_of_groups, expected_alert_groups):
             assert check_eq_group_alerts(grp1, grp2)
 
@@ -236,6 +237,7 @@ def test_grouping_logic(
 @Parametrization.default_parameters(
     grouping_class=GroupOfAlertsBySingleAlert,
     default_channel=DEFAULT_CHANNEL,
+    default_env="dev",
     expected_owners=None,
     expected_tags=None,
     expected_subs=None,
@@ -316,6 +318,7 @@ def test_alert_group_construction(
     grouping_class,
     alerts_list,
     default_channel,
+    default_env,
     expected_owners,
     expected_tags,
     expected_subs,
@@ -325,7 +328,7 @@ def test_alert_group_construction(
     expected_channel,
 ):
     # business logic
-    alerts_group = grouping_class(alerts_list, default_channel)
+    alerts_group = grouping_class(alerts_list, default_channel, env=default_env)
 
     # assertions
     if expected_owners is not None:
