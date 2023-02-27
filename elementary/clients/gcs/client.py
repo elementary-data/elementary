@@ -1,5 +1,6 @@
 from os import path
 from typing import Optional, Tuple
+from urllib.parse import urljoin
 
 import google
 from google.auth.credentials import Credentials
@@ -81,7 +82,9 @@ class GCSClient:
                     if destination_bucket
                     else bucket_name
                 )
-                bucket_website_url = f"{DEFAULT_BUCKET_WEBSITE_URL}/{full_bucket_path}"
+                bucket_website_url = urljoin(
+                    DEFAULT_BUCKET_WEBSITE_URL, full_bucket_path
+                )
         return bucket_website_url
 
     def get_client(self, config: Config):
