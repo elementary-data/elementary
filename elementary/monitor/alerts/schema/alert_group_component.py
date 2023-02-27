@@ -10,7 +10,8 @@ class NotificationComponent:
 
 
 @dataclass(frozen=True, eq=True)
-class AlertGroupComponent(NotificationComponent):
+class AlertGroupComponent:
+    name_in_summary: str
     emoji_in_summary: str
     name_in_full: str
     emoji_in_full: str

@@ -130,13 +130,16 @@ class DataMonitoringAlerts(DataMonitoring):
             GroupOfAlertsByTable(
                 alerts=table_to_alerts[model_unique_id],
                 default_channel_destination=self.config.slack_channel_name,
+                env=self.config.env
             )
             for model_unique_id in table_to_alerts.keys()
         ]
 
         by_alert_group = [
             GroupOfAlertsBySingleAlert(
-                alerts=[al], default_channel_destination=self.config.slack_channel_name
+                alerts=[al],
+                default_channel_destination=self.config.slack_channel_name,
+                env=self.config.env
             )
             for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]
         ]
@@ -186,12 +189,13 @@ class DataMonitoringAlerts(DataMonitoring):
                 self.success = False
 
         # Now update as sent:
-        table_name_to_alert_ids = defaultdict(lambda: [])
-        for alert_id, table_name in sent_alert_ids_and_tables:
-            table_name_to_alert_ids[table_name].append(alert_id)
+        if False:
+            table_name_to_alert_ids = defaultdict(lambda: [])
+            for alert_id, table_name in sent_alert_ids_and_tables:
+                table_name_to_alert_ids[table_name].append(alert_id)
 
-        for table_name, alert_ids in table_name_to_alert_ids.items():
-            self.alerts_api.update_sent_alerts(alert_ids, table_name)
+            for table_name, alert_ids in table_name_to_alert_ids.items():
+                self.alerts_api.update_sent_alerts(alert_ids, table_name)
 
         # Now update sent alerts counter:
         self.sent_alert_count += len(sent_alert_ids_and_tables)

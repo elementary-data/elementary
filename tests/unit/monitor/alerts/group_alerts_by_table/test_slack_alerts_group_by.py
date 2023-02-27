@@ -1,14 +1,14 @@
 from parametrization import Parametrization
 
 from elementary.monitor.alerts.group_of_alerts import (
-    ErrorComponent,
-    FailureComponent,
+    TestErrorComponent,
+    TestFailureComponent,
     GroupOfAlertsBySingleAlert,
     GroupOfAlertsByTable,
     OwnersComponent,
     SubsComponent,
     TagsComponent,
-    WarningComponent, GroupingType,
+    TestWarningComponent, GroupingType,
 )
 from elementary.monitor.data_monitoring.data_monitoring_alerts import (
     DataMonitoringAlerts,
@@ -341,10 +341,10 @@ def test_alert_group_construction(
             alerts_group._components_to_attention_required[SubsComponent]
         ) == sorted(expected_subs)
     if expected_errors is not None:
-        assert alerts_group._components_to_alerts[ErrorComponent] == expected_errors
+        assert alerts_group._components_to_alerts[TestErrorComponent] == expected_errors
     if expected_warnings is not None:
-        assert alerts_group._components_to_alerts[WarningComponent] == expected_warnings
+        assert alerts_group._components_to_alerts[TestWarningComponent] == expected_warnings
     if expected_fails is not None:
-        assert alerts_group._components_to_alerts[FailureComponent] == expected_fails
+        assert alerts_group._components_to_alerts[TestFailureComponent] == expected_fails
     if expected_channel is not None:
         assert alerts_group.channel_destination == expected_channel
