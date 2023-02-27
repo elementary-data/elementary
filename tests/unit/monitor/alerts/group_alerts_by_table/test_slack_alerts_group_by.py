@@ -16,11 +16,12 @@ from elementary.monitor.data_monitoring.data_monitoring_alerts import (
 from tests.unit.monitor.alerts.group_alerts_by_table.mock_classes import MockConfig
 from tests.unit.monitor.alerts.group_alerts_by_table.mock_data import (
     AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
-    AL_ERROR_MODEL3_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
+    AL_ERROR_MODEL3_NO_CHANNEL_WITH_MODEL_META_GROUPING_BY_ALERT,
     AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
     AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
     AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
-    AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+    AL_WARN_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
+    AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
     AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
     DEFAULT_CHANNEL,
     OTHER_CHANNEL,
@@ -39,7 +40,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 @Parametrization.autodetect_parameters()
 @Parametrization.default_parameters(
     default_channel=DEFAULT_CHANNEL,
-    default_grouping="alert",
+    default_grouping=GroupingType.BY_ALERT.value,
     expected_execution_properties=None,
 )
 @Parametrization.case(
@@ -49,7 +50,6 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     expected_execution_properties={
         "had_group_by_alert": False,
         "had_group_by_table": False,
-        "had_group_by_all": False,
     },
 )
 @Parametrization.case(
@@ -78,7 +78,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     ],
     expected_execution_properties={
         "had_group_by_alert": False,
-        "had_group_by_table": False,
+        "had_group_by_table": True,
     },
 )
 @Parametrization.case(
@@ -104,7 +104,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 )
 @Parametrization.case(
     name="one_fail_one_warn_same_table_one_other_table_group_by_table_groups_them_to_2_groups",
-    default_grouping="table",
+    default_grouping=GroupingType.BY_TABLE.value,
     list_of_alerts=[
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
@@ -160,29 +160,29 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     },
 )
 @Parametrization.case(
-    name="default_grouping_all_and_overrides_existing_by_alert_and_by_table_to_2_out_of_3_of_model_2_s_alerts",
-    default_grouping="all",
+    name="default_grouping_by_table_and_overrides_existing_by_alert",
+    default_grouping=GroupingType.BY_TABLE.value,
     list_of_alerts=[
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
-        AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+        AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
         AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
-        AL_ERROR_MODEL3_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
+        AL_ERROR_MODEL3_NO_CHANNEL_WITH_MODEL_META_GROUPING_BY_ALERT,
     ],
     expected_alert_groups=[
-        GroupOfAlertsByAll(
+        GroupOfAlertsByTable(
             alerts=[
                 AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
-                AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
-                AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
+                AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING
             ],
             default_channel_destination=DEFAULT_CHANNEL,
         ),
         GroupOfAlertsByTable(
             alerts=[
-                AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+                AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
+                AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
                 AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
@@ -192,14 +192,13 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
             default_channel_destination=DEFAULT_CHANNEL,
         ),
         GroupOfAlertsBySingleAlert(
-            alerts=[AL_ERROR_MODEL3_NO_CHANNEL_WITH_GROUPING_BY_ALERT],
+            alerts=[AL_ERROR_MODEL3_NO_CHANNEL_WITH_MODEL_META_GROUPING_BY_ALERT],
             default_channel_destination=DEFAULT_CHANNEL,
         ),
     ],
     expected_execution_properties={
         "had_group_by_alert": True,
         "had_group_by_table": True,
-        "had_group_by_all": True,
     },
 )
 def test_grouping_logic(
@@ -222,7 +221,8 @@ def test_grouping_logic(
 
     # assertions
     if expected_alert_groups is not None:
-        assert len(list_of_groups) == len(expected_alert_groups)
+        if len(list_of_groups) != len(expected_alert_groups):
+            assert False
         for grp1, grp2 in zip(list_of_groups, expected_alert_groups):
             assert check_eq_group_alerts(grp1, grp2)
 
@@ -234,7 +234,7 @@ def test_grouping_logic(
 
 @Parametrization.autodetect_parameters()
 @Parametrization.default_parameters(
-    grouping_class=GroupOfAlertsByAll,
+    grouping_class=GroupOfAlertsBySingleAlert,
     default_channel=DEFAULT_CHANNEL,
     expected_owners=None,
     expected_tags=None,
@@ -260,23 +260,23 @@ def test_grouping_logic(
     name="group_by_table_forces_use_of_the_model_channel",
     grouping_class=GroupOfAlertsByTable,
     alerts_list=[
-        AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+        AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
         AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
     ],
     expected_channel=OTHER_CHANNEL,
 )
 @Parametrization.case(
-    name="group_by_all_forces_use_of_the_default_channel",
-    grouping_class=GroupOfAlertsByAll,
+    name="group_by_table_forces_use_of_the_models_channel",
+    grouping_class=GroupOfAlertsByTable,
     alerts_list=[
-        AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+        AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
         AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
     ],
-    expected_channel=DEFAULT_CHANNEL,
+    expected_channel=OTHER_CHANNEL,
 )
 @Parametrization.case(
     name="owners_are_deduplicated",
-    grouping_class=GroupOfAlertsByAll,
+    grouping_class=GroupOfAlertsByTable,
     alerts_list=[
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
@@ -285,7 +285,7 @@ def test_grouping_logic(
 )
 @Parametrization.case(
     name="tags_are_deduplicated",
-    grouping_class=GroupOfAlertsByAll,
+    grouping_class=GroupOfAlertsByTable,
     alerts_list=[
         AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
@@ -294,26 +294,22 @@ def test_grouping_logic(
 )
 @Parametrization.case(
     name="errors_warnings_and_fails_are_routed_properly",
-    grouping_class=GroupOfAlertsByAll,
+    grouping_class=GroupOfAlertsByTable,
     alerts_list=[
-        AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
-        AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
-        AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+        AL_WARN_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
+        AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
         AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
-        AL_ERROR_MODEL3_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
     ],
     expected_errors=[
         AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
-        AL_ERROR_MODEL3_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
     ],
-    expected_warnings=[AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING],
+    expected_warnings=[AL_WARN_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT],
     expected_fails=[
-        AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
         AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
-        AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE,
+        AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
     ],
 )
 def test_alert_group_construction(

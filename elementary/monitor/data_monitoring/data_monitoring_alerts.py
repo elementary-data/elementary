@@ -13,7 +13,6 @@ from elementary.monitor.alerts.alerts import Alerts
 from elementary.monitor.alerts.group_of_alerts import (
     GroupingType,
     GroupOfAlerts,
-    GroupOfAlertsByAll,
     GroupOfAlertsBySingleAlert,
     GroupOfAlertsByTable,
 )
