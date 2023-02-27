@@ -3,12 +3,14 @@ from enum import Enum
 from typing import Dict, List
 
 from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.schema.alert_group_component import NotificationComponent, AlertGroupComponent
 from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
 from elementary.utils.json_utils import try_load_json
-from elementary.utils.models import alert_to_concise_name, get_shortened_model_name
+from elementary.utils.models import alert_to_concise_name, get_shortened_model_name, \
+    list_of_strings_to_comma_delimited_unique_strings
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -62,75 +64,22 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
 
         self._sort_channel_destination(default_channel=default_channel_destination)
         self._fill_components_to_alerts()
+        hashtag = SlackMessageBuilder._HASHTAG
+        self.set_tags(list_of_strings_to_comma_delimited_unique_strings([alert.tags for alert in alerts], prefix=hashtag))
+        self.set_owners(list_of_strings_to_comma_delimited_unique_strings([alert.owners for alert in alerts]))
+        self.set_subsribers(list_of_strings_to_comma_delimited_unique_strings([alert.subscribers for alert in alerts]))
 
-        tags = self._fill_and_dedup_tags(alerts)
-        self._components_to_attention_required: Dict[NotificationComponent, str] = {
-            TagsComponent: tags
-        }
-        # self_components_to_attn_required is a magic dict that maps:
-        #   OwnersComponent -> ", ".join(self.owners) ,
-        #   SubsComponent -> self.subscribers .
-        #   magic is enforced in self.__setattr__ .
-        self._fill_and_dedup_owners_and_subs(
-            alerts
-        )  # we have to hold owners and subscribers explicitly to let DataMonitoring call the slackAPI with them.
         super().__init__()
 
-    def __setattr__(self, key, value):
-        if key == "owners":
-            self._components_to_attention_required[OwnersComponent] = ", ".join(value)
-        if key == "subscribers":
-            self._components_to_attention_required[SubsComponent] = ", ".join(value)
-        return super().__setattr__(key, value)
 
     def set_owners(self, owners):
         self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
-        self.owners = owners
 
     def set_subscribers(self, subscribers):
         self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
-        self.subscribers = subscribers
 
-    def _fill_and_dedup_owners_and_subs(self, alerts):
-        owners = set([])
-        subscribers = set([])
-        for alert in alerts:
-            if alert.owners:
-                if isinstance(alert.owners, list):
-                    owners.update(alert.owners)
-                else:  # it's a string. could be comma delimited.
-                    owners.update(alert.owners.split(","))
-            if alert.subscribers:
-                if isinstance(alert.subscribers, list):
-                    subscribers.update(alert.subscribers)
-                else:  # it's a string. could be comma delimited.
-                    subscribers.update(alert.subscribers.split(","))
-        self.owners = list(owners)
-        self.subscribers = list(subscribers)
-
-    def _fill_and_dedup_tags(self, alerts):
-        tags = set([])
-        for alert in alerts:
-            if alert.tags:
-                if isinstance(alert.tags, str):
-                    tags_unjsoned = try_load_json(
-                        alert.tags
-                    )  # tags is a string, comma delimited values
-                    if (
-                        tags_unjsoned is None
-                    ):  # maybe a string, maybe some comma delimited strings
-                        tags.update([x.strip() for x in alert.tags.split(",")])
-                    elif isinstance(tags_unjsoned, str):  # tags was a quoted string.
-                        tags.update([x.strip() for x in alert.tags.split(",")])
-                    elif isinstance(tags_unjsoned, list):  # tags was a list of strings
-                        tags.update(tags_unjsoned)
-                elif isinstance(alert.tags, list):
-                    tags.update(alert.tags)
-        TAG_PREFIX = "#"
-        formatted_tags = [
-            tag if tag.startswith(TAG_PREFIX) else f"{TAG_PREFIX}{tag}" for tag in tags
-        ]
-        return ", ".join(formatted_tags)
+    def set_tags(self, tags):
+        self._components_to_attention_required[TagsComponent] = ", ".join(tags)
 
     def _sort_channel_destination(self, default_channel):
         raise NotImplementedError

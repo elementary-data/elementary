@@ -3,6 +3,7 @@ from typing import List, Optional, Any
 
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
+from elementary.utils.models import unpack_and_flatten_and_dedup_list_of_strings
 
 logger = get_logger(__name__)
 
@@ -67,15 +68,25 @@ class NormalizedAlert:
         ALERT_FIELDS_KEY (or DEFAULT_ALERT_FIELDS)--> ALERT_FIELDS_KEY
         "group" (or None) --> SLACK_GROUP_ALERTS_BY_KEY
 
+        After this normalization step, Tags, Owners and Subscribers should all be deduplicated Lists, either of strings or []
+
+
         :return:
         """
 
         try:
             normalized_alert = copy.deepcopy(self.alert)
-            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_meta_attrs(
-                SUBSCRIBERS_KEY
+
+            normalized_alert[SUBSCRIBERS_KEY] = unpack_and_flatten_and_dedup_list_of_strings(
+                self._get_alert_meta_attrs(SUBSCRIBERS_KEY)
             )
-            normalized_alert[OWNERS_KEY] = self._get_alert_meta_attrs("owner")
+            normalized_alert[OWNERS_KEY] = unpack_and_flatten_and_dedup_list_of_strings(
+                self._get_alert_meta_attrs("owner")
+            )
+            normalized_alert[TAGS_FIELD] = unpack_and_flatten_and_dedup_list_of_strings(
+                self._get_alert_meta_attrs(TAGS_FIELD)
+            )
+
             normalized_alert["slack_channel"] = self._get_alert_channel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
