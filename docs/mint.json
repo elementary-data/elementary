@@ -139,11 +139,13 @@
         {
           "group": "Releases",
           "pages": [
+            "release-notes/releases/0.7.2",
             "release-notes/releases/0.6.10",
             "release-notes/releases/0.6.7",
             "release-notes/releases/0.6.5",
             "release-notes/releases/0.6.3",
-            "release-notes/releases/0.6.1"
+            "release-notes/releases/0.6.1",
+            "release-notes/releases/0.5.4"
           ]
         }
       ]
