@@ -15,7 +15,7 @@ class MockAlert:
     ]  # this string should be a json of a dict that has or has not the key "channel"
     owners: Optional[List[str]]
     subscribers: Optional[List[str]]
-    tags: Optional[str]
+    tags: Optional[List[str]]
 
 
 @dataclass

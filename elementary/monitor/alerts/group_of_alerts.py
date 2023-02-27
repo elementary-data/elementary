@@ -8,9 +8,8 @@ from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.schema.alert_group_component import NotificationComponent, AlertGroupComponent
 from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
-from elementary.utils.json_utils import try_load_json
-from elementary.utils.models import alert_to_concise_name, get_shortened_model_name, \
-    list_of_strings_to_comma_delimited_unique_strings
+from elementary.utils.json_utils import try_load_json, list_of_lists_of_strings_to_comma_delimited_unique_strings
+from elementary.utils.models import alert_to_concise_name, get_shortened_model_name
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -65,21 +64,19 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         self._sort_channel_destination(default_channel=default_channel_destination)
         self._fill_components_to_alerts()
         hashtag = SlackMessageBuilder._HASHTAG
-        self.set_tags(list_of_strings_to_comma_delimited_unique_strings([alert.tags for alert in alerts], prefix=hashtag))
-        self.set_owners(list_of_strings_to_comma_delimited_unique_strings([alert.owners for alert in alerts]))
-        self.set_subsribers(list_of_strings_to_comma_delimited_unique_strings([alert.subscribers for alert in alerts]))
+        self._components_to_attention_required: Dict[AlertGroupComponent, str] = dict()
+        self._components_to_attention_required[TagsComponent] = list_of_lists_of_strings_to_comma_delimited_unique_strings([alert.tags for alert in alerts], prefix=hashtag)
+        self._components_to_attention_required[OwnersComponent] = list_of_lists_of_strings_to_comma_delimited_unique_strings([alert.owners for alert in alerts])
+        self._components_to_attention_required[SubsComponent] = list_of_lists_of_strings_to_comma_delimited_unique_strings([alert.subscribers for alert in alerts])
 
         super().__init__()
 
 
-    def set_owners(self, owners):
+    def set_owners(self, owners: list[str]):
         self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
 
-    def set_subscribers(self, subscribers):
+    def set_subscribers(self, subscribers: list[str]):
         self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
-
-    def set_tags(self, tags):
-        self._components_to_attention_required[TagsComponent] = ", ".join(tags)
 
     def _sort_channel_destination(self, default_channel):
         raise NotImplementedError
@@ -142,14 +139,14 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
         fields = []
         all_components = list(self._components_to_alerts.items())
         all_components_but_last = all_components[:-1]
-        for component, al_list in all_components_but_last:
+        for component, alert_list in all_components_but_last:
             fields.append(
-                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(al_list)}    |"
+                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}    |"
             )
-        component, al_list = all_components[-1]
+        component, alert_list = all_components[-1]
         fields.append(
             (
-                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(al_list)}"
+                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}"
             )
         )
 
@@ -173,10 +170,10 @@ class GroupOfAlerts(SlackAlertMessageBuilder):
 
         return preview_blocks
 
-    def _tabulate_list_of_alerts(self, al_list):
+    def _tabulate_list_of_alerts(self, alert_list):
         ret = []
-        for al in al_list:
-            ret.append(self._get_tabulated_row_from_alert(al))
+        for alert in alert_list:
+            ret.append(self._get_tabulated_row_from_alert(alert))
         return "\n".join(ret)
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
@@ -278,3 +275,12 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
 
     def to_slack(self):
         return self.alerts[0].to_slack()
+
+    def set_owners(self, owners):
+        self.alerts[0].owners = owners
+
+    def set_subscribers(self, subscribers):
+        self.alerts[0].subscribers=subscribers
+
+    def set_tags(self, tags):
+        self.alerts[0].tags=tags

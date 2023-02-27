@@ -36,6 +36,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
 )
 
 
+
 @Parametrization.autodetect_parameters()
 @Parametrization.default_parameters(
     default_channel=DEFAULT_CHANNEL,
@@ -343,13 +344,8 @@ def test_alert_group_construction(
         ) == sorted(expected_owners)
     if expected_tags is not None:
         assert sorted(
-            [
-                x.replace("#", "")
-                for x in alerts_group._components_to_attention_required[TagsComponent].split(
-                    ", "
-                )
-            ]
-        ) == sorted(expected_tags.split(", "))
+            alerts_group._components_to_attention_required[TagsComponent].split(", ")
+        ) == sorted(expected_tags)
     if expected_subs is not None:
         assert sorted(
             alerts_group._components_to_attention_required[SubsComponent]

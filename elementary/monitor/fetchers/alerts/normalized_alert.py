@@ -1,9 +1,8 @@
 import copy
 from typing import List, Optional, Any
 
-from elementary.utils.json_utils import try_load_json
+from elementary.utils.json_utils import try_load_json, unpack_and_flatten_and_dedup_list_of_strings
 from elementary.utils.log import get_logger
-from elementary.utils.models import unpack_and_flatten_and_dedup_list_of_strings
 
 logger = get_logger(__name__)
 
