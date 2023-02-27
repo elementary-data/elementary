@@ -1,7 +1,10 @@
 import copy
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
-from elementary.utils.json_utils import try_load_json, unpack_and_flatten_and_dedup_list_of_strings
+from elementary.utils.json_utils import (
+    try_load_json,
+    unpack_and_flatten_and_dedup_list_of_strings,
+)
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -76,7 +79,9 @@ class NormalizedAlert:
         try:
             normalized_alert = copy.deepcopy(self.alert)
 
-            normalized_alert[SUBSCRIBERS_KEY] = unpack_and_flatten_and_dedup_list_of_strings(
+            normalized_alert[
+                SUBSCRIBERS_KEY
+            ] = unpack_and_flatten_and_dedup_list_of_strings(
                 self._get_alert_meta_attrs(SUBSCRIBERS_KEY)
             )
             normalized_alert[OWNERS_KEY] = unpack_and_flatten_and_dedup_list_of_strings(

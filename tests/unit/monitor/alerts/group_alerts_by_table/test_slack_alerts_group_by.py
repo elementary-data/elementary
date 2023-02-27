@@ -1,14 +1,15 @@
 from parametrization import Parametrization
 
 from elementary.monitor.alerts.group_of_alerts import (
-    TestErrorComponent,
-    TestFailureComponent,
+    GroupingType,
     GroupOfAlertsBySingleAlert,
     GroupOfAlertsByTable,
     OwnersComponent,
     SubsComponent,
     TagsComponent,
-    TestWarningComponent, GroupingType,
+    TestErrorComponent,
+    TestFailureComponent,
+    TestWarningComponent,
 )
 from elementary.monitor.data_monitoring.data_monitoring_alerts import (
     DataMonitoringAlerts,
@@ -20,9 +21,9 @@ from tests.unit.monitor.alerts.group_alerts_by_table.mock_data import (
     AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
     AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING,
     AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
-    AL_WARN_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
     AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE,
     AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
+    AL_WARN_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT,
     DEFAULT_CHANNEL,
     OTHER_CHANNEL,
     OWNER_1,
@@ -34,7 +35,6 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
     check_eq_group_alerts,
     mock_data_monitoring_alerts,
 )
-
 
 
 @Parametrization.autodetect_parameters()
@@ -176,7 +176,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
         GroupOfAlertsByTable(
             alerts=[
                 AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING,
-                AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING
+                AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
         ),
@@ -212,7 +212,9 @@ def test_grouping_logic(
 ):
     # init
     conf = MockConfig(
-        slack_group_alerts_by=default_grouping, slack_channel_name=default_channel,env=default_env
+        slack_group_alerts_by=default_grouping,
+        slack_channel_name=default_channel,
+        env=default_env,
     )
     data_monitoring_alerts = mock_data_monitoring_alerts(conf)
 
@@ -346,8 +348,13 @@ def test_alert_group_construction(
     if expected_errors is not None:
         assert alerts_group._components_to_alerts[TestErrorComponent] == expected_errors
     if expected_warnings is not None:
-        assert alerts_group._components_to_alerts[TestWarningComponent] == expected_warnings
+        assert (
+            alerts_group._components_to_alerts[TestWarningComponent]
+            == expected_warnings
+        )
     if expected_fails is not None:
-        assert alerts_group._components_to_alerts[TestFailureComponent] == expected_fails
+        assert (
+            alerts_group._components_to_alerts[TestFailureComponent] == expected_fails
+        )
     if expected_channel is not None:
         assert alerts_group.channel_destination == expected_channel

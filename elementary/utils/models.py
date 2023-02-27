@@ -1,14 +1,13 @@
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert, ElementaryTestAlert
+from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 
 
 def get_shortened_model_name(model):
-    return model
     if model is None:
         # this can happen for example when a Singular test is failing for having no refs.
         return None
-    return ".".join(model.split(".")[1:])
+    return model.split(".")[-1]
 
 
 def alert_to_concise_name(alert):
@@ -25,5 +24,3 @@ def alert_to_concise_name(alert):
             text = "model"
         return f"dbt {text} alert - {alert.alias}"
     return "Alert"  # used only in Unit Tests
-
-

@@ -1,5 +1,5 @@
 import json
-from typing import Union, List, Optional
+from typing import List, Optional, Union
 
 
 def try_load_json(string_value: str):
@@ -29,7 +29,9 @@ def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
     """
     # we're either dealing with a json of a list, a comma delimited string, or just one string
     list_unpacked = try_load_json(list_as_str)
-    if list_unpacked is None:  # it was not a json, could be a comma delimited string, or a simple string.
+    if (
+        list_unpacked is None
+    ):  # it was not a json, could be a comma delimited string, or a simple string.
         return [x.strip() for x in list_as_str.split(",")]
 
     if isinstance(list_unpacked, list):
@@ -37,7 +39,9 @@ def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
     return []  # edge case of a string of an empty dict or IDK
 
 
-def unpack_and_flatten_and_dedup_list_of_strings(list_maybe_jsoned: Optional[Union[List[str], str]]) -> List[str]:
+def unpack_and_flatten_and_dedup_list_of_strings(
+    list_maybe_jsoned: Optional[Union[List[str], str]]
+) -> List[str]:
     if not list_maybe_jsoned:
         return []
     ret = []
@@ -49,8 +53,9 @@ def unpack_and_flatten_and_dedup_list_of_strings(list_maybe_jsoned: Optional[Uni
     return list(set(ret))
 
 
-def list_of_lists_of_strings_to_comma_delimited_unique_strings(list_of_strings: List[List[str]],
-                                                               prefix: Optional[str] = None) -> str:
+def list_of_lists_of_strings_to_comma_delimited_unique_strings(
+    list_of_strings: List[List[str]], prefix: Optional[str] = None
+) -> str:
     flat_list = sum(list_of_strings, start=[])
     if prefix:
         flat_list = [append_prefix_if_missing(x, prefix) for x in flat_list]

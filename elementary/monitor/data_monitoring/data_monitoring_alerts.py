@@ -125,12 +125,11 @@ class DataMonitoringAlerts(DataMonitoring):
         for alert in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
             table_to_alerts[alert.model_unique_id].append(alert)
 
-
         by_table_group = [
             GroupOfAlertsByTable(
                 alerts=table_to_alerts[model_unique_id],
                 default_channel_destination=self.config.slack_channel_name,
-                env=self.config.env
+                env=self.config.env,
             )
             for model_unique_id in table_to_alerts.keys()
         ]
@@ -139,7 +138,7 @@ class DataMonitoringAlerts(DataMonitoring):
             GroupOfAlertsBySingleAlert(
                 alerts=[al],
                 default_channel_destination=self.config.slack_channel_name,
-                env=self.config.env
+                env=self.config.env,
             )
             for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]
         ]

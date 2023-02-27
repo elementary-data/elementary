@@ -16,6 +16,8 @@ class MockAlert:
     owners: Optional[List[str]]
     subscribers: Optional[List[str]]
     tags: Optional[List[str]]
+    database_name: str = "elementary_test_db"
+    schema_name: str = "master_elementary"
 
 
 @dataclass
