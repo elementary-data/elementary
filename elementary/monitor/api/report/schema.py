@@ -20,3 +20,4 @@ class ReportDataSchema(BaseModel):
     lineage: dict = dict()
     env: dict = dict()
     tracking: Optional[dict] = None
+    error: Optional[str] = None
