@@ -449,6 +449,12 @@ def report(
     help="The report's file name, this is where it will be stored in the bucket (may contain folders).",
 )
 @click.option(
+    "--bucket-website-url",
+    type=str,
+    default=None,
+    help="The URL the bucket website is set to (if not provided edr will assume the default bucket website url).",
+)
+@click.option(
     "--disable-passed-test-metrics",
     type=bool,
     default=False,
@@ -482,6 +488,7 @@ def send_report(
     project_profile_target,
     executions_limit,
     bucket_file_path,
+    bucket_website_url,
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
@@ -523,6 +530,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        bucket_website_url=bucket_website_url,
         env=env,
     )
     anonymous_tracking = AnonymousTracking(config)

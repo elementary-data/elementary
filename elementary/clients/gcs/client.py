@@ -13,6 +13,8 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+DEFAULT_BUCKET_WEBSITE_URL = "https://storage.googleapis.com"
+
 
 class GCSClient:
     def __init__(self, config: Config, tracking: AnonymousTracking = None):
@@ -71,12 +73,15 @@ class GCSClient:
     ) -> Optional[str]:
         bucket_website_url = None
         if self.config.update_bucket_website:
-            full_bucket_path = (
-                f"{destination_bucket}/{bucket_name}"
-                if destination_bucket
-                else bucket_name
-            )
-            bucket_website_url = f"https://storage.googleapis.com/{full_bucket_path}"
+            if self.config.bucket_website_url:
+                bucket_website_url = self.config.bucket_website_url
+            else:
+                full_bucket_path = (
+                    f"{destination_bucket}/{bucket_name}"
+                    if destination_bucket
+                    else bucket_name
+                )
+                bucket_website_url = f"{DEFAULT_BUCKET_WEBSITE_URL}/{full_bucket_path}"
         return bucket_website_url
 
     def get_client(self, config: Config):

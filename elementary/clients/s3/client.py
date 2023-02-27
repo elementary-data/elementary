@@ -64,22 +64,25 @@ class S3Client:
         return True, bucket_website_url
 
     def get_bucket_website_url(self) -> Optional[str]:
+        bucket_website_url = None
         if self.config.update_bucket_website:
-            try:
-                bucket_name = self.config.s3_bucket_name
-                bucket_location = self.client.get_bucket_location(Bucket=bucket_name)[
-                    "LocationConstraint"
-                ]
-                aws_s3_website_url = self._get_aws_s3_website_url_from_location(
-                    bucket_location
-                )
-                return f"http://{bucket_name}.{aws_s3_website_url}"
+            if self.config.bucket_website_url:
+                bucket_website_url = self.config.bucket_website_url
+            else:
+                try:
+                    bucket_name = self.config.s3_bucket_name
+                    bucket_location = self.client.get_bucket_location(
+                        Bucket=bucket_name
+                    )["LocationConstraint"]
+                    aws_s3_website_url = self._get_aws_s3_website_url_from_location(
+                        bucket_location
+                    )
+                    bucket_website_url = f"http://{bucket_name}.{aws_s3_website_url}"
 
-            except Exception as ex:
-                logger.warning(f"Unable to get bucket website URL: {ex}.")
-                return None
-        else:
-            return None
+                except Exception as ex:
+                    logger.warning(f"Unable to get bucket website URL: {ex}.")
+                    bucket_website_url = None
+        return bucket_website_url
 
     @staticmethod
     def _get_aws_s3_website_url_from_location(location: str) -> str:
