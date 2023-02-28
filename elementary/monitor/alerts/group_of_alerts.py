@@ -287,7 +287,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         self._schema = alerts[0].schema_name
         super().__init__(alerts, default_channel_destination, env)
 
-    def _get_title(self):
+    def _get_title(self) -> str:
         return f"Table issues detected - {self._model}"
 
     def _sort_channel_destination(self, default_channel):
