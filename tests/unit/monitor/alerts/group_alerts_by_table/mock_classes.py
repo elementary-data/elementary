@@ -15,13 +15,16 @@ class MockAlert:
     ]  # this string should be a json of a dict that has or has not the key "channel"
     owners: Optional[List[str]]
     subscribers: Optional[List[str]]
-    tags: Optional[str]
+    tags: Optional[List[str]]
+    database_name: str = "elementary_test_db"
+    schema_name: str = "master_elementary"
 
 
 @dataclass
 class MockConfig:
     slack_group_alerts_by: Optional[str]
     slack_channel_name: Optional[str]
+    env: str = "dev"
 
 
 @dataclass

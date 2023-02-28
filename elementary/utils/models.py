@@ -1,6 +1,6 @@
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert
+from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 
 
 def get_shortened_model_name(model):
@@ -11,11 +11,13 @@ def get_shortened_model_name(model):
 
 
 def alert_to_concise_name(alert):
-    if isinstance(alert, TestAlert):
+    if isinstance(alert, ElementaryTestAlert):
         return f"{alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
-    elif isinstance(alert, SourceFreshnessAlert):
+    if isinstance(alert, TestAlert):
+        return f"{alert.test_short_name or alert.test_name}"
+    if isinstance(alert, SourceFreshnessAlert):
         return f"source freshness alert - {alert.source_name}.{alert.identifier}"
-    elif isinstance(alert, ModelAlert):
+    if isinstance(alert, ModelAlert):
         if alert.materialization == "snapshot":
             text = "snapshot"
         else:

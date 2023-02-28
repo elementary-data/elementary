@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 OK_STATUS_CODE = 200
 ONE_MINUTE = 60
+ONE_SECOND = 1
 
 
 class SlackClient(ABC):
@@ -73,7 +74,7 @@ class SlackWebClient(SlackClient):
         return WebClient(token=self.token)
 
     @sleep_and_retry
-    @limits(calls=50, period=ONE_MINUTE)
+    @limits(calls=1, period=ONE_SECOND)
     def send_message(
         self, channel_name: str, message: SlackMessageSchema, **kwargs
     ) -> bool:
@@ -94,7 +95,7 @@ class SlackWebClient(SlackClient):
             return False
 
     @sleep_and_retry
-    @limits(calls=50, period=ONE_MINUTE)
+    @limits(calls=1, period=ONE_SECOND)
     def send_file(
         self,
         channel_name: str,
@@ -116,7 +117,7 @@ class SlackWebClient(SlackClient):
             return False
 
     @sleep_and_retry
-    @limits(calls=50, period=ONE_MINUTE)
+    @limits(calls=1, period=ONE_SECOND)
     def send_report(self, channel: str, report_file_path: str):
         send_succeed = self.send_file(channel_name=channel, file_path=report_file_path)
         if send_succeed:
@@ -189,7 +190,7 @@ class SlackWebhookClient(SlackClient):
         )
 
     @sleep_and_retry
-    @limits(calls=50, period=ONE_MINUTE)
+    @limits(calls=1, period=ONE_SECOND)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
         response = self.client.send(
             text=message.text, blocks=message.blocks, attachments=message.attachments
