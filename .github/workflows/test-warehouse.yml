@@ -153,6 +153,11 @@ jobs:
       - name: Run help
         run: edr --help
 
+      - name: Run Python package integration tests for slack alerts
+        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
+        run: pytest -vv tests/e2e/monitor --warehouse-type ${{ inputs.warehouse-type }}
+
+
       - name: Run monitor
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
@@ -209,6 +214,6 @@ jobs:
           name: edr.log
           path: elementary/edr.log
 
-      - name: Run Python package e2e tests
+      - name: Run e2e tests on edr report
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
+        run: pytest -vv tests/e2e/report --warehouse-type ${{ inputs.warehouse-type }}
