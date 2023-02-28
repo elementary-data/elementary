@@ -53,7 +53,7 @@ class Config:
         google_project_name: str = None,
         google_service_account_path: str = None,
         gcs_bucket_name: str = None,
-        bucket_website_url: str = None,
+        slack_report_url: str = None,
         env: str = None,
     ):
         self.config_dir = config_dir
@@ -135,10 +135,10 @@ class Config:
             gcs_bucket_name,
             google_config.get("gcs_bucket_name"),
         )
-        self.bucket_website_url = self._first_not_none(
-            bucket_website_url,
-            aws_config.get("bucket_website_url"),
-            google_config.get("bucket_website_url"),
+        self.slack_report_url = self._first_not_none(
+            slack_report_url,
+            aws_config.get("slack_report_url"),
+            google_config.get("slack_report_url"),
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
