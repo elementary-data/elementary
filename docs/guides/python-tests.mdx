@@ -166,6 +166,7 @@ which we returned a `DataFrame`.
 - `elementary.python` dbt test:
     - `code_macro: str`: Name of the macro that returns the Python code.
     - `macro_args: dict`: Arguments that are supplied to the macro - `{{ code_macro(macro_args) }}`.
+    - `where_expression: str`: SQL WHERE clause to limit the test scope. 
     - All available configuration in Python models such as:
       - `packages: list[str]`: PyPI package requirements.
       - `submission_method: str`: `cluster` or `serverless` for BigQuery.
