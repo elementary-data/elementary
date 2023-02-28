@@ -52,7 +52,6 @@ TestFailureComponent = AlertGroupComponent(
     emoji_in_full="small_red_triangle",
 )
 
-
 TagsComponent = NotificationComponent(
     name_in_summary="Tags", empty_section_content="No Tags"
 )
@@ -66,7 +65,7 @@ SubsComponent = NotificationComponent(
 
 class GroupOfAlerts:
     def __init__(
-        self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
+            self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
     ):
 
         self.alerts = alerts
@@ -93,7 +92,7 @@ class GroupOfAlerts:
             [alert.subscribers for alert in alerts]
         )
 
-        self._message_builder = SlackAlertMessageBuilder()
+        self._message_builder = SlackAlertMessageBuilder()  # only place it should be used is inside to_slack
         self._env = env
 
     def set_owners(self, owners: list[str]):
@@ -131,31 +130,36 @@ class GroupOfAlerts:
 
     def to_slack(self) -> SlackMessageSchema:
         title_blocks = []  # title, [banner], number of passed or failed,
-        title_blocks.append(self._title_block())
+        title_blocks.append(self._message_builder.create_header_block(self._title_block()))
         banner_block = self._get_banner_block(self._env)
         if banner_block:
-            title_blocks.append(banner_block)
-        title_blocks.append(self._number_of_failed_block())
+            title_blocks.append(self._message_builder.create_text_section_block(banner_block))
+        title_blocks.append(self._message_builder.create_context_block(self._number_of_failed_block()))
         self._message_builder._add_title_to_slack_alert(title_blocks=title_blocks)
 
         # attention required : tags, owners, subscribers
+        preview_blocks = [self._message_builder.create_text_section_block(block) for block in
+                          self._attention_required_blocks()] + [
+                             self._message_builder.create_empty_section_block()]
         self._message_builder._add_preview_to_slack_alert(
-            preview_blocks=self._attention_required_blocks()
+            preview_blocks=preview_blocks
         )
 
         details_blocks = []
         for component, alerts_list in self._components_to_alerts.items():
             details_blocks.append(
                 self._message_builder.create_text_section_block(
-                    f":{component.emoji_in_summary}: *{component.name_in_summary}*"
+                    f"*{component.name_in_summary}*"
                 )
             )
             details_blocks.append(self._message_builder.create_divider_block())
             if component == ModelErrorComponent:
-                blocks = self._get_model_error_blocks()
-                details_blocks.extend(blocks)
+                block_header = self._message_builder.create_context_block(self._get_model_error_block_header())
+                block_body = self._message_builder.create_text_section_block(self._get_model_error_block_body())
+                details_blocks.extend([block_header, block_body])
             else:
-                text = self._tabulate_list_of_alerts(alerts_list)
+                rows = self._tabulate_list_of_alerts(alerts_list)
+                text = "\n".join([f":{component.emoji_in_summary}: {row}" for row in rows])
                 details_blocks.append(
                     self._message_builder.create_text_section_block(text)
                 )
@@ -165,7 +169,7 @@ class GroupOfAlerts:
 
     def _title_block(self):
         title = f":small_red_triangle: {self._title} ({len(self.alerts)} alerts)"
-        return self._message_builder.create_header_block(title)
+        return title
 
     def _number_of_failed_block(self):
         # small_red_triangle: Falied: 36    |    :Warning: Warning: 3    |    :exclamation: Errors: 1
@@ -183,12 +187,12 @@ class GroupOfAlerts:
             )
         )
 
-        return self._message_builder.create_context_block(fields)
+        return fields
 
     def _get_banner_block(self, env):
-        raise NotImplementedError
+        return None
 
-    def _get_model_error_blocks(self) -> List:
+    def _get_model_error_block_header(self) -> List:
         model_error_alert_list = self._components_to_alerts[ModelErrorComponent]
         if len(model_error_alert_list) == 0:
             return []
@@ -196,29 +200,30 @@ class GroupOfAlerts:
         for model_error_alert in model_error_alert_list:
             if model_error_alert.message:
                 result.extend(
-                    [
-                        self._message_builder.create_context_block(
-                            ["*Result message*"]
-                        ),
-                        self._message_builder.create_text_section_block(
-                            f"```{model_error_alert.message.strip()}```"
-                        ),
-                    ]
+                    ["*Result message*"]
                 )
         return result
 
+    def _get_model_error_block_body(self) -> str:
+        model_error_alert_list = self._components_to_alerts[ModelErrorComponent]
+        if len(model_error_alert_list) == 0:
+            return ""
+        for model_error_alert in model_error_alert_list:
+            if model_error_alert.message:
+                return f"```{model_error_alert.message.strip()}```"
+        return ""
+
+
     def _attention_required_blocks(self):
-        preview_blocks = []
+        preview_blocks = [
+            f"{self._db}.{self._schema}.{self._model}"
+        ]
 
         for component, val in self._components_to_attention_required.items():
             text = f"_{component.empty_section_content}_" if not val else val
             preview_blocks.append(
-                self._message_builder.create_text_section_block(
-                    f"*{component.name_in_summary}*: {text}"
-                )
+                f"*{component.name_in_summary}*: {text}"
             )
-
-        preview_blocks.append(self._message_builder.create_empty_section_block())
 
         return preview_blocks
 
@@ -226,7 +231,7 @@ class GroupOfAlerts:
         ret = []
         for alert in alert_list:
             ret.append(self._get_tabulated_row_from_alert(alert))
-        return "\n".join(ret)
+        return ret
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
         raise NotImplementedError
@@ -240,7 +245,7 @@ class GroupOfAlerts:
 
 class GroupOfAlertsByTable(GroupOfAlerts):
     def __init__(
-        self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
+            self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
     ):
 
         # sort out model unique id
@@ -249,23 +254,21 @@ class GroupOfAlertsByTable(GroupOfAlerts):
             raise ValueError(
                 f"failed initializing a GroupOfAlertsByTable, for alerts with multiple models: {list(models)}"
             )
-        self._model = list(models)[0]
+        self._model = get_shortened_model_name(list(models)[0])
         self._db = alerts[0].database_name
         self._schema = alerts[0].schema_name
         super().__init__(alerts, default_channel_destination, env)
 
     def _get_title(self):
-        return f"{self._schema}.{get_shortened_model_name(self._model)}"
+        return f"Table issues detected - {self._model}"
 
-    def _get_banner_block(self, env):
-        env_text = (
-            ":construction: Development"
-            if env == "dev"
-            else ":large_green_circle: Production"
-        )
-        return self._message_builder.create_text_section_block(
-            f"_Env: {env_text}, DB: {self._db}_ "
-        )
+    # def _get_banner_block(self, env):
+    #     env_text = (
+    #         ":construction: Development"
+    #         if env == "dev"
+    #         else ":large_green_circle: Production"
+    #     )
+    #     return f"_Env: {env_text}, DB: {self._db}_ "
 
     def _sort_channel_destination(self, default_channel):
         """
