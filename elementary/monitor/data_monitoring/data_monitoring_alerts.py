@@ -188,13 +188,12 @@ class DataMonitoringAlerts(DataMonitoring):
                 self.success = False
 
         # Now update as sent:
-        if False:
-            table_name_to_alert_ids = defaultdict(lambda: [])
-            for alert_id, table_name in sent_alert_ids_and_tables:
-                table_name_to_alert_ids[table_name].append(alert_id)
+        table_name_to_alert_ids = defaultdict(lambda: [])
+        for alert_id, table_name in sent_alert_ids_and_tables:
+            table_name_to_alert_ids[table_name].append(alert_id)
 
-            for table_name, alert_ids in table_name_to_alert_ids.items():
-                self.alerts_api.update_sent_alerts(alert_ids, table_name)
+        for table_name, alert_ids in table_name_to_alert_ids.items():
+            self.alerts_api.update_sent_alerts(alert_ids, table_name)
 
         # Now update sent alerts counter:
         self.sent_alert_count += len(sent_alert_ids_and_tables)
