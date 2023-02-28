@@ -321,7 +321,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         else:
             self.channel_destination = default_channel
 
-    def _get_tabulated_row_from_alert(self, alert: Alert):
+    def _get_tabulated_row_from_alert(self, alert: Alert) -> str:
         return alert.consice_name
 
 
