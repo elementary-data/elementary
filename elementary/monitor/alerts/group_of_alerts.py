@@ -53,13 +53,13 @@ TestFailureComponent = AlertGroupComponent(
 )
 
 TagsComponent = NotificationComponent(
-    name_in_summary="Tags", empty_section_content="No Tags"
+    order=0, name_in_summary="Tags", empty_section_content="No Tags"
 )
 OwnersComponent = NotificationComponent(
-    name_in_summary="Owners", empty_section_content="No Owners"
+    order=1, name_in_summary="Owners", empty_section_content="No Owners"
 )
 SubsComponent = NotificationComponent(
-    name_in_summary="Subscribers", empty_section_content="No Subscribers"
+    order=2, name_in_summary="Subscribers", empty_section_content="No Subscribers"
 )
 
 
@@ -202,27 +202,8 @@ class GroupOfAlerts:
 
         return self._message_builder.get_slack_message()
 
-    def _title_block(self):
-        title = f":small_red_triangle: {self._title}"
-        return title
-
-    def _number_of_failed_block(self):
-        # small_red_triangle: Falied: 36    |    :Warning: Warning: 3    |    :exclamation: Errors: 1
-        fields = []
-        all_components = list(self._components_to_alerts.items())
-        all_components_but_last = all_components[:-1]
-        for component, alert_list in all_components_but_last:
-            fields.append(
-                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}    |"
-            )
-        component, alert_list = all_components[-1]
-        fields.append(
-            (
-                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}"
-            )
-        )
-
-        return fields
+    def _title_block(self) -> str:
+        return f":small_red_triangle: {self._title}"
 
     def _get_banner_block(self, env):
         return None  # Keeping this placeholder since it's supposed to be over-rided very soon
@@ -249,23 +230,22 @@ class GroupOfAlerts:
     def _attention_required_blocks(self):
         preview_blocks = [f"*{self._db}.{self._schema}.{self._model}*"]
 
-        for component, val in self._components_to_attention_required.items():
+        for component, val in sorted(
+            self._components_to_attention_required.items(), key=lambda x: x[0].order
+        ):
             text = f"_{component.empty_section_content}_" if not val else val
             preview_blocks.append(f"*{component.name_in_summary}*: {text}")
 
         return preview_blocks
 
-    def _tabulate_list_of_alerts(self, alert_list):
-        ret = []
+    def _tabulate_list_of_alerts(self, alert_list) -> List[str]:
+        rows = []
         for alert in alert_list:
-            ret.append(self._get_tabulated_row_from_alert(alert))
-        return ret
+            rows.append(self._get_tabulated_row_from_alert(alert))
+        return rows
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
         raise NotImplementedError
-
-    def _had_channel_clashes(self):
-        return False
 
     def _get_title(self):
         return None
