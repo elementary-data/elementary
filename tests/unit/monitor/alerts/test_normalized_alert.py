@@ -132,7 +132,7 @@ def test_get_alert_chennel():
         ),
     }
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_chennel() == "my_channel"
+    assert normalized_alert._get_alert_channel() == "my_channel"
 
     # Only test channel
     alert = {
@@ -145,7 +145,7 @@ def test_get_alert_chennel():
         ),
     }
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_chennel() == "my_channel"
+    assert normalized_alert._get_alert_channel() == "my_channel"
 
     # Only model channel
     alert = {
@@ -158,7 +158,7 @@ def test_get_alert_chennel():
         ),
     }
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_chennel() == "my_other_channel"
+    assert normalized_alert._get_alert_channel() == "my_other_channel"
 
     # No channel
     alert = dict(
@@ -166,7 +166,7 @@ def test_get_alert_chennel():
         model_meta=json.dumps(dict()),
     )
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_chennel() is None
+    assert normalized_alert._get_alert_channel() is None
 
 
 def test_get_alert_suppression_interval():

@@ -7,6 +7,7 @@ from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError
 
 from elementary.exceptions.exceptions import InvalidArgumentsError
+from elementary.monitor.alerts.group_of_alerts import GroupingType
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
@@ -42,6 +43,7 @@ class Config:
         slack_webhook: str = None,
         slack_token: str = None,
         slack_channel_name: str = None,
+        slack_group_alerts_by: str = None,
         timezone: str = None,
         aws_profile_name: str = None,
         aws_access_key_id: str = None,
@@ -99,6 +101,11 @@ class Config:
         self.is_slack_workflow = self._first_not_none(
             slack_config.get("workflows"),
             False,
+        )
+        self.slack_group_alerts_by = self._first_not_none(
+            slack_group_alerts_by,
+            slack_config.get("group_alerts_by"),
+            GroupingType.BY_ALERT.value,
         )
 
         aws_config = config.get(self._AWS, {})

@@ -1,7 +1,10 @@
 import copy
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from elementary.utils.json_utils import try_load_json
+from elementary.utils.json_utils import (
+    try_load_json,
+    unpack_and_flatten_and_dedup_list_of_strings,
+)
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -37,6 +40,7 @@ SUBSCRIBERS_KEY = "subscribers"
 CHANNEL_KEY = "channel"
 ALERT_FIELDS_KEY = "alert_fields"
 ALERT_SUPRESSION_INTERVAL_KEY = "alert_suppression_interval"
+SLACK_GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
 
 
 class NormalizedAlert:
@@ -57,17 +61,46 @@ class NormalizedAlert:
         return flatten_meta
 
     def _normalize_alert(self):
+        """
+        extract from the test+model jsons:
+        key in data ( or default val)  -- > key in normalized alert
+        SUBSCRIBERS_KEY (or []) --> SUBSCRIBERS_KEY
+        "owner" (or []) --> OWNERS_KEY
+        CHANNEL_KEY (or None) --> "slack channel"
+        ALERT_FIELDS_KEY (or DEFAULT_ALERT_FIELDS)--> ALERT_FIELDS_KEY
+        "group" (or None) --> SLACK_GROUP_ALERTS_BY_KEY
+
+        After this normalization step, Tags, Owners and Subscribers should all be deduplicated Lists, either of strings or []
+
+
+        :return:
+        """
+
         try:
             normalized_alert = copy.deepcopy(self.alert)
-            normalized_alert[SUBSCRIBERS_KEY] = self._get_alert_meta_attrs(
+
+            normalized_alert[
                 SUBSCRIBERS_KEY
+            ] = unpack_and_flatten_and_dedup_list_of_strings(
+                self._get_alert_meta_attrs(SUBSCRIBERS_KEY)
             )
-            normalized_alert[OWNERS_KEY] = self._get_alert_meta_attrs("owner")
-            normalized_alert["slack_channel"] = self._get_alert_chennel()
+            normalized_alert[OWNERS_KEY] = unpack_and_flatten_and_dedup_list_of_strings(
+                self._get_alert_meta_attrs("owner")
+            )
+            normalized_alert[TAGS_FIELD] = unpack_and_flatten_and_dedup_list_of_strings(
+                self._get_alert_meta_attrs(TAGS_FIELD)
+            )
+
+            normalized_alert["slack_channel"] = self._get_alert_channel()
             normalized_alert[
                 ALERT_SUPRESSION_INTERVAL_KEY
             ] = self._get_alert_suppression_interval()
             normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
+
+            normalized_alert[
+                SLACK_GROUP_ALERTS_BY_KEY
+            ] = self._get_field_from_test_meta_or_model_meta_or_default(key="group")
+
             return normalized_alert
         except Exception:
             logger.error(
@@ -90,31 +123,23 @@ class NormalizedAlert:
             attrs.append(model_attrs)
         return attrs
 
-    def _get_alert_chennel(self) -> Optional[str]:
-        model_slack_channel = self.model_meta.get(CHANNEL_KEY)
-        test_slack_channel = self.test_meta.get(CHANNEL_KEY)
-        return test_slack_channel or model_slack_channel
+    def _get_alert_channel(self) -> Optional[str]:
+        return self._get_field_from_test_meta_or_model_meta_or_default(key=CHANNEL_KEY)
 
     def _get_alert_suppression_interval(self) -> int:
-        model_alert_suppression_interval = self.model_meta.get(
-            ALERT_SUPRESSION_INTERVAL_KEY
+        return self._get_field_from_test_meta_or_model_meta_or_default(
+            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=0
         )
-        test_alert_suppression_interval = self.test_meta.get(
-            ALERT_SUPRESSION_INTERVAL_KEY
-        )
-        if test_alert_suppression_interval is not None:
-            return test_alert_suppression_interval
-        elif model_alert_suppression_interval is not None:
-            return model_alert_suppression_interval
-        else:
-            return 0
 
     def _get_alert_fields(self) -> Optional[List[str]]:
         # If there is no alerts_fields in the test meta object,
         # we return the model alerts_fields from the model meta object.
         # The fallback is DEFAULT_ALERT_FIELDS.
-        return (
-            self.test_meta.get(ALERT_FIELDS_KEY)
-            or self.model_meta.get(ALERT_FIELDS_KEY)
-            or DEFAULT_ALERT_FIELDS
+        return self._get_field_from_test_meta_or_model_meta_or_default(
+            key=ALERT_FIELDS_KEY, default_val=DEFAULT_ALERT_FIELDS
         )
+
+    def _get_field_from_test_meta_or_model_meta_or_default(
+        self, key: str, default_val=None
+    ) -> Any:
+        return self.test_meta.get(key) or self.model_meta.get(key) or default_val

@@ -23,8 +23,8 @@ class Alert:
         database_name: str = None,
         schema_name: str = None,
         elementary_database_and_schema: str = None,
-        owners: str = None,
-        tags: str = None,
+        owners: Optional[List[str]] = None,
+        tags: Optional[List[str]] = None,
         status: str = None,
         subscribers: Optional[List[str]] = None,
         slack_channel: Optional[str] = None,
@@ -33,6 +33,8 @@ class Alert:
         timezone: Optional[str] = None,
         meta: Optional[dict] = None,
         model_meta: Optional[str] = None,
+        alerts_table: Optional[str] = None,
+        slack_group_alerts_by: Optional[str] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
@@ -65,12 +67,17 @@ class Alert:
         self.slack_channel = slack_channel
         self.alert_suppression_interval = alert_suppression_interval
         self.alert_fields = alert_fields
+        self.slack_group_alerts_by = slack_group_alerts_by
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
+
+    @property
+    def consice_name(self):
+        return "Alert"
 
 
 class PreviewIsTooLongError(Exception):
@@ -149,23 +156,32 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
 
     @classmethod
     def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):
-        if not preview_blocks:
+        """
+        This function -
+         0/ For None, returns None. Otherwise :
+         1/ makes sure preview_blocks number is not bigger than the max num of blocks set in SlackMessageBuilder
+         2/ pads with empty blocks in case there's not enough preview blocks
+                                          (we want to control the cutoff so we need an exact number of preview blocks)
+        :param preview_blocks:
+        :return:
+        """
+        if (
+            not preview_blocks
+        ):  # this condition captures case of Null and also of a list with legnth 0
             return
 
         preview_blocks_count = len(preview_blocks)
+
         if preview_blocks_count > SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS:
             raise PreviewIsTooLongError(preview_blocks)
 
-        elif (
-            preview_blocks_count < SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS
-            and preview_blocks_count > 0
-        ):
-            padded_preview_blocks = [*preview_blocks]
-            blocks_counter = preview_blocks_count
-            while blocks_counter < SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS:
-                padded_preview_blocks.append(cls.create_empty_section_block())
-                blocks_counter += 1
-            return padded_preview_blocks
-
-        else:
+        if preview_blocks_count == SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS:
             return preview_blocks
+
+        padded_preview_blocks = [*preview_blocks]
+        padding_length = (
+            SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
+        )
+        padding = [cls.create_empty_section_block() for i in range(padding_length)]
+        padded_preview_blocks.extend(padding)
+        return padded_preview_blocks

@@ -50,6 +50,7 @@ class SourceFreshnessAlert(Alert):
         self.freshness_filter = freshness_filter
         self.path = path
         self.error = error
+        self.alerts_table = SourceFreshnessAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
@@ -163,3 +164,7 @@ class SourceFreshnessAlert(Alert):
         return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
+
+    @property
+    def consice_name(self):
+        return f"source freshness alert - {self.source_name}.{self.identifier}"

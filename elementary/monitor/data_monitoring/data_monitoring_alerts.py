@@ -1,7 +1,8 @@
 import json
 import re
+from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from alive_progress import alive_it
 
@@ -9,6 +10,12 @@ from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.alerts import Alerts
+from elementary.monitor.alerts.group_of_alerts import (
+    GroupingType,
+    GroupOfAlerts,
+    GroupOfAlertsBySingleAlert,
+    GroupOfAlertsByTable,
+)
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
@@ -66,31 +73,80 @@ class DataMonitoringAlerts(DataMonitoring):
         else:
             return prettify_json_str_set(emails)
 
-    def _send_alerts_to_slack(self, alerts: List[Alert], alerts_table_name: str):
-        if not alerts:
-            return
-
-        sent_alert_ids = []
-        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
-        for alert in alerts_with_progress_bar:
+    def _fix_owners_and_subscribers(self, group_alert: GroupOfAlerts):
+        """
+        Only reason it's not in the __init__ of GroupOfAlerts, is that it goes to the slack API.
+        This function is based on _parse_emails_to_ids which uses slack's API to get the handle for owners, subscribers.
+        :param group_alert:
+        :return:
+        """
+        for alert in group_alert.alerts:
             alert.owners = self._parse_emails_to_ids(alert.owners)
             alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
-            alert_msg = alert.to_slack()
-            sent_successfully = self.slack_client.send_message(
-                channel_name=alert.slack_channel
-                if alert.slack_channel
-                else self.config.slack_channel_name,
-                message=alert_msg,
-            )
-            if sent_successfully:
-                sent_alert_ids.append(alert.id)
-            else:
-                logger.error(
-                    f"Could not send the alert - {alert.id}. Full alert: {json.dumps(dict(alert_msg))}"
+        all_owners = set([])
+        all_subscribers = set([])
+        for alert in group_alert.alerts:
+            all_owners.update(alert.owners)
+            all_subscribers.update(alert.subscribers)
+        group_alert.set_owners(all_owners)
+        group_alert.set_subscribers(all_subscribers)
+
+    def _group_alerts_per_config(self, alerts: List[Alert]) -> List[GroupOfAlerts]:
+        """
+        reads self.config and alerts' config, and groups alerts in a smart way
+        1. split by grouping type
+        2. split Table grouped-by, by the Table
+        3. concat
+
+        :param alerts:
+        :return:
+        """
+        default_alerts_group_by_strategy = GroupingType(
+            self.config.slack_group_alerts_by
+        )
+        alerts_by_grouping_mechanism = defaultdict(lambda: [])
+        for alert in alerts:
+            if not alert.slack_group_alerts_by:
+                alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
+                    alert
                 )
-                self.success = False
-        self.alerts_api.update_sent_alerts(sent_alert_ids, alerts_table_name)
-        self.sent_alert_count += len(sent_alert_ids)
+                continue
+            try:
+                grouping_type = GroupingType(alert.slack_group_alerts_by)
+                alerts_by_grouping_mechanism[grouping_type].append(alert)
+            except ValueError:
+                alerts_by_grouping_mechanism[default_alerts_group_by_strategy].append(
+                    alert
+                )
+                logger.error(
+                    f"Failed to extract value as a group-by config: '{alert.slack_group_alerts_by}'. Allowed Values: {list(GroupingType.__members__.keys())} Ignoring it for now and default grouping strategy will be used"
+                )
+        table_to_alerts = defaultdict(lambda: [])
+        for alert in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
+            table_to_alerts[alert.model_unique_id].append(alert)
+
+        by_table_group = [
+            GroupOfAlertsByTable(
+                alerts=table_to_alerts[model_unique_id],
+                default_channel_destination=self.config.slack_channel_name,
+                env=self.config.env,
+            )
+            for model_unique_id in table_to_alerts.keys()
+        ]
+
+        by_alert_group = [
+            GroupOfAlertsBySingleAlert(
+                alerts=[al],
+                default_channel_destination=self.config.slack_channel_name,
+                env=self.config.env,
+            )
+            for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]
+        ]
+
+        self.execution_properties["had_group_by_table"] = len(by_table_group) > 0
+        self.execution_properties["had_group_by_alert"] = len(by_alert_group) > 0
+
+        return by_table_group + by_alert_group
 
     def _send_test_message(self):
         self.slack_client.send_message(
@@ -102,11 +158,45 @@ class DataMonitoringAlerts(DataMonitoring):
         logger.info("Sent the test message.")
 
     def _send_alerts(self, alerts: Alerts):
-        self._send_alerts_to_slack(alerts.tests.get_all(), TestAlert.TABLE_NAME)
-        self._send_alerts_to_slack(alerts.models.get_all(), ModelAlert.TABLE_NAME)
-        self._send_alerts_to_slack(
-            alerts.source_freshnesses.get_all(), SourceFreshnessAlert.TABLE_NAME
+        all_alerts_to_send = alerts.get_all()
+        if not all_alerts_to_send:
+            self.execution_properties["sent_alert_count"] = self.sent_alert_count
+            return
+
+        sent_alert_ids_and_tables: List[Tuple[str, str]] = []
+
+        alerts_groups: List[GroupOfAlerts] = self._group_alerts_per_config(
+            all_alerts_to_send
         )
+        alerts_with_progress_bar = alive_it(alerts_groups, title="Sending alerts")
+        for alert_group in alerts_with_progress_bar:
+            self._fix_owners_and_subscribers(alert_group)
+            alert_msg = alert_group.to_slack()
+            sent_successfully = self.slack_client.send_message(
+                channel_name=alert_group.channel_destination,
+                message=alert_msg,
+            )
+            alerts_ids_and_tables = [
+                (alert.id, alert.alerts_table) for alert in alert_group.alerts
+            ]
+            if sent_successfully:
+                sent_alert_ids_and_tables.extend(alerts_ids_and_tables)
+            else:
+                logger.error(
+                    f"Could not send the alert[s] - {[alert_id_and_table[0] for alert_id_and_table in alerts_ids_and_tables]}. Full alert: {json.dumps(dict(alert_msg))}"
+                )
+                self.success = False
+
+        # Now update as sent:
+        table_name_to_alert_ids = defaultdict(lambda: [])
+        for alert_id, table_name in sent_alert_ids_and_tables:
+            table_name_to_alert_ids[table_name].append(alert_id)
+
+        for table_name, alert_ids in table_name_to_alert_ids.items():
+            self.alerts_api.update_sent_alerts(alert_ids, table_name)
+
+        # Now update sent alerts counter:
+        self.sent_alert_count += len(sent_alert_ids_and_tables)
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: Alerts):
