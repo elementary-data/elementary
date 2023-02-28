@@ -10,10 +10,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor import dbt_project_utils
-from elementary.utils.log import get_logger
 from elementary.utils.ordered_yaml import OrderedYaml
-
-logger = get_logger(__name__)
 
 
 class Config:
