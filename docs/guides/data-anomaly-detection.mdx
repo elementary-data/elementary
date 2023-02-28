@@ -5,8 +5,6 @@ title: "Data anomaly detection"
 Elementary dbt package includes **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. The tests collect data quality metrics. On each execution, the latest metrics are compared to historical values to detect anomalies.
 These tests are configured and executed like any other tests in your project.
 
-
-
 ## Tests and monitors types
 
 ### What are data monitors?
@@ -31,10 +29,10 @@ If there is no timestamp column configured, monitors will query on the entire ta
 
 #### Table level monitors
 
-| Monitor name     |
-| ---------------- |
-| `freshness`      |
-| `row_count`      |
+| Monitor name |
+| ------------ |
+| `freshness`  |
+| `row_count`  |
 
 #### Column level monitors
 
@@ -53,6 +51,7 @@ If there is no timestamp column configured, monitors will query on the entire ta
 | `zero_percent`       | numeric     |
 | `standard_deviation` | numeric     |
 | `variance`           | numeric     |
+| `sum`                | numeric     |
 
 #### Dimension monitors
 

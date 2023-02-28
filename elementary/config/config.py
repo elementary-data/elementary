@@ -6,7 +6,6 @@ import google.auth
 from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.alerts.group_of_alerts import GroupingType
@@ -55,6 +54,7 @@ class Config:
         google_project_name: str = None,
         google_service_account_path: str = None,
         gcs_bucket_name: str = None,
+        bucket_website_url: str = None,
         env: str = None,
     ):
         self.config_dir = config_dir
@@ -136,6 +136,11 @@ class Config:
             gcs_bucket_name,
             google_config.get("gcs_bucket_name"),
         )
+        self.bucket_website_url = self._first_not_none(
+            bucket_website_url,
+            aws_config.get("bucket_website_url"),
+            google_config.get("bucket_website_url"),
+        )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
 
@@ -178,31 +183,17 @@ class Config:
         return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
-        self._validate_internal_dbt_project()
         self._validate_timezone()
         if not self.has_slack:
             raise InvalidArgumentsError(
                 "Either a Slack token and a channel or a Slack webhook is required."
             )
 
-    def validate_report(self):
-        self._validate_internal_dbt_project()
-
     def validate_send_report(self):
-        self._validate_internal_dbt_project()
         if not self.has_send_report_platform:
             raise InvalidArgumentsError(
                 "You must provide a platform to upload the report to (Slack token / S3 / GCS)."
             )
-
-    def _validate_internal_dbt_project(self):
-        dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
-            self.profiles_dir,
-            self.profile_target,
-            dbt_env_vars=self.dbt_env_vars,
-        )
-        dbt_runner.debug(quiet=True)
 
     def _validate_timezone(self):
         if self.timezone and not tz.gettz(self.timezone):
