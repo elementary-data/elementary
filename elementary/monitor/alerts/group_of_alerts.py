@@ -168,7 +168,7 @@ class GroupOfAlerts:
         return self._message_builder.get_slack_message()
 
     def _title_block(self):
-        title = f":small_red_triangle: {self._title} ({len(self.alerts)} alerts)"
+        title = f":small_red_triangle: {self._title}"
         return title
 
     def _number_of_failed_block(self):
@@ -216,7 +216,7 @@ class GroupOfAlerts:
 
     def _attention_required_blocks(self):
         preview_blocks = [
-            f"{self._db}.{self._schema}.{self._model}"
+            f"*{self._db}.{self._schema}.{self._model}*"
         ]
 
         for component, val in self._components_to_attention_required.items():
