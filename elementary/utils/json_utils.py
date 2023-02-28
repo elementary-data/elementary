@@ -38,6 +38,7 @@ def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
         return list_unpacked
     return []  # edge case of a string of an empty dict or IDK
 
+
 def sum_lists(list_of_lists: List[List]) -> List:
     ret = []
     for list_ in list_of_lists:

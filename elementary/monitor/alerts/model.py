@@ -204,3 +204,11 @@ class ModelAlert(Alert):
         return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
+
+    @property
+    def consice_name(self):
+        if self.materialization == "snapshot":
+            text = "snapshot"
+        else:
+            text = "model"
+        return f"dbt {text} alert - {self.alias}"

@@ -164,3 +164,7 @@ class SourceFreshnessAlert(Alert):
         return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
+
+    @property
+    def consice_name(self):
+        return f"source freshness alert - {self.source_name}.{self.identifier}"

@@ -18,6 +18,7 @@ class MockAlert:
     tags: Optional[List[str]]
     database_name: str = "elementary_test_db"
     schema_name: str = "master_elementary"
+    concise_name: str = "Alert"
 
 
 @dataclass
