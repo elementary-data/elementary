@@ -25,41 +25,41 @@ class GroupingType(Enum):
 
 
 ModelErrorComponent = AlertGroupComponent(
-    name_in_summary="Model Errors",
+    name_in_summary="Model errors",
     emoji_in_summary="X",
-    name_in_full="Model Errors",
+    name_in_full="Model errors",
     emoji_in_full="X",
 )
 
 TestErrorComponent = AlertGroupComponent(
-    name_in_summary="Test Errors",
+    name_in_summary="Test errors",
     emoji_in_summary="exclamation",
-    name_in_full="Test Errors",
+    name_in_full="Test errors",
     emoji_in_full="exclamation",
 )
 
 TestWarningComponent = AlertGroupComponent(
-    name_in_summary="Test Warnings",
+    name_in_summary="Test warnings",
     emoji_in_summary="warning",
-    name_in_full="Test Warnings",
+    name_in_full="Test warnings",
     emoji_in_full="warning",
 )
 
 TestFailureComponent = AlertGroupComponent(
-    name_in_summary="Test Failures",
+    name_in_summary="Test failures",
     emoji_in_summary="small_red_triangle",
-    name_in_full="Test Failurues",
+    name_in_full="Test failures",
     emoji_in_full="small_red_triangle",
 )
 
 TagsComponent = NotificationComponent(
-    order=0, name_in_summary="Tags", empty_section_content="No Tags"
+    order=0, name_in_summary="Tags", empty_section_content="No tags"
 )
 OwnersComponent = NotificationComponent(
-    order=1, name_in_summary="Owners", empty_section_content="No Owners"
+    order=1, name_in_summary="Owners", empty_section_content="No owners"
 )
 SubsComponent = NotificationComponent(
-    order=2, name_in_summary="Subscribers", empty_section_content="No Subscribers"
+    order=2, name_in_summary="Subscribers", empty_section_content="No subscribers"
 )
 
 
