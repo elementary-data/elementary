@@ -6,9 +6,7 @@ import google.auth
 from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.exceptions.exceptions import InvalidArgumentsError
-from elementary.monitor import dbt_project_utils
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
@@ -177,31 +175,17 @@ class Config:
         return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
-        self._validate_internal_dbt_project()
         self._validate_timezone()
         if not self.has_slack:
             raise InvalidArgumentsError(
                 "Either a Slack token and a channel or a Slack webhook is required."
             )
 
-    def validate_report(self):
-        self._validate_internal_dbt_project()
-
     def validate_send_report(self):
-        self._validate_internal_dbt_project()
         if not self.has_send_report_platform:
             raise InvalidArgumentsError(
                 "You must provide a platform to upload the report to (Slack token / S3 / GCS)."
             )
-
-    def _validate_internal_dbt_project(self):
-        dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
-            self.profiles_dir,
-            self.profile_target,
-            dbt_env_vars=self.dbt_env_vars,
-        )
-        dbt_runner.debug(quiet=True)
 
     def _validate_timezone(self):
         if self.timezone and not tz.gettz(self.timezone):

@@ -349,7 +349,6 @@ def report(
         Command.REPORT, get_cli_properties(), ctx.command.name
     )
     try:
-        config.validate_report()
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
