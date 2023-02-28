@@ -95,10 +95,10 @@ class GroupOfAlerts:
         self._message_builder = SlackAlertMessageBuilder()  # only place it should be used is inside to_slack
         self._env = env
 
-    def set_owners(self, owners: list[str]):
+    def set_owners(self, owners: List[str]):
         self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
 
-    def set_subscribers(self, subscribers: list[str]):
+    def set_subscribers(self, subscribers: List[str]):
         self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
 
     def _sort_channel_destination(self, default_channel):
