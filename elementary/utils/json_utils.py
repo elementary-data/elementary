@@ -38,6 +38,12 @@ def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
         return list_unpacked
     return []  # edge case of a string of an empty dict or IDK
 
+def sum_lists(list_of_lists: List[List]) -> List:
+    ret = []
+    for list_ in list_of_lists:
+        ret.extend(list_)
+    return ret
+
 
 def unpack_and_flatten_and_dedup_list_of_strings(
     list_maybe_jsoned: Optional[Union[List[str], str]]
@@ -49,14 +55,14 @@ def unpack_and_flatten_and_dedup_list_of_strings(
         ret = unpack_and_flatten_str_to_list(list_maybe_jsoned)
     elif isinstance(list_maybe_jsoned, list):
         ret = [unpack_and_flatten_str_to_list(x) for x in list_maybe_jsoned]
-        ret = sum(ret, start=[])
+        ret = sum_lists(ret)
     return list(set(ret))
 
 
 def list_of_lists_of_strings_to_comma_delimited_unique_strings(
     list_of_strings: List[List[str]], prefix: Optional[str] = None
 ) -> str:
-    flat_list = sum(list_of_strings, start=[])
+    flat_list = sum_lists(list_of_strings)
     if prefix:
         flat_list = [append_prefix_if_missing(x, prefix) for x in flat_list]
     unique_strings = list(set(flat_list))
