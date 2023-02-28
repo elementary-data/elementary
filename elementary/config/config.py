@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -9,7 +10,10 @@ from google.auth.exceptions import DefaultCredentialsError
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor import dbt_project_utils
+from elementary.utils.log import get_logger
 from elementary.utils.ordered_yaml import OrderedYaml
+
+logger = get_logger(__name__)
 
 
 class Config:
@@ -195,6 +199,10 @@ class Config:
             )
 
     def _validate_internal_dbt_project(self):
+        # dbt debug relies on git, so don't run it if git is not installed
+        if not self._is_git_installed():
+            return
+
         dbt_runner = DbtRunner(
             dbt_project_utils.PATH,
             self.profiles_dir,
@@ -202,6 +210,14 @@ class Config:
             dbt_env_vars=self.dbt_env_vars,
         )
         dbt_runner.debug(quiet=True)
+
+    @staticmethod
+    def _is_git_installed():
+        try:
+            subprocess.run(["git", "--version"], capture_output=True, check=True)
+            return True
+        except Exception:
+            return False
 
     def _validate_timezone(self):
         if self.timezone and not tz.gettz(self.timezone):
