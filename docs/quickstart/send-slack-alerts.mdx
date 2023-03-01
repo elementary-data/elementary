@@ -438,7 +438,13 @@ edr monitor --group_by table
 Grouping can also be configured through the yml files. To set it up globaly for your project, add the configuration to your models in the dbt_project.yml file:  
   
  ```yml dbt_project.yml
-ADD EXAMPLE
+models:
+  marketing_bi:
+    +meta:
+      alerts_config:
+      # alerts on models in marekting_bi should never be grouped by table:
+        slack_group_alerts_by: alert
+
 ```  
   
 To set it up for a model, add the configuration to your model in the properties.yml:
