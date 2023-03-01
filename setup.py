@@ -36,7 +36,7 @@ setup(
         "ruamel.yaml<1.0.0",
         "alive-progress<=2.3.1",
         "slack-sdk>=3.19.2,<4.0.0",
-        "pytest-parametrization>==2022.2.1",
+        "pytest-parametrization>=2022.2.1",
         "pydantic<2.0",
         "networkx>=2.3,<3",
         "packaging>=20.9,<22.0",
