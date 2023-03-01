@@ -450,13 +450,23 @@ models:
 To set it up for a model, add the configuration to your model in the properties.yml:
   
  ```yml properties.yml
-ADD EXAMPLE
+models:
+  - name: marketing_leads
+    meta:
+      alerts_config:
+        # all alerts on marketing_leads should group together to one slack message:
+        slack_group_alerts_by: table
 ```   
   
 Grouping by table can be configured globally (in the dbt_project.yml) but if you wish to override it for a specific model where you want a single alert for each failure, you can add the configuration to your model in the properties.yml:
 
  ```yml properties.yml
-ADD EXAMPLE
+models:
+  - name: marketing_leads
+    meta:
+      alerts_config:
+        # all alerts on marketing_leads should NEVER group together to one slack message:
+        slack_group_alerts_by: alert
 ```   
   
 </Accordion>  
