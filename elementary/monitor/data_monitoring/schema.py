@@ -3,9 +3,8 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
-from elementary.monitor.fetchers.tests.schema import (
-    ModelUniqueIdType,
+from elementary.monitor.api.tests.schema import (
+    InvocationSchema,
     TestResultSchema,
     TestRunSchema,
     TotalsSchema,
@@ -43,11 +42,11 @@ class SelectorFilterSchema(BaseModel):
 
 
 class DataMonitoringReportTestResultsSchema(BaseModel):
-    results: Dict[Optional[ModelUniqueIdType], List[TestResultSchema]] = dict()
+    results: Dict[Optional[str], List[TestResultSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
-    invocation: DbtInvocationSchema = dict()
+    invocation: InvocationSchema = dict()
 
 
 class DataMonitoringReportTestRunsSchema(BaseModel):
-    runs: Dict[Optional[ModelUniqueIdType], List[TestRunSchema]] = dict()
+    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()

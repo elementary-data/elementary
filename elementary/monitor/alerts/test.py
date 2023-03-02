@@ -45,6 +45,7 @@ class TestAlert(Alert):
         self.test_created_at = test_created_at
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ""
+        self.alerts_table = TestAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
@@ -261,6 +262,10 @@ class DbtTestAlert(TestAlert):
             title=title, preview=preview, result=result, configuration=configuration
         )
 
+    @property
+    def consice_name(self):
+        return f"{self.test_short_name or self.test_name}"
+
 
 class ElementaryTestAlert(DbtTestAlert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
@@ -400,3 +405,7 @@ class ElementaryTestAlert(DbtTestAlert):
         return self.slack_message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
+
+    @property
+    def consice_name(self):
+        return f"{self.test_short_name or self.test_name} - {self.test_sub_type_display_name}"

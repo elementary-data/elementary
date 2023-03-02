@@ -27,7 +27,6 @@
             group by parent_model_unique_id
         {% endset %}
         {% set coverage_agate = run_query(get_coverages_query) %}
-        {% set coverage_json = elementary.agate_to_json(coverage_agate) %}
-        {% do elementary.edr_log(coverage_json) %}
+        {% do return(elementary.agate_to_dicts(coverage_agate)) %}
     {%- endif -%}
 {% endmacro %}

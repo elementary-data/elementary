@@ -3,20 +3,19 @@ from typing import List
 
 import pytest
 
+from elementary.monitor.api.tests.schema import TestResultSummarySchema
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
-from elementary.monitor.fetchers.tests.schema import TestResultSummarySchema
 
 
 def test_get_test_results_totals(test_results_summary):
     message_builder = SlackReportSummaryMessageBuilder()
     totals = message_builder._get_test_results_totals(test_results_summary)
-    assert totals.get("schema_changes") == 2
     assert totals.get("passed") == 4
     assert totals.get("error") == 1
-    assert totals.get("failed") == 2
-    assert totals.get("warning") == 1
+    assert totals.get("failed") == 3
+    assert totals.get("warning") == 2
 
 
 def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
@@ -28,22 +27,20 @@ def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
     )
     assert ":small_red_triangle: *Failed tests*" in attachments_as_string
     assert ":warning: *Warning*" in attachments_as_string
-    assert ":wrench: *Schema changes*" in attachments_as_string
     assert ":exclamation: *Error*" in attachments_as_string
 
     message_builder = SlackReportSummaryMessageBuilder()
-    message_builder._add_details_to_slack_alert((test_results_summary * 5)[0:37])
+    message_builder._add_details_to_slack_alert((test_results_summary * 5)[0:39])
     attachments_as_string = json.dumps(
         message_builder.slack_message.get("attachments")[0].get("blocks")
     )
     assert ":small_red_triangle: *Failed tests*" in attachments_as_string
     assert ":warning: *Warning*" in attachments_as_string
-    assert ":wrench: *Schema changes*" in attachments_as_string
     assert ":exclamation: *Error*" in attachments_as_string
 
     # Over attachments limitation
     message_builder = SlackReportSummaryMessageBuilder()
-    message_builder._add_details_to_slack_alert((test_results_summary * 5)[0:38])
+    message_builder._add_details_to_slack_alert((test_results_summary * 5)[0:40])
     attachments_as_string = json.dumps(
         message_builder.slack_message.get("attachments")[0].get("blocks")
     )

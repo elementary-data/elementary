@@ -34,6 +34,5 @@
         from dbt_exposures   
     {% endset %}
     {% set models_depends_on_agate = run_query(models_depends_on_nodes_query) %}
-    {% set models_depends_on_json = elementary.agate_to_json(models_depends_on_agate) %}
-    {% do elementary.edr_log(models_depends_on_json) %}
+    {% do return(elementary.agate_to_dicts(models_depends_on_agate)) %}
 {% endmacro %}

@@ -21,7 +21,7 @@ class MockAlertsFetcher(AlertsFetcher):
             mock_dbt_runner, config, elementary_database_and_schema="test.test"
         )
 
-    def _query_pending_test_alerts(self, *args, **kwargs):
+    def query_pending_test_alerts(self, *args, **kwargs):
         PENDDING_TEST_ALERTS_MOCK_DATA = [
             # Alert within suppression interval
             dict(
@@ -185,7 +185,7 @@ class MockAlertsFetcher(AlertsFetcher):
         ]
         return AlertsQueryResult(alerts=pending_test_alerts, malformed_alerts=[])
 
-    def _query_pending_model_alerts(self, *args, **kwargs):
+    def query_pending_model_alerts(self, *args, **kwargs):
         PENDDING_MODEL_ALERTS_MOCK_DATA = [
             # Alert within suppression interval
             dict(
@@ -302,7 +302,7 @@ class MockAlertsFetcher(AlertsFetcher):
         ]
         return AlertsQueryResult(alerts=pending_model_alerts, malformed_alerts=[])
 
-    def _query_pending_source_freshness_alerts(self, *args, **kwargs):
+    def query_pending_source_freshness_alerts(self, *args, **kwargs):
         PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA = [
             # Alert within suppression interval
             dict(
@@ -441,7 +441,7 @@ class MockAlertsFetcher(AlertsFetcher):
             alerts=pending_source_freshness_alerts, malformed_alerts=[]
         )
 
-    def _query_last_test_alert_times(self, *args, **kwargs):
+    def query_last_test_alert_times(self, *args, **kwargs):
         return {
             "test_id_1.column.generic": (
                 CURRENT_DATETIME_UTC - timedelta(hours=1.5)
@@ -454,7 +454,7 @@ class MockAlertsFetcher(AlertsFetcher):
             ).strftime(DATETIME_FORMAT),
         }
 
-    def _query_last_model_alert_times(self, *args, **kwargs):
+    def query_last_model_alert_times(self, *args, **kwargs):
         return dict(
             model_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
                 DATETIME_FORMAT
@@ -467,7 +467,7 @@ class MockAlertsFetcher(AlertsFetcher):
             ),
         )
 
-    def _query_last_source_freshness_alert_times(self, *args, **kwargs):
+    def query_last_source_freshness_alert_times(self, *args, **kwargs):
         return dict(
             source_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
                 DATETIME_FORMAT

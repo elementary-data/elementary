@@ -15,5 +15,5 @@
     {% do return(none) %}
   {% endif %}
 
-  {% do elementary.edr_log(elementary.agate_to_json(result)) %}
+  {% do return(elementary.agate_to_dicts(result)) %}
 {% endmacro %}
