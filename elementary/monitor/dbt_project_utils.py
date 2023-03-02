@@ -21,7 +21,7 @@ def get_elementary_package_path():
     if os.path.exists(package_path):
         return package_path
 
-    legacy_package_path = os.path.join(_PACKAGES_PATH, _DBT_PACKAGE_NAME)
+    legacy_package_path = os.path.join(_MODULES_PATH, _DBT_PACKAGE_NAME)
     if os.path.exists(legacy_package_path):
         return legacy_package_path
 
