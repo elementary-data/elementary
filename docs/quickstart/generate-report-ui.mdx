@@ -55,25 +55,15 @@ The filtered report will only include data for the selected invocation (This app
 
 There are 3 ways to filter the report by invocation:
 
-- Last invocation - Filter by the last invocation (`dbt test` / `dbt build`) that ran.
-- Invocation time - Filter by the closest invocation (`dbt test` / `dbt build`) to the provided time (the provided time should be in ISO format local time).
-- Invocation id - Filter by the provided invoation (`dbt test` / `dbt build`) id.
+- **Last invocation** - Filter by the last invocation (`dbt test` / `dbt build`) that ran.
+- **Invocation time** - Filter by the closest invocation (`dbt test` / `dbt build`) to the provided time (the provided time should be in ISO format local time).
+- **Invocation id** - Filter by the provided invoation (`dbt test` / `dbt build`) id.
 
-To filter by last invocation:
+Filters usage example:
 
-```shell
+```shell edr report invocation filters
 edr report --select last_invocation
-```
-
-To filter by invocation time:
-
-```shell
 edr report --select "invocation_time:2022-12-25 10:10:35"
-```
-
-To filter by invocation id:
-
-```shell
 edr report --select invocation_id:XXXXXXXXXXXXX
 ```
 
