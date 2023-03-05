@@ -1,4 +1,4 @@
-{%- macro get_test_results(days_back = 7, metrics_sample_limit = 5, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
+{%- macro get_test_results(days_back = 7, metrics_sample_limit = 5, invocations_per_test = 720, disable_passed_test_metrics = false, should_query_dwh_for_samples = true) -%}
     {% set select_test_results %}
         with test_results as (
             {{ elementary_internal.current_tests_run_results_query(days_back=days_back) }}
@@ -63,7 +63,7 @@
                 {% do elementary_tests_allowlist_status.append('pass') %}
             {% endif %}
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
-                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id), test_type, test.test_results_query, metrics_sample_limit) %}
+                {% set test_rows_sample = elementary_internal.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id), test_type, test.test_results_query, metrics_sample_limit, should_query_dwh_for_samples) %}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
                 {% if test.test_sub_type == 'dimension' %}
