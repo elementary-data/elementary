@@ -3,7 +3,7 @@
   legacy_result_rows: elementary_test_results.result_rows
   result_rows_agate: test_result_rows
 #}
-{%- macro get_test_rows_sample(legacy_result_rows, result_rows_agate, test_type, test_query, results_sample_limit=5) -%}
+{%- macro get_test_rows_sample(legacy_result_rows, result_rows_agate, test_type, test_query, results_sample_limit=5, should_query_dwh=true) -%}
     {% set should_limit_sample = test_type == 'dbt_test' %}
 
     {% if legacy_result_rows is defined and legacy_result_rows is not none %}
@@ -26,11 +26,15 @@
         {{ return(result_rows) }}
     {% endif %}
 
-    {% set query %}
-      with test_results as (
-        {{ test_query }}
-      )
-      select * from test_results {% if should_limit_sample %} limit {{ results_sample_limit }} {% endif %}
-    {% endset %}
-    {% do return(elementary.agate_to_dicts(elementary.run_query(query))) %}
+    {% if should_query_dwh %}
+      {% set query %}
+        with test_results as (
+          {{ test_query }}
+        )
+        select * from test_results {% if should_limit_sample %} limit {{ results_sample_limit }} {% endif %}
+      {% endset %}
+      {% do return(elementary.agate_to_dicts(elementary.run_query(query))) %}  
+    {% else %}
+      {% do return(elementary.agate_to_dicts([])) %}
+    {% endif %}
 {%- endmacro -%}

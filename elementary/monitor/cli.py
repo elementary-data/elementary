@@ -135,7 +135,7 @@ def common_options(cmd: str):
             "--select",
             type=str,
             default=None,
-            help="Filter the report by tag:<TAG> / owner:<OWNER> / model:<MODEL> / last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
+            help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
             else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL>.",
         )(func)
@@ -357,7 +357,6 @@ def report(
         Command.REPORT, get_cli_properties(), ctx.command.name
     )
     try:
-        config.validate_report()
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
@@ -457,6 +456,12 @@ def report(
     help="The report's file name, this is where it will be stored in the bucket (may contain folders).",
 )
 @click.option(
+    "--slack-report-url",
+    type=str,
+    default=None,
+    help="The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+)
+@click.option(
     "--disable-passed-test-metrics",
     type=bool,
     default=False,
@@ -490,6 +495,7 @@ def send_report(
     project_profile_target,
     executions_limit,
     bucket_file_path,
+    slack_report_url,
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
@@ -531,6 +537,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        slack_report_url=slack_report_url,
         env=env,
     )
     anonymous_tracking = AnonymousTracking(config)

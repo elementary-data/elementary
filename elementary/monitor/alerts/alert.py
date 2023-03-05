@@ -75,6 +75,10 @@ class Alert:
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
 
+    @property
+    def consice_name(self):
+        return "Alert"
+
 
 class PreviewIsTooLongError(Exception):
     def __init__(

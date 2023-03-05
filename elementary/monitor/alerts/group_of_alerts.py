@@ -14,7 +14,7 @@ from elementary.utils.json_utils import (
     list_of_lists_of_strings_to_comma_delimited_unique_strings,
     try_load_json,
 )
-from elementary.utils.models import alert_to_concise_name, get_shortened_model_name
+from elementary.utils.models import get_shortened_model_name
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -25,42 +25,41 @@ class GroupingType(Enum):
 
 
 ModelErrorComponent = AlertGroupComponent(
-    name_in_summary="Model Errors",
+    name_in_summary="Model errors",
     emoji_in_summary="X",
-    name_in_full="Model Errors",
+    name_in_full="Model errors",
     emoji_in_full="X",
 )
 
 TestErrorComponent = AlertGroupComponent(
-    name_in_summary="Test Errors",
+    name_in_summary="Test errors",
     emoji_in_summary="exclamation",
-    name_in_full="Test Errors",
+    name_in_full="Test errors",
     emoji_in_full="exclamation",
 )
 
 TestWarningComponent = AlertGroupComponent(
-    name_in_summary="Test Warnings",
+    name_in_summary="Test warnings",
     emoji_in_summary="warning",
-    name_in_full="Test Warnings",
+    name_in_full="Test warnings",
     emoji_in_full="warning",
 )
 
 TestFailureComponent = AlertGroupComponent(
-    name_in_summary="Test Failures",
+    name_in_summary="Test failures",
     emoji_in_summary="small_red_triangle",
-    name_in_full="Test Failurues",
+    name_in_full="Test failures",
     emoji_in_full="small_red_triangle",
 )
 
-
 TagsComponent = NotificationComponent(
-    name_in_summary="Tags", empty_section_content="No Tags"
+    order=0, name_in_summary="Tags", empty_section_content="No tags"
 )
 OwnersComponent = NotificationComponent(
-    name_in_summary="Owners", empty_section_content="No Owners"
+    order=1, name_in_summary="Owners", empty_section_content="No owners"
 )
 SubsComponent = NotificationComponent(
-    name_in_summary="Subscribers", empty_section_content="No Subscribers"
+    order=2, name_in_summary="Subscribers", empty_section_content="No subscribers"
 )
 
 
@@ -93,13 +92,15 @@ class GroupOfAlerts:
             [alert.subscribers for alert in alerts]
         )
 
-        self._message_builder = SlackAlertMessageBuilder()
+        self._message_builder = (
+            SlackAlertMessageBuilder()
+        )  # only place it should be used is inside to_slack
         self._env = env
 
-    def set_owners(self, owners: list[str]):
+    def set_owners(self, owners: List[str]):
         self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
 
-    def set_subscribers(self, subscribers: list[str]):
+    def set_subscribers(self, subscribers: List[str]):
         self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
 
     def _sort_channel_destination(self, default_channel):
@@ -131,31 +132,69 @@ class GroupOfAlerts:
 
     def to_slack(self) -> SlackMessageSchema:
         title_blocks = []  # title, [banner], number of passed or failed,
-        title_blocks.append(self._title_block())
+        title_blocks.append(
+            self._message_builder.create_header_block(self._title_block())
+        )
         banner_block = self._get_banner_block(self._env)
         if banner_block:
-            title_blocks.append(banner_block)
-        title_blocks.append(self._number_of_failed_block())
+            title_blocks.append(
+                self._message_builder.create_text_section_block(banner_block)
+            )
+
+        # summary of number of failed, errors, etc.
+        fields_summary = []
+        # this would have been a loop but the order matters.
+        alert_list = self._components_to_alerts.get(ModelErrorComponent)
+        if alert_list:
+            fields_summary.append(
+                f":{ModelErrorComponent.emoji_in_summary}: {ModelErrorComponent.name_in_summary}: {len(alert_list)}    |"
+            )
+        alert_list = self._components_to_alerts.get(TestFailureComponent)
+        if alert_list:
+            fields_summary.append(
+                f":{TestFailureComponent.emoji_in_summary}: {TestFailureComponent.name_in_summary}: {len(alert_list)}    |"
+            )
+        alert_list = self._components_to_alerts.get(TestWarningComponent)
+        if alert_list:
+            fields_summary.append(
+                f":{TestWarningComponent.emoji_in_summary}: {TestWarningComponent.name_in_summary}: {len(alert_list)}    |"
+            )
+        alert_list = self._components_to_alerts.get(TestErrorComponent)
+        if alert_list:
+            fields_summary.append(
+                f":{TestErrorComponent.emoji_in_summary}: {TestErrorComponent.name_in_summary}: {len(alert_list)}"
+            )
+        title_blocks.append(self._message_builder.create_context_block(fields_summary))
         self._message_builder._add_title_to_slack_alert(title_blocks=title_blocks)
 
         # attention required : tags, owners, subscribers
-        self._message_builder._add_preview_to_slack_alert(
-            preview_blocks=self._attention_required_blocks()
-        )
+        preview_blocks = [
+            self._message_builder.create_text_section_block(block)
+            for block in self._attention_required_blocks()
+        ] + [self._message_builder.create_empty_section_block()]
+        self._message_builder._add_preview_to_slack_alert(preview_blocks=preview_blocks)
 
         details_blocks = []
         for component, alerts_list in self._components_to_alerts.items():
             details_blocks.append(
                 self._message_builder.create_text_section_block(
-                    f":{component.emoji_in_summary}: *{component.name_in_summary}*"
+                    f"*{component.name_in_summary}*"
                 )
             )
             details_blocks.append(self._message_builder.create_divider_block())
             if component == ModelErrorComponent:
-                blocks = self._get_model_error_blocks()
-                details_blocks.extend(blocks)
+                block_header = self._message_builder.create_context_block(
+                    self._get_model_error_block_header()
+                )
+                block_body = self._message_builder.create_text_section_block(
+                    self._get_model_error_block_body()
+                )
+                details_blocks.extend([block_header, block_body])
             else:
-                text = self._tabulate_list_of_alerts(alerts_list)
+                rows = self._tabulate_list_of_alerts(alerts_list)
+                text = "\n".join(
+                    [f":{component.emoji_in_summary}: {row}" for row in rows]
+                )
                 details_blocks.append(
                     self._message_builder.create_text_section_block(text)
                 )
@@ -163,76 +202,50 @@ class GroupOfAlerts:
 
         return self._message_builder.get_slack_message()
 
-    def _title_block(self):
-        title = f":small_red_triangle: {self._title} ({len(self.alerts)} alerts)"
-        return self._message_builder.create_header_block(title)
-
-    def _number_of_failed_block(self):
-        # small_red_triangle: Falied: 36    |    :Warning: Warning: 3    |    :exclamation: Errors: 1
-        fields = []
-        all_components = list(self._components_to_alerts.items())
-        all_components_but_last = all_components[:-1]
-        for component, alert_list in all_components_but_last:
-            fields.append(
-                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}    |"
-            )
-        component, alert_list = all_components[-1]
-        fields.append(
-            (
-                f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}"
-            )
-        )
-
-        return self._message_builder.create_context_block(fields)
+    def _title_block(self) -> str:
+        return f":small_red_triangle: {self._title}"
 
     def _get_banner_block(self, env):
-        raise NotImplementedError
+        return None  # Keeping this placeholder since it's supposed to be over-rided very soon
 
-    def _get_model_error_blocks(self) -> List:
+    def _get_model_error_block_header(self) -> List:
         model_error_alert_list = self._components_to_alerts[ModelErrorComponent]
         if len(model_error_alert_list) == 0:
             return []
         result = []
         for model_error_alert in model_error_alert_list:
             if model_error_alert.message:
-                result.extend(
-                    [
-                        self._message_builder.create_context_block(
-                            ["*Result message*"]
-                        ),
-                        self._message_builder.create_text_section_block(
-                            f"```{model_error_alert.message.strip()}```"
-                        ),
-                    ]
-                )
+                result.extend(["*Result message*"])
         return result
 
+    def _get_model_error_block_body(self) -> str:
+        model_error_alert_list = self._components_to_alerts[ModelErrorComponent]
+        if len(model_error_alert_list) == 0:
+            return ""
+        for model_error_alert in model_error_alert_list:
+            if model_error_alert.message:
+                return f"```{model_error_alert.message.strip()}```"
+        return ""
+
     def _attention_required_blocks(self):
-        preview_blocks = []
+        preview_blocks = [f"*{self._db}.{self._schema}.{self._model}*"]
 
-        for component, val in self._components_to_attention_required.items():
+        for component, val in sorted(
+            self._components_to_attention_required.items(), key=lambda x: x[0].order
+        ):
             text = f"_{component.empty_section_content}_" if not val else val
-            preview_blocks.append(
-                self._message_builder.create_text_section_block(
-                    f"*{component.name_in_summary}*: {text}"
-                )
-            )
-
-        preview_blocks.append(self._message_builder.create_empty_section_block())
+            preview_blocks.append(f"*{component.name_in_summary}*: {text}")
 
         return preview_blocks
 
-    def _tabulate_list_of_alerts(self, alert_list):
-        ret = []
+    def _tabulate_list_of_alerts(self, alert_list) -> List[str]:
+        rows = []
         for alert in alert_list:
-            ret.append(self._get_tabulated_row_from_alert(alert))
-        return "\n".join(ret)
+            rows.append(self._get_tabulated_row_from_alert(alert))
+        return rows
 
     def _get_tabulated_row_from_alert(self, alert: Alert):
         raise NotImplementedError
-
-    def _had_channel_clashes(self):
-        return False
 
     def _get_title(self):
         return None
@@ -249,23 +262,13 @@ class GroupOfAlertsByTable(GroupOfAlerts):
             raise ValueError(
                 f"failed initializing a GroupOfAlertsByTable, for alerts with multiple models: {list(models)}"
             )
-        self._model = list(models)[0]
+        self._model = get_shortened_model_name(list(models)[0])
         self._db = alerts[0].database_name
         self._schema = alerts[0].schema_name
         super().__init__(alerts, default_channel_destination, env)
 
-    def _get_title(self):
-        return f"{self._schema}.{get_shortened_model_name(self._model)}"
-
-    def _get_banner_block(self, env):
-        env_text = (
-            ":construction: Development"
-            if env == "dev"
-            else ":large_green_circle: Production"
-        )
-        return self._message_builder.create_text_section_block(
-            f"_Env: {env_text}, DB: {self._db}_ "
-        )
+    def _get_title(self) -> str:
+        return f"Table issues detected - {self._model}"
 
     def _sort_channel_destination(self, default_channel):
         """
@@ -298,8 +301,8 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         else:
             self.channel_destination = default_channel
 
-    def _get_tabulated_row_from_alert(self, alert: Alert):
-        return f"{alert_to_concise_name(alert)}"
+    def _get_tabulated_row_from_alert(self, alert: Alert) -> str:
+        return alert.consice_name
 
 
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):

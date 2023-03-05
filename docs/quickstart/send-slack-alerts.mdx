@@ -13,7 +13,7 @@ Also, you can add information for each test / model in your `.yml` files:
 - Owners - tag the owner of the model
 - Subscribers - let users subscribe to models and tests they care about
 
-You can also configure your notification preferences to make sure they are aligned with your workflow and serve you best: 
+You can also set your notification preferences to make sure they are aligned with your workflow and serve you best: 
   - Custom channels - distribute alerts to different Slack channels based on their context
   - Field alerts - choose which fields to display in your alert
   - Filter alerts - by using a selector you can filter alerts by tag, owner or table.
@@ -197,7 +197,7 @@ models:
 </AccordionGroup> 
 
 
-## Notification settings: configure how you want to get your alerts
+## Notification settings: decide how you want to get your alerts
 
 Elementary also allows you to customize how you want to get your alerts so that the right information reaches the right people at the right frequency. This is important so you can ensure your alerts are valuable and to avoid alert fatigue. 
 
@@ -221,7 +221,7 @@ Elementary supports configuring custom slack channels that are configured on you
 - If you configure a custom slack channel for both a model and a test, the test channel will override the model channel.
 - If you configure a custom slack channel and you decide to group your alerts by table into a single message, it will be sent to the model channel (even if a differnt channel was configured on the test level0 
 
-For example, this enables you to duplicate all your marketing model and test alerts to a specific marketing-data-ops
+For example, this enables you to send all your marketing model and test alerts to a specific marketing-data-ops
 channel.
 
 To set it up, simply add the relevant channel to your models in the `properties.yml` (can be done also for sources and
@@ -427,7 +427,7 @@ models:
 <Accordion title="Group alerts by table">
 By default, Elementary sends a single alert to notify on each failure. When using single alerts, the alert will include extensive information for fast triage.
   
-Elementary also supports grouping alerts by table. In this case, a single Slack notification will be generated containing all test warnings/failures/errors as well as the errors associated with the model. The created notification will contain a union of the relevant owners, tags and subscribers.
+Elementary also supports grouping alerts by table. In this case, a single Slack notification will be generated containing all test warnings/failures/errors as well as the errors associated with the model. The created notification will contain a union of the relevant owners, tags and subscribers. Due to their nature, grouped alerts will contain less information on each issue. As always, you can use our ([detailed report](/quickstart/generate-report-ui)) for easy triage. 
   
 To group alerts by table:
 
@@ -438,19 +438,35 @@ edr monitor --group_by table
 Grouping can also be configured through the yml files. To set it up globaly for your project, add the configuration to your models in the dbt_project.yml file:  
   
  ```yml dbt_project.yml
-ADD EXAMPLE
+models:
+  marketing_bi:
+    +meta:
+      alerts_config:
+      # alerts on models in marekting_bi should be grouped by table:
+        slack_group_alerts_by: table
+
 ```  
   
 To set it up for a model, add the configuration to your model in the properties.yml:
   
  ```yml properties.yml
-ADD EXAMPLE
+models:
+  - name: marketing_leads
+    meta:
+      alerts_config:
+        # all alerts on marketing_leads should group together to one slack message:
+        slack_group_alerts_by: table
 ```   
   
 Grouping by table can be configured globally (in the dbt_project.yml) but if you wish to override it for a specific model where you want a single alert for each failure, you can add the configuration to your model in the properties.yml:
 
  ```yml properties.yml
-ADD EXAMPLE
+models:
+  - name: marketing_leads
+    meta:
+      alerts_config:
+        # all alerts on marketing_leads should NEVER group together to one slack message:
+        slack_group_alerts_by: alert
 ```   
   
 </Accordion>  

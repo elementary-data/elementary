@@ -38,6 +38,7 @@ class TestsAPI(APIClient):
         invocations_per_test: int = 720,
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
+        should_query_dwh_for_samples: bool = True,
     ):
         super().__init__(dbt_runner)
         self.tests_fetcher = TestsFetcher(dbt_runner=self.dbt_runner)
@@ -47,6 +48,7 @@ class TestsAPI(APIClient):
             invocations_per_test=invocations_per_test,
             metrics_sample_limit=metrics_sample_limit,
             disable_passed_test_metrics=disable_passed_test_metrics,
+            should_query_dwh_for_samples=should_query_dwh_for_samples,
         )
 
     def _get_test_results_db_rows(
@@ -55,12 +57,14 @@ class TestsAPI(APIClient):
         invocations_per_test: int = 720,
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
+        should_query_dwh_for_samples: bool = True,
     ) -> List[TestResultDBRowSchema]:
         return self.tests_fetcher.get_all_test_results_db_rows(
             days_back=days_back,
             invocations_per_test=invocations_per_test,
             metrics_sample_limit=metrics_sample_limit,
             disable_passed_test_metrics=disable_passed_test_metrics,
+            should_query_dwh_for_samples=should_query_dwh_for_samples,
         )
 
     def get_test_results_summary(
