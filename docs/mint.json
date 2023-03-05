@@ -52,10 +52,15 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart",
-        "quickstart-cli",
         {
-          "group": "Quickstart: Tutorial",
+          "group": "Quickstart",
+          "pages": [
+            "quickstart",
+            "quickstart-cli"
+          ]
+        },
+        {
+          "group": "Tutorial",
           "pages": [
             "tutorial/tutorial-start",
             "tutorial/setup",
