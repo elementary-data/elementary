@@ -19,7 +19,6 @@ class TestsFetcher(FetcherClient):
         invocations_per_test: int = 720,
         metrics_sample_limit: int = 5,
         disable_passed_test_metrics: bool = False,
-        should_query_dwh_for_samples: bool = True,
     ) -> List[TestResultDBRowSchema]:
         run_operation_response = self.dbt_runner.run_operation(
             macro_name="get_test_results",
@@ -28,7 +27,6 @@ class TestsFetcher(FetcherClient):
                 invocations_per_test=invocations_per_test,
                 metrics_sample_limit=metrics_sample_limit,
                 disable_passed_test_metrics=disable_passed_test_metrics,
-                should_query_dwh_for_samples=should_query_dwh_for_samples,
             ),
         )
         test_results = (
