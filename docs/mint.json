@@ -52,10 +52,15 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart",
-        "quickstart-cli",
         {
-          "group": "Quickstart: Tutorial",
+          "group": "Quickstart",
+          "pages": [
+            "quickstart",
+            "quickstart-cli"
+          ]
+        },
+        {
+          "group": "Tutorial",
           "pages": [
             "tutorial/tutorial-start",
             "tutorial/setup",
@@ -71,7 +76,16 @@
       "group": "Guides",
       "pages": [
         "quickstart/generate-report-ui",
-        "quickstart/share-report-ui",
+        {
+          "group": "Share observability report",
+          "pages": [
+            "quickstart/share-report-ui",
+            "guides/share-observability-report/share-via-slack",
+            "guides/share-observability-report/host-on-s3",
+            "guides/share-observability-report/host-on-gcs",
+            "guides/share-observability-report/send-report-summary"
+          ]
+        },
         "quickstart/send-slack-alerts",
         "guides/add-elementary-tests",
         "guides/add-schema-tests",
