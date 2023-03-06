@@ -26,5 +26,5 @@
         {{ return(result_rows) }}
     {% endif %}
 
-    {% do return(elementary.agate_to_dicts([])) %}
+    {% do return([]) %}
 {%- endmacro -%}
