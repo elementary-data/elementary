@@ -1,0 +1,43 @@
+---
+title: "Elementary 0.7.5"
+sidebarTitle: "0.7.5"
+---
+
+_March 6, 2023: [v0.7.5 Python](https://github.com/elementary-data/elementary/releases/tag/v0.7.5), [v0.7.3 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.7.3)_
+
+### 🔥 What's new?
+
+- **Grouped alert for test results by table** 🤝
+  - Feeling overwhelmed by alerts on each failed test?
+  - You can now add `-group-by table` to `edr monitor` and the table test results will be sent as one message.
+  - Docs are [here](/quickstart/send-slack-alerts#notification-settings-decide-how-you-want-to-get-your-alerts) ; Pic attached 📸
+  - This was requested by [@Jake Beresford](https://elementary-community.slack.com/team/U03BN2E93SQ) and [@Ekaterina Khrushch](https://elementary-community.slack.com/team/U03PVN83DC2)
+
+- **Add `sum` to column anomaly tests** ➕
+  - You can now monitor anomalies on the sum of a numeric column.
+  - Thanks [tc-chrisbui](https://github.com/tc-chrisbui) for the contribution! 🤩
+
+- **Add `where_expression` to Python tests** 🟰
+  - You can now filter the data you are testing in a Python test.
+  - Thank you [Oskar Elvkull](https://github.com/Deathfireofdoom) for the contribution! 🤩
+
+
+### 💫 More changes
+- Added dbt 1.5.0 support. 😎
+
+
+### 🐞 Bug fixes
+
+- Fixed a bug in `dimension_anomalies` without a `timestamp_column` - Thanks [@Amihay Gonen](https://elementary-community.slack.com/team/U031P4UGEFK) and [@Alvin M](https://elementary-community.slack.com/team/U04HWDV7D4P) for reporting!
+- Fixed a bug with anomaly monitors running on the wrong data type (only in 0.7.2) - Thanks again [@Amihay Gonen](https://elementary-community.slack.com/team/U031P4UGEFK)!
+- Fixed problems in the numbers presented in the dashboard 🔢
+  - Counting exposures as models - Thanks for reporting [@Willi Mueller](https://elementary-community.slack.com/team/U04NG6HNZC4) !
+  - Classifying tests as the wrong kind of test - - Thanks for reporting [@Jan Santora](https://elementary-community.slack.com/team/U03TESH0JSD)!
+- Fixed dashboard header sometimes having an empty timestamp - [@Mohamed Omran](https://elementary-community.slack.com/team/U04RBFR5VDK) thanks for reporting!
+
+<Frame>
+  <img
+    src="/pics/group-alert-by-table.png"
+    alt="Demo"
+  />
+</Frame>

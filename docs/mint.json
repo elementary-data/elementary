@@ -153,6 +153,7 @@
         {
           "group": "Releases",
           "pages": [
+            "release-notes/releases/0.7.5",
             "release-notes/releases/0.7.2",
             "release-notes/releases/0.6.10",
             "release-notes/releases/0.6.7",
