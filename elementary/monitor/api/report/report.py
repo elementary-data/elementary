@@ -32,7 +32,6 @@ class ReportAPI(APIClient):
         disable_samples: bool = False,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
-        should_query_dwh_for_samples: bool = True,
     ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         try:
             tests_api = TestsAPI(
@@ -40,7 +39,6 @@ class ReportAPI(APIClient):
                 days_back=days_back,
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
-                should_query_dwh_for_samples=should_query_dwh_for_samples,
             )
             models_api = ModelsAPI(dbt_runner=self.dbt_runner)
             sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
