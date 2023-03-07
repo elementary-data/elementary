@@ -135,6 +135,7 @@ def test_alerts(warehouse_type, days_back=1):
     # even if we do have a few CI runs spamming, we should have more than 0
     assert data_monitoring.sent_alert_count > 0
 
+    # assertions to make sure counting alerts sent by the alert fetcher and marked as sent by the data_monitoring is the same
     assert (
         sum(len(x) for x in data_monitoring.alerts_api.sent_alerts.values())
         == data_monitoring.sent_alert_count
