@@ -1,7 +1,9 @@
 from typing import Optional
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring.data_monitoring_alerts import DataMonitoringAlerts
+from elementary.monitor.data_monitoring.data_monitoring_alerts import (
+    DataMonitoringAlerts,
+)
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from tests.mocks.api.alerts_api_mock import MockAlertsAPIReadOnly
 

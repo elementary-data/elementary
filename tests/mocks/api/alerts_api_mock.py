@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Dict, Set, List, Union
+from typing import Dict, List, Set, Union
+
 from elementary.config.config import Config
 from elementary.monitor.alerts.alerts import AlertType
 from elementary.monitor.alerts.malformed import MalformedAlert
@@ -17,10 +18,15 @@ class MockAlertsAPI(AlertsAPI):
         )
         self.alerts_fetcher = MockAlertsFetcher()
 
+
 class MockAlertsAPIReadOnly(AlertsAPI):
     def __init__(self, *args, **kwargs):
-        self.sent_alerts: Dict[str, Set[str]] = defaultdict(set)  # map from table_name to alert IDs
-        self.skipped_alerts: Dict[str, Set[str]] = defaultdict(set)  # map from table_name to alert IDs
+        self.sent_alerts: Dict[str, Set[str]] = defaultdict(
+            set
+        )  # map from table_name to alert IDs
+        self.skipped_alerts: Dict[str, Set[str]] = defaultdict(
+            set
+        )  # map from table_name to alert IDs
         super().__init__(*args, **kwargs)
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:

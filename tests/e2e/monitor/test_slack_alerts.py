@@ -11,14 +11,24 @@ SLACK_CHANNEL_TEST_NOT_USED_NAME = "test"
 
 # these will need to be updated when the package e2e changes.
 NUM_ALERTS_E2E_GIVES = 127
-EXPECTED_MESSAGE_HEADERS_COUNT = [(':small_red_triangle: Data anomaly detected', 104), (':small_red_triangle: Schema change detected', 11), (':small_red_triangle: dbt test alert', 7), (':warning: Data anomaly detected', 1), (':x: Schema change detected', 1), (':x: dbt model alert', 1), (':x: dbt snapshot alert', 1), (':x: dbt test alert', 1)]
-TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E = ['alerts_models', 'alerts']
+EXPECTED_MESSAGE_HEADERS_COUNT = [
+    (":small_red_triangle: Data anomaly detected", 104),
+    (":small_red_triangle: Schema change detected", 11),
+    (":small_red_triangle: dbt test alert", 7),
+    (":warning: Data anomaly detected", 1),
+    (":x: Schema change detected", 1),
+    (":x: dbt model alert", 1),
+    (":x: dbt snapshot alert", 1),
+    (":x: dbt test alert", 1),
+]
+TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E = ["alerts_models", "alerts"]
+
 
 def try_parse_header_text_from_slack_message_schema(msg: SlackMessageSchema):
     # find header block
     header_block = None
     for bl in msg.blocks:
-        if bl.get('type') == "header":
+        if bl.get("type") == "header":
             header_block = bl
     if not header_block:
         return None
@@ -52,7 +62,6 @@ def test_alerts(warehouse_type="snowflake", days_back=15):
     )
     anonymous_tracking = MockAnonymousTracking(config)
 
-
     data_monitoring = DataMonitoringAlertsMock(
         config=config,
         tracking=anonymous_tracking,
@@ -61,7 +70,9 @@ def test_alerts(warehouse_type="snowflake", days_back=15):
         disable_samples=False,
         filter=None,
     )
-    data_monitoring.slack_client = SlackWebClientMock(token=None, webhook=None, tracking=None)
+    data_monitoring.slack_client = SlackWebClientMock(
+        token=None, webhook=None, tracking=None
+    )
 
     success = data_monitoring.run_alerts(
         days_back, dbt_full_refresh=False, dbt_vars=None
@@ -72,10 +83,29 @@ def test_alerts(warehouse_type="snowflake", days_back=15):
 
     # assertions about sent alerts strongly tied our dbt package e2e:
     assert data_monitoring.sent_alert_count == NUM_ALERTS_E2E_GIVES
-    assert sum(len(x) for x in data_monitoring.alerts_api.sent_alerts.values()) == NUM_ALERTS_E2E_GIVES
-    assert len(data_monitoring.slack_client.sent_messages[SLACK_CHANNEL_TEST_NOT_USED_NAME]) == NUM_ALERTS_E2E_GIVES
+    assert (
+        sum(len(x) for x in data_monitoring.alerts_api.sent_alerts.values())
+        == NUM_ALERTS_E2E_GIVES
+    )
+    assert (
+        len(
+            data_monitoring.slack_client.sent_messages[SLACK_CHANNEL_TEST_NOT_USED_NAME]
+        )
+        == NUM_ALERTS_E2E_GIVES
+    )
 
-    assert sorted(list(data_monitoring.alerts_api.sent_alerts.keys())) == sorted(TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E)
+    assert sorted(list(data_monitoring.alerts_api.sent_alerts.keys())) == sorted(
+        TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E
+    )
 
-    assert sorted(Counter([try_parse_header_text_from_slack_message_schema(x) for x in
-                    data_monitoring.slack_client.sent_messages['test']]).items()) == EXPECTED_MESSAGE_HEADERS_COUNT
+    assert (
+        sorted(
+            Counter(
+                [
+                    try_parse_header_text_from_slack_message_schema(x)
+                    for x in data_monitoring.slack_client.sent_messages["test"]
+                ]
+            ).items()
+        )
+        == EXPECTED_MESSAGE_HEADERS_COUNT
+    )
