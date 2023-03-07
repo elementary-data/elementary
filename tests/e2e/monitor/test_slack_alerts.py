@@ -98,15 +98,19 @@ def test_alerts(warehouse_type, days_back=15):
     # general "code not broken" assertion:
     assert success
 
-    import pdb
-
-    pdb.set_trace()  # NO_COMMIT
-
     # assertions about sent alerts strongly tied our dbt package e2e:
-    if warehouse_type not in NUM_ALERTS_E2E_GIVES.keys():  # for generating test data for the first time in a new warehouse
-        print(f"NUM_ALERTS_E2E_GIVES[{warehouse_type}]={NUM_ALERTS_E2E_GIVES[warehouse_type]}")
-        print(f"TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[{warehouse_type}]={TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[warehouse_type]}")
-        print(f"EXPECTED_MESSAGE_HEADERS_COUNT[{warehouse_type}]={EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]}")
+    if (
+        warehouse_type not in NUM_ALERTS_E2E_GIVES.keys()
+    ):  # for generating test data for the first time in a new warehouse
+        print(
+            f"NUM_ALERTS_E2E_GIVES[{warehouse_type}]={NUM_ALERTS_E2E_GIVES[warehouse_type]}"
+        )
+        print(
+            f"TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[{warehouse_type}]={TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[warehouse_type]}"
+        )
+        print(
+            f"EXPECTED_MESSAGE_HEADERS_COUNT[{warehouse_type}]={EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]}"
+        )
         # this flow shouldn't be left alone in production so assert False to get some attention
         assert warehouse_type in NUM_ALERTS_E2E_GIVES.keys()
     else:
@@ -117,7 +121,9 @@ def test_alerts(warehouse_type, days_back=15):
         )
         assert (
             len(
-                data_monitoring.slack_client.sent_messages[SLACK_CHANNEL_TEST_NOT_USED_NAME]
+                data_monitoring.slack_client.sent_messages[
+                    SLACK_CHANNEL_TEST_NOT_USED_NAME
+                ]
             )
             == data_monitoring.sent_alert_count
         )
