@@ -12,8 +12,8 @@ from tests.mocks.slack_client_mock import SlackWebClientMock
 SLACK_CHANNEL_TEST_NOT_USED_NAME = "test"
 
 # these will need to be updated when the package e2e changes.
-NUM_ALERTS_E2E_GIVES = 127
-EXPECTED_MESSAGE_HEADERS_COUNT = [
+NUM_ALERTS_E2E_GIVES = {"snowflake": 127, "postgres": 132}
+EXPECTED_MESSAGE_HEADERS_COUNT_SNOWFLAKE = [
     (":small_red_triangle: Data anomaly detected", 104),
     (":small_red_triangle: Schema change detected", 11),
     (":small_red_triangle: dbt test alert", 7),
@@ -23,7 +23,24 @@ EXPECTED_MESSAGE_HEADERS_COUNT = [
     (":x: dbt snapshot alert", 1),
     (":x: dbt test alert", 1),
 ]
-TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E = ["alerts_models", "alerts"]
+EXPECTED_MESSAGE_HEADERS_COUNT_POSTGRES = [
+    (":small_red_triangle: Data anomaly detected", 109),
+    (":small_red_triangle: Schema change detected", 11),
+    (":small_red_triangle: dbt test alert", 7),
+    (":warning: Data anomaly detected", 1),
+    (":x: Schema change detected", 1),
+    (":x: dbt model alert", 1),
+    (":x: dbt snapshot alert", 1),
+    (":x: dbt test alert", 1),
+]
+EXPECTED_MESSAGE_HEADERS_COUNT = {
+    "snoflake": EXPECTED_MESSAGE_HEADERS_COUNT_SNOWFLAKE,
+    "postgres": EXPECTED_MESSAGE_HEADERS_COUNT_POSTGRES,
+}
+TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E = {
+    "snowflake": ["alerts_models", "alerts"],
+    "postgres": ["alerts_models", "alerts"],
+}
 
 
 def try_parse_header_text_from_slack_message_schema(msg: SlackMessageSchema):
@@ -45,7 +62,6 @@ def test_alerts(warehouse_type, days_back=15):
     # - the part where alerts are updated as sent/skipped,
     # - the part that actually sends alerts to slack
     # instead assert they're as expected.
-
 
     config = Config(
         config_dir=Config.DEFAULT_CONFIG_DIR,
@@ -82,34 +98,46 @@ def test_alerts(warehouse_type, days_back=15):
     # general "code not broken" assertion:
     assert success
 
+    import pdb
+
+    pdb.set_trace()  # NO_COMMIT
+
     # assertions about sent alerts strongly tied our dbt package e2e:
-    assert data_monitoring.sent_alert_count == NUM_ALERTS_E2E_GIVES
-    assert (
-        sum(len(x) for x in data_monitoring.alerts_api.sent_alerts.values())
-        == NUM_ALERTS_E2E_GIVES
-    )
-    assert (
-        len(
-            data_monitoring.slack_client.sent_messages[SLACK_CHANNEL_TEST_NOT_USED_NAME]
+    if warehouse_type not in NUM_ALERTS_E2E_GIVES.keys():  # for generating test data for the first time in a new warehouse
+        print(f"NUM_ALERTS_E2E_GIVES[{warehouse_type}]={NUM_ALERTS_E2E_GIVES[warehouse_type]}")
+        print(f"TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[{warehouse_type}]={TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[warehouse_type]}")
+        print(f"EXPECTED_MESSAGE_HEADERS_COUNT[{warehouse_type}]={EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]}")
+        # this flow shouldn't be left alone in production so assert False to get some attention
+        assert warehouse_type in NUM_ALERTS_E2E_GIVES.keys()
+    else:
+        assert data_monitoring.sent_alert_count == NUM_ALERTS_E2E_GIVES[warehouse_type]
+        assert (
+            sum(len(x) for x in data_monitoring.alerts_api.sent_alerts.values())
+            == data_monitoring.sent_alert_count
         )
-        == NUM_ALERTS_E2E_GIVES
-    )
-
-    assert sorted(list(data_monitoring.alerts_api.sent_alerts.keys())) == sorted(
-        TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E
-    )
-
-    assert (
-        sorted(
-            Counter(
-                [
-                    try_parse_header_text_from_slack_message_schema(x)
-                    for x in data_monitoring.slack_client.sent_messages["test"]
-                ]
-            ).items()
+        assert (
+            len(
+                data_monitoring.slack_client.sent_messages[SLACK_CHANNEL_TEST_NOT_USED_NAME]
+            )
+            == data_monitoring.sent_alert_count
         )
-        == EXPECTED_MESSAGE_HEADERS_COUNT
-    )
+
+        assert sorted(list(data_monitoring.alerts_api.sent_alerts.keys())) == sorted(
+            TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[warehouse_type]
+        )
+
+        assert (
+            sorted(
+                Counter(
+                    [
+                        try_parse_header_text_from_slack_message_schema(x)
+                        for x in data_monitoring.slack_client.sent_messages["test"]
+                    ]
+                ).items()
+            )
+            == EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]
+        )
+
 
 @pytest.fixture(scope="session")
 def warehouse_type(pytestconfig):
