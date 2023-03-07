@@ -46,7 +46,7 @@ jobs:
           script: |
             core.setFailed("Invalid version inputs")
 
-  bump-cli-version:
+  bump-version:
     needs: validate-version
     runs-on: ubuntu-latest
     steps:
