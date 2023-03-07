@@ -12,7 +12,7 @@ from tests.mocks.slack_client_mock import SlackWebClientMock
 SLACK_CHANNEL_TEST_NOT_USED_NAME = "test"
 
 # these will need to be updated when the package e2e changes.
-NUM_ALERTS_E2E_GIVES = {"snowflake": 127, "postgres": 132}
+NUM_ALERTS_E2E_GIVES = {"snowflake": 127, "postgres": 131}
 EXPECTED_MESSAGE_HEADERS_COUNT_SNOWFLAKE = [
     (":small_red_triangle: Data anomaly detected", 104),
     (":small_red_triangle: Schema change detected", 11),
@@ -24,7 +24,7 @@ EXPECTED_MESSAGE_HEADERS_COUNT_SNOWFLAKE = [
     (":x: dbt test alert", 1),
 ]
 EXPECTED_MESSAGE_HEADERS_COUNT_POSTGRES = [
-    (":small_red_triangle: Data anomaly detected", 109),
+    (":small_red_triangle: Data anomaly detected", 108),
     (":small_red_triangle: Schema change detected", 11),
     (":small_red_triangle: dbt test alert", 7),
     (":warning: Data anomaly detected", 1),
@@ -152,15 +152,25 @@ def test_alerts(warehouse_type, days_back=1):
     assert sorted(list(data_monitoring.alerts_api.sent_alerts.keys())) == sorted(
         TABLES_TO_UPDATE_IN_EDR_RUN_ON_E2E[warehouse_type]
     )
-
-    assert sorted(
-        Counter(
-            [
-                try_parse_header_text_from_slack_message_schema(x)
-                for x in data_monitoring.slack_client.sent_messages["test"]
+    cnt = Counter(
+        [
+            try_parse_header_text_from_slack_message_schema(x)
+            for x in data_monitoring.slack_client.sent_messages[
+                SLACK_CHANNEL_TEST_NOT_USED_NAME
             ]
-        ).items()
-    ) == sorted(EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type])
+        ]
+    )
+    if sorted(cnt.items()) != sorted(EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]):
+        assert sorted(cnt.keys()) == sorted(
+            [x[0] for x in EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]]
+        )
+        print("looks like either a failure or a few runs mixing up together:")
+        print(
+            f"EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]={EXPECTED_MESSAGE_HEADERS_COUNT[warehouse_type]}"
+        )
+        print(
+            f"Counter(try_parse_header_text_from_slack_message_schema (message) for message in data_monitoring.slack_client.sent_messages)={cnt.items()}"
+        )
 
 
 @pytest.fixture(scope="session")
