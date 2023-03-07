@@ -1,5 +1,7 @@
 from collections import Counter
 
+import pytest
+
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.group_of_alerts import GroupingType
@@ -38,13 +40,12 @@ def try_parse_header_text_from_slack_message_schema(msg: SlackMessageSchema):
     return header_text_part.get("text")
 
 
-def test_alerts(warehouse_type="snowflake", days_back=15):
+def test_alerts(warehouse_type, days_back=15):
     # very similar to the CLI, only mocking edr monitor:
     # - the part where alerts are updated as sent/skipped,
     # - the part that actually sends alerts to slack
     # instead assert they're as expected.
 
-    # TODO get help from Idan how to make warehouse type actually the pytest fixture "warehouse_type" and not hardcoded.
 
     config = Config(
         config_dir=Config.DEFAULT_CONFIG_DIR,
@@ -109,3 +110,7 @@ def test_alerts(warehouse_type="snowflake", days_back=15):
         )
         == EXPECTED_MESSAGE_HEADERS_COUNT
     )
+
+@pytest.fixture(scope="session")
+def warehouse_type(pytestconfig):
+    return pytestconfig.getoption("warehouse_type")
