@@ -129,8 +129,10 @@ def test_alerts(warehouse_type, days_back=1):
 
     if data_monitoring.sent_alert_count != NUM_ALERTS_E2E_GIVES[warehouse_type]:
         print("looks like either a failure or a few runs mixing up together:")
-        print(f"{data_monitoring.sent_alert_count=}")
-        print(f"{NUM_ALERTS_E2E_GIVES[warehouse_type]=}")
+        print(f"data_monitoring.sent_alert_count={data_monitoring.sent_alert_count}")
+        print(
+            f"NUM_ALERTS_E2E_GIVES[warehouse_type]={NUM_ALERTS_E2E_GIVES[warehouse_type]}"
+        )
 
     # even if we do have a few CI runs spamming, we should have more than 0
     assert data_monitoring.sent_alert_count > 0
