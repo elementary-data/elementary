@@ -99,7 +99,8 @@ class DataMonitoring:
             )[0]
         except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
-            self.tracking.record_cli_internal_exception(ex)
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
 
     def get_latest_invocation(self) -> Dict[str, Any]:
@@ -110,7 +111,8 @@ class DataMonitoring:
             return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
             logger.error(f"Unable to get the latest invocation: {err}")
-            self.tracking.record_cli_internal_exception(err)
+            if self.tracking:
+                self.tracking.record_cli_internal_exception(err)
             return {}
 
     @staticmethod
