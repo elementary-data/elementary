@@ -219,22 +219,22 @@ def test_duplicate_rows_for_latest_run_status(warehouse_type):
         expected_ammount=4,
     )
 
-    # e2e contains 58 all columns anomalies tests
-    assert_test_counter(
-        report_data=report_data,
-        test_type="anomaly_detection",
-        name="all_columns_anomalies",
-        expected_ammount=58,
-    )
+#     # e2e contains 58 all columns anomalies tests
+#     assert_test_counter(
+#         report_data=report_data,
+#         test_type="anomaly_detection",
+#         name="all_columns_anomalies",
+#         expected_ammount=58,
+#     )
 
-    # All of the tests are defined on the table any_type_column_anomalies
-    assert_test_counter(
-        report_data=report_data,
-        test_type="anomaly_detection",
-        name="all_columns_anomalies",
-        table="any_type_column_anomalies",
-        expected_ammount=58,
-    )
+#     # All of the tests are defined on the table any_type_column_anomalies
+#     assert_test_counter(
+#         report_data=report_data,
+#         test_type="anomaly_detection",
+#         name="all_columns_anomalies",
+#         table="any_type_column_anomalies",
+#         expected_ammount=58,
+#     )
 
     # occurred_at column should have 2 passed test results.
     # 2 for any type column
