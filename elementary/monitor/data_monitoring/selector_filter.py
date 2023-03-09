@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 class SelectorFilter:
     def __init__(
         self,
-        tracking: AnonymousTracking,
+        tracking: Optional[AnonymousTracking],
         user_dbt_runner: Optional[DbtRunner] = None,
         selector: Optional[str] = None,
     ) -> None:
@@ -28,7 +28,8 @@ class SelectorFilter:
         data_monitoring_filter = SelectorFilterSchema()
         if selector:
             if self.selector_fetcher:
-                self.tracking.set_env("select_method", "dbt selector")
+                if self.tracking:
+                    self.tracking.set_env("select_method", "dbt selector")
                 node_names = self.selector_fetcher.get_selector_results(
                     selector=selector
                 )
@@ -64,17 +65,20 @@ class SelectorFilter:
                         selector=selector,
                     )
                 elif tag_match:
-                    self.tracking.set_env("select_method", "tag")
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "tag")
                     data_monitoring_filter = SelectorFilterSchema(
                         tag=tag_match.group().split(":", 1)[1], selector=selector
                     )
                 elif owner_match:
-                    self.tracking.set_env("select_method", "owner")
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "owner")
                     data_monitoring_filter = SelectorFilterSchema(
                         owner=owner_match.group().split(":", 1)[1], selector=selector
                     )
                 elif model_match:
-                    self.tracking.set_env("select_method", "model")
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "model")
                     data_monitoring_filter = SelectorFilterSchema(
                         model=model_match.group().split(":", 1)[1], selector=selector
                     )
