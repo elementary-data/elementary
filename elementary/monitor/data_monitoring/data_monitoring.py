@@ -29,21 +29,9 @@ class DataMonitoring:
     ):
         self.config = config
         self.tracking = tracking
-        self.internal_dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
-            self.config.profiles_dir,
-            self.config.profile_target,
-            dbt_env_vars=self.config.dbt_env_vars,
-        )
-        if self.config.project_dir:
-            self.user_dbt_runner = DbtRunner(
-                self.config.project_dir,
-                self.config.profiles_dir,
-                self.config.project_profile_target,
-                dbt_env_vars=self.config.dbt_env_vars,
-            )
-        else:
-            self.user_dbt_runner = None
+        self.internal_dbt_runner = self._init_internal_dbt_runner()
+        self.user_dbt_runner = self._init_user_dbt_runner()
+
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -70,6 +58,27 @@ class DataMonitoring:
             user_dbt_runner=self.user_dbt_runner,
             selector=self.raw_filter,
         )
+
+    def _init_internal_dbt_runner(self):
+        internal_dbt_runner = DbtRunner(
+            dbt_project_utils.PATH,
+            self.config.profiles_dir,
+            self.config.profile_target,
+            dbt_env_vars=self.config.dbt_env_vars,
+        )
+        return internal_dbt_runner
+
+    def _init_user_dbt_runner(self):
+        if self.config.project_dir:
+            user_dbt_runner = DbtRunner(
+                self.config.project_dir,
+                self.config.profiles_dir,
+                self.config.project_profile_target,
+                dbt_env_vars=self.config.dbt_env_vars,
+            )
+        else:
+            user_dbt_runner = None
+        return user_dbt_runner
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_up_to_date = dbt_project_utils.is_dbt_package_up_to_date()

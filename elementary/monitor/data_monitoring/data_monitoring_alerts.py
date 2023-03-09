@@ -35,7 +35,7 @@ class DataMonitoringAlerts(DataMonitoring):
     def __init__(
         self,
         config: Config,
-        tracking: AnonymousTracking,
+        tracking: Optional[AnonymousTracking] = None,
         filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
