@@ -79,14 +79,6 @@ vars:
   disable_skipped_test_alerts: true
 ```
 
-## Alert on source freshness failures
-
-_Not supported in dbt cloud_
-
-To alert on source freshness, you will need to run `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
-This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
-- Note that it needs to be from the same machine.
-- Note that this requires passing `--project-dir` argument.
 
 ## Alert properties 
 
@@ -457,9 +449,22 @@ models:
 
 </AccordionGroup>
 
+
+## Alert on source freshness failures
+
+_Not supported in dbt cloud_
+
+To alert on source freshness, you will need to run `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
+- Note that it needs to be from the same machine.
+- Note that this requires passing `--project-dir` argument.
+
+
 ## Continuous alerting
 
 In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after
 your dbt job ends to monitor the latest data updates).
+
+Read more about how to deploy [Elementary in production](/deployment-and-configuration/elementary-in-production). 
 If you need help or wish to consult on this, reach out to us
 on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).
