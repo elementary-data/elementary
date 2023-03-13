@@ -2,9 +2,6 @@ from collections import defaultdict
 from typing import Any
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-from elementary.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 class APIClient:
