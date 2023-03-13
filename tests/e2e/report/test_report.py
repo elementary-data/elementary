@@ -6,7 +6,7 @@ import pytest
 
 _REPORT_DATA_FILENAME = "elementary_output.json"
 _REPORT_DATA_FIXTURE = Path(__file__).parent / "fixtures" / _REPORT_DATA_FILENAME
-_REPORT_DATA_PATH = Path(_REPORT_DATA_FILENAME)
+_REPORT_DATA_PATH = Path("edr_target/" + _REPORT_DATA_FILENAME)
 
 TotalsEntry = Dict[str, int]
 Totals = Dict[str, TotalsEntry]
