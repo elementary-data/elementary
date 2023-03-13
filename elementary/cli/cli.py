@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import click
@@ -9,13 +10,24 @@ from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import package
-from elementary.utils.log import get_logger
+from elementary.utils.log import get_logger, set_root_logger_handlers
 
 f = Figlet(font="slant")
 click.echo(f.renderText("Elementary"))
 elementary.cli.upgrade.recommend_version_upgrade()
 
 logger = get_logger(__name__)
+
+
+def get_log_path(ctx):
+    file_path = Config.DEFAULT_FILES_PATH
+    try:
+        ctx_args = ctx.args
+        target_path_flag = "--target-path"
+        file_path = ctx_args[ctx_args.index(target_path_flag) + 1]
+    finally:
+        os.makedirs(os.path.abspath(file_path), exist_ok=True)
+        return os.path.join(file_path, "edr.log")
 
 
 class ElementaryCLI(click.MultiCommand):
@@ -45,6 +57,8 @@ class ElementaryCLI(click.MultiCommand):
         self.format_epilog(ctx, formatter)
 
     def invoke(self, ctx: click.Context) -> Any:
+        files_target_path = get_log_path(ctx)
+        set_root_logger_handlers("elementary", files_target_path)
         click.echo(
             "Any feedback and suggestions are welcomed! join our community here - "
             "https://bit.ly/slack-elementary\n"
