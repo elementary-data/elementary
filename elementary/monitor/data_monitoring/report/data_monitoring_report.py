@@ -186,7 +186,9 @@ class DataMonitoringReport(DataMonitoring):
 
         should_send_report_over_slack = True
         # If we upload the report to a bucket, we don't want to share it via Slack.
-        if (upload_succeeded and bucket_website_url is not None) or disable_html_attachment:
+        if (
+            upload_succeeded and bucket_website_url is not None
+        ) or disable_html_attachment:
             should_send_report_over_slack = False
 
         # If a Slack client is provided, we want send a results summary and attachment of the report if needed.
