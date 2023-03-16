@@ -40,7 +40,12 @@ def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
 
     # Over attachments limitation
     message_builder = SlackReportSummaryMessageBuilder()
-    message_builder._add_details_to_slack_alert((test_results_summary * 5)[0:40])
+    nonsuccessful_parts_of_fixture = [
+        x for x in test_results_summary if x.status != "pass"
+    ]
+    message_builder._add_details_to_slack_alert(
+        (nonsuccessful_parts_of_fixture * 50)[0:40]
+    )
     attachments_as_string = json.dumps(
         message_builder.slack_message.get("attachments")[0].get("blocks")
     )
