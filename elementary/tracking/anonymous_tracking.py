@@ -37,13 +37,15 @@ class AnonymousTracking:
         self._config = config
         self._do_not_track = config.anonymous_tracking_enabled is False
         self._run_id = str(uuid.uuid4())
-        self._init()
 
         # Exceptions that occurred during the run of the CLI, but don't fail the entire run.
         # We want to avoid sending an event for each one of these (as there might be many of them), so we will send
         # them as a part of the cli-end event.
         self.internal_exceptions = []
         self.internal_exceptions_count = 0
+
+        if not self._do_not_track:
+            self._init()
 
     def _init(self):
         try:
