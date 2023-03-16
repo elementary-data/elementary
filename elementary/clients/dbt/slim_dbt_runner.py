@@ -12,7 +12,6 @@ from dbt.config import RuntimeConfig
 from dbt.flags import set_from_args
 from dbt.parser.manifest import ManifestLoader
 from dbt.tracking import disable_tracking
-from dbt.version import __version__
 from pydantic import BaseModel, validator
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner

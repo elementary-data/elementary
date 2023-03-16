@@ -93,11 +93,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: report.html
-          path: report.html
+          path: edr_target/report.html
 
       - name: Upload log
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: edr.log
-          path: edr.log
+          path: edr_target/edr.log
