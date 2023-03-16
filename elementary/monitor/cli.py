@@ -480,7 +480,7 @@ def report(
     "--disable",
     type=str,
     default=None,
-    help='Disable functualities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
+    help='Disable functionalities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
 )
 @click.option(
     "--include",

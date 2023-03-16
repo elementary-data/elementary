@@ -177,16 +177,19 @@ class DataMonitoringReport(DataMonitoring):
             return self.success
 
         bucket_website_url = None
-        # If we upload the report to a bucket, we don't want to share it via Slack.
-        should_send_report_over_slack = not (
-            disable_html_attachment or self.s3_client or self.gcs_client
-        )
-
+        upload_succeeded = False
         # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
         if self.s3_client or self.gcs_client:
             upload_succeeded, bucket_website_url = self.upload_report(
                 local_html_path=local_html_path, remote_file_path=remote_file_path
             )
+
+        should_send_report_over_slack = True
+        # If we upload the report to a bucket, we don't want to share it via Slack.
+        if (
+            upload_succeeded and bucket_website_url is not None
+        ) or disable_html_attachment:
+            should_send_report_over_slack = False
 
         # If a Slack client is provided, we want send a results summary and attachment of the report if needed.
         if self.slack_client:
