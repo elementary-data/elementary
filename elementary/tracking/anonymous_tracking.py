@@ -5,7 +5,6 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-import posthog
 from pydantic import BaseModel
 
 import elementary.exceptions.exceptions
@@ -123,7 +122,7 @@ class AnonymousTracking(Tracking):
             anonymous_warehouse_id = hashlib.sha256(
                 adapter_unique_id.encode("utf-8")
             ).hexdigest()
-            posthog.group_identify(
+            self._set_events_group(
                 "warehouse",
                 anonymous_warehouse_id,
                 {"id": anonymous_warehouse_id, "type": adapter_type},

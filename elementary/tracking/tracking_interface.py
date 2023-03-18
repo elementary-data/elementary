@@ -1,3 +1,5 @@
+from typing import Optional
+
 import posthog
 
 from elementary.config.config import Config
@@ -10,6 +12,12 @@ class Tracking:
         posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
         self._config = config
         self._props = {}
+
+    @staticmethod
+    def _set_events_group(
+        group_type: str, group_identifier: str, group_props: Optional[dict] = None
+    ) -> None:
+        posthog.group_identify(group_type, group_identifier, group_props)
 
     @staticmethod
     def _send_event(
