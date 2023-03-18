@@ -13,6 +13,7 @@ import elementary.tracking.runner
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
 logging.getLogger("posthog").disabled = True
@@ -24,17 +25,14 @@ class AnonymousWarehouse(BaseModel):
     type: str
 
 
-class AnonymousTracking:
+class AnonymousTracking(Tracking):
     _ANONYMOUS_USER_ID_FILE = ".user_id"
     _INTERNAL_EXCEPTIONS_LIMIT = 5
 
-    POSTHOG_PROJECT_API_KEY = "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
-
     def __init__(self, config: Config) -> None:
-        self._props = {}
+        super().__init__(config)
         self.anonymous_user_id = None
         self.anonymous_warehouse = None
-        self._config = config
         self._do_not_track = config.anonymous_tracking_enabled is False
         self._run_id = str(uuid.uuid4())
         self._init()
@@ -47,7 +45,6 @@ class AnonymousTracking:
 
     def _init(self):
         try:
-            posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
             self._props["env"] = elementary.tracking.runner.get_props()
             self.anonymous_user_id = self._get_anonymous_user_id()
             self.anonymous_warehouse = self._get_anonymous_warehouse()
@@ -69,7 +66,7 @@ class AnonymousTracking:
             pass
         return user_id
 
-    def _send_event(self, name: str, properties: dict = None) -> None:
+    def _send_anonymous_event(self, name: str, properties: dict = None) -> None:
         try:
             if self._do_not_track:
                 return
@@ -77,9 +74,9 @@ class AnonymousTracking:
             if properties is None:
                 properties = dict()
 
-            posthog.capture(
+            self._send_event(
                 distinct_id=self.anonymous_user_id,
-                event=name,
+                event_name=name,
                 properties={
                     "run_id": self._run_id,
                     **self._props,
@@ -94,49 +91,7 @@ class AnonymousTracking:
         except Exception:
             logger.debug("Unable to send tracking event.", exc_info=True)
 
-    def track_cli_start(
-        self,
-        module_name: str,
-        cli_properties: Optional[dict] = None,
-        command: Optional[str] = None,
-    ):
-        props = {
-            "cli_properties": cli_properties,
-            "module_name": module_name,
-            "command": command,
-            "edr_env": self._config.env,
-            "has_project_dir": bool(self._config.project_dir),
-        }
-        self._send_event("cli-start", properties=props)
-
-    def track_cli_end(
-        self,
-        module_name: str,
-        execution_properties: Optional[dict],
-        command: Optional[str] = None,
-    ):
-        props = {
-            "execution_properties": execution_properties,
-            "module_name": module_name,
-            "command": command,
-        }
-        if self.internal_exceptions_count > 0:
-            props["internal_exceptions"] = self.internal_exceptions
-            props["internal_exceptions_count"] = self.internal_exceptions_count
-        self._send_event("cli-end", properties=props)
-
-    def track_cli_exception(
-        self, module_name: str, exc: Exception, command: str = None
-    ) -> None:
-        props = {
-            "module_name": module_name,
-            "command": command,
-        }
-        props.update(self._get_exception_properties(exc))
-
-        self._send_event("cli-exception", properties=props)
-
-    def record_cli_internal_exception(self, exc: Exception):
+    def record_internal_exception(self, exc: Exception):
         self.internal_exceptions_count += 1
         if len(self.internal_exceptions) < self._INTERNAL_EXCEPTIONS_LIMIT:
             self.internal_exceptions.append(self._get_exception_properties(exc))
@@ -147,9 +102,6 @@ class AnonymousTracking:
         if isinstance(exc, elementary.exceptions.exceptions.Error):
             props.update(exc.anonymous_tracking_context)
         return props
-
-    def track_cli_help(self):
-        self._send_event("cli-help")
 
     def _get_anonymous_warehouse(self) -> Optional[AnonymousWarehouse]:
         try:
@@ -180,5 +132,49 @@ class AnonymousTracking:
         except Exception:
             return None
 
-    def set_env(self, key: str, value):
-        self._props[key] = value
+
+class AnonymousCommandLineTracking(AnonymousTracking):
+    def track_cli_start(
+        self,
+        module_name: str,
+        cli_properties: Optional[dict] = None,
+        command: Optional[str] = None,
+    ):
+        props = {
+            "cli_properties": cli_properties,
+            "module_name": module_name,
+            "command": command,
+            "edr_env": self._config.env,
+            "has_project_dir": bool(self._config.project_dir),
+        }
+        self._send_anonymous_event("cli-start", properties=props)
+
+    def track_cli_end(
+        self,
+        module_name: str,
+        execution_properties: Optional[dict],
+        command: Optional[str] = None,
+    ):
+        props = {
+            "execution_properties": execution_properties,
+            "module_name": module_name,
+            "command": command,
+        }
+        if self.internal_exceptions_count > 0:
+            props["internal_exceptions"] = self.internal_exceptions
+            props["internal_exceptions_count"] = self.internal_exceptions_count
+        self._send_anonymous_event("cli-end", properties=props)
+
+    def track_cli_exception(
+        self, module_name: str, exc: Exception, command: str = None
+    ) -> None:
+        props = {
+            "module_name": module_name,
+            "command": command,
+        }
+        props.update(self._get_exception_properties(exc))
+
+        self._send_anonymous_event("cli-exception", properties=props)
+
+    def track_cli_help(self):
+        self._send_anonymous_event("cli-help")

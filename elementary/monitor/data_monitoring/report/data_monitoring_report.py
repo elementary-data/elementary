@@ -16,7 +16,7 @@ from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -29,7 +29,7 @@ class DataMonitoringReport(DataMonitoring):
     def __init__(
         self,
         config: Config,
-        tracking: AnonymousTracking,
+        tracking: Tracking,
         filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
@@ -121,7 +121,7 @@ class DataMonitoringReport(DataMonitoring):
         self, report_data: ReportDataSchema, error: Exception = None
     ):
         if error:
-            self.tracking.record_cli_internal_exception(error)
+            self.tracking.record_internal_exception(error)
             return
 
         test_metadatas = []

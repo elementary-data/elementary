@@ -8,7 +8,7 @@ from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import package
 from elementary.utils.log import get_logger
 
@@ -22,7 +22,7 @@ class DataMonitoring:
     def __init__(
         self,
         config: Config,
-        tracking: Optional[AnonymousTracking] = None,
+        tracking: Optional[Tracking] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         filter: Optional[str] = None,
@@ -35,13 +35,11 @@ class DataMonitoring:
         self.execution_properties = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
-        if tracking:
-            tracking.set_env("target_name", latest_invocation.get("target_name"))
-            tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
-            tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
+        tracking.set_env("target_name", latest_invocation.get("target_name"))
+        tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
+        tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
         dbt_pkg_version = latest_invocation.get("elementary_version")
-        if tracking:
-            tracking.set_env("dbt_pkg_version", dbt_pkg_version)
+        tracking.set_env("dbt_pkg_version", dbt_pkg_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
@@ -110,8 +108,7 @@ class DataMonitoring:
             )[0]
         except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
-            if self.tracking:
-                self.tracking.record_cli_internal_exception(ex)
+            self.tracking.record_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
 
     def get_latest_invocation(self) -> Dict[str, Any]:
@@ -122,8 +119,7 @@ class DataMonitoring:
             return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
             logger.error(f"Unable to get the latest invocation: {err}")
-            if self.tracking:
-                self.tracking.record_cli_internal_exception(err)
+            self.tracking.record_internal_exception(err)
             return {}
 
     @staticmethod

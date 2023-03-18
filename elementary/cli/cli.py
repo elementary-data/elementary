@@ -7,7 +7,7 @@ import elementary.cli.upgrade
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import package
 from elementary.utils.log import get_logger
 
@@ -36,7 +36,7 @@ class ElementaryCLI(click.MultiCommand):
     def format_help(self, ctx, formatter):
         try:
             click.echo("Loading dependencies (this might take a few seconds)")
-            AnonymousTracking(config=Config()).track_cli_help()
+            AnonymousCommandLineTracking(config=Config()).track_cli_help()
         except Exception:
             pass
         self.format_usage(ctx, formatter)

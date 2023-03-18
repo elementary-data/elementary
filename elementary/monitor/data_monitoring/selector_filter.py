@@ -4,7 +4,7 @@ from typing import Optional
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.selector.selector import SelectorFetcher
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 class SelectorFilter:
     def __init__(
         self,
-        tracking: Optional[AnonymousTracking],
+        tracking: Optional[Tracking],
         user_dbt_runner: Optional[DbtRunner] = None,
         selector: Optional[str] = None,
     ) -> None:
@@ -28,8 +28,7 @@ class SelectorFilter:
         data_monitoring_filter = SelectorFilterSchema()
         if selector:
             if self.selector_fetcher:
-                if self.tracking:
-                    self.tracking.set_env("select_method", "dbt selector")
+                self.tracking.set_env("select_method", "dbt selector")
                 node_names = self.selector_fetcher.get_selector_results(
                     selector=selector
                 )
@@ -65,20 +64,17 @@ class SelectorFilter:
                         selector=selector,
                     )
                 elif tag_match:
-                    if self.tracking:
-                        self.tracking.set_env("select_method", "tag")
+                    self.tracking.set_env("select_method", "tag")
                     data_monitoring_filter = SelectorFilterSchema(
                         tag=tag_match.group().split(":", 1)[1], selector=selector
                     )
                 elif owner_match:
-                    if self.tracking:
-                        self.tracking.set_env("select_method", "owner")
+                    self.tracking.set_env("select_method", "owner")
                     data_monitoring_filter = SelectorFilterSchema(
                         owner=owner_match.group().split(":", 1)[1], selector=selector
                     )
                 elif model_match:
-                    if self.tracking:
-                        self.tracking.set_env("select_method", "model")
+                    self.tracking.set_env("select_method", "model")
                     data_monitoring_filter = SelectorFilterSchema(
                         model=model_match.group().split(":", 1)[1], selector=selector
                     )
