@@ -12,12 +12,14 @@ class Tracking:
         self._props = {}
 
     @staticmethod
-    def _send_event(distinct_id: str, event_name: str, properties: dict = None, groups: dict = None) -> None:
+    def _send_event(
+        distinct_id: str, event_name: str, properties: dict = None, groups: dict = None
+    ) -> None:
         posthog.capture(
             distinct_id=distinct_id,
             event=event_name,
             properties=properties,
-            groups=groups
+            groups=groups,
         )
 
     def record_internal_exception(self, exc: Exception):
