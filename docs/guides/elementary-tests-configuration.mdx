@@ -1,8 +1,10 @@
 ---
-title: "Tests configuration"
+title: "Anomaly detection tests configuration"
+sidebarTitle: "Tests configuration"
 ---
 
-The data tests configuration is defined in `.yml` files in your dbt project.
+The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
+
 Elementary tests have three levels of configurations:
 
 1. [Test arguments](#test-arguments) - Test specific arguments.
@@ -29,6 +31,8 @@ For dbt models and sources, elementary searches and prioritizes configuration in
 
 Test specific configurations, configured in the yml for each test (like dbt `severity`, `limit`, etc).
 
+#### Configuration for all anomaly detection tests:
+
 <AccordionGroup>
 
 <Accordion title="timestamp_column">
@@ -43,10 +47,10 @@ If undefined, default is null (no time buckets).
 
 </Accordion>
 
-<Accordion title="time_buckets">
+<Accordion title="time_bucket">
 ```
 time_bucket:
-  period: < time period >
+  period: < time period > # supported periods: day, hour, week
   count: < number of periods >
 ```
 
@@ -81,14 +85,53 @@ If undefined, default is 2 buckets.
 
 </Accordion>
 
-<Accordion title="exclude_regexp">
+<Accordion title="where_expression">
+`where_expression`: [sql expression]
+
+Filter the tested data using a valid sql expression. Example usage: `exlude_regexp: "user_name = 'test'"`
+
+</Accordion>
+
+
+</AccordionGroup>
+
+
+#### Configuration for specific anomaly detection tests:
+
+<AccordionGroup>
+
+<Accordion title="column_anomalies" description="all_column_anomalies, column_anomalies">
+`column_anomalies`: [list]
+
+Select which monitors to activate as part of the test. Example usage: `column_anomalies: [null_count, missing_count, average]`
+
+Available monitors:
+
+<Snippet file="column-metrics.mdx" />
+
+</Accordion>
+
+<Accordion title="event_timestamp_column & update_timestamp_column" description="event_freshness_anomalies">
+`event_timestamp_column`: [column name]
+`update_timestamp_column`: [column name]
+
+This test compliments the freshness_anomalies test and is primarily intended for data that is updated in a continuous / streaming fashion.
+
+The test can work in a couple of modes:
+
+- If only an event_timestamp_column is supplied, the test measures over time the difference between the current timestamp (“now”) and the most recent event timestamp.
+- If both an event_timestamp_column and an update_timestamp_column are provided, the test will measure over time the difference between these two columns.
+
+</Accordion>
+
+<Accordion title="exclude_regexp" description="all_column_anomalies">
 `exclude_regexp`: [regex]
 
 Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on regular expression match. Example usage: `exlude_regexp: '.*SDC$'`
 
 </Accordion>
 
-<Accordion title="exclude_prefix">
+<Accordion title="exclude_prefix" description="all_column_anomalies">
 `exclude_prefix`: [string]
 
 Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on prefix match. Example usage: `exlude_prefix: 'dbt_'`

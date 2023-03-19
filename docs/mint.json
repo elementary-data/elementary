@@ -116,8 +116,8 @@
     {
       "group": "Data Anomaly Detection Tests",
       "pages": [
-        "guides/data-anomaly-detection",
-        "guides/elementary-tests-configuration"
+        "guides/elementary-tests-configuration",
+        "guides/data-anomaly-detection"
       ]
     },
     {

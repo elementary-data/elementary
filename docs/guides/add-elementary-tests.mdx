@@ -19,7 +19,7 @@ These tests are configured and executed like any other tests in your project.
 
 <Accordion title="elementary.volume_anomalies">
 
-Monitors the row count of your table over time.
+Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
 
 Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
 field), and then we compute the row count per bucket for the last `days_back` days (by default 14).
@@ -304,22 +304,7 @@ models:
 
 #### Column anomalies
 
-| Data quality metric  | Column Type |
-|----------------------| ----------- |
-| `null_count`         | any         |
-| `null_percent`       | any         |
-| `min_length`         | string      |
-| `max_length`         | string      |
-| `average_length`     | string      |
-| `missing_count`      | string      |
-| `missing_percent`    | string      |
-| `min`                | numeric     |
-| `max`                | numeric     |
-| `zero_count`         | numeric     |
-| `zero_percent`       | numeric     |
-| `standard_deviation` | numeric     |
-| `variance`           | numeric     |
-| `sum`                | numeric     |
+<Snippet file="column-metrics.mdx" />
 
 </Accordion>
 
@@ -414,42 +399,12 @@ models:
 
 #### Column anomalies
 
-| Data quality metric  | Column Type |
-|----------------------| ----------- |
-| `null_count`         | any         |
-| `null_percent`       | any         |
-| `min_length`         | string      |
-| `max_length`         | string      |
-| `average_length`     | string      |
-| `missing_count`      | string      |
-| `missing_percent`    | string      |
-| `min`                | numeric     |
-| `max`                | numeric     |
-| `zero_count`         | numeric     |
-| `zero_percent`       | numeric     |
-| `standard_deviation` | numeric     |
-| `variance`           | numeric     |
-| `sum`                | numeric     |
+<Snippet file="column-metrics.mdx" />
 
 </Accordion>
 
-## Advanced configuration for your elementary tests
 
-The elementary anomaly detection tests described above can work out-of-the-box with default configuration. However,
-we support additional configuration that can be used to customize their behavior, depending on your needs.
-
-Elementary tests have three levels of configurations:
-
-1. [Test arguments](/guides/elementary-tests-configuration#test-arguments) - Test specific arguments.
-2. Table configuration - Configure the timestamp column and details of a monitored table.
-3. [Global vars](/guides/elementary-tests-configuration#data-monitoring-global-vars) - Optional configuration parameters
-   of the operation.
-
-More on data tests configuration [here](/guides/elementary-tests-configuration).
-
-We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection
-parameter `--select tag:elementary`.
-If you wish to only be warned on anomalies, configure the severity of the tests to warn.
+#### Adding tests examples: 
 
 <CodeGroup>
 
@@ -600,6 +555,17 @@ sources:
 ```
 
 </CodeGroup>
+
+## Advanced configuration for your elementary tests
+
+The elementary anomaly detection tests described above can work out-of-the-box with default configuration. However,
+we support additional configuration that can be used to customize their behavior, depending on your needs.
+Read all about data anomaly detection tests configuration [here](/guides/elementary-tests-configuration).
+
+We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection
+parameter `--select tag:elementary`.
+If you wish to only be warned on anomalies, configure the severity of the tests to warn.
+
 
 ## What happens on each test?
 
