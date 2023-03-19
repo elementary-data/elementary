@@ -9,7 +9,7 @@ from elementary.monitor.data_monitoring.data_monitoring_alerts import (
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
 from elementary.utils.ordered_yaml import OrderedYaml
 
@@ -271,7 +271,7 @@ def monitor(
         env=env,
         slack_group_alerts_by=group_by,
     )
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.MONITOR, get_cli_properties(), ctx.command.name
@@ -360,7 +360,7 @@ def report(
         dbt_quoting=dbt_quoting,
         env=env,
     )
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.REPORT, get_cli_properties(), ctx.command.name
@@ -551,7 +551,7 @@ def send_report(
         slack_report_url=slack_report_url,
         env=env,
     )
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.SEND_REPORT, get_cli_properties(), ctx.command.name
