@@ -32,6 +32,11 @@
   ],
   "anchors": [
     {
+      "name": "Elementary Cloud",
+      "icon": "cloud",
+      "url": "cloud"
+    },
+    {
       "name": "Community",
       "icon": "slack",
       "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
@@ -162,6 +167,16 @@
             "release-notes/releases/0.5.4"
           ]
         }
+      ]
+    },
+    {
+      "group": "Getting Started",
+      "pages": [
+        "cloud/introduction",
+        "cloud/onboarding/quickstart-dbt-package",
+        "cloud/onboarding/signup",
+        "cloud/onboarding/connect-data-warehouse",
+        "cloud/manage-team"
       ]
     }
   ],
