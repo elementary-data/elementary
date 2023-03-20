@@ -44,6 +44,7 @@ class DbtCommandError(Error):
 
         # Command args sent to _run_command (without additional user-specific args it as such as projects / profiles
         # dir)
+        self.proc_err = err
         self.base_command_args = base_command_args
         self.return_code = err.returncode
 
