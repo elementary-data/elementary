@@ -18,7 +18,7 @@
   },
   "topbarCtaButton": {
     "name": "Signup for cloud beta",
-    "url": "https://www.elementary-data.com/cloud-beta"
+    "url": "mailto:team@elementary-data.com?subject=Tell me about Elementary Managed!&body=I'm interested in learning more about the Elementary Managed private beta. Please send me further details."
   },
   "topbarLinks": [
     {
