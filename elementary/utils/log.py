@@ -25,7 +25,6 @@ class ColoredFormatter(logging.Formatter):
 
 
 FORMATTER = ColoredFormatter()
-LOG_FILE = "edr.log"
 
 
 def get_console_handler():
@@ -35,8 +34,8 @@ def get_console_handler():
     return console_handler
 
 
-def get_file_handler():
-    file_handler = logging.FileHandler(LOG_FILE)
+def get_file_handler(files_target_path):
+    file_handler = logging.FileHandler(files_target_path, delay=True)
     file_handler.setFormatter(FORMATTER)
     file_handler.setLevel(logging.DEBUG)
     return file_handler
@@ -45,8 +44,10 @@ def get_file_handler():
 def get_logger(logger_name):
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
-    logger.addHandler(get_console_handler())
-    logger.addHandler(get_file_handler())
-    # with this pattern, it's rarely necessary to propagate the error up to parent
-    logger.propagate = False
     return logger
+
+
+def set_root_logger_handlers(logger_name, files_target_path):
+    logger = logging.getLogger(logger_name)
+    logger.addHandler(get_file_handler(files_target_path))
+    logger.addHandler(get_console_handler())

@@ -31,6 +31,8 @@ class Config:
 
     DEFAULT_CONFIG_DIR = str(Path.home() / ".edr")
 
+    DEFAULT_FILES_PATH = os.getcwd() + "/edr_target"
+
     def __init__(
         self,
         config_dir: str = DEFAULT_CONFIG_DIR,
@@ -38,6 +40,7 @@ class Config:
         project_dir: str = None,
         profile_target: str = None,
         project_profile_target: str = None,
+        target_path: str = DEFAULT_FILES_PATH,
         dbt_quoting: bool = None,
         update_bucket_website: bool = None,
         slack_webhook: str = None,
@@ -70,9 +73,11 @@ class Config:
         config = self._load_configuration()
 
         self.target_dir = self._first_not_none(
+            target_path,
             config.get("target-path"),
             os.getcwd(),
         )
+        os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
 
         self.update_bucket_website = self._first_not_none(
             update_bucket_website,

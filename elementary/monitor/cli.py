@@ -11,12 +11,9 @@ from elementary.monitor.data_monitoring.report.data_monitoring_report import (
 )
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.utils import bucket_path
-from elementary.utils.log import get_logger
 from elementary.utils.ordered_yaml import OrderedYaml
 
 yaml = OrderedYaml()
-
-logger = get_logger(__name__)
 
 
 class Command:
@@ -28,6 +25,12 @@ class Command:
 # Displayed in reverse order in --help.
 def common_options(cmd: str):
     def decorator(func):
+        func = click.option(
+            "--target-path",
+            type=str,
+            default=Config.DEFAULT_FILES_PATH,
+            help="Absolute target path for saving edr files such as logs and reports",
+        )(func)
         func = click.option(
             "--disable-samples",
             type=bool,
@@ -154,10 +157,12 @@ def get_cli_properties() -> dict:
         return dict()
 
     reload_monitoring_configuration = params.get("reload_monitoring_configuration")
+    target_path = params.get("target_path")
     update_dbt_package = params.get("update_dbt_package")
     full_refresh_dbt_package = params.get("full_refresh_dbt_package")
 
     return {
+        "target_path": target_path,
         "reload_monitoring_configuration": reload_monitoring_configuration,
         "update_dbt_package": update_dbt_package,
         "full_refresh_dbt_package": full_refresh_dbt_package,
@@ -236,6 +241,7 @@ def monitor(
     env,
     select,
     group_by,
+    target_path,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -256,6 +262,7 @@ def monitor(
         project_dir,
         profile_target,
         project_profile_target,
+        target_path,
         dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
@@ -338,6 +345,7 @@ def report(
     project_name,
     env,
     select,
+    target_path,
 ):
     """
     Generate a local observability report of your warehouse.
@@ -348,6 +356,7 @@ def report(
         project_dir,
         profile_target,
         project_profile_target,
+        target_path,
         dbt_quoting=dbt_quoting,
         env=env,
     )
@@ -471,7 +480,7 @@ def report(
     "--disable",
     type=str,
     default=None,
-    help='Disable functualities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
+    help='Disable functionalities from the "send-report" command.\nCurrently only --disable html_attachment is supported.',
 )
 @click.option(
     "--include",
@@ -513,6 +522,7 @@ def send_report(
     select,
     disable,
     include,
+    target_path,
 ):
     """
     Generate and send the report to an external platform.
@@ -525,6 +535,7 @@ def send_report(
         project_dir,
         profile_target,
         project_profile_target,
+        target_path,
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,

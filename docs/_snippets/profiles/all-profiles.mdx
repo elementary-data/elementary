@@ -12,7 +12,7 @@ elementary:
       type: snowflake
       account: [account id]
 
-      ## User/password auth, other options (Keypair/SSO) require other configs ##
+      ## User/password auth ##
       user: [username]
       password: [password]
 
@@ -35,7 +35,7 @@ elementary:
     default:
       type: bigquery
 
-      ## Service account auth, other options require other configs ##
+      ## Service account auth ##
       method: service-account
       keyfile: [full path to your keyfile]
 
@@ -58,7 +58,7 @@ elementary:
       type: redshift
       host: [hostname, like hostname.region.redshift.amazonaws.com]
 
-      ## User/password auth, other options (IAM) require other configs ##
+      ## User/password auth ##
       user: [username]
       password: [password]
 
