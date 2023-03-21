@@ -9,6 +9,7 @@ from elementary.monitor.data_monitoring.data_monitoring_alerts import (
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
+from elementary.monitor.debug import Debug
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
 from elementary.utils.ordered_yaml import OrderedYaml
@@ -20,6 +21,7 @@ class Command:
     MONITOR = "monitor"
     REPORT = "monitor-report"
     SEND_REPORT = "monitor-send-report"
+    DEBUG = "debug"
 
 
 # Displayed in reverse order in --help.
@@ -597,6 +599,24 @@ def send_report(
             Command.SEND_REPORT, exc, ctx.command.name
         )
         raise
+
+
+@monitor.command()
+@click.option(
+    "--profiles-dir",
+    "-p",
+    type=click.Path(exists=True),
+    default=None,
+    help="Which directory to look in for the profiles.yml file. "
+    "If not set, edr will look in the current working directory first, then HOME/.dbt/",
+)
+@click.pass_context
+def debug(ctx, profiles_dir):
+    config = Config(profiles_dir=profiles_dir)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
+    anonymous_tracking.track_cli_start(Command.DEBUG, None, ctx.command.name)
+    Debug(config).run()
+    anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
 
 
 if __name__ == "__main__":
