@@ -71,7 +71,6 @@ class DbtRunner(BaseDbtRunner):
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
-            logger.debug(f"Output: {output}")
         if result.returncode != 0:
             return False, output
         return True, output
