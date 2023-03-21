@@ -615,7 +615,10 @@ def debug(ctx, profiles_dir):
     config = Config(profiles_dir=profiles_dir)
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.track_cli_start(Command.DEBUG, None, ctx.command.name)
-    Debug(config).run()
+    success = Debug(config).run()
+    if not success:
+        sys.exit(1)
+
     anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
 
 
