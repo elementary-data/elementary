@@ -54,7 +54,8 @@ class DbtRunner(BaseDbtRunner):
         if vars:
             json_vars = json.dumps(vars)
             dbt_command.extend(["--vars", json_vars])
-        log_msg = f"Running {' '.join(dbt_command)}"
+        dbt_command_str = ' '.join(dbt_command)
+        log_msg = f"Running {dbt_command_str}"
         if not quiet:
             logger.info(log_msg)
         else:
@@ -71,6 +72,7 @@ class DbtRunner(BaseDbtRunner):
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
+            logger.debug(f"Result bytes size for command '{dbt_command_str}' is {len(result.stdout)}")
         if result.returncode != 0:
             return False, output
         return True, output
