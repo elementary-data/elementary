@@ -63,6 +63,7 @@ def unpack_and_flatten_and_dedup_list_of_strings(
 def list_of_lists_of_strings_to_comma_delimited_unique_strings(
     list_of_strings: List[List[str]], prefix: Optional[str] = None
 ) -> str:
+    list_of_strings = [x for x in list_of_strings if x] # filter Nones and empty lists
     flat_list = sum_lists(list_of_strings)
     if prefix:
         flat_list = [append_prefix_if_missing(x, prefix) for x in flat_list]
