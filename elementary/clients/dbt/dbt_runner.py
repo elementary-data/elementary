@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
+from elementary.utils.env_vars import is_debug
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
@@ -72,6 +73,8 @@ class DbtRunner(BaseDbtRunner):
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
+            if is_debug():
+                logger.debug(f"Output: {output}")
             logger.debug(
                 f"Result bytes size for command '{dbt_command_str}' is {len(result.stdout)}"
             )
