@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
+from elementary.utils.env_vars import is_debug
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
@@ -54,7 +55,8 @@ class DbtRunner(BaseDbtRunner):
         if vars:
             json_vars = json.dumps(vars)
             dbt_command.extend(["--vars", json_vars])
-        log_msg = f"Running {' '.join(dbt_command)}"
+        dbt_command_str = " ".join(dbt_command)
+        log_msg = f"Running {dbt_command_str}"
         if not quiet:
             logger.info(log_msg)
         else:
@@ -71,7 +73,11 @@ class DbtRunner(BaseDbtRunner):
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
-            logger.debug(f"Output: {output}")
+            if is_debug():
+                logger.debug(f"Output: {output}")
+            logger.debug(
+                f"Result bytes size for command '{dbt_command_str}' is {len(result.stdout)}"
+            )
         if result.returncode != 0:
             return False, output
         return True, output
