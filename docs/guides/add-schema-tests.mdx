@@ -243,7 +243,10 @@ column using existing data.
 
 Example usage:
 ```shell
->>> dbt run-operation elementary.generate_json_schema_test --args '{"node_name": "login_events", "column_name": "raw_event_data"}'
+dbt run-operation elementary.generate_json_schema_test --args '{"node_name": "login_events", "column_name": "raw_event_data"}'
+```
+Will print:
+```shell
 Please add the following test to your model configuration:
 ----------------------------------------------------------
 

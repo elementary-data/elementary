@@ -2,9 +2,9 @@
 title: "Elementary in production"
 ---
 
-<a href="mailto:team@elementary-data.com?subject=Tell me about Elementary Managed!&body=I'm interested in learning more about the Elementary Managed private beta. Please send me further details.">
-  <img src="/pics/elementary-managed-beta.png" />
-</a>
+<Card title="Try Elementry cloud" href="mailto:cloud@elementary-data.com?subject=Tell me about Elementary cloud!&body=I'm interested in learning more about the Elementary cloud private beta. Please send me further details.">
+  _The service is currently in private beta_ 
+</Card>
 
 Running Elementary in production means to include the dbt package in your production dbt project,
 and setting up an automated manner to run the Elementary CLI.
@@ -15,6 +15,12 @@ You can choose any system that allows you to orchestrate a CLI execution, as lon
 - Network access to the data warehouse.
 - Access to a `profiles.yml` file with `elementary` profile name.
 - Read and write permissions to the Elementary schema.
+
+## Elementary `--env` flag
+
+When you run Elementary in production use the `--env prod` flag (By default, it is set to `dev`).
+This will show the environment as `prod` in the report and alerts. 
+
 
 ## Elementary production deployment and jobs
 
@@ -32,8 +38,8 @@ In your dbt jobs, after you deploy the Elementary dbt package:
 
 On an orchestration system of your choice, run the CLI to:
 
-1. **Send Slack alerts** - Use the `edr monitor` command and Slack integration.
-2. **Generate a report** - Use the `edr report` or `edr send-report` that has built in support for sending the report to Slack / GCS / S3.
+1. **Send Slack alerts** - Use the `edr monitor --env prod` command and Slack integration.
+2. **Generate a report** - Use the `edr report --env prod` or `edr send-report --env prod` that has built in support for sending the report to Slack / GCS / S3.
 
 ## What permissions Elementary requires?
 
@@ -68,9 +74,7 @@ Any automation server / orchestration tool supports running a CLI tool like Elem
 
 Some options include:
 
-1. <a href="mailto:team@elementary-data.com?subject=Tell me about Elementary Managed!&body=I'm interested in learning more about the Elementary Managed private beta. Please send me further details.">
-     Elementary Managed
-   </a>
+1. [Elementary cloud](/cloud/introduction)
 2. GitHub Actions - Checkout the [Elementary GitHub Action](https://github.com/elementary-data/run-elementary-action) we created.
 3. [Docker](/deployment-and-configuration/docker)
 4. [GitLab CI](/deployment-and-configuration/gitlab-ci)

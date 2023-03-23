@@ -2,23 +2,19 @@
 title: "Send Slack alerts"
 ---
 
-Elementary has a Slack integration to send alerts about failures in dbt tests, Elementary tests, models and
-snapshots runs, and source freshness.
+Elementary has a Slack integration to send alerts about failures of dbt tests, Elementary tests, model runs, and source freshness.
 
-The alerts include information for fast triage.
-Also, you can add information for each test / model in your `.yml` files:
+You can customize the alerts in your `.yml` files by configuring:
 
-- Description - add custom description to the alert
-- dbt Tags - add custom context to the alert
-- Owners - tag the owner of the model
-- Subscribers - let users subscribe to models and tests they care about
-
-You can also set your notification preferences to make sure they are aligned with your workflow and serve you best: 
-  - Custom channels - distribute alerts to different Slack channels based on their context
-  - Field alerts - choose which fields to display in your alert
-  - Filter alerts - by using a selector you can filter alerts by tag, owner or table.
-  - Suppression interval - set a cooldown period on which the alert won't be sent
-  - Grouping - group all alerts that relate to one model into a single Slack message
+- **Description**
+- **Tags**
+- **Owner**  
+- **Subscribers**
+- **Custom channel**
+- **Alert fields**
+- **Alert filters**
+- **Alert grouping**
+- **Suppression interval**
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
@@ -83,32 +79,20 @@ vars:
   disable_skipped_test_alerts: true
 ```
 
-## Alert on source freshness failures
 
-By default, alerts are sent on dbt tests, models and snapshots.
-You can also monitor source freshness by running `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
-Note that it needs to be from the same machine.
+## Alert properties 
 
-This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
-Please note that this requires integration with your dbt project using the `--project-dir` argument.
-
-## Customize alerts: add metadata to enrich alerts 
-
-Elementary enriches alerts with dbt model/source/snapshot owners and
-tags ([see dbt's docs to learn more](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
-
-On top of that, you can use these custom Elementary fields:
-
-- Subscribers: tag additional users except the owner in an alert.
-- Description: add a description to your test and alert.
-
+In your `.yml` files, add the following properties to models / tests:
 
 <AccordionGroup>
 
 <Accordion title="Owners">
+  
+Elementary enriches alerts with [table owners](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
+  
 If you want to tag a model owner in a slack alert:
-- Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack)
-- For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, simply add the email prefix (with lower case) jessica.jones as follows to your model schema.yml / properties.yml
+- Use '@' and the email prefix of the slack user.
+- For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, simply add the email prefix (with lower case) jessica.jones as follows to your model schema.yml / properties.yml:
 
 ```yml properties.yml
 models:
@@ -129,6 +113,7 @@ models:
 </Accordion>
 
 <Accordion title="Test descriptions">
+  
 Elementary supports configuring description to tests alerts.
 
 To set it up, simply add the description to your test in the `properties.yml`
@@ -144,7 +129,8 @@ tests:
   
   
 <Accordion title="Tags">
-You can use tags to provide context to your alerts. 
+
+You can use [tags](https://docs.getdbt.com/reference/resource-configs/tags) to provide context to your alerts. 
 
 You can also use it to tag a group or a channel in a slack alert:
 
@@ -162,9 +148,9 @@ tests:
 </Accordion>
 
 <Accordion title="Subscribers">
-If you want to tag users on a model / test / snapshot failure alert:
-- Use '@' and the email prefix of your slack user (find the user's email from your Slack workspace to make sure it is the email this user has been registered with to Slack). 
-- Add 'subscribers' under a meta field to your properties.yml file.
+
+ If you want to tag users on an alert:
+- Use '@' and the email prefix of your slack user, and to 'subscribers' under a meta field to your `properties.yml` file.
 - For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, use "@jessica.jones".
 
 ```yml properties.yml
@@ -197,35 +183,24 @@ models:
 </AccordionGroup> 
 
 
-## Notification settings: decide how you want to get your alerts
+## Alert configuration
 
-Elementary also allows you to customize how you want to get your alerts so that the right information reaches the right people at the right frequency. This is important so you can ensure your alerts are valuable and to avoid alert fatigue. 
-
-To do so, you can use these Elementary configurations:
-
-- Channel: to send the alert to additional Slack channel (only available for Slack token).
-- Alert fields: to control which fields to display in your alert.
-- Filter alerts: by using a selector you can filter alerts by tag, owner or table.
-- Suppression interval: to set a cooldown period which alert won't sent.
-- Grouping: to group all alerts that relate to one model into a single Slack message.
+Elementary allows you to customize alerts to distribute the right information to the right people. This way you can ensure your alerts are valuable and to avoid alert fatigue. 
 
 
 <AccordionGroup>
 
-
 <Accordion title="Custom Slack channel">
+
 By default Elementary uses the Slack channel that was configured in the Slack integration.
 Elementary supports configuring custom slack channels that are configured on your models / sources / tests and snapshots.
 
 - If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel.
 - If you configure a custom slack channel for both a model and a test, the test channel will override the model channel.
-- If you configure a custom slack channel and you decide to group your alerts by table into a single message, it will be sent to the model channel (even if a differnt channel was configured on the test level0 
+- If you configure a custom slack channel and you decide to group your alerts by table into a single message, it will be sent to the model channel (even if a differnt channel was configured on the test level) 
+  
 
-For example, this enables you to send all your marketing model and test alerts to a specific marketing-data-ops
-channel.
-
-To set it up, simply add the relevant channel to your models in the `properties.yml` (can be done also for sources and
-snapshots):
+To set it up, simply add the relevant channel to your models in the `properties.yml`:
 
 ```yml properties.yml
 models:
@@ -465,7 +440,7 @@ models:
   - name: marketing_leads
     meta:
       alerts_config:
-        # all alerts on marketing_leads should NEVER group together to one slack message:
+        # alerts on marketing_leads will not be grouped:
         slack_group_alerts_by: alert
 ```   
   
@@ -474,9 +449,22 @@ models:
 
 </AccordionGroup>
 
+
+## Alert on source freshness failures
+
+_Not supported in dbt cloud_
+
+To alert on source freshness, you will need to run `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
+- Note that it needs to be from the same machine.
+- Note that this requires passing `--project-dir` argument.
+
+
 ## Continuous alerting
 
 In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after
 your dbt job ends to monitor the latest data updates).
+
+Read more about how to deploy [Elementary in production](/deployment-and-configuration/elementary-in-production). 
 If you need help or wish to consult on this, reach out to us
 on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg).
