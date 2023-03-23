@@ -7,6 +7,6 @@ WORKDIR $USR_APP_PATH
 RUN chmod 777 .
 
 COPY . /app
-RUN pip install --no-cache-dir "/app[postgres, snowflake, bigquery, redshift, databricks]"
+RUN pip install --no-cache-dir "/app[all]"
 
 ENTRYPOINT ["edr"]
