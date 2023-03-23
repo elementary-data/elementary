@@ -30,7 +30,7 @@ def common_options(cmd: str):
         func = click.option(
             "--target-path",
             type=str,
-            default=Config.DEFAULT_FILES_PATH,
+            default=Config.DEFAULT_TARGET_PATH,
             help="Absolute target path for saving edr files such as logs and reports",
         )(func)
         func = click.option(

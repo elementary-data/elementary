@@ -20,14 +20,14 @@ logger = get_logger(__name__)
 
 
 def get_log_path(ctx):
-    file_path = Config.DEFAULT_FILES_PATH
+    target_path = Config.DEFAULT_TARGET_PATH
     try:
         ctx_args = ctx.args
         target_path_flag = "--target-path"
-        file_path = ctx_args[ctx_args.index(target_path_flag) + 1]
+        target_path = ctx_args[ctx_args.index(target_path_flag) + 1]
     finally:
-        os.makedirs(os.path.abspath(file_path), exist_ok=True)
-        return os.path.join(file_path, "edr.log")
+        os.makedirs(os.path.abspath(target_path), exist_ok=True)
+        return os.path.join(target_path, "edr.log")
 
 
 class ElementaryCLI(click.MultiCommand):
