@@ -1,7 +1,7 @@
 name: Test all warehouse platforms
 on:
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: "0 */8 * * *"
   workflow_dispatch:
     inputs:
       elementary-ref:
@@ -12,16 +12,21 @@ on:
         type: string
         required: false
         description: Branch or tag to checkout for 'dbt-data-reliability' repository
+      dbt-version:
+        type: string
+        required: false
+        description: dbt's version to test with
 
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        warehouse-type: [ postgres, snowflake, bigquery, redshift, databricks ]
+        warehouse-type: [postgres, snowflake, bigquery, redshift, databricks]
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       elementary-ref: ${{ inputs.elementary-ref }}
       dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
+      dbt-version: ${{ inputs.dbt-version }}
     secrets: inherit
