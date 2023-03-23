@@ -146,10 +146,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
                 failed_tests_details.extend(
                     self._get_test_result_details_block(test, include_description)
                 )
-            else:
+            elif test.status == "warning":
                 warning_tests_details.extend(
                     self._get_test_result_details_block(test, include_description)
                 )
+            else:  # test status is "pass" i.e. success
+                pass
 
         details_blocks = []
         if failed_tests_details:

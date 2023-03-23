@@ -21,7 +21,7 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 
@@ -35,7 +35,7 @@ class DataMonitoringAlerts(DataMonitoring):
     def __init__(
         self,
         config: Config,
-        tracking: AnonymousTracking,
+        tracking: Tracking = None,
         filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,

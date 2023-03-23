@@ -8,7 +8,7 @@ import elementary.cli.upgrade
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import package
 from elementary.utils.log import get_logger, set_root_logger_handlers
 
@@ -20,14 +20,14 @@ logger = get_logger(__name__)
 
 
 def get_log_path(ctx):
-    file_path = Config.DEFAULT_FILES_PATH
+    target_path = Config.DEFAULT_TARGET_PATH
     try:
         ctx_args = ctx.args
         target_path_flag = "--target-path"
-        file_path = ctx_args[ctx_args.index(target_path_flag) + 1]
+        target_path = ctx_args[ctx_args.index(target_path_flag) + 1]
     finally:
-        os.makedirs(os.path.abspath(file_path), exist_ok=True)
-        return os.path.join(file_path, "edr.log")
+        os.makedirs(os.path.abspath(target_path), exist_ok=True)
+        return os.path.join(target_path, "edr.log")
 
 
 class ElementaryCLI(click.MultiCommand):
@@ -48,7 +48,7 @@ class ElementaryCLI(click.MultiCommand):
     def format_help(self, ctx, formatter):
         try:
             click.echo("Loading dependencies (this might take a few seconds)")
-            AnonymousTracking(config=Config()).track_cli_help()
+            AnonymousCommandLineTracking(config=Config()).track_cli_help()
         except Exception:
             pass
         self.format_usage(ctx, formatter)

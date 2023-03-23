@@ -8,7 +8,7 @@ from google.cloud import storage
 from google.oauth2 import service_account
 
 from elementary.config.config import Config
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 
@@ -18,14 +18,14 @@ DEFAULT_BUCKET_WEBSITE_URL = "https://storage.googleapis.com"
 
 
 class GCSClient:
-    def __init__(self, config: Config, tracking: AnonymousTracking = None):
+    def __init__(self, config: Config, tracking: Tracking = None):
         self.config = config
         self.client = self.get_client(config)
         self.tracking = tracking
 
     @classmethod
     def create_client(
-        cls, config: Config, tracking: AnonymousTracking = None
+        cls, config: Config, tracking: Tracking = None
     ) -> Optional["GCSClient"]:
         return cls(config, tracking=tracking) if config.has_gcs else None
 

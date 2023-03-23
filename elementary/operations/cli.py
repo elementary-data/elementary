@@ -2,7 +2,7 @@ import click
 
 from elementary.config.config import Config
 from elementary.operations.upload_source_freshness import UploadSourceFreshnessOperation
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 
 _MODULE_NAME = "run-operation"
 
@@ -46,7 +46,7 @@ def upload_source_freshness(ctx, **conf):
     This is required in order to monitor and get alerts on source freshness failures.
     """
     config = Config(**conf)
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.track_cli_start(_MODULE_NAME, None, ctx.command.name)
     UploadSourceFreshnessOperation(config).run()
     anonymous_tracking.track_cli_end(_MODULE_NAME, None, ctx.command.name)

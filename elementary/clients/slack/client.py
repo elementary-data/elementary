@@ -9,7 +9,7 @@ from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -21,7 +21,7 @@ ONE_SECOND = 1
 
 class SlackClient(ABC):
     def __init__(
-        self, token: str = None, webhook: str = None, tracking: AnonymousTracking = None
+        self, token: str = None, webhook: str = None, tracking: Tracking = None
     ) -> None:
         self.token = token
         self.webhook = webhook
@@ -32,7 +32,7 @@ class SlackClient(ABC):
 
     @staticmethod
     def create_client(
-        config: Config, tracking: AnonymousTracking = None
+        config: Config, tracking: Tracking = None
     ) -> Optional["SlackClient"]:
         if not config.has_slack:
             return None
@@ -90,7 +90,7 @@ class SlackWebClient(SlackClient):
         except SlackApiError as err:
             if self._handle_send_err(err, channel_name):
                 return self.send_message(channel_name, message)
-            self.tracking.record_cli_internal_exception(err)
+            self.tracking.record_internal_exception(err)
             return False
 
     @sleep_and_retry
@@ -159,8 +159,7 @@ class SlackWebClient(SlackClient):
             return True
         except SlackApiError as e:
             logger.error(f"Elementary app failed to join the given channel. Error: {e}")
-            if self.tracking:
-                self.tracking.record_cli_internal_exception(e)
+            self.tracking.record_internal_exception(e)
             return False
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:

@@ -9,7 +9,8 @@ from elementary.monitor.data_monitoring.data_monitoring_alerts import (
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.monitor.debug import Debug
+from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
 from elementary.utils.ordered_yaml import OrderedYaml
 
@@ -20,6 +21,7 @@ class Command:
     MONITOR = "monitor"
     REPORT = "monitor-report"
     SEND_REPORT = "monitor-send-report"
+    DEBUG = "debug"
 
 
 # Displayed in reverse order in --help.
@@ -28,7 +30,7 @@ def common_options(cmd: str):
         func = click.option(
             "--target-path",
             type=str,
-            default=Config.DEFAULT_FILES_PATH,
+            default=Config.DEFAULT_TARGET_PATH,
             help="Absolute target path for saving edr files such as logs and reports",
         )(func)
         func = click.option(
@@ -271,7 +273,7 @@ def monitor(
         env=env,
         slack_group_alerts_by=group_by,
     )
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.MONITOR, get_cli_properties(), ctx.command.name
@@ -360,7 +362,7 @@ def report(
         dbt_quoting=dbt_quoting,
         env=env,
     )
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.REPORT, get_cli_properties(), ctx.command.name
@@ -551,7 +553,7 @@ def send_report(
         slack_report_url=slack_report_url,
         env=env,
     )
-    anonymous_tracking = AnonymousTracking(config)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     anonymous_tracking.track_cli_start(
         Command.SEND_REPORT, get_cli_properties(), ctx.command.name
@@ -597,6 +599,27 @@ def send_report(
             Command.SEND_REPORT, exc, ctx.command.name
         )
         raise
+
+
+@monitor.command()
+@click.option(
+    "--profiles-dir",
+    "-p",
+    type=click.Path(exists=True),
+    default=None,
+    help="Which directory to look in for the profiles.yml file. "
+    "If not set, edr will look in the current working directory first, then HOME/.dbt/",
+)
+@click.pass_context
+def debug(ctx, profiles_dir):
+    config = Config(profiles_dir=profiles_dir)
+    anonymous_tracking = AnonymousCommandLineTracking(config)
+    anonymous_tracking.track_cli_start(Command.DEBUG, None, ctx.command.name)
+    success = Debug(config).run()
+    if not success:
+        sys.exit(1)
+
+    anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
 
 
 if __name__ == "__main__":

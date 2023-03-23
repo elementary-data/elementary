@@ -4,7 +4,7 @@ from typing import Optional
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.selector.selector import SelectorFetcher
-from elementary.tracking.anonymous_tracking import AnonymousTracking
+from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 class SelectorFilter:
     def __init__(
         self,
-        tracking: AnonymousTracking,
+        tracking: Optional[Tracking],
         user_dbt_runner: Optional[DbtRunner] = None,
         selector: Optional[str] = None,
     ) -> None:
