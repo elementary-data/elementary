@@ -571,7 +571,7 @@ If you wish to only be warned on anomalies, configure the severity of the tests 
 
 Upon running a test, your data is split into time buckets based on the `time_bucket` field and is limited by
 the `days_back` var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
-period (`backfill_days`) to the row count of all the previous time buckets.
+period (`backfill_days`) to the row count of all the previous time buckets within the `days_back` period.
 If there were any anomalies in the detection period, the test will fail.
 On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical
 metrics.
