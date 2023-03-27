@@ -5,6 +5,20 @@ title: "Data anomaly detection"
 Elementary dbt package includes **data monitoring and anomaly detection as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. The tests collect data quality metrics. On each execution, the latest metrics are compared to historical values to detect anomalies.
 These tests are configured and executed like any other tests in your project.
 
+## What happens on each test?
+
+Upon running a test, your data is split into time buckets based on the `time_bucket` field and is limited by
+the `days_back` var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
+period (`backfill_days`) to the row count of all the previous time buckets.
+If there were any anomalies in the detection period, the test will fail.
+On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical
+metrics.
+At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models.
+
+## What does it mean when a test fails?
+
+When a test fail, it means that an anomaly was detected on this metric and dataset.
+
 ## Tests and monitors types
 
 ### What are data monitors?
