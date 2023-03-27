@@ -54,7 +54,7 @@ def get_required_dbt_package_version() -> Optional[str]:
     packages_file_path = os.path.join(PATH, _PACKAGES_FILENAME)
     packages_yaml = OrderedYaml().load(packages_file_path)
 
-    for requirement in packages_yaml["packages"]:
+    for requirement in packages_yaml.get("packages", []):
         package_name = requirement["package"].split("/")[-1]
         if package_name == _DBT_PACKAGE_NAME:
             return requirement["version"]
