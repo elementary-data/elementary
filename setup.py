@@ -49,7 +49,7 @@ setup(
         "pytest-parametrization>=2022.2.1",
         "pydantic<2.0",
         "networkx>=2.3,<3",
-        "packaging>=20.9,<22.0",
+        "packaging>=20.9,<23.0",
     ],
     extras_require={
         **ADAPTER_EXTRA_REQUIREMENTS,
