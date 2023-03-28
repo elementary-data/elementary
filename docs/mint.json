@@ -18,7 +18,7 @@
   },
   "topbarCtaButton": {
     "name": "Try Elementary cloud",
-    "url": "mailto:cloud@elementary-data.com?subject=Send me an invite Elementary cloud!&body=I'm interested in joining Elementary cloud private beta. Please send me an invite!"
+    "url": "https://www.elementary-data.com/cloud-beta"
   },
   "topbarLinks": [
     {
