@@ -27,7 +27,6 @@ def get_log_path(ctx):
         target_path = ctx_args[ctx_args.index(target_path_flag) + 1]
     finally:
         os.makedirs(os.path.abspath(target_path), exist_ok=True)
-        os.environ["DBT_LOG_PATH"] = os.path.abspath(target_path)
         return os.path.join(target_path, "edr.log")
 
 
