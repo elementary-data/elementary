@@ -1,5 +1,6 @@
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 
 from elementary.utils.env_vars import is_debug
 
@@ -25,6 +26,8 @@ class ColoredFormatter(logging.Formatter):
 
 
 FORMATTER = ColoredFormatter()
+MAX_BYTES_IN_FILE = 10240000
+ROTATION_BACKUP_COUNT = 4
 
 
 def get_console_handler():
@@ -41,6 +44,13 @@ def get_file_handler(files_target_path):
     return file_handler
 
 
+def log_rotation_handler(files_target_path):
+    rotation_handler = RotatingFileHandler(
+        files_target_path, maxBytes=MAX_BYTES_IN_FILE, backupCount=ROTATION_BACKUP_COUNT
+    )
+    return rotation_handler
+
+
 def get_logger(logger_name):
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
@@ -51,3 +61,4 @@ def set_root_logger_handlers(logger_name, files_target_path):
     logger = logging.getLogger(logger_name)
     logger.addHandler(get_file_handler(files_target_path))
     logger.addHandler(get_console_handler())
+    logger.addHandler(log_rotation_handler(files_target_path))
