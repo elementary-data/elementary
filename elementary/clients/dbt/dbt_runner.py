@@ -9,6 +9,7 @@ from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.utils.env_vars import is_debug
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
+from memory_profiler import profile
 
 logger = get_logger(__name__)
 
@@ -35,6 +36,7 @@ class DbtRunner(BaseDbtRunner):
         self.raise_on_failure = raise_on_failure
         self.dbt_env_vars = dbt_env_vars
 
+    @profile
     def _run_command(
         self,
         command_args: List[str],
@@ -99,6 +101,7 @@ class DbtRunner(BaseDbtRunner):
         success, _ = self._run_command(["snapshot"])
         return success
 
+    @profile
     def run_operation(
         self,
         macro_name: str,

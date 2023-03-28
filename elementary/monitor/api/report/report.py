@@ -19,9 +19,11 @@ from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.utils.time import get_now_utc_iso_format
+from memory_profiler import profile
 
 
 class ReportAPI(APIClient):
+    @profile
     def get_report_data(
         self,
         days_back: Optional[int] = None,

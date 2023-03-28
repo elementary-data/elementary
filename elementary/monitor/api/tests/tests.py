@@ -26,6 +26,7 @@ from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
+from memory_profiler import profile
 
 logger = get_logger(__name__)
 
@@ -49,6 +50,7 @@ class TestsAPI(APIClient):
             disable_passed_test_metrics=disable_passed_test_metrics,
         )
 
+    @profile
     def _get_test_results_db_rows(
         self,
         days_back: Optional[int] = 7,
@@ -132,6 +134,7 @@ class TestsAPI(APIClient):
             subscribers.append(model_subscribers)
         return subscribers
 
+    @profile
     def get_test_results(
         self,
         filter: SelectorFilterSchema = SelectorFilterSchema(),

@@ -5,6 +5,7 @@ from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
 from elementary.utils.log import get_logger
+from memory_profiler import profile
 
 logger = get_logger(__name__)
 
@@ -13,6 +14,7 @@ class TestsFetcher(FetcherClient):
     def __init__(self, dbt_runner: DbtRunner):
         super().__init__(dbt_runner)
 
+    @profile
     def get_all_test_results_db_rows(
         self,
         days_back: Optional[int] = 7,
