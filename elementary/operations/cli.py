@@ -39,6 +39,12 @@ def run_operation():
     help="Which directory to look in for the profiles.yml file. "
     "If not set, edr will look in the current working directory first, then HOME/.dbt/",
 )
+@click.option(
+    "--target-path",
+    type=str,
+    default=Config.DEFAULT_TARGET_PATH,
+    help="Absolute target path for saving edr files such as logs and reports",
+)
 @click.pass_context
 def upload_source_freshness(ctx, **conf):
     """
