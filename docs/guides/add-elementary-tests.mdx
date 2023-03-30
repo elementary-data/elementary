@@ -85,7 +85,7 @@ models:
 Monitors the freshness of your table over time, as the expected time between data updates.
 
 Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
-field), and then we compute the maximum freshness value per bucket for the last `days_back` days (by default 14).
+field), and then we compute the maximum freshness value per bucket for the last `backfill_days` days (by default 14).
 
 The test then compares the freshness of buckets within the detection period (last 2 days by default, controlled by the
 `days_back` var), and compares it with the freshness of the previous time buckets.
