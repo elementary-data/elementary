@@ -25,13 +25,13 @@ class ModelRunSchema(ExtendedBaseModel):
 
 
 class ArtifactSchema(ExtendedBaseModel):
-    name: str
-    unique_id: str
-    owners: List[str]
-    tags: List[str]
-    package_name: Optional[str]
-    description: Optional[str]
-    full_path: str
+    name: Optional[str] = None
+    unique_id: Optional[str] = None
+    owners: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    package_name: Optional[str] = None
+    description: Optional[str] = None
+    full_path: Optional[str] = None
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):
@@ -47,22 +47,25 @@ class ArtifactSchema(ExtendedBaseModel):
 
 
 class ModelSchema(ArtifactSchema):
-    database_name: str = None
+    database_name: Optional[str] = None
     schema_name: str
     table_name: str
+    ref_function: str = "ref"
 
 
 class SourceSchema(ArtifactSchema):
-    database_name: str = None
+    database_name: Optional[str] = None
     schema_name: str
     table_name: str
+    ref_function: str = "source"
 
 
 class ExposureSchema(ArtifactSchema):
-    url: Optional[str]
-    type: Optional[str]
-    maturity: Optional[str]
-    owner_email: Optional[str]
+    url: Optional[str] = None
+    type: Optional[str] = None
+    maturity: Optional[str] = None
+    owner_email: Optional[str] = None
+    depends_on: Optional[List[str]] = None
 
 
 class ModelTestCoverage(ExtendedBaseModel):
