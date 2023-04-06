@@ -26,31 +26,25 @@ We also recommend you work with a [Python virtual environment](https://docs.pyth
 <Accordion title="dbt core">
 
 ### 1. Initialize a New dbt Project:
-
-Name the project `elementary_tutorial`
-
+Name the project `elementary_tutorial`:
 ```shell
 dbt init elementary_tutorial
 ```
 Ensure that you have a working connection to your DWH. To troubleshoot, you can run **dbt debug**.
 
-<br />
-<br />
+### 2. Download tutorial sample data and models
 
-### 2. Add Sample Data to your Tutorial Project
+We created a dbt project and sample data for the tutorial.
+[Download the files here](https://github.com/elementary-data/elementary-tutorial/archive/refs/heads/main.zip).
 
-We created a dbt project to help us with the tutorial.
-The project is an extended version of the **dbt "jaffle shop" project**.
-It contains seeds and models that we will use to run Elementary's tests on, and collect arrtifacts.
+### 3. Copy files to the `elementary_tutorial` project
 
-In order to load the tutorial project into your dbt project [download the files here](https://github.com/elementary-data/elementary-tutorial/archive/refs/heads/main.zip).
+Copy the following downloaded directories to your local `elementary_tutorial` project:
+- Copy `/seeds` to the project `/data` directory.   
+- Copy `/models` to the project `/models` directory.
 
-
-- **seeds**: copy the **validation** and **training** folders from the **seeds** directory into your local project's **seeds** folder.
-- **models**: copy all of the files plus the **staging** folder into the **models** folder in your local dbt project.
-<br />
-### 3. Seed Data to our DWH
-We will populate our DWH with the sample data:
+### 4. Seed Data to the DWH
+Populate the sample data:
 ```shell
 dbt seed
 ```
@@ -73,13 +67,17 @@ To create a new project in dbt cloud, go to `Account Settings` and click on the 
 <Warning>
 **Make sure you name the project `elementary_tutorial`.**
 </Warning>
+
 #### 3. Connect to the Tutorial Repo
 Connect to the forked repository.
+
 #### 4. Seed Data to our DWH
 After creating a branch, we will populate our DWH with the sample data:
 ```shell
 dbt seed
 ```
+
 </Accordion>
 <br/>
+
 **Now, let's add Elementary's package into our project.**
