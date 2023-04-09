@@ -133,7 +133,7 @@ class DataMonitoring:
             logger.warning(
                 f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
                 "To fix please run:\n"
-                "pip install elementary-data --upgrade\n",
+                "pip install --upgrade elementary-data\n",
             )
             return
 
