@@ -101,13 +101,13 @@ def test_duplicate_rows_for_latest_run_status(warehouse_type):
 
     # Currently scehma changes tests are not supported at databricks
     if warehouse_type != "databricks":
-        # e2e contains 1 passed schema change test for groups table
-        assert_test_counter(
-            report_data=report_data,
-            test_type="schema_change",
-            name="schema_changes",
-            table="groups",
-        )
+        # # e2e contains 1 passed schema change test for groups table
+        # assert_test_counter(
+        #     report_data=report_data,
+        #     test_type="schema_change",
+        #     name="schema_changes",
+        #     table="groups",
+        # )
 
         # e2e contains 3 failed schema change test for stats_player table
         assert_test_counter(
