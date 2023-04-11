@@ -89,7 +89,7 @@ def test_duplicate_rows_for_latest_run_status(warehouse_type):
         test_type="anomaly_detection",
         name="dimension_anomalies",
         status="fail",
-        expected_ammount=2,
+        expected_ammount=3,
     )
     assert_test_counter(
         report_data=report_data,
