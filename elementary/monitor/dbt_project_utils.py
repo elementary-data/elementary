@@ -16,7 +16,20 @@ _MODULES_PATH = os.path.join(PATH, "dbt_modules")
 _PACKAGES_PATH = os.path.join(PATH, "dbt_packages")
 
 
-def get_elementary_package_path():
+def is_dbt_package_up_to_date() -> bool:
+    installed_version = _get_installed_dbt_package_version()
+    if installed_version is None:
+        return False
+
+    required_version = _get_required_dbt_package_version()
+    # We're using a non dbt Hub requirement, such as Git or local.
+    if not required_version:
+        return True
+
+    return installed_version == required_version
+
+
+def _get_elementary_package_path():
     package_path = os.path.join(_PACKAGES_PATH, _DBT_PACKAGE_NAME)
     if os.path.exists(package_path):
         return package_path
@@ -28,17 +41,8 @@ def get_elementary_package_path():
     return None
 
 
-def is_dbt_package_up_to_date() -> bool:
-    installed_version = get_installed_dbt_package_version()
-    if installed_version is None:
-        return False
-
-    required_version = get_required_dbt_package_version()
-    return installed_version == required_version
-
-
-def get_installed_dbt_package_version() -> Optional[str]:
-    package_path = get_elementary_package_path()
+def _get_installed_dbt_package_version() -> Optional[str]:
+    package_path = _get_elementary_package_path()
     if package_path is None:
         return None
 
@@ -50,13 +54,15 @@ def get_installed_dbt_package_version() -> Optional[str]:
     return project_yaml_dict["version"]
 
 
-def get_required_dbt_package_version() -> Optional[str]:
+def _get_required_dbt_package_version() -> Optional[str]:
     packages_file_path = os.path.join(PATH, _PACKAGES_FILENAME)
     packages_yaml = OrderedYaml().load(packages_file_path)
 
-    for requirement in packages_yaml["packages"]:
-        package_name = requirement["package"].split("/")[-1]
+    for requirement in packages_yaml.get("packages", []):
+        package_id = requirement.get("package")
+        if not package_id:
+            continue
+        package_name = package_id.split("/")[-1]
         if package_name == _DBT_PACKAGE_NAME:
             return requirement["version"]
-
     return None

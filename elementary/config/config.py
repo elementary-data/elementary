@@ -78,6 +78,7 @@ class Config:
             os.getcwd(),
         )
         os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
+        os.environ["DBT_LOG_PATH"] = os.path.abspath(target_path)
 
         self.update_bucket_website = self._first_not_none(
             update_bucket_website,

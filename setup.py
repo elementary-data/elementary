@@ -8,10 +8,20 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file.
 README = (HERE / "README.md").read_text()
 
+ADAPTER_EXTRA_REQUIREMENTS = {
+    "snowflake": ["dbt-snowflake>=0.20,<2.0.0"],
+    "bigquery": ["dbt-bigquery>=0.20,<2.0.0"],
+    "redshift": ["dbt-redshift>=0.20,<2.0.0"],
+    "postgres": ["dbt-postgres>=0.20,<2.0.0"],
+    "databricks": ["dbt-databricks>=0.20,<2.0.0"],
+    "spark": ["dbt-spark>=0.20,<2.0.0", "dbt-spark[PyHive]>=0.20,<2.0.0"],
+}
+
+
 setup(
     name="elementary-data",
     description="Data monitoring and lineage",
-    version="0.7.6",
+    version="0.7.7",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.6.2",
@@ -39,15 +49,11 @@ setup(
         "pytest-parametrization>=2022.2.1",
         "pydantic<2.0",
         "networkx>=2.3,<3",
-        "packaging>=20.9,<22.0",
+        "packaging>=20.9,<23.0",
     ],
     extras_require={
-        "snowflake": ["dbt-snowflake>=0.20,<2.0.0"],
-        "bigquery": ["dbt-bigquery>=0.20,<2.0.0"],
-        "redshift": ["dbt-redshift>=0.20,<2.0.0"],
-        "postgres": ["dbt-postgres>=0.20,<2.0.0"],
-        "databricks": ["dbt-databricks>=0.20,<2.0.0"],
-        "spark": ["dbt-spark>=0.20,<2.0.0", "dbt-spark[PyHive]>=0.20,<2.0.0"],
+        **ADAPTER_EXTRA_REQUIREMENTS,
+        "all": sum(ADAPTER_EXTRA_REQUIREMENTS.values(), []),
     },
     long_description_content_type="text/markdown",
     license="",

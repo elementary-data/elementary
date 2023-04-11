@@ -123,17 +123,31 @@ class DataMonitoring:
             return {}
 
     @staticmethod
-    def _check_dbt_package_compatibility(dbt_pkg_ver: str):
+    def _check_dbt_package_compatibility(dbt_pkg_ver: str) -> None:
         dbt_pkg_ver = version.parse(dbt_pkg_ver)
         py_pkg_ver = version.parse(package.get_package_version())
-        logger.info(
-            f"Checking compatibility between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver})."
-        )
-        if (
-            dbt_pkg_ver.major != py_pkg_ver.major
-            or dbt_pkg_ver.minor != py_pkg_ver.minor
+        if dbt_pkg_ver.major > py_pkg_ver.major or (
+            dbt_pkg_ver.major == py_pkg_ver.major
+            and dbt_pkg_ver.minor > py_pkg_ver.minor
         ):
             logger.warning(
                 f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
-                "Please upgrade the major and minor versions to align.\n",
+                "To fix please run:\n"
+                "pip install --upgrade elementary-data\n",
             )
+            return
+
+        if dbt_pkg_ver.major < py_pkg_ver.major or (
+            dbt_pkg_ver.major == py_pkg_ver.major
+            and dbt_pkg_ver.minor < py_pkg_ver.minor
+        ):
+            logger.warning(
+                f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
+                "To fix please update your packages.yml, and run:\n"
+                "dbt deps && dbt run --select elementary\n",
+            )
+            return
+
+        logger.info(
+            f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible :)"
+        )
