@@ -96,7 +96,7 @@ def test_duplicate_rows_for_latest_run_status(warehouse_type):
         test_type="anomaly_detection",
         name="dimension_anomalies",
         status="pass",
-        expected_ammount=1,
+        expected_ammount=2,
     )
 
     # Currently scehma changes tests are not supported at databricks
