@@ -14,7 +14,7 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-DEFAULT_BUCKET_WEBSITE_URL = "https://storage.googleapis.com"
+DEFAULT_BUCKET_WEBSITE_URL = "https://storage.cloud.google.com"
 
 
 class GCSClient:
