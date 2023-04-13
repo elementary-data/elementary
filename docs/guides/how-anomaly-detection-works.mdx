@@ -1,38 +1,103 @@
 ---
 title: "Elementary anomaly detection tests"
-sidebarTitle: "Overview"
+sidebarTitle: "Core concepts"
 ---
 
 Elementary dbt package includes **anomaly detection tests, implemented as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**.
-These tests can detect anomalies in volume, freshness, null rates, and anomalies in specific dimensions, among others.
 The tests are configured and executed like any other tests in your project.
 
-<Tooltip tip="Anomaly detection test result example from Elementary report">
+# Core concepts
+
+In data anomaly detection tests Elementary monitors a specific metric (like row count, null rate, average value, etc.) and compare recent values to historical values. 
+This is done to detect significant changes and deviations, that are probably data reliability issues. 
+
+
+<Tooltip tip="Anomaly detection tests core concepts">
 <img
-src="/pics/anomalies/anomaly-example.png"
-alt="Demo"
+src="https://raw.githubusercontent.com/elementary-data/assets-hosting/master/anomaly_detection/elementary-anomaly-detection-core-concepts.png"
+alt="Elementary anomaly detection tests core concepts"
 />
 </Tooltip>
 
-## What happens on each test?
 
-Upon running a test, your data is split into time buckets based on the `time_bucket` field and is limited by the `days_back` var. 
-The test then compares a certain metric (e.g. row count) of the buckets that are within the detection period (`backfill_days`) to the row count of all the previous time buckets within the `days_back` period.
-If there were any anomalies in the detection period, the test will fail.
+### Anomaly
+A value in the detection set that is an outlier comparing to the expected range calculated based on the training set.
 
-On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
+### Monitored data set 
+The data set we run the data monitor against, and includes the training set values and detection set values.
+
+### Data monitors
+When we use anomaly detection tests we can monitor different metrics to detect problems - freshness, volume, nullness, uniqueness, distribution, etc.
+Each different metric we collect is a ‘data monitor’.
+
+### Training set 
+The set of values used as a reference point to calculate the expected range.
+
+### Detection set
+The set of values that are compared to the expected range. 
+If a value in the detection set is an outlier to the expected range, it will be flagged as an anomaly. 
+
+### Expected range
+Based of the values in the training test, we calculate an expected range for the monitor. 
+Each data point in the detection period will be compared to the expected range calculated based on it’s training set.
+
+### Training period 
+The period of time for which the training set is collected. 
+As data changed over time, we don’t consider the entire history of the metric, just a recent period.
+
+### Detection period
+The values in the detection period will be compared to the expected range calculated using the training set. 
+If a data point is outside the expected range and is part of the detection period, it is flagged as an anomaly.
+
+### Time bucket
+To calculate how data changes over time and detect issues, we split the data into consistent time buckets. 
+For example, if we use daily time bucket and monitor for row count anomalies, we will count new rows per day. 
 
 
-## Core concepts
+# Tests configuration
 
-- Data monitors
+Not all data sets are the same, so Elementary offers configuration options for the anomaly detection tests.  
+To detect data issues with high accuracy, it is important to leverage the configuration options.
 
-- Anomaly
-- Expected range
-  - Direction and sensitivity 
-- Training set
-  - includes seasonality and min training set
+The different configuration options relate directly to the test's core concepts: 
 
-- Time buckets
-- Training period
-- Detection period
+**Data monitors**
+
+**Expected range**
+- anomaly_sensitivity
+- anomaly_direction
+
+**Detection period and detection set**
+- backfill_days
+
+**Training period and training set**
+- `days_back`
+- `min_training_set`
+- `seasonality`
+
+**Time buckets**
+- `timestamp_column`
+- `time_bucket`
+
+**Data set**
+- `where_expression`
+
+# Anomaly detection
+
+Elementary uses "[standard score](https://en.wikipedia.org/wiki/Standard_score)", also known as "Z-score" for anomaly detection. This score represents the number of standard deviations of a value from the average of a set of values.
+
+According to the [empirical rule](https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/empirical-rule-2/), in a standard normal distribution:
+
+- **~68%** of values have an absolute **z-score of 1 or less.**
+- **~95%** of values have an absolute **z-score of 2 or less.**
+- **~99.7%** of values have an absolute **z-score of 3 or less.**
+
+Values with a **standard score of 3 and above are [considered outliers](https://www.ctspedia.org/do/view/CTSpedia/OutLier)**, and this is a recommended threshold for anomaly detection.
+This is the default Elementary uses as well, and it can be changed using the var `anomaly_score_threshold` in the [global configuration](/guides/elementary-tests-configuration).
+
+You can use the model `anomaly_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
+
+<img
+src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/z-score_so2djq.png"
+alt="Z Score"
+/>
