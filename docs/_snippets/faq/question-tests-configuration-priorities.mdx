@@ -1,0 +1,10 @@
+<Accordion title="How test configurations are prioritized?">
+
+The configuration of Elementary is dbt native and follows the same priorities of `dbt configuration`.
+Elementary searches and prioritizes configuration in the following order:
+
+1. Test arguments.
+2. Model `config` (timestamp_column only).
+3. Global vars in `dbt_project.yml`.
+
+</Accordion>

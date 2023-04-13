@@ -1,0 +1,49 @@
+---
+title: "timestamp_column"
+sidebarTitle: "timestamp_column"
+---
+
+`timestamp_column: [column name]`
+
+Elementary anomaly detection tests will use this column to create time buckets and filter the table.
+It is highly recommended to configure a timestamp column (if there is one).
+The best column for this would be an `updated_at`/`created_at`/`loaded_at` timestamp for each row (date type also works).
+
+If undefined, default is null (no time buckets).
+
+- _Default: none
+- _Relevant tests: All anomaly detection tests_
+- _Configuration level: model config, test config_
+
+#### Configuration example
+
+<CodeGroup>
+
+```yaml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        timestamp_column: updated_at
+```
+
+```yaml source
+ources:
+  - name: my_non_dbt_tables
+    schema: raw
+    tables:
+      - name: source_table
+        meta:
+          elementary:
+            timestamp_column: loaded_at
+```
+
+```yaml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          timestamp_column: created_at
+```
+
+</CodeGroup>

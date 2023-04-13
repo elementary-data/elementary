@@ -125,7 +125,14 @@
     {
       "group": "Data Anomaly Detection Tests",
       "pages": [
+        "guides/how-anomaly-detection-works",
         "guides/elementary-tests-configuration",
+        {
+          "group": "Tests configuration",
+          "pages": [
+            "guides/anomaly-detection-configuration/days-back"
+          ]
+        },
         "guides/data-anomaly-detection"
       ]
     },
