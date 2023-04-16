@@ -7,11 +7,16 @@ tests.
 
 ## Data anomaly detection dbt tests
 
-Elementary dbt package includes **data monitoring and anomaly detection
-as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**. The tests collect data quality metrics. On
-each execution, the latest metrics are compared to historical values to detect anomalies.
-These tests are configured and executed like any other tests in your project.
+Elementary dbt package includes **anomaly detection tests, implemented as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**.
+These tests can detect anomalies in volume, freshness, null rates, and anomalies in specific dimensions, among others. 
+The tests are configured and executed like any other tests in your project.
 
+<Tooltip tip="Anomaly detection test result example from Elementary report">
+<img
+src="/pics/anomalies/anomaly-example.png"
+alt="Demo"
+/>
+</Tooltip>
 
 ## Available anomaly detection tests
 
@@ -25,7 +30,7 @@ Upon running the test, your data is split into time buckets (daily by default, c
 field), and then we compute the row count per bucket for the last `days_back` days (by default 14).
 
 The test then compares the row count of buckets within the detection period (last 2 days by default, controlled by the
-`days_back` var), and compares it with the row count of the previous time buckets.
+`backfill_days` var), and compares it with the row count of the previous time buckets.
 If there were any anomalies during the detection period, the test will fail.
 
 For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
@@ -556,7 +561,7 @@ sources:
 
 </CodeGroup>
 
-## Advanced configuration for your elementary tests
+## Configure your elementary anomaly detection tests
 
 The elementary anomaly detection tests described above can work out-of-the-box with default configuration. However,
 we support additional configuration that can be used to customize their behavior, depending on your needs.
@@ -571,7 +576,7 @@ If you wish to only be warned on anomalies, configure the severity of the tests 
 
 Upon running a test, your data is split into time buckets based on the `time_bucket` field and is limited by
 the `days_back` var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
-period (`backfill_days`) to the row count of all the previous time buckets.
+period (`backfill_days`) to the row count of all the previous time buckets within the `days_back` period.
 If there were any anomalies in the detection period, the test will fail.
 On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical
 metrics.

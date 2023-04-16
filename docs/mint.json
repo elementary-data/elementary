@@ -16,9 +16,13 @@
       "to": "#FE10B0"
     }
   },
+  "feedback": {
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
   "topbarCtaButton": {
     "name": "Try Elementary cloud",
-    "url": "mailto:cloud@elementary-data.com?subject=Tell me about Elementary cloud!&body=I'm interested in learning more about the Elementary cloud private beta. Please send me further details."
+    "url": "https://www.elementary-data.com/cloud-beta"
   },
   "topbarLinks": [
     {

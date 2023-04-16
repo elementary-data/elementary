@@ -91,10 +91,12 @@ If not, ask your admin to create both schemas and grant permissions to the relev
 
 ```yml dbt_project.yml
 models:
-  ## elementary models will be created in the schema '<your_schema>_elementary'
   ## see docs: https://docs.elementary-data.com/
   elementary:
+    ## elementary models will be created in the schema '<your_schema>_elementary'
     +schema: "elementary"
+    ## To disable elementary for dev, uncomment this:
+    # enabled: "{{ target.name in ['prod','analytics'] }}"
 ```
 
 ### 3. Import the package
