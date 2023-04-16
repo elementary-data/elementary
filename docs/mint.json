@@ -16,6 +16,10 @@
       "to": "#FE10B0"
     }
   },
+  "feedback": {
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
   "topbarCtaButton": {
     "name": "Try Elementary cloud",
     "url": "https://www.elementary-data.com/cloud-beta"
