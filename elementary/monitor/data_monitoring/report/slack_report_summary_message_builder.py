@@ -21,14 +21,13 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         include_description: bool = False,
     ) -> SlackMessageSchema:
-        self._add_title_to_slack_alert(
-            test_results=test_results,
-            bucket_website_url=bucket_website_url,
+        self._add_title_to_slack_alert(env=env)
+        self._add_preview_to_slack_alert(
+            test_results,
             days_back=days_back,
-            env=env,
+            bucket_website_url=bucket_website_url,
             filter=filter,
         )
-        self._add_preview_to_slack_alert(test_results)
         self._add_details_to_slack_alert(
             test_results=test_results,
             include_description=include_description,
@@ -38,44 +37,18 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
 
     def _add_title_to_slack_alert(
         self,
-        test_results: List[TestResultSummarySchema],
         env: str,
-        days_back: int,
-        bucket_website_url: Optional[str] = None,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
     ):
         env_text = (
             ":construction: Development"
             if env == "dev"
             else ":large_green_circle: Production"
         )
-        summary_filter_text = self._get_summary_filter_text(days_back, filter)
-        totals = self._get_test_results_totals(test_results)
 
         title_blocks = [
             self.create_header_block(f":mag: Monitoring summary ({env_text})"),
-            self.create_text_section_block(summary_filter_text),
+            self.create_divider_block(),
         ]
-
-        if bucket_website_url:
-            title_blocks.append(
-                self.create_text_section_block(
-                    f"<{bucket_website_url}|View full report> :arrow_upper_right:"
-                )
-            )
-
-        title_blocks.append(
-            self.create_fields_section_block(
-                [
-                    f":white_check_mark: Passed: {totals.get('passed', 0)}",
-                    f":small_red_triangle: Failed: {totals.get('failed', 0)}",
-                    f":exclamation: Errors: {totals.get('error', 0)}",
-                    f":Warning: Warning: {totals.get('warning', 0)}",
-                ]
-            )
-        )
-
-        title_blocks.append(self.create_divider_block())
         self._add_always_displayed_blocks(title_blocks)
 
     @staticmethod
@@ -96,37 +69,42 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
 
         return f"_This summary was generated with the following filters - {days_back_text}{f', {selector_text}' if selector_text else ''}_"
 
-    def _add_preview_to_slack_alert(self, test_results: List[TestResultSummarySchema]):
-        owners = []
-        tags = []
-        subscribers = []
-        for test in test_results:
-            if test.status != "pass":
-                formatted_tags = [
-                    tag if tag.startswith(TAG_PREFIX) else f"{TAG_PREFIX}{tag}"
-                    for tag in test.tags
-                ]
-                owners.extend(test.owners)
-                tags.extend(formatted_tags)
-                subscribers.extend(test.subscribers)
+    def _add_preview_to_slack_alert(
+        self,
+        test_results: List[TestResultSummarySchema],
+        days_back: int,
+        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        bucket_website_url: Optional[str] = None,
+    ):
+        preview_blocks = []
 
-        tags_text = self.prettify_and_dedup_list(tags) if tags else "_No tags_"
-        owners_text = self.prettify_and_dedup_list(owners) if owners else "_No owners_"
-        subscribers_text = (
-            self.prettify_and_dedup_list(subscribers)
-            if subscribers
-            else "_No subscribers_"
+        summary_filter_text = self._get_summary_filter_text(days_back, filter)
+        preview_blocks.append(self.create_text_section_block(summary_filter_text))
+
+        if bucket_website_url:
+            preview_blocks.append(
+                self.create_text_section_block(
+                    f"<{bucket_website_url}|View full report> :arrow_upper_right:"
+                )
+            )
+
+        totals = self._get_test_results_totals(test_results)
+        preview_blocks.append(
+            self.create_fields_section_block(
+                [
+                    f":white_check_mark: Passed: {totals.get('passed', 0)}",
+                    f":small_red_triangle: Failed: {totals.get('failed', 0)}",
+                    f":exclamation: Errors: {totals.get('error', 0)}",
+                    f":Warning: Warning: {totals.get('warning', 0)}",
+                ]
+            )
         )
 
-        preview_blocks = [
-            self.create_text_section_block(":mega: *Attention required* :mega:"),
-            self.create_text_section_block(f"*Tags:* {tags_text}"),
-            self.create_text_section_block(f"*Owners:* {owners_text}"),
-            self.create_text_section_block(f"*Subscribers:* {subscribers_text}"),
-            self.create_empty_section_block(),
-        ]
-        if preview_blocks:
-            self._add_blocks_as_attachments(preview_blocks)
+        preview_blocks_filler = [self.create_empty_section_block()] * (
+            self._MAX_ALERT_PREVIEW_BLOCKS - len(preview_blocks)
+        )
+        preview_blocks.extend(preview_blocks_filler)
+        self._add_blocks_as_attachments(preview_blocks)
 
     def _add_details_to_slack_alert(
         self,
