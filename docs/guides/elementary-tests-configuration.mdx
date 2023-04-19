@@ -91,6 +91,22 @@ If undefined, default is 2 buckets.
 Filter the tested data using a valid sql expression. Example usage: `where_expression: "user_name = 'test'"`
 
 </Accordion>
+<Accordion title="seasonality">
+`seasonality`: [string]
+
+Compare data of a specific point in time to not-adjacent previous data points.
+Currently only support `seasonality: day_of_week` with `time_bucket` of 1 day.
+day_of_week means each daily bucket would be compared to the daily bucket of 1 week prior to it, 2 weeks prior, 3 weeks prior, ...
+
+Example usage:
+```yml
+time_bucket:
+  period: day
+  count: 1
+seasonality: day_of_week
+```
+
+</Accordion>
 
 
 </AccordionGroup>

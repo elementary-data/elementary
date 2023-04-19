@@ -27,13 +27,18 @@ Data monitors are SQL queries generators that are executed to collect a specific
 
 ### How do monitors work in Elementary data tests?
 
-Monitors have two modes:
+Monitors have three modes:
 
 #### Time buckets
 
 If a `timestamp_column` is defined for the table, the monitor will collect metrics by timeframe buckets. It is highly recommended to use time buckets on every table that has a time field. This is both for performance reasons, as well as better anomaly detection.
 
 The _default time bucket is 24 hours_.
+
+#### Seasonal Time buckets
+
+If `seasonality: day_of_week` is defined (currently supported only with time_bucket of 1 day), each bucket/day is compared to the same bucket/day in previous week.
+This means that Monday is compared to [last Monday, the Monday before that, ...] , and Saturday is compared to [last Saturday, the Saturday before that, ...]
 
 #### Global
 
@@ -84,7 +89,7 @@ According to the [empirical rule](https://www.statisticshowto.com/probability-an
 Values with a **standard score of 3 and above are [considered outliers](https://www.ctspedia.org/do/view/CTSpedia/OutLier)**, and this is a recommended threshold for anomaly detection.
 This is the default Elementary uses as well, and it can be changed using the var `anomaly_score_threshold` in the [global configuration](/guides/elementary-tests-configuration).
 
-You can use the model `anomaly_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
+You can use the model `anomaly_threshold_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
 
 <img
   src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/z-score_so2djq.png"
