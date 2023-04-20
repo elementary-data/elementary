@@ -170,7 +170,7 @@ class AlertsAPI(APIClient):
                 else None
             )
             is_alert_in_suppression = (
-                (current_time_utc - last_sent_time).seconds / 3600
+                (current_time_utc - last_sent_time).total_seconds() / 3600
                 <= suppression_interval
                 if last_sent_time
                 else False
