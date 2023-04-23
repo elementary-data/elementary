@@ -52,35 +52,12 @@ def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
     assert "The amount of results exceeded Slack" in attachments_as_string
 
 
-def test_owners_tags_and_subscribers_of_passed_tests_are_filtered_out(
-    test_results_summary,
-):
-    # Within attachments limitation
-    message_builder = SlackReportSummaryMessageBuilder()
-    message_builder._add_preview_to_slack_alert(test_results_summary)
-    attachments_as_string = json.dumps(
-        message_builder.slack_message.get("attachments")[0].get("blocks")
-    )
-    assert "Jeff" in attachments_as_string
-    assert "Joe" in attachments_as_string
-    assert "Ron" in attachments_as_string
-    assert "subscriber1" in attachments_as_string
-    assert "subscriber2" in attachments_as_string
-    assert "production" in attachments_as_string
-    assert "dev" in attachments_as_string
-
-    assert "Jack" not in attachments_as_string
-    assert "subscriber22" not in attachments_as_string
-    assert "staging" not in attachments_as_string
-
-
 def test_passed_tests_filtered_out_of_details_view(
     test_results_summary,
 ):
     # Within attachments limitation
     message_builder = SlackReportSummaryMessageBuilder()
     passed_tests_from_fixture = [x for x in test_results_summary if x.status == "pass"]
-    message_builder._add_preview_to_slack_alert(passed_tests_from_fixture)
     message_builder._add_details_to_slack_alert(passed_tests_from_fixture)
     attachments_as_string = json.dumps(
         message_builder.slack_message.get("attachments")[0].get("blocks")
