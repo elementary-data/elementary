@@ -18,13 +18,14 @@ The expected range for Monday will be based on a training set of previous Monday
 
 
 - _Default: none_
+- _Supported values: `day_of_week`_
 - _Relevant tests: Anomaly detection tests with `timestamp_column` and 1 day `time_bucket`_
 - _Configuration level: test_
 
-<Frame caption="days_back change impact">
+<Frame caption="seasonality change impact">
     <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1681301377/Anomaly%20detection%20tests/days_back_lpbr5p.png"
-    alt="days_back change impact"
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1681301380/Anomaly%20detection%20tests/seasonality_bz6gqp.png"
+    alt="seasonality change impact"
     />
 </Frame>
 
@@ -45,3 +46,5 @@ models:
 
 #### How it works?
 
+- The test will compare the value of a bucket to previous bucket with the same seasonality attribute, and not to the adjacent previous data points.
+- The `days_back` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `days_back` is by default multiplied by 7.
