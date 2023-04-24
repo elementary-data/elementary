@@ -324,11 +324,11 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
     def to_slack(self):
         return self.alerts[0].to_slack()
 
-    def set_owners(self, owners):
-        self.alerts[0].owners = owners
+    def set_owners(self, owners: List[str]):
+        self.alerts[0].owners = ", ".join(owners)
 
-    def set_subscribers(self, subscribers):
-        self.alerts[0].subscribers = subscribers
+    def set_subscribers(self, subscribers: List[str]):
+        self.alerts[0].subscribers = ", ".join(subscribers)
 
-    def set_tags(self, tags):
-        self.alerts[0].tags = tags
+    def set_tags(self, tags: List[str]):
+        self.alerts[0].tags = ", ".join(tags)
