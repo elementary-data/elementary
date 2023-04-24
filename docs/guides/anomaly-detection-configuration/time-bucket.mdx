@@ -1,0 +1,51 @@
+---
+title: "time_bucket"
+sidebarTitle: "time_bucket"
+---
+
+```
+time_bucket:
+  period: < time period > # supported periods: hour, day, week, month
+  count: < number of periods >
+```
+
+This configuration controls the duration of the time buckets.
+
+To calculate how data changes over time and detect issues, we split the data into consistent time buckets.
+For example, if we use daily (period=`day`, count=`1`) time bucket and monitor for row count anomalies, we will count new rows per day.
+
+Depending on the nature of your data, it may make sense to modify this parameter. 
+For example, if you want to detect volume anomalies in an hourly resolution, you should set the time bucket to period=`hour` and count=`1`.
+
+- _Default: daily buckets. `time_bucket: {period: day, count: 1}`_
+- _Relevant tests: Anomaly detection tests with `timestamp_column`_
+- _Configuration level: test_
+
+<Frame caption="time_bucket change impact">
+    <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1681301377/Anomaly%20detection%20tests/time_bucket_ypxuxu.png"
+    alt="time_bucket change impact"
+    />
+</Frame>
+
+#### Configuration example
+
+<CodeGroup>
+
+```yaml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          time_bucket:
+            period: hour
+            count: 4
+```
+
+</CodeGroup>
+
+
+#### How it works?
+
+- The `days_back` and `backfill_days` of the test might be extended to ensure full time buckets (for example, full week Sunday-Saturday). 
+- Weekly buckets start at the day that is configured as week start on the data warehouse. 
