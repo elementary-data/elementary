@@ -88,8 +88,8 @@ class DataMonitoringAlerts(DataMonitoring):
         for alert in group_alert.alerts:
             all_owners.update(alert.owners)
             all_subscribers.update(alert.subscribers)
-        group_alert.set_owners(all_owners)
-        group_alert.set_subscribers(all_subscribers)
+        group_alert.set_owners(list(all_owners))
+        group_alert.set_subscribers(list(all_subscribers))
 
     def _group_alerts_per_config(self, alerts: List[Alert]) -> List[GroupOfAlerts]:
         """
