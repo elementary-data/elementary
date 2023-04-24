@@ -1,6 +1,6 @@
 import os
 import posixpath
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import Field, validator
 
@@ -32,6 +32,7 @@ class ArtifactSchema(ExtendedBaseModel):
     package_name: Optional[str] = None
     description: Optional[str] = None
     full_path: Optional[str] = None
+    meta: Optional[Dict[str, Any]] = None
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):

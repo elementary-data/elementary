@@ -217,7 +217,7 @@ def get_cli_properties() -> dict:
 @click.option(
     "--group-by",
     type=click.Choice(["alert", "table"]),
-    default="alert",
+    default=None,
     help="Whether to group alerts by 'alert' or by 'table'",
 )
 @click.pass_context
