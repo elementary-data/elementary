@@ -61,12 +61,17 @@ class SourceSchema(ArtifactSchema):
     ref_function: str = "source"
 
 
+class OwnerSchema(ExtendedBaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+
+
 class ExposureSchema(ArtifactSchema):
     url: Optional[str] = None
     type: Optional[str] = None
     maturity: Optional[str] = None
-    owner_email: Optional[str] = None
     depends_on: Optional[List[str]] = None
+    owner: Optional[OwnerSchema] = None
 
 
 class ModelTestCoverage(ExtendedBaseModel):
