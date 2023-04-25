@@ -72,6 +72,7 @@ class OwnerSchema(ExtendedBaseModel):
 
 
 class ExposureSchema(ArtifactSchema):
+    label: Optional[str] = None
     url: Optional[str] = None
     type: Optional[str] = None
     maturity: Optional[str] = None
