@@ -22,14 +22,15 @@ Larger values will have the opposite effect and will reduce the number of anomal
     />
 </Frame>
 
-#### Configuration example
-
-<CodeGroup>
+<RequestExample>
 
 ```yaml dbt_project.yml
 vars:
   anomaly_sensitivity: 3
 ```
+</RequestExample>
+
+<RequestExample>
 
 ```yaml test
 models:
@@ -39,4 +40,4 @@ models:
           anomaly_sensitivity: 3
 ```
 
-</CodeGroup>
+</RequestExample>

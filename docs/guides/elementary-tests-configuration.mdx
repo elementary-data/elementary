@@ -5,107 +5,52 @@ sidebarTitle: "Tests configuration"
 
 The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
 
-<Snippet file="faq/tests-configuration-priorities.mdx" />
+<Snippet file="question-tests-configuration-priorities.mdx" />
 
 ---
 
-## All configuration params
+## Anomaly detection tests configuration params
 
-## Configuration by test
+<Tip>If your data set has a timestamp column that represents the creation time of a field, it is highly recommended configuring it as a `timestamp_column`.</Tip>
+
+<Tabs>
+  <Tab title="Params by anomaly detection test">
+    <pre>
+     <code>
+      All anomaly detection tests:
+       -- <a href="./anomaly-detection-configuration/timestamp-column.mdx"><font color="#CD7D55">timestamp_column: column name</font>></a>
+       -- <a href="./anomaly-detection-configuration/where-expression.mdx"><font color="#CD7D55">where_expression: sql expression</font>></a>
+       -- <a href="./anomaly-detection-configuration/anomaly-sensitivity.mdx"><font color="#CD7D55">anomaly_sensitivity: int</font>></a>
+       -- <a href="./anomaly-detection-configuration/anomaly-direction.mdx"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font>></a>
+
+      Anomaly detection tests with timestamp_column:
+       -- <a href="./anomaly-detection-configuration/days-back.mdx"><font color="#CD7D55">days_back: int</font>></a>
+       -- <a href="./anomaly-detection-configuration/backfill-days.mdx"><font color="#CD7D55">backfill_days: int</font>></a>
+       -- <a href="./anomaly-detection-configuration/time-bucket.mdx"><font color="#CD7D55">time_bucket:</font>></a>
+            &nbsp;&nbsp;&nbsp; <a href="./anomaly-detection-configuration/time-bucket.mdx"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+            &nbsp;&nbsp;&nbsp; <a href="./anomaly-detection-configuration/time-bucket.mdx"><font color="#CD7D55">count: int</font></a>
+       -- <a href="./anomaly-detection-configuration/seasonality.mdx"><font color="#CD7D55">seasonality: day_of_week</font>></a>
+
+      all_columns_anomalies test:
+       -- <a href="./anomaly-detection-configuration/column_anomalies.mdx"><font color="#CD7D55">column_anomalies: column monitors list</font>></a>
+       -- <a href="./anomaly-detection-configuration/exclude_prefix.mdx"><font color="#CD7D55">exclude_prefix: string</font>></a>
+       -- <a href="./anomaly-detection-configuration/exclude_regexp.mdx"><font color="#CD7D55">exclude_regexp: regex</font>></a>
+
+      dimension_anomalies test:
+       -- <a href="./anomaly-detection-configuration/dimensions.mdx"><font color="#CD7D55">dimensions: sql expression</font>></a>
+
+      event_freshness_anomalies:
+       -- <a href="./anomaly-detection-configuration/event_timestamp_column.mdx"><font color="#CD7D55">event_timestamp_column: column name</font>></a>
+       -- <a href="./anomaly-detection-configuration/update_timestamp_column.mdx"><font color="#CD7D55">update_timestamp_column: column name</font>></a>
+     </code>
+    </pre>
+  </Tab>
+  <Tab title="Params by configuration level">
+    💪 Here's content that's only inside the third Tab.
+  </Tab>
+</Tabs>
 
 ## Example configurations
-
-
-Test specific configurations, configured in the yml for each test (like dbt `severity`, `limit`, etc).
-
-#### Configuration for all anomaly detection tests:
-
-<AccordionGroup>
-
-
-
-<Accordion title="backfill_days">
-`backfill_days`: [int]
-
-The minimal amount of buckets for running time buckets monitors. If these buckets were already calculated, Elementary will overwrite them. The reason behind it is to monitor recent backfills of data, if there were any.
-This configuration should be changed according to your data delays.
-
-If undefined, default is 2 buckets.
-
-</Accordion>
-
-<Accordion title="where_expression">
-`where_expression`: [sql expression]
-
-Filter the tested data using a valid sql expression. Example usage: `where_expression: "user_name = 'test'"`
-
-</Accordion>
-
-
-</AccordionGroup>
-
-
-#### Configuration for specific anomaly detection tests:
-
-<AccordionGroup>
-
-<Accordion title="column_anomalies" description="all_column_anomalies, column_anomalies">
-`column_anomalies`: [list]
-
-Select which monitors to activate as part of the test. Example usage: `column_anomalies: [null_count, missing_count, average]`
-
-Available monitors:
-
-<Snippet file="column-metrics.mdx" />
-
-</Accordion>
-
-<Accordion title="event_timestamp_column & update_timestamp_column" description="event_freshness_anomalies">
-`event_timestamp_column`: [column name]
-`update_timestamp_column`: [column name]
-
-This test compliments the freshness_anomalies test and is primarily intended for data that is updated in a continuous / streaming fashion.
-
-The test can work in a couple of modes:
-
-- If only an event_timestamp_column is supplied, the test measures over time the difference between the current timestamp (“now”) and the most recent event timestamp.
-- If both an event_timestamp_column and an update_timestamp_column are provided, the test will measure over time the difference between these two columns.
-
-</Accordion>
-
-<Accordion title="exclude_regexp" description="all_column_anomalies">
-`exclude_regexp`: [regex]
-
-Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on regular expression match. Example usage: `exlude_regexp: '.*SDC$'`
-
-</Accordion>
-
-<Accordion title="exclude_prefix" description="all_column_anomalies">
-`exclude_prefix`: [string]
-
-Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on prefix match. Example usage: `exlude_prefix: 'dbt_'`
-
-</Accordion>
-
-</AccordionGroup>
-
----
-
-## Table configuration
-
-Elementary tests `timestamp_column` can be configured for a model / source.
-This will apply to any test defined on the table that has no `timestamp_column` param.
-
-<Accordion title="timestamp_column">
-`timestamp_column`: [column_name]
-
-It is recommended to configure a timestamp column (if there is one).
-The best column for this will have an 'updated at' timestamp for each row (date type also works).
-Elementary will use this column to filter the table when running monitors.
-
-If undefined, default is null (no time buckets).
-
-**Example configuration:**
 
 <CodeGroup>
 
@@ -184,50 +129,3 @@ sources:
 ```
 
 </CodeGroup>
-
-</Accordion>
-
----
-
-## Data monitoring global vars
-
-Elementary has several global vars used for tests configurations.
-You can change their defaults by adding them with a new value in your `dbt_project.yml` under the vars key.
-
-<AccordionGroup>
-
-<Accordion title="days_back">
-`days_back`: [int]
-
-The maximum timeframe for running [time buckets](/guides/data-anomaly-detection#tests-and-monitors-types) monitors, as well as to calculate a baseline for anomaly detection.
-This limit is applied in three cases: - On the first run of elementary or on full refresh (first run for all tables). - For each new table that is added to the monitoring (first run for table). - On each new metric that is added to the configuration (first run of new metric). - If there was a gap bigger than this limit since the last run.
-If undefined, _default is 14 days back_.
-
-</Accordion>
-
-<Accordion title="backfill_days">
-`backfill_days`: [int]
-
-The minimal amount of buckets for running time buckets monitors. If these buckets were already calculated, Elementary will overwrite them. The reason behind it is to monitor recent backfills of data, if there were any. This configuration should be changed according to your data delays.
-If undefined, _default is 2 buckets_.
-
-</Accordion>
-
-<Accordion title="anomaly_sensitivity">
-`anomaly_sensitivity`: [int]
-
-This threshold determines the sensitivity level for anomaly detection. Elementary uses [statistical analysis](/guides/data-anomaly-detection#anomaly-detection) to grade deviations of recent metrics from historical metrics. Increasing this threshold makes the detection less sensitive for anomalies, and reducing makes it more sensitive (smaller deviations will be flagged as anomalies).
-If undefined, _default threshold is 3_.
-
-</Accordion>
-
-</AccordionGroup>
-
-```yml dbt_project.yml
-# optional #
-# Global vars for data monitoring#
-vars:
-  days_back: 14 # maximum timeframe for collecting metrics and analyzing anomalies
-  anomaly_sensitivity: 3 # sensitivity of anomaly detection
-  backfill_days: 2 # days to backfill on each run, adjust to your data delays
-```
