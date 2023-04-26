@@ -1,0 +1,45 @@
+---
+title: "anomaly_direction"
+sidebarTitle: "anomaly_direction"
+---
+
+`anomaly_direction: both | spike | drop`
+
+By default, data points are compared to the expected range and check if these are below or above it.
+For some data monitors, you might only want to flag anomalies if they are above the range and not under it, and vice versa.
+For example - when monitoring for freshness, we only want to detect data delays and not data that is “early”. 
+The anomaly_direction configuration is used to configure the direction of the expected range, and can be set to both, spike or drop.
+
+
+- _Default: `both`_
+- _Supported values: `both`, `spike`, `drop`_
+- _Relevant tests: All anomaly detection tests_
+- _Configuration level: test_
+
+<Frame caption="anomaly_direction change impact">
+    <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1681301375/Anomaly%20detection%20tests/anomaly_direction_r1sdl9.png"
+    alt="anomaly_direction change impact"
+    />
+</Frame>
+
+<RequestExample>
+
+```yaml test
+models:
+  - name: this_is_a_model
+    tests:
+    
+      - elementary.volume_anomalies:
+          anomaly_direction: drop
+          
+      - elementary.all_columns_anomalies:
+          column_anomalies:
+            - null_count
+            - missing_count
+            - zero_count
+          anomaly_direction: spike
+          
+```
+
+</RequestExample>

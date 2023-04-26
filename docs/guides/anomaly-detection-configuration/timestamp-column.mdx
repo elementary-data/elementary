@@ -5,6 +5,8 @@ sidebarTitle: "timestamp_column"
 
 `timestamp_column: [column name]`
 
+<Tip>If your data set has a timestamp column that represents the creation time of a field, it is highly recommended configuring it as a `timestamp_column`.</Tip>
+
 Elementary anomaly detection tests will use this column to create time buckets and filter the table.
 It is highly recommended to configure a timestamp column (if there is one).
 The best column for this would be an `updated_at`/`created_at`/`loaded_at` timestamp for each row (date type also works).
@@ -15,9 +17,7 @@ If undefined, default is null (no time buckets).
 - _Relevant tests: All anomaly detection tests_
 - _Configuration level: model config, test config_
 
-#### Configuration example
-
-<CodeGroup>
+<RequestExample>
 
 ```yaml model
 models:
@@ -26,6 +26,10 @@ models:
       elementary:
         timestamp_column: updated_at
 ```
+
+</RequestExample>
+
+<RequestExample>
 
 ```yaml source
 ources:
@@ -38,6 +42,10 @@ ources:
             timestamp_column: loaded_at
 ```
 
+</RequestExample>
+
+<RequestExample>
+
 ```yaml test
 models:
   - name: this_is_a_model
@@ -46,4 +54,4 @@ models:
           timestamp_column: created_at
 ```
 
-</CodeGroup>
+</RequestExample>
