@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -157,7 +157,7 @@ class AnonymousCommandLineTracking(AnonymousTracking):
         execution_properties: Optional[dict],
         command: Optional[str] = None,
     ):
-        props = {
+        props: Dict[str, Any] = {
             "execution_properties": execution_properties,
             "module_name": module_name,
             "command": command,
@@ -168,7 +168,7 @@ class AnonymousCommandLineTracking(AnonymousTracking):
         self._send_anonymous_event("cli-end", properties=props)
 
     def track_cli_exception(
-        self, module_name: str, exc: Exception, command: str = None
+        self, module_name: str, exc: Exception, command: Optional[str] = None
     ) -> None:
         props = {
             "module_name": module_name,

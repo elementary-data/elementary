@@ -8,7 +8,7 @@ from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
 
-AlertType = TypeVar("AlertType")
+AlertType = TypeVar("AlertType", bound=Alert)
 
 
 @dataclass

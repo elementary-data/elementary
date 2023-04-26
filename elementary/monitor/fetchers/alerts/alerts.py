@@ -1,10 +1,11 @@
 import json
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, cast
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts import AlertsQueryResult, AlertType
+from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.alerts import AlertsQueryResult
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -19,7 +20,7 @@ logger = get_logger(__name__)
 class AlertsFetcher(FetcherClient):
     def __init__(
         self,
-        dbt_runner: DbtRunner,
+        dbt_runner: BaseDbtRunner,
         config: Config,
         elementary_database_and_schema: str,
     ):
@@ -27,9 +28,7 @@ class AlertsFetcher(FetcherClient):
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
-    def skip_alerts(
-        self, alerts_to_skip: List[Union[AlertType, MalformedAlert]], table_name: str
-    ):
+    def skip_alerts(self, alerts_to_skip: List[Alert], table_name: str):
         alert_ids = [alert.id for alert in alerts_to_skip]
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
         logger.info(f'Update skipped alerts at "{table_name}"')
@@ -62,13 +61,14 @@ class AlertsFetcher(FetcherClient):
         self, days_back: int
     ) -> AlertsQueryResult[ModelAlert]:
         logger.info("Querying model alerts.")
-        return self._query_alert_type(
+        res = self._query_alert_type(
             {
                 "macro_name": "get_pending_model_alerts",
                 "macro_args": {"days_back": days_back},
             },
             ModelAlert,
         )
+        return cast(AlertsQueryResult[ModelAlert], res)
 
     def query_pending_source_freshness_alerts(
         self, days_back: int

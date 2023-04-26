@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 import google
 from google.auth.credentials import Credentials
-from google.cloud import storage
+from google.cloud import storage  # type: ignore[attr-defined]
 from google.oauth2 import service_account
 
 from elementary.config.config import Config
@@ -18,14 +18,14 @@ DEFAULT_BUCKET_WEBSITE_URL = "https://storage.googleapis.com"
 
 
 class GCSClient:
-    def __init__(self, config: Config, tracking: Tracking = None):
+    def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
         self.client = self.get_client(config)
         self.tracking = tracking
 
     @classmethod
     def create_client(
-        cls, config: Config, tracking: Tracking = None
+        cls, config: Config, tracking: Optional[Tracking] = None
     ) -> Optional["GCSClient"]:
         return cls(config, tracking=tracking) if config.has_gcs else None
 

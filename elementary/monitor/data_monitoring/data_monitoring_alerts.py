@@ -2,10 +2,11 @@ import json
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
 
 from alive_progress import alive_it
 
+from elementary.clients.slack.client import SlackClient
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.alert import Alert
@@ -35,7 +36,7 @@ class DataMonitoringAlerts(DataMonitoring):
     def __init__(
         self,
         config: Config,
-        tracking: Tracking = None,
+        tracking: Optional[Tracking] = None,
         filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
@@ -53,11 +54,20 @@ class DataMonitoringAlerts(DataMonitoring):
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
 
-    def _parse_emails_to_ids(self, emails: List[str]) -> str:
+        if self.slack_client is None:
+            raise Exception("Could not initialize slack client!")
+
+        # Type hint to mark that in this class the slack client cannot be None
+        self.slack_client: SlackClient
+
+    def _parse_emails_to_ids(self, emails: Optional[List[str]]) -> str:
+        if emails is None:
+            return ""
+
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
 
-            return re.fullmatch(email_regex, potential_email)
+            return bool(re.fullmatch(email_regex, potential_email))
 
         def _get_user_id(email: str) -> str:
             user_id = self.slack_client.get_user_id_from_email(email)
@@ -201,13 +211,13 @@ class DataMonitoringAlerts(DataMonitoring):
 
     def _skip_alerts(self, alerts: Alerts):
         self.alerts_api.skip_alerts(
-            alerts.tests.get_alerts_to_skip(), TestAlert.TABLE_NAME
+            cast(List[Alert], alerts.tests.get_alerts_to_skip()), TestAlert.TABLE_NAME
         )
         self.alerts_api.skip_alerts(
-            alerts.models.get_alerts_to_skip(), ModelAlert.TABLE_NAME
+            cast(List[Alert], alerts.models.get_alerts_to_skip()), ModelAlert.TABLE_NAME
         )
         self.alerts_api.skip_alerts(
-            alerts.source_freshnesses.get_alerts_to_skip(),
+            cast(List[Alert], alerts.source_freshnesses.get_alerts_to_skip()),
             SourceFreshnessAlert.TABLE_NAME,
         )
 

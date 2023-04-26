@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, TypeVar
 
 from dateutil import tz
 
@@ -70,6 +70,10 @@ class Alert:
         self.alert_fields = alert_fields
         self.slack_group_alerts_by = slack_group_alerts_by
 
+        # Defined in the base class so type checks will not complain
+        self.data = None
+        self.model_unique_id = None
+
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."
 
@@ -79,6 +83,15 @@ class Alert:
     @property
     def consice_name(self):
         return "Alert"
+
+
+class ValidAlert(Alert):
+    def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
+        raise NotImplementedError
+
+
+# Matches any subclass of ValidAlert
+ValidAlertType = TypeVar("ValidAlertType", bound=ValidAlert)
 
 
 class PreviewIsTooLongError(Exception):

@@ -1,11 +1,12 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import DefaultDict, Dict, List, cast
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult, AlertType
+from elementary.monitor.alerts.alert import Alert, ValidAlertType
+from elementary.monitor.alerts.alerts import Alerts, AlertsQueryResult
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -66,7 +67,7 @@ class AlertsAPI(APIClient):
         test_alerts = self._sort_alerts(
             pending_test_alerts, last_alert_sent_times, filter
         )
-        return test_alerts
+        return cast(AlertsQueryResult[TestAlert], test_alerts)
 
     def get_model_alerts(
         self,
@@ -80,7 +81,7 @@ class AlertsAPI(APIClient):
         model_alerts = self._sort_alerts(
             pending_model_alerts, last_alert_sent_times, filter
         )
-        return model_alerts
+        return cast(AlertsQueryResult[ModelAlert], model_alerts)
 
     def get_source_freshness_alerts(
         self,
@@ -96,11 +97,9 @@ class AlertsAPI(APIClient):
         source_freshness_alerts = self._sort_alerts(
             pending_source_freshness_alerts, last_alert_sent_times, filter
         )
-        return source_freshness_alerts
+        return cast(AlertsQueryResult[SourceFreshnessAlert], source_freshness_alerts)
 
-    def skip_alerts(
-        self, alerts_to_skip: List[Union[AlertType, MalformedAlert]], table_name: str
-    ) -> None:
+    def skip_alerts(self, alerts_to_skip: List[Alert], table_name: str) -> None:
         self.alerts_fetcher.skip_alerts(
             alerts_to_skip=alerts_to_skip, table_name=table_name
         )
@@ -112,25 +111,17 @@ class AlertsAPI(APIClient):
 
     def _sort_alerts(
         self,
-        pending_alerts: Union[
-            AlertsQueryResult[TestAlert],
-            AlertsQueryResult[ModelAlert],
-            AlertsQueryResult[SourceFreshnessAlert],
-        ],
+        pending_alerts: AlertsQueryResult[ValidAlertType],
         last_alert_sent_times: Dict[str, str],
         filter: SelectorFilterSchema = SelectorFilterSchema(),
-    ) -> Union[
-        AlertsQueryResult[TestAlert],
-        AlertsQueryResult[ModelAlert],
-        AlertsQueryResult[SourceFreshnessAlert],
-    ]:
+    ) -> AlertsQueryResult[Alert]:
         suppressed_alerts = self._get_suppressed_alerts(
             pending_alerts, last_alert_sent_times
         )
         latest_alert_ids = self._get_latest_alerts(pending_alerts)
-        alerts_to_skip = []
-        alerts_to_send = []
-        malformed_alerts_to_send = []
+        alerts_to_skip: List[Alert] = []
+        alerts_to_send: List[Alert] = []
+        malformed_alerts_to_send: List[Alert] = []
 
         for alert in pending_alerts.alerts:
             if alert.id in suppressed_alerts or alert.id not in latest_alert_ids:
@@ -146,26 +137,25 @@ class AlertsAPI(APIClient):
 
         return AlertsQueryResult(
             alerts=filter_alerts(alerts_to_send, filter),
-            malformed_alerts=filter_alerts(malformed_alerts_to_send, filter),
+            malformed_alerts=cast(
+                List[MalformedAlert], filter_alerts(malformed_alerts_to_send, filter)
+            ),
             alerts_to_skip=filter_alerts(alerts_to_skip, filter),
         )
 
+    @staticmethod
     def _get_suppressed_alerts(
-        self,
-        alerts: Union[
-            AlertsQueryResult[TestAlert],
-            AlertsQueryResult[ModelAlert],
-            AlertsQueryResult[SourceFreshnessAlert],
-        ],
+        alerts: AlertsQueryResult[ValidAlertType],
         last_alert_sent_times: Dict[str, str],
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
-        for alert in [*alerts.alerts, *alerts.malformed_alerts]:
-            alert_class_id = alert.alert_class_id
+        all_alerts: List[Alert] = [*alerts.alerts, *alerts.malformed_alerts]
+        for alert in all_alerts:
+            alert_class_id = alert.alert_class_id or ""
             suppression_interval = alert.alert_suppression_interval
             last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times.get(alert_class_id))
+                datetime.fromisoformat(last_alert_sent_times[alert_class_id])
                 if last_alert_sent_times.get(alert_class_id)
                 else None
             )
@@ -180,18 +170,15 @@ class AlertsAPI(APIClient):
 
         return suppressed_alerts
 
+    @staticmethod
     def _get_latest_alerts(
-        self,
-        alerts: Union[
-            AlertsQueryResult[TestAlert],
-            AlertsQueryResult[ModelAlert],
-            AlertsQueryResult[SourceFreshnessAlert],
-        ],
+        alerts: AlertsQueryResult[ValidAlertType],
     ) -> List[str]:
-        alert_last_times = defaultdict(lambda: None)
+        alert_last_times: DefaultDict[str, dict] = defaultdict(dict)
         latest_alert_ids = []
-        for alert in [*alerts.alerts, *alerts.malformed_alerts]:
-            alert_class_id = alert.alert_class_id
+        all_alerts: List[Alert] = [*alerts.alerts, *alerts.malformed_alerts]
+        for alert in all_alerts:
+            alert_class_id = alert.alert_class_id or ""
             current_last_alert = alert_last_times[alert_class_id]
             alert_detected_at = alert.detected_at
             if (
@@ -203,5 +190,5 @@ class AlertsAPI(APIClient):
                 )
 
         for alert_last_time in alert_last_times.values():
-            latest_alert_ids.append(alert_last_time.get("alert_id"))
+            latest_alert_ids.append(alert_last_time["alert_id"])
         return latest_alert_ids

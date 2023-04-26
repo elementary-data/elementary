@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 
 class S3Client:
-    def __init__(self, config: Config, tracking: Tracking = None):
+    def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
         aws_session = boto3.Session(
             profile_name=config.aws_profile_name,
@@ -24,7 +24,7 @@ class S3Client:
 
     @classmethod
     def create_client(
-        cls, config: Config, tracking: Tracking = None
+        cls, config: Config, tracking: Optional[Tracking] = None
     ) -> Optional["S3Client"]:
         return cls(config, tracking=tracking) if config.has_s3 else None
 

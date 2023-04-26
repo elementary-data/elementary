@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from packaging import version
 
@@ -32,14 +32,15 @@ class DataMonitoring:
         self.internal_dbt_runner = self._init_internal_dbt_runner()
         self.user_dbt_runner = self._init_user_dbt_runner()
 
-        self.execution_properties = {}
+        self.execution_properties: Dict[str, Any] = {}
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
-        tracking.set_env("target_name", latest_invocation.get("target_name"))
-        tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
-        tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
         dbt_pkg_version = latest_invocation.get("elementary_version")
-        tracking.set_env("dbt_pkg_version", dbt_pkg_version)
+        if tracking:
+            tracking.set_env("target_name", latest_invocation.get("target_name"))
+            tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
+            tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
+            tracking.set_env("dbt_pkg_version", dbt_pkg_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
         # slack client is optional
@@ -121,13 +122,19 @@ class DataMonitoring:
             return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
             logger.error(f"Unable to get the latest invocation: {err}")
-            self.tracking.record_internal_exception(err)
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
             return {}
 
     @staticmethod
     def _check_dbt_package_compatibility(dbt_pkg_ver: str) -> None:
-        dbt_pkg_ver = version.parse(dbt_pkg_ver)
-        py_pkg_ver = version.parse(package.get_package_version())
+        raw_py_pkg_ver = package.get_package_version()
+        if raw_py_pkg_ver is None:
+            logger.warning("Could not get package version!")
+            return
+
+        dbt_pkg_ver = cast(version.Version, version.parse(dbt_pkg_ver))
+        py_pkg_ver = cast(version.Version, version.parse(raw_py_pkg_ver))
         if dbt_pkg_ver.major > py_pkg_ver.major or (
             dbt_pkg_ver.major == py_pkg_ver.major
             and dbt_pkg_ver.minor > py_pkg_ver.minor

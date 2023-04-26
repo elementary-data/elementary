@@ -1,5 +1,6 @@
-from typing import List, Union
+from typing import List
 
+from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -12,19 +13,9 @@ logger = get_logger(__name__)
 
 
 def filter_alerts(
-    alerts: Union[
-        List[TestAlert],
-        List[ModelAlert],
-        List[SourceFreshnessAlert],
-        List[MalformedAlert],
-    ],
+    alerts: List[Alert],
     filter: SelectorFilterSchema = SelectorFilterSchema(),
-) -> Union[
-    List[TestAlert],
-    List[ModelAlert],
-    List[SourceFreshnessAlert],
-    List[MalformedAlert],
-]:
+) -> List[Alert]:
     filtered_alerts = []
     # If the filter is empty, we want to return all of the alerts
     if not filter.selector:
@@ -46,19 +37,9 @@ def filter_alerts(
 
 
 def _filter_alerts_by_tag(
-    alerts: Union[
-        List[TestAlert],
-        List[ModelAlert],
-        List[SourceFreshnessAlert],
-        List[MalformedAlert],
-    ],
+    alerts: List[Alert],
     filter: SelectorFilterSchema,
-) -> Union[
-    List[TestAlert],
-    List[ModelAlert],
-    List[SourceFreshnessAlert],
-    List[MalformedAlert],
-]:
+) -> List[Alert]:
     if filter.tag is None:
         return alerts
 
@@ -75,19 +56,9 @@ def _filter_alerts_by_tag(
 
 
 def _filter_alerts_by_owner(
-    alerts: Union[
-        List[TestAlert],
-        List[ModelAlert],
-        List[SourceFreshnessAlert],
-        List[MalformedAlert],
-    ],
+    alerts: List[Alert],
     filter: SelectorFilterSchema,
-) -> Union[
-    List[TestAlert],
-    List[ModelAlert],
-    List[SourceFreshnessAlert],
-    List[MalformedAlert],
-]:
+) -> List[Alert]:
     if filter.owner is None:
         return alerts
 
@@ -104,19 +75,9 @@ def _filter_alerts_by_owner(
 
 
 def _filter_alerts_by_model(
-    alerts: Union[
-        List[TestAlert],
-        List[ModelAlert],
-        List[SourceFreshnessAlert],
-        List[MalformedAlert],
-    ],
+    alerts: List[Alert],
     filter: SelectorFilterSchema,
-) -> Union[
-    List[TestAlert],
-    List[ModelAlert],
-    List[SourceFreshnessAlert],
-    List[MalformedAlert],
-]:
+) -> List[Alert]:
     if filter.model is None:
         return alerts
 
@@ -129,19 +90,9 @@ def _filter_alerts_by_model(
 
 
 def _filter_alerts_by_node_names(
-    alerts: Union[
-        List[TestAlert],
-        List[ModelAlert],
-        List[SourceFreshnessAlert],
-        List[MalformedAlert],
-    ],
+    alerts: List[Alert],
     filter: SelectorFilterSchema,
-) -> Union[
-    List[TestAlert],
-    List[ModelAlert],
-    List[SourceFreshnessAlert],
-    List[MalformedAlert],
-]:
+) -> List[Alert]:
     if filter.node_names is None:
         return alerts
 
@@ -154,6 +105,7 @@ def _filter_alerts_by_node_names(
             alert_node_name = alert.model_unique_id
         # Malformed alert
         else:
+            assert isinstance(alert, MalformedAlert)
             alert_node_name = alert.test_name or alert.model_unique_id
         if alert_node_name:
             for node_name in filter.node_names:
