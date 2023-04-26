@@ -24,7 +24,9 @@ class LineageAPI(APIClient):
             lineage_graph.add_edges_from(
                 [
                     (node_depends_on_nodes.unique_id, depends_on_node)
-                    for depends_on_node in node_depends_on_nodes.depends_on_nodes
+                    for depends_on_node in (
+                        node_depends_on_nodes.depends_on_nodes or []
+                    )
                 ]
             )
         return LineageSchema(
@@ -36,11 +38,11 @@ class LineageAPI(APIClient):
         nodes_to_depends_map = defaultdict(list)
         lineage_graph = nx.Graph()
 
-        nodes_depends_on_nodes = self._get_nodes_depends_on_nodes()
+        nodes_depends_on_nodes = self.lineage_fetcher.get_nodes_depends_on_nodes()
         for node_depends_on_nodes in nodes_depends_on_nodes:
             edges = [
                 (node_depends_on_nodes.unique_id, depends_on_node)
-                for depends_on_node in node_depends_on_nodes.depends_on_nodes
+                for depends_on_node in (node_depends_on_nodes.depends_on_nodes or [])
             ]
             nodes_to_depends_map[node_depends_on_nodes.unique_id] = edges
             lineage_graph.add_edges_from(edges)

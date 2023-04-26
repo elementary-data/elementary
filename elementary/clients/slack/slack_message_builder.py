@@ -124,7 +124,7 @@ class SlackMessageBuilder:
         # Compacting sections into attachments.
         # Each section can contian _MAX_SLACK_SECTION_SIZE fields.
         attachments = []
-        section_fields = []
+        section_fields: List[dict] = []
 
         for section_msg in section_msgs:
             section_field = {

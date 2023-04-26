@@ -8,6 +8,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedSourceSchema,
 )
 from elementary.monitor.api.tests.schema import TotalsSchema
+from elementary.monitor.fetchers.models.schema import ArtifactSchema
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -50,7 +51,8 @@ class FiltersAPI(APIClient):
 
         totals_models_ids = totals.keys()
         for artifact in [*models.values(), *sources.values()]:
-            if artifact.unique_id not in totals_models_ids:
+            assert isinstance(artifact, ArtifactSchema)
+            if artifact.unique_id and artifact.unique_id not in totals_models_ids:
                 no_tests_filter.add_model_unique_id(artifact.unique_id)
 
         for model_unique_id, total in totals.items():

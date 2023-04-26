@@ -15,6 +15,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
     TotalsModelRunsSchema,
+    TotalsSchema,
 )
 from elementary.monitor.fetchers.models.models import ModelsFetcher
 from elementary.monitor.fetchers.models.schema import ExposureSchema
@@ -93,12 +94,12 @@ class ModelsAPI(APIClient):
 
         model_runs_totals = {}
         for model_runs in aggregated_models_runs:
-            model_runs_totals[model_runs.unique_id] = {
-                "errors": model_runs.totals.errors,
-                "warnings": 0,
-                "failures": 0,
-                "passed": model_runs.totals.success,
-            }
+            model_runs_totals[model_runs.unique_id] = TotalsSchema(
+                errors=model_runs.totals.errors,
+                warnings=0,
+                failures=0,
+                passed=model_runs.totals.success,
+            )
         return ModelRunsWithTotalsSchema(
             runs=aggregated_models_runs, totals=model_runs_totals
         )
@@ -121,7 +122,11 @@ class ModelsAPI(APIClient):
         if models_results:
             for model_result in models_results:
                 normalized_model = self._normalize_dbt_artifact_dict(model_result)
+                assert isinstance(normalized_model, NormalizedModelSchema)
+
                 model_unique_id = normalized_model.unique_id
+                assert model_unique_id is not None
+
                 models[model_unique_id] = normalized_model
         return models
 
@@ -131,7 +136,11 @@ class ModelsAPI(APIClient):
         if sources_results:
             for source_result in sources_results:
                 normalized_source = self._normalize_dbt_artifact_dict(source_result)
-                source_unique_id = normalized_source.unique_id
+                assert isinstance(normalized_source, NormalizedSourceSchema)
+
+                source_unique_id = normalized_source.unique_id or ""
+                assert source_unique_id is not None
+
                 sources[source_unique_id] = normalized_source
         return sources
 
@@ -141,7 +150,11 @@ class ModelsAPI(APIClient):
         if exposures_results:
             for exposure_result in exposures_results:
                 normalized_exposure = self._normalize_dbt_artifact_dict(exposure_result)
+                assert isinstance(normalized_exposure, NormalizedExposureSchema)
+
                 exposure_unique_id = normalized_exposure.unique_id
+                assert exposure_unique_id is not None
+
                 exposures[exposure_unique_id] = normalized_exposure
         return exposures
 
@@ -150,7 +163,7 @@ class ModelsAPI(APIClient):
         coverages = dict()
         if coverage_results:
             for coverage_result in coverage_results:
-                coverages[coverage_result.model_unique_id] = ModelCoverageSchema(
+                coverages[coverage_result.model_unique_id or ""] = ModelCoverageSchema(
                     table_tests=coverage_result.table_tests,
                     column_tests=coverage_result.column_tests,
                 )
@@ -178,6 +191,7 @@ class ModelsAPI(APIClient):
         cls,
         artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
     ) -> str:
+        assert artifact.full_path is not None
         splited_artifact_path = artifact.full_path.split(os.path.sep)
         artifact_file_name = splited_artifact_path[-1]
 

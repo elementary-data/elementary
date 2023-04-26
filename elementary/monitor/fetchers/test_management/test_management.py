@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.test_management.schema import (
     ResourceModel,
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 class TestManagementFetcher(FetcherClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
 
     def get_models(self, exclude_elementary=True) -> List[ResourceModel]:

@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from pydantic import validator
 
@@ -10,13 +10,13 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
 
     id: str
-    invocation_id: str = None
-    test_execution_id: str = None
+    invocation_id: Optional[str] = None
+    test_execution_id: Optional[str] = None
     model_unique_id: Optional[str] = None
     test_unique_id: str
     elementary_unique_id: str
     detected_at: str
-    database_name: str = None
+    database_name: Optional[str] = None
     schema_name: str
     table_name: Optional[str] = None
     column_name: Optional[str]
@@ -37,7 +37,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_created_at: Optional[str] = None
     days_diff: float
     invocations_rank_index: int
-    sample_data: Optional[Union[dict, List]] = None
+    sample_data: Optional[List] = None
     failures: Optional[int] = None
 
     class Config:

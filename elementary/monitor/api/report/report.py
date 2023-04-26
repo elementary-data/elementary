@@ -71,7 +71,9 @@ class ReportAPI(APIClient):
             serializable_sidebars = sidebars.dict()
             serializable_models = self._serilize_models(models, sources, exposures)
             serializable_model_runs = self._serilize_models_runs(models_runs.runs)
-            serializable_model_runs_totals = models_runs.totals.dict()
+            serializable_model_runs_totals = models_runs.dict(include={"totals"})[
+                "totals"
+            ]
             serializable_models_coverages = self._serilize_coverages(coverages)
             serializable_test_results = self._serilize_test_results(
                 test_results.results

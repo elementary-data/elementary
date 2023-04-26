@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -38,7 +38,7 @@ class AnonymousTracking(Tracking):
         # Exceptions that occurred during the run of the CLI, but don't fail the entire run.
         # We want to avoid sending an event for each one of these (as there might be many of them), so we will send
         # them as a part of the cli-end event.
-        self.internal_exceptions = []
+        self.internal_exceptions: List[dict] = []
         self.internal_exceptions_count = 0
 
         if not self._do_not_track:
@@ -67,7 +67,9 @@ class AnonymousTracking(Tracking):
             pass
         return user_id
 
-    def _send_anonymous_event(self, name: str, properties: dict = None) -> None:
+    def _send_anonymous_event(
+        self, name: str, properties: Optional[dict] = None
+    ) -> None:
         try:
             if self._do_not_track:
                 return
@@ -76,7 +78,7 @@ class AnonymousTracking(Tracking):
                 properties = dict()
 
             self._send_event(
-                distinct_id=self.anonymous_user_id,
+                distinct_id=self.anonymous_user_id or "",
                 event_name=name,
                 properties={
                     "run_id": self._run_id,
@@ -84,9 +86,8 @@ class AnonymousTracking(Tracking):
                     **properties,
                 },
                 groups={
-                    "warehouse": self.anonymous_warehouse.id
-                    if self.anonymous_warehouse
-                    else None
+                    "warehouse": self.anonymous_warehouse
+                    and self.anonymous_warehouse.id
                 },
             )
         except Exception:

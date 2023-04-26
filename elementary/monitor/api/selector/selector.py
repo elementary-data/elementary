@@ -14,4 +14,4 @@ class SelectorAPI(APIClient):
 
     def get_selector_results(self, selector: str) -> SelectorSchema:
         selector_results = self.selector_fetcher.get_selector_results(selector=selector)
-        return SelectorSchema(selector=selector, selector_results=selector_results)
+        return SelectorSchema(selector=selector, results=selector_results)

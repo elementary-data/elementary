@@ -1,11 +1,11 @@
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Union
 
 from dateutil import tz
 
 from elementary.clients.api.api_client import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.tests.schema import (
     DbtTestResultSchema,
@@ -33,7 +33,7 @@ logger = get_logger(__name__)
 class TestsAPI(APIClient):
     def __init__(
         self,
-        dbt_runner: DbtRunner,
+        dbt_runner: BaseDbtRunner,
         days_back: Optional[int] = 7,
         invocations_per_test: int = 720,
         disable_passed_test_metrics: bool = False,
@@ -68,13 +68,13 @@ class TestsAPI(APIClient):
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
-                if (filter.tag in test_result.tags)
+                if (test_result.tags and filter.tag in test_result.tags)
             ]
         elif filter.owner:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
-                if (filter.owner in test_result.owners)
+                if (test_result.owners and filter.owner in test_result.owners)
             ]
         elif filter.model:
             filtered_test_results_db_rows = [
@@ -113,7 +113,7 @@ class TestsAPI(APIClient):
         ]
 
     @staticmethod
-    def _get_test_subscribers(test_meta: dict, model_meta: dict) -> List[Optional[str]]:
+    def _get_test_subscribers(test_meta: dict, model_meta: dict) -> List[str]:
         subscribers = []
         test_subscribers = test_meta.get("subscribers", [])
         model_subscribers = model_meta.get("subscribers", [])
@@ -197,7 +197,7 @@ class TestsAPI(APIClient):
         self, test_result_db_rows: List[TestResultDBRowSchema]
     ) -> Dict[str, InvocationsSchema]:
         grouped_invocations = defaultdict(list)
-        grouped_invocation_ids = defaultdict(list)
+        grouped_invocation_ids: DefaultDict[str, List[str]] = defaultdict(list)
         for test_result_db_row in test_result_db_rows:
             try:
                 elementary_unique_id = test_result_db_row.elementary_unique_id
@@ -205,7 +205,10 @@ class TestsAPI(APIClient):
                     test_result_db_row.invocation_id
                     or test_result_db_row.test_execution_id
                 )
-                # Currently the way we flat test results causing that there is duplication in test invocation for each test.
+                assert invocation_id is not None
+
+                # Currently the way we flat test results causing that there is duplication in test invocation for
+                # each test.
                 # This if statement checks if the invocation is already counted or not.
                 if invocation_id not in grouped_invocation_ids[elementary_unique_id]:
                     grouped_invocation_ids[elementary_unique_id].append(invocation_id)
@@ -216,6 +219,7 @@ class TestsAPI(APIClient):
                             status=test_result_db_row.status,
                             affected_rows=self._parse_affected_row(
                                 results_description=test_result_db_row.test_results_description
+                                or ""
                             ),
                         )
                     )
@@ -275,7 +279,7 @@ class TestsAPI(APIClient):
 
     def _get_invocation_from_filter(
         self, filter: SelectorFilterSchema
-    ) -> Optional[DbtInvocationSchema]:
+    ) -> DbtInvocationSchema:
         # If none of the following filter options exists, the invocation is empty and there is no filter.
         invocation = DbtInvocationSchema()
         if filter.invocation_id:
@@ -327,6 +331,7 @@ class TestsAPI(APIClient):
             result_query=test_query,
         )
 
+        configuration: Dict[str, Any]
         if test_result_db_row.test_type == "dbt_test":
             configuration = dict(
                 test_name=test_result_db_row.test_name,
@@ -386,7 +391,10 @@ class TestsAPI(APIClient):
                 "_", " "
             ).title()
             if test_result_db_row.test_type == "anomaly_detection":
-                if sample_data and test_result_db_row.test_sub_type != "dimension":
+                if (
+                    isinstance(sample_data, list)
+                    and test_result_db_row.test_sub_type != "dimension"
+                ):
                     sample_data.sort(key=lambda metric: metric.get("end_time"))
                 test_results = ElementaryTestResultSchema(
                     display_name=test_sub_type_display_name,
