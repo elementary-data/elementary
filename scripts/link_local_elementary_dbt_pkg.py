@@ -13,7 +13,7 @@ def main():
             "Please provide the path to the local elementary dbt package as an argument."
         )
     local_dbt_pkg_path = Path(sys.argv[1]).resolve()
-    if ELE_DBT_PKG_PATH.is_file():
+    if ELE_DBT_PKG_PATH.is_symlink():
         ELE_DBT_PKG_PATH.unlink()
     if ELE_DBT_PKG_PATH.is_dir():
         shutil.rmtree(ELE_DBT_PKG_PATH)
