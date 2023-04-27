@@ -53,6 +53,8 @@ class UploadSourceFreshnessOperation:
             )
 
     def get_target_path(self) -> Path:
+        assert self.config.project_dir is not None
+
         env_target_path = os.getenv("DBT_TARGET_PATH")
         if env_target_path:
             return Path(env_target_path)

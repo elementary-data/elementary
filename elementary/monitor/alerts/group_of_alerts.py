@@ -79,17 +79,17 @@ class GroupOfAlerts:
         self._components_to_attention_required[
             TagsComponent
         ] = list_of_lists_of_strings_to_comma_delimited_unique_strings(
-            [alert.tags for alert in alerts], prefix=hashtag
+            [alert.tags or [] for alert in alerts], prefix=hashtag
         )
         self._components_to_attention_required[
             OwnersComponent
         ] = list_of_lists_of_strings_to_comma_delimited_unique_strings(
-            [alert.owners for alert in alerts]
+            [alert.owners or [] for alert in alerts]
         )
         self._components_to_attention_required[
             SubsComponent
         ] = list_of_lists_of_strings_to_comma_delimited_unique_strings(
-            [alert.subscribers for alert in alerts]
+            [alert.subscribers or [] for alert in alerts]
         )
 
         self._message_builder = (
@@ -214,6 +214,7 @@ class GroupOfAlerts:
             return []
         result = []
         for model_error_alert in model_error_alert_list:
+            assert isinstance(model_error_alert, ModelAlert)
             if model_error_alert.message:
                 result.extend(["*Result message*"])
         return result
@@ -223,6 +224,7 @@ class GroupOfAlerts:
         if len(model_error_alert_list) == 0:
             return ""
         for model_error_alert in model_error_alert_list:
+            assert isinstance(model_error_alert, ModelAlert)
             if model_error_alert.message:
                 return f"```{model_error_alert.message.strip()}```"
         return ""

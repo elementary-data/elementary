@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import posthog
 
@@ -11,7 +11,7 @@ class Tracking:
     def __init__(self, config: Config):
         posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
         self._config = config
-        self._props = {}
+        self._props: Dict[str, Any] = {}
 
     @staticmethod
     def _set_events_group(
@@ -21,7 +21,10 @@ class Tracking:
 
     @staticmethod
     def _send_event(
-        distinct_id: str, event_name: str, properties: dict = None, groups: dict = None
+        distinct_id: str,
+        event_name: str,
+        properties: Optional[dict] = None,
+        groups: Optional[dict] = None,
     ) -> None:
         posthog.capture(
             distinct_id=distinct_id,

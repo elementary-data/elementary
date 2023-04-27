@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 SLACK_MESSAGE_ATTACHMENTS_LIMIT = 50
 
 SlackBlockType = dict
-SlackBlocksType = List[Optional[SlackBlockType]]
+SlackBlocksType = List[SlackBlockType]
 
 
 class SlackMessageSchema(BaseModel):

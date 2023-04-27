@@ -57,7 +57,7 @@ class Config:
         google_service_account_path: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
         slack_report_url: Optional[str] = None,
-        env: Optional[str] = None,
+        env: str = "dev",
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir

@@ -260,17 +260,20 @@ class DataMonitoringReport(DataMonitoring):
         summary_test_results = tests_api.get_test_results_summary(
             filter=self.filter.get_filter(),
         )
-        send_succeeded = self.slack_client.send_message(
-            channel_name=self.config.slack_channel_name,
-            message=SlackReportSummaryMessageBuilder().get_slack_message(
-                test_results=summary_test_results,
-                bucket_website_url=bucket_website_url,
-                include_description=include_description,
-                filter=self.filter.get_filter(),
-                days_back=days_back,
-                env=self.config.env,
-            ),
-        )
+        if self.slack_client:
+            send_succeeded = self.slack_client.send_message(
+                channel_name=self.config.slack_channel_name,
+                message=SlackReportSummaryMessageBuilder().get_slack_message(
+                    test_results=summary_test_results,
+                    bucket_website_url=bucket_website_url,
+                    include_description=include_description,
+                    filter=self.filter.get_filter(),
+                    days_back=days_back,
+                    env=self.config.env,
+                ),
+            )
+        else:
+            send_succeeded = False
 
         self.execution_properties[
             "sent_test_results_summary_succesfully"
