@@ -6,7 +6,7 @@ sidebarTitle: "Core concepts"
 Elementary dbt package includes **anomaly detection tests, implemented as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**.
 The tests are configured and executed like any other tests in your project.
 
-# Core concepts
+## Core concepts
 
 In data anomaly detection tests Elementary monitors a specific metric (like row count, null rate, average value, etc.) and compare recent values to historical values. 
 This is done to detect significant changes and deviations, that are probably data reliability issues. 
@@ -56,7 +56,9 @@ For example, if we use daily time bucket and monitor for row count anomalies, we
 ### Detection algorithm
 Read about it in [data anomaly detection](/guides/data_anomaly_detection).
 
-# Tests configuration
+
+
+## Tests configuration and core concepts
 
 Not all data sets are the same, so Elementary offers configuration options for the anomaly detection tests.  
 To detect data issues with high accuracy, it is important to leverage the configuration options.
