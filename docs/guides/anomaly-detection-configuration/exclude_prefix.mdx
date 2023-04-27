@@ -1,0 +1,24 @@
+---
+title: "exclude_prefix"
+sidebarTitle: "exclude_prefix"
+---
+
+`exclude_prefix: [string]`
+
+Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on prefix match.
+
+- _Default: None_
+- _Relevant tests: `all_column_anomalies`_
+- _Configuration level: test_
+
+<RequestExample>
+
+```yaml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.column_anomalies:
+          exlude_prefix: 'id_'
+```
+
+</RequestExample>

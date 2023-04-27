@@ -1,0 +1,35 @@
+---
+title: "dimensions"
+sidebarTitle: "dimensions"
+---
+
+`dimensions: sql expression`
+
+Configuration for the test `dimension_anomalies`.
+The test counts rows grouped by given column / columns / valid select sql expression.
+Under `dimensions` you can configure the group by expression.
+
+This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
+It is best to configure it on low-cardinality fields.
+
+- _Default: None_
+- _Relevant tests: `dimension_anomalies`_
+- _Configuration level: test_
+
+<RequestExample>
+
+```yaml test
+models:
+  - name: model_name
+    config:
+      elementary:
+        timestamp_column: updated_at
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions: 'device_os, device_browser'
+```
+
+</RequestExample>
+
+
+

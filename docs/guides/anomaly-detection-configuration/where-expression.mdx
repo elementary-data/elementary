@@ -1,0 +1,24 @@
+---
+title: "where_expression"
+sidebarTitle: "where_expression"
+---
+
+`where_expression: [sql expression]`
+
+Filter the tested data using a valid sql expression.
+
+- _Default: None_
+- _Relevant tests: All anomaly detection tests_
+- _Configuration level: test_
+
+<RequestExample>
+
+```yaml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          where_expression: "user_name != 'test'"
+```
+
+</RequestExample>

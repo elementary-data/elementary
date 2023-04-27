@@ -1,0 +1,20 @@
+<Accordion title="How test configurations are prioritized?">
+
+The configuration of Elementary is dbt native and follows the same priorities of `dbt configuration`.
+The more granular and specific configuration overrides the less granular one. 
+
+Elementary searches and prioritizes configuration in the following order:
+
+For models:
+1. Test arguments.
+2. Model configuration.
+3. Global vars in `dbt_project.yml`.
+
+For sources:
+1. Test arguments.
+2. Table configuration.
+3. Source configuration.
+4. Global vars in `dbt_project.yml`.
+
+
+</Accordion>

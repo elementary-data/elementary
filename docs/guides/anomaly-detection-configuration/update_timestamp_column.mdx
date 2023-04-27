@@ -1,0 +1,31 @@
+---
+title: "update_timestamp_column"
+sidebarTitle: "update_timestamp_column"
+---
+
+`update_timestamp_column: [column name]`
+
+Configuration for the test `event_freshness_anomalies`.
+This test compliments the freshness_anomalies test and is primarily intended for data that is updated in a continuous / streaming fashion.
+
+The test can work in a couple of modes:
+
+- If only an event_timestamp_column is supplied, the test measures over time the difference between the current timestamp (“now”) and the most recent event timestamp.
+- If both an event_timestamp_column and an update_timestamp_column are provided, the test will measure over time the difference between these two columns.
+
+- _Default: None_
+- _Relevant tests: `event_freshness_anomalies`_
+- _Configuration level: test_
+
+<RequestExample>
+
+```yaml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.event_timestamp_column:
+          event_timestamp_column: "event_timestamp"
+          update_timestamp_column: "created_at"
+```
+
+</RequestExample>
