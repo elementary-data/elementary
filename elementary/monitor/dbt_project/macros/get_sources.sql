@@ -7,6 +7,7 @@
             with dbt_artifacts_sources as (
                 select
                   name,
+                  source_name,
                   unique_id,
                   database_name,
                   schema_name,

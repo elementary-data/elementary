@@ -51,22 +51,33 @@ class ModelSchema(ArtifactSchema):
     database_name: Optional[str] = None
     schema_name: str
     table_name: str
-    ref_function: str = "ref"
+
+    def ref(self):
+        return f"ref('{self.name}')"
 
 
 class SourceSchema(ArtifactSchema):
+    source_name: Optional[str] = None
     database_name: Optional[str] = None
     schema_name: str
     table_name: str
-    ref_function: str = "source"
+
+    def ref(self):
+        return f"source('{self.source_name}', '{self.table_name}')"
+
+
+class OwnerSchema(ExtendedBaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
 
 
 class ExposureSchema(ArtifactSchema):
+    label: Optional[str] = None
     url: Optional[str] = None
     type: Optional[str] = None
     maturity: Optional[str] = None
-    owner_email: Optional[str] = None
     depends_on: Optional[List[str]] = None
+    owner: Optional[OwnerSchema] = None
 
 
 class ModelTestCoverage(ExtendedBaseModel):
