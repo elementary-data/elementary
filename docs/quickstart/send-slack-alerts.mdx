@@ -354,7 +354,7 @@ Elementary support configuring suppression interval for alerts.
 By default, the suppression interval for all of the alerts is set to 0.
 Elementary won't send any alert that is generated within suppression interval.
 
-`alert_suppression_interval` can accept values of 0-24 (including unrounded numbers) - this number represents the number of hours for which alerts will be skipped.
+`alert_suppression_interval` can accept values greater than 0, including unrounded numbers - this number represents the number of hours for which alerts will be skipped.
 
 To set it up globaly for your project, add the alert suppression interval to your models and tests in the `dbt_project.yml` file:
 

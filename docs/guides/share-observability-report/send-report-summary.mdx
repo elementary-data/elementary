@@ -11,51 +11,38 @@ This is useful for you and your team members to understand quickly if there is s
 - **Hosting on S3 or GCS**: You need to provide slack token and channel to in order to enable the Slack results summary.
 
 <Frame>
-  <img
-    src="/pics/report_slack_summary.png"
-    alt="Demo"
-  />
+  <img src="/pics/report_slack_summary.png" alt="Demo" />
 </Frame>
 
+### Enabling report summary for hosted report
 
-### Enabling report summary for hosted report 
- 
 After you [set up a Slack app and token](/integrations/slack#slack-integration-setup) you can run the following command:
 
 AWS S3:
+
 ```shell
 edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
 ```
 
 GCS:
-```shell  
-edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>  
-```  
+
+```shell
+edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
 
 A link to the hosted report is included in the summary, which can be accessed based on the permissions you have set on your hosting platform (AWS/GCS).
 
-
-### Report summary configuration 
+### Report summary configuration
 
 #### Filter results summary
 
 You can filter your results summary by a specific tag, owner or model.
 
 To filter by tag:
+
 ```shell send-report selectors
 edr send-report --select tag:finance
 edr send-report --select config.meta.owner:@jeff
 edr send-report --select model:customers
 edr send-report --select customers
-```
-
-#### Include test descriptions
-
-For a quick high level overview and to avoid reaching Slack's row limit, the default test results summary does not include test descriptions.
-The test descriptions can be included in your summary, but it is only recommended if you have a small number of failures.
-
-The following `include` configuration will allow you to add descriptions:
-
-```shell
-edr send-report --include descriptions
 ```

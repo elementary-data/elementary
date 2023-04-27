@@ -111,7 +111,7 @@ def common_options(cmd: str):
             type=str,
             default=None,
             help="Which target to load for the given profile. "
-            "If specified, the target will be used for both the 'elementary' profile and your dbt project."
+            "If specified, the target will be used for both the 'elementary' profile and your dbt project. "
             "Else, the default target will be used.",
         )(func)
         func = click.option(
@@ -133,7 +133,7 @@ def common_options(cmd: str):
             type=str,
             default=None,
             help="Which target to load for the given profile. "
-            "If specified, the target will be used for your dbt project."
+            "If specified, the target will be used for your dbt project. "
             "Else, the --profile-target will be used.",
         )(func)
         func = click.option(
@@ -217,7 +217,7 @@ def get_cli_properties() -> dict:
 @click.option(
     "--group-by",
     type=click.Choice(["alert", "table"]),
-    default="alert",
+    default=None,
     help="Whether to group alerts by 'alert' or by 'table'",
 )
 @click.pass_context
