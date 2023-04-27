@@ -336,7 +336,7 @@ def test_prettify_and_dedup_list():
     list_prettified = message_builder.prettify_and_dedup_list(
         ["name1", "name2", "name2"]
     )
-    assert list_prettified == "name1, name2" or list_prettified == "name2, name1"
+    assert list_prettified == "name1, name2"
 
     assert (
         message_builder.prettify_and_dedup_list("name1, name2, name2")
@@ -346,13 +346,7 @@ def test_prettify_and_dedup_list():
     string_of_list_prettified = message_builder.prettify_and_dedup_list(
         '["name1", "name2", "name2"]'
     )
-    assert (
-        string_of_list_prettified == "name1, name2"
-        or string_of_list_prettified == "name2, name1"
-    )
-
-    assert message_builder.prettify_and_dedup_list({}) == {}
-    assert message_builder.prettify_and_dedup_list(123) == 123
+    assert string_of_list_prettified == "name1, name2"
 
 
 def test_slack_message_attachments_limit():

@@ -12,18 +12,6 @@ def try_load_json(string_value: Optional[str]):
         return None
 
 
-def prettify_json_str_set(str_json_list: Union[str, list]) -> str:
-    if not str_json_list:
-        return ""
-
-    json_obj = str_json_list
-    if isinstance(json_obj, str):
-        json_obj = try_load_json(json_obj)
-    if isinstance(json_obj, list):
-        return ", ".join(set(json_obj))
-    return str(json_obj)
-
-
 def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
     """
     if given a simple token like "marketing" -> return ["marketing"]

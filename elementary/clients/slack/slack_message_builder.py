@@ -3,7 +3,7 @@ from typing import List, Union
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
-from elementary.utils.json_utils import prettify_json_str_set
+from elementary.utils.json_utils import try_load_json
 
 
 class SlackMessageBuilder:
@@ -155,14 +155,17 @@ class SlackMessageBuilder:
         return SlackMessageSchema(**self.slack_message)
 
     @staticmethod
-    def prettify_and_dedup_list(
-        list_variation: Union[List[str], str]
-    ) -> Union[List[str], str]:
-        if isinstance(list_variation, str):
-            return prettify_json_str_set(list_variation)
+    def prettify_and_dedup_list(str_list: Union[List[str], str]) -> str:
+        """
+        Receives a list of strings, either JSON dumped or not, dedups and sorts it, and returns it as a comma-separated
+        string.
+        This is useful for various lists we include in slack messages (owners, subscribers, etc)
+        """
+        if isinstance(str_list, str):
+            loaded_str_list = try_load_json(str_list)
+            if loaded_str_list is None:
+                # If json is invalid, return the given string as-is
+                return str_list
+            str_list = loaded_str_list
 
-        elif isinstance(list_variation, list):
-            return ", ".join(set(list_variation))
-
-        else:
-            return list_variation
+        return ", ".join(sorted(set(str_list)))
