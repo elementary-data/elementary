@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import validator
 
@@ -37,7 +37,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_created_at: Optional[str] = None
     days_diff: float
     invocations_rank_index: int
-    sample_data: Optional[List] = None
+    sample_data: Optional[Union[dict, List]] = None
     failures: Optional[int] = None
 
     class Config:

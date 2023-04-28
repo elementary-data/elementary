@@ -152,7 +152,12 @@ class AlertsAPI(APIClient):
         current_time_utc = datetime.utcnow()
         all_alerts: List[Alert] = [*alerts.alerts, *alerts.malformed_alerts]
         for alert in all_alerts:
-            alert_class_id = alert.alert_class_id or ""
+            alert_class_id = alert.alert_class_id
+            if alert_class_id is None:
+                # Shouldn't happen, but logging in any case
+                logger.debug("Alert without an id detected!")
+                continue
+
             suppression_interval = alert.alert_suppression_interval
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times[alert_class_id])
@@ -178,7 +183,12 @@ class AlertsAPI(APIClient):
         latest_alert_ids = []
         all_alerts: List[Alert] = [*alerts.alerts, *alerts.malformed_alerts]
         for alert in all_alerts:
-            alert_class_id = alert.alert_class_id or ""
+            alert_class_id = alert.alert_class_id
+            if alert_class_id is None:
+                # Shouldn't happen, but logging in any case
+                logger.debug("Alert without an id detected!")
+                continue
+
             current_last_alert = alert_last_times[alert_class_id]
             alert_detected_at = alert.detected_at
             if (
