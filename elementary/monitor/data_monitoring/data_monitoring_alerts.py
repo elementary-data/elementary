@@ -2,7 +2,7 @@ import json
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, List, Optional, Set, Tuple, Union, cast
+from typing import DefaultDict, List, Optional, Set, Tuple, cast
 
 from alive_progress import alive_it
 
@@ -59,9 +59,7 @@ class DataMonitoringAlerts(DataMonitoring):
         # Type hint to mark that in this class the slack client cannot be None
         self.slack_client: SlackClient
 
-    def _parse_emails_to_ids(
-        self, emails: Optional[Union[str, List[str]]]
-    ) -> List[str]:
+    def _parse_emails_to_ids(self, emails: Optional[List[str]]) -> List[str]:
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
 
@@ -73,9 +71,6 @@ class DataMonitoringAlerts(DataMonitoring):
 
         if emails is None:
             return []
-        if isinstance(emails, str):
-            emails = json.loads(emails)
-            assert isinstance(emails, list)
 
         return [
             _get_user_id(email) if _regex_match_owner_email(email) else email
