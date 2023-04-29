@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Union
 
 from elementary.clients.api.api_client import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.api.models.schema import (
     ModelCoverageSchema,
     ModelRunSchema,
@@ -32,7 +32,7 @@ SQL_FILE_EXTENSION = ".sql"
 
 
 class ModelsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
         self.models_fetcher = ModelsFetcher(dbt_runner=self.dbt_runner)
 

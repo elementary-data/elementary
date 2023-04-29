@@ -4,14 +4,14 @@ from typing import List
 import networkx as nx
 
 from elementary.clients.api.api_client import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.api.lineage.schema import LineageNodeSchema, LineageSchema
 from elementary.monitor.fetchers.lineage.lineage import LineageFetcher
 from elementary.monitor.fetchers.lineage.schema import NodeDependsOnNodesSchema
 
 
 class LineageAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
         self.lineage_fetcher = LineageFetcher(dbt_runner=self.dbt_runner)
 

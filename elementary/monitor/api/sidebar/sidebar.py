@@ -31,7 +31,7 @@ class SidebarAPI(APIClient):
     def get_dbt_sidebar(
         self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> DbtSidebarSchema:
-        sidebar: DbtSidebarSchema = DbtSidebarSchema()
+        sidebar: DbtSidebarSchema = dict()
         for artifact in artifacts:
             self._update_dbt_sidebar(
                 dbt_sidebar=sidebar,
