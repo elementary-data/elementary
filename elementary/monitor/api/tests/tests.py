@@ -219,7 +219,6 @@ class TestsAPI(APIClient):
                             status=test_result_db_row.status,
                             affected_rows=self._parse_affected_row(
                                 results_description=test_result_db_row.test_results_description
-                                or ""
                             ),
                         )
                     )

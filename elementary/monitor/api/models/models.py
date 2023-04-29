@@ -138,7 +138,7 @@ class ModelsAPI(APIClient):
                 normalized_source = self._normalize_dbt_artifact_dict(source_result)
                 assert isinstance(normalized_source, NormalizedSourceSchema)
 
-                source_unique_id = normalized_source.unique_id or ""
+                source_unique_id = normalized_source.unique_id
                 assert source_unique_id is not None
 
                 sources[source_unique_id] = normalized_source
@@ -163,7 +163,8 @@ class ModelsAPI(APIClient):
         coverages = dict()
         if coverage_results:
             for coverage_result in coverage_results:
-                coverages[coverage_result.model_unique_id or ""] = ModelCoverageSchema(
+                assert coverage_result.model_unique_id is not None
+                coverages[coverage_result.model_unique_id] = ModelCoverageSchema(
                     table_tests=coverage_result.table_tests,
                     column_tests=coverage_result.column_tests,
                 )

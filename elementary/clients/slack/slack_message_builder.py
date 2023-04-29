@@ -3,7 +3,7 @@ from typing import List, Union
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
-from elementary.utils.json_utils import try_load_json
+from elementary.utils.json_utils import unpack_and_flatten_str_to_list
 
 
 class SlackMessageBuilder:
@@ -162,10 +162,5 @@ class SlackMessageBuilder:
         This is useful for various lists we include in slack messages (owners, subscribers, etc)
         """
         if isinstance(str_list, str):
-            loaded_str_list = try_load_json(str_list)
-            if loaded_str_list is None:
-                # If json is invalid, return the given string as-is
-                return str_list
-            str_list = loaded_str_list
-
+            str_list = unpack_and_flatten_str_to_list(str_list)
         return ", ".join(sorted(set(str_list)))

@@ -71,14 +71,14 @@ class AnonymousTracking(Tracking):
         self, name: str, properties: Optional[dict] = None
     ) -> None:
         try:
-            if self._do_not_track:
+            if self._do_not_track or self.anonymous_user_id is None:
                 return
 
             if properties is None:
                 properties = dict()
 
             self._send_event(
-                distinct_id=self.anonymous_user_id or "",
+                distinct_id=self.anonymous_user_id,
                 event_name=name,
                 properties={
                     "run_id": self._run_id,

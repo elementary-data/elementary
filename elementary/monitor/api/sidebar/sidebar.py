@@ -33,9 +33,10 @@ class SidebarAPI(APIClient):
     ) -> DbtSidebarSchema:
         sidebar: DbtSidebarSchema = dict()
         for artifact in artifacts:
+            assert artifact.unique_id is not None
             self._update_dbt_sidebar(
                 dbt_sidebar=sidebar,
-                artifact_unique_id=artifact.unique_id or "",
+                artifact_unique_id=artifact.unique_id,
                 artifact_full_path=artifact.normalized_full_path,
             )
         return sidebar
@@ -64,7 +65,8 @@ class SidebarAPI(APIClient):
     ) -> TagsSidebarSchema:
         sidebar = defaultdict(list)
         for artifact in artifacts:
-            unique_id = artifact.unique_id or ""
+            unique_id = artifact.unique_id
+            assert unique_id is not None
             if artifact.tags:
                 for tag in artifact.tags:
                     sidebar[tag].append(unique_id)
@@ -77,7 +79,8 @@ class SidebarAPI(APIClient):
     ) -> OwnersSidebarSchema:
         sidebar = defaultdict(list)
         for artifact in artifacts:
-            unique_id = artifact.unique_id or ""
+            unique_id = artifact.unique_id
+            assert unique_id is not None
             if artifact.owners:
                 for owner in artifact.owners:
                     sidebar[owner].append(unique_id)
