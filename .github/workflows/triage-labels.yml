@@ -1,0 +1,16 @@
+name: Update Triage Label
+on: issue_comment
+
+permissions:
+  issues: write
+
+jobs:
+  triage_label:
+    if: contains(github.event.issue.labels.*.name, 'Awaiting Response')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update label
+        uses: andymckay/labeler@master
+        with:
+          add-labels: "Triage 👀"
+          remove-labels: "Awaiting Response"
