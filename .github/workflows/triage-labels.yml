@@ -6,7 +6,7 @@ permissions:
 
 jobs:
   triage_label:
-    if: contains(github.event.issue.labels.*.name, 'awaiting_response')
+    if: contains(github.event.issue.labels.*.name, 'Awaiting Response')
     runs-on: ubuntu-latest
     steps:
       - name: initial labeling
