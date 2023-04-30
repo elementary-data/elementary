@@ -9,7 +9,7 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'Awaiting Response')
     runs-on: ubuntu-latest
     steps:
-      - name: initial labeling
+      - name: Update label
         uses: andymckay/labeler@master
         with:
           add-labels: "Triage 👀"
