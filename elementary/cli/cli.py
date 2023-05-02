@@ -71,10 +71,15 @@ cli = ElementaryCLI(
     help="Open source data reliability solution (https://docs.elementary-data.com/)"
 )
 
+
 @click.command(cls=ElementaryCLI)
-@click.version_option(version=package.get_package_version(), message="Elementary installed version %(version)s.")
+@click.version_option(
+    version=package.get_package_version(),
+    message="Elementary installed version %(version)s.",
+)
 def cli():
     pass
+
 
 if __name__ == "__main__":
     cli()
