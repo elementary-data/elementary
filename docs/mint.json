@@ -208,7 +208,8 @@
         "cloud/onboarding/quickstart-dbt-package",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
-        "cloud/manage-team"
+        "cloud/manage-team",
+        "cloud/general/security-and-privacy"
       ]
     }
   ],
