@@ -2,7 +2,7 @@
 name: Documentation gap
 about: Help us improve the documentation 
 title: ''
-labels: documentation, Triage 👀
+labels: Documentation, Triage 👀
 assignees: ''
 
 ---
