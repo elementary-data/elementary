@@ -25,7 +25,7 @@ class ExtendedBaseModel(BaseModel):
         elif isinstance(var, str):
             loaded_var = try_load_json(var)
             if type(loaded_var) is dict:
-                json_string = json.dumps(loaded_var)
+                loaded_var = json.dumps(loaded_var)
                 return loaded_var
             if loaded_var is None:
                 loaded_var = [var]
