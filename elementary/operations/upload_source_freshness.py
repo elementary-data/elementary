@@ -38,11 +38,14 @@ class UploadSourceFreshnessOperation:
             self.config.profiles_dir,
             self.config.profile_target,
         )
-        dbt_runner.run_operation(
-            "elementary_internal.upload_source_freshness",
-            macro_args={"results": json.dumps(results)},
-            quiet=True,
-        )
+        chunk_size = 100
+        for chunk in range(0, len(results), chunk_size):
+            results_segment = results[chunk:chunk+chunk_size]
+            dbt_runner.run_operation(
+                "elementary_internal.upload_source_freshness",
+                macro_args={"results": json.dumps(results_segment)},
+                quiet=True,
+            )
 
     def get_target_path(self) -> Path:
         env_target_path = os.getenv("DBT_TARGET_PATH")
