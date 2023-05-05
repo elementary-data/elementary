@@ -99,7 +99,7 @@ class NormalizedAlert:
 
             normalized_alert[
                 SLACK_GROUP_ALERTS_BY_KEY
-            ] = self._get_field_from_test_meta_or_model_meta_or_default(key="group")
+            ] = self._get_field_from_test_meta_or_model_meta_or_default(key=SLACK_GROUP_ALERTS_BY_KEY)
 
             return normalized_alert
         except Exception:
