@@ -18,15 +18,14 @@ class ExtendedBaseModel(BaseModel):
 
     @staticmethod
     def _load_var_to_list(var: Union[str, list]) -> list:
-        if not var & type(var) != dict:
+        if not var:
             return []
         elif isinstance(var, list):
             return var
         elif isinstance(var, str):
             loaded_var = try_load_json(var)
-            if type(loaded_var) is dict:
-                loaded_var = json.dumps(loaded_var)
-                return loaded_var
+            if isinstance(loaded_var, dict):
+                loaded_var = [json.dumps(loaded_var)]
             if loaded_var is None:
                 loaded_var = [var]
             return loaded_var
