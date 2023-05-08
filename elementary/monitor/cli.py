@@ -327,6 +327,12 @@ def monitor(
     default=True,
     help="Whether to open the report in the browser.",
 )
+@click.option(
+    "--dbt-vars",
+    type=str,
+    default=None,
+    help="Specify raw YAML string of your dbt variables.",
+)
 @click.pass_context
 def report(
     ctx,
@@ -338,6 +344,7 @@ def report(
     dbt_quoting,
     profile_target,
     project_profile_target,
+    dbt_vars,
     executions_limit,
     file_path,
     disable_passed_test_metrics,
@@ -352,6 +359,7 @@ def report(
     """
     Generate a local observability report of your warehouse.
     """
+    vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
         config_dir,
         profiles_dir,
@@ -383,6 +391,7 @@ def report(
             exclude_elementary_models=exclude_elementary_models,
             should_open_browser=open_browser,
             project_name=project_name,
+            dbt_vars=vars,
         )
         anonymous_tracking.track_cli_end(
             Command.REPORT, data_monitoring.properties(), ctx.command.name
