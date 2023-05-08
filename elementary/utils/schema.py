@@ -24,6 +24,8 @@ class ExtendedBaseModel(BaseModel):
             return var
         elif isinstance(var, str):
             loaded_var = try_load_json(var)
+            if isinstance(loaded_var, dict):
+                loaded_var = [json.dumps(loaded_var)]
             if loaded_var is None:
                 loaded_var = [var]
             return loaded_var
