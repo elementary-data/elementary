@@ -87,6 +87,7 @@ class TestManagementFetcher(FetcherClient):
         )
         tests = []
         for test_result in test_results:
+            meta = json.loads(test_result["meta"])
             owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
             tags = list(
                 set(
@@ -96,6 +97,7 @@ class TestManagementFetcher(FetcherClient):
                     ]
                 )
             )
+            description = meta.get("description")
 
             tests.append(
                 TestModel(
@@ -109,6 +111,7 @@ class TestManagementFetcher(FetcherClient):
                     severity=test_result["severity"],
                     owners=owners,
                     tags=tags,
+                    description=description,
                     updated_at=test_result["generated_at"],
                 )
             )

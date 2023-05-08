@@ -34,6 +34,7 @@ class TestModel(BaseModel):
     severity: str
     owners: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
+    description: Optional[str]
     updated_at: str
     updated_by: Optional[str]
 

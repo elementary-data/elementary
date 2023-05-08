@@ -20,7 +20,8 @@
             dbt_tests.model_owners as model_owners,
             dbt_tests.model_tags as model_tags,
             dbt_tests.tags as tags,
-            dbt_tests.generated_at as generated_at
+            dbt_tests.generated_at as generated_at,
+            dbt_tests.meta as meta
         from dbt_tests left join dbt_models on dbt_tests.parent_model_unique_id = dbt_models.unique_id
     {% endset %}
     {% set tests_agate = run_query(tests_query) %}
