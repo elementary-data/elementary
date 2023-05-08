@@ -67,9 +67,17 @@ class ElementaryCLI(click.MultiCommand):
         return super().invoke(ctx)
 
 
-cli = ElementaryCLI(
-    help="Open source data reliability solution (https://docs.elementary-data.com/)"
+@click.command(
+    cls=ElementaryCLI,
+    help="Open source data reliability solution (https://docs.elementary-data.com/)",
 )
+@click.version_option(
+    version=package.get_package_version(),
+    message="Elementary version %(version)s.",
+)
+def cli():
+    pass
+
 
 if __name__ == "__main__":
     cli()
