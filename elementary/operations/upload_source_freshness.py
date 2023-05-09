@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import click
+from alive_progress import alive_it
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
@@ -39,7 +40,9 @@ class UploadSourceFreshnessOperation:
             self.config.profile_target,
         )
         chunk_size = 100
-        for chunk in range(0, len(results), chunk_size):
+        chunk_list = list(range(0, len(results), chunk_size))
+        upload_with_progress_bar = alive_it(chunk_list, title='Uploading source freshness results')
+        for chunk in upload_with_progress_bar:
             results_segment = results[chunk:chunk+chunk_size]
             dbt_runner.run_operation(
                 "elementary_internal.upload_source_freshness",
