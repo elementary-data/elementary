@@ -41,9 +41,11 @@ class UploadSourceFreshnessOperation:
         )
         chunk_size = 100
         chunk_list = list(range(0, len(results), chunk_size))
-        upload_with_progress_bar = alive_it(chunk_list, title='Uploading source freshness results')
+        upload_with_progress_bar = alive_it(
+            chunk_list, title="Uploading source freshness results"
+        )
         for chunk in upload_with_progress_bar:
-            results_segment = results[chunk:chunk+chunk_size]
+            results_segment = results[chunk : chunk + chunk_size]
             dbt_runner.run_operation(
                 "elementary_internal.upload_source_freshness",
                 macro_args={"results": json.dumps(results_segment)},
