@@ -26,6 +26,7 @@ class TestModel(BaseModel):
     id: str
     db_schema: str = Field(alias="schema")
     table: Optional[str]
+    source_name: Optional[str]
     column: Optional[str]
     package: Optional[str] = None
     name: str

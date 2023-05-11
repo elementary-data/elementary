@@ -104,6 +104,7 @@ class TestManagementFetcher(FetcherClient):
                     id=test_result["id"],
                     schema=test_result["schema"],
                     table=test_result["table"],
+                    source_name=test_result["source_name"],
                     column=test_result["column"],
                     package=test_result["test_package"],
                     name=test_result["test_name"],
