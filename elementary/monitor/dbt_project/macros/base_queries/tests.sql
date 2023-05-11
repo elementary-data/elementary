@@ -40,7 +40,11 @@
             dbt_tests.model_tags as model_tags,
             dbt_tests.tags as tags,
             dbt_tests.generated_at as generated_at,
-            dbt_tests.meta as meta
+            dbt_tests.meta as meta,
+            case 
+                when dbt_tests.type = 'singular' then TRUE
+                else FALSE
+            end as is_singular
         from dbt_tests left join dbt_resources on dbt_tests.parent_model_unique_id = dbt_resources.unique_id
     {% endset %}
     {% set tests_agate = run_query(tests_query) %}

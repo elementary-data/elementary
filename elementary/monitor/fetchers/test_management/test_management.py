@@ -113,6 +113,7 @@ class TestManagementFetcher(FetcherClient):
                     owners=owners,
                     tags=tags,
                     description=description,
+                    is_singular=test_result["is_singular"],
                     updated_at=test_result["generated_at"],
                 )
             )
