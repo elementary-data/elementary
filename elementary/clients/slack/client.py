@@ -139,7 +139,7 @@ class SlackWebClient(SlackClient):
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
-    def _get_channels_list(
+    def _get_channels(
         self, cursor: Optional[str] = None
     ) -> Tuple[List[dict], Optional[str]]:
         response = self.client.conversations_list(
@@ -155,7 +155,7 @@ class SlackWebClient(SlackClient):
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
         cursor = None
         while True:
-            channels, cursor = self._get_channels_list(cursor)
+            channels, cursor = self._get_channels(cursor)
             for channel in channels:
                 if channel["name"] == channel_name:
                     return channel["id"]
@@ -165,7 +165,7 @@ class SlackWebClient(SlackClient):
     def _join_channel(self, channel_id: str) -> bool:
         try:
             self.client.conversations_join(channel=channel_id)
-            logger.info("Elementary app joined the channel successfully")
+            logger.info("Elementary app joined the channel successfully.")
             return True
         except SlackApiError as e:
             logger.error(f"Elementary app failed to join the given channel. Error: {e}")
@@ -181,7 +181,7 @@ class SlackWebClient(SlackClient):
             channel_id = self._get_channel_id(channel_name)
             if not channel_id:
                 logger.info(
-                    f'Elementary app could not find the channel "{channel_name}"'
+                    f'Elementary app could not find the channel "{channel_name}".'
                 )
                 return False
             return self._join_channel(channel_id=channel_id)
