@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
@@ -137,28 +137,35 @@ class SlackWebClient(SlackClient):
             logger.error(f"Unable to get Slack user ID from email: {err}.")
             return None
 
+    @sleep_and_retry
+    @limits(calls=20, period=ONE_MINUTE)
+    def _get_channels_list(
+        self, cursor: Optional[str] = None
+    ) -> Tuple[List[dict], Optional[str]]:
+        response = self.client.conversations_list(
+            cursor=cursor,
+            types="public_channel,private_channel",
+            exclude_archived=True,
+            limit=1000,
+        )
+        channels = response["channels"]
+        cursor = response.get("response_metadata", {}).get("next_cursor")
+        return channels, cursor
+
     def _get_channel_id(self, channel_name: str) -> Optional[str]:
         cursor = None
         while True:
-            response = self.client.conversations_list(
-                cursor=cursor,
-                types="public_channel,private_channel",
-                exclude_archived=True,
-                limit=1000,
-            )
-            for channel in response["channels"]:
+            channels, cursor = self._get_channels_list(cursor)
+            for channel in channels:
                 if channel["name"] == channel_name:
                     return channel["id"]
-            cursor = response.get("response_metadata", {}).get("next_cursor")
             if not cursor:
                 return None
 
     def _join_channel(self, channel_id: str) -> bool:
         try:
             self.client.conversations_join(channel=channel_id)
-            logger.info(
-                f'Elementary app joined the channel successfully - channel id: "{channel_id}"'
-            )
+            logger.info("Elementary app joined the channel successfully")
             return True
         except SlackApiError as e:
             logger.error(f"Elementary app failed to join the given channel. Error: {e}")
