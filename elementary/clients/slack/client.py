@@ -156,6 +156,9 @@ class SlackWebClient(SlackClient):
     def _join_channel(self, channel_id: str) -> bool:
         try:
             self.client.conversations_join(channel=channel_id)
+            logger.info(
+                f'Elementary app joined the channel successfully - channel id: "{channel_id}"'
+            )
             return True
         except SlackApiError as e:
             logger.error(f"Elementary app failed to join the given channel. Error: {e}")
@@ -165,9 +168,14 @@ class SlackWebClient(SlackClient):
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
         err_type = err.response.data["error"]
         if err_type == "not_in_channel":
-            logger.info("Elementary app is not in the channel. Attempting to join.")
+            logger.info(
+                f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
+            )
             channel_id = self._get_channel_id(channel_name)
             if not channel_id:
+                logger.info(
+                    f'Elementary app could not find the channel "{channel_name}"'
+                )
                 return False
             return self._join_channel(channel_id=channel_id)
         elif err_type == "channel_not_found":
