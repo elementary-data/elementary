@@ -5,6 +5,7 @@
         )
 
         select
+            unique_id,
             name,
             schema_name as schema,
             tags,
@@ -26,6 +27,7 @@
         )
 
         select
+            unique_id,
             name,
             source_name,
             schema_name AS schema,
