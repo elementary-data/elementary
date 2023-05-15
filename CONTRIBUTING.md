@@ -28,6 +28,8 @@ pip install -r dev-requirements.txt
 pip install -e .
 ```
 
+You're done. Running `edr` will now run the code in your local repository.
+
 ## First time contributors
 
 If you're looking for things to help with, browse
