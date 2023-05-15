@@ -32,6 +32,7 @@ class TestManagementFetcher(FetcherClient):
             owners = unpack_and_flatten_str_to_list(model_result["owners"])
             models.append(
                 ResourceModel(
+                    id=model_result["unique_id"],
                     name=model_result["name"],
                     schema=model_result["schema"],
                     tags=json.loads(model_result["tags"]),
@@ -53,6 +54,7 @@ class TestManagementFetcher(FetcherClient):
             owners = unpack_and_flatten_str_to_list(source_result["owners"])
             sources.append(
                 ResourceModel(
+                    id=source_result["unique_id"],
                     name=source_result["name"],
                     source_name=source_result["source_name"],
                     schema=source_result["schema"],

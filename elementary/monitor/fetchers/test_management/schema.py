@@ -9,6 +9,7 @@ class ResourceColumnModel(BaseModel):
 
 
 class ResourceModel(BaseModel):
+    id: str
     name: str
     source_name: Optional[str]
     db_schema: str = Field(alias="schema")
