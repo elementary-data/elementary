@@ -88,15 +88,10 @@ class TestManagementFetcher(FetcherClient):
         tests = []
         for test_result in test_results:
             meta = json.loads(test_result["meta"])
-            owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
-            tags = list(
-                set(
-                    [
-                        *json.loads(test_result["model_tags"]),
-                        *json.loads(test_result["tags"]),
-                    ]
-                )
-            )
+            owners = unpack_and_flatten_str_to_list(meta.get("owner"))
+            model_owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
+            tags = list(set(json.loads(test_result["tags"])))
+            model_tags = list(set(json.loads(test_result["model_tags"])))
             description = meta.get("description")
 
             tests.append(
@@ -111,7 +106,9 @@ class TestManagementFetcher(FetcherClient):
                     args=json.loads(test_result["test_params"]),
                     severity=test_result["severity"],
                     owners=owners,
+                    model_owners=model_owners,
                     tags=tags,
+                    model_tags=model_tags,
                     description=description,
                     is_singular=test_result["is_singular"],
                     updated_at=test_result["generated_at"],
