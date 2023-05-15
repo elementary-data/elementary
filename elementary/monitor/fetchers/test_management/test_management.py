@@ -88,7 +88,7 @@ class TestManagementFetcher(FetcherClient):
         tests = []
         for test_result in test_results:
             meta = json.loads(test_result["meta"])
-            owners = unpack_and_flatten_str_to_list(meta.get("owner"))
+            owners = unpack_and_flatten_str_to_list(meta.get("owner", "[]"))
             model_owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
             tags = list(set(json.loads(test_result["tags"])))
             model_tags = list(set(json.loads(test_result["model_tags"])))
