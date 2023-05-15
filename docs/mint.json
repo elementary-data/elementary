@@ -21,7 +21,7 @@
     "raiseIssue": true
   },
   "topbarCtaButton": {
-    "name": "Try Elementary cloud",
+    "name": "Try Elementary Cloud",
     "url": "https://www.elementary-data.com/cloud-beta"
   },
   "topbarLinks": [
@@ -63,10 +63,7 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": [
-            "quickstart",
-            "quickstart-cli"
-          ]
+          "pages": ["quickstart", "quickstart-cli"]
         },
         {
           "group": "Tutorial",

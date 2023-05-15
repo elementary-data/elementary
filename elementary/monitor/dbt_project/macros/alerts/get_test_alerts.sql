@@ -1,4 +1,4 @@
-{% macro get_pending_test_alerts(days_back, results_sample_limit=5, disable_samples=false) %}
+{% macro get_pending_test_alerts(days_back, disable_samples=false) %}
     -- depends_on: {{ ref('alerts') }}
     {% set select_pending_alerts_query %}
         with alerts_in_time_limit as (
@@ -80,7 +80,7 @@
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(alert.result_rows, test_result_rows_agate.get(alert.alert_id), test_type, alert.alert_results_query, results_sample_limit) %}
+            {% set test_rows_sample = elementary_internal.get_test_rows_sample(alert.result_rows, test_result_rows_agate.get(alert.alert_id)) %}
         {%- endif -%}
         {% set pending_alert_dict = {'id': alert.alert_id,
                                  'alert_class_id': alert.alert_class_id,

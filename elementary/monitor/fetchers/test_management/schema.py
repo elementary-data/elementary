@@ -26,6 +26,7 @@ class TestModel(BaseModel):
     id: str
     db_schema: str = Field(alias="schema")
     table: Optional[str]
+    source_name: Optional[str]
     column: Optional[str]
     package: Optional[str] = None
     name: str
@@ -34,6 +35,8 @@ class TestModel(BaseModel):
     severity: str
     owners: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
+    description: Optional[str]
+    is_singular: bool
     updated_at: str
     updated_by: Optional[str]
 

@@ -149,5 +149,5 @@ class DataMonitoring:
             return
 
         logger.info(
-            f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible :)"
+            f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible."
         )
