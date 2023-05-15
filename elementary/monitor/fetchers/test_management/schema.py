@@ -37,6 +37,7 @@ class TestModel(BaseModel):
     model_owners: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
     model_tags: List[str] = Field(default_factory=list)
+    meta: dict = Field(default_factory=dict)
     description: Optional[str]
     is_singular: bool
     updated_at: str

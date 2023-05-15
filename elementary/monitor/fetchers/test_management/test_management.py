@@ -109,6 +109,7 @@ class TestManagementFetcher(FetcherClient):
                     model_owners=model_owners,
                     tags=tags,
                     model_tags=model_tags,
+                    meta=meta,
                     description=description,
                     is_singular=test_result["is_singular"],
                     updated_at=test_result["generated_at"],
