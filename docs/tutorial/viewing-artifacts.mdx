@@ -5,9 +5,11 @@ sidebarTitle: "dbt artifacts"
 
 Now that we have downloaded the Elementary package, let’s understand its impact on our data. When we use dbt run, Elementary will generate a number of new artifacts in our database. These artifacts are used by Elementary for anomaly detection and testing.<br/>
 To generate these artifacts use:
+
 ```shell
 dbt run
 ```
+
 To see these artifacts, we can navigate to our tutorial’s database; here, we will see a number of new Elementary artifacts have indeed been generated under `<schema_name>_ELEMENTARY`.<br/><br/>
 
 <Frame>
@@ -15,6 +17,6 @@ To see these artifacts, we can navigate to our tutorial’s database; here, we w
 </Frame>
 
 These artifacts are used by Elementary tests and the Elementary CLI and will be updated when we run **dbt test**, **dbt run**, and **dbt build**.
-For more information about Elementary's dbt artifacts [click here](https://docs.elementary-data.com/dbt/dbt-artifacts).
+For more information about Elementary's dbt artifacts [click here](/dbt/dbt-artifacts).
 
 **Next, let’s see how we add Elementary's tests and anomaly detection to our data.**
