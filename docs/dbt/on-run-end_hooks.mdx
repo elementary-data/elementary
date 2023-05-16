@@ -5,6 +5,15 @@ sidebarTitle: "on-run-end hooks"
 
 Elementary dbt package uses `on-run-end` [hooks](https://docs.getdbt.com/reference/project-configs/on-run-start-on-run-end) to log results and metadata to tables in the Elementary schema.
 
+## Why Elementary uses `on-run-end` hooks?
+
+As a data observability solution, the completeness and freshness of the results Elementary collects is critical. 
+
+By leveraging `on-run-end` hooks, we add a built-in collection of the latest results and metadata as part of your runs.
+This means the results you see in Elementary report and the alerts you receive are full, up-to-date and accurate.   
+
+We stringly recommend not to disable the hooks for environments you want to minitor using Elementary. 
+
 ## What happens on the `on-run-end` hooks?
 
 On the `on-run-end` hooks Elementary extracts data from the dbt `results` and `graph` objects, and runs SQL queries to load this data to the Elementary models.  
