@@ -47,7 +47,7 @@ class DataMonitoring:
             self.config, tracking=self.tracking
         )
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
+        self.elementary_database_and_schema = self.get_elementary_relation()
         self.success = True
         self.disable_samples = disable_samples
         self.raw_filter = filter
@@ -101,11 +101,13 @@ class DataMonitoring:
         }
         return data_monitoring_properties
 
-    def get_elementary_database_and_schema(self):
+    def get_elementary_relation(self):
         try:
-            return self.internal_dbt_runner.run_operation(
+            relation = self.internal_dbt_runner.run_operation(
                 "get_elementary_database_and_schema", quiet=True
-            )[0]
+            )[0].strip("\"'`")
+            logger.info(f"Elementary's database and schema: '{relation}'")
+            return relation
         except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
             self.tracking.record_internal_exception(ex)
