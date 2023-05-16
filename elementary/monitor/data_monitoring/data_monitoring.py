@@ -105,7 +105,7 @@ class DataMonitoring:
         try:
             relation = self.internal_dbt_runner.run_operation(
                 "get_elementary_database_and_schema", quiet=True
-            )[0].strip("\"'`")
+            )[0]
             logger.info(f"Elementary's database and schema: '{relation}'")
             return relation
         except Exception as ex:
