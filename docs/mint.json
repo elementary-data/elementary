@@ -138,6 +138,7 @@
       "pages": [
         "understand-elementary/elementary-overview",
         "guides/modules-overview/dbt-package",
+        "dbt/on-run-end_hooks",
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
