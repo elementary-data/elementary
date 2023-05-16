@@ -47,7 +47,7 @@ class DataMonitoring:
             self.config, tracking=self.tracking
         )
         self._download_dbt_package_if_needed(force_update_dbt_package)
-        self.elementary_database_and_schema = self.get_elementary_relation()
+        self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
         self.disable_samples = disable_samples
         self.raw_filter = filter
@@ -101,7 +101,7 @@ class DataMonitoring:
         }
         return data_monitoring_properties
 
-    def get_elementary_relation(self):
+    def get_elementary_database_and_schema(self):
         try:
             relation = self.internal_dbt_runner.run_operation(
                 "get_elementary_database_and_schema", quiet=True
