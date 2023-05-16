@@ -75,7 +75,9 @@ class DbtRunner(BaseDbtRunner):
                 err_json_logs = err.output.splitlines()
                 for err_log_line in err_json_logs:
                     try:
-                        err_log_msgs.append(DbtLog(err_log_line).msg)
+                        log = DbtLog(err_log_line)
+                        if log.level == "error":
+                            err_log_msgs.append(log.msg)
                     except JSONDecodeError:
                         logger.debug(
                             f"Unable to parse dbt log message: {err_log_line}",
