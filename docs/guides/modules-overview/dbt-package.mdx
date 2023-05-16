@@ -9,10 +9,10 @@ The impact of the package on `dbt run` is minimal, and most of the processing ha
 dbt tests, that are executed on `dbt test`.
 
 <Accordion title="What are dbt packages and packages.yml?">
-A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference it's macros, execute it's models, and so on.
+A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
 
-Add packages to your project by creating a 'packages.yml' file under the main project directory (where your '
-dbt_project.yml is), and adding the relevant package. After you add a new package, run dbt deps to actually pull it's
+Add packages to your project by creating a `packages.yml` file under the main project directory (where your `
+dbt_project.yml` is), and adding the relevant package. After you add a new package, run `dbt deps` to actually pull its
 code to your project. This is also how you update packages.
 Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/)
 , [dbt_date](https://github.com/calogica/dbt-date/tree/0.5.4/)
