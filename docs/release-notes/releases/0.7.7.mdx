@@ -1,0 +1,50 @@
+---
+title: "Elementary 0.7.7"
+sidebarTitle: "0.7.7"
+---
+
+_April 12, 2023: [v0.7.7 Python](https://github.com/elementary-data/elementary/releases/tag/v0.7.7), [v0.7.5 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.7.5)_
+
+### 🔥 What's new?
+
+- **Seasonality and Anomaly direction** 📈
+  - On this release we are introducing 2 new anomaly detection tests configurations. The goal is to improve the accuracy and unlock more detection use cases. 🎯💪
+  - We prepared a [short video to explain](https://www.loom.com/share/b92d880b768d44a7bd2b0010a6223b62) 📽👇🏻
+  - `seasonality: day_of_week` 🗓
+    - If enabled, daily values will be compared only to the same week day previous values.
+    - This configuration would improve accuracy and detection of datasets that have different volume and metrics on weekends and different weekdays.
+  - `anomaly_direction: [ both | spike | drop ]` ↗️↘️
+    - By default, elementary alerts on both spikes and drops of a metric. Using this configuration, you can limit anomaly tests to alert only on the wanted direction.
+    - For example - If you want volume anomalies to fail only on drop in row count, and not on a spike, just add `anomaly_direction: drop` to the test config.
+
+<Frame>
+  <div style={{ paddingBottom: "64.98194945848375%" }}>
+    <iframe
+      src="https://www.loom.com/embed/b92d880b768d44a7bd2b0010a6223b62"
+      frameborder="0"
+      webkitallowfullscreen
+      mozallowfullscreen
+      allowfullscreen
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+      }}
+    ></iframe>
+  </div>
+</Frame>
+
+- **on-run-end performance improvements** ⏳
+  - We fixed problems in artifacts caching, and implemented an incremental upload. This means that upon a change to models / tests / sources - elementary will now only update the changed resources.
+  - This should improve the performance of the hooks, and we have additional ideas and planned tasks around further improvements.
+  - Special thanks to [@panapost](https://elementary-community.slack.com/team/U050WNK4SQL) for helping with this effort 🤩
+  
+
+### 🐞 Bug fixes
+- Added support to unsupported time buckets on Bigquery (week, month), and made buckets full and consistent to calendar times - Thank you [@Kenneth Roos](https://elementary-community.slack.com/team/U04UDU686P7) and [@Julian Schulte](https://elementary-community.slack.com/team/U04U9DAPR5L) for reporting!
+- Added log rotation to `edr.log` to prevent large log files that won't open - Thank you [@Stéphane Burwash](https://elementary-community.slack.com/team/U03R02KUP1V) and [@Grant Mehrer](https://elementary-community.slack.com/team/U04E1UTPEAE) for reporting!
+- Fixed elementary tests custom names issue - Thank you [@Fabien Traventhal](https://elementary-community.slack.com/team/U03G693L05R) for reporting!
+- Fixed subscribers parsing issue - Thank you [@Muthu](https://elementary-community.slack.com/team/U04TL5H856K) for reporting!
+- Added `target-path` to upload_source_freshness - Requested by [@Ange Melhuish](https://elementary-community.slack.com/team/U04KWBDTP4J)!

@@ -1,0 +1,53 @@
+---
+title: "Security and Privacy"
+sidebarTitle: "Security and privacy"
+---
+
+## Security principals
+
+Elementary Cloud is designed with the core principle of least privilege.
+Our cloud service does not require permissions to access the customer data.
+Therefor, we instruct our customers to create a dedicated role for Elementary with `read only` access only to the Elementary schema in your data warehouse.
+
+As long as you follow the onboarding process instructions, it will be impossible for Elementary Cloud to read data from your warehouse that does not reside in the Elementary schema.
+This ensures that Elementary cloud will not mistakenly access your data, and minimizes the risk in case of a data breach.
+Our product and architecture are always evolving, but our commitment to secure design always remains.
+
+
+## How it works
+
+1. You install the Elementary dbt package in your dbt project and configure it to write to it's own schema, the Elementary schema.
+2. The package writes test results, run results, logs and metadata to the Elementary schema.
+3. The cloud service only requires `read access` to the Elementary schema, not to schemas where your sensitive data is stored.
+4. The cloud service connects to sync the Elementary schema using an **encrypted connection** and a **static IP address** that you will need to add to your allowlist. 
+
+<Frame>
+    <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1682954617/security-architecture_mdmh8i.png"
+    alt="Elementary cloud security"
+    />
+</Frame>
+
+
+## What is stored in the Elementary schema?
+
+The Elementary schema stores only metadata, aggregated metrics and logs.
+You can find the details of the tables [here](/guides/modules-overview/dbt-package). 
+
+The only exception to that is the `test_results_samples` which can be disabled. This is a feature that shows a sample of a few raw failed rows for failed tests, to help them triage and understand the problem. 
+To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
+
+
+## Secrets and data protection
+
+- **Tokens and credentials** - For customer secrets (tokens and credentials) we use [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html). Secrets Manager uses envelope encryption with AWS KMS keys and data keys to protect each secret value. Whenever the secret value in a secret changes, Secrets Manager generates a new data key to protect it. The data key is encrypted under a KMS key and stored in the metadata of the secret. [See this link for more details](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html).
+- **Customer data (Elementary schema replica)** - The synced customer data is encrypted at rest using server-side encryption (AES-256).
+
+## Compliance 
+
+[Contact us](mailto:legal@elementary-data.com) for auditing reports and penetration testing results. 
+
+## Have more questions?
+
+We would be happy to answer!
+Reach out to us on [email](mailto:legal@elementary-data.com) or [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA).

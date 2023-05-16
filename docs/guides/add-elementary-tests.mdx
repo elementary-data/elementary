@@ -2,8 +2,7 @@
 title: "Add anomaly detection tests"
 ---
 
-After you [install the dbt package](/quickstart#install-the-dbt-package), you can add Elementary data anomaly detection
-tests.
+After you [install the dbt package](/quickstart#install-the-dbt-package), you can add Elementary data anomaly detection tests.
 
 ## Data anomaly detection dbt tests
 
@@ -27,13 +26,13 @@ alt="Demo"
 Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
 
 Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
-field), and then we compute the row count per bucket for the last `days_back` days (by default 14).
+field), and then we compute the row count per bucket for the last [`days_back`](/guides/anomaly-detection-configuration/days-back) days (by default 14).
 
 The test then compares the row count of buckets within the detection period (last 2 days by default, controlled by the
 `backfill_days` var), and compares it with the row count of the previous time buckets.
 If there were any anomalies during the detection period, the test will fail.
 
-For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 
 <CodeGroup>
@@ -96,7 +95,7 @@ The test then compares the freshness of buckets within the detection period (las
 `backfill_days` var), and compares it with the freshness of the previous time buckets.
 If there were any anomalies during the detection period, the test will fail.
 
-For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 <CodeGroup>
 
@@ -150,7 +149,7 @@ timestamp ("now") and the most recent event timestamp.
 - If both an `event_timestamp_column` and an `update_timestamp_column` are provided, the test will measure over time
 the difference between these two columns.
 
-For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 <CodeGroup>
 
@@ -199,7 +198,7 @@ It is best to configure it on low-cardinality fields.
 The test counts rows grouped by given columns/expressions, and can be configured using the `dimensions`
 and `where_expression` keys.
 
-For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 <CodeGroup>
 
@@ -265,7 +264,7 @@ Executes column level monitors and anomaly detection on all the columns of the t
 are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
 the `all_columns_anomalies` key.
 
-For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 <CodeGroup>
 
@@ -323,9 +322,12 @@ Executes column level monitors and anomaly detection. Specific monitors
 are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
 the `column_anomalies` key.
 
-For advanced configuration of Elementary anomaly tests, please click [here](/guides/add-elementary-tests#advanced-configuration-for-your-elementary-tests)
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 <CodeGroup>
+
+
+For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 ```yml Models
 version: 2
@@ -563,28 +565,35 @@ sources:
 
 ## Configure your elementary anomaly detection tests
 
-The elementary anomaly detection tests described above can work out-of-the-box with default configuration. However,
-we support additional configuration that can be used to customize their behavior, depending on your needs.
-Read all about data anomaly detection tests configuration [here](/guides/elementary-tests-configuration).
+<Tip>If your data set has a timestamp column that represents the creation time of a field, it is highly recommended configuring it as a `timestamp_column`.</Tip>
 
-We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection
-parameter `--select tag:elementary`.
-If you wish to only be warned on anomalies, configure the severity of the tests to warn.
+To support different types of data sets, the tests have configuration that can be used to customize their behavior.
+Read more about [data anomaly detection tests configuration here](/guides/elementary-tests-configuration).
+
+We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
+If you wish to only be warned on anomalies, configure the `severity` of the tests to `warn`.
 
 
 ## What happens on each test?
 
-Upon running a test, your data is split into time buckets based on the `time_bucket` field and is limited by
-the `days_back` var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
-period (`backfill_days`) to the row count of all the previous time buckets within the `days_back` period.
+Upon running a test, your data is split into time buckets based on the [`time_bucket`](/guides/anomaly-detection-configuration/time-bucket) field and is limited by
+the [`days_back`](/guides/anomaly-detection-configuration/days-back) var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
+period ([`backfill_days`](/guides/anomaly-detection-configuration/backfill-days)) to the row count of all the previous time buckets within the [`days_back`](/guides/anomaly-detection-configuration/days-back) period.
 If there were any anomalies in the detection period, the test will fail.
-On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical
-metrics.
-At the end of the `dbt test` run, all results and collected metrics are merged into the elementary models.
+On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
+
+<Tooltip tip="Anomaly detection tests core concepts">
+<img
+src="https://raw.githubusercontent.com/elementary-data/assets-hosting/master/anomaly_detection/elementary-anomaly-detection-core-concepts.png"
+alt="Elementary anomaly detection tests core concepts"
+/>
+</Tooltip>
+
+To learn more, refer to [core concepts](/guides/how-anomaly-detection-works).
+
 
 ## What does it mean when a test fails?
 
-When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer
-to [anomaly detection](/guides/data-anomaly-detection#anomaly-detection).
+When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [core concepts](/guides/how-anomaly-detection-works) and [anomaly detection](/guides/data-anomaly-detection).
 
 
