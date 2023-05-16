@@ -38,7 +38,10 @@ def test_update_sent_alerts(
         assert call_args[0][0][1] == "run"
         assert call_args[0][0][2] == "-s"
         assert call_args[0][0][3] == "update_alerts.update_sent_alerts"
-        assert "alert_ids" in json.loads(call_args[0][0][9])
+        dbt_run_params = json.loads(call_args[0][0][9])
+        assert "alert_ids" in dbt_run_params
+        assert "table_name" in dbt_run_params
+        assert "sent_at" in dbt_run_params
 
 
 @mock.patch("subprocess.run")
@@ -60,7 +63,9 @@ def test_skip_alerts(mock_subprocess_run, alerts_fetcher_mock: MockAlertsFetcher
         assert call_args[0][0][1] == "run"
         assert call_args[0][0][2] == "-s"
         assert call_args[0][0][3] == "update_alerts.update_skipped_alerts"
-        assert "alert_ids" in json.loads(call_args[0][0][9])
+        dbt_run_params = json.loads(call_args[0][0][9])
+        assert "alert_ids" in dbt_run_params
+        assert "table_name" in dbt_run_params
 
 
 @pytest.fixture
