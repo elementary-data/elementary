@@ -1,3 +1,9 @@
+{{
+  config(
+    materialized = 'nothing',
+    )
+}}
+
 -- depends_on: {{ ref('alerts') }}
 -- depends_on: {{ ref('alerts_models') }}
 -- depends_on: {{ ref('alerts_source_freshness') }}
