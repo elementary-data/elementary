@@ -7,33 +7,31 @@ After you [install the dbt package](/quickstart#install-the-dbt-package), you ca
 ## Data anomaly detection dbt tests
 
 Elementary dbt package includes **anomaly detection tests, implemented as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**.
-These tests can detect anomalies in volume, freshness, null rates, and anomalies in specific dimensions, among others. 
+These tests can detect anomalies in volume, freshness, null rates, and anomalies in specific dimensions, among others.
 The tests are configured and executed like any other tests in your project.
 
 <Tooltip tip="Anomaly detection test result example from Elementary report">
-<img
-src="/pics/anomalies/anomaly-example.png"
-alt="Demo"
-/>
+  <img src="/pics/anomalies/anomaly-example.png" alt="Demo" />
 </Tooltip>
 
 ## Available anomaly detection tests
 
 ### Table (model / source) tests
 
-<Accordion title="elementary.volume_anomalies">
+#### Volume (row count) anomalies
+
+`elementary.volume_anomalies`
 
 Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
 
 Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
 field), and then we compute the row count per bucket for the last [`days_back`](/guides/anomaly-detection-configuration/days-back) days (by default 14).
 
-The test then compares the row count of buckets within the detection period (last 2 days by default, controlled by the
-`backfill_days` var), and compares it with the row count of the previous time buckets.
+The test then compares the row count of each bucket buckets within the detection period (last 2 days by default, controlled by the
+`backfill_days` var), and compares it to the row count of the previous time buckets.
 If there were any anomalies during the detection period, the test will fail.
 
 For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
 
 <CodeGroup>
 
@@ -46,7 +44,7 @@ models:
       - elementary.volume_anomalies:
           timestamp_column: < timestamp column >
           where_expression: < sql expression >
-          time_bucket:                # Daily by default
+          time_bucket: # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -58,7 +56,7 @@ models:
   - name: login_events
     config:
       elementary:
-        timestamp_column: 'loaded_at'
+        timestamp_column: "loaded_at"
     tests:
       - elementary.volume_anomalies:
           where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
@@ -66,23 +64,21 @@ models:
             period: day
             count: 1
           # optional - use tags to run elementary tests on a dedicated run
-          tags: ['elementary']
+          tags: ["elementary"]
           config:
-          # optional - change severity
+            # optional - change severity
             severity: warn
 
   - name: users
     # if no timestamp is configured, elementary will monitor without time filtering
     tests:
       - elementary.volume_anomalies:
-          tags: ['elementary']
+          tags: ["elementary"]
 ```
 
 </CodeGroup>
 
-</Accordion>
-
-<Accordion title="elementary.freshness_anomalies">
+#### Freshness anomalies
 
 `elementary.freshness_anomalies`
 
@@ -91,8 +87,8 @@ Monitors the freshness of your table over time, as the expected time between dat
 Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
 field), and then we compute the maximum freshness value per bucket for the last `days_back` days (by default 14).
 
-The test then compares the freshness of buckets within the detection period (last 2 days by default, controlled by the
-`backfill_days` var), and compares it with the freshness of the previous time buckets.
+The test then compares the freshness of each bucket within the detection period (last 2 days by default, controlled by the
+`backfill_days` var), and compares it to the freshness of the previous time buckets.
 If there were any anomalies during the detection period, the test will fail.
 
 For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
@@ -106,9 +102,9 @@ models:
   - name: < model name >
     tests:
       - elementary.freshness_anomalies:
-          timestamp_column: < timestamp column >            # Mandatory
+          timestamp_column: < timestamp column > # Mandatory
           where_expression: < sql expression >
-          time_bucket:              # Daily by default
+          time_bucket: # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -120,19 +116,17 @@ models:
   - name: login_events
     tests:
       - elementary.freshness_anomalies:
-          timestamp_column: 'updated_at'
+          timestamp_column: "updated_at"
           # optional - use tags to run elementary tests on a dedicated run
-          tags: ['elementary']
+          tags: ["elementary"]
           config:
-          # optional - change severity
+            # optional - change severity
             severity: warn
 ```
 
 </CodeGroup>
 
-</Accordion>
-
-<Accordion title="elementary.event_freshness_anomalies">
+#### Event freshness anomalies
 
 `elementary.event_freshness_anomalies`
 
@@ -144,10 +138,11 @@ This test compliments the `freshness_anomalies` test and is primarily intended f
 continuous / streaming fashion.
 
 The test can work in a couple of modes:
+
 - If only an `event_timestamp_column` is supplied, the test measures over time the difference between the current
-timestamp ("now") and the most recent event timestamp.
+  timestamp ("now") and the most recent event timestamp.
 - If both an `event_timestamp_column` and an `update_timestamp_column` are provided, the test will measure over time
-the difference between these two columns.
+  the difference between these two columns.
 
 For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
@@ -160,10 +155,10 @@ models:
   - name: < model name >
     tests:
       - elementary.event_freshness_anomalies:
-          event_timestamp_column: < timestamp column >          # Mandatory
-          update_timestamp_column: < timestamp column >         # Optional
+          event_timestamp_column: < timestamp column > # Mandatory
+          update_timestamp_column: < timestamp column > # Optional
           where_expression: < sql expression >
-          time_bucket:              # Daily by default
+          time_bucket: # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -175,20 +170,18 @@ models:
   - name: login_events
     tests:
       - elementary.event_freshness_anomalies:
-          event_timestamp_column: 'occurred_at'
-          update_timestamp_column: 'updated_at'
+          event_timestamp_column: "occurred_at"
+          update_timestamp_column: "updated_at"
           # optional - use tags to run elementary tests on a dedicated run
-          tags: ['elementary']
+          tags: ["elementary"]
           config:
-          # optional - change severity
+            # optional - change severity
             severity: warn
 ```
 
 </CodeGroup>
 
-</Accordion>
-
-<Accordion title="elementary.dimension_anomalies">
+#### Dimension anomalies
 
 `elementary.dimension_anomalies`
 
@@ -215,7 +208,7 @@ models:
           dimensions: < columns or sql expressions of columns >
           # optional - configure a where a expression to accurate the dimension monitoring
           where_expression: < sql expression >
-          time_bucket:              # Daily by default
+          time_bucket: # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -254,9 +247,7 @@ models:
 
 </CodeGroup>
 
-</Accordion>
-
-<Accordion title="elementary.all_columns_anomalies">
+#### All columns anomalies
 
 `elementary.all_columns_anomalies`
 
@@ -280,7 +271,7 @@ models:
       - elementary.all_columns_anomalies:
           column_anomalies: < specific monitors, all if null >
           where_expression: < sql expression >
-          time_bucket:              # Daily by default
+          time_bucket: # Daily by default
             period: < time period >
             count: < number of periods >
 ```
@@ -306,15 +297,11 @@ models:
 
 </CodeGroup>
 
-#### Column anomalies
-
 <Snippet file="column-metrics.mdx" />
-
-</Accordion>
 
 ### Column tests
 
-<Accordion title="elementary.column_anomalies">
+#### Column anomalies
 
 `elementary.column_anomalies`
 
@@ -325,7 +312,6 @@ the `column_anomalies` key.
 For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
 <CodeGroup>
-
 
 For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
 
@@ -343,9 +329,9 @@ models:
           - elementary.column_anomalies:
               column_anomalies: < specific monitors, all if null >
               where_expression: < sql expression >
-              time_bucket:              # Daily by default
-                              period: < time period >
-                              count: < number of periods >
+              time_bucket: # Daily by default
+                period: < time period >
+                count: < number of periods >
 
   - name: < model name >
     ## if no timestamp is configured, elementary will monitor without time filtering
@@ -408,10 +394,7 @@ models:
 
 <Snippet file="column-metrics.mdx" />
 
-</Accordion>
-
-
-#### Adding tests examples: 
+#### Adding tests examples:
 
 <CodeGroup>
 
@@ -530,15 +513,15 @@ sources:
 
 ```yml Sources example
 sources:
-  - name: 'my_non_dbt_data'
-    database: 'raw_events'
-    schema: 'product'
+  - name: "my_non_dbt_data"
+    database: "raw_events"
+    schema: "product"
     tables:
-      - name: 'raw_product_login_events'
-      ## sources don't have config, so elementary config is placed under 'meta'
+      - name: "raw_product_login_events"
+        ## sources don't have config, so elementary config is placed under 'meta'
         meta:
           elementary:
-            timestamp_column: 'loaded_at'
+            timestamp_column: "loaded_at"
         tests:
           - elementary.table_anomalies
           - elementary.dimension_anomalies:
@@ -565,14 +548,16 @@ sources:
 
 ## Configure your elementary anomaly detection tests
 
-<Tip>If your data set has a timestamp column that represents the creation time of a field, it is highly recommended configuring it as a `timestamp_column`.</Tip>
+<Tip>
+  If your data set has a timestamp column that represents the creation time of a
+  field, it is highly recommended configuring it as a `timestamp_column`.
+</Tip>
 
 To support different types of data sets, the tests have configuration that can be used to customize their behavior.
 Read more about [data anomaly detection tests configuration here](/guides/elementary-tests-configuration).
 
 We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
 If you wish to only be warned on anomalies, configure the `severity` of the tests to `warn`.
-
 
 ## What happens on each test?
 
@@ -583,17 +568,14 @@ If there were any anomalies in the detection period, the test will fail.
 On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
 
 <Tooltip tip="Anomaly detection tests core concepts">
-<img
-src="https://raw.githubusercontent.com/elementary-data/assets-hosting/master/anomaly_detection/elementary-anomaly-detection-core-concepts.png"
-alt="Elementary anomaly detection tests core concepts"
-/>
+  <img
+    src="https://raw.githubusercontent.com/elementary-data/assets-hosting/master/anomaly_detection/elementary-anomaly-detection-core-concepts.png"
+    alt="Elementary anomaly detection tests core concepts"
+  />
 </Tooltip>
 
 To learn more, refer to [core concepts](/guides/how-anomaly-detection-works).
 
-
 ## What does it mean when a test fails?
 
 When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [core concepts](/guides/how-anomaly-detection-works) and [anomaly detection](/guides/data-anomaly-detection).
-
-

@@ -69,7 +69,23 @@ class DbtRunner(BaseDbtRunner):
                 env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
-            raise DbtCommandError(err, command_args)
+            err_msg = None
+            if capture_output:
+                err_log_msgs = []
+                err_json_logs = err.output.splitlines()
+                for err_log_line in err_json_logs:
+                    try:
+                        log = DbtLog(err_log_line)
+                        if log.level == "error":
+                            err_log_msgs.append(log.msg)
+                    except JSONDecodeError:
+                        logger.debug(
+                            f"Unable to parse dbt log message: {err_log_line}",
+                            exc_info=True,
+                        )
+                err_msg = "\n".join(err_log_msgs)
+            raise DbtCommandError(err, command_args, err_msg)
+
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")

@@ -71,6 +71,7 @@ on:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+  ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
 
 jobs:
   test:
@@ -162,6 +163,12 @@ jobs:
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-webhook "$SLACK_WEBHOOK"
+
+      - name: Validate alerts statuses were updated
+        working-directory: ${{ env.ELMENTARY_INTERNAL_DBT_PKG_DIR }}
+        run: |
+          dbt deps
+          dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
 
       - name: Run report
         run: >

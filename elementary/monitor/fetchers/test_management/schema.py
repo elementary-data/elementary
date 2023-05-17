@@ -9,6 +9,7 @@ class ResourceColumnModel(BaseModel):
 
 
 class ResourceModel(BaseModel):
+    id: str
     name: str
     source_name: Optional[str]
     db_schema: str = Field(alias="schema")
@@ -34,7 +35,10 @@ class TestModel(BaseModel):
     args: Optional[dict]
     severity: str
     owners: List[str] = Field(default_factory=list)
+    model_owners: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
+    model_tags: List[str] = Field(default_factory=list)
+    meta: dict = Field(default_factory=dict)
     description: Optional[str]
     is_singular: bool
     updated_at: str
