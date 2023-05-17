@@ -165,11 +165,10 @@ jobs:
           --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Validate alerts statuses were updated
-        if: ${{ always() }}
         working-directory: ${{ env.ELMENTARY_INTERNAL_DBT_PKG_DIR }}
-        run: >
-          dbt run-operation validate_alert_statuses_are_updated
-          -t "${{ inputs.warehouse-type }}"
+        run: |
+          dbt deps
+          dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
 
       - name: Run report
         run: >
