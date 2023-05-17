@@ -169,7 +169,6 @@ jobs:
         run: >
           dbt run-operation validate_alert_statuses_are_updated
           -t "${{ inputs.warehouse-type }}"
-          --project-profile-target "${{ inputs.warehouse-type }}"
 
       - name: Run report
         run: >
