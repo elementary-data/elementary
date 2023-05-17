@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
