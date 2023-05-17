@@ -18,10 +18,10 @@
         all_alerts as (
             select alert_id, suppression_status
             from alerts
-            union
+            union all
             select alert_id, suppression_status
             from alerts_models
-            union
+            union all
             select alert_id, suppression_status
             from alerts_source_freshness
         )
