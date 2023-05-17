@@ -32,15 +32,15 @@ class AlertsFetcher(FetcherClient):
     ):
         alert_ids = [alert.id for alert in alerts_to_skip]
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
+        logger.info(f'Update skipped alerts at "{table_name}"')
         for alert_ids_chunk in alert_ids_chunks:
-            self.dbt_runner.run_operation(
-                macro_name="update_skipped_alerts",
-                macro_args={
+            self.dbt_runner.run(
+                select="update_alerts.update_skipped_alerts",
+                vars={
                     "alert_ids": alert_ids_chunk,
                     "table_name": table_name,
                 },
-                capture_output=False,
-                should_log=False,
+                quiet=True,
             )
 
     def query_pending_test_alerts(
@@ -138,16 +138,16 @@ class AlertsFetcher(FetcherClient):
 
     def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
+        logger.info(f'Update sent alerts at "{table_name}"')
         for alert_ids_chunk in alert_ids_chunks:
-            self.dbt_runner.run_operation(
-                macro_name="update_sent_alerts",
-                macro_args={
+            self.dbt_runner.run(
+                select="update_alerts.update_sent_alerts",
+                vars={
                     "alert_ids": alert_ids_chunk,
                     "sent_at": get_now_utc_str(),
                     "table_name": table_name,
                 },
-                capture_output=False,
-                should_log=False,
+                quiet=True,
             )
 
     @staticmethod
