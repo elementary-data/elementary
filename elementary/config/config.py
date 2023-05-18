@@ -58,6 +58,7 @@ class Config:
         gcs_bucket_name: str = None,
         slack_report_url: str = None,
         env: str = None,
+        dbt_vars: dict = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -67,7 +68,7 @@ class Config:
         self.env = env
 
         # Additional env vars supplied to dbt invocations
-        self.dbt_env_vars = dict()
+        self.dbt_env_vars = dbt_vars
         self.dbt_env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
         config = self._load_configuration()

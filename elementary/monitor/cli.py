@@ -257,7 +257,6 @@ def monitor(
             fg="bright_red",
         )
         slack_webhook = deprecated_slack_webhook
-    vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
         config_dir,
         profiles_dir,
@@ -272,6 +271,7 @@ def monitor(
         timezone=timezone,
         env=env,
         slack_group_alerts_by=group_by,
+        dbt_vars=yaml.loads(dbt_vars),
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
@@ -288,9 +288,7 @@ def monitor(
             disable_samples=disable_samples,
             filter=select,
         )
-        success = data_monitoring.run_alerts(
-            days_back, full_refresh_dbt_package, dbt_vars=vars
-        )
+        success = data_monitoring.run_alerts(days_back, full_refresh_dbt_package)
         anonymous_tracking.track_cli_end(
             Command.MONITOR, data_monitoring.properties(), ctx.command.name
         )
@@ -359,7 +357,6 @@ def report(
     """
     Generate a local observability report of your warehouse.
     """
-    vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
         config_dir,
         profiles_dir,
@@ -369,6 +366,7 @@ def report(
         target_path,
         dbt_quoting=dbt_quoting,
         env=env,
+        dbt_vars=yaml.loads(dbt_vars),
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
@@ -391,7 +389,6 @@ def report(
             exclude_elementary_models=exclude_elementary_models,
             should_open_browser=open_browser,
             project_name=project_name,
-            dbt_vars=vars,
         )
         anonymous_tracking.track_cli_end(
             Command.REPORT, data_monitoring.properties(), ctx.command.name
