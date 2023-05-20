@@ -20,7 +20,10 @@ class AlertsQueryResult(Generic[AlertType]):
         return len(self.alerts) + len(self.malformed_alerts)
 
     def get_all(self) -> List[Alert]:
-        return self.alerts + self.malformed_alerts
+        ret: List[Alert] = []
+        ret.extend(self.alerts)
+        ret.extend(self.malformed_alerts)
+        return ret
 
     def get_alerts_to_skip(self) -> List[Union[AlertType, MalformedAlert]]:
         return self.alerts_to_skip or []

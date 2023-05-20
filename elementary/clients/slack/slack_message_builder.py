@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -143,7 +143,7 @@ class SlackMessageBuilder:
         return attachments
 
     @staticmethod
-    def get_slack_status_icon(status: str) -> str:
+    def get_slack_status_icon(status: Optional[str]) -> str:
         icon = ":small_red_triangle:"
         if status == "warn":
             icon = ":warning:"

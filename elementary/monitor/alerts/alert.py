@@ -1,4 +1,4 @@
-from typing import List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 
 from dateutil import tz
 
@@ -71,8 +71,8 @@ class Alert:
         self.slack_group_alerts_by = slack_group_alerts_by
 
         # Defined in the base class so type checks will not complain
-        self.data = None
-        self.model_unique_id = None
+        self.data: Dict[str, Any] = {}
+        self.model_unique_id: Optional[str] = None
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."

@@ -53,10 +53,10 @@ class SourceFreshnessAlert(Alert):
         self.alerts_table = SourceFreshnessAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
-        owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+        tags = self.slack_message_builder.prettify_and_dedup_list(self.tags or [])
+        owners = self.slack_message_builder.prettify_and_dedup_list(self.owners or [])
         subscribers = self.slack_message_builder.prettify_and_dedup_list(
-            self.subscribers
+            self.subscribers or []
         )
         icon = self.slack_message_builder.get_slack_status_icon(self.status)
 
@@ -76,7 +76,7 @@ class SourceFreshnessAlert(Alert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -88,7 +88,7 @@ class SourceFreshnessAlert(Alert):
                     [
                         f"*Source:* {self.source_name}.{self.identifier}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}*",
                     ],
                 ),
             )
@@ -118,7 +118,7 @@ class SourceFreshnessAlert(Alert):
             result.extend(
                 self.slack_message_builder.create_compacted_sections_blocks(
                     [
-                        f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s)}",
+                        f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s) if self.max_loaded_at_time_ago_in_s else 'N/A'}",
                         f"*Last Record At*\n{self.max_loaded_at}",
                         f"*Sampled At*\n{self.snapshotted_at}",
                     ]

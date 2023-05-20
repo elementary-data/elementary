@@ -1,6 +1,6 @@
 from typing import List
 
-from elementary.monitor.alerts.alert import Alert, AlertType
+from elementary.monitor.alerts.alert import AlertType
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -37,51 +37,57 @@ def filter_alerts(
 
 
 def _filter_alerts_by_tag(
-    alerts: List[Alert],
+    alerts: List[AlertType],
     filter: SelectorFilterSchema,
-) -> List[Alert]:
+) -> List[AlertType]:
     if filter.tag is None:
         return alerts
 
     filtered_alerts = []
     for alert in alerts:
-        alert_tags = (
-            try_load_json(alert.tags)
+        raw_tags = (
+            alert.tags
             if not isinstance(alert, MalformedAlert)
-            else try_load_json(alert.data.get("tags"))
+            else alert.data.get("tags")
         )
+        alert_tags = try_load_json(raw_tags) if isinstance(raw_tags, str) else raw_tags
+
         if alert_tags and filter.tag in alert_tags:
             filtered_alerts.append(alert)
     return filtered_alerts
 
 
 def _filter_alerts_by_owner(
-    alerts: List[Alert],
+    alerts: List[AlertType],
     filter: SelectorFilterSchema,
-) -> List[Alert]:
+) -> List[AlertType]:
     if filter.owner is None:
         return alerts
 
     filtered_alerts = []
     for alert in alerts:
-        alert_owners = (
-            try_load_json(alert.owners)
+        raw_owners = (
+            alert.owners
             if not isinstance(alert, MalformedAlert)
-            else try_load_json(alert.data.get("owners"))
+            else alert.data.get("owners")
         )
+        alert_owners = (
+            try_load_json(raw_owners) if isinstance(raw_owners, str) else raw_owners
+        )
+
         if alert_owners and filter.owner in alert_owners:
             filtered_alerts.append(alert)
     return filtered_alerts
 
 
 def _filter_alerts_by_model(
-    alerts: List[Alert],
+    alerts: List[AlertType],
     filter: SelectorFilterSchema,
-) -> List[Alert]:
+) -> List[AlertType]:
     if filter.model is None:
         return alerts
 
-    filtered_alerts = []
+    filtered_alerts: List[AlertType] = []
     for alert in alerts:
         alert_model_unique_id = alert.model_unique_id
         if alert_model_unique_id and alert_model_unique_id.endswith(filter.model):
@@ -90,9 +96,9 @@ def _filter_alerts_by_model(
 
 
 def _filter_alerts_by_node_names(
-    alerts: List[Alert],
+    alerts: List[AlertType],
     filter: SelectorFilterSchema,
-) -> List[Alert]:
+) -> List[AlertType]:
     if filter.node_names is None:
         return alerts
 

@@ -127,14 +127,14 @@ class DataMonitoring:
             return {}
 
     @staticmethod
-    def _check_dbt_package_compatibility(dbt_pkg_ver: str) -> None:
-        raw_py_pkg_ver = package.get_package_version()
-        if raw_py_pkg_ver is None:
+    def _check_dbt_package_compatibility(dbt_pkg_ver_str: str) -> None:
+        py_pkg_ver_str = package.get_package_version()
+        if py_pkg_ver_str is None:
             logger.warning("Could not get package version!")
             return
 
-        dbt_pkg_ver = cast(version.Version, version.parse(dbt_pkg_ver))
-        py_pkg_ver = cast(version.Version, version.parse(raw_py_pkg_ver))
+        dbt_pkg_ver = cast(version.Version, version.parse(dbt_pkg_ver_str))
+        py_pkg_ver = cast(version.Version, version.parse(py_pkg_ver_str))
         if dbt_pkg_ver.major > py_pkg_ver.major or (
             dbt_pkg_ver.major == py_pkg_ver.major
             and dbt_pkg_ver.minor > py_pkg_ver.minor
