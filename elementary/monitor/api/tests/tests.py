@@ -223,6 +223,7 @@ class TestsAPI(APIClient):
                             status=test_result_db_row.status,
                             affected_rows=self._parse_affected_row(
                                 results_description=test_result_db_row.test_results_description
+                                or ""
                             ),
                         )
                     )
@@ -418,19 +419,19 @@ class TestsAPI(APIClient):
             test_result_db_row.status != "pass"
             and test_result_db_row.test_results_description
         ):
-            found_rows_number = re.search(
+            found_rows_number_match = re.search(
                 r"\d+", test_result_db_row.test_results_description
             )
-            if found_rows_number:
-                found_rows_number = found_rows_number.group()
+            if found_rows_number_match:
+                found_rows_number = found_rows_number_match.group()
                 failed_rows_count = int(found_rows_number)
         return failed_rows_count
 
     def _get_total_tests_results(
         self,
         test_metadatas: List[TestMetadataSchema],
-    ) -> Dict[Optional[str], TotalsSchema]:
-        totals = dict()
+    ) -> Dict[str, TotalsSchema]:
+        totals: Dict[str, TotalsSchema] = dict()
         for test in test_metadatas:
             self._update_test_results_totals(
                 totals_dict=totals,
