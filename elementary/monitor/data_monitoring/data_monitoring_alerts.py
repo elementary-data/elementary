@@ -2,7 +2,7 @@ import json
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, List, Optional, Set, Tuple, cast
+from typing import DefaultDict, List, Optional, Set, Tuple
 
 from alive_progress import alive_it
 
@@ -207,13 +207,13 @@ class DataMonitoringAlerts(DataMonitoring):
 
     def _skip_alerts(self, alerts: Alerts):
         self.alerts_api.skip_alerts(
-            cast(List[Alert], alerts.tests.get_alerts_to_skip()), TestAlert.TABLE_NAME
+            alerts.tests.get_alerts_to_skip(), TestAlert.TABLE_NAME
         )
         self.alerts_api.skip_alerts(
-            cast(List[Alert], alerts.models.get_alerts_to_skip()), ModelAlert.TABLE_NAME
+            alerts.models.get_alerts_to_skip(), ModelAlert.TABLE_NAME
         )
         self.alerts_api.skip_alerts(
-            cast(List[Alert], alerts.source_freshnesses.get_alerts_to_skip()),
+            alerts.source_freshnesses.get_alerts_to_skip(),
             SourceFreshnessAlert.TABLE_NAME,
         )
 

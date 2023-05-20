@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Dict, List, cast
+from typing import Callable, Dict, List, Sequence
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
@@ -28,7 +28,7 @@ class AlertsFetcher(FetcherClient):
         self.config = config
         self.elementary_database_and_schema = elementary_database_and_schema
 
-    def skip_alerts(self, alerts_to_skip: List[Alert], table_name: str):
+    def skip_alerts(self, alerts_to_skip: Sequence[Alert], table_name: str):
         alert_ids = [alert.id for alert in alerts_to_skip]
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
         logger.info(f'Update skipped alerts at "{table_name}"')
@@ -68,7 +68,7 @@ class AlertsFetcher(FetcherClient):
             },
             ModelAlert,
         )
-        return cast(AlertsQueryResult[ModelAlert], res)
+        return res
 
     def query_pending_source_freshness_alerts(
         self, days_back: int

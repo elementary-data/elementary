@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, Dict, List, Union
+from typing import DefaultDict, Dict, List, Sequence, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -99,7 +99,7 @@ class AlertsAPI(APIClient):
         )
         return source_freshness_alerts
 
-    def skip_alerts(self, alerts_to_skip: List[Alert], table_name: str) -> None:
+    def skip_alerts(self, alerts_to_skip: Sequence[Alert], table_name: str) -> None:
         self.alerts_fetcher.skip_alerts(
             alerts_to_skip=alerts_to_skip, table_name=table_name
         )
