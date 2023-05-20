@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.monitor.alerts.alert import ValidAlert
+from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
     DATETIME_FORMAT,
@@ -12,7 +12,7 @@ from elementary.utils.time import (
 logger = get_logger(__name__)
 
 
-class SourceFreshnessAlert(ValidAlert):
+class SourceFreshnessAlert(Alert):
     TABLE_NAME = "alerts_source_freshness"
 
     def __init__(

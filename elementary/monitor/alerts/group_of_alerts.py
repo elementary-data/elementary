@@ -214,7 +214,11 @@ class GroupOfAlerts:
             return []
         result = []
         for model_error_alert in model_error_alert_list:
-            assert isinstance(model_error_alert, ModelAlert)
+            if not isinstance(model_error_alert, ModelAlert):
+                raise Exception(
+                    f"Unexpected type in model error alerts list: {type(model_error_alert)}"
+                )
+
             if model_error_alert.message:
                 result.extend(["*Result message*"])
         return result
@@ -224,7 +228,11 @@ class GroupOfAlerts:
         if len(model_error_alert_list) == 0:
             return ""
         for model_error_alert in model_error_alert_list:
-            assert isinstance(model_error_alert, ModelAlert)
+            if not isinstance(model_error_alert, ModelAlert):
+                raise Exception(
+                    f"Unexpected type in model error alerts list: {type(model_error_alert)}"
+                )
+
             if model_error_alert.message:
                 return f"```{model_error_alert.message.strip()}```"
         return ""

@@ -85,13 +85,7 @@ class Alert:
         return "Alert"
 
 
-class ValidAlert(Alert):
-    def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
-        raise NotImplementedError
-
-
-# Matches any subclass of ValidAlert
-ValidAlertType = TypeVar("ValidAlertType", bound=ValidAlert)
+AlertType = TypeVar("AlertType", bound=Alert)
 
 
 class PreviewIsTooLongError(Exception):

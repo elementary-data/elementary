@@ -5,7 +5,7 @@ from typing import Optional
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.monitor.alerts.alert import ValidAlert
+from elementary.monitor.alerts.alert import Alert
 from elementary.monitor.fetchers.alerts.normalized_alert import (
     COLUMN_FIELD,
     DESCRIPTION_FIELD,
@@ -25,7 +25,7 @@ from elementary.utils.time import DATETIME_FORMAT
 logger = get_logger(__name__)
 
 
-class TestAlert(ValidAlert):
+class TestAlert(Alert):
     TABLE_NAME = "alerts"
     __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
 

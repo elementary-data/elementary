@@ -1,14 +1,14 @@
 import json
 
 from elementary.clients.slack.schema import SlackMessageSchema
-from elementary.monitor.alerts.alert import ValidAlert
+from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
 
-class ModelAlert(ValidAlert):
+class ModelAlert(Alert):
     TABLE_NAME = "alerts_models"
 
     def __init__(

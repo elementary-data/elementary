@@ -205,7 +205,11 @@ class TestsAPI(APIClient):
                     test_result_db_row.invocation_id
                     or test_result_db_row.test_execution_id
                 )
-                assert invocation_id is not None
+
+                if invocation_id is None:
+                    # Shouldn't happen, mainly a sanity
+                    logger.warning("Test result without invocation ID found, skipping")
+                    continue
 
                 # Currently the way we flat test results causing that there is duplication in test invocation for
                 # each test.

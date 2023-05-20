@@ -1,6 +1,6 @@
 from typing import List
 
-from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.alert import Alert, AlertType
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -13,9 +13,9 @@ logger = get_logger(__name__)
 
 
 def filter_alerts(
-    alerts: List[Alert],
+    alerts: List[AlertType],
     filter: SelectorFilterSchema = SelectorFilterSchema(),
-) -> List[Alert]:
+) -> List[AlertType]:
     filtered_alerts = []
     # If the filter is empty, we want to return all of the alerts
     if not filter.selector:
@@ -103,10 +103,12 @@ def _filter_alerts_by_node_names(
             alert_node_name = alert.test_name
         elif isinstance(alert, ModelAlert) or isinstance(alert, SourceFreshnessAlert):
             alert_node_name = alert.model_unique_id
-        # Malformed alert
-        else:
-            assert isinstance(alert, MalformedAlert)
+        elif isinstance(alert, MalformedAlert):
             alert_node_name = alert.test_name or alert.model_unique_id
+        else:
+            # Shouldn't happen
+            raise Exception(f"Unexpected alert type: {type(alert)}")
+
         if alert_node_name:
             for node_name in filter.node_names:
                 if alert_node_name.endswith(node_name) or node_name.endswith(

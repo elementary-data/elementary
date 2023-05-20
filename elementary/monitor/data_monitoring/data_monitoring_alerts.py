@@ -127,7 +127,8 @@ class DataMonitoringAlerts(DataMonitoring):
                 )
         table_to_alerts: DefaultDict[str, list] = defaultdict(list)
         for alert in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
-            assert alert.model_unique_id is not None
+            if alert.model_unique_id is None:
+                continue
             table_to_alerts[alert.model_unique_id].append(alert)
 
         by_table_group: List[GroupOfAlerts] = [

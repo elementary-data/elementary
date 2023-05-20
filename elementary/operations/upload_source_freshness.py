@@ -53,7 +53,10 @@ class UploadSourceFreshnessOperation:
             )
 
     def get_target_path(self) -> Path:
-        assert self.config.project_dir is not None
+        if not self.config.project_dir:
+            raise click.ClickException(
+                "Path to dbt project is missing. Please run the command with `--project-dir <DBT_PROJECT_DIR>`."
+            )
 
         env_target_path = os.getenv("DBT_TARGET_PATH")
         if env_target_path:

@@ -50,8 +50,8 @@ class FiltersAPI(APIClient):
         no_tests_filter = FilterSchema(name="no_test", display_name="No Tests")
 
         totals_models_ids = totals.keys()
-        for artifact in [*models.values(), *sources.values()]:
-            assert isinstance(artifact, ArtifactSchema)
+        artifacts: List[ArtifactSchema] = [*models.values(), *sources.values()]
+        for artifact in artifacts:
             if artifact.unique_id and artifact.unique_id not in totals_models_ids:
                 no_tests_filter.add_model_unique_id(artifact.unique_id)
 
