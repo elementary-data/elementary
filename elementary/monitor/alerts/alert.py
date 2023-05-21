@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, TypeVar
 
 from dateutil import tz
 
@@ -16,16 +16,16 @@ class Alert:
     def __init__(
         self,
         id: str,
-        alert_class_id: str = None,
-        suppression_status: str = None,
-        sent_at: str = None,
-        detected_at: str = None,
-        database_name: str = None,
-        schema_name: str = None,
-        elementary_database_and_schema: str = None,
+        alert_class_id: Optional[str] = None,
+        suppression_status: Optional[str] = None,
+        sent_at: Optional[str] = None,
+        detected_at: Optional[str] = None,
+        database_name: Optional[str] = None,
+        schema_name: Optional[str] = None,
+        elementary_database_and_schema: Optional[str] = None,
         owners: Optional[List[str]] = None,
         tags: Optional[List[str]] = None,
-        status: str = None,
+        status: Optional[str] = None,
         subscribers: Optional[List[str]] = None,
         slack_channel: Optional[str] = None,
         alert_suppression_interval: int = 0,
@@ -48,14 +48,15 @@ class Alert:
         self.detected_at_utc = None
         self.detected_at = None
         self.timezone = timezone
-        try:
-            detected_at_datetime = convert_utc_iso_format_to_datetime(detected_at)
-            self.detected_at_utc = detected_at_datetime
-            self.detected_at = detected_at_datetime.astimezone(
-                tz.gettz(timezone) if timezone else tz.tzlocal()
-            )
-        except Exception:
-            logger.error('Failed to parse "detected_at" field.')
+        if detected_at is not None:
+            try:
+                detected_at_datetime = convert_utc_iso_format_to_datetime(detected_at)
+                self.detected_at_utc = detected_at_datetime
+                self.detected_at = detected_at_datetime.astimezone(
+                    tz.gettz(timezone) if timezone else tz.tzlocal()
+                )
+            except Exception:
+                logger.error('Failed to parse "detected_at" field.')
         self.database_name = database_name
         self.schema_name = schema_name
         self.owners = owners
@@ -69,6 +70,10 @@ class Alert:
         self.alert_fields = alert_fields
         self.slack_group_alerts_by = slack_group_alerts_by
 
+        # Defined in the base class so type checks will not complain
+        self.data: Dict[str, Any] = {}
+        self.model_unique_id: Optional[str] = None
+
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."
 
@@ -78,6 +83,9 @@ class Alert:
     @property
     def consice_name(self):
         return "Alert"
+
+
+AlertType = TypeVar("AlertType", bound=Alert)
 
 
 class PreviewIsTooLongError(Exception):

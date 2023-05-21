@@ -2,10 +2,10 @@ import json
 import os
 import statistics
 from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, overload
 
 from elementary.clients.api.api_client import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.api.models.schema import (
     ModelCoverageSchema,
     ModelRunSchema,
@@ -15,9 +15,10 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
     TotalsModelRunsSchema,
+    TotalsSchema,
 )
 from elementary.monitor.fetchers.models.models import ModelsFetcher
-from elementary.monitor.fetchers.models.schema import ExposureSchema
+from elementary.monitor.fetchers.models.schema import ArtifactSchemaType, ExposureSchema
 from elementary.monitor.fetchers.models.schema import (
     ModelRunSchema as FetcherModelRunSchema,
 )
@@ -31,7 +32,7 @@ SQL_FILE_EXTENSION = ".sql"
 
 
 class ModelsAPI(APIClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
         self.models_fetcher = ModelsFetcher(dbt_runner=self.dbt_runner)
 
@@ -92,13 +93,13 @@ class ModelsAPI(APIClient):
             )
 
         model_runs_totals = {}
-        for model_runs in aggregated_models_runs:
-            model_runs_totals[model_runs.unique_id] = {
-                "errors": model_runs.totals.errors,
-                "warnings": 0,
-                "failures": 0,
-                "passed": model_runs.totals.success,
-            }
+        for aggregated_model_run in aggregated_models_runs:
+            model_runs_totals[aggregated_model_run.unique_id] = TotalsSchema(
+                errors=aggregated_model_run.totals.errors,
+                warnings=0,
+                failures=0,
+                passed=aggregated_model_run.totals.success,
+            )
         return ModelRunsWithTotalsSchema(
             runs=aggregated_models_runs, totals=model_runs_totals
         )
@@ -121,7 +122,12 @@ class ModelsAPI(APIClient):
         if models_results:
             for model_result in models_results:
                 normalized_model = self._normalize_dbt_artifact_dict(model_result)
+
                 model_unique_id = normalized_model.unique_id
+                if model_unique_id is None:
+                    # Shouldn't happen, but handling this case for mypy
+                    continue
+
                 models[model_unique_id] = normalized_model
         return models
 
@@ -131,7 +137,12 @@ class ModelsAPI(APIClient):
         if sources_results:
             for source_result in sources_results:
                 normalized_source = self._normalize_dbt_artifact_dict(source_result)
+
                 source_unique_id = normalized_source.unique_id
+                if source_unique_id is None:
+                    # Shouldn't happen, but handling this case for mypy
+                    continue
+
                 sources[source_unique_id] = normalized_source
         return sources
 
@@ -141,7 +152,12 @@ class ModelsAPI(APIClient):
         if exposures_results:
             for exposure_result in exposures_results:
                 normalized_exposure = self._normalize_dbt_artifact_dict(exposure_result)
+
                 exposure_unique_id = normalized_exposure.unique_id
+                if exposure_unique_id is None:
+                    # Shouldn't happen, but handling this case for mypy
+                    continue
+
                 exposures[exposure_unique_id] = normalized_exposure
         return exposures
 
@@ -150,15 +166,37 @@ class ModelsAPI(APIClient):
         coverages = dict()
         if coverage_results:
             for coverage_result in coverage_results:
+                if coverage_result.model_unique_id is None:
+                    # Shouldn't happen, but handling this case for mypy
+                    continue
+
                 coverages[coverage_result.model_unique_id] = ModelCoverageSchema(
                     table_tests=coverage_result.table_tests,
                     column_tests=coverage_result.column_tests,
                 )
         return coverages
 
+    @overload
+    def _normalize_dbt_artifact_dict(
+        self, artifact: ModelSchema
+    ) -> NormalizedModelSchema:
+        ...
+
+    @overload
+    def _normalize_dbt_artifact_dict(
+        self, artifact: ExposureSchema
+    ) -> NormalizedExposureSchema:
+        ...
+
+    @overload
+    def _normalize_dbt_artifact_dict(
+        self, artifact: SourceSchema
+    ) -> NormalizedSourceSchema:
+        ...
+
     def _normalize_dbt_artifact_dict(
         self, artifact: Union[ModelSchema, ExposureSchema, SourceSchema]
-    ) -> Union[NormalizedExposureSchema, NormalizedModelSchema, NormalizedSourceSchema]:
+    ) -> Union[NormalizedModelSchema, NormalizedExposureSchema, NormalizedSourceSchema]:
         schema_to_normalized_schema_map = {
             ExposureSchema: NormalizedExposureSchema,
             ModelSchema: NormalizedModelSchema,
@@ -176,8 +214,11 @@ class ModelsAPI(APIClient):
     @classmethod
     def _normalize_artifact_path(
         cls,
-        artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
+        artifact: Union[ArtifactSchemaType],
     ) -> str:
+        if artifact.full_path is None:
+            raise Exception("Artifact full path can't be null")
+
         splited_artifact_path = artifact.full_path.split(os.path.sep)
         artifact_file_name = splited_artifact_path[-1]
 

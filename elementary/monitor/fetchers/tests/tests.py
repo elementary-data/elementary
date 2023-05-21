@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
 from elementary.utils.log import get_logger
@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 
 
 class TestsFetcher(FetcherClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
 
     def get_all_test_results_db_rows(

@@ -107,9 +107,9 @@ class DbtTestAlert(TestAlert):
 
         self.failed_rows_count = -1
         if self.status != "pass" and self.error_message:
-            found_rows_number = re.search(r"\d+", self.error_message)
-            if found_rows_number:
-                found_rows_number = found_rows_number.group()
+            found_rows_number_match = re.search(r"\d+", self.error_message)
+            if found_rows_number_match:
+                found_rows_number = found_rows_number_match.group()
                 self.failed_rows_count = int(found_rows_number)
 
     def _get_test_description(self):
@@ -140,7 +140,7 @@ class DbtTestAlert(TestAlert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time*: {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Time*: {self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -152,10 +152,13 @@ class DbtTestAlert(TestAlert):
                     [
                         f"*Test:* {self.test_short_name or self.test_name} - {self.test_sub_type_display_name}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}*",
                     ],
                 ),
             )
+
+        if self.alert_fields is None:
+            self.alert_fields = []
 
         preview = []
         if TABLE_FIELD in self.alert_fields:
@@ -169,14 +172,16 @@ class DbtTestAlert(TestAlert):
         if COLUMN_FIELD in self.alert_fields:
             compacted_sections.append(f"*Column*\n{self.column_name or '_No column_'}")
         if TAGS_FIELD in self.alert_fields:
-            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
         if OWNERS_FIELD in self.alert_fields:
-            owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+            owners = self.slack_message_builder.prettify_and_dedup_list(
+                self.owners or []
+            )
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in self.alert_fields:
             subscribers = self.slack_message_builder.prettify_and_dedup_list(
-                self.subscribers
+                self.subscribers or []
             )
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers or "_No subscribers_"}'
@@ -297,7 +302,7 @@ class ElementaryTestAlert(DbtTestAlert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time*: {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Time*: {self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -309,10 +314,13 @@ class ElementaryTestAlert(DbtTestAlert):
                     [
                         f"*Test:* {self.test_short_name or self.test_name} - {self.test_sub_type_display_name}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                        f"*{self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}*",
                     ],
                 ),
             )
+
+        if self.alert_fields is None:
+            self.alert_fields = []
 
         preview = []
         if TABLE_FIELD in self.alert_fields:
@@ -326,14 +334,16 @@ class ElementaryTestAlert(DbtTestAlert):
         if COLUMN_FIELD in self.alert_fields:
             compacted_sections.append(f"*Column*\n{self.column_name or '_No column_'}")
         if TAGS_FIELD in self.alert_fields:
-            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags)
+            tags = self.slack_message_builder.prettify_and_dedup_list(self.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
         if OWNERS_FIELD in self.alert_fields:
-            owners = self.slack_message_builder.prettify_and_dedup_list(self.owners)
+            owners = self.slack_message_builder.prettify_and_dedup_list(
+                self.owners or []
+            )
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in self.alert_fields:
             subscribers = self.slack_message_builder.prettify_and_dedup_list(
-                self.subscribers
+                self.subscribers or []
             )
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers or "_No subscribers_"}'

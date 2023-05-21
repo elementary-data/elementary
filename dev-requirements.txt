@@ -1,2 +1,13 @@
 pytest
 pre-commit
+mypy
+
+# MyPy stubs
+types-pkg-resources
+types-requests
+networkx-stubs
+types-python-dateutil
+boto3-stubs
+google-auth-stubs
+ratelimit-stubs
+types-google-cloud-ndb

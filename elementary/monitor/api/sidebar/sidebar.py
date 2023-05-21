@@ -31,8 +31,11 @@ class SidebarAPI(APIClient):
     def get_dbt_sidebar(
         self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> DbtSidebarSchema:
-        sidebar = dict()
+        sidebar: DbtSidebarSchema = dict()
         for artifact in artifacts:
+            if artifact.unique_id is None:
+                continue
+
             self._update_dbt_sidebar(
                 dbt_sidebar=sidebar,
                 artifact_unique_id=artifact.unique_id,
@@ -65,22 +68,28 @@ class SidebarAPI(APIClient):
         sidebar = defaultdict(list)
         for artifact in artifacts:
             unique_id = artifact.unique_id
+            if unique_id is None:
+                continue
+
             if artifact.tags:
                 for tag in artifact.tags:
                     sidebar[tag].append(unique_id)
             else:
                 sidebar[NO_TAGS_DEFAULT_TREE].append(unique_id)
-        return sidebar
+        return dict(sidebar)
 
     def get_owners_sidebar(
-        self, artifacts: List[Union[NormalizedModelSchema, NormalizedModelSchema]]
+        self, artifacts: List[Union[NormalizedModelSchema, NormalizedSourceSchema]]
     ) -> OwnersSidebarSchema:
         sidebar = defaultdict(list)
         for artifact in artifacts:
             unique_id = artifact.unique_id
+            if unique_id is None:
+                continue
+
             if artifact.owners:
                 for owner in artifact.owners:
                     sidebar[owner].append(unique_id)
             else:
                 sidebar[NO_OWNERS_DEFAULT_TREE].append(unique_id)
-        return sidebar
+        return dict(sidebar)

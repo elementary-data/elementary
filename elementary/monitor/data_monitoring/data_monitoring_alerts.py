@@ -2,10 +2,11 @@ import json
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import DefaultDict, List, Optional, Set, Tuple
 
 from alive_progress import alive_it
 
+from elementary.clients.slack.client import SlackClient
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.alert import Alert
@@ -22,7 +23,6 @@ from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.tracking.tracking_interface import Tracking
-from elementary.utils.json_utils import prettify_json_str_set
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -35,7 +35,7 @@ class DataMonitoringAlerts(DataMonitoring):
     def __init__(
         self,
         config: Config,
-        tracking: Tracking = None,
+        tracking: Optional[Tracking] = None,
         filter: Optional[str] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
@@ -53,25 +53,29 @@ class DataMonitoringAlerts(DataMonitoring):
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
 
-    def _parse_emails_to_ids(self, emails: List[str]) -> str:
+        if self.slack_client is None:
+            raise Exception("Could not initialize slack client!")
+
+        # Type hint to mark that in this class the slack client cannot be None
+        self.slack_client: SlackClient
+
+    def _parse_emails_to_ids(self, emails: Optional[List[str]]) -> List[str]:
         def _regex_match_owner_email(potential_email: str) -> bool:
             email_regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
 
-            return re.fullmatch(email_regex, potential_email)
+            return bool(re.fullmatch(email_regex, potential_email))
 
         def _get_user_id(email: str) -> str:
             user_id = self.slack_client.get_user_id_from_email(email)
             return f"<@{user_id}>" if user_id else email
 
-        if isinstance(emails, list) and emails != []:
-            ids = [
-                _get_user_id(email) if _regex_match_owner_email(email) else email
-                for email in emails
-            ]
-            parsed_ids_str = prettify_json_str_set(ids)
-            return parsed_ids_str
-        else:
-            return prettify_json_str_set(emails)
+        if emails is None:
+            return []
+
+        return [
+            _get_user_id(email) if _regex_match_owner_email(email) else email
+            for email in emails
+        ]
 
     def _fix_owners_and_subscribers(self, group_alert: GroupOfAlerts):
         """
@@ -83,11 +87,11 @@ class DataMonitoringAlerts(DataMonitoring):
         for alert in group_alert.alerts:
             alert.owners = self._parse_emails_to_ids(alert.owners)
             alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
-        all_owners = set([])
-        all_subscribers = set([])
+        all_owners: Set[str] = set([])
+        all_subscribers: Set[str] = set([])
         for alert in group_alert.alerts:
-            all_owners.update(alert.owners)
-            all_subscribers.update(alert.subscribers)
+            all_owners.update(alert.owners or [])
+            all_subscribers.update(alert.subscribers or [])
         group_alert.set_owners(list(all_owners))
         group_alert.set_subscribers(list(all_subscribers))
 
@@ -121,11 +125,13 @@ class DataMonitoringAlerts(DataMonitoring):
                 logger.error(
                     f"Failed to extract value as a group-by config: '{alert.slack_group_alerts_by}'. Allowed Values: {list(GroupingType.__members__.keys())} Ignoring it for now and default grouping strategy will be used"
                 )
-        table_to_alerts = defaultdict(lambda: [])
+        table_to_alerts: DefaultDict[str, list] = defaultdict(list)
         for alert in alerts_by_grouping_mechanism[GroupingType.BY_TABLE]:
+            if alert.model_unique_id is None:
+                continue
             table_to_alerts[alert.model_unique_id].append(alert)
 
-        by_table_group = [
+        by_table_group: List[GroupOfAlerts] = [
             GroupOfAlertsByTable(
                 alerts=table_to_alerts[model_unique_id],
                 default_channel_destination=self.config.slack_channel_name,
@@ -134,7 +140,7 @@ class DataMonitoringAlerts(DataMonitoring):
             for model_unique_id in table_to_alerts.keys()
         ]
 
-        by_alert_group = [
+        by_alert_group: List[GroupOfAlerts] = [
             GroupOfAlertsBySingleAlert(
                 alerts=[al],
                 default_channel_destination=self.config.slack_channel_name,

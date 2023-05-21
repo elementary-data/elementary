@@ -44,7 +44,7 @@ class SelectorFilterSchema(BaseModel):
 class DataMonitoringReportTestResultsSchema(BaseModel):
     results: Dict[Optional[str], List[TestResultSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
-    invocation: InvocationSchema = dict()
+    invocation: InvocationSchema
 
 
 class DataMonitoringReportTestRunsSchema(BaseModel):
