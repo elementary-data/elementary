@@ -339,8 +339,7 @@ def test_prettify_and_dedup_list():
     assert list_prettified == "name1, name2"
 
     assert (
-        message_builder.prettify_and_dedup_list("name1, name2, name2")
-        == "name1, name2, name2"
+        message_builder.prettify_and_dedup_list("name1, name2, name2") == "name1, name2"
     )
 
     string_of_list_prettified = message_builder.prettify_and_dedup_list(
