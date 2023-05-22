@@ -5,7 +5,7 @@ from typing import Optional
 import dbt.adapters.factory
 
 # IMPORTANT: This must be kept before the rest of the dbt imports
-dbt.adapters.factory.get_adapter = lambda config: config.adapter
+dbt.adapters.factory.get_adapter = lambda config: config.adapter  # type: ignore[attr-defined]
 
 from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
 from dbt.config import RuntimeConfig
@@ -46,7 +46,7 @@ class SlimDbtRunner(BaseDbtRunner):
         project_dir: str,
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
-        vars: dict = None,
+        vars: Optional[dict] = None,
         **kwargs,
     ):
         super().__init__(project_dir, profiles_dir, target)
@@ -59,7 +59,7 @@ class SlimDbtRunner(BaseDbtRunner):
         project_dir: str,
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
-        vars: dict = None,
+        vars: Optional[dict] = None,
     ):
         self._load_config_args(
             project_dir=project_dir, profiles_dir=profiles_dir, target=target, vars=vars
@@ -73,7 +73,7 @@ class SlimDbtRunner(BaseDbtRunner):
         project_dir: str,
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
-        vars: dict = None,
+        vars: Optional[dict] = None,
     ):
         args = ConfigArgs(
             project_dir=project_dir,
@@ -137,7 +137,7 @@ class SlimDbtRunner(BaseDbtRunner):
                 project_dir=self.args.project_dir,
                 profiles_dir=self.args.profiles_dir,
                 target=self.args.target,
-                vars=json.dumps(vars),
+                vars=vars,
             )
 
         log_message = f"Running dbt run-operation {macro_name} --args {macro_args}{f' --var {vars}' if vars else ''}"

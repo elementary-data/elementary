@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, ValidationError, validator
+from pydantic import BaseModel, Field, validator
 
 
 class ResourceColumnModel(BaseModel):
@@ -9,8 +9,9 @@ class ResourceColumnModel(BaseModel):
 
 
 class ResourceModel(BaseModel):
+    id: str
     name: str
-    source_name: Optional[str]
+    source_name: Optional[str] = None
     db_schema: str = Field(alias="schema")
     tags: List[str] = Field(default_factory=list)
     owners: List[str] = Field(default_factory=list)
@@ -25,23 +26,29 @@ class ResourcesModel(BaseModel):
 class TestModel(BaseModel):
     id: str
     db_schema: str = Field(alias="schema")
-    table: Optional[str]
-    column: Optional[str]
+    table: Optional[str] = None
+    source_name: Optional[str] = None
+    column: Optional[str] = None
     package: Optional[str] = None
     name: str
-    type: Optional[str]
-    args: Optional[dict]
+    type: Optional[str] = None
+    args: Optional[dict] = None
     severity: str
     owners: List[str] = Field(default_factory=list)
+    model_owners: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
+    model_tags: List[str] = Field(default_factory=list)
+    meta: dict = Field(default_factory=dict)
+    description: Optional[str]
+    is_singular: bool
     updated_at: str
-    updated_by: Optional[str]
+    updated_by: Optional[str] = None
 
     @validator("severity", pre=True)
     def validate_severity(cls, severity: str):
         severity_lower_string = severity.lower()
         if severity_lower_string not in ["error", "warn"]:
-            raise ValidationError('Severity must be "warn" or "error"')
+            raise ValueError('Severity must be "warn" or "error"')
         return severity_lower_string
 
 
@@ -55,7 +62,7 @@ class TagsModel(BaseModel):
 
 class UserModel(BaseModel):
     name: str
-    email: Optional[str]
+    email: Optional[str] = None
     origin: Literal["account", "project"]
 
 

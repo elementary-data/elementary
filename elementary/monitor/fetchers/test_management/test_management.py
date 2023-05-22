@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.test_management.schema import (
     ResourceModel,
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 class TestManagementFetcher(FetcherClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
 
     def get_models(self, exclude_elementary=True) -> List[ResourceModel]:
@@ -32,6 +32,7 @@ class TestManagementFetcher(FetcherClient):
             owners = unpack_and_flatten_str_to_list(model_result["owners"])
             models.append(
                 ResourceModel(
+                    id=model_result["unique_id"],
                     name=model_result["name"],
                     schema=model_result["schema"],
                     tags=json.loads(model_result["tags"]),
@@ -53,6 +54,7 @@ class TestManagementFetcher(FetcherClient):
             owners = unpack_and_flatten_str_to_list(source_result["owners"])
             sources.append(
                 ResourceModel(
+                    id=source_result["unique_id"],
                     name=source_result["name"],
                     source_name=source_result["source_name"],
                     schema=source_result["schema"],
@@ -87,28 +89,31 @@ class TestManagementFetcher(FetcherClient):
         )
         tests = []
         for test_result in test_results:
-            owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
-            tags = list(
-                set(
-                    [
-                        *json.loads(test_result["model_tags"]),
-                        *json.loads(test_result["tags"]),
-                    ]
-                )
-            )
+            meta = json.loads(test_result["meta"])
+            owners = unpack_and_flatten_str_to_list(meta.get("owner", "[]"))
+            model_owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
+            tags = list(set(json.loads(test_result["tags"])))
+            model_tags = list(set(json.loads(test_result["model_tags"])))
+            description = meta.get("description")
 
             tests.append(
                 TestModel(
                     id=test_result["id"],
                     schema=test_result["schema"],
                     table=test_result["table"],
+                    source_name=test_result["source_name"],
                     column=test_result["column"],
                     package=test_result["test_package"],
                     name=test_result["test_name"],
                     args=json.loads(test_result["test_params"]),
                     severity=test_result["severity"],
                     owners=owners,
+                    model_owners=model_owners,
                     tags=tags,
+                    model_tags=model_tags,
+                    meta=meta,
+                    description=description,
+                    is_singular=test_result["is_singular"],
                     updated_at=test_result["generated_at"],
                 )
             )

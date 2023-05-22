@@ -16,6 +16,7 @@ from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
+from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -118,10 +119,11 @@ class DataMonitoringReport(DataMonitoring):
         return report_data_dict
 
     def _add_report_tracking(
-        self, report_data: ReportDataSchema, error: Exception = None
+        self, report_data: ReportDataSchema, error: Optional[Exception] = None
     ):
         if error:
-            self.tracking.record_internal_exception(error)
+            if self.tracking:
+                self.tracking.record_internal_exception(error)
             return
 
         test_metadatas = []
@@ -138,27 +140,28 @@ class DataMonitoringReport(DataMonitoring):
         )
         self.execution_properties["test_result_count"] = len(test_metadatas)
 
-        if self.config.anonymous_tracking_enabled:
+        if self.config.anonymous_tracking_enabled and isinstance(
+            self.tracking, AnonymousTracking
+        ):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.tracking.anonymous_warehouse.id
-                if self.tracking.anonymous_warehouse
-                else None,
+                anonymous_warehouse_id=self.tracking.anonymous_warehouse
+                and self.tracking.anonymous_warehouse.id,
             )
 
     def send_report(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int = 7,
+        test_runs_amount: int = 720,
         file_path: Optional[str] = None,
         disable_passed_test_metrics: bool = False,
         should_open_browser: bool = False,
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
         remote_file_path: Optional[str] = None,
-        disable_html_attachment: Optional[bool] = False,
-        include_description: Optional[bool] = False,
+        disable_html_attachment: bool = False,
+        include_description: bool = False,
     ):
         # Generate the report
         generated_report_successfully, local_html_path = self.generate_report(
@@ -242,8 +245,8 @@ class DataMonitoringReport(DataMonitoring):
 
     def send_test_results_summary(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int,
+        test_runs_amount: int,
         disable_passed_test_metrics: bool = False,
         bucket_website_url: Optional[str] = None,
         include_description: bool = False,
@@ -257,17 +260,20 @@ class DataMonitoringReport(DataMonitoring):
         summary_test_results = tests_api.get_test_results_summary(
             filter=self.filter.get_filter(),
         )
-        send_succeeded = self.slack_client.send_message(
-            channel_name=self.config.slack_channel_name,
-            message=SlackReportSummaryMessageBuilder().get_slack_message(
-                test_results=summary_test_results,
-                bucket_website_url=bucket_website_url,
-                include_description=include_description,
-                filter=self.filter.get_filter(),
-                days_back=days_back,
-                env=self.config.env,
-            ),
-        )
+        if self.slack_client:
+            send_succeeded = self.slack_client.send_message(
+                channel_name=self.config.slack_channel_name,
+                message=SlackReportSummaryMessageBuilder().get_slack_message(
+                    test_results=summary_test_results,
+                    bucket_website_url=bucket_website_url,
+                    include_description=include_description,
+                    filter=self.filter.get_filter(),
+                    days_back=days_back,
+                    env=self.config.env,
+                ),
+            )
+        else:
+            send_succeeded = False
 
         self.execution_properties[
             "sent_test_results_summary_succesfully"

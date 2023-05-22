@@ -1,10 +1,13 @@
 import click
+from click import ClickException
 
 
 class RequiredIf(click.Option):
     def __init__(self, *args, **kwargs):
         self.required_if = kwargs.pop("required_if")
-        assert self.required_if, "'required_if' parameter required"
+        if not self.required_if:
+            raise ClickException("'required_if' parameter is required")
+
         kwargs["help"] = (
             kwargs.get("help", "")
             + " NOTE: This argument must be configured together with %s."

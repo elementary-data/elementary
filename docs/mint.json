@@ -102,11 +102,35 @@
       "group": "Deployment and Configuration",
       "pages": [
         "deployment-and-configuration/elementary-in-production",
-        "deployment-and-configuration/docker",
-        "deployment-and-configuration/github-actions",
-        "deployment-and-configuration/gitlab-ci",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"
+      ]
+    },
+    {
+      "group": "Data Anomaly Detection Tests",
+      "pages": [
+        "guides/how-anomaly-detection-works",
+        "guides/data-anomaly-detection",
+        "guides/elementary-tests-configuration",
+        {
+          "group": "Tests params",
+          "pages": [
+            "guides/anomaly-detection-configuration/timestamp-column",
+            "guides/anomaly-detection-configuration/where-expression",
+            "guides/anomaly-detection-configuration/anomaly-sensitivity",
+            "guides/anomaly-detection-configuration/anomaly-direction",
+            "guides/anomaly-detection-configuration/days-back",
+            "guides/anomaly-detection-configuration/backfill-days",
+            "guides/anomaly-detection-configuration/time-bucket",
+            "guides/anomaly-detection-configuration/seasonality",
+            "guides/anomaly-detection-configuration/column_anomalies",
+            "guides/anomaly-detection-configuration/exclude_prefix",
+            "guides/anomaly-detection-configuration/exclude_regexp",
+            "guides/anomaly-detection-configuration/dimensions",
+            "guides/anomaly-detection-configuration/event_timestamp_column",
+            "guides/anomaly-detection-configuration/update_timestamp_column"
+          ]
+        }
       ]
     },
     {
@@ -117,13 +141,6 @@
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
-      ]
-    },
-    {
-      "group": "Data Anomaly Detection Tests",
-      "pages": [
-        "guides/elementary-tests-configuration",
-        "guides/data-anomaly-detection"
       ]
     },
     {
@@ -139,6 +156,14 @@
             "integrations/redshift",
             "integrations/databricks",
             "integrations/postgres"
+          ]
+        },
+        {
+          "group": "Deployment",
+          "pages": [
+            "deployment-and-configuration/docker",
+            "deployment-and-configuration/github-actions",
+            "deployment-and-configuration/gitlab-ci"
           ]
         }
       ]
@@ -159,6 +184,8 @@
         {
           "group": "Releases",
           "pages": [
+            "release-notes/releases/0.7.7",
+            "release-notes/releases/0.7.6",
             "release-notes/releases/0.7.5",
             "release-notes/releases/0.7.2",
             "release-notes/releases/0.6.10",
@@ -178,7 +205,8 @@
         "cloud/onboarding/quickstart-dbt-package",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
-        "cloud/manage-team"
+        "cloud/manage-team",
+        "cloud/general/security-and-privacy"
       ]
     }
   ],

@@ -1,8 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from pydantic import BaseModel
 
-DbtSidebarSchema = dict
+DbtSidebarSchema = Dict[str, Union[list, dict]]
 TagsSidebarSchema = Dict[str, List[str]]
 OwnersSidebarSchema = Dict[str, List[str]]
 

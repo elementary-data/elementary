@@ -21,7 +21,7 @@ ADAPTER_EXTRA_REQUIREMENTS = {
 setup(
     name="elementary-data",
     description="Data monitoring and lineage",
-    version="0.7.8",
+    version="0.7.10",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.6.2",

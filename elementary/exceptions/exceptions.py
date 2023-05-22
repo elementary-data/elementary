@@ -38,9 +38,16 @@ class DbtCommandError(Error):
     """Exception raised while executing a dbt command"""
 
     def __init__(
-        self, err: subprocess.CalledProcessError, base_command_args: List[str]
+        self,
+        err: subprocess.CalledProcessError,
+        base_command_args: List[str],
+        err_msg: Optional[str],
     ):
-        super().__init__(f"Failed to run dbt command - {vars(err)}")
+        msg = "Failed to run dbt command."
+        if err_msg:
+            msg = f"{msg}\n{err_msg}"
+
+        super().__init__(msg)
 
         # Command args sent to _run_command (without additional user-specific args it as such as projects / profiles
         # dir)

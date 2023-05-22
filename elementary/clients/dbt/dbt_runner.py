@@ -42,7 +42,7 @@ class DbtRunner(BaseDbtRunner):
         log_format: str = "json",
         vars: Optional[dict] = None,
         quiet: bool = False,
-    ) -> Tuple[bool, str]:
+    ) -> Tuple[bool, Optional[str]]:
         dbt_command = ["dbt"]
         if capture_output:
             dbt_command.extend(["--log-format", log_format])
@@ -69,7 +69,23 @@ class DbtRunner(BaseDbtRunner):
                 env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
-            raise DbtCommandError(err, command_args)
+            err_msg = None
+            if capture_output:
+                err_log_msgs = []
+                err_json_logs = err.output.splitlines()
+                for err_log_line in err_json_logs:
+                    try:
+                        log = DbtLog(err_log_line)
+                        if log.level == "error":
+                            err_log_msgs.append(log.msg)
+                    except JSONDecodeError:
+                        logger.debug(
+                            f"Unable to parse dbt log message: {err_log_line}",
+                            exc_info=True,
+                        )
+                err_msg = "\n".join(err_log_msgs)
+            raise DbtCommandError(err, command_args, err_msg)
+
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
@@ -130,7 +146,7 @@ class DbtRunner(BaseDbtRunner):
                 f'Failed to run macro: "{macro_name}"\nRun output: {command_output}'
             )
         run_operation_results = []
-        if capture_output:
+        if capture_output and command_output is not None:
             json_messages = command_output.splitlines()
             for json_message in json_messages:
                 try:
@@ -201,7 +217,9 @@ class DbtRunner(BaseDbtRunner):
             success, command_output_string = self._run_command(
                 command_args=command_args, capture_output=True, log_format="text"
             )
-            command_outputs = command_output_string.splitlines()
+            command_outputs = (
+                command_output_string.splitlines() if command_output_string else []
+            )
             # ls command didn't match nodes.
             # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.
             if (

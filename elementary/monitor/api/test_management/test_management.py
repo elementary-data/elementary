@@ -1,5 +1,5 @@
 from elementary.clients.api.api_client import APIClient
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.fetchers.test_management.schema import (
     ResourcesModel,
     TagsModel,
@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 class TestManagementAPI(APIClient):
     def __init__(
         self,
-        dbt_runner: DbtRunner,
+        dbt_runner: BaseDbtRunner,
         exclude_elementary: bool = True,
     ):
         super().__init__(dbt_runner)

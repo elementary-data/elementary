@@ -35,9 +35,13 @@ def test_update_sent_alerts(
     calls_args = mock_subprocess_run.call_args_list
     for call_args in calls_args:
         # Test that update_sent_alerts has been called with alert_ids as arguments.
-        assert call_args[0][0][1] == "run-operation"
-        assert call_args[0][0][2] == "update_sent_alerts"
-        assert "alert_ids" in json.loads(call_args[0][0][4])
+        assert call_args[0][0][1] == "run"
+        assert call_args[0][0][2] == "-s"
+        assert call_args[0][0][3] == "update_alerts.update_sent_alerts"
+        dbt_run_params = json.loads(call_args[0][0][9])
+        assert "alert_ids" in dbt_run_params
+        assert "table_name" in dbt_run_params
+        assert "sent_at" in dbt_run_params
 
 
 @mock.patch("subprocess.run")
@@ -56,9 +60,12 @@ def test_skip_alerts(mock_subprocess_run, alerts_fetcher_mock: MockAlertsFetcher
     calls_args = mock_subprocess_run.call_args_list
     for call_args in calls_args:
         # Test that update_skipped_alerts has been called with alert_ids as arguments.
-        assert call_args[0][0][1] == "run-operation"
-        assert call_args[0][0][2] == "update_skipped_alerts"
-        assert "alert_ids" in json.loads(call_args[0][0][4])
+        assert call_args[0][0][1] == "run"
+        assert call_args[0][0][2] == "-s"
+        assert call_args[0][0][3] == "update_alerts.update_skipped_alerts"
+        dbt_run_params = json.loads(call_args[0][0][9])
+        assert "alert_ids" in dbt_run_params
+        assert "table_name" in dbt_run_params
 
 
 @pytest.fixture
