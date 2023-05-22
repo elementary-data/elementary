@@ -12,6 +12,10 @@ class DbtInvocationSchema(BaseModel):
     command: Optional[str] = None
     selected: Optional[str] = None
     full_refresh: Optional[bool] = None
+    job_url: Optional[str] = None
+    job_name: Optional[str] = None
+    job_id: Optional[str] = None
+    orchestrator: Optional[str] = None
 
     @validator("detected_at", pre=True)
     def format_detected_at(cls, detected_at):
