@@ -21,3 +21,17 @@ class InvocationsFetcher(FetcherClient):
         else:
             logger.warning(f"Could not find invocation by filter: {macro_args}")
             return DbtInvocationSchema()
+
+    def get_invocations_by_ids(
+        self, macro_args: Optional[dict] = None
+    ) -> [DbtInvocationSchema]:
+        invocations_response = self.dbt_runner.run_operation(
+            macro_name="get_invocations_by_ids", macro_args=macro_args
+        )
+        invocation_results = (
+            json.loads(invocations_response[0]) if invocations_response else []
+        )
+        invocation_results = [
+            DbtInvocationSchema(**invocation_result) for invocation_result in invocation_results
+        ]
+        return invocation_results
