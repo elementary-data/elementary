@@ -1,3 +1,5 @@
+from typing import Dict
+
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.fetchers.invocations.invocations import InvocationsFetcher
@@ -44,3 +46,6 @@ class InvocationsAPI(APIClient):
         return self.invocations_fetcher.get_invocations_by_ids(
             macro_args=dict(ids=invocations_ids)
         )
+
+    def get_resources_latest_invocation(self) -> Dict[str, str]:
+        return self.invocations_fetcher.get_resources_latest_invocation()
