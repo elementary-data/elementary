@@ -37,3 +37,10 @@ class InvocationsAPI(APIClient):
             )
         else:
             raise NotImplementedError
+
+    def get_invocations_by_ids(
+        self, invocations_ids: list[str]
+    ) -> DbtInvocationSchema:
+        return self.invocations_fetcher.get_invocations_by_ids(
+            macro_args=dict(ids=invocations_ids)
+        )
