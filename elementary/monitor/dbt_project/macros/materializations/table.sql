@@ -13,6 +13,7 @@
       select * from result where 1 = 0
     {% endset %}
     {% do context.update({"sql": init_schema_sql}) %}
+  {# This is meant to deal with a race between initializing the table and loading data into it. #}
   {% else %}
     {% set same_sql %}
       select * from {{ this }}
