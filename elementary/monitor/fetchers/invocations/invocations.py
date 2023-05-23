@@ -32,7 +32,8 @@ class InvocationsFetcher(FetcherClient):
             json.loads(invocations_response[0]) if invocations_response else []
         )
         invocation_results = [
-            DbtInvocationSchema(**invocation_result) for invocation_result in invocation_results
+            DbtInvocationSchema(**invocation_result)
+            for invocation_result in invocation_results
         ]
         return invocation_results
 
@@ -46,6 +47,8 @@ class InvocationsFetcher(FetcherClient):
 
         resources_latest_invocation_dict = dict()
         for result in resources_latest_invocation_results:
-            resources_latest_invocation_dict[result['unique_id']] = result['invocation_id']
+            resources_latest_invocation_dict[result["unique_id"]] = result[
+                "invocation_id"
+            ]
 
         return resources_latest_invocation_dict
