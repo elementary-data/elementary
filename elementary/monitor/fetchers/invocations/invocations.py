@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
