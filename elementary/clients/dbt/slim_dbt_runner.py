@@ -29,6 +29,7 @@ disable_tracking()
 
 dbt_version = version.parse(dbt_version_string)
 
+DEFAULT_VARS: Union[str, Dict[str, Any]]
 if dbt_version >= version.parse("1.5.0"):
     DEFAULT_VARS = {}
 else:
@@ -58,7 +59,7 @@ DEFAULT_PROJECT_DIR = str(default_project_dir())
 class ConfigArgs(BaseModel):
     project_dir: str = DEFAULT_PROJECT_DIR
     profiles_dir: str = DEFAULT_PROFILES_DIR
-    profile: str = None
+    profile: Optional[str] = None
     target: Optional[str] = None
     threads: Optional[int] = 1
     vars: Optional[Union[str, Dict[str, Any]]] = DEFAULT_VARS
@@ -115,7 +116,7 @@ class SlimDbtRunner(BaseDbtRunner):
             target=target,
             vars=config_vars,
         )
-        set_from_args(args, args)
+        set_from_args(args, args)  # type: ignore[arg-type]
         self.args = args
 
     def _load_config(self):
