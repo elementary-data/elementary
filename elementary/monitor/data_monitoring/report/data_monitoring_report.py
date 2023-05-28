@@ -269,7 +269,6 @@ class DataMonitoringReport(DataMonitoring):
                     include_description=include_description,
                     filter=self.filter.get_filter(),
                     days_back=days_back,
-                    env=self.config.env,
                 ),
             )
         else:
