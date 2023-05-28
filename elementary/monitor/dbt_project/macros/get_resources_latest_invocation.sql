@@ -1,7 +1,7 @@
 {% macro get_resources_latest_invocation() %}
   {% set dbt_run_results = ref('dbt_run_results') %}
   {% set get_resources_latest_invocation_query %}
-    with row_numbered_run_results as (
+    with ordered_run_results as (
       select
         *,
         ROW_NUMBER() OVER (PARTITION BY unique_id ORDER BY generated_at DESC) AS row_number
@@ -9,7 +9,7 @@
     ),
     latest_run_results as (
       select *
-      from row_numbered_run_results
+      from ordered_run_results
       where row_number = 1
     )
 
