@@ -1,19 +1,21 @@
 {% macro get_invocations_by_ids(ids) %}
   {% set database, schema = elementary.target_database(), target.schema %}
   {% set invocations_relation = adapter.get_relation(database, schema, 'dbt_invocations') %}
-  {% if not invocations_relation %}
-    {% do elementary.edr_log('failed getting invocations relation') %}
-    {% do return(none) %}
+  {% if invocations_relation %}
+    {% set get_invocations_query %}
+      select
+        invocation_id,
+        command,
+        selected,
+        full_refresh,
+        job_url,
+        job_name,
+        job_id,
+        orchestrator
+      from {{ invocations_relation }}
+      where invocation_id in {{ elementary.strings_list_to_tuple(ids) }}
+    {% endset %}
+    {% set result = elementary.run_query(get_invocations_query) %}
+    {% do return(elementary.agate_to_dicts(result)) %}
   {% endif %}
-
-  {% set get_invocations_query %}
-    select * from {{ invocations_relation }} where invocation_id in {{ elementary.strings_list_to_tuple(ids) }}
-  {% endset %}
-  {% set result = elementary.run_query(get_invocations_query) %}
-  {% if not result %}
-    {% do elementary.edr_log('no invocations were found') %}
-    {% do return(none) %}
-  {% endif %}
-
-  {% do return(elementary.agate_to_dicts(result)) %}
 {% endmacro %}

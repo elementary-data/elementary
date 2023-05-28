@@ -7,6 +7,7 @@
         ROW_NUMBER() OVER (PARTITION BY unique_id ORDER BY generated_at DESC) AS row_number
       from {{ dbt_run_results }}
     ),
+
     latest_run_results as (
       select *
       from ordered_run_results
