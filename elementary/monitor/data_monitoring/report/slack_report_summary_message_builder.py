@@ -15,13 +15,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     def get_slack_message(
         self,
         test_results: List[TestResultSummarySchema],
-        env: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         include_description: bool = False,
     ) -> SlackMessageSchema:
-        self._add_title_to_slack_alert(env=env)
+        self._add_title_to_slack_alert()
         self._add_preview_to_slack_alert(
             test_results,
             days_back=days_back,
@@ -35,18 +34,9 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         )
         return super().get_slack_message()
 
-    def _add_title_to_slack_alert(
-        self,
-        env: str,
-    ):
-        env_text = (
-            ":construction: Development"
-            if env == "dev"
-            else ":large_green_circle: Production"
-        )
-
+    def _add_title_to_slack_alert(self):
         title_blocks = [
-            self.create_header_block(f":mag: Monitoring summary ({env_text})"),
+            self.create_header_block(":mag: Monitoring summary"),
             self.create_divider_block(),
         ]
         self._add_always_displayed_blocks(title_blocks)
