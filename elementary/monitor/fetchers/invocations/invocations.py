@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
@@ -23,10 +23,13 @@ class InvocationsFetcher(FetcherClient):
             return DbtInvocationSchema()
 
     def get_invocations_by_ids(
-        self, macro_args: Optional[dict] = None
-    ) -> [DbtInvocationSchema]:
+        self, invocations_ids: list[str]
+    ) -> List[DbtInvocationSchema]:
         invocations_response = self.dbt_runner.run_operation(
-            macro_name="get_invocations_by_ids", macro_args=macro_args
+            macro_name="get_invocations_by_ids",
+            macro_args={
+                "ids": invocations_ids,
+            },
         )
         invocation_results = (
             json.loads(invocations_response[0]) if invocations_response else []
@@ -45,6 +48,8 @@ class InvocationsFetcher(FetcherClient):
             json.loads(response[0]) if response else []
         )
 
-        resources_latest_invocation_map = {result["unique_id"]: result["invocation_id"] for result in
-                                           resources_latest_invocation_results}
+        resources_latest_invocation_map = {
+            result["unique_id"]: result["invocation_id"]
+            for result in resources_latest_invocation_results
+        }
         return resources_latest_invocation_map
