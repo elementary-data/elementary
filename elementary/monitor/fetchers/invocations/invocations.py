@@ -45,10 +45,6 @@ class InvocationsFetcher(FetcherClient):
             json.loads(response[0]) if response else []
         )
 
-        resources_latest_invocation_dict = dict()
-        for result in resources_latest_invocation_results:
-            resources_latest_invocation_dict[result["unique_id"]] = result[
-                "invocation_id"
-            ]
-
-        return resources_latest_invocation_dict
+        resources_latest_invocation_map = {result["unique_id"]: result["invocation_id"] for result in
+                                           resources_latest_invocation_results}
+        return resources_latest_invocation_map

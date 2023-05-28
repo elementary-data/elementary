@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -40,7 +40,9 @@ class InvocationsAPI(APIClient):
         else:
             raise NotImplementedError
 
-    def get_invocations_by_ids(self, invocations_ids: list[str]) -> DbtInvocationSchema:
+    def get_invocations_by_ids(
+        self, invocations_ids: list[str]
+    ) -> List[DbtInvocationSchema]:
         return self.invocations_fetcher.get_invocations_by_ids(
             macro_args=dict(ids=invocations_ids)
         )
