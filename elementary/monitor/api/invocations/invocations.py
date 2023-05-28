@@ -43,9 +43,7 @@ class InvocationsAPI(APIClient):
     def get_invocations_by_ids(
         self, invocations_ids: list[str]
     ) -> List[DbtInvocationSchema]:
-        return self.invocations_fetcher.get_invocations_by_ids(
-            macro_args=dict(ids=invocations_ids)
-        )
+        return self.invocations_fetcher.get_invocations_by_ids(invocations_ids)
 
     def get_resources_latest_invocation(self) -> Dict[str, str]:
         return self.invocations_fetcher.get_resources_latest_invocation()
