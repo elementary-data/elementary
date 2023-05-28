@@ -6,14 +6,12 @@ from elementary.monitor.api.filters.filters import FiltersAPI
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.models.models import ModelsAPI
-from elementary.monitor.api.models.schema import (
-    ModelCoverageSchema,
-    ModelRunsSchema,
-    NormalizedExposureSchema,
-    NormalizedModelSchema,
-    NormalizedSourceSchema,
-    TotalsSchema,
-)
+from elementary.monitor.api.models.schema import (ModelCoverageSchema,
+                                                  ModelRunsSchema,
+                                                  NormalizedExposureSchema,
+                                                  NormalizedModelSchema,
+                                                  NormalizedSourceSchema,
+                                                  TotalsSchema)
 from elementary.monitor.api.report.schema import ReportDataSchema
 from elementary.monitor.api.sidebar.sidebar import SidebarAPI
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
