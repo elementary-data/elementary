@@ -23,7 +23,7 @@ class InvocationsFetcher(FetcherClient):
             return DbtInvocationSchema()
 
     def get_invocations_by_ids(
-        self, invocations_ids: list[str]
+        self, invocations_ids: List[str]
     ) -> List[DbtInvocationSchema]:
         invocations_response = self.dbt_runner.run_operation(
             macro_name="get_invocations_by_ids",

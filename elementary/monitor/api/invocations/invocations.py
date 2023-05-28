@@ -41,7 +41,7 @@ class InvocationsAPI(APIClient):
             raise NotImplementedError
 
     def get_invocations_by_ids(
-        self, invocations_ids: list[str]
+        self, invocations_ids: List[str]
     ) -> List[DbtInvocationSchema]:
         return self.invocations_fetcher.get_invocations_by_ids(invocations_ids)
 
