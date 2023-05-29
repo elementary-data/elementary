@@ -15,11 +15,18 @@ If undefined, default is null (no time buckets).
 
 - _Default: none_
 - _Relevant tests: All anomaly detection tests_
-- _Configuration level: model config, test config_
 
 <RequestExample>
 
-```yaml model
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          timestamp_column: created_at
+```
+
+```yml model
 models:
   - name: this_is_a_model
     config:
@@ -27,9 +34,8 @@ models:
         timestamp_column: updated_at
 ```
 
-
-```yaml source
-ources:
+```yml source
+sources:
   - name: my_non_dbt_tables
     schema: raw
     tables:
@@ -39,12 +45,10 @@ ources:
             timestamp_column: loaded_at
 ```
 
-```yaml test
-models:
-  - name: this_is_a_model
-    tests:
-      - elementary.volume_anomalies:
-          timestamp_column: created_at
+```yml dbt_project.yml
+vars:
+  timestamp_column: loaded_at
 ```
+
 
 </RequestExample>
