@@ -11,7 +11,6 @@ This timeframe includes the training period and detection period.
 
 - _Default: 14_
 - _Relevant tests: Anomaly detection tests with `timestamp_column`_
-- _Configuration level: var_
 
 <Frame caption="days_back change impact">
     <img
@@ -22,9 +21,25 @@ This timeframe includes the training period and detection period.
 
 <RequestExample>
 
-```yaml dbt_project.yml
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          days_back: 30
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        days_back: 60
+```
+
+```yml dbt_project.yml
 vars:
-  days_back: 14
+  days_back: 45
 ```
 
 </RequestExample>
