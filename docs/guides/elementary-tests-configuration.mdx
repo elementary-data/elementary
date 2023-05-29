@@ -136,7 +136,7 @@ models:
       elementary:
         timestamp_column: updated_at
     tests:
-      - elementary.table_anomalies:
+      - elementary.freshness_anomalies:
           tags: ["elementary"]
       - elementary.all_columns_anomalies:
           tags: ["elementary"]
@@ -144,7 +144,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-      - elementary.table_anomalies:
+      - elementary.volume_anomalies:
           tags: ["elementary"]
 ```
 
@@ -174,7 +174,7 @@ sources:
           elementary:
             timestamp_column: "loaded_at"
         tests:
-          - elementary.table_anomalies
+          - elementary.volume_anomalies
           - elementary.all_columns_anomalies:
               column_anomalies:
                 - null_count

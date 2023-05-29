@@ -87,10 +87,8 @@ models:
       elementary:
         timestamp_column: < timestamp column >
     tests:
-      - elementary.table_anomalies:
-          table_anomalies: < specific monitors, all if null >
+      - elementary.freshness_anomalies:
           # optional - configure different freshness column than timestamp column
-          freshness_column: < freshness_column >
           where_expression: < sql expression >
           time_bucket:
             period: < time period >
@@ -128,10 +126,7 @@ models:
       elementary:
         timestamp_column: 'loaded_at'
     tests:
-        - elementary.table_anomalies:
-            table_anomalies:
-              - row_count
-              - freshness
+        - elementary.volume_anomalies:
             # optional - use tags to run elementary tests on a dedicated run
             tags: ['elementary']
             config:
@@ -160,7 +155,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-        elementary.table_anomalies
+        elementary.volume_anomalies
           tags: ['elementary']
     columns:
       - name: user_id
@@ -203,7 +198,7 @@ sources:
           elementary:
             timestamp_column: "loaded_at"
         tests:
-          - elementary.table_anomalies
+          - elementary.freshness_anomalies
           - elementary.dimension_anomalies:
               dimensions:
                 - event_type
