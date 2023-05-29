@@ -135,6 +135,7 @@
             "guides/anomaly-detection-configuration/backfill-days",
             "guides/anomaly-detection-configuration/time-bucket",
             "guides/anomaly-detection-configuration/seasonality",
+            "guides/anomaly-detection-configuration/min-training-set-size",
             "guides/anomaly-detection-configuration/column-anomalies",
             "guides/anomaly-detection-configuration/exclude_prefix",
             "guides/anomaly-detection-configuration/exclude_regexp",
