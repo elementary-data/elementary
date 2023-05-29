@@ -7,7 +7,7 @@ class ReportDataSchema(BaseModel):
     creation_time: Optional[str] = None
     days_back: Optional[int] = None
     models: dict = dict()
-    sidebars: dict = dict()
+    groups: dict = dict()
     invocation: dict = dict()
     test_results: dict = dict()
     test_results_totals: dict = dict()
