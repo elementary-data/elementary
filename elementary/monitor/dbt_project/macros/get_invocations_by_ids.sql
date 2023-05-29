@@ -1,6 +1,8 @@
 {% macro get_invocations_by_ids(ids) %}
   {% set database, schema = elementary.target_database(), target.schema %}
   {% set invocations_relation = adapter.get_relation(database, schema, 'dbt_invocations') %}
+  {% set column_exists = elementary.column_exists_in_relation(invocations_relation, 'job_url') %}
+
   {% if invocations_relation %}
     {% set get_invocations_query %}
       select
@@ -8,7 +10,9 @@
         command,
         selected,
         full_refresh,
-        job_url,
+        {% if column_exists %}
+          job_url,
+        {% endif %}
         job_name,
         job_id,
         orchestrator
