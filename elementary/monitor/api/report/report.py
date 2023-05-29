@@ -104,9 +104,6 @@ class ReportAPI(APIClient):
                 lineage=serializable_lineage,
                 env=dict(project_name=project_name, env=env),
             )
-            # import ipdb
-
-            # ipdb.set_trace()
             return report_data, None
         except Exception as error:
             return ReportDataSchema(), error
