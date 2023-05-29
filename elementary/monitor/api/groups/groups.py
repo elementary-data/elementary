@@ -5,6 +5,7 @@ from typing import List, Union
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.groups.schema import (
     DbtGroupSchema,
+    GroupItemSchema,
     GroupsSchema,
     OwnersGroupSchema,
     TagsGroupSchema,
@@ -99,8 +100,7 @@ class GroupsAPI(APIClient):
         return dict(group)
 
     @staticmethod
-    def _get_group_item(artifact: GROUPABLE_ARTIFACT) -> dict:
-        return {
-            "node_id": artifact.unique_id,
-            "resource_type": artifact.artifact_type,
-        }
+    def _get_group_item(artifact: GROUPABLE_ARTIFACT) -> GroupItemSchema:
+        return GroupItemSchema(
+            node_id=artifact.unique_id, resource_type=artifact.artifact_type
+        )
