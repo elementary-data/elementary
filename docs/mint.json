@@ -102,6 +102,7 @@
       "group": "Deployment and Configuration",
       "pages": [
         "deployment-and-configuration/elementary-in-production",
+        "deployment-and-configuration/collect-job-data",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"
       ]
