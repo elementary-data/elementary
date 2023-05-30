@@ -9,6 +9,7 @@ def gen_report(json_output_path: str):
         / "elementary"
         / "monitor"
         / "data_monitoring"
+        / "report"
         / "index.html"
     )
     report_template_data = report_template_path.read_text()
