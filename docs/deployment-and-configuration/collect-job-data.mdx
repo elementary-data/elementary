@@ -17,7 +17,7 @@ The goal is to provide context that is useful to triage and resolve data issues,
 - Orchestrator name: `orchestrator`
 - Job name: `job_name`
 - Job ID: `job_id`
-- Job URL: `job_url`
+- Job results URL: `job_url`
 - Job run ID: `job_run_id`
 
 ## How Elementary collects jobs metadata? 
@@ -64,7 +64,7 @@ dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_loa
 
 ## Where can I see my job info?
 
-- In your Elementary schema, the fields are stored in the table `dbt_invocations`.
+- In your Elementary schema, the raw fields are stored in the table `dbt_invocations`. You could also use the view `job_run_results` which groups invocation by job. 
 - In the Elementary report, if the info was collected successfully, you can filter the lineage by job and see the details in the node info. 
 
 
