@@ -36,6 +36,16 @@ To pass job data to elementary using `var`, use the `--vars` flag in your invoca
 dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_load"}'
 ```
 
+#### Variables supported format
+
+| var / env_var               | Format                                                                                                                                            |
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| orchestrator                | one of: `airflow`, `dbt_cloud`, `github_actions`, `prefect`, `dagster` <br/> Any other string would be collected but not presented in the report. |
+| job_name, job_id, job_run_d | string                                                                                                                                            |
+| job_url                     | valid HTTP URL                                                                                                                                    |
+
+
+
 ## Which orchestrators are supported? 
 
 Technically you can pass job info to Elementary from any orchestration tool as long as you configure `env_vars` / `vars`.
