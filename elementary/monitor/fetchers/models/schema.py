@@ -1,6 +1,6 @@
 import os
 import posixpath
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypeVar
 
 from pydantic import Field, validator
 
@@ -45,6 +45,9 @@ class ArtifactSchema(ExtendedBaseModel):
     @validator("full_path", pre=True)
     def format_full_path_sep(cls, full_path: str) -> str:
         return posixpath.sep.join(full_path.split(os.path.sep))
+
+
+ArtifactSchemaType = TypeVar("ArtifactSchemaType", bound=ArtifactSchema)
 
 
 class ModelSchema(ArtifactSchema):

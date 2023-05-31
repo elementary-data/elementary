@@ -1,6 +1,6 @@
 import os
 import posixpath
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
@@ -58,8 +58,8 @@ class ModelRunSchema(BaseModel):
     id: str
     time_utc: str
     status: str
-    full_refresh: bool
-    materialization: str
+    full_refresh: Optional[bool]
+    materialization: Optional[str]
     execution_time: float
 
     @validator("time_utc", pre=True)
@@ -75,7 +75,7 @@ class TotalsModelRunsSchema(BaseModel):
 class ModelRunsSchema(BaseModel):
     unique_id: str
     # schema is a saved name, so we use alias
-    schema_name: str = Field(alias="schema")
+    schema_name: Optional[str] = Field(alias="schema")
     name: str
     status: str
     last_exec_time: float
@@ -117,4 +117,4 @@ class TotalsSchema(BaseModel):
 
 class ModelRunsWithTotalsSchema(BaseModel):
     runs: List[ModelRunsSchema] = list()
-    totals: TotalsSchema = dict()
+    totals: Dict[str, TotalsSchema] = dict()

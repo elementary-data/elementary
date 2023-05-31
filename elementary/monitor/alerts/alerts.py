@@ -1,14 +1,12 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Generic, List, Optional, TypeVar, Union
+from typing import Generic, List, Optional, Union
 
-from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.alert import Alert, AlertType
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import ElementaryTestAlert, TestAlert
-
-AlertType = TypeVar("AlertType")
 
 
 @dataclass
@@ -22,9 +20,12 @@ class AlertsQueryResult(Generic[AlertType]):
         return len(self.alerts) + len(self.malformed_alerts)
 
     def get_all(self) -> List[Alert]:
-        return self.alerts + self.malformed_alerts
+        ret: List[Alert] = []
+        ret.extend(self.alerts)
+        ret.extend(self.malformed_alerts)
+        return ret
 
-    def get_alerts_to_skip(self) -> List[Optional[Union[AlertType, MalformedAlert]]]:
+    def get_alerts_to_skip(self) -> List[Union[AlertType, MalformedAlert]]:
         return self.alerts_to_skip or []
 
 

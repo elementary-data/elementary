@@ -1,17 +1,21 @@
 # flake8: noqa
 import json
-from typing import Optional
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
 import dbt.adapters.factory
+from packaging import version
 
 # IMPORTANT: This must be kept before the rest of the dbt imports
-dbt.adapters.factory.get_adapter = lambda config: config.adapter
+dbt.adapters.factory.get_adapter = lambda config: config.adapter  # type: ignore[attr-defined]
 
 from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
 from dbt.config import RuntimeConfig
 from dbt.flags import set_from_args
 from dbt.parser.manifest import ManifestLoader
 from dbt.tracking import disable_tracking
+from dbt.version import __version__ as dbt_version_string
 from pydantic import BaseModel, validator
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -23,15 +27,42 @@ logger = get_logger(__name__)
 # Disable dbt tracking
 disable_tracking()
 
-DEFAULT_VARS = "{}"
+dbt_version = version.parse(dbt_version_string)
+
+DEFAULT_VARS: Union[str, Dict[str, Any]]
+if dbt_version >= version.parse("1.5.0"):
+    DEFAULT_VARS = {}
+else:
+    DEFAULT_VARS = "{}"
+
+
+def default_project_dir() -> Path:
+    if "DBT_PROJECT_DIR" in os.environ:
+        return Path(os.environ["DBT_PROJECT_DIR"]).resolve()
+    paths = list(Path.cwd().parents)
+    paths.insert(0, Path.cwd())
+    return next((x for x in paths if (x / "dbt_project.yml").exists()), Path.cwd())
+
+
+def default_profiles_dir() -> Path:
+    if "DBT_PROFILES_DIR" in os.environ:
+        return Path(os.environ["DBT_PROFILES_DIR"]).resolve()
+    return (
+        Path.cwd() if (Path.cwd() / "profiles.yml").exists() else Path.home() / ".dbt"
+    )
+
+
+DEFAULT_PROFILES_DIR = str(default_profiles_dir())
+DEFAULT_PROJECT_DIR = str(default_project_dir())
 
 
 class ConfigArgs(BaseModel):
-    profiles_dir: Optional[str] = None
-    project_dir: str
+    project_dir: str = DEFAULT_PROJECT_DIR
+    profiles_dir: str = DEFAULT_PROFILES_DIR
+    profile: Optional[str] = None
     target: Optional[str] = None
     threads: Optional[int] = 1
-    vars: Optional[str] = DEFAULT_VARS
+    vars: Optional[Union[str, Dict[str, Any]]] = DEFAULT_VARS
 
     @validator("vars", pre=True)
     def validate_vars(cls, vars):
@@ -43,10 +74,10 @@ class ConfigArgs(BaseModel):
 class SlimDbtRunner(BaseDbtRunner):
     def __init__(
         self,
-        project_dir: str,
-        profiles_dir: Optional[str] = None,
+        project_dir: str = DEFAULT_PROJECT_DIR,
+        profiles_dir: str = DEFAULT_PROFILES_DIR,
         target: Optional[str] = None,
-        vars: dict = None,
+        vars: Optional[dict] = None,
         **kwargs,
     ):
         super().__init__(project_dir, profiles_dir, target)
@@ -57,9 +88,9 @@ class SlimDbtRunner(BaseDbtRunner):
     def _load_runner(
         self,
         project_dir: str,
-        profiles_dir: Optional[str] = None,
+        profiles_dir: str,
         target: Optional[str] = None,
-        vars: dict = None,
+        vars: Optional[dict] = None,
     ):
         self._load_config_args(
             project_dir=project_dir, profiles_dir=profiles_dir, target=target, vars=vars
@@ -71,17 +102,21 @@ class SlimDbtRunner(BaseDbtRunner):
     def _load_config_args(
         self,
         project_dir: str,
-        profiles_dir: Optional[str] = None,
+        profiles_dir: str,
         target: Optional[str] = None,
-        vars: dict = None,
+        vars: Optional[dict] = None,
     ):
+        config_vars: Optional[Union[str, Dict[str, Any]]] = vars
+        if dbt_version < version.parse("1.5.0"):
+            config_vars = json.dumps(config_vars)
+
         args = ConfigArgs(
             project_dir=project_dir,
-            target=target,
             profiles_dir=profiles_dir,
-            vars=json.dumps(vars) if vars else None,
+            target=target,
+            vars=config_vars,
         )
-        set_from_args(args, args)
+        set_from_args(args, args)  # type: ignore[arg-type]
         self.args = args
 
     def _load_config(self):
@@ -137,7 +172,7 @@ class SlimDbtRunner(BaseDbtRunner):
                 project_dir=self.args.project_dir,
                 profiles_dir=self.args.profiles_dir,
                 target=self.args.target,
-                vars=json.dumps(vars),
+                vars=vars,
             )
 
         log_message = f"Running dbt run-operation {macro_name} --args {macro_args}{f' --var {vars}' if vars else ''}"

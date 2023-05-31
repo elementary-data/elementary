@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -38,7 +38,7 @@ class AnonymousTracking(Tracking):
         # Exceptions that occurred during the run of the CLI, but don't fail the entire run.
         # We want to avoid sending an event for each one of these (as there might be many of them), so we will send
         # them as a part of the cli-end event.
-        self.internal_exceptions = []
+        self.internal_exceptions: List[dict] = []
         self.internal_exceptions_count = 0
 
         if not self._do_not_track:
@@ -67,9 +67,11 @@ class AnonymousTracking(Tracking):
             pass
         return user_id
 
-    def _send_anonymous_event(self, name: str, properties: dict = None) -> None:
+    def _send_anonymous_event(
+        self, name: str, properties: Optional[dict] = None
+    ) -> None:
         try:
-            if self._do_not_track:
+            if self._do_not_track or self.anonymous_user_id is None:
                 return
 
             if properties is None:
@@ -84,9 +86,8 @@ class AnonymousTracking(Tracking):
                     **properties,
                 },
                 groups={
-                    "warehouse": self.anonymous_warehouse.id
-                    if self.anonymous_warehouse
-                    else None
+                    "warehouse": self.anonymous_warehouse
+                    and self.anonymous_warehouse.id
                 },
             )
         except Exception:
@@ -156,7 +157,7 @@ class AnonymousCommandLineTracking(AnonymousTracking):
         execution_properties: Optional[dict],
         command: Optional[str] = None,
     ):
-        props = {
+        props: Dict[str, Any] = {
             "execution_properties": execution_properties,
             "module_name": module_name,
             "command": command,
@@ -167,7 +168,7 @@ class AnonymousCommandLineTracking(AnonymousTracking):
         self._send_anonymous_event("cli-end", properties=props)
 
     def track_cli_exception(
-        self, module_name: str, exc: Exception, command: str = None
+        self, module_name: str, exc: Exception, command: Optional[str] = None
     ) -> None:
         props = {
             "module_name": module_name,

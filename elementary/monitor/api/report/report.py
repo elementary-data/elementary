@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
+from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.models.schema import (
@@ -44,6 +45,7 @@ class ReportAPI(APIClient):
             sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
             lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
             filters_api = FiltersAPI(dbt_runner=self.dbt_runner)
+            invocations_api = InvocationsAPI(dbt_runner=self.dbt_runner)
 
             models = models_api.get_models(exclude_elementary_models)
             sources = models_api.get_sources()
@@ -71,7 +73,9 @@ class ReportAPI(APIClient):
             serializable_sidebars = sidebars.dict()
             serializable_models = self._serilize_models(models, sources, exposures)
             serializable_model_runs = self._serilize_models_runs(models_runs.runs)
-            serializable_model_runs_totals = models_runs.totals.dict()
+            serializable_model_runs_totals = models_runs.dict(include={"totals"})[
+                "totals"
+            ]
             serializable_models_coverages = self._serilize_coverages(coverages)
             serializable_test_results = self._serilize_test_results(
                 test_results.results
@@ -84,6 +88,13 @@ class ReportAPI(APIClient):
             serializable_invocation = test_results.invocation.dict()
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
+
+            resources_latest_invocation = (
+                invocations_api.get_resources_latest_invocation()
+            )
+            invocations = invocations_api.get_invocations_by_ids(
+                invocations_ids=list(set(resources_latest_invocation.values()))
+            )
 
             report_data = ReportDataSchema(
                 creation_time=get_now_utc_iso_format(),
@@ -100,6 +111,8 @@ class ReportAPI(APIClient):
                 model_runs_totals=serializable_model_runs_totals,
                 filters=serializable_filters,
                 lineage=serializable_lineage,
+                invocations=invocations,
+                resources_latest_invocation=resources_latest_invocation,
                 env=dict(project_name=project_name, env=env),
             )
             return report_data, None

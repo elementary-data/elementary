@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.test_management.schema import (
     ResourceModel,
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 class TestManagementFetcher(FetcherClient):
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
 
     def get_models(self, exclude_elementary=True) -> List[ResourceModel]:
@@ -29,7 +29,11 @@ class TestManagementFetcher(FetcherClient):
         )
         models = []
         for model_result in models_results:
-            owners = unpack_and_flatten_str_to_list(model_result["owners"])
+            owners = (
+                unpack_and_flatten_str_to_list(model_result["owners"])
+                if model_result["owners"]
+                else []
+            )
             models.append(
                 ResourceModel(
                     id=model_result["unique_id"],
@@ -51,7 +55,11 @@ class TestManagementFetcher(FetcherClient):
         )
         sources = []
         for source_result in sources_results:
-            owners = unpack_and_flatten_str_to_list(source_result["owners"])
+            owners = (
+                unpack_and_flatten_str_to_list(source_result["owners"])
+                if source_result["owners"]
+                else []
+            )
             sources.append(
                 ResourceModel(
                     id=source_result["unique_id"],
