@@ -29,7 +29,11 @@ class TestManagementFetcher(FetcherClient):
         )
         models = []
         for model_result in models_results:
-            owners = unpack_and_flatten_str_to_list(model_result["owners"])
+            owners = (
+                unpack_and_flatten_str_to_list(model_result["owners"])
+                if model_result["owners"]
+                else []
+            )
             models.append(
                 ResourceModel(
                     id=model_result["unique_id"],
@@ -51,7 +55,11 @@ class TestManagementFetcher(FetcherClient):
         )
         sources = []
         for source_result in sources_results:
-            owners = unpack_and_flatten_str_to_list(source_result["owners"])
+            owners = (
+                unpack_and_flatten_str_to_list(source_result["owners"])
+                if source_result["owners"]
+                else []
+            )
             sources.append(
                 ResourceModel(
                     id=source_result["unique_id"],
