@@ -112,6 +112,17 @@
       "pages": [
         "guides/how-anomaly-detection-works",
         "guides/data-anomaly-detection",
+        {
+          "group": "Anomaly detection tests",
+          "pages": [
+            "guides/anomaly-detection-tests/volume-anomalies",
+            "guides/anomaly-detection-tests/freshness-anomalies",
+            "guides/anomaly-detection-tests/event-freshness-anomalies",
+            "guides/anomaly-detection-tests/dimension-anomalies",
+            "guides/anomaly-detection-tests/all-columns-anomalies",
+            "guides/anomaly-detection-tests/column-anomalies"
+          ]
+        },
         "guides/elementary-tests-configuration",
         {
           "group": "Tests params",
@@ -124,7 +135,8 @@
             "guides/anomaly-detection-configuration/backfill-days",
             "guides/anomaly-detection-configuration/time-bucket",
             "guides/anomaly-detection-configuration/seasonality",
-            "guides/anomaly-detection-configuration/column_anomalies",
+            "guides/anomaly-detection-configuration/min-training-set-size",
+            "guides/anomaly-detection-configuration/column-anomalies",
             "guides/anomaly-detection-configuration/exclude_prefix",
             "guides/anomaly-detection-configuration/exclude_regexp",
             "guides/anomaly-detection-configuration/dimensions",
