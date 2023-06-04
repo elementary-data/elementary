@@ -49,7 +49,11 @@ class GroupsAPI(APIClient):
         dbt_group: dict,
         artifact: GROUPABLE_ARTIFACT,
     ) -> None:
-        if artifact.unique_id is None or artifact.normalized_full_path is None:
+        if (
+            artifact.unique_id is None
+            or artifact.normalized_full_path is None
+            or not artifact.normalized_full_path.endswith(".sql")
+        ):
             return
         artifact_full_path_split = artifact.normalized_full_path.split(posixpath.sep)
         for part in artifact_full_path_split:
