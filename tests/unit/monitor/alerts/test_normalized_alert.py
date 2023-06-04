@@ -11,6 +11,7 @@ from elementary.monitor.fetchers.alerts.normalized_alert import (
     OWNERS_FIELD,
     SUBSCRIBERS_KEY,
     TABLE_FIELD,
+    TAGS_FIELD,
     TEST_META_KEY,
     NormalizedAlert,
 )
@@ -279,3 +280,24 @@ def test_get_alert_fields():
     )
     normalized_alert = NormalizedAlert(alert)
     assert normalized_alert._get_alert_fields() == DEFAULT_ALERT_FIELDS
+
+
+def test_normalized_alert_tags():
+    tags = ["first", "second"]
+
+    alert = dict(tags=json.dumps(tags))
+    normalized_alert = NormalizedAlert(alert).get_normalized_alert()
+    assert json.dumps(normalized_alert.get(TAGS_FIELD).sort()) == json.dumps(
+        tags.sort()
+    )
+
+    alert = dict(tags=tags)
+    normalized_alert = NormalizedAlert(alert).get_normalized_alert()
+    assert json.dumps(normalized_alert.get(TAGS_FIELD).sort()) == json.dumps(
+        tags.sort()
+    )
+
+    # No tags return empty list
+    alert = dict()
+    normalized_alert = NormalizedAlert(alert).get_normalized_alert()
+    assert normalized_alert.get(TAGS_FIELD) == []
