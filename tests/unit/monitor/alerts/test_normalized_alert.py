@@ -296,3 +296,8 @@ def test_normalized_alert_tags():
     assert json.dumps(normalized_alert.get(TAGS_FIELD).sort()) == json.dumps(
         tags.sort()
     )
+
+    # No tags return empty list
+    alert = dict()
+    normalized_alert = NormalizedAlert(alert).get_normalized_alert()
+    assert normalized_alert.get(TAGS_FIELD) == []
