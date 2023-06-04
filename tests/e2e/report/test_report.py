@@ -19,40 +19,46 @@ def test_report_keys(report_data_fixture):
 
 def test_group():
     report_data = get_report_data()
-    assert (
-        "model.elementary_integration_tests.error_model"
-        in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
-            "__files__"
-        ]
-    )
-    assert (
-        "model.elementary_integration_tests.nested"
-        in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
-            "nested"
-        ]["models"]["tree"]["__files__"]
-    )
-    assert (
-        "source.elementary_integration_tests.training.any_type_column_anomalies_training"
-        in report_data["groups"]["dbt"]["elementary_integration_tests"]["sources"][
-            "__files__"
-        ]
-    )
-    assert (
-        "model.elementary_integration_tests.any_type_column_anomalies"
-        in report_data["groups"]["owners"]["@edr"]
-    )
-    assert (
-        "model.elementary_integration_tests.any_type_column_anomalies"
-        not in report_data["groups"]["owners"]["No owners"]
-    )
-    assert (
-        "model.elementary_integration_tests.string_column_anomalies"
-        in report_data["groups"]["tags"]["marketing"]
-    )
-    assert (
-        "model.elementary_integration_tests.string_column_anomalies"
-        not in report_data["groups"]["tags"]["No tags"]
-    )
+    assert {
+        "node_id": "model.elementary_integration_tests.error_model",
+        "resource_type": "model",
+    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
+        "__files__"
+    ]
+    assert {
+        "node_id": "model.elementary_integration_tests.nested",
+        "resource_type": "model",
+    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
+        "nested"
+    ][
+        "models"
+    ][
+        "tree"
+    ][
+        "__files__"
+    ]
+    assert {
+        "node_id": "source.elementary_integration_tests.training.any_type_column_anomalies_training",
+        "resource_type": "source",
+    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["sources"][
+        "__files__"
+    ]
+    assert {
+        "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
+        "resource_type": "model",
+    } in report_data["groups"]["owners"]["@edr"]
+    assert {
+        "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
+        "resource_type": "model",
+    } not in report_data["groups"]["owners"]["No owners"]
+    assert {
+        "node_id": "model.elementary_integration_tests.string_column_anomalies",
+        "resource_type": "model",
+    } in report_data["groups"]["tags"]["marketing"]
+    assert {
+        "node_id": "model.elementary_integration_tests.string_column_anomalies",
+        "resource_type": "model",
+    } not in report_data["groups"]["tags"]["No tags"]
 
 
 def test_duplicate_test_runs():
