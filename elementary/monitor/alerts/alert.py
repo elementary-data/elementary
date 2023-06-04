@@ -31,7 +31,7 @@ class Alert:
         alert_suppression_interval: int = 0,
         alert_fields: Optional[list] = None,
         timezone: Optional[str] = None,
-        meta: Optional[dict] = None,
+        test_meta: Optional[dict] = None,
         model_meta: Optional[str] = None,
         alerts_table: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
@@ -61,7 +61,7 @@ class Alert:
         self.schema_name = schema_name
         self.owners = owners
         self.tags = tags
-        self.meta = meta
+        self.meta = test_meta
         self.model_meta = try_load_json(model_meta) or {}
         self.status = status
         self.subscribers = subscribers
