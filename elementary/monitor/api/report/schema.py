@@ -18,5 +18,7 @@ class ReportDataSchema(BaseModel):
     model_runs_totals: dict = dict()
     filters: dict = dict()
     lineage: dict = dict()
+    invocations: list = list()
+    resources_latest_invocation: dict = dict()
     env: dict = dict()
     tracking: Optional[dict] = None

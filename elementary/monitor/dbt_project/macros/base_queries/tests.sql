@@ -33,7 +33,10 @@
             dbt_resources.source_name as source_name,
             dbt_tests.test_column_name as column,
             dbt_tests.test_namespace as test_package,
-            dbt_tests.short_name as test_name,
+            case
+                when dbt_tests.short_name is not NULL then dbt_tests.short_name
+                else dbt_tests.name
+            end as test_name,
             dbt_tests.test_params as test_params,
             dbt_tests.severity as severity,
             dbt_tests.model_owners as model_owners,
