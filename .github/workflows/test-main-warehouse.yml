@@ -1,16 +1,15 @@
 name: Test main warehouse platform
 on:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
     paths:
       - elementary/**
-      - setup.py
   pull_request:
-    branches: ["master"]
+    branches: [ "master" ]
     paths:
       - elementary/**
-      - setup.py
   workflow_dispatch:
+
 
 jobs:
   test:
