@@ -17,41 +17,41 @@ def test_report_keys(report_data_fixture):
     assert sorted(list(report_data.keys())) == sorted(list(report_data_fixture.keys()))
 
 
-def test_sidebar():
+def test_group():
     report_data = get_report_data()
     assert (
         "model.elementary_integration_tests.error_model"
-        in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["models"][
+        in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
             "__files__"
         ]
     )
     assert (
         "model.elementary_integration_tests.nested"
-        in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["models"][
+        in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
             "nested"
         ]["models"]["tree"]["__files__"]
     )
     assert (
         "source.elementary_integration_tests.training.any_type_column_anomalies_training"
-        in report_data["sidebars"]["dbt"]["elementary_integration_tests"]["sources"][
+        in report_data["groups"]["dbt"]["elementary_integration_tests"]["sources"][
             "__files__"
         ]
     )
     assert (
         "model.elementary_integration_tests.any_type_column_anomalies"
-        in report_data["sidebars"]["owners"]["@edr"]
+        in report_data["groups"]["owners"]["@edr"]
     )
     assert (
         "model.elementary_integration_tests.any_type_column_anomalies"
-        not in report_data["sidebars"]["owners"]["No owners"]
+        not in report_data["groups"]["owners"]["No owners"]
     )
     assert (
         "model.elementary_integration_tests.string_column_anomalies"
-        in report_data["sidebars"]["tags"]["marketing"]
+        in report_data["groups"]["tags"]["marketing"]
     )
     assert (
         "model.elementary_integration_tests.string_column_anomalies"
-        not in report_data["sidebars"]["tags"]["No tags"]
+        not in report_data["groups"]["tags"]["No tags"]
     )
 
 
