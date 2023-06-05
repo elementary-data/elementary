@@ -21,7 +21,7 @@ ADAPTER_EXTRA_REQUIREMENTS = {
 setup(
     name="elementary-data",
     description="Data monitoring and lineage",
-    version="0.8.0",
+    version="0.8.1",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.6.2",
@@ -49,7 +49,7 @@ setup(
         "pytest-parametrization>=2022.2.1",
         "pydantic<2.0",
         "networkx>=2.3,<3",
-        "packaging>=20.9,<23.0",
+        "packaging>=20.9,<=23.1",
     ],
     extras_require={
         **ADAPTER_EXTRA_REQUIREMENTS,
