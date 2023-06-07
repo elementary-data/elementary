@@ -63,7 +63,10 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": ["quickstart", "quickstart-cli"]
+          "pages": [
+            "quickstart",
+            "quickstart-cli"
+          ]
         },
         {
           "group": "Tutorial",
@@ -213,14 +216,19 @@
       ]
     },
     {
-      "group": "Getting Started",
+      "group": "Elementary Cloud",
       "pages": [
         "cloud/introduction",
+        "cloud/general/security-and-privacy"
+      ]
+    },
+    {
+      "group": "Onboarding",
+      "pages": [
         "cloud/onboarding/quickstart-dbt-package",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
-        "cloud/manage-team",
-        "cloud/general/security-and-privacy"
+        "cloud/manage-team"
       ]
     }
   ],
