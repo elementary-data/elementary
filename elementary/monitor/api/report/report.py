@@ -97,6 +97,11 @@ class ReportAPI(APIClient):
             )
 
             invocations_job_identification = defaultdict(list)
+            for invocation in invocations:
+                key = invocation.job_name or invocation.job_id
+                if key is not None:
+                    invocations_job_identification[key].append(invocation.invocation_id)
+
             report_data = ReportDataSchema(
                 creation_time=get_now_utc_iso_format(),
                 days_back=days_back,
