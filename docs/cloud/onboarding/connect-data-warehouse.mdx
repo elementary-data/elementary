@@ -5,34 +5,23 @@ sidebarTitle: "Data warehouse"
 
 You can connect Elementary to a data warehouse that has an Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-Here are the steps needed to enable the connection: 
-
-### Authentication and IP Allowlist
-
-Elementary needs authentication details, permissions to read the Elementary schema (and not the rest of your data), and network access enabled by adding the cloud IPs to your data warehouse allowlist. 
-
-Elementary IP for allowlist: `3.126.156.226`
-
-### Create a `profiles.yml` file
-
-You will need to provide the connection and authentication details by uploading a YML file with a connection profile named `elementary`.
-The profile needs to point at the database and schema name where your elementary tables are. 
-
-The easiest way to generate the profile is to run the following command within the dbt project where you deployed the elementary dbt package (works in dbt cloud as well):
-
-```shell
-dbt run-operation elementary.generate_elementary_cli_profile
-```
-
-Save the output to a YML file, update the missing details, and you are ready. 
-
-Here are the formats of profile for each supported data warehouse:
-
-<Snippet file="profiles/all-profiles.mdx" />
-
+Elementary Cloud needs:
+- [`profiles.yml`](/cloud/onboarding/create-profile) with connection details
+- Read permissions to the Elementary schema (and not the rest of your data)
+- Network access (might require to allowlist Elementary IP address)
 
 ### Connect Elementary cloud
 
 On the `Account settings` under `Integrations`, press `Connect` on the "Connect Your data warehouse" section.
 
-Provide an env name, select a data warehouse type, and upload the `profiles.yml` file with the `elementary` profile. 
+Provide an environment name, select a data warehouse type, and upload the `profiles.yml` file with the `elementary` profile.
+
+
+### Allowlist Elementary IP
+
+Elementary IP for allowlist: `3.126.156.226`
+
+
+### Need help with onboarding?
+
+We can provide [support on Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) or hop on an [onboarding call](https://savvycal.com/MaayanSa/df29881c).

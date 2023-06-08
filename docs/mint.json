@@ -223,9 +223,10 @@
       ]
     },
     {
-      "group": "Onboarding",
+      "group": "Getting Started",
       "pages": [
         "cloud/onboarding/quickstart-dbt-package",
+        "create-profile",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
