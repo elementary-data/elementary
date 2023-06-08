@@ -66,6 +66,7 @@ class Config:
         self.profile_target = profile_target
         self.project_profile_target = project_profile_target
         self.env = env
+        self.dbt_vars = {**dbt_vars} if dbt_vars else dict()
 
         # Additional env vars supplied to dbt invocations
         self.dbt_env_vars = {**dbt_vars} if dbt_vars else dict()
