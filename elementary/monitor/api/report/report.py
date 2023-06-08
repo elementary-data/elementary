@@ -96,6 +96,12 @@ class ReportAPI(APIClient):
                 invocations_ids=list(set(resources_latest_invocation.values()))
             )
 
+            invocations_job_identification = defaultdict(list)
+            for invocation in invocations:
+                key = invocation.job_name or invocation.job_id
+                if key is not None:
+                    invocations_job_identification[key].append(invocation.invocation_id)
+
             report_data = ReportDataSchema(
                 creation_time=get_now_utc_iso_format(),
                 days_back=days_back,
@@ -113,6 +119,7 @@ class ReportAPI(APIClient):
                 lineage=serializable_lineage,
                 invocations=invocations,
                 resources_latest_invocation=resources_latest_invocation,
+                invocations_job_identification=invocations_job_identification,
                 env=dict(project_name=project_name, env=env),
             )
             return report_data, None

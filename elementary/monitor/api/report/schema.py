@@ -20,5 +20,6 @@ class ReportDataSchema(BaseModel):
     lineage: dict = dict()
     invocations: list = list()
     resources_latest_invocation: dict = dict()
+    invocations_job_identification: dict = dict()
     env: dict = dict()
     tracking: Optional[dict] = None
