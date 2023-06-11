@@ -1,0 +1,32 @@
+---
+title: "Elementary 0.8.0"
+sidebarTitle: "0.8.0"
+---
+
+_June 1, 2023: [v0.8.0 Python](https://github.com/elementary-data/elementary/releases/tag/v0.8.0), [v0.8.0 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.8.0)_
+_As this is a minor version bump, you need to run `dbt run -s elementary`_
+
+### 🔥 What's new?
+
+- **🆕 Jobs info from Orchestrator 🆕**
+  - Elementary now supports collecting metadata about your jobs from your orchestration tool!
+  - The goal is to provide context that is useful to triage and resolve data issues:
+  - As a first step, you could filter the lineage by job in the Elementary report.
+    - More orchestrator related features are coming soon 😎
+  - Here is the [guide for enabling jobs info collection.](https://docs.elementary-data.com/deployment-and-configuration/collect-job-data).
+
+- **You can now configure all test params in the project / model / test level 🤯**
+  - Why is it useful?
+    - It enables you to tailor the tests to the dataset and get higher level of accuracy!
+    - You can leverage inheritance, configure at a higher level (like folder of models) and save the need to configure by test.
+  - Some examples:
+    - You can set `days_back: 90` to tests with `time_bucket: period: week`, and `days_back: 7` to tests with `time_bucket: period: hour` .
+    - You can set `timestamp_column: updated_at` in your dbt_project.yml if this is your convention, and override it for models where it's different.
+    - You can set `seasonality`, `time_bucket` and `timestamp_column` at the source level, and it will apply for all the tests you add to tables of this source.
+  - We also upgraded our documentation of the [tests configuration](https://docs.elementary-data.com/guides/elementary-tests-configuration) and [how the tests work](https://docs.elementary-data.com/guides/how-anomaly-detection-works), to make it clearer 😇
+
+  
+### 💫 More changes
+
+- Added `materialization` field to models run results, thank you [@Aril Mavinkere](https://elementary-community.slack.com/team/U058SJFFTEU) for contributing! 🤩
+- Removed `env` from report summary.

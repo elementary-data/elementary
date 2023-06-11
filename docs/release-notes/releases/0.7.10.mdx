@@ -1,0 +1,43 @@
+---
+title: "Elementary 0.7.10"
+sidebarTitle: "0.7.10"
+---
+
+_May 17, 2023: [v0.7.10 Python](https://github.com/elementary-data/elementary/releases/tag/v0.7.10), [v0.7.8 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.7.8)_
+
+### 🔥 What's new?
+
+- **New artifacts model - dbt_columns 🆕**
+    - Many users requested that we add this model with useful information about the columns in your project.
+    - We also plan to add features to the report and alerts based on this data. Stay tuned... :coming-soon:
+    - (This is not yet supported for Databricks, [working on it](https://github.com/elementary-data/elementary/issues/872))
+  
+- **New lineage filters - Tags and owners #️⃣👥**
+    - You can now filter the lineage to see only the nodes that are relevant to a business department or a specific owner, and their upstream and downstream nodes.
+    - We also made some general improvements to the filters usability like adding search and clear all.
+  
+- **Test results sample size in the report can be changed 🔢**
+    - The report is no longer limited to 5 results, you can change this by adding the var:
+        - `test_sample_row_count: 10`
+
+- New flag - `edr --version` 🏁
+    - Thank you [@Manul Patel](https://elementary-community.slack.com/team/U054N92MU11) for contributing this  🤩
+
+
+### 💫 More changes
+
+- Alerts suppression interval is no longer limited to 24 hours.
+- Added indicative exceptions to Elementary tests.
+- `time_bucket` can now be configured in model and var levels as well.
+- Created workarounds to solve breaking changes in dbt 1.5.0 adapters:
+- Not rely on Databricks adapter to create temp tables - Thanks [@Joseph Berni](https://elementary-community.slack.com/team/U03NWMS0Y93), [@fitz](https://elementary-community.slack.com/team/U03V5KGR3U3) and [@Dharit Sura](https://elementary-community.slack.com/team/U047ZFZRDCH) for reporting!
+- Run queries from `run` instead of `run-operation` due to bug in Redshift adapter - Thank you [@Eugene Sobolev](https://elementary-community.slack.com/team/U054BV7MR0T) for reporting and investigating with us!
+
+
+### 🐞 Bug fixes
+- Support dbt run results compiled sql with % on Redshift new adapter - Thanks [@Fabien Traventhal](https://elementary-community.slack.com/team/U03G693L05R) for reporting!
+- Fixed ignored backfill_days in no timestamp tests - Thanks [@leila](https://elementary-community.slack.com/team/U04HFCUM2G6) and [@Roland Baranovic](https://elementary-community.slack.com/team/U04K5SUJS8Z) for reporting!
+- Fixed alerts `-group-by` empty value - Thank you [@Dimosthenis Schizas](https://elementary-community.slack.com/team/U054B4PNACE) for contributing 🤩
+- Owners accept dict format - Thank you [@Stephen Lloyd](https://elementary-community.slack.com/team/U03FQELBBV1) for reporting and [@Manul Patel](https://elementary-community.slack.com/team/U054N92MU11) for contributing 🤩
+- Paginate upload of source freshness data for large results - Thank you [@Fred](https://elementary-community.slack.com/team/U03QXQ3VCF8) for reporting and fixing 🤩
+- Thank you [@winzee](https://github.com/winzee) and [@vinooganesh](https://github.com/vinooganesh) for helping keep our docs accurate and typos free 🎉e Melhuish](https://elementary-community.slack.com/team/U04KWBDTP4J)!
