@@ -28,9 +28,9 @@ models:
          where_expression: "loaded_at is not null"
 ```
 
-```yml dbt_project.yml
+```yml dbt_project.yml 
 vars:
-  timestamp_column: "loaded_at > '2022-01-01'"
+  where_expression: "loaded_at > '2022-01-01'"
 ```
 
 
