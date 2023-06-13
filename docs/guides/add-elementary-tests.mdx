@@ -18,6 +18,7 @@ The tests are configured and executed like any other tests in your project.
 
 ### Table (model / source) tests
 
+
 #### - Volume anomalies
 <Card href="/guides/anomaly-detection-tests/volume-anomalies">
 ```
@@ -26,8 +27,8 @@ The tests are configured and executed like any other tests in your project.
   Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
 </Card>
 
-
-<Card title="Freshness anomalies" href="/guides/anomaly-detection-tests/freshness-anomalies">
+#### - Freshness anomalies
+<Card href="/guides/anomaly-detection-tests/freshness-anomalies">
 ```
   elementary.freshness_anomalies
 ```
@@ -35,7 +36,8 @@ The tests are configured and executed like any other tests in your project.
   Requires a [`timestamp_column`](/guides/anomaly-detection-configuration/timestamp-column) configuration. 
 </Card>
 
-<Card title="Event freshness anomalies" href="/guides/anomaly-detection-tests/event-freshness-anomalies">
+#### - Event freshness anomalies
+<Card href="/guides/anomaly-detection-tests/event-freshness-anomalies">
 ```
   elementary.event_freshness_anomalies
 ```
@@ -44,7 +46,8 @@ The tests are configured and executed like any other tests in your project.
   database (the `update timestamp`). Configuring `event_timestamp_column` is required, and `update_timestamp_column` is optional.
 </Card>
 
-<Card title="Dimension anomalies" href="/guides/anomaly-detection-tests/dimension-anomalies">
+#### - Dimension anomalies
+<Card href="/guides/anomaly-detection-tests/dimension-anomalies">
 ```
   elementary.dimension_anomalies
 ```
@@ -53,7 +56,8 @@ The tests are configured and executed like any other tests in your project.
   The test counts rows grouped by given `dimensions` (columns/expressions).
 </Card>
 
-<Card title="All columns anomalies" href="/guides/anomaly-detection-tests/all-columns-anomalies">
+#### - All columns anomalies
+<Card href="/guides/anomaly-detection-tests/all-columns-anomalies">
 ```
   elementary.all_columns_anomalies
 ```
@@ -65,7 +69,9 @@ The tests are configured and executed like any other tests in your project.
 
 ### Column tests
 
-<Card title="Column anomalies" href="/guides/anomaly-detection-tests/column-anomalies">
+
+#### - Columns anomalies
+<Card href="/guides/anomaly-detection-tests/column-anomalies">
 ```
   elementary.column_anomalies
 ```
@@ -75,7 +81,7 @@ The tests are configured and executed like any other tests in your project.
 </Card>
 
 
-#### Adding tests examples:
+### Adding tests examples
 
 <CodeGroup>
 
