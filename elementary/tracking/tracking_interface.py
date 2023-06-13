@@ -1,3 +1,4 @@
+import hashlib
 from typing import Any, Dict, Optional
 
 import posthog
@@ -32,6 +33,10 @@ class Tracking:
             properties=properties,
             groups=groups,
         )
+
+    @staticmethod
+    def _hash(content: str):
+        return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
     def record_internal_exception(self, exc: Exception):
         pass
