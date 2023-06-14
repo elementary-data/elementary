@@ -1,4 +1,3 @@
-import hashlib
 import json
 import logging
 import uuid
@@ -122,9 +121,7 @@ class AnonymousTracking(Tracking):
                     0
                 ]
             )
-            anonymous_warehouse_id = hashlib.sha256(
-                adapter_unique_id.encode("utf-8")
-            ).hexdigest()
+            anonymous_warehouse_id = self._hash(adapter_unique_id)
             self._set_events_group(
                 "warehouse",
                 anonymous_warehouse_id,
