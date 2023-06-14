@@ -1,50 +1,45 @@
 ---
-title: "Send Slack alerts"
+title: "Setup Slack alerts"
 ---
 
-Elementary has a Slack integration to send alerts about failures of dbt tests, Elementary tests, model runs, and source freshness.
+Elementary has a Slack integration to send alerts about:
+- Failures and/or of dbt tests
+- Failures and/or Elementary tests
+- Model runs failures
+- Source freshness issues
 
-You can customize the alerts in your `.yml` files by configuring:
+You can enrich your alerts by adding properties to tests and models in your `.yml` files. 
+The supported attributes are: description, tags, owner, subscribers.
 
-- **Description**
-- **Tags**
-- **Owner**  
-- **Subscribers**
-- **Custom channel**
-- **Alert fields**
-- **Alert filters**
-- **Alert grouping**
-- **Suppression interval**
+You can configure and customize your alerts by configuring: 
+custom channel, alert fields, alert grouping, alert filters, suppression interval.
 
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304885/elementary/slack-alert-format_rgcg1p.png"
-  alt="New Slack alert format"
-/>
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1686642474/slack_alert_gshqdm.png"
+      alt="New Slack alert format"
+    />
+  </div>
+</Frame>
 
-## Before you start
+
+## Setup Slack Integration
+
+<Info>
+
+**Before you start**
 
 Before you can start using the alerts, make sure to install the dbt package, configure a profile and install the CLI.
 This is **required for the alerts to work.**
 
-<Accordion title="dbt package installation">
+1. A working Python installation
+2. [pip installer](https://pip.pypa.io/en/stable/) for Python
+3. Access and credentials to a data warehouse supported by Elementary
 
-<Snippet file="install-dbt-package.mdx" />
+We also recommend you work with a [Python virtual environment](https://docs.python.org/3/library/venv.html).
 
-</Accordion>
-
-<Accordion title="Configure connection profile">
-
-<Snippet file="add-connection-profile.mdx" />
-
-</Accordion>
-
-<Accordion title="Install CLI">
-
-<Snippet file="install-cli.mdx" />
-
-</Accordion>
-
-## Setup Slack Integration
+</Info>
 
 <Snippet file="setup-slack-integration.mdx" />
 
@@ -60,395 +55,6 @@ Or just `edr monitor` if you used `config.yml`.
 
 
 ---
-
-## Enable/disable alerts
-
-By default, alerts are sent on failed tests, errored models and errored snapshots.
-You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
-
-Below are the available vars and their default config:
-
-```yml dbt_project.yml
-vars:
-  # Alerts configuration vars   #
-  # All set to false by default #
-  disable_model_alerts: false
-  disable_test_alerts: false
-  disable_warn_alerts: false
-  disable_skipped_model_alerts: true
-  disable_skipped_test_alerts: true
-```
-
-
-## Alert properties 
-
-In your `.yml` files, add the following properties to models / tests:
-
-<AccordionGroup>
-
-<Accordion title="Owners">
-  
-Elementary enriches alerts with [table owners](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
-  
-If you want to tag a model owner in a slack alert:
-- Use '@' and the email prefix of the slack user.
-- For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, simply add the email prefix (with lower case) jessica.jones as follows to your model schema.yml / properties.yml:
-
-```yml properties.yml
-models:
-  - name: my_model_name
-    meta:
-      owner: "@jessica.jones"
-```
-
-It is possible to tag multiple owners as well:
-
-```yml properties.yml
-models:
-  - name: my_model_name
-    meta:
-      owner: ["@jessica.jones", "@joe.joseph"]
-```
-
-</Accordion>
-
-<Accordion title="Test descriptions">
-  
-Elementary supports configuring description to tests alerts.
-
-To set it up, simply add the description to your test in the `properties.yml`
-
-```yml properties.yml
-tests:
-  - test_name:
-    meta:
-      description: "This is the test description"
-```
-
-</Accordion>
-  
-  
-<Accordion title="Tags">
-
-You can use [tags](https://docs.getdbt.com/reference/resource-configs/tags) to provide context to your alerts. 
-
-You can also use it to tag a group or a channel in a slack alert:
-
-- Add it as model tag and use '#' as the prefix of the channel name.
-- For example, to tag the marketing team's data ops channel add the following to your `model schema.yml`
-  / `properties.yml`.
-
-```yml properties.yml
-tests:
-  - test_name:
-    meta:
-      tags: ["#marketing", "#support"]
-```
-
-</Accordion>
-
-<Accordion title="Subscribers">
-
- If you want to tag users on an alert:
-- Use '@' and the email prefix of your slack user, and to 'subscribers' under a meta field to your `properties.yml` file.
-- For example, if we want to tag a user named Jessica with an email jessica.jones@marvel.com in our Slack workspace, use "@jessica.jones".
-
-```yml properties.yml
-models:
-  - name: my_model_name
-    meta:
-      alerts_config:
-        subscribers: "@jessica.jones"
-    columns:
-      - name: column_name
-        tests:
-          - unique:
-              meta:
-                alerts_config:
-                  subscribers: "@luke.cage"
-```
-
-It is possible to tag multiple subscribers as well:
-
-```yml properties.yml
-models:
-  - name: my_model_name
-    meta:
-      alerts_config:
-        subscribers: ["@jessica.jones", "@luke.cage"]
-```
-
-</Accordion>
-  
-</AccordionGroup> 
-
-
-## Alert configuration
-
-Elementary allows you to customize alerts to distribute the right information to the right people. This way you can ensure your alerts are valuable and to avoid alert fatigue. 
-
-
-<AccordionGroup>
-
-<Accordion title="Custom Slack channel">
-
-By default Elementary uses the Slack channel that was configured in the Slack integration.
-Elementary supports configuring custom slack channels that are configured on your models / sources / tests and snapshots.
-
-- If you configure a custom slack channel for a model, all the test alerts that belong to this model will be sent to this custom slack channel.
-- If you configure a custom slack channel for both a model and a test, the test channel will override the model channel.
-- If you configure a custom slack channel and you decide to group your alerts by table into a single message, it will be sent to the model channel (even if a differnt channel was configured on the test level) 
-  
-
-To set it up, simply add the relevant channel to your models in the `properties.yml`:
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    meta:
-      alerts_config:
-        channel: marketing_data_ops
-```
-
-If your models / tests are in folders by department / team, another useful option is to configure the channel in
-your `dbt_project.yml` file:
-
-```yml dbt_project.yml
-models:
-  marketing_bi:
-    +meta:
-      alerts_config:
-        channel: marketing_data_ops
-
-tests:
-  marketing_bi:
-    +meta:
-      alerts_config:
-        channel: marketing_data_ops
-```
-
-You can also configure a custom slack channel for a specific test:
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    columns:
-      - name: column_name
-        tests:
-          - unique:
-              meta:
-                alerts_config:
-                  channel: marketing_data_ops
-```
-
-</Accordion>  
-
-<Accordion title="Alert fields">
-<Warning>
-**Currently this feature is supported only by test alerts!**
-</Warning>
-
-Elementary supports the following alert fields:
-
-- table: Displays the table name of the test
-- column: Displays the column name of the test
-- description: Displays the description of the test
-- owners: Displays the owners of the model on which the test is running
-- tags: Displays the dbt tags of the test/model
-- subscribers: Displays the subscribers of the test/model
-- result_message: Displays the returned message from the test result
-- test_parameters: Displays the parameters that were provided to the test
-- test_query: Displays the query of the test
-- test_results_sample: Displays a sample of the test results
-
-By default, all of the fields are shown in the alerts.
-Elementary supports configuring alert fields on your dbt project / models and tests.
-- If you configure alert fields on your dbt project, all the test alerts of all of your tests will display only the configured alert fields.
-- If you configure alert fields for a model, all the test alerts that belong to this model will display only the configured alert fields.
-- If you configure alert fields for both a model and a test, the test configured alert fields will override the model configured alert fields (same as for the dbt project configured alert fields).
-
-To set it up globaly for your project, add the desired alert fields to your models and tests in the `dbt_project.yml` file:
-
-```yml dbt_project.yml
-models:
-  marketing_leads:
-    +meta:
-      alerts_config:
-        alert_fields: ["description", "owners", "tags", "subscribers"]
-
-tests:
-  marketing_leads:
-    +meta:
-      alerts_config:
-        alert_fields: ["description", "owners", "tags", "subscribers"]
-```
-
-To set it up for a model, add the desired alert fields to your model in the properties.yml:
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    meta:
-      alerts_config:
-        alert_fields: ["description", "owners", "tags", "subscribers"]
-```
-
-You can also configure alert fields for a specific test:
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    columns:
-      - name: column_name
-        tests:
-          - unique:
-              meta:
-                alerts_config:
-                  alert_fields: ["description", "owners", "tags", "subscribers"]
-```
-
-</Accordion>
-
- 
-
-<Accordion title="Filter alerts using a selector">
-
-Elementary supports filtering alerts using a selector.
-Elementry `edr monitor` command will notify only on the selector's matched alerts.
-
-There are 3 selectors supported by elementary:
-
-- tag - Notify on models/sources/tests that are tagged with the provided tag selector (notice that tests can be matched on their model's/source's tag).
-- owner - Notify on models/sources/tests that their owner is provided owner selector (notice that tests can be matched on their model's/source's owner).
-- model - Notify on the model/source and its tests.
-
-To filter alerts by tag:
-
-```shell
-edr monitor --select tag:critical
-edr monitor --select tag:finance
-```
-
-To filter alerts by owner:
-
-```shell
-edr monitor --select config.meta.owner:@jeff
-edr monitor --select config.meta.owner:@jessy
-```
-
-To filter alerts by model:
-
-```shell
-edr monitor --select model:customers
-edr monitor --select model:orders
-
-edr monitor --select customers
-edr monitor --select orders
-```
-</Accordion> 
-  
-
-<Accordion title="Suppression interval">
-
-Elementary support configuring suppression interval for alerts.
-By default, the suppression interval for all of the alerts is set to 0.
-Elementary won't send any alert that is generated within suppression interval.
-
-`alert_suppression_interval` can accept values greater than 0, including unrounded numbers - this number represents the number of hours for which alerts will be skipped.
-
-To set it up globaly for your project, add the alert suppression interval to your models and tests in the `dbt_project.yml` file:
-
-```yml dbt_project.yml
-models:
-  marketing_leads:
-    +meta:
-      alerts_config:
-        alert_suppression_interval: 24
-
-
-tests:
-  marketing_leads:
-    +meta:
-      alerts_config:
-        alert_suppression_interval: 24
-```
-
-To set it up for a model, add the desired alert suppression interval to your model in the properties.yml:
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    meta:
-      alerts_config:
-        alert_suppression_interval: 24
-```
-
-You can also configure alert suppression interval for a specific test:
-
-```yml properties.yml
-models:
-  - name: marketing_leads
-    columns:
-      - name: column_name
-        tests:
-          - unique:
-              meta:
-                alerts_config:
-                  alert_suppression_interval: 24
-```
-
-</Accordion>  
-  
-<Accordion title="Group alerts by table">
-By default, Elementary sends a single alert to notify on each failure. When using single alerts, the alert will include extensive information for fast triage.
-  
-Elementary also supports grouping alerts by table. In this case, a single Slack notification will be generated containing all test warnings/failures/errors as well as the errors associated with the model. The created notification will contain a union of the relevant owners, tags and subscribers. Due to their nature, grouped alerts will contain less information on each issue. As always, you can use our ([detailed report](/quickstart/generate-report-ui)) for easy triage. 
-  
-To group alerts by table:
-
-```shell
-edr monitor --group-by table
-```
-
-Grouping can also be configured through the yml files. To set it up globaly for your project, add the configuration to your models in the dbt_project.yml file:  
-  
- ```yml dbt_project.yml
-models:
-  marketing_bi:
-    +meta:
-      alerts_config:
-      # alerts on models in marekting_bi should be grouped by table:
-        slack_group_alerts_by: table
-
-```  
-  
-To set it up for a model, add the configuration to your model in the properties.yml:
-  
- ```yml properties.yml
-models:
-  - name: marketing_leads
-    meta:
-      alerts_config:
-        # all alerts on marketing_leads should group together to one slack message:
-        slack_group_alerts_by: table
-```   
-  
-Grouping by table can be configured globally (in the dbt_project.yml) but if you wish to override it for a specific model where you want a single alert for each failure, you can add the configuration to your model in the properties.yml:
-
- ```yml properties.yml
-models:
-  - name: marketing_leads
-    meta:
-      alerts_config:
-        # alerts on marketing_leads will not be grouped:
-        slack_group_alerts_by: alert
-```   
-  
-</Accordion>  
-
-
-</AccordionGroup>
-
 
 ## Alert on source freshness failures
 

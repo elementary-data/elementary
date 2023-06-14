@@ -95,7 +95,13 @@
             "guides/share-observability-report/send-report-summary"
           ]
         },
-        "quickstart/send-slack-alerts",
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "quickstart/send-slack-alerts",
+            "guides/alerts-configuration"
+          ]
+        },
         "guides/add-elementary-tests",
         "guides/add-schema-tests",
         "guides/python-tests"
