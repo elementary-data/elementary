@@ -16,6 +16,7 @@
                   tags,
                   package_name,
                   description,
+                  meta,
                   original_path as full_path
                 from {{ dbt_exposures_relation }}
               )
