@@ -6,6 +6,7 @@
               with dbt_artifacts_exposures as (
                 select
                   name,
+                  label,
                   unique_id,
                   url,
                   type,
