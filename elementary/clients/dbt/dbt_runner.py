@@ -172,6 +172,7 @@ class DbtRunner(BaseDbtRunner):
         full_refresh: bool = False,
         vars: Optional[dict] = None,
         quiet: bool = False,
+        capture_output: bool = False,
     ) -> bool:
         command_args = ["run"]
         if full_refresh:
@@ -181,7 +182,10 @@ class DbtRunner(BaseDbtRunner):
         if select:
             command_args.extend(["-s", select])
         success, _ = self._run_command(
-            command_args=command_args, vars=vars, quiet=quiet
+            command_args=command_args,
+            vars=vars,
+            quiet=quiet,
+            capture_output=capture_output,
         )
         return success
 
@@ -190,12 +194,16 @@ class DbtRunner(BaseDbtRunner):
         select: Optional[str] = None,
         vars: Optional[dict] = None,
         quiet: bool = False,
+        capture_output: bool = False,
     ) -> bool:
         command_args = ["test"]
         if select:
             command_args.extend(["-s", select])
         success, _ = self._run_command(
-            command_args=command_args, vars=vars, quiet=quiet
+            command_args=command_args,
+            vars=vars,
+            quiet=quiet,
+            capture_output=capture_output,
         )
         return success
 
