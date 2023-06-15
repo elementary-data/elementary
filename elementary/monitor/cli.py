@@ -450,7 +450,7 @@ def report(
 @click.option(
     "--update-bucket-website",
     type=bool,
-    default=False,
+    default=None,
     help="Update the bucket's static website with the latest report.",
 )
 @click.option(
