@@ -1,9 +1,9 @@
-import hashlib
 from typing import Any, Dict, Optional
 
 import posthog
 
 from elementary.config.config import Config
+from elementary.utils.hash import hash
 
 
 class Tracking:
@@ -36,7 +36,7 @@ class Tracking:
 
     @staticmethod
     def _hash(content: str):
-        return hashlib.sha256(content.encode("utf-8")).hexdigest()
+        return hash(content)
 
     def record_internal_exception(self, exc: Exception):
         pass
