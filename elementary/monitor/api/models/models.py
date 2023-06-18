@@ -208,6 +208,9 @@ class ModelsAPI(APIClient):
         normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(
             artifact
         )
+        normalized_artifact["fully_qualified_name"] = self._fully_qualified_name(
+            artifact
+        )
 
         return schema_to_normalized_schema_map[type(artifact)](**normalized_artifact)
 
@@ -235,3 +238,22 @@ class ModelsAPI(APIClient):
             splited_artifact_path.insert(0, artifact.package_name)
 
         return os.path.sep.join(splited_artifact_path)
+
+    @classmethod
+    def _fully_qualified_name(
+        cls,
+        artifact: Union[ArtifactSchemaType],
+    ) -> str:
+        if isinstance(artifact, ExposureSchema):
+            path = (artifact.meta or {}).get("path")
+            name = artifact.label or artifact.name
+            full_qualified_name = f"{path}/{name}" if path else name
+            return full_qualified_name
+
+        full_qualified_name = (
+            f"{artifact.database_name}.{artifact.schema_name}.{artifact.table_name}"
+            if artifact.database_name is not None and artifact.schema_name is not None
+            else artifact.table_name
+        )
+
+        return full_qualified_name
