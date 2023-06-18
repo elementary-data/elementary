@@ -20,6 +20,7 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     # Currently its model_name to match the CLI UI.
     model_name: str
     normalized_full_path: str
+    fully_qualified_name: str
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):
