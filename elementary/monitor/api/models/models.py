@@ -254,4 +254,4 @@ class ModelsAPI(APIClient):
             else artifact.table_name
         )
 
-        return fqn
+        return fqn.lower()
