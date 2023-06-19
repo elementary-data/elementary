@@ -97,6 +97,4 @@ venv/
 .vscode/
 
 # elementary outputs
-elementary_output.json
-elementary_report.html
-edr.log
+edr_target/
