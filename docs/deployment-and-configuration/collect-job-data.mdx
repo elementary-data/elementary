@@ -3,13 +3,13 @@ title: "Collect jobs info from orchestrator"
 sidebarTitle: "Jobs name & info"
 ---
 
-_Supported in Elementary 0.8.0 and above_ 
+_Supported in Elementary 0.8.0 and above_
 
 Elementary can collect metadata about your jobs from the orchestrator you are using, and enrich the Elementary report with this information.
 
 The goal is to provide context that is useful to triage and resolve data issues, such as:
 - Is my freshness / volume issue related to a job that didn't complete? Which job?
-- Which tables were built as part of the job that loaded data with issues? 
+- Which tables were built as part of the job that loaded data with issues?
 - Which job should I rerun to resolve?
 
 
@@ -44,7 +44,7 @@ dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_loa
 
 | var / env_var                | Format                                                                                                                                            |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| orchestrator                 | One of: `airflow`, `dbt_cloud`, `github_actions`, `prefect`, `dagster` <br/> Any other string would be collected but not presented in the report. |
+| orchestrator                 | One of: `airflow`, `dbt_cloud`, `github_actions`, `prefect`, `dagster` |
 | job_name, job_id, job_run_id | String                                                                                                                                            |
 | job_url, job_run_url         | Valid HTTP URL                                                                                                                                    |
 
@@ -63,21 +63,21 @@ The following default environment variables are supported out of the box:
 | Airflow        | orchestrator                                                                                                               |
 
 
-## What if I use dbt cloud + orchestrator? 
+## What if I use dbt cloud + orchestrator?
 
-By default, Elementary will collect the dbt cloud jobs info. 
-If you wish to override that, change your dbt cloud invocations to pass the orchestrator job info using `--vars`: 
+By default, Elementary will collect the dbt cloud jobs info.
+If you wish to override that, change your dbt cloud invocations to pass the orchestrator job info using `--vars`:
 ```shell
 dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_load"}'
 ```
 
 ## Where can I see my job info?
 
-- In your Elementary schema, the raw fields are stored in the table `dbt_invocations`. You could also use the view `job_run_results` which groups invocation by job. 
-- In the Elementary report, if the info was collected successfully, you can filter the lineage by job and see the details in the node info. 
+- In your Elementary schema, the raw fields are stored in the table `dbt_invocations`. You could also use the view `job_run_results` which groups invocation by job.
+- In the Elementary report, if the info was collected successfully, you can filter the lineage by job and see the details in the node info.
 
 
 ## Can't find your orchestrator? Missing info?
 
-We would love to support more orchestrators and collect more useful info! 
+We would love to support more orchestrators and collect more useful info!
 Please [open an issue](https://github.com/elementary-data/elementary/issues/new/choose) and tell us what we should add.  
