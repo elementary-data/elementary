@@ -9,16 +9,29 @@ Filter the tested data using a valid sql expression.
 
 - _Default: None_
 - _Relevant tests: All anomaly detection tests_
-- _Configuration level: test_
 
 <RequestExample>
 
-```yaml test
+```yml test
 models:
   - name: this_is_a_model
     tests:
       - elementary.volume_anomalies:
           where_expression: "user_name != 'test'"
 ```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+         where_expression: "loaded_at is not null"
+```
+
+```yml dbt_project.yml 
+vars:
+  where_expression: "loaded_at > '2022-01-01'"
+```
+
 
 </RequestExample>

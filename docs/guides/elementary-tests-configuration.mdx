@@ -5,7 +5,24 @@ sidebarTitle: "Tests configuration"
 
 The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
 
-<Snippet file="faq/question-tests-configuration-priorities.mdx" />
+The configuration of Elementary is dbt native and follows the same priorities and inheritance.
+The more granular and specific configuration overrides the less granular one.
+
+Elementary searches and prioritizes configuration in the following order:
+
+**For models tests:**
+1. Test arguments.
+2. Tests path configuration under `tests` key in `dbt_project.yml`.
+3. Model configuration.
+4. Path configuration under `models` key in `dbt_project.yml`. 
+5. Global vars in `dbt_project.yml`.
+
+**For sources tests:**
+1. Test arguments.
+2. Tests path configuration under `tests` key in `dbt_project.yml`.
+3. Table configuration.
+4. Source configuration.
+5. Global vars in `dbt_project.yml`.
 
 ---
 
@@ -17,13 +34,14 @@ The anomaly detection tests configuration is defined in `.yml` files in your dbt
 </Tip>
 
 <Tabs>
-  <Tab title="Params by anomaly detection test">
+  <Tab title="Params by test">
     <pre>
      <code>
       All anomaly detection tests:
        -- <a href="/guides/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/min-training-set-size"><font color="#CD7D55">min_training_set_size: int</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font>></a>
 
       Anomaly detection tests with timestamp_column:
@@ -35,7 +53,7 @@ The anomaly detection tests configuration is defined in `.yml` files in your dbt
        -- <a href="/guides/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font>></a>
 
       all_columns_anomalies test:
-       -- <a href="/guides/anomaly-detection-configuration/column_anomalies"><font color="#CD7D55">column_anomalies: column monitors list</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">column_anomalies: column monitors list</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/exclude_prefix"><font color="#CD7D55">exclude_prefix: string</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/exclude_regexp"><font color="#CD7D55">exclude_regexp: regex</font>></a>
 
@@ -50,32 +68,41 @@ The anomaly detection tests configuration is defined in `.yml` files in your dbt
 
   </Tab>
 
-  <Tab title="Params by configuration level">
+  <Tab title="Params by [core concept](/guides/how-anomaly-detection-works)">
     <pre>
      <code>
-      dbt_project.yml vars:
+      Expected range:
        -- <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/days-back"><font color="#CD7D55">days_back: int</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font>></a>
+
+      Detection period and detection set:
        -- <a href="/guides/anomaly-detection-configuration/backfill-days"><font color="#CD7D55">backfill_days: int</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font>></a>
 
-      Model / source level:
-       -- <a href="/guides/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font>></a>
+      Training period and training set:
+       -- <a href="/guides/anomaly-detection-configuration/days-back"><font color="#CD7D55">days_back: int</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/min-training-set-size"><font color="#CD7D55">min_training_set_size: int</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font>></a>
 
-      Test level:
+      Time buckets:
        -- <a href="/guides/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font>></a>
             &nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
             &nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
-       -- <a href="/guides/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/column_anomalies"><font color="#CD7D55">column_anomalies: column monitors list</font>></a>
+
+      Monitored data set:
+       -- <a href="/guides/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/exclude_prefix"><font color="#CD7D55">exclude_prefix: string</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/exclude_regexp"><font color="#CD7D55">exclude_regexp: regex</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/dimensions"><font color="#CD7D55">dimensions: sql expression</font>></a>
+      
+      Data monitors:
+       -- <a href="/guides/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">column_anomalies: column monitors list</font>></a>
+
+      Other:
        -- <a href="/guides/anomaly-detection-configuration/event_timestamp_column"><font color="#CD7D55">event_timestamp_column: column name</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font>></a> 
+
      </code>
     </pre>
 
@@ -111,7 +138,7 @@ models:
       elementary:
         timestamp_column: updated_at
     tests:
-      - elementary.table_anomalies:
+      - elementary.freshness_anomalies:
           tags: ["elementary"]
       - elementary.all_columns_anomalies:
           tags: ["elementary"]
@@ -119,7 +146,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-      - elementary.table_anomalies:
+      - elementary.volume_anomalies:
           tags: ["elementary"]
 ```
 
@@ -149,7 +176,7 @@ sources:
           elementary:
             timestamp_column: "loaded_at"
         tests:
-          - elementary.table_anomalies
+          - elementary.volume_anomalies
           - elementary.all_columns_anomalies:
               column_anomalies:
                 - null_count
