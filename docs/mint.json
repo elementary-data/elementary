@@ -111,6 +111,7 @@
       "group": "Deployment and Configuration",
       "pages": [
         "deployment-and-configuration/elementary-in-production",
+        "dbt/on-run-end_hooks",
         "deployment-and-configuration/collect-job-data",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"
@@ -160,7 +161,6 @@
       "pages": [
         "understand-elementary/elementary-overview",
         "guides/modules-overview/dbt-package",
-        "dbt/on-run-end_hooks",
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
         "understand-elementary/elementary-alerts"
