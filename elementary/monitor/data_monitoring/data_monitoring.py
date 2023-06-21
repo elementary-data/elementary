@@ -39,14 +39,12 @@ class DataMonitoring:
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         dbt_pkg_version = latest_invocation.get("elementary_version")
-        warehouse_info = self._get_warehouse_info(
+        self.warehouse_info = self._get_warehouse_info(
             hash_id=isinstance(tracking, AnonymousTracking)
         )
-        if warehouse_info:
-            self.warehouse_type = warehouse_info.type
         if tracking:
-            if warehouse_info:
-                tracking.register_warehouse_group(warehouse_info)
+            if self.warehouse_info:
+                tracking.register_warehouse_group(self.warehouse_info)
             tracking.set_env("target_name", latest_invocation.get("target_name"))
             tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
             tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))

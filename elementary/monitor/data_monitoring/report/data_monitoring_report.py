@@ -108,7 +108,7 @@ class DataMonitoringReport(DataMonitoring):
             project_name=project_name or self.project_name,
             filter=self.filter.get_filter(),
             env=self.config.env,
-            warehouse_type=self.warehouse_type,
+            warehouse_type=self.warehouse_info.type if self.warehouse_info else None,
         )
         self._add_report_tracking(report_data, error)
         if error:
@@ -148,7 +148,9 @@ class DataMonitoringReport(DataMonitoring):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.tracking.anonymous_warehouse_id,
+                anonymous_warehouse_id=self.warehouse_info.id
+                if self.warehouse_info
+                else None,
             )
 
     def send_report(

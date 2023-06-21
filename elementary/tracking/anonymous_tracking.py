@@ -20,7 +20,6 @@ class AnonymousTracking(Tracking):
     def __init__(self, config: Config) -> None:
         super().__init__(config)
         self.anonymous_user_id = None
-        self.anonymous_warehouse_id = None
         self._do_not_track = config.anonymous_tracking_enabled is False
         self._run_id = str(uuid.uuid4())
 
