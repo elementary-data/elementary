@@ -33,6 +33,7 @@ class ReportAPI(APIClient):
         disable_samples: bool = False,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
+        warehouse_type: Optional[str] = None,
     ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         try:
             tests_api = TestsAPI(
@@ -121,6 +122,7 @@ class ReportAPI(APIClient):
                 resources_latest_invocation=resources_latest_invocation,
                 invocations_job_identification=invocations_job_identification,
                 env=dict(project_name=project_name, env=env),
+                warehouse_type=warehouse_type,
             )
             return report_data, None
         except Exception as error:

@@ -23,3 +23,4 @@ class ReportDataSchema(BaseModel):
     invocations_job_identification: dict = dict()
     env: dict = dict()
     tracking: Optional[dict] = None
+    warehouse_type: Optional[str] = None

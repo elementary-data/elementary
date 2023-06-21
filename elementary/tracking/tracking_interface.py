@@ -5,6 +5,7 @@ import posthog
 import requests
 
 from elementary.config.config import Config
+from elementary.monitor.data_monitoring.schema import WarehouseInfo
 from elementary.utils.hash import hash
 
 
@@ -15,6 +16,7 @@ class BaseTracking(ABC):
     def __init__(self, config: Config):
         self._config = config
         self._props: Dict[str, Any] = {}
+        self.groups = {}
 
     @staticmethod
     def _hash(content: str):
@@ -27,19 +29,26 @@ class BaseTracking(ABC):
         self._props[key] = value
 
     @abstractmethod
-    def _set_events_group(
-        group_type: str, group_identifier: str, group_props: Optional[dict] = None
+    def _register_group(
+        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def _send_event(
+        self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-        groups: Optional[dict] = None,
     ) -> None:
         raise NotImplementedError
+
+    def register_warehouse_group(self, warehouse_info: WarehouseInfo) -> None:
+        self._register_group(
+            "warehouse",
+            warehouse_info.id,
+            warehouse_info.dict(),
+        )
 
 
 class Tracking(BaseTracking):
@@ -47,25 +56,24 @@ class Tracking(BaseTracking):
         super().__init__(config)
         posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
 
-    @staticmethod
-    def _set_events_group(
-        group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ) -> None:
-        posthog.group_identify(group_type, group_identifier, group_props)
-
-    @staticmethod
     def _send_event(
+        self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-        groups: Optional[dict] = None,
     ) -> None:
         posthog.capture(
             distinct_id=distinct_id,
             event=event_name,
             properties=properties,
-            groups=groups,
+            groups=self.groups,
         )
+
+    def _register_group(
+        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
+    ) -> None:
+        posthog.group_identify(group_type, group_identifier, group_props)
+        self.groups[group_type] = group_identifier
 
 
 class TrackingAPI(BaseTracking):
@@ -108,26 +116,27 @@ class TrackingAPI(BaseTracking):
                 api_key=self.POSTHOG_PROJECT_API_KEY,
                 event=event_name,
                 distinct_id=distinct_id,
-                properties={**properties, "$groups": groups},
+                properties={**(properties or {}), "$groups": groups},
             ),
         )
         return response
 
-    def _set_events_group(
+    def _register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> requests.Response:
-        return self._group_identify(group_type, group_identifier, group_props)
+        resp = self._group_identify(group_type, group_identifier, group_props)
+        self.groups[group_type] = group_identifier
+        return resp
 
     def _send_event(
         self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-        groups: Optional[dict] = None,
     ) -> requests.Response:
         return self._capture(
             distinct_id=distinct_id,
             event_name=event_name,
             properties=properties,
-            groups=groups,
+            groups=self.groups,
         )
