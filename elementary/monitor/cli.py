@@ -367,6 +367,10 @@ def report(
     anonymous_tracking.track_cli_start(
         Command.REPORT, get_cli_properties(), ctx.command.name
     )
+    success = Debug(config).run()
+
+    if not success:
+        sys.exit(1)
     try:
         data_monitoring = DataMonitoringReport(
             config=config,
