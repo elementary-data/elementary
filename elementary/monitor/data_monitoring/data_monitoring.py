@@ -44,7 +44,11 @@ class DataMonitoring:
         )
         if tracking:
             if self.warehouse_info:
-                tracking.register_warehouse_group(self.warehouse_info)
+                tracking.register_group(
+                    "warehouse",
+                    self.warehouse_info.id,
+                    self.warehouse_info.dict(),
+                )
             tracking.set_env("target_name", latest_invocation.get("target_name"))
             tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
             tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))

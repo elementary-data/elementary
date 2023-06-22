@@ -5,7 +5,6 @@ import posthog
 import requests
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring.schema import WarehouseInfo
 from elementary.utils.hash import hash
 
 
@@ -29,7 +28,7 @@ class BaseTracking(ABC):
         self._props[key] = value
 
     @abstractmethod
-    def _register_group(
+    def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> None:
         raise NotImplementedError
@@ -42,13 +41,6 @@ class BaseTracking(ABC):
         properties: Optional[dict] = None,
     ) -> None:
         raise NotImplementedError
-
-    def register_warehouse_group(self, warehouse_info: WarehouseInfo) -> None:
-        self._register_group(
-            "warehouse",
-            warehouse_info.id,
-            warehouse_info.dict(),
-        )
 
 
 class Tracking(BaseTracking):
@@ -69,7 +61,7 @@ class Tracking(BaseTracking):
             groups=self.groups,
         )
 
-    def _register_group(
+    def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> None:
         posthog.group_identify(group_type, group_identifier, group_props)
@@ -121,7 +113,7 @@ class TrackingAPI(BaseTracking):
         )
         return response
 
-    def _register_group(
+    def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> requests.Response:
         resp = self._group_identify(group_type, group_identifier, group_props)
