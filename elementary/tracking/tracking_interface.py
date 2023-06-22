@@ -15,6 +15,7 @@ class BaseTracking(ABC):
     def __init__(self, config: Config):
         self._config = config
         self._props: Dict[str, Any] = {}
+        self.groups = {}
 
     @staticmethod
     def _hash(content: str):
@@ -27,17 +28,17 @@ class BaseTracking(ABC):
         self._props[key] = value
 
     @abstractmethod
-    def _set_events_group(
-        group_type: str, group_identifier: str, group_props: Optional[dict] = None
+    def register_group(
+        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def _send_event(
+        self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-        groups: Optional[dict] = None,
     ) -> None:
         raise NotImplementedError
 
@@ -47,25 +48,24 @@ class Tracking(BaseTracking):
         super().__init__(config)
         posthog.project_api_key = self.POSTHOG_PROJECT_API_KEY
 
-    @staticmethod
-    def _set_events_group(
-        group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ) -> None:
-        posthog.group_identify(group_type, group_identifier, group_props)
-
-    @staticmethod
     def _send_event(
+        self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-        groups: Optional[dict] = None,
     ) -> None:
         posthog.capture(
             distinct_id=distinct_id,
             event=event_name,
             properties=properties,
-            groups=groups,
+            groups=self.groups,
         )
+
+    def register_group(
+        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
+    ) -> None:
+        posthog.group_identify(group_type, group_identifier, group_props)
+        self.groups[group_type] = group_identifier
 
 
 class TrackingAPI(BaseTracking):
@@ -108,26 +108,27 @@ class TrackingAPI(BaseTracking):
                 api_key=self.POSTHOG_PROJECT_API_KEY,
                 event=event_name,
                 distinct_id=distinct_id,
-                properties={**properties, "$groups": groups},
+                properties={**(properties or {}), "$groups": groups},
             ),
         )
         return response
 
-    def _set_events_group(
+    def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
     ) -> requests.Response:
-        return self._group_identify(group_type, group_identifier, group_props)
+        resp = self._group_identify(group_type, group_identifier, group_props)
+        self.groups[group_type] = group_identifier
+        return resp
 
     def _send_event(
         self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-        groups: Optional[dict] = None,
     ) -> requests.Response:
         return self._capture(
             distinct_id=distinct_id,
             event_name=event_name,
             properties=properties,
-            groups=groups,
+            groups=self.groups,
         )

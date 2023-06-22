@@ -50,3 +50,8 @@ class DataMonitoringReportTestResultsSchema(BaseModel):
 class DataMonitoringReportTestRunsSchema(BaseModel):
     runs: Dict[Optional[str], List[TestRunSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
+
+
+class WarehouseInfo(BaseModel):
+    id: str
+    type: str
