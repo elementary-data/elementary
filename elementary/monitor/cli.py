@@ -285,6 +285,8 @@ def monitor(
             disable_samples=disable_samples,
             filter=select,
         )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
         anonymous_tracking.track_cli_start(
             Command.MONITOR, get_cli_properties(), ctx.command.name
         )
@@ -372,6 +374,8 @@ def report(
             disable_samples=disable_samples,
             filter=select,
         )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
         anonymous_tracking.track_cli_start(
             Command.REPORT, get_cli_properties(), ctx.command.name
         )
@@ -571,6 +575,8 @@ def send_report(
             disable_samples=disable_samples,
             filter=select,
         )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
         anonymous_tracking.track_cli_start(
             Command.SEND_REPORT, get_cli_properties(), ctx.command.name
         )
