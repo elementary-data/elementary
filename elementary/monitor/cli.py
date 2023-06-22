@@ -610,9 +610,22 @@ def send_report(
     help="Which directory to look in for the profiles.yml file. "
     "If not set, edr will look in the current working directory first, then HOME/.dbt/",
 )
+@click.option(
+    "--profile-target",
+    "-t",
+    type=str,
+    default=None,
+    help="Which target to load for the given profile. "
+    "If specified, the target will be used for both the 'elementary' profile and your dbt project. "
+    "Else, the default target will be used.",
+)
 @click.pass_context
-def debug(ctx, profiles_dir):
-    config = Config(profiles_dir=profiles_dir)
+def debug(
+    ctx,
+    profile_target,
+    profiles_dir,
+):
+    config = Config(profile_target=profile_target, profiles_dir=profiles_dir)
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.track_cli_start(Command.DEBUG, None, ctx.command.name)
     success = Debug(config).run()
