@@ -18,6 +18,14 @@ class Debug:
         )
 
         try:
+            dbt_runner.debug()
+        except DbtCommandError as err:
+            click.echo(
+                f"Could not connect to the DWH, please check your profiles file. See details below\n\n{err}"
+            )
+            return False
+
+        try:
             dbt_runner.run_operation("test_conn", quiet=True)
         except DbtCommandError as err:
             click.echo(
