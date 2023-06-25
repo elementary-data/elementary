@@ -1,4 +1,4 @@
-{% macro model_resources(exclude_elementary=true) %}
+{% macro get_model_resources(exclude_elementary=true) %}
     {% set model_resources_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}
@@ -21,7 +21,7 @@
 {% endmacro %}
 
 
-{% macro source_resources(exclude_elementary=true) %}
+{% macro get_source_resources(exclude_elementary=true) %}
     {% set source_resources_query %}
         with dbt_sources as (
             select * from {{ ref('elementary', 'dbt_sources') }}
@@ -45,7 +45,7 @@
 {% endmacro %}
 
 
-{% macro all_resources(exclude_elementary=true) %}
+{% macro get_all_resources(exclude_elementary=true) %}
     {% set models = model_resources(exclude_elementary) %}
     {% set sources = source_resources(exclude_elementary) %}
     
@@ -59,7 +59,7 @@
 {% endmacro %}
 
 
-{% macro resources_meta() %}
+{% macro get_resources_meta() %}
     {% set resources_meta_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}
@@ -90,7 +90,7 @@
 {% endmacro %}
 
 
-{% macro resources_columns() %}
+{% macro get_resources_columns() %}
     {% set resources_columns_query %}
         with dbt_columns as (
             select * from {{ ref('elementary', 'dbt_columns') }}
