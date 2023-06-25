@@ -1,12 +1,15 @@
 {% macro get_exposures() %}
     {% set dbt_exposures_relation = ref('elementary', 'dbt_exposures') %}
+    {% set label_column_exists = elementary.column_exists_in_relation(dbt_exposures_relation, 'label') %}
     {%- if elementary.relation_exists(dbt_exposures_relation) -%}
         --{# TODO: should we group by #}
         {% set get_exposures_query %}
               with dbt_artifacts_exposures as (
                 select
                   name,
-                  label,
+                  {% if label_column_exists %}
+                    label,
+                  {% endif %}
                   unique_id,
                   url,
                   type,
