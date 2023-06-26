@@ -15,5 +15,6 @@
     "pre_hooks": [],
     "post_hooks": [],
     }) %}
+  {# We call the incremental materialization in order to hand-off the implementation of schema changes to dbt. #}
   {{ return(dbt.materialization_incremental_default()) }}
 {% endmaterialization %}
