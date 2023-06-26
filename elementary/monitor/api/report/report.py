@@ -15,7 +15,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedSourceSchema,
     TotalsSchema,
 )
-from elementary.monitor.api.report.schema import ReportDataSchema
+from elementary.monitor.api.report.schema import ReportDataEnvSchema, ReportDataSchema
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -33,6 +33,7 @@ class ReportAPI(APIClient):
         disable_samples: bool = False,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
+        warehouse_type: Optional[str] = None,
     ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         try:
             tests_api = TestsAPI(
@@ -120,7 +121,9 @@ class ReportAPI(APIClient):
                 invocations=invocations,
                 resources_latest_invocation=resources_latest_invocation,
                 invocations_job_identification=invocations_job_identification,
-                env=dict(project_name=project_name, env=env),
+                env=ReportDataEnvSchema(
+                    project_name=project_name, env=env, warehouse_type=warehouse_type
+                ),
             )
             return report_data, None
         except Exception as error:

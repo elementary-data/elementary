@@ -1,0 +1,32 @@
+---
+title: "column_anomalies"
+sidebarTitle: "column_anomalies"
+---
+
+`column_anomalies: [column monitors list]`
+
+Select which monitors to activate as part of the test.
+
+- _Default: default monitors_
+- _Relevant tests: `all_column_anomalies`, `column_anomalies`_
+- _Configuration level: test_
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.column_anomalies:
+          column_anomalies: 
+            - null_count
+            - missing_count
+            - average
+```
+
+</RequestExample>
+
+
+#### Supported column monitors
+
+<Snippet file="column-metrics.mdx" />

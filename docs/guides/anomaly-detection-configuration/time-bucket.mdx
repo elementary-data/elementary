@@ -19,7 +19,6 @@ For example, if you want to detect volume anomalies in an hourly resolution, you
 
 - _Default: daily buckets. `time_bucket: {period: day, count: 1}`_
 - _Relevant tests: Anomaly detection tests with `timestamp_column`_
-- _Configuration level: test_
 
 <Frame caption="time_bucket change impact">
     <img
@@ -30,14 +29,31 @@ For example, if you want to detect volume anomalies in an hourly resolution, you
 
 <RequestExample>
 
-```yaml test
+```yml test
 models:
   - name: this_is_a_model
     tests:
       - elementary.volume_anomalies:
           time_bucket:
-            period: hour
-            count: 4
+            period: day
+            count: 2
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        time_bucket:
+          period: hour
+          count: 4
+```
+
+```yml dbt_project.yml
+vars:
+  time_bucket:
+    period: hour
+    count: 12
 ```
 
 </RequestExample>

@@ -1,4 +1,4 @@
-{% macro project_tags() %}
+{% macro get_project_tags() %}
     {% set project_tags_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}

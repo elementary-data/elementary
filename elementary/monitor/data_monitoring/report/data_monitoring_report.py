@@ -1,3 +1,4 @@
+import html
 import json
 import os
 import os.path
@@ -64,7 +65,7 @@ class DataMonitoringReport(DataMonitoring):
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, "r", encoding="utf-8") as template_html_file:
                 template_html_code = template_html_file.read()
-                dumped_output_data = json.dumps(output_data)
+                dumped_output_data = html.escape(json.dumps(output_data), quote=False)
                 compiled_output_html = f"""
                         {template_html_code}
                         <script>
@@ -107,6 +108,7 @@ class DataMonitoringReport(DataMonitoring):
             project_name=project_name or self.project_name,
             filter=self.filter.get_filter(),
             env=self.config.env,
+            warehouse_type=self.warehouse_info.type if self.warehouse_info else None,
         )
         self._add_report_tracking(report_data, error)
         if error:
@@ -146,8 +148,9 @@ class DataMonitoringReport(DataMonitoring):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.tracking.anonymous_warehouse
-                and self.tracking.anonymous_warehouse.id,
+                anonymous_warehouse_id=self.warehouse_info.id
+                if self.warehouse_info
+                else None,
             )
 
     def send_report(

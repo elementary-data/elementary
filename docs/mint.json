@@ -22,7 +22,7 @@
   },
   "topbarCtaButton": {
     "name": "Try Elementary Cloud",
-    "url": "https://www.elementary-data.com/cloud-beta"
+    "url": "https://t2taztilhde.typeform.com/to/ObfMbxB5?utm_source=docs&utm_medium=cta&utm_content=v1"
   },
   "topbarLinks": [
     {
@@ -63,7 +63,10 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": ["quickstart", "quickstart-cli"]
+          "pages": [
+            "quickstart",
+            "quickstart-cli"
+          ]
         },
         {
           "group": "Tutorial",
@@ -92,7 +95,13 @@
             "guides/share-observability-report/send-report-summary"
           ]
         },
-        "quickstart/send-slack-alerts",
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "quickstart/send-slack-alerts",
+            "guides/alerts-configuration"
+          ]
+        },
         "guides/add-elementary-tests",
         "guides/add-schema-tests",
         "guides/python-tests"
@@ -102,6 +111,8 @@
       "group": "Deployment and Configuration",
       "pages": [
         "deployment-and-configuration/elementary-in-production",
+        "dbt/on-run-end_hooks",
+        "deployment-and-configuration/collect-job-data",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"
       ]
@@ -111,6 +122,17 @@
       "pages": [
         "guides/how-anomaly-detection-works",
         "guides/data-anomaly-detection",
+        {
+          "group": "Anomaly detection tests",
+          "pages": [
+            "guides/anomaly-detection-tests/volume-anomalies",
+            "guides/anomaly-detection-tests/freshness-anomalies",
+            "guides/anomaly-detection-tests/event-freshness-anomalies",
+            "guides/anomaly-detection-tests/dimension-anomalies",
+            "guides/anomaly-detection-tests/all-columns-anomalies",
+            "guides/anomaly-detection-tests/column-anomalies"
+          ]
+        },
         "guides/elementary-tests-configuration",
         {
           "group": "Tests params",
@@ -123,7 +145,8 @@
             "guides/anomaly-detection-configuration/backfill-days",
             "guides/anomaly-detection-configuration/time-bucket",
             "guides/anomaly-detection-configuration/seasonality",
-            "guides/anomaly-detection-configuration/column_anomalies",
+            "guides/anomaly-detection-configuration/min-training-set-size",
+            "guides/anomaly-detection-configuration/column-anomalies",
             "guides/anomaly-detection-configuration/exclude_prefix",
             "guides/anomaly-detection-configuration/exclude_regexp",
             "guides/anomaly-detection-configuration/dimensions",
@@ -184,6 +207,8 @@
         {
           "group": "Releases",
           "pages": [
+            "release-notes/releases/0.8.0",
+            "release-notes/releases/0.7.10",
             "release-notes/releases/0.7.7",
             "release-notes/releases/0.7.6",
             "release-notes/releases/0.7.5",
@@ -199,14 +224,20 @@
       ]
     },
     {
-      "group": "Getting Started",
+      "group": "Elementary Cloud",
       "pages": [
         "cloud/introduction",
+        "cloud/general/security-and-privacy"
+      ]
+    },
+    {
+      "group": "Getting Started",
+      "pages": [
         "cloud/onboarding/quickstart-dbt-package",
+        "cloud/onboarding/create-profile",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
-        "cloud/manage-team",
-        "cloud/general/security-and-privacy"
+        "cloud/manage-team"
       ]
     }
   ],

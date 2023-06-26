@@ -21,7 +21,7 @@ A `schema.yml` file that includes all the below tests can be found at the bottom
 <Accordion title="Test 1: Customer Signups">
 First, we will use the **tables_anomalies** test to perform a **row_count**. This tests counts the number of rows created in a given period to determine if there have been any anomalies in the number of signups in a given time period.
 
-We will add the **table_anomalies** test using **row_count** as a monitor as follows:
+We will add the **volume_anomalies** test as follows:
 
 ```yaml
 models:
@@ -30,12 +30,10 @@ models:
     config:
       tags: ["PII"]
     tests:
-      - elementary.table_anomalies:
-          table_anomalies:
-            - row_count
+      - elementary.volume_anomalies
 ```
 
-Now that we have selected row_count as our monitor, we must define a column to use for our timestamp. This will be used to create time buckets for anomaly detection. We select the **signup_date** column as seen below:
+Now that we have configured a test, we should define a column to use for our timestamp. This will be used to create time buckets for anomaly detection. We select the **signup_date** column as seen below:
 
 ```yaml
 models:
@@ -46,9 +44,7 @@ models:
       elementary:
         timestamp_column: "signup_date"
     tests:
-      - elementary.table_anomalies:
-          table_anomalies:
-            - row_count
+      - elementary.volume_anomalies
 ```
 
 This test will fail if there are any days (as defined by **signup_date**) where the number of rows exceeds 3 standard deviations above/below the mean.
@@ -56,7 +52,7 @@ This test will fail if there are any days (as defined by **signup_date**) where 
 </Accordion>
 <br/>
 <Accordion title="Test 2: Returned Orders">
-Similar to Test 1, we will use the **table_anomalies** test and **row_count** to detect an anomalous number of returned orders in a given time period. In this test, however, we will define the timestamp column at the test level - instead of at the model level.
+Similar to Test 1, we will use the **volume_anomalies** test to detect an anomalous number of returned orders in a given time period. In this test, however, we will define the timestamp column at the test level - instead of at the model level.
 ```yaml
   - name: returned_orders
     description: This table contains all of the returned orders
@@ -64,10 +60,8 @@ Similar to Test 1, we will use the **table_anomalies** test and **row_count** to
       tags: ["finance"]
 
     tests:
-      - elementary.table_anomalies:
+      - elementary.volume_anomalies
           tags: ["table_anomalies"]
-          table_anomalies:
-            - row_count
           timestamp_column: "order_date"
 
 ````
@@ -140,10 +134,8 @@ models:
       elementary:
         timestamp_column: "signup_date"
     tests:
-      - elementary.table_anomalies:
-          table_anomalies:
-            - row_count
-
+      - elementary.volume_anomalies
+      
     columns:
       - name: customer_id
         description: This is a unique identifier for a customer
@@ -225,10 +217,8 @@ models:
       tags: ["finance"]
 
     tests:
-      - elementary.table_anomalies:
+      - elementary.volume_anomalies:
           tags: ["table_anomalies"]
-          table_anomalies:
-            - row_count
           timestamp_column: "order_date"
 
     columns:

@@ -3,4 +3,3 @@ packages:
     version: [">=0.8.0", "<0.9.0"]
   - git: "https://github.com/elementary-data/dbt-data-reliability.git"
     revision: 8cb5570b562b044c58c131e4b9178e14fc3bd29a
-

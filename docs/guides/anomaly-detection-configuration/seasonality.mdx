@@ -20,7 +20,6 @@ The expected range for Monday will be based on a training set of previous Monday
 - _Default: none_
 - _Supported values: `day_of_week`_
 - _Relevant tests: Anomaly detection tests with `timestamp_column` and 1 day `time_bucket`_
-- _Configuration level: test_
 
 <Frame caption="seasonality change impact">
     <img
@@ -31,12 +30,25 @@ The expected range for Monday will be based on a training set of previous Monday
 
 <RequestExample>
 
-```yaml test
+```yml test
 models:
   - name: this_is_a_model
     tests:
       - elementary.volume_anomalies:
           seasonality: day_of_week
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        seasonality: day_of_week
+```
+
+```yml dbt_project.yml
+vars:
+  seasonality: day_of_week
 ```
 
 </RequestExample>
