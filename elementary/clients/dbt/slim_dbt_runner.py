@@ -81,9 +81,7 @@ class SlimDbtRunner(BaseDbtRunner):
         secret_vars: Optional[dict] = None,
         **kwargs,
     ):
-        super().__init__(project_dir, profiles_dir, target)
-        self.vars = vars
-        self.secret_vars = secret_vars
+        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
         self.config = None
         self.adapter = None
         self.adapter_name = None
@@ -171,16 +169,12 @@ class SlimDbtRunner(BaseDbtRunner):
         quiet: bool = False,
         **kwargs,
     ) -> list:
-        agg_vars = {
-            **(self.vars or {}),
-            **(self.secret_vars or {}),
-            **(vars or {}),
-        }
+        all_vars = self._get_all_vars(vars)
         self._load_runner(
             project_dir=self.project_dir,
             profiles_dir=self.profiles_dir,
             target=self.target,
-            vars=agg_vars,
+            vars=all_vars,
         )
         log_command = [
             "dbt",
@@ -189,16 +183,11 @@ class SlimDbtRunner(BaseDbtRunner):
             "--args",
             json.dumps(macro_args),
         ]
-        if agg_vars:
+        if all_vars:
             log_command.extend(
                 [
                     "--vars",
-                    json.dumps(
-                        {
-                            k: v if k not in self.secret_vars else "***"
-                            for k, v in agg_vars.items()
-                        }
-                    ),
+                    json.dumps(self._get_secret_masked_vars(all_vars)),
                 ]
             )
         log_msg = f"Running {' '.join(log_command)}"

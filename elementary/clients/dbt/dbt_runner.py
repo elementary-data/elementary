@@ -33,11 +33,9 @@ class DbtRunner(BaseDbtRunner):
         vars: Optional[Dict[str, Any]] = None,
         secret_vars: Optional[Dict[str, Any]] = None,
     ) -> None:
-        super().__init__(project_dir, profiles_dir, target)
+        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
-        self.vars = vars
-        self.secret_vars = secret_vars
 
     def _run_command(
         self,
@@ -56,25 +54,16 @@ class DbtRunner(BaseDbtRunner):
             dbt_command.extend(["--profiles-dir", self.profiles_dir])
         if self.target:
             dbt_command.extend(["--target", self.target])
-        agg_vars = {
-            **(self.vars or {}),
-            **(self.secret_vars or {}),
-            **(vars or {}),
-        }
+        all_vars = self._get_all_vars(vars)
         log_command = " ".join(
             [
                 *dbt_command,
                 "--vars",
-                json.dumps(
-                    {
-                        k: v if k not in self.secret_vars else "***"
-                        for k, v in agg_vars.items()
-                    }
-                ),
+                json.dumps(self._get_secret_masked_vars(all_vars)),
             ]
         )
-        if agg_vars:
-            json_vars = json.dumps(agg_vars)
+        if all_vars:
+            json_vars = json.dumps(all_vars)
             dbt_command.extend(["--vars", json_vars])
         log_msg = f"Running {log_command}"
         if not quiet:

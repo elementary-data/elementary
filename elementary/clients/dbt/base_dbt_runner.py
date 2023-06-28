@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Dict, Optional
 
 
 class BaseDbtRunner(ABC):
@@ -8,10 +8,14 @@ class BaseDbtRunner(ABC):
         project_dir: str,
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
+        vars: Optional[dict] = None,
+        secret_vars: Optional[dict] = None,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
+        self.vars = vars or {}
+        self.secret_vars = secret_vars or {}
 
     @abstractmethod
     def deps(self, *args, **kwargs):
@@ -48,3 +52,13 @@ class BaseDbtRunner(ABC):
     @abstractmethod
     def source_freshness(self, *args, **kwargs):
         raise NotImplementedError
+
+    def _get_all_vars(self, vars: Optional[Dict[str, Any]] = None):
+        return {
+            **self.vars,
+            **self.secret_vars,
+            **(vars or {}),
+        }
+
+    def _get_secret_masked_vars(self, vars: Dict[str, Any]):
+        return {k: v if k not in self.secret_vars else "***" for k, v in vars.items()}
