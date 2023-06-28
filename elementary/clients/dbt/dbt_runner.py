@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 from json import JSONDecodeError
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
@@ -29,11 +29,13 @@ class DbtRunner(BaseDbtRunner):
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
         raise_on_failure: bool = True,
-        dbt_env_vars: Optional[Dict[str, str]] = None,
+        env_vars: Optional[Dict[str, str]] = None,
+        vars: Optional[Dict[str, Any]] = None,
+        secret_vars: Optional[Dict[str, Any]] = None,
     ) -> None:
-        super().__init__(project_dir, profiles_dir, target)
+        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
         self.raise_on_failure = raise_on_failure
-        self.dbt_env_vars = dbt_env_vars
+        self.env_vars = env_vars
 
     def _run_command(
         self,
@@ -52,11 +54,21 @@ class DbtRunner(BaseDbtRunner):
             dbt_command.extend(["--profiles-dir", self.profiles_dir])
         if self.target:
             dbt_command.extend(["--target", self.target])
-        if vars:
-            json_vars = json.dumps(vars)
-            dbt_command.extend(["--vars", json_vars])
-        dbt_command_str = " ".join(dbt_command)
-        log_msg = f"Running {dbt_command_str}"
+
+        all_vars = self._get_all_vars(vars)
+        if all_vars:
+            log_command = dbt_command.copy()
+            log_command.extend(
+                [
+                    "--vars",
+                    json.dumps(self._get_secret_masked_vars(all_vars)),
+                ]
+            )
+            dbt_command.extend(["--vars", json.dumps(all_vars)])
+        else:
+            log_command = dbt_command
+
+        log_msg = f"Running {log_command}"
         if not quiet:
             logger.info(log_msg)
         else:
@@ -92,7 +104,7 @@ class DbtRunner(BaseDbtRunner):
             if is_debug():
                 logger.debug(f"Output: {output}")
             logger.debug(
-                f"Result bytes size for command '{dbt_command_str}' is {len(result.stdout)}"
+                f"Result bytes size for command '{log_command}' is {len(result.stdout)}"
             )
         if result.returncode != 0:
             return False, output
@@ -209,8 +221,8 @@ class DbtRunner(BaseDbtRunner):
 
     def _get_command_env(self):
         env = os.environ.copy()
-        if self.dbt_env_vars is not None:
-            env.update(self.dbt_env_vars)
+        if self.env_vars is not None:
+            env.update(self.env_vars)
         return env
 
     def debug(self, quiet: bool = False) -> bool:

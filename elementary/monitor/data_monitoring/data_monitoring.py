@@ -75,7 +75,7 @@ class DataMonitoring:
             dbt_project_utils.PATH,
             self.config.profiles_dir,
             self.config.profile_target,
-            dbt_env_vars=self.config.dbt_env_vars,
+            env_vars=self.config.env_vars,
         )
         return internal_dbt_runner
 
@@ -85,7 +85,7 @@ class DataMonitoring:
                 self.config.project_dir,
                 self.config.profiles_dir,
                 self.config.project_profile_target,
-                dbt_env_vars=self.config.dbt_env_vars,
+                env_vars=self.config.env_vars,
             )
         else:
             user_dbt_runner = None
@@ -178,7 +178,7 @@ class DataMonitoring:
             dbt_project_utils.PATH,
             self.config.profiles_dir,
             self.config.profile_target,
-            dbt_env_vars=self.config.dbt_env_vars,
+            env_vars=self.config.env_vars,
         )
         try:
             warehouse_type, warehouse_unique_id = json.loads(

@@ -78,12 +78,15 @@ class SlimDbtRunner(BaseDbtRunner):
         profiles_dir: str = DEFAULT_PROFILES_DIR,
         target: Optional[str] = None,
         vars: Optional[dict] = None,
+        secret_vars: Optional[dict] = None,
         **kwargs,
     ):
-        super().__init__(project_dir, profiles_dir, target)
-        self._load_runner(
-            project_dir=project_dir, profiles_dir=profiles_dir, target=target, vars=vars
-        )
+        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
+        self.config = None
+        self.adapter = None
+        self.adapter_name = None
+        self.project_parser = None
+        self.manifest = None
 
     def _load_runner(
         self,
@@ -166,20 +169,32 @@ class SlimDbtRunner(BaseDbtRunner):
         quiet: bool = False,
         **kwargs,
     ) -> list:
-        if vars:
-            # vars are being parsed as part of the manifest
-            self._load_runner(
-                project_dir=self.args.project_dir,
-                profiles_dir=self.args.profiles_dir,
-                target=self.args.target,
-                vars=vars,
+        all_vars = self._get_all_vars(vars)
+        self._load_runner(
+            project_dir=self.project_dir,
+            profiles_dir=self.profiles_dir,
+            target=self.target,
+            vars=all_vars,
+        )
+        log_command = [
+            "dbt",
+            "run-operation",
+            macro_name,
+            "--args",
+            json.dumps(macro_args),
+        ]
+        if all_vars:
+            log_command.extend(
+                [
+                    "--vars",
+                    json.dumps(self._get_secret_masked_vars(all_vars)),
+                ]
             )
-
-        log_message = f"Running dbt run-operation {macro_name} --args {macro_args}{f' --var {vars}' if vars else ''}"
+        log_msg = f"Running {' '.join(log_command)}"
         if not quiet:
-            logger.info(log_message)
+            logger.info(log_msg)
         else:
-            logger.debug(log_message)
+            logger.debug(log_msg)
 
         run_operation_results = []
         macro_output = self._execute_macro(macro_name, **macro_args)
