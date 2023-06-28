@@ -54,17 +54,20 @@ class DbtRunner(BaseDbtRunner):
             dbt_command.extend(["--profiles-dir", self.profiles_dir])
         if self.target:
             dbt_command.extend(["--target", self.target])
+
         all_vars = self._get_all_vars(vars)
-        log_command = " ".join(
-            [
-                *dbt_command,
-                "--vars",
-                json.dumps(self._get_secret_masked_vars(all_vars)),
-            ]
-        )
         if all_vars:
-            json_vars = json.dumps(all_vars)
-            dbt_command.extend(["--vars", json_vars])
+            log_command = dbt_command.copy()
+            log_command.extend(
+                [
+                    "--vars",
+                    json.dumps(self._get_secret_masked_vars(all_vars)),
+                ]
+            )
+            dbt_command.extend(["--vars", json.dumps(all_vars)])
+        else:
+            log_command = dbt_command
+
         log_msg = f"Running {log_command}"
         if not quiet:
             logger.info(log_msg)
