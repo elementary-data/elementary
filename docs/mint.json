@@ -207,6 +207,7 @@
         {
           "group": "Releases",
           "pages": [
+            "release-notes/releases/0.8.2",
             "release-notes/releases/0.8.0",
             "release-notes/releases/0.7.10",
             "release-notes/releases/0.7.7",
