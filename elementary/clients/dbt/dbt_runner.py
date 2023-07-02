@@ -68,7 +68,7 @@ class DbtRunner(BaseDbtRunner):
         else:
             log_command = dbt_command
 
-        log_msg = f"Running {log_command}"
+        log_msg = f"Running {' '.join(log_command)}"
         if not quiet:
             logger.info(log_msg)
         else:
