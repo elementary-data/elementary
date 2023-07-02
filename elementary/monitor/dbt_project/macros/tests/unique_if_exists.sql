@@ -5,8 +5,8 @@
 
     {% if not elementary.relation_exists(model) %}
         {% do exceptions.warn("Relation '{}' does not exist.".format(model)) %}
-        {{ elementary.no_results_query() }}
+        {% do return(elementary.no_results_query()) %}
     {% else %}
-        {{ adapter.dispatch("test_unique")(model, column_name) }}
+        {% do return(adapter.dispatch("test_unique")(model, column_name)) %}
     {% endif %}
 {% endtest %}
