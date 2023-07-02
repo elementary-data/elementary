@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: elementary
+    schema: "{{ target.schema }}"
+    tables:
+      - name: dbt_models
+        columns:
+          - name: unique_id
+            tests:
+              - unique
+
+      - name: dbt_tests
+        columns:
+          - name: unique_id
+            tests:
+              - unique
+
+      - name: dbt_sources
+        columns:
+          - name: unique_id
+            tests:
+              - unique
+
+      - name: dbt_snapshots
+        columns:
+          - name: unique_id
+            tests:
+              - unique
+
+      - name: dbt_metrics
+        columns:
+          - name: unique_id
+            tests:
+              - unique
+
+      - name: dbt_exposures
+        columns:
+          - name: unique_id
+            tests:
+              - unique
