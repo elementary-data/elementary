@@ -11,7 +11,7 @@ from elementary.monitor.fetchers.test_management.schema import (
     TagsModel,
     TestModel,
 )
-from elementary.utils.json_utils import unpack_and_flatten_str_to_list
+from elementary.utils.json_utils import unpack_and_flatten_and_dedup_list_of_strings
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -80,7 +80,7 @@ class TestManagementFetcher(FetcherClient):
         formatted_resources = []
         for resource in resources:
             owners = (
-                unpack_and_flatten_str_to_list(resource["owners"])
+                unpack_and_flatten_and_dedup_list_of_strings(resource["owners"])
                 if resource["owners"]
                 else []
             )
@@ -126,8 +126,12 @@ class TestManagementFetcher(FetcherClient):
         tests = []
         for test_result in test_results:
             meta = json.loads(test_result["meta"])
-            owners = unpack_and_flatten_str_to_list(meta.get("owner", "[]"))
-            model_owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
+            owners = unpack_and_flatten_and_dedup_list_of_strings(
+                meta.get("owner", "[]")
+            )
+            model_owners = unpack_and_flatten_and_dedup_list_of_strings(
+                test_result["model_owners"]
+            )
             tags = list(set(json.loads(test_result["tags"])))
             model_tags = list(set(json.loads(test_result["model_tags"])))
             description = meta.get("description")
@@ -167,7 +171,7 @@ class TestManagementFetcher(FetcherClient):
             owners = owners_result["owner"]
             if owners is None:
                 continue
-            owners = unpack_and_flatten_str_to_list(owners)
+            owners = unpack_and_flatten_and_dedup_list_of_strings(owners)
             all_owners.extend(owners)
         return all_owners
 
