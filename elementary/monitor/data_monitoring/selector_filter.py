@@ -36,12 +36,12 @@ class SelectorFilter:
                 return SelectorFilterSchema(node_names=node_names, selector=selector)
             else:
 
-                invocation_id_regex = re.compile(r"invocation_id:.*")
-                invocation_time_regex = re.compile(r"invocation_time:.*")
+                invocation_id_regex = re.compile(r"invocation_id:(.*)")
+                invocation_time_regex = re.compile(r"invocation_time:(.*)")
                 last_invocation_regex = re.compile(r"last_invocation")
-                tag_regex = re.compile(r"tag:.*")
-                owner_regex = re.compile(r"config.meta.owner:.*")
-                model_regex = re.compile(r"model:.*")
+                tag_regex = re.compile(r"tag:(.*)")
+                owner_regex = re.compile(r"config.meta.owner:(.*)")
+                model_regex = re.compile(r"model:(.*)")
                 status_regex = re.compile(r"status:(.*)")
 
                 invocation_id_match = invocation_id_regex.search(selector)
@@ -58,31 +58,31 @@ class SelectorFilter:
                     )
                 elif invocation_id_match:
                     data_monitoring_filter = SelectorFilterSchema(
-                        invocation_id=invocation_id_match.group().split(":", 1)[1],
+                        invocation_id=invocation_id_match.group(1),
                         selector=selector,
                     )
                 elif invocation_time_match:
                     data_monitoring_filter = SelectorFilterSchema(
-                        invocation_time=invocation_time_match.group().split(":", 1)[1],
+                        invocation_time=invocation_time_match.group(1),
                         selector=selector,
                     )
                 elif tag_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "tag")
                     data_monitoring_filter = SelectorFilterSchema(
-                        tag=tag_match.group().split(":", 1)[1], selector=selector
+                        tag=tag_match.group(1), selector=selector
                     )
                 elif owner_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "owner")
                     data_monitoring_filter = SelectorFilterSchema(
-                        owner=owner_match.group().split(":", 1)[1], selector=selector
+                        owner=owner_match.group(1), selector=selector
                     )
                 elif model_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "model")
                     data_monitoring_filter = SelectorFilterSchema(
-                        model=model_match.group().split(":", 1)[1], selector=selector
+                        model=model_match.group(1), selector=selector
                     )
                 elif status_match:
                     if self.tracking:
