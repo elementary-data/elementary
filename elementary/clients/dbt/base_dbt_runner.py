@@ -6,7 +6,7 @@ class BaseDbtRunner(ABC):
     def __init__(
         self,
         project_dir: str,
-        profiles_dir: Optional[str],
+        profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
         vars: Optional[dict] = None,
         secret_vars: Optional[dict] = None,
