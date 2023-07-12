@@ -10,6 +10,10 @@ def recommend_version_upgrade():
     try:
         latest_version = package.get_latest_package_version()
         current_version = package.get_package_version()
+        if not latest_version or not current_version:
+            # Failed to parse versions, so skip the check
+            return
+
         if version.parse(current_version) < version.parse(latest_version):
             click.secho(
                 f"You are using Elementary {current_version}, however version {latest_version} is available.\n"

@@ -15,8 +15,8 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
     TotalsModelRunsSchema,
-    TotalsSchema,
 )
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.models import ModelsFetcher
 from elementary.monitor.fetchers.models.schema import ArtifactSchemaType, ExposureSchema
 from elementary.monitor.fetchers.models.schema import (
@@ -215,7 +215,7 @@ class ModelsAPI(APIClient):
     @classmethod
     def _normalize_artifact_path(
         cls,
-        artifact: Union[ArtifactSchemaType],
+        artifact: ArtifactSchemaType,
     ) -> str:
         if artifact.full_path is None:
             raise Exception("Artifact full path can't be null")
@@ -240,11 +240,11 @@ class ModelsAPI(APIClient):
     @classmethod
     def _fqn(
         cls,
-        artifact: Union[ArtifactSchemaType],
+        artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
     ) -> str:
         if isinstance(artifact, ExposureSchema):
             path = (artifact.meta or {}).get("path")
-            name = artifact.label or artifact.name
+            name = artifact.label or artifact.name or "N/A"
             fqn = f"{path}/{name}" if path else name
             return fqn
 

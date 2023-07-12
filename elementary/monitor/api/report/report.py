@@ -13,11 +13,11 @@ from elementary.monitor.api.models.schema import (
     NormalizedExposureSchema,
     NormalizedModelSchema,
     NormalizedSourceSchema,
-    TotalsSchema,
 )
 from elementary.monitor.api.report.schema import ReportDataEnvSchema, ReportDataSchema
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.utils.time import get_now_utc_iso_format
 
@@ -25,8 +25,8 @@ from elementary.utils.time import get_now_utc_iso_format
 class ReportAPI(APIClient):
     def get_report_data(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int = 7,
+        test_runs_amount: int = 720,
         disable_passed_test_metrics: bool = False,
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
@@ -81,7 +81,7 @@ class ReportAPI(APIClient):
             serializable_test_results = self._serilize_test_results(
                 test_results.results
             )
-            serializable_test_restuls_totals = self._serialize_totals(
+            serializable_test_results_totals = self._serialize_totals(
                 test_results.totals
             )
             serializable_test_runs = self._serilize_test_runs(test_runs.runs)
@@ -110,7 +110,7 @@ class ReportAPI(APIClient):
                 groups=serializable_groups,
                 invocation=serializable_invocation,
                 test_results=serializable_test_results,
-                test_results_totals=serializable_test_restuls_totals,
+                test_results_totals=serializable_test_results_totals,
                 test_runs=serializable_test_runs,
                 test_runs_totals=serializable_test_runs_totals,
                 coverages=serializable_models_coverages,
@@ -150,7 +150,7 @@ class ReportAPI(APIClient):
         return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
     def _serilize_test_results(
-        self, test_results: Dict[Optional[str], List[TestResultSchema]]
+        self, test_results: Dict[str, List[TestResultSchema]]
     ) -> Dict[str, List[dict]]:
         serializable_test_results = defaultdict(list)
         for model_unique_id, test_result in test_results.items():
@@ -160,7 +160,7 @@ class ReportAPI(APIClient):
         return serializable_test_results
 
     def _serilize_test_runs(
-        self, test_runs: Dict[Optional[str], List[TestRunSchema]]
+        self, test_runs: Dict[str, List[TestRunSchema]]
     ) -> Dict[str, List[dict]]:
         serializable_test_runs = defaultdict(list)
         for model_unique_id, test_run in test_runs.items():

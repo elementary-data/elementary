@@ -6,6 +6,9 @@ import requests
 
 from elementary.config.config import Config
 from elementary.utils.hash import hash
+from elementary.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class BaseTracking(ABC):
@@ -15,7 +18,7 @@ class BaseTracking(ABC):
     def __init__(self, config: Config):
         self._config = config
         self._props: Dict[str, Any] = {}
-        self.groups = {}
+        self.groups: Dict[str, str] = {}
 
     @staticmethod
     def _hash(content: str):
@@ -30,7 +33,7 @@ class BaseTracking(ABC):
     @abstractmethod
     def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ) -> None:
+    ):
         raise NotImplementedError
 
     @abstractmethod
@@ -39,7 +42,7 @@ class BaseTracking(ABC):
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-    ) -> None:
+    ):
         raise NotImplementedError
 
 
@@ -53,7 +56,7 @@ class Tracking(BaseTracking):
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-    ) -> None:
+    ):
         posthog.capture(
             distinct_id=distinct_id,
             event=event_name,
@@ -63,7 +66,7 @@ class Tracking(BaseTracking):
 
     def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ) -> None:
+    ):
         posthog.group_identify(group_type, group_identifier, group_props)
         self.groups[group_type] = group_identifier
 
@@ -73,13 +76,12 @@ class TrackingAPI(BaseTracking):
         super().__init__(config)
         self.client = self._init_client()
 
-    def _init_client(self) -> requests.Session:
+    @staticmethod
+    def _init_client() -> requests.Session:
         session = requests.Session()
         return session
 
-    def _group_identify(
-        self, group_type, group_identifier, group_props
-    ) -> requests.Response:
+    def _group_identify(self, group_type, group_identifier, group_props):
         response = self.client.post(
             f"{self.POSTHOG_API_HOST}/capture/",
             json=dict(
@@ -93,7 +95,10 @@ class TrackingAPI(BaseTracking):
                 },
             ),
         )
-        return response
+        if response.status_code != requests.codes.ok:
+            logger.warning(
+                f"Failed to register group in Posthog - {group_type} {group_identifier}"
+            )
 
     def _capture(
         self,
@@ -101,7 +106,7 @@ class TrackingAPI(BaseTracking):
         event_name: str,
         properties: Optional[dict] = None,
         groups: Optional[dict] = None,
-    ) -> requests.Response:
+    ):
         response = self.client.post(
             f"{self.POSTHOG_API_HOST}/capture/",
             json=dict(
@@ -111,22 +116,22 @@ class TrackingAPI(BaseTracking):
                 properties={**(properties or {}), "$groups": groups},
             ),
         )
-        return response
+        if response.status_code != requests.codes.ok:
+            logger.debug(f"Failed to capture event - {event_name} {distinct_id}")
 
     def register_group(
         self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ) -> requests.Response:
-        resp = self._group_identify(group_type, group_identifier, group_props)
+    ):
+        self._group_identify(group_type, group_identifier, group_props)
         self.groups[group_type] = group_identifier
-        return resp
 
     def _send_event(
         self,
         distinct_id: str,
         event_name: str,
         properties: Optional[dict] = None,
-    ) -> requests.Response:
-        return self._capture(
+    ):
+        self._capture(
             distinct_id=distinct_id,
             event_name=event_name,
             properties=properties,

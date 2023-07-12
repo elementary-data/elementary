@@ -7,7 +7,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
 )
-from elementary.monitor.api.tests.schema import TotalsSchema
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.schema import ArtifactSchema
 from elementary.utils.log import get_logger
 

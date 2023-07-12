@@ -2,13 +2,14 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class ElementaryTestResultSchema(BaseModel):
     display_name: Optional[str] = None
-    metrics: Optional[Union[list, dict]]
+    metrics: Optional[Union[list, dict]] = None
     result_description: Optional[str] = None
 
     class Config:
@@ -20,36 +21,6 @@ class DbtTestResultSchema(BaseModel):
     results_sample: Optional[list] = None
     error_message: Optional[str] = None
     failed_rows_count: Optional[int] = None
-
-
-class TotalsSchema(BaseModel):
-    errors: int = 0
-    warnings: int = 0
-    passed: int = 0
-    failures: int = 0
-
-    def add_total(self, status):
-        total_adders = {
-            "error": self._add_error,
-            "warn": self._add_warning,
-            "fail": self._add_failure,
-            "pass": self._add_passed,
-        }
-        adder = total_adders.get(status)
-        if adder:
-            adder()
-
-    def _add_error(self):
-        self.errors += 1
-
-    def _add_warning(self):
-        self.warnings += 1
-
-    def _add_passed(self):
-        self.passed += 1
-
-    def _add_failure(self):
-        self.failures += 1
 
 
 class InvocationSchema(BaseModel):
@@ -103,8 +74,8 @@ class TestResultSchema(BaseModel):
 
 
 class TestResultsWithTotalsSchema(BaseModel):
-    results: Dict[Optional[str], List[TestResultSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
+    results: Dict[str, List[TestResultSchema]] = dict()
+    totals: Dict[str, TotalsSchema] = dict()
     invocation: DbtInvocationSchema = Field(default_factory=DbtInvocationSchema)
 
 
@@ -114,8 +85,8 @@ class TestRunSchema(BaseModel):
 
 
 class TestRunsWithTotalsSchema(BaseModel):
-    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
+    runs: Dict[str, List[TestRunSchema]] = dict()
+    totals: Dict[str, TotalsSchema] = dict()
 
 
 class TestResultSummarySchema(BaseModel):

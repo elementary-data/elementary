@@ -22,12 +22,8 @@ ONE_SECOND = 1
 class SlackClient(ABC):
     def __init__(
         self,
-        token: Optional[str] = None,
-        webhook: Optional[str] = None,
         tracking: Optional[Tracking] = None,
-    ) -> None:
-        self.token = token
-        self.webhook = webhook
+    ):
         self.client = self._initial_client()
         self.tracking = tracking
         self._initial_retry_handlers()
@@ -73,6 +69,14 @@ class SlackClient(ABC):
 
 
 class SlackWebClient(SlackClient):
+    def __init__(
+        self,
+        token: str,
+        tracking: Optional[Tracking] = None,
+    ):
+        super().__init__(tracking)
+        self.token = token
+
     def _initial_client(self):
         return WebClient(token=self.token)
 
@@ -203,6 +207,14 @@ class SlackWebClient(SlackClient):
 
 
 class SlackWebhookClient(SlackClient):
+    def __init__(
+        self,
+        webhook: str,
+        tracking: Optional[Tracking] = None,
+    ):
+        super().__init__(tracking)
+        self.webhook = webhook
+
     def _initial_client(self):
         return WebhookClient(
             url=self.webhook, default_headers={"Content-type": "application/json"}
