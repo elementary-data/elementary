@@ -23,6 +23,7 @@ class SelectorFilterSchema(BaseModel):
     tag: Optional[str] = None
     owner: Optional[str] = None
     model: Optional[str] = None
+    status: Optional[str] = None
     node_names: Optional[List[str]] = None
 
     @validator("invocation_time", pre=True)

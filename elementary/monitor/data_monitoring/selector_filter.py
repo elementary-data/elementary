@@ -42,6 +42,7 @@ class SelectorFilter:
                 tag_regex = re.compile(r"tag:.*")
                 owner_regex = re.compile(r"config.meta.owner:.*")
                 model_regex = re.compile(r"model:.*")
+                status_regex = re.compile(r"status:(.*)")
 
                 invocation_id_match = invocation_id_regex.search(selector)
                 invocation_time_match = invocation_time_regex.search(selector)
@@ -49,6 +50,7 @@ class SelectorFilter:
                 tag_match = tag_regex.search(selector)
                 owner_match = owner_regex.search(selector)
                 model_match = model_regex.search(selector)
+                status_match = status_regex.search(selector)
 
                 if last_invocation_match:
                     data_monitoring_filter = SelectorFilterSchema(
@@ -81,6 +83,12 @@ class SelectorFilter:
                         self.tracking.set_env("select_method", "model")
                     data_monitoring_filter = SelectorFilterSchema(
                         model=model_match.group().split(":", 1)[1], selector=selector
+                    )
+                elif status_match:
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "status")
+                    data_monitoring_filter = SelectorFilterSchema(
+                        status=status_match.group(1), selector=selector
                     )
                 else:
                     logger.error(f"Could not parse the given -s/--select: {selector}")

@@ -123,3 +123,16 @@ def _filter_alerts_by_node_names(
                     filtered_alerts.append(alert)
                     break
     return filtered_alerts
+
+
+def _filter_alerts_by_status(
+    alerts: List[AlertType],
+    status_filter: SelectorFilterSchema,
+) -> List[AlertType]:
+    if status_filter.status is None:
+        return alerts
+
+    if status_filter.status not in ["warn", "fail"]:
+        raise ValueError("Status selector must be either 'warn' or 'fail'")
+
+    return list(filter(lambda alert: alert.status == status_filter.status, alerts))
