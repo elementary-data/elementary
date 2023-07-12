@@ -21,3 +21,12 @@ repos:
         name: Check for NO_COMMIT marker
         entry: bash -c "git diff --cached -U0 | (! grep NO_COMMIT)"
         language: system
+        require_serial: true
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: bash -c "mypy"
+        language: system
+        require_serial: true
