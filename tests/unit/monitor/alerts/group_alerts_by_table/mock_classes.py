@@ -20,6 +20,9 @@ class MockAlert:
     schema_name: str = "master_elementary"
     concise_name: str = "Alert"
 
+    def __repr__(self):
+        return f"{self.status} {self.model_unique_id} {self.detected_at}"
+
 
 @dataclass
 class MockConfig:
