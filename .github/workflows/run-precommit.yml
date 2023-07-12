@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: '3.9'
+          python-version: '3.8'
 
       - name: Install elementary (mainly needed so mypy will have the dependencies it needs)
         run: pip install -e .

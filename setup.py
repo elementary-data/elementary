@@ -34,7 +34,7 @@ setup(
     "Snowflake, BigQuery, Redshift, data reliability, analytics engineering",
     long_description=README,
     install_requires=[
-        "click>=7.0,<9",
+        "click>=7.0,<8.1.4",
         "pyfiglet",
         "dbt-core>=0.20,<2.0.0",
         "requests>=2.28.1,<3.0.0",
