@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '**.py'
+      - '.pre-commit-config.yaml'
   workflow_dispatch:
 
 jobs:
