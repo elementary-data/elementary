@@ -1,5 +1,3 @@
-import json
-
 from elementary.monitor.alerts.group_of_alerts import GroupingType
 from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
 from tests.unit.monitor.alerts.group_alerts_by_table.mock_classes import MockAlert
@@ -18,9 +16,9 @@ TAGS_3 = ["#marketing", "#finance", "#data-ops"]
 DETECTED_AT_1 = "1992-11-11 20:00:03+0200"
 DETECTED_AT_2 = "1992-11-11 20:01:03+0200"
 DETECTED_AT_3 = "1992-11-11 20:02:03+0200"
-EMPTY_DICT = json.dumps(dict())
-GROUP_BY_ALERT_IN_DICT = json.dumps({"group_alerts_by": GroupingType.BY_ALERT.value})
-OTHER_CHANNEL_IN_DICT = json.dumps({CHANNEL_KEY: OTHER_CHANNEL})
+EMPTY_DICT = dict()
+GROUP_BY_ALERT_IN_DICT = {"group_alerts_by": GroupingType.BY_ALERT.value}
+OTHER_CHANNEL_IN_DICT = {CHANNEL_KEY: OTHER_CHANNEL}
 
 AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING_TS3 = MockAlert(
     status="warn",
@@ -39,7 +37,7 @@ AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING_TS3 = MockAlert(
     model_unique_id=MODEL_1,
     slack_channel=OTHER_CHANNEL,
     detected_at=DETECTED_AT_3,
-    model_meta="{}",
+    model_meta=EMPTY_DICT,
     owners=[OWNER_1, OWNER_3],
     subscribers=[],
     tags=TAGS_2,
