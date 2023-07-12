@@ -5,6 +5,7 @@ from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_model,
     _filter_alerts_by_node_names,
     _filter_alerts_by_owner,
+    _filter_alerts_by_status,
     _filter_alerts_by_tag,
     filter_alerts,
 )
@@ -22,6 +23,7 @@ def initial_alerts():
             test_created_at="2022-10-10 10:10:10",
             tags='["one", "two"]',
             owners='["jeff", "john"]',
+            status="fail",
         ),
         TestAlert(
             id="2",
@@ -32,6 +34,7 @@ def initial_alerts():
             test_created_at="2022-10-10 09:10:10",
             tags='["three"]',
             owners='["jeff", "john"]',
+            status="fail",
         ),
         TestAlert(
             id="3",
@@ -43,6 +46,7 @@ def initial_alerts():
             # invalid tag
             tags="one",
             owners='["john"]',
+            status="fail",
         ),
         TestAlert(
             id="4",
@@ -53,6 +57,7 @@ def initial_alerts():
             test_created_at="2022-10-10 09:10:10",
             tags='["three", "four"]',
             owners='["jeff"]',
+            status="warn",
         ),
     ]
     model_alerts = [
@@ -70,6 +75,7 @@ def initial_alerts():
             alert_suppression_interval=0,
             tags='["one", "two"]',
             owners='["jeff", "john"]',
+            status="fail",
         ),
         ModelAlert(
             id="2",
@@ -85,6 +91,7 @@ def initial_alerts():
             alert_suppression_interval=3,
             tags='["three"]',
             owners='["john"]',
+            status="fail",
         ),
         ModelAlert(
             id="3",
@@ -100,6 +107,7 @@ def initial_alerts():
             alert_suppression_interval=1,
             tags='["three", "four"]',
             owners='["jeff"]',
+            status="warn",
         ),
     ]
     malformed_alerts = [
@@ -114,6 +122,7 @@ def initial_alerts():
                 test_created_at="2022-10-10 10:10:10",
                 tags='["one", "two"]',
                 owners='["jeff", "john"]',
+                status="fail",
             ),
         ),
         MalformedAlert(
@@ -132,6 +141,7 @@ def initial_alerts():
                 alert_suppression_interval=3,
                 tags='["three"]',
                 owners='["john"]',
+                status="fail",
             ),
         ),
     ]
@@ -304,3 +314,25 @@ def test_filter_alerts_by_node_names():
     filter_malformed_alerts = _filter_alerts_by_node_names(malformed_alerts, filter)
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "1"
+
+
+def test_filter_alerts_by_status():
+    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+
+    filter = SelectorFilterSchema(status="warn")
+    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
+    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
+    filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    assert len(filter_test_alerts) == 1
+    assert filter_test_alerts[0].id == "4"
+    assert len(filter_model_alerts) == 1
+    assert filter_model_alerts[0].id == "3"
+    assert len(filter_malformed_alerts) == 0
+
+    filter = SelectorFilterSchema(status="fail")
+    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
+    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
+    filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    assert len(filter_test_alerts) == 3
+    assert len(filter_model_alerts) == 2
+    assert len(filter_malformed_alerts) == 2

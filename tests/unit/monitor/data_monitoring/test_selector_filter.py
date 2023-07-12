@@ -66,6 +66,14 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         data_monitoring_filter_with_user_dbt_runner.get_selector() == "model:mock_model"
     )
 
+    # status selector
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        tracking=anonymous_tracking_mock,
+        selector="status:fail",
+    )
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().status == "fail"
+    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "status:fail"
+
     # invocation_id selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,

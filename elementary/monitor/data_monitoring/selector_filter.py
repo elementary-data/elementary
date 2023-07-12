@@ -35,7 +35,6 @@ class SelectorFilter:
                 )
                 return SelectorFilterSchema(node_names=node_names, selector=selector)
             else:
-
                 invocation_id_regex = re.compile(r"invocation_id:(.*)")
                 invocation_time_regex = re.compile(r"invocation_time:(.*)")
                 last_invocation_regex = re.compile(r"last_invocation")

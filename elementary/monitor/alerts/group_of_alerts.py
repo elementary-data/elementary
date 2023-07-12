@@ -67,7 +67,6 @@ class GroupOfAlerts:
     def __init__(
         self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
     ):
-
         self.alerts = alerts
         self._title = self._get_title()
         self._sort_channel_destination(default_channel=default_channel_destination)
@@ -265,7 +264,6 @@ class GroupOfAlertsByTable(GroupOfAlerts):
     def __init__(
         self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
     ):
-
         # sort out model unique id
         models = set([alert.model_unique_id for alert in alerts])
         if len(models) != 1:
