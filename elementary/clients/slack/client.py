@@ -74,8 +74,8 @@ class SlackWebClient(SlackClient):
         token: str,
         tracking: Optional[Tracking] = None,
     ):
-        super().__init__(tracking)
         self.token = token
+        super().__init__(tracking)
 
     def _initial_client(self):
         return WebClient(token=self.token)
@@ -212,8 +212,8 @@ class SlackWebhookClient(SlackClient):
         webhook: str,
         tracking: Optional[Tracking] = None,
     ):
-        super().__init__(tracking)
         self.webhook = webhook
+        super().__init__(tracking)
 
     def _initial_client(self):
         return WebhookClient(
