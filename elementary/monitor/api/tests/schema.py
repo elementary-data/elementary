@@ -74,7 +74,7 @@ class TestResultSchema(BaseModel):
 
 
 class TestResultsWithTotalsSchema(BaseModel):
-    results: Dict[str, List[TestResultSchema]] = dict()
+    results: Dict[Optional[str], List[TestResultSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
     invocation: DbtInvocationSchema = Field(default_factory=DbtInvocationSchema)
 

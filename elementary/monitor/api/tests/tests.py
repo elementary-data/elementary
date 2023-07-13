@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List, Optional, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Union, cast
 
 from dateutil import tz
 
@@ -148,11 +148,10 @@ class TestsAPI(APIClient):
             if test_result.invocations_rank_index == 1
         ]
 
-        tests_results: DefaultDict[str, List[TestResultSchema]] = defaultdict(list)
+        tests_results: DefaultDict[Optional[str], List[TestResultSchema]] = defaultdict(
+            list
+        )
         for test_result_db_row in filtered_test_results_db_rows:
-            if not test_result_db_row.model_unique_id:
-                continue
-
             metadata = self._get_test_metadata_from_test_result_db_row(
                 test_result_db_row
             )
@@ -395,9 +394,8 @@ class TestsAPI(APIClient):
 
         sample_data = test_result_db_row.sample_data if not disable_samples else None
         if test_result_db_row.test_type == "dbt_test":
-            if sample_data is not None and not isinstance(sample_data, list):
-                # Sanity check, shouldn't happen
-                raise Exception("Invalid sample data for dbt test")
+            # Sample data is always a list for non-elementary tests
+            sample_data = cast(Optional[list], sample_data)
 
             test_results = DbtTestResultSchema(
                 display_name=test_result_db_row.test_name,

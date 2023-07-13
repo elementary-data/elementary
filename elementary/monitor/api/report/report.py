@@ -150,8 +150,8 @@ class ReportAPI(APIClient):
         return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
     def _serilize_test_results(
-        self, test_results: Dict[str, List[TestResultSchema]]
-    ) -> Dict[str, List[dict]]:
+        self, test_results: Dict[Optional[str], List[TestResultSchema]]
+    ) -> Dict[Optional[str], List[dict]]:
         serializable_test_results = defaultdict(list)
         for model_unique_id, test_result in test_results.items():
             serializable_test_results[model_unique_id].extend(
