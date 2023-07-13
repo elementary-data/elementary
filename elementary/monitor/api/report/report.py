@@ -160,8 +160,8 @@ class ReportAPI(APIClient):
         return serializable_test_results
 
     def _serilize_test_runs(
-        self, test_runs: Dict[str, List[TestRunSchema]]
-    ) -> Dict[str, List[dict]]:
+        self, test_runs: Dict[Optional[str], List[TestRunSchema]]
+    ) -> Dict[Optional[str], List[dict]]:
         serializable_test_runs = defaultdict(list)
         for model_unique_id, test_run in test_runs.items():
             serializable_test_runs[model_unique_id].extend(
@@ -169,7 +169,9 @@ class ReportAPI(APIClient):
             )
         return serializable_test_runs
 
-    def _serialize_totals(self, totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
+    def _serialize_totals(
+        self, totals: Dict[Optional[str], TotalsSchema]
+    ) -> Dict[Optional[str], dict]:
         serialized_totals = dict()
         for model_unique_id, total in totals.items():
             serialized_totals[model_unique_id] = total.dict()

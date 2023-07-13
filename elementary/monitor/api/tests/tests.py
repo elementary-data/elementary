@@ -190,9 +190,6 @@ class TestsAPI(APIClient):
 
         test_runs = defaultdict(list)
         for test_result_db_row in latest_test_results:
-            if not test_result_db_row.model_unique_id:
-                continue
-
             test_invocations = tests_invocations.get(
                 test_result_db_row.elementary_unique_id
             )
@@ -456,25 +453,24 @@ class TestsAPI(APIClient):
     def _get_total_tests_results(
         self,
         test_metadatas: List[TestMetadataSchema],
-    ) -> Dict[str, TotalsSchema]:
-        totals: Dict[str, TotalsSchema] = dict()
+    ) -> Dict[Optional[str], TotalsSchema]:
+        totals: Dict[Optional[str], TotalsSchema] = dict()
         for test in test_metadatas:
-            if not test.model_unique_id:
-                continue
-
             self._update_test_results_totals(
                 totals_dict=totals,
                 model_unique_id=test.model_unique_id,
-                status=test.latest_run_status or "unknown",
+                status=test.latest_run_status,
             )
         return totals
 
     def _get_total_tests_runs(
-        self, tests_runs: Dict[str, List[TestRunSchema]]
-    ) -> Dict[str, TotalsSchema]:
-        totals: Dict[str, TotalsSchema] = dict()
+        self, tests_runs: Dict[Optional[str], List[TestRunSchema]]
+    ) -> Dict[Optional[str], TotalsSchema]:
+        totals: Dict[Optional[str], TotalsSchema] = dict()
         for test_runs in tests_runs.values():
             for test_run in test_runs:
+                # It's possible test_runs will be None if we didn't find any invocations associated
+                # with this test, in that case it also makes sense to skip it.
                 if not test_run.test_runs:
                     continue
 
@@ -488,13 +484,11 @@ class TestsAPI(APIClient):
 
     @staticmethod
     def _update_test_runs_totals(
-        totals_dict: Dict[str, TotalsSchema],
+        totals_dict: Dict[Optional[str], TotalsSchema],
         test: TestMetadataSchema,
         test_invocations: List[InvocationSchema],
     ):
         model_unique_id = test.model_unique_id
-        if model_unique_id is None:
-            return
 
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = TotalsSchema()
@@ -504,7 +498,9 @@ class TestsAPI(APIClient):
 
     @staticmethod
     def _update_test_results_totals(
-        totals_dict: Dict[str, TotalsSchema], model_unique_id: str, status: str
+        totals_dict: Dict[Optional[str], TotalsSchema],
+        model_unique_id: Optional[str],
+        status: str,
     ):
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = TotalsSchema()

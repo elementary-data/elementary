@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.schema import FilterSchema, FiltersSchema
@@ -20,8 +20,8 @@ SQL_FILE_EXTENSION = ".sql"
 class FiltersAPI(APIClient):
     def get_filters(
         self,
-        test_results_totals: Dict[str, TotalsSchema],
-        test_runs_totals: Dict[str, TotalsSchema],
+        test_results_totals: Dict[Optional[str], TotalsSchema],
+        test_runs_totals: Dict[Optional[str], TotalsSchema],
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
         models_runs: List[ModelRunsSchema],
@@ -39,7 +39,7 @@ class FiltersAPI(APIClient):
 
     @staticmethod
     def _get_test_filters(
-        totals: Dict[str, TotalsSchema],
+        totals: Dict[Optional[str], TotalsSchema],
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
     ) -> List[FilterSchema]:

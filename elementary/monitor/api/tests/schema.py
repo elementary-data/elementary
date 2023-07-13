@@ -42,27 +42,27 @@ class InvocationsSchema(BaseModel):
 
 
 class TestMetadataSchema(BaseModel):
-    test_unique_id: Optional[str] = None
-    elementary_unique_id: Optional[str] = None
+    test_unique_id: str
+    elementary_unique_id: str
     database_name: Optional[str] = None
-    schema_name: Optional[str] = None
+    schema_name: str
     table_name: Optional[str] = None
     column_name: Optional[str] = None
-    test_name: Optional[str] = None
-    test_display_name: Optional[str] = None
-    latest_run_time: Optional[str] = None
-    latest_run_time_utc: Optional[str] = None
-    latest_run_status: Optional[str] = None
+    test_name: str
+    test_display_name: str
+    latest_run_time: str
+    latest_run_time_utc: str
+    latest_run_status: str
     model_unique_id: Optional[str] = None
     table_unique_id: Optional[str] = None
-    test_type: Optional[str] = None
-    test_sub_type: Optional[str] = None
+    test_type: str
+    test_sub_type: str
     test_query: Optional[str] = None
-    test_params: Optional[dict] = None
+    test_params: dict
     test_created_at: Optional[str] = None
     description: Optional[str] = None
-    result: Optional[dict] = None
-    configuration: Optional[dict] = None
+    result: dict
+    configuration: dict
 
 
 class TestResultSchema(BaseModel):
@@ -75,7 +75,7 @@ class TestResultSchema(BaseModel):
 
 class TestResultsWithTotalsSchema(BaseModel):
     results: Dict[str, List[TestResultSchema]] = dict()
-    totals: Dict[str, TotalsSchema] = dict()
+    totals: Dict[Optional[str], TotalsSchema] = dict()
     invocation: DbtInvocationSchema = Field(default_factory=DbtInvocationSchema)
 
 
@@ -85,8 +85,8 @@ class TestRunSchema(BaseModel):
 
 
 class TestRunsWithTotalsSchema(BaseModel):
-    runs: Dict[str, List[TestRunSchema]] = dict()
-    totals: Dict[str, TotalsSchema] = dict()
+    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
+    totals: Dict[Optional[str], TotalsSchema] = dict()
 
 
 class TestResultSummarySchema(BaseModel):
