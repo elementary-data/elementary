@@ -148,8 +148,6 @@ class SlimDbtRunner(BaseDbtRunner):
             raise Exception("Config not loaded")
         if not self.adapter or not self.connections_manager:
             raise Exception("Adapter not loaded")
-        if not self.manifest:
-            raise Exception("Manifest not loaded")
 
         self.project_parser = ManifestLoader(
             self.config,
@@ -157,6 +155,8 @@ class SlimDbtRunner(BaseDbtRunner):
             self.connections_manager.set_query_header,
         )
         self.manifest = self.project_parser.load()
+        if self.manifest is None:
+            raise Exception("Failed to load manifest!")
         self.manifest.build_flat_graph()
         self.project_parser.save_macros_to_adapter(self.adapter)
 

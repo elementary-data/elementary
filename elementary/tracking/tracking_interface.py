@@ -95,7 +95,7 @@ class TrackingAPI(BaseTracking):
                 },
             ),
         )
-        if response.status_code != requests.codes.ok:
+        if not response.ok:
             logger.warning(
                 f"Failed to register group in Posthog - {group_type} {group_identifier}"
             )
