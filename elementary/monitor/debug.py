@@ -21,7 +21,7 @@ class Debug:
             dbt_runner.run_operation("test_conn", quiet=True)
         except DbtCommandError as err:
             click.echo(
-                f"Could not connect to the Elementary db and schema. See details below\n\n{err}"
+                f"Could not connect to the Elementary db and schema. See details below\n\n{err.get_exception_message() or err}"
             )
             return False
 

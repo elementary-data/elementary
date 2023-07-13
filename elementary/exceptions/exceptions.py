@@ -81,6 +81,17 @@ class DbtCommandError(Error):
             return detailed_command_args
         except Exception as ex:
             logger.error(f"Failed to extract detailed dbt command args, error: {ex}")
+    
+    def get_exception_message(self) -> Optional[str]:
+        error_output = self.proc_err.output.decode()
+        for line in reversed(error_output.strip().splitlines()):
+            try:
+                log = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if "data" in log and "exc" in log["data"]:
+                return log["data"]["exc"]
+        return None
 
 
 class DbtLsCommandError(Error):
