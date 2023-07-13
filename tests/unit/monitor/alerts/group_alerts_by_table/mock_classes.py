@@ -10,9 +10,7 @@ class MockAlert:
     model_unique_id: Optional[str]
     slack_channel: Optional[str]
     detected_at: Optional[Union[str, datetime]]
-    model_meta: Optional[
-        str
-    ]  # this string should be a json of a dict that has or has not the key "channel"
+    model_meta: Optional[dict]
     owners: Optional[List[str]]
     subscribers: Optional[List[str]]
     tags: Optional[List[str]]

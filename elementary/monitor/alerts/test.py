@@ -20,7 +20,6 @@ from elementary.monitor.fetchers.alerts.normalized_alert import (
 )
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
-from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
@@ -33,7 +32,7 @@ class TestAlert(Alert):
         self,
         model_unique_id: str,
         test_unique_id: str,
-        test_name: Optional[str] = None,
+        test_name: str,
         test_created_at: Optional[str] = None,
         test_meta: Optional[str] = None,
         **kwargs,
@@ -140,7 +139,7 @@ class DbtTestAlert(TestAlert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time*: {self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}     |",
+                            f"*Time*: {self.detected_at_str}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -152,7 +151,7 @@ class DbtTestAlert(TestAlert):
                     [
                         f"*Test:* {self.test_short_name or self.test_name} - {self.test_sub_type_display_name}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}*",
+                        f"*{self.detected_at_str}*",
                     ],
                 ),
             )
@@ -268,7 +267,7 @@ class DbtTestAlert(TestAlert):
         )
 
     @property
-    def consice_name(self):
+    def concise_name(self):
         return f"{self.test_short_name or self.test_name}"
 
 
@@ -302,7 +301,7 @@ class ElementaryTestAlert(DbtTestAlert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time*: {self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}     |",
+                            f"*Time*: {self.detected_at_str}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -314,7 +313,7 @@ class ElementaryTestAlert(DbtTestAlert):
                     [
                         f"*Test:* {self.test_short_name or self.test_name} - {self.test_sub_type_display_name}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else 'N/A'}*",
+                        f"*{self.detected_at_str}*",
                     ],
                 ),
             )
@@ -417,5 +416,5 @@ class ElementaryTestAlert(DbtTestAlert):
         )
 
     @property
-    def consice_name(self):
+    def concise_name(self):
         return f"{self.test_short_name or self.test_name} - {self.test_sub_type_display_name}"

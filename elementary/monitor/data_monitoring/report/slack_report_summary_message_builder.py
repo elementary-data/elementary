@@ -20,21 +20,21 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         include_description: bool = False,
     ) -> SlackMessageSchema:
-        self._add_title_to_slack_alert()
-        self._add_preview_to_slack_alert(
+        self.add_title_to_slack_alert()
+        self.add_preview_to_slack_alert(
             test_results,
             days_back=days_back,
             bucket_website_url=bucket_website_url,
             filter=filter,
         )
-        self._add_details_to_slack_alert(
+        self.add_details_to_slack_alert(
             test_results=test_results,
             include_description=include_description,
             bucket_website_url=bucket_website_url,
         )
         return super().get_slack_message()
 
-    def _add_title_to_slack_alert(self):
+    def add_title_to_slack_alert(self):
         title_blocks = [
             self.create_header_block(":mag: Monitoring summary"),
             self.create_divider_block(),
@@ -59,7 +59,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
 
         return f"_This summary was generated with the following filters - {days_back_text}{f', {selector_text}' if selector_text else ''}_"
 
-    def _add_preview_to_slack_alert(
+    def add_preview_to_slack_alert(
         self,
         test_results: List[TestResultSummarySchema],
         days_back: int,
@@ -96,7 +96,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         preview_blocks.extend(preview_blocks_filler)
         self._add_blocks_as_attachments(preview_blocks)
 
-    def _add_details_to_slack_alert(
+    def add_details_to_slack_alert(
         self,
         test_results: List[TestResultSummarySchema],
         include_description: bool = False,

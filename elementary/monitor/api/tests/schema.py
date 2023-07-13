@@ -2,13 +2,14 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class ElementaryTestResultSchema(BaseModel):
     display_name: Optional[str] = None
-    metrics: Optional[Union[list, dict]]
+    metrics: Optional[Union[list, dict]] = None
     result_description: Optional[str] = None
 
     class Config:
@@ -20,36 +21,6 @@ class DbtTestResultSchema(BaseModel):
     results_sample: Optional[list] = None
     error_message: Optional[str] = None
     failed_rows_count: Optional[int] = None
-
-
-class TotalsSchema(BaseModel):
-    errors: int = 0
-    warnings: int = 0
-    passed: int = 0
-    failures: int = 0
-
-    def add_total(self, status):
-        total_adders = {
-            "error": self._add_error,
-            "warn": self._add_warning,
-            "fail": self._add_failure,
-            "pass": self._add_passed,
-        }
-        adder = total_adders.get(status)
-        if adder:
-            adder()
-
-    def _add_error(self):
-        self.errors += 1
-
-    def _add_warning(self):
-        self.warnings += 1
-
-    def _add_passed(self):
-        self.passed += 1
-
-    def _add_failure(self):
-        self.failures += 1
 
 
 class InvocationSchema(BaseModel):
@@ -71,27 +42,27 @@ class InvocationsSchema(BaseModel):
 
 
 class TestMetadataSchema(BaseModel):
-    test_unique_id: Optional[str] = None
-    elementary_unique_id: Optional[str] = None
+    test_unique_id: str
+    elementary_unique_id: str
     database_name: Optional[str] = None
-    schema_name: Optional[str] = None
+    schema_name: str
     table_name: Optional[str] = None
     column_name: Optional[str] = None
-    test_name: Optional[str] = None
-    test_display_name: Optional[str] = None
-    latest_run_time: Optional[str] = None
-    latest_run_time_utc: Optional[str] = None
-    latest_run_status: Optional[str] = None
+    test_name: str
+    test_display_name: str
+    latest_run_time: str
+    latest_run_time_utc: str
+    latest_run_status: str
     model_unique_id: Optional[str] = None
     table_unique_id: Optional[str] = None
-    test_type: Optional[str] = None
-    test_sub_type: Optional[str] = None
+    test_type: str
+    test_sub_type: str
     test_query: Optional[str] = None
-    test_params: Optional[dict] = None
+    test_params: dict
     test_created_at: Optional[str] = None
     description: Optional[str] = None
-    result: Optional[dict] = None
-    configuration: Optional[dict] = None
+    result: dict
+    configuration: dict
 
 
 class TestResultSchema(BaseModel):

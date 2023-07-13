@@ -123,7 +123,8 @@ class DataMonitoring:
             return relation
         except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
-            self.tracking.record_internal_exception(ex)
+            if self.tracking:
+                self.tracking.record_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
 
     def get_latest_invocation(self) -> Dict[str, Any]:
