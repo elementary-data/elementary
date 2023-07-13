@@ -27,6 +27,6 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: bash -c "mypy"
+        entry: bash -c "mypy --no-error-summary $@" mypy
         language: system
-        require_serial: true
+        files: ^elementary/.*\.py$
