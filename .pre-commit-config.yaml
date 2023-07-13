@@ -22,6 +22,7 @@ repos:
         entry: bash -c "git diff --cached -U0 | (! grep NO_COMMIT)"
         language: system
         require_serial: true
+        pass_filenames: false
 
   - repo: local
     hooks:
