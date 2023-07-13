@@ -14,387 +14,72 @@ The tests are configured and executed like any other tests in your project.
   <img src="/pics/anomalies/anomaly-example.png" alt="Demo" />
 </Tooltip>
 
-## Available anomaly detection tests
-
 ### Table (model / source) tests
 
-#### Volume (row count) anomalies
 
-`elementary.volume_anomalies`
-
-Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
-
-Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
-field), and then we compute the row count per bucket for the last [`days_back`](/guides/anomaly-detection-configuration/days-back) days (by default 14).
-
-The test then compares the row count of each bucket buckets within the detection period (last 2 days by default, controlled by the
-`backfill_days` var), and compares it to the row count of the previous time buckets.
-If there were any anomalies during the detection period, the test will fail.
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-<CodeGroup>
-
-```yml Models
-version: 2
-
-models:
-  - name: < model name >
-    tests:
-      - elementary.volume_anomalies:
-          timestamp_column: < timestamp column >
-          where_expression: < sql expression >
-          time_bucket: # Daily by default
-            period: < time period >
-            count: < number of periods >
+#### - Volume anomalies
+<Card href="/guides/anomaly-detection-tests/volume-anomalies">
 ```
-
-```yml Models example
-version: 2
-
-models:
-  - name: login_events
-    config:
-      elementary:
-        timestamp_column: "loaded_at"
-    tests:
-      - elementary.volume_anomalies:
-          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
-          time_bucket:
-            period: day
-            count: 1
-          # optional - use tags to run elementary tests on a dedicated run
-          tags: ["elementary"]
-          config:
-            # optional - change severity
-            severity: warn
-
-  - name: users
-    # if no timestamp is configured, elementary will monitor without time filtering
-    tests:
-      - elementary.volume_anomalies:
-          tags: ["elementary"]
+  elementary.volume_anomalies
 ```
+  Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
+</Card>
 
-</CodeGroup>
-
-#### Freshness anomalies
-
-`elementary.freshness_anomalies`
-
-Monitors the freshness of your table over time, as the expected time between data updates.
-
-Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket`
-field), and then we compute the maximum freshness value per bucket for the last `days_back` days (by default 14).
-
-The test then compares the freshness of each bucket within the detection period (last 2 days by default, controlled by the
-`backfill_days` var), and compares it to the freshness of the previous time buckets.
-If there were any anomalies during the detection period, the test will fail.
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-<CodeGroup>
-
-```yml Models
-version: 2
-
-models:
-  - name: < model name >
-    tests:
-      - elementary.freshness_anomalies:
-          timestamp_column: < timestamp column > # Mandatory
-          where_expression: < sql expression >
-          time_bucket: # Daily by default
-            period: < time period >
-            count: < number of periods >
+#### - Freshness anomalies
+<Card href="/guides/anomaly-detection-tests/freshness-anomalies">
 ```
-
-```yml Models example
-version: 2
-
-models:
-  - name: login_events
-    tests:
-      - elementary.freshness_anomalies:
-          timestamp_column: "updated_at"
-          # optional - use tags to run elementary tests on a dedicated run
-          tags: ["elementary"]
-          config:
-            # optional - change severity
-            severity: warn
+  elementary.freshness_anomalies
 ```
+  Monitors the freshness of your table over time, as the expected time between data updates. 
+  Requires a [`timestamp_column`](/guides/anomaly-detection-configuration/timestamp-column) configuration. 
+</Card>
 
-</CodeGroup>
-
-#### Event freshness anomalies
-
-`elementary.event_freshness_anomalies`
-
-Monitors the freshness of event data over time, as the expected time it takes each event to load -
-that is, the time between the when the event actually occurs (the event timestamp), and when it is loaded to the
-database (the update timestamp).
-
-This test compliments the `freshness_anomalies` test and is primarily intended for data that is updated in a
-continuous / streaming fashion.
-
-The test can work in a couple of modes:
-
-- If only an `event_timestamp_column` is supplied, the test measures over time the difference between the current
-  timestamp ("now") and the most recent event timestamp.
-- If both an `event_timestamp_column` and an `update_timestamp_column` are provided, the test will measure over time
-  the difference between these two columns.
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-<CodeGroup>
-
-```yml Models
-version: 2
-
-models:
-  - name: < model name >
-    tests:
-      - elementary.event_freshness_anomalies:
-          event_timestamp_column: < timestamp column > # Mandatory
-          update_timestamp_column: < timestamp column > # Optional
-          where_expression: < sql expression >
-          time_bucket: # Daily by default
-            period: < time period >
-            count: < number of periods >
+#### - Event freshness anomalies
+<Card href="/guides/anomaly-detection-tests/event-freshness-anomalies">
 ```
-
-```yml Models example
-version: 2
-
-models:
-  - name: login_events
-    tests:
-      - elementary.event_freshness_anomalies:
-          event_timestamp_column: "occurred_at"
-          update_timestamp_column: "updated_at"
-          # optional - use tags to run elementary tests on a dedicated run
-          tags: ["elementary"]
-          config:
-            # optional - change severity
-            severity: warn
+  elementary.event_freshness_anomalies
 ```
+  Monitors the freshness of event data over time, as the expected time it takes each event to load -
+  that is, the time between when the event actually occurs (the `event timestamp`), and when it is loaded to the
+  database (the `update timestamp`). Configuring `event_timestamp_column` is required, and `update_timestamp_column` is optional.
+</Card>
 
-</CodeGroup>
-
-#### Dimension anomalies
-
-`elementary.dimension_anomalies`
-
-This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in
-the distribution.
-It is best to configure it on low-cardinality fields.
-The test counts rows grouped by given columns/expressions, and can be configured using the `dimensions`
-and `where_expression` keys.
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-<CodeGroup>
-
-```yml Models
-version: 2
-
-models:
-  - name: < model name >
-    config:
-      elementary:
-        timestamp_column: < timestamp column >
-    tests:
-      - elementary.dimension_anomalies:
-          dimensions: < columns or sql expressions of columns >
-          # optional - configure a where a expression to accurate the dimension monitoring
-          where_expression: < sql expression >
-          time_bucket: # Daily by default
-            period: < time period >
-            count: < number of periods >
+#### - Dimension anomalies
+<Card href="/guides/anomaly-detection-tests/dimension-anomalies">
 ```
-
-```yml Models example
-version: 2
-
-models:
-  - name: login_events
-    config:
-      elementary:
-        timestamp_column: "loaded_at"
-    tests:
-      - elementary.dimension_anomalies:
-          dimensions:
-            - event_type
-            - country_name
-          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
-          time_bucket:
-            period: hour
-            count: 4
-          # optional - use tags to run elementary tests on a dedicated run
-          tags: ["elementary"]
-          config:
-            # optional - change severity
-            severity: warn
-
-  - name: users
-    # if no timestamp is configured, elementary will monitor without time filtering
-    tests:
-      - elementary.dimension_anomalies:
-          dimensions:
-            - event_type
-          tags: ["elementary"]
+  elementary.dimension_anomalies
 ```
+  This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
+  It is best to configure it on low-cardinality fields.
+  The test counts rows grouped by given `dimensions` (columns/expressions).
+</Card>
 
-</CodeGroup>
-
-#### All columns anomalies
-
-`elementary.all_columns_anomalies`
-
-Executes column level monitors and anomaly detection on all the columns of the table. Specific monitors
-are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
-the `all_columns_anomalies` key.
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-<CodeGroup>
-
-```yml Models
-version: 2
-
-models:
-  - name: < model name >
-    config:
-      elementary:
-        timestamp_column: < timestamp column >
-    tests:
-      - elementary.all_columns_anomalies:
-          column_anomalies: < specific monitors, all if null >
-          where_expression: < sql expression >
-          time_bucket: # Daily by default
-            period: < time period >
-            count: < number of periods >
+#### - All columns anomalies
+<Card href="/guides/anomaly-detection-tests/all-columns-anomalies">
 ```
-
-```yml Models example
-version: 2
-
-models:
-  - name: login_events
-    config:
-      elementary:
-        timestamp_column: "loaded_at"
-    tests:
-      - elementary.all_columns_anomalies:
-          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
-          time_bucket:
-            period: day
-            count: 1
-          tags: ["elementary"]
-          # optional - change global sensitivity
-          sensitivity: 3.5
+  elementary.all_columns_anomalies
 ```
+  Executes column level monitors and anomaly detection on all the columns of the table. 
+  Specific monitors are [detailed here](/guides/anomaly-detection-configuration/column-anomalies).
+  You can use `column_anomalies` param to override the default monitors, and `exclude_prefix` / `exclude_regexp` to exclude columns from the test.
+</Card>
 
-</CodeGroup>
-
-<Snippet file="column-metrics.mdx" />
 
 ### Column tests
 
-#### Column anomalies
 
-`elementary.column_anomalies`
-
-Executes column level monitors and anomaly detection. Specific monitors
-are [detailed here](/guides/data-anomaly-detection#tests-and-monitors-types) and can be configured using
-the `column_anomalies` key.
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-<CodeGroup>
-
-For advanced configuration of Elementary anomaly tests, refer to [tests configuration](/guides/elementary-tests-configuration).
-
-```yml Models
-version: 2
-
-models:
-  - name: < model name >
-    config:
-      elementary:
-        timestamp_column: < timestamp column >
-    columns:
-      - name: < column name >
-        tests:
-          - elementary.column_anomalies:
-              column_anomalies: < specific monitors, all if null >
-              where_expression: < sql expression >
-              time_bucket: # Daily by default
-                period: < time period >
-                count: < number of periods >
-
-  - name: < model name >
-    ## if no timestamp is configured, elementary will monitor without time filtering
-    columns:
-      - name: < column name >
-        tests:
-          - elementary.column_anomalies:
-              column_anomalies: < specific monitors, all if null >
-              where_expression: < sql expression >
+#### - Columns anomalies
+<Card href="/guides/anomaly-detection-tests/column-anomalies">
 ```
-
-```yml Models example
-version: 2
-
-models:
-  - name: login_events
-    config:
-      elementary:
-        timestamp_column: 'loaded_at'
-    columns:
-      - name: user_name
-        tests:
-          - elementary.column_anomalies:
-              column_anomalies:
-                - missing_count
-                - min_length
-              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
-              time_bucket:
-                period: day
-                count: 1
-              tags: ['elementary']
-
-  - name: users
-    ## if no timestamp is configured, elementary will monitor without time filtering
-    tests:
-        elementary.table_anomalies
-          tags: ['elementary']
-    columns:
-      - name: user_id
-        tests:
-          - elementary.column_anomalies:
-              tags: ['elementary']
-              timestamp_column: 'updated_at'
-              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
-              time_bucket:
-                period: < time period >
-                count: < number of periods >
-      - name: user_name
-        tests:
-          - elementary.column_anomalies:
-              column_anomalies:
-                - missing_count
-                - min_length
-              tags: ['elementary']
+  elementary.column_anomalies
 ```
+  Executes column level monitors and anomaly detection on the column. 
+  Specific monitors are [detailed here](/guides/anomaly-detection-configuration/column-anomalies) and can be configured using
+  the `columns_anomalies` configuration.
+</Card>
 
-</CodeGroup>
 
-#### Column anomalies
-
-<Snippet file="column-metrics.mdx" />
-
-#### Adding tests examples:
+### Adding tests examples
 
 <CodeGroup>
 
@@ -407,10 +92,8 @@ models:
       elementary:
         timestamp_column: < timestamp column >
     tests:
-      - elementary.table_anomalies:
-          table_anomalies: < specific monitors, all if null >
+      - elementary.freshness_anomalies:
           # optional - configure different freshness column than timestamp column
-          freshness_column: < freshness_column >
           where_expression: < sql expression >
           time_bucket:
             period: < time period >
@@ -448,10 +131,7 @@ models:
       elementary:
         timestamp_column: 'loaded_at'
     tests:
-        - elementary.table_anomalies:
-            table_anomalies:
-              - row_count
-              - freshness
+        - elementary.volume_anomalies:
             # optional - use tags to run elementary tests on a dedicated run
             tags: ['elementary']
             config:
@@ -480,7 +160,7 @@ models:
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
     tests:
-        elementary.table_anomalies
+        elementary.volume_anomalies
           tags: ['elementary']
     columns:
       - name: user_id
@@ -523,7 +203,7 @@ sources:
           elementary:
             timestamp_column: "loaded_at"
         tests:
-          - elementary.table_anomalies
+          - elementary.freshness_anomalies
           - elementary.dimension_anomalies:
               dimensions:
                 - event_type

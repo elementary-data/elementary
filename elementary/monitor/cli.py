@@ -275,9 +275,6 @@ def monitor(
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
-    anonymous_tracking.track_cli_start(
-        Command.MONITOR, get_cli_properties(), ctx.command.name
-    )
     try:
         config.validate_monitor()
         data_monitoring = DataMonitoringAlerts(
@@ -288,7 +285,16 @@ def monitor(
             disable_samples=disable_samples,
             filter=select,
         )
-        success = data_monitoring.run_alerts(days_back, full_refresh_dbt_package)
+
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
+        anonymous_tracking.track_cli_start(
+            Command.MONITOR, get_cli_properties(), ctx.command.name
+        )
+        success = data_monitoring.run_alerts(
+            days_back, full_refresh_dbt_package, dbt_vars=vars
+        )
+        
         anonymous_tracking.track_cli_end(
             Command.MONITOR, data_monitoring.properties(), ctx.command.name
         )
@@ -370,9 +376,6 @@ def report(
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
-    anonymous_tracking.track_cli_start(
-        Command.REPORT, get_cli_properties(), ctx.command.name
-    )
     try:
         data_monitoring = DataMonitoringReport(
             config=config,
@@ -380,6 +383,11 @@ def report(
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
             filter=select,
+        )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
+        anonymous_tracking.track_cli_start(
+            Command.REPORT, get_cli_properties(), ctx.command.name
         )
         generated_report_successfully, _ = data_monitoring.generate_report(
             days_back=days_back,
@@ -456,7 +464,7 @@ def report(
 @click.option(
     "--update-bucket-website",
     type=bool,
-    default=False,
+    default=None,
     help="Update the bucket's static website with the latest report.",
 )
 @click.option(
@@ -561,9 +569,6 @@ def send_report(
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
-    anonymous_tracking.track_cli_start(
-        Command.SEND_REPORT, get_cli_properties(), ctx.command.name
-    )
     try:
         config.validate_send_report()
         # bucket-file-path determines the path of the report in the bucket.
@@ -579,6 +584,11 @@ def send_report(
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
             filter=select,
+        )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
+        anonymous_tracking.track_cli_start(
+            Command.SEND_REPORT, get_cli_properties(), ctx.command.name
         )
         sent_report_successfully = data_monitoring.send_report(
             days_back=days_back,

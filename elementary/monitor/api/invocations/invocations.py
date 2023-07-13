@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.fetchers.invocations.invocations import InvocationsFetcher
@@ -37,3 +39,11 @@ class InvocationsAPI(APIClient):
             )
         else:
             raise NotImplementedError
+
+    def get_invocations_by_ids(
+        self, invocations_ids: List[str]
+    ) -> List[DbtInvocationSchema]:
+        return self.invocations_fetcher.get_invocations_by_ids(invocations_ids)
+
+    def get_resources_latest_invocation(self) -> Dict[str, str]:
+        return self.invocations_fetcher.get_resources_latest_invocation()

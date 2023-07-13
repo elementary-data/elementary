@@ -3,6 +3,8 @@ from typing import Dict, List, Optional, Tuple
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
+from elementary.monitor.api.groups.groups import GroupsAPI
+from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.models.schema import (
@@ -13,8 +15,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedSourceSchema,
     TotalsSchema,
 )
-from elementary.monitor.api.report.schema import ReportDataSchema
-from elementary.monitor.api.sidebar.sidebar import SidebarAPI
+from elementary.monitor.api.report.schema import ReportDataEnvSchema, ReportDataSchema
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -32,6 +33,7 @@ class ReportAPI(APIClient):
         disable_samples: bool = False,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
+        warehouse_type: Optional[str] = None,
     ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         try:
             tests_api = TestsAPI(
@@ -41,16 +43,17 @@ class ReportAPI(APIClient):
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
             models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-            sidebar_api = SidebarAPI(dbt_runner=self.dbt_runner)
+            groups_api = GroupsAPI(dbt_runner=self.dbt_runner)
             lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
             filters_api = FiltersAPI(dbt_runner=self.dbt_runner)
+            invocations_api = InvocationsAPI(dbt_runner=self.dbt_runner)
 
             models = models_api.get_models(exclude_elementary_models)
             sources = models_api.get_sources()
             exposures = models_api.get_exposures()
 
-            sidebars = sidebar_api.get_sidebars(
-                artifacts=[*models.values(), *sources.values()]
+            groups = groups_api.get_groups(
+                artifacts=[*models.values(), *sources.values(), *exposures.values()]
             )
 
             models_runs = models_api.get_models_runs(
@@ -68,7 +71,7 @@ class ReportAPI(APIClient):
                 test_results.totals, test_runs.totals, models, sources, models_runs.runs
             )
 
-            serializable_sidebars = sidebars.dict()
+            serializable_groups = groups.dict()
             serializable_models = self._serilize_models(models, sources, exposures)
             serializable_model_runs = self._serilize_models_runs(models_runs.runs)
             serializable_model_runs_totals = models_runs.dict(include={"totals"})[
@@ -87,11 +90,24 @@ class ReportAPI(APIClient):
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
 
+            resources_latest_invocation = (
+                invocations_api.get_resources_latest_invocation()
+            )
+            invocations = invocations_api.get_invocations_by_ids(
+                invocations_ids=list(set(resources_latest_invocation.values()))
+            )
+
+            invocations_job_identification = defaultdict(list)
+            for invocation in invocations:
+                key = invocation.job_name or invocation.job_id
+                if key is not None:
+                    invocations_job_identification[key].append(invocation.invocation_id)
+
             report_data = ReportDataSchema(
                 creation_time=get_now_utc_iso_format(),
                 days_back=days_back,
                 models=serializable_models,
-                sidebars=serializable_sidebars,
+                groups=serializable_groups,
                 invocation=serializable_invocation,
                 test_results=serializable_test_results,
                 test_results_totals=serializable_test_restuls_totals,
@@ -102,7 +118,12 @@ class ReportAPI(APIClient):
                 model_runs_totals=serializable_model_runs_totals,
                 filters=serializable_filters,
                 lineage=serializable_lineage,
-                env=dict(project_name=project_name, env=env),
+                invocations=invocations,
+                resources_latest_invocation=resources_latest_invocation,
+                invocations_job_identification=invocations_job_identification,
+                env=ReportDataEnvSchema(
+                    project_name=project_name, env=env, warehouse_type=warehouse_type
+                ),
             )
             return report_data, None
         except Exception as error:

@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file.
-README = (HERE / "README.md").read_text()
+README = (HERE / "README.md").read_text(encoding="UTF-8")
 
 ADAPTER_EXTRA_REQUIREMENTS = {
     "snowflake": ["dbt-snowflake>=0.20,<2.0.0"],
@@ -21,7 +21,7 @@ ADAPTER_EXTRA_REQUIREMENTS = {
 setup(
     name="elementary-data",
     description="Data monitoring and lineage",
-    version="0.7.10",
+    version="0.8.2",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.6.2",
@@ -49,7 +49,7 @@ setup(
         "pytest-parametrization>=2022.2.1",
         "pydantic<2.0",
         "networkx>=2.3,<3",
-        "packaging>=20.9,<23.0",
+        "packaging>=20.9,<=23.1",
     ],
     extras_require={
         **ADAPTER_EXTRA_REQUIREMENTS,

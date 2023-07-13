@@ -46,6 +46,10 @@ class ArtifactSchema(ExtendedBaseModel):
     def format_full_path_sep(cls, full_path: str) -> str:
         return posixpath.sep.join(full_path.split(os.path.sep))
 
+    @validator("meta", pre=True)
+    def load_meta(cls, meta):
+        return cls._load_var_to_dict(meta)
+
 
 ArtifactSchemaType = TypeVar("ArtifactSchemaType", bound=ArtifactSchema)
 

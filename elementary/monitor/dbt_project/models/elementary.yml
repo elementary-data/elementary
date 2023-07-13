@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: elementary
+    schema: "{{ target.schema }}"
+    tables:
+      - name: dbt_models
+        columns:
+          - name: unique_id
+            tests:
+              - elementary_internal.unique_if_exists
+
+      - name: dbt_tests
+        columns:
+          - name: unique_id
+            tests:
+              - elementary_internal.unique_if_exists
+
+      - name: dbt_sources
+        columns:
+          - name: unique_id
+            tests:
+              - elementary_internal.unique_if_exists
+
+      - name: dbt_snapshots
+        columns:
+          - name: unique_id
+            tests:
+              - elementary_internal.unique_if_exists
+
+      - name: dbt_metrics
+        columns:
+          - name: unique_id
+            tests:
+              - elementary_internal.unique_if_exists
+
+      - name: dbt_exposures
+        columns:
+          - name: unique_id
+            tests:
+              - elementary_internal.unique_if_exists

@@ -1,4 +1,4 @@
-{% macro project_owners() %}
+{% macro get_project_owners() %}
     {% set project_owners_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}

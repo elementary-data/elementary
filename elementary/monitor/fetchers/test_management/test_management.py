@@ -1,15 +1,17 @@
 import json
-from typing import List
+from collections import defaultdict
+from typing import Any, DefaultDict, Dict, List, Optional
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.test_management.schema import (
+    ResourceColumnModel,
     ResourceModel,
     ResourcesModel,
     TagsModel,
     TestModel,
 )
-from elementary.utils.json_utils import unpack_and_flatten_str_to_list
+from elementary.utils.json_utils import unpack_and_flatten_and_dedup_list_of_strings
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -19,59 +21,93 @@ class TestManagementFetcher(FetcherClient):
     def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
 
-    def get_models(self, exclude_elementary=True) -> List[ResourceModel]:
+    def get_models(
+        self,
+        exclude_elementary: bool = True,
+        columns: Optional[DefaultDict[str, List[ResourceColumnModel]]] = None,
+    ) -> List[ResourceModel]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="model_resources",
+            macro_name="get_model_resources",
             macro_args=dict(exclude_elementary=exclude_elementary),
         )
         models_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
-        models = []
-        for model_result in models_results:
-            owners = unpack_and_flatten_str_to_list(model_result["owners"])
-            models.append(
-                ResourceModel(
-                    id=model_result["unique_id"],
-                    name=model_result["name"],
-                    schema=model_result["schema"],
-                    tags=json.loads(model_result["tags"]),
-                    owners=owners,
-                )
-            )
-        return models
+        return self._format_resources(models_results, columns)
 
-    def get_sources(self, exclude_elementary=True) -> List[ResourceModel]:
+    def get_sources(
+        self,
+        exclude_elementary: bool = True,
+        columns: Optional[DefaultDict[str, List[ResourceColumnModel]]] = None,
+    ) -> List[ResourceModel]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="source_resources",
+            macro_name="get_source_resources",
             macro_args=dict(exclude_elementary=exclude_elementary),
         )
         sources_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
-        sources = []
-        for source_result in sources_results:
-            owners = unpack_and_flatten_str_to_list(source_result["owners"])
-            sources.append(
+        return self._format_resources(sources_results, columns)
+
+    def get_resources_columns(self) -> DefaultDict[str, List[ResourceColumnModel]]:
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="get_resources_columns"
+        )
+        resources_columns_results = (
+            json.loads(run_operation_response[0]) if run_operation_response else {}
+        )
+        resources_columns = defaultdict(list)
+        for resource, columns in resources_columns_results.items():
+            resources_columns[resource.lower()].extend(
+                [
+                    ResourceColumnModel(
+                        name=column.get("column"),
+                        type=column.get("type"),
+                    )
+                    for column in columns
+                ]
+            )
+        return resources_columns
+
+    def _format_resources(
+        self,
+        resources: List[Dict[str, Any]],
+        columns: Optional[DefaultDict[str, List[ResourceColumnModel]]] = None,
+    ) -> List[ResourceModel]:
+        if not columns:
+            columns = defaultdict(list)
+
+        formatted_resources = []
+        for resource in resources:
+            owners = (
+                unpack_and_flatten_and_dedup_list_of_strings(resource["owners"])
+                if resource["owners"]
+                else []
+            )
+            formatted_resources.append(
                 ResourceModel(
-                    id=source_result["unique_id"],
-                    name=source_result["name"],
-                    source_name=source_result["source_name"],
-                    schema=source_result["schema"],
-                    tags=json.loads(source_result["tags"]),
+                    id=resource["unique_id"],
+                    name=resource["name"],
+                    source_name=resource.get("source_name"),
+                    schema=resource["schema"],
+                    tags=json.loads(resource["tags"]),
                     owners=owners,
+                    columns=columns[
+                        f'{resource["database"]}.{resource["schema"]}.{resource["name"]}'.lower()
+                    ],
                 )
             )
-        return sources
+        return formatted_resources
 
-    def get_resources(self, exclude_elementary=True) -> ResourcesModel:
-        models = self.get_models(exclude_elementary)
-        sources = self.get_sources(exclude_elementary)
+    def get_resources(self, exclude_elementary: bool = True) -> ResourcesModel:
+        columns = self.get_resources_columns()
+        models = self.get_models(exclude_elementary, columns)
+        sources = self.get_sources(exclude_elementary, columns)
         return ResourcesModel(models=models, sources=sources)
 
     def get_tags(self) -> TagsModel:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="project_tags"
+            macro_name="get_project_tags"
         )
         tags_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
@@ -90,8 +126,12 @@ class TestManagementFetcher(FetcherClient):
         tests = []
         for test_result in test_results:
             meta = json.loads(test_result["meta"])
-            owners = unpack_and_flatten_str_to_list(meta.get("owner", "[]"))
-            model_owners = unpack_and_flatten_str_to_list(test_result["model_owners"])
+            owners = unpack_and_flatten_and_dedup_list_of_strings(
+                meta.get("owner", "[]")
+            )
+            model_owners = unpack_and_flatten_and_dedup_list_of_strings(
+                test_result["model_owners"]
+            )
             tags = list(set(json.loads(test_result["tags"])))
             model_tags = list(set(json.loads(test_result["model_tags"])))
             description = meta.get("description")
@@ -121,7 +161,7 @@ class TestManagementFetcher(FetcherClient):
 
     def get_project_owners(self) -> List[str]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="project_owners"
+            macro_name="get_project_owners"
         )
         owners_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
@@ -131,13 +171,13 @@ class TestManagementFetcher(FetcherClient):
             owners = owners_result["owner"]
             if owners is None:
                 continue
-            owners = unpack_and_flatten_str_to_list(owners)
+            owners = unpack_and_flatten_and_dedup_list_of_strings(owners)
             all_owners.extend(owners)
         return all_owners
 
     def get_project_subscribers(self) -> List[str]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="resources_meta"
+            macro_name="get_resources_meta"
         )
         resources_meta_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []

@@ -127,6 +127,8 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/Hadarsagiv"><img src="https://avatars.githubusercontent.com/u/119170841?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/noaKurman"><img src="https://avatars.githubusercontent.com/u/16741969?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/NoyaArie"><img src="https://avatars.githubusercontent.com/u/31591071?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/ellakz"><img src="https://avatars.githubusercontent.com/u/18530437?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/ofek1weiss"><img src="https://avatars.githubusercontent.com/u/55920061?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/RoiTabach"><img src="https://avatars.githubusercontent.com/u/25003091?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/hahnbeelee"><img src="https://avatars.githubusercontent.com/u/55263191?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/seanglynn-thrive"><img src="https://avatars.githubusercontent.com/u/93200565?v=4" width="50" height="50" alt=""/></a>
@@ -180,6 +182,7 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/dimoschi"><img src="https://avatars.githubusercontent.com/u/13113025?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/manulpatel"><img src="https://avatars.githubusercontent.com/u/77568048?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/arilmav"><img src="https://avatars.githubusercontent.com/u/60354578?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/kochalex"><img src="https://avatars.githubusercontent.com/u/3217653?v=4" width="50" height="50" alt=""/></a>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->

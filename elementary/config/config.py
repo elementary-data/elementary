@@ -69,8 +69,8 @@ class Config:
         self.dbt_vars = {**dbt_vars} if dbt_vars else dict()
 
         # Additional env vars supplied to dbt invocations
-        self.dbt_env_vars = {**dbt_vars} if dbt_vars else dict()
-        self.dbt_env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
+        self.env_vars = dict()
+        self.env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
         config = self._load_configuration()
 

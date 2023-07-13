@@ -2,6 +2,8 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field, validator
 
+from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
+
 
 class ResourceColumnModel(BaseModel):
     name: str
@@ -45,11 +47,15 @@ class TestModel(BaseModel):
     updated_by: Optional[str] = None
 
     @validator("severity", pre=True)
-    def validate_severity(cls, severity: str):
+    def validate_severity(cls, severity: str) -> str:
         severity_lower_string = severity.lower()
         if severity_lower_string not in ["error", "warn"]:
             raise ValueError('Severity must be "warn" or "error"')
         return severity_lower_string
+
+    @validator("updated_at", pre=True)
+    def validate_updated_at(cls, updated_at: str) -> str:
+        return convert_partial_iso_format_to_full_iso_format(updated_at)
 
 
 class TestsModel(BaseModel):

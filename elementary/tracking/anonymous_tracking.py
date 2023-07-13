@@ -1,27 +1,16 @@
-import hashlib
-import json
 import logging
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
-
 import elementary.exceptions.exceptions
 import elementary.tracking.runner
-from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor import dbt_project_utils
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
 logging.getLogger("posthog").disabled = True
 logger = get_logger(__name__)
-
-
-class AnonymousWarehouse(BaseModel):
-    id: str
-    type: str
 
 
 class AnonymousTracking(Tracking):
@@ -31,7 +20,6 @@ class AnonymousTracking(Tracking):
     def __init__(self, config: Config) -> None:
         super().__init__(config)
         self.anonymous_user_id = None
-        self.anonymous_warehouse = None
         self._do_not_track = config.anonymous_tracking_enabled is False
         self._run_id = str(uuid.uuid4())
 
@@ -48,7 +36,6 @@ class AnonymousTracking(Tracking):
         try:
             self._props["env"] = elementary.tracking.runner.get_props()
             self.anonymous_user_id = self._get_anonymous_user_id()
-            self.anonymous_warehouse = self._get_anonymous_warehouse()
         except Exception:
             logger.debug("Unable to initialize anonymous tracking.", exc_info=True)
 
@@ -85,10 +72,6 @@ class AnonymousTracking(Tracking):
                     **self._props,
                     **properties,
                 },
-                groups={
-                    "warehouse": self.anonymous_warehouse
-                    and self.anonymous_warehouse.id
-                },
             )
         except Exception:
             logger.debug("Unable to send tracking event.", exc_info=True)
@@ -104,35 +87,6 @@ class AnonymousTracking(Tracking):
         if isinstance(exc, elementary.exceptions.exceptions.Error):
             props.update(exc.anonymous_tracking_context)
         return props
-
-    def _get_anonymous_warehouse(self) -> Optional[AnonymousWarehouse]:
-        try:
-            dbt_runner = DbtRunner(
-                dbt_project_utils.PATH,
-                self._config.profiles_dir,
-                self._config.profile_target,
-                dbt_env_vars=self._config.dbt_env_vars,
-            )
-            if not dbt_project_utils.is_dbt_package_up_to_date():
-                logger.info("Downloading edr internal dbt package")
-                dbt_runner.deps(quiet=True)
-
-            adapter_type, adapter_unique_id = json.loads(
-                dbt_runner.run_operation("get_adapter_type_and_unique_id", quiet=True)[
-                    0
-                ]
-            )
-            anonymous_warehouse_id = hashlib.sha256(
-                adapter_unique_id.encode("utf-8")
-            ).hexdigest()
-            self._set_events_group(
-                "warehouse",
-                anonymous_warehouse_id,
-                {"id": anonymous_warehouse_id, "type": adapter_type},
-            )
-            return AnonymousWarehouse(id=anonymous_warehouse_id, type=adapter_type)
-        except Exception:
-            return None
 
 
 class AnonymousCommandLineTracking(AnonymousTracking):
