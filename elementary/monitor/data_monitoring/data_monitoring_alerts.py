@@ -152,7 +152,11 @@ class DataMonitoringAlerts(DataMonitoring):
         self.execution_properties["had_group_by_table"] = len(by_table_group) > 0
         self.execution_properties["had_group_by_alert"] = len(by_alert_group) > 0
 
-        return by_table_group + by_alert_group
+        grouped_alerts = by_table_group + by_alert_group
+        return sorted(
+            grouped_alerts,
+            key=lambda group: min(alert.detected_at for alert in group.alerts),
+        )
 
     def _send_test_message(self):
         self.slack_client.send_message(
