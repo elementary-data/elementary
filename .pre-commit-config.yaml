@@ -27,6 +27,6 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: bash -c "mypy --no-error-summary $@" mypy
+        entry: mypy
         language: system
         files: ^elementary/.*\.py$
