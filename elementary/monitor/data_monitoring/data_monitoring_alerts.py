@@ -155,7 +155,7 @@ class DataMonitoringAlerts(DataMonitoring):
         grouped_alerts = by_table_group + by_alert_group
         return sorted(
             grouped_alerts,
-            key=lambda grp: min(alert.detected_at for alert in grp.alerts),
+            key=lambda group: min(alert.detected_at for alert in group.alerts),
         )
 
     def _send_test_message(self):
