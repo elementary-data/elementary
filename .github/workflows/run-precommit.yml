@@ -1,10 +1,6 @@
 name: Run pre-commit hooks
 on:
   push:
-    paths:
-      - '**.py'
-      - '.pre-commit-config.yaml'
-      - '.github/workflows/run-precommit.yml'
   workflow_dispatch:
 
 jobs:
@@ -17,7 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: '3.8'
+          python-version: "3.8"
 
       # mainly needed so mypy will have the dependencies it needs
       - name: Install elementary
