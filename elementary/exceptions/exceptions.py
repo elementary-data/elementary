@@ -47,7 +47,7 @@ class DbtCommandError(Error):
     ):
         msg = "Failed to run dbt command."
         if logs and not err_msg:
-            err_msg = "\n".join([log.msg for log in logs if log.level == "error"])
+            err_msg = "\n".join([str(log.msg) for log in logs if log.level == "error"])
         if err_msg:
             msg = f"{msg}\n{err_msg}"
         super().__init__(msg)
@@ -100,6 +100,8 @@ class DbtCommandError(Error):
             logger.error(f"Failed to extract detailed dbt command args, error: {ex}")
 
     def get_exception_message(self) -> Optional[str]:
+        if not self.logs:
+            return None
         for log in reversed(self.logs):
             if log.exception:
                 return log.exception

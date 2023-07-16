@@ -1,8 +1,6 @@
-from dataclasses import dataclass
 import json
 import os
 import subprocess
-from json import JSONDecodeError
 from typing import Any, Dict, List, Optional, Tuple
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -13,7 +11,6 @@ from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
-
 
 
 class DbtRunner(BaseDbtRunner):
