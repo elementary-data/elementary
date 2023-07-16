@@ -23,10 +23,10 @@ class DbtLog:
         )
 
     def __str__(self) -> str:
-        ret = f"{self.level or 'unknown'}: {self.msg}"
+        as_string = f"{self.level or 'unknown'}: {self.msg}"
         if self.exception:
-            ret += f"\nError:\n{self.exception}"
-        return ret
+            as_string += f"\nError:\n{self.exception}"
+        return as_string
 
 
 def parse_dbt_output(output: str) -> Iterator[DbtLog]:
