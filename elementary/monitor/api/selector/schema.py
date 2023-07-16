@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
 
 class SelectorSchema(BaseModel):
     selector: str
-    results: List[Optional[str]]
+    results: List[str]

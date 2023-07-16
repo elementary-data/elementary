@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Generic, List, Optional, Union
+from typing import DefaultDict, Generic, List, Optional, Union
 
 from elementary.monitor.alerts.alert import Alert, AlertType
 from elementary.monitor.alerts.malformed import MalformedAlert
@@ -55,7 +55,7 @@ class Alerts:
         )
 
     def get_elementary_test_count(self):
-        elementary_test_count = defaultdict(int)
+        elementary_test_count: DefaultDict[str, int] = defaultdict(int)
         for test_result in self.tests.alerts:
             if isinstance(test_result, ElementaryTestAlert):
                 elementary_test_count[test_result.test_name] += 1
