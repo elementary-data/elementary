@@ -110,18 +110,18 @@ class NormalizedAlert:
             )
             return self.alert
 
-    def _get_alert_meta_attrs(self, meta_key: str) -> List[Optional[str]]:
+    def _get_alert_meta_attrs(self, meta_key: str) -> List[str]:
         attrs = []
         test_attrs = self.test_meta.get(meta_key, [])
         model_attrs = self.model_meta.get(meta_key, [])
         if isinstance(test_attrs, list):
             attrs.extend(test_attrs)
-        else:
+        elif isinstance(test_attrs, str):
             attrs.append(test_attrs)
 
         if isinstance(model_attrs, list):
             attrs.extend(model_attrs)
-        else:
+        elif isinstance(model_attrs, str):
             attrs.append(model_attrs)
         return attrs
 
