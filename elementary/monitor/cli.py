@@ -93,7 +93,7 @@ def common_options(cmd: str):
         )(func)
         func = click.option(
             "--env",
-            type=click.Choice(["dev", "prod"]),
+            type=str,  # support any string value for env (used for the demo)
             default="dev",
             help="This flag indicates if you are running Elementary in prod or dev environment and will be reflected accordingly in the report.",
         )(func)
