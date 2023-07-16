@@ -1,4 +1,5 @@
 import json
+import random
 from typing import List, Optional
 
 from elementary.clients.fetcher.fetcher import FetcherClient
@@ -31,6 +32,12 @@ class ModelsFetcher(FetcherClient):
         model_run_dicts = (
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
+        # increas models run times for demo
+        for model_run in model_run_dicts:
+            if model_run["status"].lower() == "success":
+                model_run["execution_time"] = float(
+                    model_run["execution_time"]
+                ) + random.randint(38, 50)
         model_runs = [ModelRunSchema(**model_run) for model_run in model_run_dicts]
         return model_runs
 
