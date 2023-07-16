@@ -1,15 +1,8 @@
 <Accordion title="What permissions Elementary requires?">
 
-The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile,
+The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile, write files to disk, 
 and network access to the data warehouse.
 
-Also, in the `elementary` profile, the credentials should have permissions to:
-- Read all project schemas
-- Write to the elementary schema
-
-On your dbt project, make sure that Elementary dbt package can:
-- Read all project schemas
-- Write to the elementary schema
-- Create a schema (alternatively, you can create the elementary schema in advance)
+Also, in the `elementary` profile, the credentials should have permissions to read and write the elementary schema, and execute queries.
 
 </Accordion>
