@@ -1,6 +1,5 @@
-
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from typing import Iterator, Optional
 
 from elementary.utils.log import get_logger
@@ -15,18 +14,18 @@ class DbtLog:
     exception: Optional[str]
 
     @classmethod
-    def from_log_line(cls, log_line: str) -> 'DbtLog':
+    def from_log_line(cls, log_line: str) -> "DbtLog":
         log = json.loads(log_line)
         return cls(
             msg=log.get("info", {}).get("msg") or log.get("data", {}).get("msg"),
             level=log.get("info", {}).get("level") or log.get("level"),
-            exception=log.get("info", {}).get("exc") or log.get("data", {}).get("exc")
+            exception=log.get("info", {}).get("exc") or log.get("data", {}).get("exc"),
         )
-    
+
     def __str__(self) -> str:
         ret = f"{self.level or 'unknown'}: {self.msg}"
         if self.exception:
-            ret += f"\nException:\n{self.exception}"
+            ret += f"\nError:\n{self.exception}"
         return ret
 
 

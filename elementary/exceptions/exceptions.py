@@ -1,8 +1,8 @@
 import json
 import subprocess
 from typing import List, Optional
-from elementary.clients.dbt.dbt_log import DbtLog, parse_dbt_output
 
+from elementary.clients.dbt.dbt_log import DbtLog, parse_dbt_output
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -44,10 +44,10 @@ class DbtCommandError(Error):
         base_command_args: List[str],
         err_msg: Optional[str] = None,
         logs: Optional[List[DbtLog]] = None,
-    ):  
+    ):
         msg = "Failed to run dbt command."
         if logs and not err_msg:
-            err_msg = '\n'.join([log.msg for log in logs if log.level == 'error'])
+            err_msg = "\n".join([log.msg for log in logs if log.level == "error"])
         if err_msg:
             msg = f"{msg}\n{err_msg}"
         super().__init__(msg)
@@ -58,14 +58,19 @@ class DbtCommandError(Error):
         self.base_command_args = base_command_args
         self.return_code = err.returncode
         self.logs = logs
-    
+
     @classmethod
-    def from_process_error(cls, err: subprocess.CalledProcessError, base_command_args: List[str], err_msg: Optional[str] = None) -> 'DbtCommandError':
+    def from_process_error(
+        cls,
+        err: subprocess.CalledProcessError,
+        base_command_args: List[str],
+        err_msg: Optional[str] = None,
+    ) -> "DbtCommandError":
         if err.output is None:
-            return cls(err, base_command_args, err_msg, None)
+            return cls(err, base_command_args, err_msg, logs=None)
         output = err.output.decode()
         logs = list(parse_dbt_output(output))
-        return cls(err, base_command_args, err_msg, logs)
+        return cls(err, base_command_args, err_msg, logs=logs)
 
     @property
     def anonymous_tracking_context(self):
@@ -99,6 +104,7 @@ class DbtCommandError(Error):
             if log.exception:
                 return log.exception
         return None
+
 
 class DbtLsCommandError(Error):
     """Exception raised while executing a dbt ls command"""
