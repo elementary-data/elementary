@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 import os
 import subprocess
@@ -5,6 +6,7 @@ from json import JSONDecodeError
 from typing import Any, Dict, List, Optional, Tuple
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
+from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.utils.env_vars import is_debug
 from elementary.utils.json_utils import try_load_json
@@ -12,12 +14,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-
-class DbtLog:
-    def __init__(self, log_line: str):
-        log = json.loads(log_line)
-        self.msg = log.get("info", {}).get("msg") or log.get("data", {}).get("msg")
-        self.level = log.get("info", {}).get("level") or log.get("level")
 
 
 class DbtRunner(BaseDbtRunner):
@@ -82,15 +78,11 @@ class DbtRunner(BaseDbtRunner):
                 env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
-            err_msg = None
+            logs = list(parse_dbt_output(err.output.decode()))
             if capture_output:
-                dbt_logs = self._parse_output(err.output)
-                if log_output or is_debug():
-                    for log in dbt_logs:
-                        logger.info(log.msg)
-                err_log_msgs = [log.msg for log in dbt_logs if log.level == "error"]
-                err_msg = "\n".join(err_log_msgs)
-            raise DbtCommandError(err, command_args, err_msg)
+                for log in logs:
+                    logger.info(log.msg)
+            raise DbtCommandError(err, command_args, logs=logs)
 
         output = None
         if capture_output:
@@ -99,8 +91,7 @@ class DbtRunner(BaseDbtRunner):
                 f"Result bytes size for command '{log_command}' is {len(result.stdout)}"
             )
             if log_output or is_debug():
-                dbt_logs = self._parse_output(output)
-                for log in dbt_logs:
+                for log in parse_dbt_output(output):
                     logger.info(log.msg)
 
         if result.returncode != 0:
@@ -158,21 +149,13 @@ class DbtRunner(BaseDbtRunner):
             )
         run_operation_results = []
         if capture_output and command_output is not None:
-            json_messages = command_output.splitlines()
-            for json_message in json_messages:
-                try:
-                    log = DbtLog(json_message)
-                    if log_errors and log.level == "error":
-                        logger.error(log.msg)
-                        continue
-                    if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
-                        run_operation_results.append(
-                            log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
-                        )
-                except JSONDecodeError:
-                    logger.debug(
-                        f"Unable to parse run-operation log message: {json_message}",
-                        exc_info=True,
+            for log in parse_dbt_output(command_output):
+                if log_errors and log.level == "error":
+                    logger.error(log.msg)
+                    continue
+                if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
+                    run_operation_results.append(
+                        log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
                     )
         return run_operation_results
 
@@ -258,13 +241,3 @@ class DbtRunner(BaseDbtRunner):
 
     def source_freshness(self):
         self._run_command(command_args=["source", "freshness"])
-
-    def _parse_output(self, output: str) -> List[DbtLog]:
-        log_msgs = []
-        json_logs = output.splitlines()
-        for json_log in json_logs:
-            try:
-                log_msgs.append(DbtLog(json_log))
-            except JSONDecodeError:
-                logger.debug(f"Unable to parse dbt log message: {json_log}")
-        return log_msgs
