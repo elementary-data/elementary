@@ -76,7 +76,7 @@ class DbtRunner(BaseDbtRunner):
             )
         except subprocess.CalledProcessError as err:
             logs = list(parse_dbt_output(err.output.decode()))
-            if capture_output:
+            if capture_output and (log_output or is_debug()):
                 for log in logs:
                     logger.info(log.msg)
             raise DbtCommandError(err, command_args, logs=logs)
