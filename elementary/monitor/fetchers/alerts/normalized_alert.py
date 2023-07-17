@@ -128,9 +128,9 @@ class NormalizedAlert:
     def _get_alert_channel(self) -> Optional[str]:
         return self._get_field_from_test_meta_or_model_meta_or_default(key=CHANNEL_KEY)
 
-    def _get_alert_suppression_interval(self) -> int:
+    def _get_alert_suppression_interval(self) -> Optional[int]:
         return self._get_field_from_test_meta_or_model_meta_or_default(
-            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=0
+            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=None
         )
 
     def _get_alert_fields(self) -> Optional[List[str]]:

@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, Dict, List, Sequence, Union
+from typing import DefaultDict, Dict, List, Optional, Sequence, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -18,6 +18,8 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS = 24
+
 
 class AlertsAPI(APIClient):
     def __init__(
@@ -25,6 +27,7 @@ class AlertsAPI(APIClient):
         dbt_runner: DbtRunner,
         config: Config,
         elementary_database_and_schema: str,
+        global_suppression_interval: Optional[int] = None,
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -34,6 +37,7 @@ class AlertsAPI(APIClient):
             config=self.config,
             elementary_database_and_schema=self.elementary_database_and_schema,
         )
+        self.global_suppression_interval = global_suppression_interval
 
     def get_new_alerts(
         self,
@@ -116,7 +120,7 @@ class AlertsAPI(APIClient):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[AlertType]:
         suppressed_alerts = self._get_suppressed_alerts(
-            pending_alerts, last_alert_sent_times
+            pending_alerts, last_alert_sent_times, self.global_suppression_interval
         )
         latest_alert_ids = self._get_latest_alerts(pending_alerts)
         alerts_to_skip: List[Union[AlertType, MalformedAlert]] = []
@@ -151,6 +155,7 @@ class AlertsAPI(APIClient):
     def _get_suppressed_alerts(
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
+        global_suppression_interval: Optional[int] = None,
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
@@ -162,7 +167,11 @@ class AlertsAPI(APIClient):
                 logger.debug("Alert without an id detected!")
                 continue
 
-            suppression_interval = alert.alert_suppression_interval
+            suppression_interval = (
+                alert.alert_suppression_interval
+                or global_suppression_interval
+                or DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS
+            )
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times[alert_class_id])
                 if last_alert_sent_times.get(alert_class_id)
