@@ -33,11 +33,33 @@ class ModelsFetcher(FetcherClient):
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
         # increas models run times for demo
-        for model_run in model_run_dicts:
+        sorted_model_runs = sorted(
+            model_run_dicts,
+            key=lambda model_run: (
+                model_run["unique_id"].lower(),
+                model_run["generated_at"],
+            ),
+        )
+        model_id = sorted_model_runs[0]["unique_id"]
+        ascend_order = random.randint(0, 1)
+        initial_time = float(sorted_model_runs[0]["execution_time"]) + (
+            random.randint(36, 39) if ascend_order else random.randint(48, 51)
+        )
+        for model_run in sorted_model_runs:
+            if model_run["unique_id"] != model_id:
+                model_id = model_run["unique_id"]
+                ascend_order = random.randint(0, 1)
+                initial_time = float(model_run["execution_time"]) + (
+                    random.randint(36, 39) if ascend_order else random.randint(48, 51)
+                )
+
             if model_run["status"].lower() == "success":
-                model_run["execution_time"] = float(
-                    model_run["execution_time"]
-                ) + random.randint(38, 50)
+                initial_time = (
+                    (initial_time + random.uniform(-0.7, 2.5))
+                    if ascend_order
+                    else (initial_time - random.uniform(-0.7, 2.5))
+                )
+                model_run["execution_time"] = initial_time
         model_runs = [ModelRunSchema(**model_run) for model_run in model_run_dicts]
         return model_runs
 
