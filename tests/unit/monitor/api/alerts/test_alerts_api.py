@@ -57,7 +57,7 @@ def test_get_suppression_interval(
     expected_interval: Optional[int],
 ):
     assert (
-        alerts_api_mock._get_suppression_interval(alert_interval, cli_interval)
+        alerts_api_mock._get_suppression_interval(cli_interval, alert_interval)
         == expected_interval
     )
 
