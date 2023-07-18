@@ -1,7 +1,12 @@
 import json
+from typing import Optional
 
 import pytest
+from parametrization import Parametrization
 
+from elementary.monitor.api.alerts.alerts import (
+    DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS,
+)
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 
 
@@ -28,6 +33,36 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     )
     assert json.dumps(suppressed_model_alerts, sort_keys=True) == json.dumps(
         ["alert_id_1"], sort_keys=True
+    )
+
+
+@Parametrization.case(
+    name="meta is none- cli wins",
+    cli_interval=1,
+    alert_interval=None,
+    expected_interval=1,
+)
+@Parametrization.case(
+    name="meta is not none- meta wins",
+    cli_interval=2,
+    alert_interval=10,
+    expected_interval=10,
+)
+@Parametrization.case(
+    name="both are none- default wins",
+    cli_interval=None,
+    alert_interval=None,
+    expected_interval=DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS,
+)
+def test_get_suppression_interval(
+    alerts_api_mock: MockAlertsAPI,
+    cli_interval: Optional[int],
+    alert_interval: Optional[int],
+    expected_interval: Optional[int],
+):
+    assert (
+        alerts_api_mock._get_suppression_interval(cli_interval, alert_interval)
+        == expected_interval
     )
 
 
