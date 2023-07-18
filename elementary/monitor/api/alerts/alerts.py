@@ -151,8 +151,9 @@ class AlertsAPI(APIClient):
             alerts_to_skip=filter_alerts(alerts_to_skip, filter),
         )
 
-    @staticmethod
+    @classmethod
     def _get_suppressed_alerts(
+        cls,
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
         global_suppression_interval: Optional[int] = None,
@@ -167,10 +168,8 @@ class AlertsAPI(APIClient):
                 logger.debug("Alert without an id detected!")
                 continue
 
-            suppression_interval = (
-                alert.alert_suppression_interval
-                or global_suppression_interval
-                or DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS
+            suppression_interval = cls._get_suppression_interval(
+                alert.alert_suppression_interval, global_suppression_interval
             )
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times[alert_class_id])
@@ -215,3 +214,11 @@ class AlertsAPI(APIClient):
         for alert_last_time in alert_last_times.values():
             latest_alert_ids.append(alert_last_time["alert_id"])
         return latest_alert_ids
+
+    @staticmethod
+    def _get_suppression_interval(interval_from_alert, interval_from_cli):
+        if interval_from_alert is not None:
+            return interval_from_alert
+        if interval_from_cli is not None:
+            return interval_from_cli
+        return DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS

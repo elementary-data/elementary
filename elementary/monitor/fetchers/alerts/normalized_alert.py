@@ -144,4 +144,8 @@ class NormalizedAlert:
     def _get_field_from_test_meta_or_model_meta_or_default(
         self, key: str, default_val=None
     ) -> Any:
-        return self.test_meta.get(key) or self.model_meta.get(key) or default_val
+        if self.test_meta.get(key) is not None:
+            return self.test_meta.get(key)
+        if self.model_meta.get(key) is not None:
+            return self.model_meta.get(key)
+        return default_val
