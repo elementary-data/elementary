@@ -250,7 +250,7 @@ def monitor(
     select,
     group_by,
     target_path,
-    suppression_interval,
+    global_suppression_interval,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -291,7 +291,7 @@ def monitor(
             send_test_message_on_success=test,
             disable_samples=disable_samples,
             filter=select,
-            global_suppression_interval=suppression_interval,
+            global_suppression_interval=global_suppression_interval,
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking
         # properties. This is a tech-debt that should be fixed in the future.
