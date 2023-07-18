@@ -36,6 +36,7 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     )
 
 
+@Parametrization.autodetect_parameters()
 @Parametrization.case(
     name="meta is none- cli wins",
     cli_interval=1,
@@ -61,7 +62,7 @@ def test_get_suppression_interval(
     expected_interval: Optional[int],
 ):
     assert (
-        alerts_api_mock._get_suppression_interval(cli_interval, alert_interval)
+        alerts_api_mock._get_suppression_interval(alert_interval, cli_interval)
         == expected_interval
     )
 
