@@ -60,6 +60,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
         GroupOfAlertsBySingleAlert(
             alerts=[AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING_TS3],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         )
     ],
     expected_execution_properties={
@@ -75,6 +76,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
         GroupOfAlertsByTable(
             alerts=[AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING_TS3],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         )
     ],
     expected_execution_properties={
@@ -96,6 +98,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
                 AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING_TS3,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         )
     ],
     expected_execution_properties={
@@ -118,10 +121,12 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
                 AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING_TS3,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
         GroupOfAlertsByTable(
             alerts=[AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING_TS3],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
     ],
     expected_execution_properties={
@@ -142,6 +147,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
         GroupOfAlertsBySingleAlert(
             alerts=[AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT_TS2],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
         GroupOfAlertsByTable(
             alerts=[
@@ -149,10 +155,12 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
                 AL_WARN_MODEL1_NO_CHANNEL_NO_GROUPING_TS3,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
         GroupOfAlertsByTable(
             alerts=[AL_FAIL_MODEL2_NO_CHANNEL_NO_GROUPING_TS3],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
     ],
     expected_execution_properties={
@@ -180,14 +188,17 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
                 AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE_TS1,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
         GroupOfAlertsBySingleAlert(
             alerts=[AL_ERROR_MODEL3_NO_CHANNEL_WITH_MODEL_META_GROUPING_BY_ALERT_TS1],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
         GroupOfAlertsBySingleAlert(
             alerts=[AL_FAIL_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_ALERT_TS2],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
         GroupOfAlertsByTable(
             alerts=[
@@ -195,6 +206,7 @@ from tests.unit.monitor.alerts.group_alerts_by_table.utils import (
                 AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING_TS3,
             ],
             default_channel_destination=DEFAULT_CHANNEL,
+            override_slack_channel=False,
         ),
     ],
     expected_execution_properties={
@@ -245,6 +257,7 @@ def test_grouping_logic(
 @Parametrization.default_parameters(
     grouping_class=GroupOfAlertsBySingleAlert,
     default_channel=DEFAULT_CHANNEL,
+    override_channel=False,
     default_env="dev",
     expected_owners=None,
     expected_tags=None,
@@ -267,6 +280,13 @@ def test_grouping_logic(
     expected_channel=OTHER_CHANNEL,
 )
 @Parametrization.case(
+    name="single alert with non-default channel and override_channel=True goes to default channel",
+    override_channel=True,
+    grouping_class=GroupOfAlertsBySingleAlert,
+    alerts_list=[AL_FAIL_MODEL1_WITH_CHANNEL_NO_GROUPING_TS3],
+    expected_channel=DEFAULT_CHANNEL,
+)
+@Parametrization.case(
     name="group_by_table_forces_use_of_the_model_channel",
     grouping_class=GroupOfAlertsByTable,
     alerts_list=[
@@ -283,6 +303,16 @@ def test_grouping_logic(
         AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE_TS1,
     ],
     expected_channel=OTHER_CHANNEL,
+)
+@Parametrization.case(
+    name="like previous, but with override_channel - should use the cli (default) channel",
+    grouping_class=GroupOfAlertsByTable,
+    alerts_list=[
+        AL_FAIL_MODEL2_WITH_CHANNEL_IN_MODEL_META_WITH_GROUPING_BY_TABLE_TS2,
+        AL_ERROR_MODEL2_NO_CHANNEL_WITH_GROUPING_BY_TABLE_TS1,
+    ],
+    override_channel=True,
+    expected_channel=DEFAULT_CHANNEL,
 )
 @Parametrization.case(
     name="owners_are_deduplicated",
@@ -326,6 +356,7 @@ def test_alert_group_construction(
     grouping_class,
     alerts_list,
     default_channel,
+    override_channel,
     default_env,
     expected_owners,
     expected_tags,
@@ -336,7 +367,12 @@ def test_alert_group_construction(
     expected_channel,
 ):
     # business logic
-    alerts_group = grouping_class(alerts_list, default_channel, env=default_env)
+    alerts_group = grouping_class(
+        alerts_list,
+        default_channel,
+        override_slack_channel=override_channel,
+        env=default_env,
+    )
 
     # assertions
     if expected_owners is not None:

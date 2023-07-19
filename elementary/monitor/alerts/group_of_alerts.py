@@ -64,11 +64,18 @@ SubsComponent = NotificationComponent(
 
 class GroupOfAlerts:
     def __init__(
-        self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
+        self,
+        alerts: List[Alert],
+        default_channel_destination: str,
+        override_slack_channel: bool,
+        env: str = "dev",
     ):
         self.alerts = alerts
         self._title = self._get_title()
-        self._sort_channel_destination(default_channel=default_channel_destination)
+        self._sort_channel_destination(
+            default_channel=default_channel_destination,
+            override_channel=override_slack_channel,
+        )
         self._fill_components_to_alerts()
         hashtag = SlackMessageBuilder._HASHTAG
         self._components_to_attention_required: Dict[
@@ -101,7 +108,7 @@ class GroupOfAlerts:
     def set_subscribers(self, subscribers: List[str]):
         self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
 
-    def _sort_channel_destination(self, default_channel):
+    def _sort_channel_destination(self, default_channel, override_channel):
         raise NotImplementedError
 
     def _fill_components_to_alerts(self):
@@ -261,7 +268,11 @@ class GroupOfAlerts:
 
 class GroupOfAlertsByTable(GroupOfAlerts):
     def __init__(
-        self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
+        self,
+        alerts: List[Alert],
+        default_channel_destination: str,
+        override_slack_channel: bool,
+        env: str = "dev",
     ):
         # sort out model unique id
         models = set([alert.model_unique_id for alert in alerts])
@@ -272,17 +283,20 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         self._model = get_shortened_model_name(list(models)[0])
         self._db = alerts[0].database_name
         self._schema = alerts[0].schema_name
-        super().__init__(alerts, default_channel_destination, env)
+        super().__init__(
+            alerts, default_channel_destination, override_slack_channel, env
+        )
 
     def _get_title(self) -> str:
         return f"Table issues detected - {self._model}"
 
-    def _sort_channel_destination(self, default_channel):
+    def _sort_channel_destination(self, default_channel, override_channel):
         """
         where do we send a group of alerts to?
         Definitions:
         1. "default_channel" is the project yaml level definition, over-rided by CLI if given
-        2. "per alert" is the definition for tests (if exists), or for the related model (if exists).
+        2. override_channel dictates whether the default channel should override the alert-specific channel
+        3. "per alert" is the definition for tests (if exists), or for the related model (if exists).
         Sorting out:
         if grouping is "by table",
          if model has specific channels configured:
@@ -290,6 +304,11 @@ class GroupOfAlertsByTable(GroupOfAlerts):
          else
           - send it to the default channel
         """
+
+        # if override_channel is set, we just use the default channel
+        if override_channel:
+            self.channel_destination = default_channel
+            return
 
         # Check for a model level configuration.
         model_specific_channel_config = None
@@ -320,7 +339,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
 
 
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):
-    def _sort_channel_destination(self, default_channel):
+    def _sort_channel_destination(self, default_channel, override_channel):
         """
         where do we send a group of alerts to?
         Definitions:
@@ -330,7 +349,7 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
 
         if grouping is "by alert", test definition or model definition or CLI if given or project-yaml definition
         """
-        if self.alerts[0].slack_channel:
+        if self.alerts[0].slack_channel and not override_channel:
             self.channel_destination = self.alerts[0].slack_channel
         else:
             self.channel_destination = default_channel

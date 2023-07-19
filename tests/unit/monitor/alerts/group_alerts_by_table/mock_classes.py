@@ -33,3 +33,4 @@ class MockConfig:
 class MockDataMonitoringAlerts:
     config: MockConfig
     execution_properties: Dict
+    override_meta_slack_channel: bool
