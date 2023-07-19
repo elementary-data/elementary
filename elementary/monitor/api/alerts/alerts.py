@@ -26,6 +26,7 @@ class AlertsAPI(APIClient):
         config: Config,
         elementary_database_and_schema: str,
         global_suppression_interval: int,
+        override_with_global_suppression_interval: bool = False,
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -36,6 +37,9 @@ class AlertsAPI(APIClient):
             elementary_database_and_schema=self.elementary_database_and_schema,
         )
         self.global_suppression_interval = global_suppression_interval
+        self.override_with_global_suppression_interval = (
+            override_with_global_suppression_interval
+        )
 
     def get_new_alerts(
         self,
@@ -118,7 +122,9 @@ class AlertsAPI(APIClient):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[AlertType]:
         suppressed_alerts = self._get_suppressed_alerts(
-            pending_alerts, last_alert_sent_times, self.global_suppression_interval
+            pending_alerts,
+            last_alert_sent_times,
+            self.global_suppression_interval,
         )
         latest_alert_ids = self._get_latest_alerts(pending_alerts)
         alerts_to_skip: List[Union[AlertType, MalformedAlert]] = []
@@ -149,9 +155,8 @@ class AlertsAPI(APIClient):
             alerts_to_skip=filter_alerts(alerts_to_skip, filter),
         )
 
-    @classmethod
     def _get_suppressed_alerts(
-        cls,
+        self,
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
         global_suppression_interval: int,
@@ -166,8 +171,10 @@ class AlertsAPI(APIClient):
                 logger.debug("Alert without an id detected!")
                 continue
 
-            suppression_interval = cls._get_suppression_interval(
-                alert.alert_suppression_interval, global_suppression_interval
+            suppression_interval = self._get_suppression_interval(
+                alert.alert_suppression_interval,
+                global_suppression_interval,
+                self.override_with_global_suppression_interval,
             )
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times[alert_class_id])
@@ -214,7 +221,9 @@ class AlertsAPI(APIClient):
         return latest_alert_ids
 
     @staticmethod
-    def _get_suppression_interval(interval_from_alert, interval_from_cli):
-        if interval_from_alert is not None:
+    def _get_suppression_interval(
+        interval_from_alert, interval_from_cli, override_by_cli
+    ):
+        if interval_from_alert is not None and not override_by_cli:
             return interval_from_alert
         return interval_from_cli
