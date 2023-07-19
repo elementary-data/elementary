@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from elementary.monitor.api.tests.schema import (
     InvocationSchema,
@@ -25,7 +25,7 @@ class SelectorFilterSchema(BaseModel):
     model: Optional[str] = None
     node_names: Optional[List[str]] = None
 
-    @validator("invocation_time", pre=True)
+    @field_validator("invocation_time", mode="before")
     def format_invocation_time(cls, invocation_time):
         if invocation_time:
             try:

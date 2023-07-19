@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
@@ -29,7 +29,7 @@ class InvocationSchema(BaseModel):
     id: str
     status: str
 
-    @validator("time_utc", pre=True)
+    @field_validator("time_utc", mode="before")
     def format_time_utc(cls, time_utc):
         return convert_partial_iso_format_to_full_iso_format(time_utc)
 

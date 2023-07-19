@@ -47,7 +47,7 @@ setup(
         "alive-progress<=2.3.1",
         "slack-sdk>=3.20.1,<4.0.0",
         "pytest-parametrization>=2022.2.1",
-        "pydantic<2.0",
+        "pydantic>2.0,<3",
         "networkx>=2.3,<3",
         "packaging>=20.9,<=23.1",
     ],

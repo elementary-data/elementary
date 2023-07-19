@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
@@ -46,14 +46,14 @@ class TestModel(BaseModel):
     updated_at: str
     updated_by: Optional[str] = None
 
-    @validator("severity", pre=True)
+    @field_validator("severity", mode="before")
     def validate_severity(cls, severity: str) -> str:
         severity_lower_string = severity.lower()
         if severity_lower_string not in ["error", "warn"]:
             raise ValueError('Severity must be "warn" or "error"')
         return severity_lower_string
 
-    @validator("updated_at", pre=True)
+    @field_validator("updated_at", mode="before")
     def validate_updated_at(cls, updated_at: str) -> str:
         return convert_partial_iso_format_to_full_iso_format(updated_at)
 

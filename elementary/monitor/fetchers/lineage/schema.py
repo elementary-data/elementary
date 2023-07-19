@@ -1,7 +1,7 @@
 import re
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from pydantic.typing import Literal
 
 SEED_PATH_PATERN = re.compile(r"^seed\.")
@@ -15,7 +15,7 @@ class NodeDependsOnNodesSchema(BaseModel):
     depends_on_nodes: Optional[List[NodeUniqueIdType]] = None
     type: NodeType
 
-    @validator("depends_on_nodes", pre=True, always=True)
+    @field_validator("depends_on_nodes", mode="before")
     def set_depends_on_nodes(cls, depends_on_nodes):
         formatted_depends_on = depends_on_nodes or []
         formatted_depends_on = [
