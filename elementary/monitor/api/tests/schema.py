@@ -12,9 +12,6 @@ class ElementaryTestResultSchema(BaseModel):
     metrics: Optional[Union[list, dict]] = None
     result_description: Optional[str] = None
 
-    class Config:
-        smart_union = True
-
 
 class DbtTestResultSchema(BaseModel):
     display_name: Optional[str] = None
@@ -68,9 +65,6 @@ class TestMetadataSchema(BaseModel):
 class TestResultSchema(BaseModel):
     metadata: TestMetadataSchema
     test_results: Union[DbtTestResultSchema, ElementaryTestResultSchema]
-
-    class Config:
-        smart_union = True
 
 
 class TestResultsWithTotalsSchema(BaseModel):

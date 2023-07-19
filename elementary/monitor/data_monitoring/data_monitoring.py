@@ -47,7 +47,7 @@ class DataMonitoring:
                 tracking.register_group(
                     "warehouse",
                     self.warehouse_info.id,
-                    self.warehouse_info.dict(),
+                    self.warehouse_info.model_dump(),
                 )
             tracking.set_env("target_name", latest_invocation.get("target_name"))
             tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))

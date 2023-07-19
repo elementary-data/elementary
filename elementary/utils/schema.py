@@ -1,12 +1,14 @@
 import json
 from typing import Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from elementary.utils.json_utils import try_load_json
 
 
 class ExtendedBaseModel(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     @staticmethod
     def _load_var_to_dict(var: Union[str, dict]) -> dict:
         if not var:
