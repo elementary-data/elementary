@@ -71,7 +71,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="status:fail",
     )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().status == "fail"
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().statuses == "fail"
     assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "status:fail"
 
     # invocation_id selector

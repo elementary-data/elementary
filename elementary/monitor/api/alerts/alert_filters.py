@@ -5,7 +5,11 @@ from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.data_monitoring.schema import (
+    ResourceType,
+    SelectorFilterSchema,
+    Status,
+)
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
@@ -27,8 +31,10 @@ def filter_alerts(
         filtered_alerts = _filter_alerts_by_model(alerts, alerts_filter)
     elif alerts_filter.owner:
         filtered_alerts = _filter_alerts_by_owner(alerts, alerts_filter)
-    elif alerts_filter.status:
+    elif alerts_filter.statuses:
         filtered_alerts = _filter_alerts_by_status(alerts, alerts_filter)
+    elif alerts_filter.resource_types:
+        filtered_alerts = _filter_alerts_by_resource_type(alerts, alerts_filter)
     elif alerts_filter.node_names is not None:
         filtered_alerts = _filter_alerts_by_node_names(alerts, alerts_filter)
     # If the filter contains a filter that we don't support, we want to return an empty list of alerts
@@ -43,6 +49,7 @@ def _filter_alerts_by_tag(
     alerts: List[AlertType],
     tag_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
+
     if tag_filter.tag is None:
         return alerts
 
@@ -64,6 +71,7 @@ def _filter_alerts_by_owner(
     alerts: List[AlertType],
     owner_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
+
     if owner_filter.owner is None:
         return alerts
 
@@ -87,6 +95,7 @@ def _filter_alerts_by_model(
     alerts: List[AlertType],
     model_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
+
     if model_filter.model is None:
         return alerts
 
@@ -102,6 +111,7 @@ def _filter_alerts_by_node_names(
     alerts: List[AlertType],
     node_name_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
+
     if node_name_filter.node_names is None:
         return alerts
 
@@ -132,10 +142,27 @@ def _filter_alerts_by_status(
     alerts: List[AlertType],
     status_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-    if status_filter.status is None:
+
+    if status_filter.statuses is None:
         return alerts
 
-    if status_filter.status not in ["warn", "fail"]:
-        raise ValueError("Status selector must be either 'warn' or 'fail'")
+    return list(
+        filter(lambda alert: Status(alert.status) in status_filter.statuses, alerts)
+    )
 
-    return list(filter(lambda alert: alert.status == status_filter.status, alerts))
+
+def _filter_alerts_by_resource_type(
+    alerts: List[AlertType],
+    resource_type_filter: SelectorFilterSchema,
+) -> List[AlertType]:
+
+    if resource_type_filter.resource_types is None:
+        return alerts
+
+    return list(
+        filter(
+            lambda alert: ResourceType.from_table_name(alert.TABLE_NAME)
+            in resource_type_filter.resource_types,
+            alerts,
+        )
+    )

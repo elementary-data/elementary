@@ -41,7 +41,8 @@ class SelectorFilter:
                 tag_regex = re.compile(r"tag:(.*)")
                 owner_regex = re.compile(r"config.meta.owner:(.*)")
                 model_regex = re.compile(r"model:(.*)")
-                status_regex = re.compile(r"status:(.*)")
+                statuses_regex = re.compile(r"statuses:(.*)")
+                resource_types_regex = re.compile(r"resource_types:(.*)")
 
                 invocation_id_match = invocation_id_regex.search(selector)
                 invocation_time_match = invocation_time_regex.search(selector)
@@ -49,7 +50,8 @@ class SelectorFilter:
                 tag_match = tag_regex.search(selector)
                 owner_match = owner_regex.search(selector)
                 model_match = model_regex.search(selector)
-                status_match = status_regex.search(selector)
+                statuses_match = statuses_regex.search(selector)
+                resource_types_match = resource_types_regex.search(selector)
 
                 if last_invocation_match:
                     data_monitoring_filter = SelectorFilterSchema(
@@ -83,11 +85,18 @@ class SelectorFilter:
                     data_monitoring_filter = SelectorFilterSchema(
                         model=model_match.group(1), selector=selector
                     )
-                elif status_match:
+                elif statuses_match:
                     if self.tracking:
-                        self.tracking.set_env("select_method", "status")
+                        self.tracking.set_env("select_method", "statuses")
                     data_monitoring_filter = SelectorFilterSchema(
-                        status=status_match.group(1), selector=selector
+                        statuses=statuses_match.group(1).split(","), selector=selector
+                    )
+                elif resource_types_match:
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "resource_types")
+                    data_monitoring_filter = SelectorFilterSchema(
+                        resource_types=resource_types_match.group(1).split(","),
+                        selector=selector,
                     )
                 else:
                     logger.error(f"Could not parse the given -s/--select: {selector}")

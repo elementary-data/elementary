@@ -54,7 +54,7 @@ class ModelsAPI(APIClient):
                 ModelRunSchema(
                     id=model_run.invocation_id,
                     time_utc=model_run.generated_at,
-                    status=model_run.status,
+                    status=model_run.statuses,
                     full_refresh=model_run.full_refresh,
                     materialization=model_run.materialization,
                     execution_time=model_run.execution_time,
@@ -65,7 +65,7 @@ class ModelsAPI(APIClient):
             successful_execution_times = [
                 model_run.execution_time
                 for model_run in model_runs
-                if model_run.status.lower() == "success"
+                if model_run.statuses.lower() == "success"
             ]
             median_execution_time = (
                 statistics.median(successful_execution_times)
@@ -83,7 +83,7 @@ class ModelsAPI(APIClient):
                     unique_id=model_unique_id,
                     schema=last_model_run.schema_name,
                     name=last_model_run.name,
-                    status=last_model_run.status,
+                    status=last_model_run.statuses,
                     last_exec_time=last_model_run.execution_time,
                     median_exec_time=median_execution_time,
                     exec_time_change_rate=execution_time_change_rate,
