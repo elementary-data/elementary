@@ -1,6 +1,6 @@
 import os
 import posixpath
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -38,17 +38,17 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
-    artifact_type: str = Field("model", const=True)
+    artifact_type: Literal["model"] = "model"
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
-    artifact_type: str = Field("source", const=True)
+    artifact_type: Literal["source"] = "source"
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
-    artifact_type: str = Field("exposure", const=True)
+    artifact_type: Literal["exposure"] = "exposure"
 
 
 class ModelCoverageSchema(BaseModel):

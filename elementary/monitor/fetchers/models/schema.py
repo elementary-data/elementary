@@ -2,7 +2,7 @@ import os
 import posixpath
 from typing import Any, Dict, List, Optional, TypeVar
 
-from pydantic import Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
@@ -88,6 +88,8 @@ class ExposureSchema(ArtifactSchema):
 
 
 class ModelTestCoverage(ExtendedBaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     model_unique_id: Optional[str] = None
     column_tests: int = 0
     table_tests: int = 0

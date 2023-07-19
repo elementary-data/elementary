@@ -1,8 +1,7 @@
 import re
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, field_validator
-from pydantic.typing import Literal
 
 SEED_PATH_PATERN = re.compile(r"^seed\.")
 

@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
@@ -26,6 +26,9 @@ class ResourcesModel(BaseModel):
 
 
 class TestModel(BaseModel):
+    __test__ = False
+    model_config = ConfigDict(protected_namespaces=())
+
     id: str
     db_schema: str = Field(alias="schema")
     table: Optional[str] = None
@@ -59,6 +62,7 @@ class TestModel(BaseModel):
 
 
 class TestsModel(BaseModel):
+    __test__ = False
     tests: List[TestModel] = Field(default_factory=list)
 
 

@@ -1,8 +1,7 @@
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import networkx as nx
 from pydantic import BaseModel, field_validator
-from pydantic.typing import Literal
 
 NodeUniqueIdType = str
 NodeType = Literal["model", "source", "exposure"]

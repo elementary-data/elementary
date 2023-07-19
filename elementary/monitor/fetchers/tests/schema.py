@@ -1,12 +1,13 @@
 from typing import List, Optional, Union
 
-from pydantic import field_validator
+from pydantic import ConfigDict, field_validator
 
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class TestResultDBRowSchema(ExtendedBaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
 
     id: str
@@ -24,7 +25,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_sub_type: str
     test_results_description: Optional[str]
     owners: Optional[List[str]]
-    model_owner: Optional[List[str]]
+    model_owner: Optional[List[str]] = None
     tags: Optional[List[str]]
     meta: dict
     model_meta: dict
@@ -39,9 +40,6 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     invocations_rank_index: int
     sample_data: Optional[Union[dict, List]] = None
     failures: Optional[int] = None
-
-    class Config:
-        smart_union = True
 
     @field_validator("detected_at", mode="before")
     def format_detected_at(cls, detected_at):
