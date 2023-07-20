@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, Dict, List, Optional, Sequence, Union
+from typing import DefaultDict, Dict, List, Sequence, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -25,7 +25,7 @@ class AlertsAPI(APIClient):
         dbt_runner: DbtRunner,
         config: Config,
         elementary_database_and_schema: str,
-        global_suppression_interval: Optional[int] = None,
+        global_suppression_interval: int,
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -154,7 +154,7 @@ class AlertsAPI(APIClient):
         cls,
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
-        global_suppression_interval: Optional[int] = None,
+        global_suppression_interval: int,
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()

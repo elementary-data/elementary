@@ -48,7 +48,7 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
 )
 def test_get_suppression_interval(
     alerts_api_mock: MockAlertsAPI,
-    cli_interval: Optional[int],
+    cli_interval: int,
     alert_interval: Optional[int],
     expected_interval: Optional[int],
 ):
