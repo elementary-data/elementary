@@ -487,3 +487,14 @@ Due to their nature, grouped alerts will contain less information on each issue.
 edr monitor --group-by table
 ```
 
+#### Suppression interval flag
+
+Don’t want to get multiple alerts if the same test keeps failing? 
+You can now configure an alert_suppression_interval, this is a “snooze” period for alerts on the same issue.
+Elementary won’t send new alerts on the same issue that are generated within suppression interval.
+
+The flag configuration is the suppression interval duration in hours.  
+
+```shell
+edr monitor --suppression-interval 24 
+```

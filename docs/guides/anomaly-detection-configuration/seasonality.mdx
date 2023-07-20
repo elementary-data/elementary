@@ -3,7 +3,7 @@ title: "seasonality"
 sidebarTitle: "seasonality"
 ---
 
-`seasonality: day_of_week`
+`seasonality: day_of_week | hour_of_day | hour_of_week`
 
 Some data sets have patterns that repeat over a time period, and are expected. 
 This is the normal behavior of these data sets. 
@@ -17,8 +17,14 @@ The `day_of_week` seasonality uses the same day of week as a training set for ea
 The expected range for Monday will be based on a training set of previous Mondays, and so on.
 
 
+**Supported seasonality configurations:**
+- `day_of_week` - Uses the same day of week as a training set for each daily bucket (Compares Sunday to Sundays, Monday to Mondays, etc.).
+- `hour_of_day` - Uses the same hour as a training set for each hourly bucket (For example will compare 10:00-11:00AM to 10:00-11:00AM on previous days, instead of any previous hour).
+- `hour_of_week` - Uses the same hour and day of week as a training set for each hourly bucket (For example will compare 10:00-11:00AM on Sunday to 10:00-11:00AM on previous sundays).
+  
+
 - _Default: none_
-- _Supported values: `day_of_week`_
+- _Supported values: `day_of_week`, `hour_of_day`, `hour_of_week`
 - _Relevant tests: Anomaly detection tests with `timestamp_column` and 1 day `time_bucket`_
 
 <Frame caption="seasonality change impact">

@@ -88,8 +88,7 @@ Here is a list of all the available options:
 
 - **Select:**
   Filter the alerts / report using a selector.
-
-  - See all of the alerts supported selector methods [here](/guides/alerts-configuration#filter-alerts).
+  - See all of the alerts supported selector methods [here](/guides/alerts-configuration#alerts-cli-flags).
   - See all of the report supported selector methods [here](/quickstart/generate-report-ui#generating-a-report-for-single-invocation).
 
 ```shell
@@ -192,4 +191,12 @@ Here is a list of all the available options:
 
 ```shell
 --env [dev|prod]
+```
+
+
+- **Suppression interval** 
+[Suppression interval](/guides/alerts-configuration#suppression-interval-flag) for similar alerts, the value is duration in hours.
+
+```shell
+edr monitor --suppression-interval [int]
 ```
