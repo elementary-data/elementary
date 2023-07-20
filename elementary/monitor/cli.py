@@ -215,9 +215,9 @@ def get_cli_properties() -> dict:
     help="Whether to send a test message in case there are no alerts.",
 )
 @click.option(
-    "--global-suppression-interval",
+    "--suppression-interval",
     type=int,
-    default=None,
+    default=24,
     help="The number of hours to suppress alerts after an alert was sent (this is a global default setting).",
 )
 @click.option(
@@ -250,7 +250,7 @@ def monitor(
     select,
     group_by,
     target_path,
-    global_suppression_interval,
+    suppression_interval,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -291,7 +291,7 @@ def monitor(
             send_test_message_on_success=test,
             disable_samples=disable_samples,
             filter=select,
-            global_suppression_interval=global_suppression_interval,
+            global_suppression_interval=suppression_interval,
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking
         # properties. This is a tech-debt that should be fixed in the future.
