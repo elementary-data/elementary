@@ -64,9 +64,7 @@ class S3Client:
             else:
                 try:
                     bucket_name = self.config.s3_bucket_name
-                    bucket_location = self.client.get_bucket_location(
-                        Bucket=bucket_name
-                    )["LocationConstraint"]
+                    bucket_location = self._get_bucket_region(bucket_name)
                     aws_s3_website_url = self._get_aws_s3_website_url_from_location(
                         bucket_location
                     )
@@ -76,6 +74,16 @@ class S3Client:
                     logger.warning(f"Unable to get bucket website URL: {ex}.")
                     bucket_website_url = None
         return bucket_website_url
+
+    def _get_bucket_region(self, bucket_name: str) -> str:
+        region = self.client.get_bucket_location(Bucket=bucket_name)[
+            "LocationConstraint"
+        ]
+        if region is None:
+            # Specifically for us-east-1, the LocationConstraint is always None
+            region = "us-east-1"
+
+        return region
 
     @staticmethod
     def _get_aws_s3_website_url_from_location(location: str) -> str:
