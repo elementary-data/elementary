@@ -18,8 +18,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS = 24
-
 
 class AlertsAPI(APIClient):
     def __init__(

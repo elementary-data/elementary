@@ -4,9 +4,6 @@ from typing import Optional
 import pytest
 from parametrization import Parametrization
 
-from elementary.monitor.api.alerts.alerts import (
-    DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS,
-)
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 
 
