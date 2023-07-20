@@ -2,7 +2,11 @@ import re
 from typing import Optional
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.data_monitoring.schema import (
+    ResourceType,
+    SelectorFilterSchema,
+    Status,
+)
 from elementary.monitor.fetchers.selector.selector import SelectorFetcher
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
@@ -88,15 +92,21 @@ class SelectorFilter:
                 elif statuses_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "statuses")
+                    statuses = [
+                        Status(status) for status in statuses_match.group(1).split(",")
+                    ]
                     data_monitoring_filter = SelectorFilterSchema(
-                        statuses=statuses_match.group(1).split(","), selector=selector
+                        statuses=statuses, selector=selector
                     )
                 elif resource_types_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "resource_types")
+                    resource_types = [
+                        ResourceType(resource_type)
+                        for resource_type in resource_types_match.group(1).split(",")
+                    ]
                     data_monitoring_filter = SelectorFilterSchema(
-                        resource_types=resource_types_match.group(1).split(","),
-                        selector=selector,
+                        resource_types=resource_types, selector=selector
                     )
                 else:
                     logger.error(f"Could not parse the given -s/--select: {selector}")
