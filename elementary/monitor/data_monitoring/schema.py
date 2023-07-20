@@ -11,8 +11,8 @@ from elementary.monitor.api.tests.schema import (
     InvocationSchema,
     TestResultSchema,
     TestRunSchema,
-    TotalsSchema,
 )
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 

@@ -12,7 +12,7 @@ def test_add_title_to_slack_alert():
     message_builder = SlackAlertMessageBuilder()
     title = message_builder.create_header_block("This is an header!")
     sub_title = message_builder.create_context_block(["I am only a sub title :("])
-    message_builder._add_title_to_slack_alert([title, sub_title])
+    message_builder.add_title_to_slack_alert([title, sub_title])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [
@@ -93,7 +93,7 @@ def test_add_preview_to_slack_alert():
     message_builder = SlackAlertMessageBuilder()
     title = message_builder.create_header_block("This is an header!")
     sub_title = message_builder.create_context_block(["I am only a sub title :("])
-    message_builder._add_preview_to_slack_alert([title, sub_title])
+    message_builder.add_preview_to_slack_alert([title, sub_title])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -136,7 +136,7 @@ def test_add_details_to_slack_alert():
 
     # No result and configuration blocks
     message_builder = SlackAlertMessageBuilder()
-    message_builder._add_details_to_slack_alert()
+    message_builder.add_details_to_slack_alert()
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -147,7 +147,7 @@ def test_add_details_to_slack_alert():
 
     # Only result blocks
     message_builder = SlackAlertMessageBuilder()
-    message_builder._add_details_to_slack_alert(result=[block, block])
+    message_builder.add_details_to_slack_alert(result=[block, block])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -173,7 +173,7 @@ def test_add_details_to_slack_alert():
 
     # Only configuration blocks
     message_builder = SlackAlertMessageBuilder()
-    message_builder._add_details_to_slack_alert(configuration=[block, block])
+    message_builder.add_details_to_slack_alert(configuration=[block, block])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
@@ -199,7 +199,7 @@ def test_add_details_to_slack_alert():
 
     # All details
     message_builder = SlackAlertMessageBuilder()
-    message_builder._add_details_to_slack_alert(
+    message_builder.add_details_to_slack_alert(
         configuration=[block, block], result=[block, block]
     )
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(

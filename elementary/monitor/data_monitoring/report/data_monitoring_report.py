@@ -45,8 +45,8 @@ class DataMonitoringReport(DataMonitoring):
 
     def generate_report(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int = 7,
+        test_runs_amount: int = 720,
         file_path: Optional[str] = None,
         disable_passed_test_metrics: bool = False,
         should_open_browser: bool = True,
@@ -92,8 +92,8 @@ class DataMonitoringReport(DataMonitoring):
 
     def get_report_data(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int = 7,
+        test_runs_amount: int = 720,
         disable_passed_test_metrics: bool = False,
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,

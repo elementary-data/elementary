@@ -20,8 +20,13 @@ class Debug:
         try:
             dbt_runner.run_operation("test_conn", quiet=True)
         except DbtCommandError as err:
+            logs = (
+                "\n".join(str(log) for log in err.logs)
+                if err.logs
+                else "No logs available"
+            )
             click.echo(
-                f"Could not connect to the Elementary db and schema. See details below\n\n{err}"
+                f"Could not connect to the Elementary db and schema. See details below\n\n{logs}"
             )
             return False
 

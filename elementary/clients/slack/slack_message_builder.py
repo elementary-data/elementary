@@ -151,7 +151,7 @@ class SlackMessageBuilder:
             icon = ":x:"
         return icon
 
-    def get_slack_message(self) -> SlackMessageSchema:
+    def get_slack_message(self, *args, **kwargs) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
 
     @staticmethod

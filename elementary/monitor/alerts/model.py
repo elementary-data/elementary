@@ -3,7 +3,6 @@ import json
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
-from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
@@ -61,7 +60,7 @@ class ModelAlert(Alert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Time:* {self.detected_at_str}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -73,7 +72,7 @@ class ModelAlert(Alert):
                     [
                         f"*Model:* {self.alias}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                        f"*{self.detected_at_str}*",
                     ],
                 ),
             )
@@ -152,7 +151,7 @@ class ModelAlert(Alert):
                     ),
                     self.slack_message_builder.create_context_block(
                         [
-                            f"*Time:* {self.detected_at.strftime(DATETIME_FORMAT)}     |",
+                            f"*Time:* {self.detected_at_str}     |",
                             f"*Suppression interval:* {self.alert_suppression_interval} hours",
                         ],
                     ),
@@ -164,7 +163,7 @@ class ModelAlert(Alert):
                     [
                         f"*Snapshot:* {self.alias}     |",
                         f"*Status:* {self.status}     |",
-                        f"*{self.detected_at.strftime(DATETIME_FORMAT)}*",
+                        f"*{self.detected_at_str}*",
                     ],
                 ),
             )
@@ -206,7 +205,7 @@ class ModelAlert(Alert):
         )
 
     @property
-    def consice_name(self):
+    def concise_name(self):
         if self.materialization == "snapshot":
             text = "snapshot"
         else:
