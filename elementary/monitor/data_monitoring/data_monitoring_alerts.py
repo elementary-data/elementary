@@ -40,6 +40,7 @@ class DataMonitoringAlerts(DataMonitoring):
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
+        global_suppression_interval: Optional[int] = None,
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
@@ -49,6 +50,7 @@ class DataMonitoringAlerts(DataMonitoring):
             self.internal_dbt_runner,
             self.config,
             self.elementary_database_and_schema,
+            global_suppression_interval,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
