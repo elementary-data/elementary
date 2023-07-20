@@ -4,9 +4,6 @@ from typing import Optional
 import pytest
 from parametrization import Parametrization
 
-from elementary.monitor.api.alerts.alerts import (
-    DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS,
-)
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 
 
@@ -53,7 +50,7 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     name="both are none- default wins",
     cli_interval=None,
     alert_interval=None,
-    expected_interval=DEFAULT_ALERT_SUPPRESSION_INTERVAL_HOURS,
+    expected_interval=0,
 )
 def test_get_suppression_interval(
     alerts_api_mock: MockAlertsAPI,
