@@ -40,7 +40,7 @@ class DataMonitoringAlerts(DataMonitoring):
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
-        global_suppression_interval: Optional[int] = None,
+        global_suppression_interval: int = 0,
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
