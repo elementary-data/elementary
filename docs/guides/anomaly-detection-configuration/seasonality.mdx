@@ -11,20 +11,22 @@ This means that when we try to detect outliers from the normal and expected rang
 The seasonality configuration is used to overcome this challenge and account for expected patterns. 
 
 
-For example - Many data sets have lower volume over the weekend, and higher volume over the week days. 
+**Supported seasonality configurations:**
+- `day_of_week` - Uses the same day of week as a training set for each daily bucket (Compares Sunday to Sundays, Monday to Mondays, etc.).
+- `hour_of_day` - Uses the same hour as a training set for each hourly bucket (For example will compare 10:00-11:00AM to 10:00-11:00AM on previous days, instead of any previous hour).
+- `hour_of_week` - Uses the same hour and day of week as a training set for each hourly bucket (For example will compare 10:00-11:00AM on Sunday to 10:00-11:00AM on previous sundays).
+
+
+**Example use case:**
+Many data sets have lower volume over the weekend, and higher volume over the week days. 
 This means that the expected range for different days of the week is different. 
 The `day_of_week` seasonality uses the same day of week as a training set for each daily time bucket data point. 
 The expected range for Monday will be based on a training set of previous Mondays, and so on.
 
 
-**Supported seasonality configurations:**
-- `day_of_week` - Uses the same day of week as a training set for each daily bucket (Compares Sunday to Sundays, Monday to Mondays, etc.).
-- `hour_of_day` - Uses the same hour as a training set for each hourly bucket (For example will compare 10:00-11:00AM to 10:00-11:00AM on previous days, instead of any previous hour).
-- `hour_of_week` - Uses the same hour and day of week as a training set for each hourly bucket (For example will compare 10:00-11:00AM on Sunday to 10:00-11:00AM on previous sundays).
-  
 
 - _Default: none_
-- _Supported values: `day_of_week`, `hour_of_day`, `hour_of_week`
+- _Supported values: `day_of_week`, `hour_of_day`, `hour_of_week`_
 - _Relevant tests: Anomaly detection tests with `timestamp_column` and 1 day `time_bucket`_
 
 <Frame caption="seasonality change impact">
