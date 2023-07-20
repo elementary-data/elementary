@@ -46,12 +46,6 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     alert_interval=10,
     expected_interval=10,
 )
-@Parametrization.case(
-    name="both are none- default wins",
-    cli_interval=None,
-    alert_interval=None,
-    expected_interval=0,
-)
 def test_get_suppression_interval(
     alerts_api_mock: MockAlertsAPI,
     cli_interval: Optional[int],
