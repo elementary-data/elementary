@@ -146,7 +146,7 @@ def _filter_alerts_by_status(
     if status_filter.statuses is None:
         return alerts
 
-    statuses: list[Status] = status_filter.statuses
+    statuses: List[Status] = status_filter.statuses
     filter_func: Callable[[AlertType], bool] = (
         lambda alert: Status(alert.status) in statuses
     )
@@ -161,7 +161,7 @@ def _filter_alerts_by_resource_type(
     if resource_type_filter.resource_types is None:
         return alerts
 
-    resource_types: list[ResourceType] = resource_type_filter.resource_types
+    resource_types: List[ResourceType] = resource_type_filter.resource_types
     filter_func: Callable[[AlertType], bool] = (
         lambda alert: ResourceType.from_table_name(alert.alerts_table) in resource_types
     )
