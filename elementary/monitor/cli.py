@@ -218,7 +218,7 @@ def get_cli_properties() -> dict:
 @click.option(
     "--suppression-interval",
     type=int,
-    default=24,
+    default=0,
     help="The number of hours to suppress alerts after an alert was sent (this is a global default setting).",
 )
 @click.option(
