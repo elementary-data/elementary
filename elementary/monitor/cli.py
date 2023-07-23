@@ -142,7 +142,8 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL>.",
+            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+            "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
         return func
 
