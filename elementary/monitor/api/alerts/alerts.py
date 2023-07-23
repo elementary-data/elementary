@@ -120,9 +120,7 @@ class AlertsAPI(APIClient):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[AlertType]:
         suppressed_alerts = self._get_suppressed_alerts(
-            pending_alerts,
-            last_alert_sent_times,
-            self.global_suppression_interval,
+            pending_alerts, last_alert_sent_times
         )
         latest_alert_ids = self._get_latest_alerts(pending_alerts)
         alerts_to_skip: List[Union[AlertType, MalformedAlert]] = []
@@ -157,7 +155,6 @@ class AlertsAPI(APIClient):
         self,
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
-        global_suppression_interval: int,
     ) -> List[str]:
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
@@ -171,7 +168,7 @@ class AlertsAPI(APIClient):
 
             suppression_interval = self._get_suppression_interval(
                 alert.alert_suppression_interval,
-                global_suppression_interval,
+                self.global_suppression_interval,
                 self.override_meta_suppression_interval,
             )
             last_sent_time = (
