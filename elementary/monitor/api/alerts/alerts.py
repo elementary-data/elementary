@@ -26,7 +26,7 @@ class AlertsAPI(APIClient):
         config: Config,
         elementary_database_and_schema: str,
         global_suppression_interval: int,
-        override_with_global_suppression_interval: bool = False,
+        override_meta_suppression_interval: bool = False,
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -37,9 +37,7 @@ class AlertsAPI(APIClient):
             elementary_database_and_schema=self.elementary_database_and_schema,
         )
         self.global_suppression_interval = global_suppression_interval
-        self.override_with_global_suppression_interval = (
-            override_with_global_suppression_interval
-        )
+        self.override_meta_suppression_interval = override_meta_suppression_interval
 
     def get_new_alerts(
         self,
@@ -174,7 +172,7 @@ class AlertsAPI(APIClient):
             suppression_interval = self._get_suppression_interval(
                 alert.alert_suppression_interval,
                 global_suppression_interval,
-                self.override_with_global_suppression_interval,
+                self.override_meta_suppression_interval,
             )
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times[alert_class_id])
@@ -224,6 +222,6 @@ class AlertsAPI(APIClient):
     def _get_suppression_interval(
         interval_from_alert, interval_from_cli, override_by_cli
     ):
-        if interval_from_alert is not None and not override_by_cli:
-            return interval_from_alert
-        return interval_from_cli
+        if interval_from_alert is None or override_by_cli:
+            return interval_from_cli
+        return interval_from_alert
