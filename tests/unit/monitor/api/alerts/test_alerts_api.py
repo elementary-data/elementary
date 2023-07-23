@@ -21,12 +21,10 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     suppressed_test_alerts = alerts_api_mock._get_suppressed_alerts(
         test_alerts,
         last_test_alert_sent_times,
-        alerts_api_mock.global_suppression_interval,
     )
     suppressed_model_alerts = alerts_api_mock._get_suppressed_alerts(
         model_alerts,
         last_model_alert_sent_times,
-        alerts_api_mock.global_suppression_interval,
     )
 
     assert json.dumps(suppressed_test_alerts, sort_keys=True) == json.dumps(
