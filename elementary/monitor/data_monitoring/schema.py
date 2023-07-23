@@ -1,8 +1,12 @@
 from datetime import datetime
+from enum import Enum
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
+from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
+from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.tests.schema import (
     InvocationSchema,
     TestResultSchema,
@@ -15,6 +19,31 @@ from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezon
 logger = get_logger(__name__)
 
 
+class Status(Enum):
+    WARN = "warn"
+    FAIL = "fail"
+    SKIPPED = "skipped"
+    ERROR = "error"
+
+
+class ResourceType(Enum):
+    TEST = "test"
+    MODEL = "model"
+    SOURCE_FRESHNESS = "source_freshness"
+
+    @staticmethod
+    def from_table_name(table_name):
+        if table_name == TestAlert.TABLE_NAME:
+            return ResourceType.TEST
+        elif table_name == ModelAlert.TABLE_NAME:
+            return ResourceType.MODEL
+        elif table_name == SourceFreshnessAlert.TABLE_NAME:
+            return ResourceType.SOURCE_FRESHNESS
+        else:
+            logger.warning(f"Unknown table name: {table_name}")
+            return None
+
+
 class SelectorFilterSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
@@ -23,6 +52,8 @@ class SelectorFilterSchema(BaseModel):
     tag: Optional[str] = None
     owner: Optional[str] = None
     model: Optional[str] = None
+    statuses: Optional[List[Status]] = None
+    resource_types: Optional[List[ResourceType]] = None
     node_names: Optional[List[str]] = None
 
     @validator("invocation_time", pre=True)

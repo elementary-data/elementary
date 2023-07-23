@@ -76,6 +76,7 @@ class Alert:
         # Defined in the base class so type checks will not complain
         self.data: Dict[str, Any] = {}
         self.model_unique_id: Optional[str] = None
+        self.alerts_table = alerts_table
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."
