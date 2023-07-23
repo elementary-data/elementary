@@ -6,15 +6,14 @@ sidebarTitle: "4. Connect data warehouse"
 You can connect Elementary to a data warehouse that has an Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
 Elementary Cloud needs:
-- [`profiles.yml`](/cloud/onboarding/create-profile) with connection details
-- Read permissions to the Elementary schema (and not the rest of your data)
+- [A user](/cloud/onboarding/configure-user) with permissions to the Elementary schema (and not the rest of your data)
 - Network access (might require to allowlist Elementary IP address)
 
 ### Connect Elementary cloud
 
 On the `Account settings` under `Integrations`, press `Connect` on the "Connect Your data warehouse" section.
 
-Provide an environment name, select a data warehouse type, and upload the `profiles.yml` file with the `elementary` profile.
+Provide an environment name, select a data warehouse type, and fill the required fields.
 
 
 ### Allowlist Elementary IP

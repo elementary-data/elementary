@@ -227,14 +227,15 @@
       "group": "Elementary Cloud",
       "pages": [
         "cloud/introduction",
-        "cloud/general/security-and-privacy"
+        "cloud/general/security-and-privacy",
+        "cloud/onboarding/create-data-warehouse-user/create-data-warehouse-user"
       ]
     },
     {
       "group": "Getting Started",
       "pages": [
         "cloud/onboarding/quickstart-dbt-package",
-        "cloud/onboarding/create-profile",
+        "cloud/onboarding/configure-user",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
