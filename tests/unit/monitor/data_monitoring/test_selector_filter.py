@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from elementary.monitor.data_monitoring.schema import ResourceType, Status
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from tests.mocks.anonymous_tracking_mock import MockAnonymousTracking
 from tests.mocks.dbt_runner_mock import MockDbtRunner
@@ -69,10 +70,29 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     # status selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
-        selector="status:fail",
+        selector="statuses:fail,error",
     )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().statuses == "fail"
-    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "status:fail"
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().statuses == [
+        Status.FAIL,
+        Status.ERROR,
+    ]
+    assert (
+        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        == "statuses:fail,error"
+    )
+
+    # resource type selector
+    data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        tracking=anonymous_tracking_mock,
+        selector="resource_types:model",
+    )
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().resource_types == [
+        ResourceType.MODEL
+    ]
+    assert (
+        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        == "resource_types:model"
+    )
 
     # invocation_id selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
