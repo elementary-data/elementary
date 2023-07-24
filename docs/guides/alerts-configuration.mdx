@@ -32,7 +32,7 @@ Elementary prioritizes configuration in the following order:
 &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#test-description"><font color="#CD7D55">description: "This is the test description"</font></a>
 &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#tags"><font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font></a>
 &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#custom-channel"><font color="#CD7D55">channel: data_ops</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#suppression_interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#suppression-interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
 &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#group-alerts-by-table"><font color="#CD7D55">slack_group_alerts_by: table</font></a>
 &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#alert_fields"><font color="#CD7D55">alert_fields: ["description", "owners", "tags", "subscribers"]</font></a>
  </code>
@@ -78,13 +78,13 @@ models:
   path:
     subfolder:
       +meta:
-        +owner: "@jessica.jones"
+        owner: "@jessica.jones"
         
 tests:
   path:
     subfolder:
       +meta:
-        +owner: "@jessica.jones"
+        owner: "@jessica.jones"
 ```
 
 </CodeGroup>
@@ -124,13 +124,13 @@ models:
   path:
     subfolder:
       +meta:
-        +subscribers: "@jessica.jones"
+        subscribers: "@jessica.jones"
         
 tests:
   path:
     subfolder:
       +meta:
-        +subscribers: "@jessica.jones"
+        subscribers: "@jessica.jones"
 ```
 
 </CodeGroup>
@@ -164,7 +164,7 @@ tests:
   path:
     subfolder:
       +meta:
-        +description: "This is the test description"
+        description: "This is the test description"
 ```
 
 </CodeGroup>
@@ -201,12 +201,12 @@ tests:
 models:
   path:
     subfolder:
-      +tags: ["#marketing", "#data_ops"]
+      tags: ["#marketing", "#data_ops"]
 
 tests:
   path:
     subfolder:
-      +tags: ["#marketing", "#data_ops"]
+      tags: ["#marketing", "#data_ops"]
 ```
 
 </CodeGroup>
@@ -251,13 +251,13 @@ models:
   path:
     subfolder:
       +meta:
-        +channel: data_ops
+        channel: data_ops
         
 tests:
   path:
     subfolder:
       +meta:
-        +channel: data_ops
+        channel: data_ops
 ```
 
 </CodeGroup>
@@ -269,6 +269,8 @@ You can now configure an `alert_suppression_interval`, this is a “snooze” pe
 
 The accepted value is in hours, so 1 day snooze is `alert_suppression_interval: 24`.
 Elementary won't send new alerts on the same issue that are generated within suppression interval.
+
+Note: if you configure a suppression interval using this method, it will override the value in the [CLI flag](/guides/alerts-configuration#suppression-interval-flag)
 
 <CodeGroup>
 
@@ -299,13 +301,13 @@ models:
   path:
     subfolder:
       +meta:
-        +alert_suppression_interval: 24
+        alert_suppression_interval: 24
         
 tests:
   path:
     subfolder:
       +meta:
-        +alert_suppression_interval: 48
+        alert_suppression_interval: 48
 ```
 
 </CodeGroup>
@@ -350,13 +352,13 @@ models:
   path:
     subfolder:
       +meta:
-        +slack_group_alerts_by: table
+        slack_group_alerts_by: table
         
 tests:
   path:
     subfolder:
       +meta:
-        +slack_group_alerts_by: table
+        slack_group_alerts_by: table
 ```
 
 </CodeGroup>
@@ -413,13 +415,13 @@ models:
   path:
     subfolder:
       +meta:
-        +alert_fields: ["description", "owners", "tags", "subscribers"]
+        alert_fields: ["description", "owners", "tags", "subscribers"]
         
 tests:
   path:
     subfolder:
       +meta:
-        +alert_fields: ["description", "owners", "tags", "subscribers"]
+        alert_fields: ["description", "owners", "tags", "subscribers"]
 ```
 
 </CodeGroup>
@@ -487,3 +489,15 @@ Due to their nature, grouped alerts will contain less information on each issue.
 edr monitor --group-by table
 ```
 
+#### Suppression interval flag
+
+Don’t want to get multiple alerts if the same test keeps failing? 
+You can now configure an alert_suppression_interval, this is a “snooze” period for alerts on the same issue.
+Elementary won’t send new alerts on the same issue that are generated within suppression interval.
+
+The flag configuration is the suppression interval duration in hours, and the default is 0 hours (no alert suppression).
+If configured otherwise in the model/test config block, the model/test config block value will be used instead.
+
+```shell
+edr monitor --suppression-interval 24 
+```
