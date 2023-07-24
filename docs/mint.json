@@ -237,9 +237,17 @@
     {
       "group": "BI tools integration",
       "pages": [
-        "cloud/integrations/BI/connect-bi-tool",
-        "cloud/integrations/BI/looker",
-        "cloud/integrations/BI/tableau"
+        "cloud/integrations/bi/connect-bi-tool",
+        "cloud/integrations/bi/looker",
+        "cloud/integrations/bi/tableau"
+      ]
+    },
+    {
+      "group": "Code repository integration",
+      "pages": [
+        "cloud/integrations/code-repo/connect-code-repo",
+        "cloud/integrations/code-repo/github",
+        "cloud/integrations/code-repo/gitlab"
       ]
     }
   ],
