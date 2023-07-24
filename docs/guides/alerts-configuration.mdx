@@ -270,6 +270,8 @@ You can now configure an `alert_suppression_interval`, this is a “snooze” pe
 The accepted value is in hours, so 1 day snooze is `alert_suppression_interval: 24`.
 Elementary won't send new alerts on the same issue that are generated within suppression interval.
 
+Note: if you configure a suppression interval using this method, it will override the value in the [CLI flag](/guides/alerts-configuration#suppression-interval-flag)
+
 <CodeGroup>
 
 ```yml model
@@ -493,7 +495,8 @@ Don’t want to get multiple alerts if the same test keeps failing?
 You can now configure an alert_suppression_interval, this is a “snooze” period for alerts on the same issue.
 Elementary won’t send new alerts on the same issue that are generated within suppression interval.
 
-The flag configuration is the suppression interval duration in hours.  
+The flag configuration is the suppression interval duration in hours, and the default is 0 hours (no alert suppression).
+If configured otherwise in the model/test config block, the model/test config block value will be used instead.
 
 ```shell
 edr monitor --suppression-interval 24 
