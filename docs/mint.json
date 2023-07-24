@@ -34,7 +34,7 @@
     {
       "name": "Github",
       "url": "https://github.com/elementary-data/elementary"
-    },
+    }
   ],
   "anchors": [
     {
@@ -46,7 +46,7 @@
       "name": "Demo",
       "icon": "circle-play",
       "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
-    },
+    }
   ],
   "navigation": [
     {
@@ -156,7 +156,7 @@
         "guides/modules-overview/dbt-package",
         "dbt/dbt-artifacts",
         "understand-elementary/elementary-report-ui",
-        "understand-elementary/elementary-alerts"
+        "quickstart/send-slack-alerts"
       ]
     },
     {
