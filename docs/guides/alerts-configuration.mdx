@@ -470,6 +470,18 @@ edr monitor --select customers
 edr monitor --select orders
 ```
 
+```shell statuses filter
+edr monitor --select statuses:warn,fail
+edr monitor --select statuses:error
+edr monitor --select statuses:skipped
+```
+
+```shell resource_types filter
+edr monitor --select resource_types:model
+edr monitor --select resource_types:test
+edr monitor --select resource_types:model,test
+```
+
 </CodeGroup> 
 
 
