@@ -45,8 +45,8 @@ class DataMonitoringReport(DataMonitoring):
 
     def generate_report(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int = 7,
+        test_runs_amount: int = 720,
         file_path: Optional[str] = None,
         disable_passed_test_metrics: bool = False,
         should_open_browser: bool = True,
@@ -92,8 +92,8 @@ class DataMonitoringReport(DataMonitoring):
 
     def get_report_data(
         self,
-        days_back: Optional[int] = None,
-        test_runs_amount: Optional[int] = None,
+        days_back: int = 7,
+        test_runs_amount: int = 720,
         disable_passed_test_metrics: bool = False,
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
@@ -108,6 +108,7 @@ class DataMonitoringReport(DataMonitoring):
             project_name=project_name or self.project_name,
             filter=self.filter.get_filter(),
             env=self.config.env,
+            warehouse_type=self.warehouse_info.type if self.warehouse_info else None,
         )
         self._add_report_tracking(report_data, error)
         if error:
@@ -147,8 +148,9 @@ class DataMonitoringReport(DataMonitoring):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.tracking.anonymous_warehouse
-                and self.tracking.anonymous_warehouse.id,
+                anonymous_warehouse_id=self.warehouse_info.id
+                if self.warehouse_info
+                else None,
             )
 
     def send_report(

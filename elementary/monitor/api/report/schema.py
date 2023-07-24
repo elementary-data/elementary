@@ -3,6 +3,12 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class ReportDataEnvSchema(BaseModel):
+    project_name: Optional[str] = None
+    env: Optional[str] = None
+    warehouse_type: Optional[str] = None
+
+
 class ReportDataSchema(BaseModel):
     creation_time: Optional[str] = None
     days_back: Optional[int] = None
@@ -21,5 +27,5 @@ class ReportDataSchema(BaseModel):
     invocations: list = list()
     resources_latest_invocation: dict = dict()
     invocations_job_identification: dict = dict()
-    env: dict = dict()
+    env: ReportDataEnvSchema = ReportDataEnvSchema()
     tracking: Optional[dict] = None

@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List, Optional, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Union, cast
 
 from dateutil import tz
 
@@ -18,8 +18,8 @@ from elementary.monitor.api.tests.schema import (
     TestResultsWithTotalsSchema,
     TestRunSchema,
     TestRunsWithTotalsSchema,
-    TotalsSchema,
 )
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
@@ -34,7 +34,7 @@ class TestsAPI(APIClient):
     def __init__(
         self,
         dbt_runner: BaseDbtRunner,
-        days_back: Optional[int] = 7,
+        days_back: int = 7,
         invocations_per_test: int = 720,
         disable_passed_test_metrics: bool = False,
     ):
@@ -148,17 +148,26 @@ class TestsAPI(APIClient):
             if test_result.invocations_rank_index == 1
         ]
 
-        tests_results = defaultdict(list)
+        tests_results: DefaultDict[Optional[str], List[TestResultSchema]] = defaultdict(
+            list
+        )
         for test_result_db_row in filtered_test_results_db_rows:
-            test_result = TestResultSchema(
-                metadata=self._get_test_metadata_from_test_result_db_row(
-                    test_result_db_row
-                ),
-                test_results=self._get_test_result_from_test_result_db_row(
-                    test_result_db_row, disable_samples=disable_samples
-                ),
+            metadata = self._get_test_metadata_from_test_result_db_row(
+                test_result_db_row
             )
-            tests_results[test_result_db_row.model_unique_id].append(test_result)
+            inner_test_results = self._get_test_result_from_test_result_db_row(
+                test_result_db_row, disable_samples=disable_samples
+            )
+
+            if inner_test_results is None:
+                continue
+
+            tests_results[test_result_db_row.model_unique_id].append(
+                TestResultSchema(
+                    metadata=metadata,
+                    test_results=inner_test_results,
+                )
+            )
 
         test_metadatas = []
         for test_results in tests_results.values():
@@ -380,10 +389,14 @@ class TestsAPI(APIClient):
     def _get_test_result_from_test_result_db_row(
         test_result_db_row: TestResultDBRowSchema,
         disable_samples: bool = False,
-    ) -> Union[DbtTestResultSchema, ElementaryTestResultSchema]:
-        test_results = None
+    ) -> Optional[Union[DbtTestResultSchema, ElementaryTestResultSchema]]:
+        test_results: Optional[Union[DbtTestResultSchema, ElementaryTestResultSchema]]
+
         sample_data = test_result_db_row.sample_data if not disable_samples else None
         if test_result_db_row.test_type == "dbt_test":
+            # Sample data is always a list for non-elementary tests
+            sample_data = cast(Optional[list], sample_data)
+
             test_results = DbtTestResultSchema(
                 display_name=test_result_db_row.test_name,
                 results_sample=sample_data,
@@ -410,6 +423,14 @@ class TestsAPI(APIClient):
                     display_name=test_sub_type_display_name.lower(),
                     result_description=test_result_db_row.test_results_description,
                 )
+            else:
+                # Unexpected test type - might have been introduced in a new package version.
+                # So we have no choice but to log a warning and ignore it.
+                logger.warning(
+                    f"Unexpected elementary test type: {test_result_db_row.test_type}"
+                )
+                test_results = None
+
         return test_results
 
     @staticmethod
@@ -430,8 +451,8 @@ class TestsAPI(APIClient):
     def _get_total_tests_results(
         self,
         test_metadatas: List[TestMetadataSchema],
-    ) -> Dict[str, TotalsSchema]:
-        totals: Dict[str, TotalsSchema] = dict()
+    ) -> Dict[Optional[str], TotalsSchema]:
+        totals: Dict[Optional[str], TotalsSchema] = dict()
         for test in test_metadatas:
             self._update_test_results_totals(
                 totals_dict=totals,
@@ -443,9 +464,14 @@ class TestsAPI(APIClient):
     def _get_total_tests_runs(
         self, tests_runs: Dict[Optional[str], List[TestRunSchema]]
     ) -> Dict[Optional[str], TotalsSchema]:
-        totals = dict()
+        totals: Dict[Optional[str], TotalsSchema] = dict()
         for test_runs in tests_runs.values():
             for test_run in test_runs:
+                # It's possible test_runs will be None if we didn't find any invocations associated
+                # with this test, in that case it also makes sense to skip it.
+                if not test_run.test_runs:
+                    continue
+
                 test_invocations = test_run.test_runs.invocations
                 self._update_test_runs_totals(
                     totals_dict=totals,
@@ -456,7 +482,7 @@ class TestsAPI(APIClient):
 
     @staticmethod
     def _update_test_runs_totals(
-        totals_dict: Dict[str, TotalsSchema],
+        totals_dict: Dict[Optional[str], TotalsSchema],
         test: TestMetadataSchema,
         test_invocations: List[InvocationSchema],
     ):
@@ -470,7 +496,9 @@ class TestsAPI(APIClient):
 
     @staticmethod
     def _update_test_results_totals(
-        totals_dict: Dict[str, TotalsSchema], model_unique_id: str, status: str
+        totals_dict: Dict[Optional[str], TotalsSchema],
+        model_unique_id: Optional[str],
+        status: str,
     ):
         if model_unique_id not in totals_dict:
             totals_dict[model_unique_id] = TotalsSchema()

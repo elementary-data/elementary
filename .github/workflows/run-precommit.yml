@@ -1,9 +1,7 @@
 name: Run pre-commit hooks
 on:
-  push:
-    paths:
-      - '**.py'
   workflow_dispatch:
+  pull_request:
 
 jobs:
   code-quality:
@@ -15,7 +13,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: '3.8'
+          python-version: "3.8"
+
+      # mainly needed so mypy will have the dependencies it needs
+      - name: Install elementary
+        run: pip install -e .
 
       - name: Install dev requirements
         run: pip install -r dev-requirements.txt

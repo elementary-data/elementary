@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import List
 
 ALERT_PREFIX = "Elementary: "
 
@@ -8,7 +9,7 @@ def get_elementary_log_lines(dbt_log: str):
     return [line for line in dbt_log.splitlines() if ALERT_PREFIX in line]
 
 
-def get_json_logs(log_lines: [str]):
+def get_json_logs(log_lines: List[str]):
     json_logs = []
     for log in log_lines:
         try:
@@ -18,7 +19,7 @@ def get_json_logs(log_lines: [str]):
     return json_logs
 
 
-def get_elementary_alerts(elementary_json_logs: [dict]):
+def get_elementary_alerts(elementary_json_logs: List[dict]):
     elementary_alerts = []
     for json_log in elementary_json_logs:
         elementary_alerts.extend(

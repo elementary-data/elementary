@@ -6,11 +6,8 @@ import requests
 _PYPI_URL = "https://pypi.org/pypi/elementary-data/json"
 
 
-def get_package_version() -> Optional[str]:
-    try:
-        return pkg_resources.get_distribution("elementary-data").version
-    except Exception:
-        return None
+def get_package_version() -> str:
+    return pkg_resources.get_distribution("elementary-data").version
 
 
 def get_latest_package_version() -> Optional[str]:

@@ -2,6 +2,7 @@ import json
 import subprocess
 from typing import List, Optional
 
+from elementary.clients.dbt.dbt_log import DbtLog, parse_dbt_output
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -41,12 +42,16 @@ class DbtCommandError(Error):
         self,
         err: subprocess.CalledProcessError,
         base_command_args: List[str],
-        err_msg: Optional[str],
+        err_msg: Optional[str] = None,
+        logs: Optional[List[DbtLog]] = None,
     ):
         msg = "Failed to run dbt command."
+        if logs and not err_msg:
+            err_msg = "\n".join(
+                [log.msg for log in logs if log.msg and log.level == "error"]
+            )
         if err_msg:
             msg = f"{msg}\n{err_msg}"
-
         super().__init__(msg)
 
         # Command args sent to _run_command (without additional user-specific args it as such as projects / profiles
@@ -54,6 +59,20 @@ class DbtCommandError(Error):
         self.proc_err = err
         self.base_command_args = base_command_args
         self.return_code = err.returncode
+        self.logs = logs
+
+    @classmethod
+    def from_process_error(
+        cls,
+        err: subprocess.CalledProcessError,
+        base_command_args: List[str],
+        err_msg: Optional[str] = None,
+    ) -> "DbtCommandError":
+        if err.output is None:
+            return cls(err, base_command_args, err_msg, logs=None)
+        output = err.output.decode()
+        logs = list(parse_dbt_output(output))
+        return cls(err, base_command_args, err_msg, logs=logs)
 
     @property
     def anonymous_tracking_context(self):
@@ -81,6 +100,14 @@ class DbtCommandError(Error):
             return detailed_command_args
         except Exception as ex:
             logger.error(f"Failed to extract detailed dbt command args, error: {ex}")
+
+    def get_exception_message(self) -> Optional[str]:
+        if not self.logs:
+            return None
+        for log in reversed(self.logs):
+            if log.exception:
+                return log.exception
+        return None
 
 
 class DbtLsCommandError(Error):

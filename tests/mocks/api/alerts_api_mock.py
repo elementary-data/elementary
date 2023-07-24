@@ -9,6 +9,9 @@ class MockAlertsAPI(AlertsAPI):
         mock_dbt_runner = MockDbtRunner()
         config = Config()
         super().__init__(
-            mock_dbt_runner, config, elementary_database_and_schema="test.test"
+            mock_dbt_runner,
+            config,
+            global_suppression_interval=0,
+            elementary_database_and_schema="test.test",
         )
         self.alerts_fetcher = MockAlertsFetcher()

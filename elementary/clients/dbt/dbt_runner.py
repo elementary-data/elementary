@@ -1,23 +1,16 @@
 import json
 import os
 import subprocess
-from json import JSONDecodeError
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
+from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.utils.env_vars import is_debug
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
-
-
-class DbtLog:
-    def __init__(self, log_line: str):
-        log = json.loads(log_line)
-        self.msg = log.get("info", {}).get("msg") or log.get("data", {}).get("msg")
-        self.level = log.get("info", {}).get("level") or log.get("level")
 
 
 class DbtRunner(BaseDbtRunner):
@@ -29,11 +22,13 @@ class DbtRunner(BaseDbtRunner):
         profiles_dir: Optional[str] = None,
         target: Optional[str] = None,
         raise_on_failure: bool = True,
-        dbt_env_vars: Optional[Dict[str, str]] = None,
+        env_vars: Optional[Dict[str, str]] = None,
+        vars: Optional[Dict[str, Any]] = None,
+        secret_vars: Optional[Dict[str, Any]] = None,
     ) -> None:
-        super().__init__(project_dir, profiles_dir, target)
+        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
         self.raise_on_failure = raise_on_failure
-        self.dbt_env_vars = dbt_env_vars
+        self.env_vars = env_vars
 
     def _run_command(
         self,
@@ -42,6 +37,7 @@ class DbtRunner(BaseDbtRunner):
         log_format: str = "json",
         vars: Optional[dict] = None,
         quiet: bool = False,
+        log_output: bool = True,
     ) -> Tuple[bool, Optional[str]]:
         dbt_command = ["dbt"]
         if capture_output:
@@ -52,11 +48,21 @@ class DbtRunner(BaseDbtRunner):
             dbt_command.extend(["--profiles-dir", self.profiles_dir])
         if self.target:
             dbt_command.extend(["--target", self.target])
-        if vars:
-            json_vars = json.dumps(vars)
-            dbt_command.extend(["--vars", json_vars])
-        dbt_command_str = " ".join(dbt_command)
-        log_msg = f"Running {dbt_command_str}"
+
+        all_vars = self._get_all_vars(vars)
+        if all_vars:
+            log_command = dbt_command.copy()
+            log_command.extend(
+                [
+                    "--vars",
+                    json.dumps(self._get_secret_masked_vars(all_vars)),
+                ]
+            )
+            dbt_command.extend(["--vars", json.dumps(all_vars)])
+        else:
+            log_command = dbt_command
+
+        log_msg = f"Running {' '.join(log_command)}"
         if not quiet:
             logger.info(log_msg)
         else:
@@ -69,31 +75,22 @@ class DbtRunner(BaseDbtRunner):
                 env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
-            err_msg = None
-            if capture_output:
-                err_log_msgs = []
-                err_json_logs = err.output.splitlines()
-                for err_log_line in err_json_logs:
-                    try:
-                        log = DbtLog(err_log_line)
-                        if log.level == "error":
-                            err_log_msgs.append(log.msg)
-                    except JSONDecodeError:
-                        logger.debug(
-                            f"Unable to parse dbt log message: {err_log_line}",
-                            exc_info=True,
-                        )
-                err_msg = "\n".join(err_log_msgs)
-            raise DbtCommandError(err, command_args, err_msg)
+            logs = list(parse_dbt_output(err.output.decode()))
+            if capture_output and (log_output or is_debug()):
+                for log in logs:
+                    logger.info(log.msg)
+            raise DbtCommandError(err, command_args, logs=logs)
 
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
-            if is_debug():
-                logger.debug(f"Output: {output}")
             logger.debug(
-                f"Result bytes size for command '{dbt_command_str}' is {len(result.stdout)}"
+                f"Result bytes size for command '{log_command}' is {len(result.stdout)}"
             )
+            if log_output or is_debug():
+                for log in parse_dbt_output(output):
+                    logger.info(log.msg)
+
         if result.returncode != 0:
             return False, output
         return True, output
@@ -124,6 +121,7 @@ class DbtRunner(BaseDbtRunner):
         vars: Optional[dict] = None,
         quiet: bool = False,
         should_log: bool = True,
+        log_output: bool = False,
     ) -> list:
         macro_to_run = macro_name
         macro_to_run_args = macro_args if macro_args else dict()
@@ -140,6 +138,7 @@ class DbtRunner(BaseDbtRunner):
             capture_output=capture_output,
             vars=vars,
             quiet=quiet,
+            log_output=log_output,
         )
         if log_errors and not success:
             logger.error(
@@ -147,21 +146,13 @@ class DbtRunner(BaseDbtRunner):
             )
         run_operation_results = []
         if capture_output and command_output is not None:
-            json_messages = command_output.splitlines()
-            for json_message in json_messages:
-                try:
-                    log = DbtLog(json_message)
-                    if log_errors and log.level == "error":
-                        logger.error(log.msg)
-                        continue
-                    if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
-                        run_operation_results.append(
-                            log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
-                        )
-                except JSONDecodeError:
-                    logger.debug(
-                        f"Unable to parse run-operation log message: {json_message}",
-                        exc_info=True,
+            for log in parse_dbt_output(command_output):
+                if log_errors and log.level == "error":
+                    logger.error(log.msg)
+                    continue
+                if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
+                    run_operation_results.append(
+                        log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
                     )
         return run_operation_results
 
@@ -172,6 +163,7 @@ class DbtRunner(BaseDbtRunner):
         full_refresh: bool = False,
         vars: Optional[dict] = None,
         quiet: bool = False,
+        capture_output: bool = False,
     ) -> bool:
         command_args = ["run"]
         if full_refresh:
@@ -181,7 +173,10 @@ class DbtRunner(BaseDbtRunner):
         if select:
             command_args.extend(["-s", select])
         success, _ = self._run_command(
-            command_args=command_args, vars=vars, quiet=quiet
+            command_args=command_args,
+            vars=vars,
+            quiet=quiet,
+            capture_output=capture_output,
         )
         return success
 
@@ -190,19 +185,23 @@ class DbtRunner(BaseDbtRunner):
         select: Optional[str] = None,
         vars: Optional[dict] = None,
         quiet: bool = False,
+        capture_output: bool = False,
     ) -> bool:
         command_args = ["test"]
         if select:
             command_args.extend(["-s", select])
         success, _ = self._run_command(
-            command_args=command_args, vars=vars, quiet=quiet
+            command_args=command_args,
+            vars=vars,
+            quiet=quiet,
+            capture_output=capture_output,
         )
         return success
 
     def _get_command_env(self):
         env = os.environ.copy()
-        if self.dbt_env_vars is not None:
-            env.update(self.dbt_env_vars)
+        if self.env_vars is not None:
+            env.update(self.env_vars)
         return env
 
     def debug(self, quiet: bool = False) -> bool:

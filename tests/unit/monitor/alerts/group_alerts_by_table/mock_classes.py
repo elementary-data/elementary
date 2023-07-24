@@ -10,15 +10,16 @@ class MockAlert:
     model_unique_id: Optional[str]
     slack_channel: Optional[str]
     detected_at: Optional[Union[str, datetime]]
-    model_meta: Optional[
-        str
-    ]  # this string should be a json of a dict that has or has not the key "channel"
+    model_meta: Optional[dict]
     owners: Optional[List[str]]
     subscribers: Optional[List[str]]
     tags: Optional[List[str]]
     database_name: str = "elementary_test_db"
     schema_name: str = "master_elementary"
     concise_name: str = "Alert"
+
+    def __repr__(self):
+        return f"{self.status} {self.model_unique_id} {self.detected_at}"
 
 
 @dataclass
