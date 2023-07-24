@@ -20,26 +20,23 @@
     "suggestEdit": true,
     "raiseIssue": true
   },
+  "tabs": [
+    {
+      "name": "Elementary Cloud",
+      "url": "cloud"
+    }
+  ],
   "topbarCtaButton": {
     "name": "Try Elementary Cloud",
     "url": "https://t2taztilhde.typeform.com/to/ObfMbxB5?utm_source=docs&utm_medium=cta&utm_content=v1"
   },
   "topbarLinks": [
     {
-      "name": "Blog",
-      "url": "https://www.elementary-data.com/blog"
+      "name": "Github",
+      "url": "https://github.com/elementary-data/elementary"
     },
-    {
-      "name": "Support",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
-    }
   ],
   "anchors": [
-    {
-      "name": "Elementary Cloud",
-      "icon": "cloud",
-      "url": "cloud"
-    },
     {
       "name": "Community",
       "icon": "slack",
@@ -50,11 +47,6 @@
       "icon": "circle-play",
       "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
     },
-    {
-      "name": "GitHub",
-      "icon": "github",
-      "url": "https://github.com/elementary-data/elementary"
-    }
   ],
   "navigation": [
     {
@@ -240,6 +232,22 @@
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
+      ]
+    },
+    {
+      "group": "BI tools integration",
+      "pages": [
+        "cloud/integrations/bi/connect-bi-tool",
+        "cloud/integrations/bi/looker",
+        "cloud/integrations/bi/tableau"
+      ]
+    },
+    {
+      "group": "Code repository integration",
+      "pages": [
+        "cloud/integrations/code-repo/connect-code-repo",
+        "cloud/integrations/code-repo/github",
+        "cloud/integrations/code-repo/gitlab"
       ]
     }
   ],
