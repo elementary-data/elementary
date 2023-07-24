@@ -424,23 +424,6 @@ tests:
 
 </CodeGroup>
 
-## Alerts global configuration
-
-#### Enable/disable alerts
-
-You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
-
-Below are the available vars and their default config:
-
-```yml dbt_project.yml
-vars:
-  disable_model_alerts: false
-  disable_test_alerts: false
-  disable_warn_alerts: false
-  disable_skipped_model_alerts: true
-  disable_skipped_test_alerts: true
-```
-
 ## Alerts CLI flags
 
 #### Filter alerts
@@ -470,6 +453,17 @@ edr monitor --select customers
 edr monitor --select orders
 ```
 
+```shell statuses filter
+edr monitor --select statuses:warn,fail
+edr monitor --select statuses:error
+edr monitor --select statuses:skipped
+```
+
+```shell resource_types filter
+edr monitor --select resource_types:model
+edr monitor --select resource_types:test
+edr monitor --select resource_types:test,source_freshness
+```
 </CodeGroup> 
 
 
