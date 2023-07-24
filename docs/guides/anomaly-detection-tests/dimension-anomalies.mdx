@@ -5,9 +5,10 @@ sidebarTitle: "dimension_anomalies"
 
 `elementary.dimension_anomalies`
 
-This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
-It is best to configure it on low-cardinality fields.
 The test counts rows grouped by given `dimensions` (columns/expressions).
+
+This test practically monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
+It is best to configure it on low-cardinality fields.
 
 If `timestamp_column` is configured, the distribution is collected per `time_bucket`. If not, it counts the total rows per dimension.
 
