@@ -3,7 +3,7 @@ title: "dimensions"
 sidebarTitle: "dimensions"
 ---
 
-`dimensions: sql expression`
+`dimensions: [list of SQL expressions]`
 
 Configuration for the test `dimension_anomalies`.
 The test counts rows grouped by given column / columns / valid select sql expression.
@@ -26,7 +26,9 @@ models:
         timestamp_column: updated_at
     tests:
       - elementary.dimension_anomalies:
-          dimensions: 'device_os, device_browser'
+          dimensions: 
+            - device_os
+            - device_browser
 ```
 
 </RequestExample>

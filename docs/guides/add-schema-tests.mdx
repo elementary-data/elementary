@@ -25,9 +25,6 @@ version: 2
 
 models:
   - name: < model name >
-    config:
-      elementary:
-        timestamp_column: < timestamp column >
     tests:
       - elementary.schema_changes
 ```
@@ -37,9 +34,6 @@ version: 2
 
 models:
   - name: login_events
-    config:
-      elementary:
-        timestamp_column: "loaded_at"
     tests:
       - elementary.schema_changes:
           tags: ["elementary"]
