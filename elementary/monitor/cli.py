@@ -227,6 +227,13 @@ def get_cli_properties() -> dict:
     default=None,
     help="Whether to group alerts by 'alert' or by 'table'",
 )
+@click.option(
+    "--override-dbt-project-config",
+    "-oc",
+    is_flag=True,
+    help="Whether to override the settings (slack channel, suppression interval) "
+    "in the model or test meta in the dbt project with the parameters provided by the CLI.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -252,6 +259,7 @@ def monitor(
     group_by,
     target_path,
     suppression_interval,
+    override_dbt_project_config,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -293,6 +301,7 @@ def monitor(
             disable_samples=disable_samples,
             filter=select,
             global_suppression_interval=suppression_interval,
+            override_config=override_dbt_project_config,
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking
         # properties. This is a tech-debt that should be fixed in the future.

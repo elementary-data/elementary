@@ -41,6 +41,7 @@ class DataMonitoringAlerts(DataMonitoring):
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
         global_suppression_interval: int = 0,
+        override_config: bool = False,
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
@@ -51,9 +52,11 @@ class DataMonitoringAlerts(DataMonitoring):
             self.config,
             self.elementary_database_and_schema,
             global_suppression_interval,
+            override_config,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
+        self.override_meta_slack_channel = override_config
 
         if self.slack_client is None:
             raise Exception("Could not initialize slack client!")
@@ -137,6 +140,7 @@ class DataMonitoringAlerts(DataMonitoring):
             GroupOfAlertsByTable(
                 alerts=table_to_alerts[model_unique_id],
                 default_channel_destination=self.config.slack_channel_name,
+                override_slack_channel=self.override_meta_slack_channel,
                 env=self.config.env,
             )
             for model_unique_id in table_to_alerts.keys()
@@ -146,6 +150,7 @@ class DataMonitoringAlerts(DataMonitoring):
             GroupOfAlertsBySingleAlert(
                 alerts=[al],
                 default_channel_destination=self.config.slack_channel_name,
+                override_slack_channel=self.override_meta_slack_channel,
                 env=self.config.env,
             )
             for al in alerts_by_grouping_mechanism[GroupingType.BY_ALERT]
