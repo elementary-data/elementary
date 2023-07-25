@@ -433,6 +433,8 @@ You can filter the alerts by tag, owner or model.
 
 If you run `edr` from the dbt project directory (or pass `--project-dir`), you can use any of the dbt selectors.
 
+_Note_: alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
+
 <CodeGroup>
 
 ```shell tag filter
