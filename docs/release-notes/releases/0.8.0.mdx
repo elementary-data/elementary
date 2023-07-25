@@ -9,6 +9,7 @@ _As this is a minor version bump, you need to run `dbt run -s elementary`_
 ### 🔥 What's new?
 
 - **🆕 Jobs info from Orchestrator 🆕**
+
   - Elementary now supports collecting metadata about your jobs from your orchestration tool!
   - The goal is to provide context that is useful to triage and resolve data issues:
   - As a first step, you could filter the lineage by job in the Elementary report.
@@ -25,7 +26,6 @@ _As this is a minor version bump, you need to run `dbt run -s elementary`_
     - You can set `seasonality`, `time_bucket` and `timestamp_column` at the source level, and it will apply for all the tests you add to tables of this source.
   - We also upgraded our documentation of the [tests configuration](https://docs.elementary-data.com/guides/elementary-tests-configuration) and [how the tests work](https://docs.elementary-data.com/guides/how-anomaly-detection-works), to make it clearer 😇
 
-  
 ### 💫 More changes
 
 - Added `materialization` field to models run results, thank you [@Aril Mavinkere](https://elementary-community.slack.com/team/U058SJFFTEU) for contributing! 🤩

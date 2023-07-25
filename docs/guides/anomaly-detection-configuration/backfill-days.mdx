@@ -5,11 +5,11 @@ sidebarTitle: "backfill_days"
 
 `backfill_days: [int]`
 
-Configuration to define the detection period. 
-If the backfill_days are set to 2, only data points in the last 2 days will be included in the detection period and could be flagged anomalous. 
+Configuration to define the detection period.
+If the backfill_days are set to 2, only data points in the last 2 days will be included in the detection period and could be flagged anomalous.
 If backfill_days is set to 7 days, the detection period will be 7 days long.
 
-For incremental models, this is also the period for re-calculating metrics. 
+For incremental models, this is also the period for re-calculating metrics.
 If metrics for buckets in the backfill days were already calculated, Elementary will overwrite them. The reason behind it is to monitor recent backfills of data, if there were any.
 This configuration should be changed according to your data delays.
 
@@ -17,12 +17,11 @@ This configuration should be changed according to your data delays.
 - _Relevant tests: Anomaly detection tests with `timestamp_column`_
 
 <Frame caption="backfill_days change impact">
-    <img
+  <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1681301376/Anomaly%20detection%20tests/backfill_days_mdjmon.png"
     alt="backfill_days change impact"
-    />
+  />
 </Frame>
-
 
 <RequestExample>
 
@@ -49,8 +48,6 @@ vars:
 
 </RequestExample>
 
-
-
 #### How it works?
 
 The `backfill_days` param only works for tests that have `timestamp_column` configuration.
@@ -59,5 +56,3 @@ It works differently according to the table materialization:
 
 - **Regular tables and views** - `backfill_days` defines the detection period.
 - **Incremental models and sources** - `backfill_days` defines the detection period, and the period for which metrics will be re-calculated.
-
-

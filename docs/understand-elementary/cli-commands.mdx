@@ -194,19 +194,19 @@ Here is a list of all the available options:
 ```
 
 - **Suppression interval:**
-    Supress similar alerts for a given number of hours.
-    [Read more about this setting here.](/guides/alerts-configuration#suppression-interval-flag)
-    The default suppression interval is 0.
+  Supress similar alerts for a given number of hours.
+  [Read more about this setting here.](/guides/alerts-configuration#suppression-interval-flag)
+  The default suppression interval is 0.
 
 ```shell
 edr monitor --suppression-interval [int]
 ```
 
 - **Override configuration from dbt project:**
-    Sometimes, for example during testing and development, you want all your alerts sent to a single slack channel,
-    without suppression, regardless of how they are configured in the model config block or schema.yml in your dbt project.
-    You can do this by using this flag.
-    Please note that when using this flag without passing a suppression interval parameter, the suppression interval for all the alerts will be overridden by the default value, 0.
+  Sometimes, for example during testing and development, you want all your alerts sent to a single slack channel,
+  without suppression, regardless of how they are configured in the model config block or schema.yml in your dbt project.
+  You can do this by using this flag.
+  Please note that when using this flag without passing a suppression interval parameter, the suppression interval for all the alerts will be overridden by the default value, 0.
 
 ```shell
 edr monitor --override-dbt-project-config --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at> --suppression-interval 0

@@ -1,10 +1,9 @@
 ---
 name: Documentation gap
-about: Help us improve the documentation 
-title: ''
+about: Help us improve the documentation
+title: ""
 labels: Documentation, Triage 👀
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe the gap**
