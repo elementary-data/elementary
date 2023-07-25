@@ -20,28 +20,32 @@ def filter_alerts(
     alerts: List[AlertType],
     alerts_filter: SelectorFilterSchema = SelectorFilterSchema(),
 ) -> List[AlertType]:
-    filtered_alerts = []
+    # If the filter is on invocation stuff, it's not relevant to alerts and we return an empty list
+    if (
+        alerts_filter.invocation_id is not None
+        or alerts_filter.invocation_time is not None
+        or alerts_filter.last_invocation
+    ):
+        logger.warning("Invalid filter for alerts: %s", alerts_filter.selector)
+        return []
+
     # If the filter is empty, we want to return all of the alerts
-    print("filtering alerts by:", alerts_filter)
-    if not alerts_filter.selector:
-        filtered_alerts = alerts
-    elif alerts_filter.tag:
-        filtered_alerts = _filter_alerts_by_tag(alerts, alerts_filter)
-    elif alerts_filter.model:
-        filtered_alerts = _filter_alerts_by_model(alerts, alerts_filter)
-    elif alerts_filter.owner:
-        filtered_alerts = _filter_alerts_by_owner(alerts, alerts_filter)
-    elif alerts_filter.statuses:
-        filtered_alerts = _filter_alerts_by_status(alerts, alerts_filter)
-    elif alerts_filter.resource_types:
-        filtered_alerts = _filter_alerts_by_resource_type(alerts, alerts_filter)
-    elif alerts_filter.node_names is not None:
-        filtered_alerts = _filter_alerts_by_node_names(alerts, alerts_filter)
-    # If the filter contains a filter that we don't support, we want to return an empty list of alerts
-    elif alerts_filter.selector:
-        logger.error(
-            f"An unsupported alerts selector has been provided - {alerts_filter.selector}!\nNo alert has been sent!"
+    filtered_alerts = alerts
+    if alerts_filter.tag is not None:
+        filtered_alerts = _filter_alerts_by_tag(filtered_alerts, alerts_filter)
+    if alerts_filter.model is not None:
+        filtered_alerts = _filter_alerts_by_model(filtered_alerts, alerts_filter)
+    if alerts_filter.owner is not None:
+        filtered_alerts = _filter_alerts_by_owner(filtered_alerts, alerts_filter)
+    if alerts_filter.statuses is not None:
+        filtered_alerts = _filter_alerts_by_status(filtered_alerts, alerts_filter)
+    if alerts_filter.resource_types is not None:
+        filtered_alerts = _filter_alerts_by_resource_type(
+            filtered_alerts, alerts_filter
         )
+    if alerts_filter.node_names is not None:
+        filtered_alerts = _filter_alerts_by_node_names(filtered_alerts, alerts_filter)
+
     return filtered_alerts
 
 
