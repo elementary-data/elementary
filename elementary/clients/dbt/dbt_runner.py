@@ -160,6 +160,7 @@ class DbtRunner(BaseDbtRunner):
         self,
         models: Optional[str] = None,
         select: Optional[str] = None,
+        selector: Optional[str] = None,
         full_refresh: bool = False,
         vars: Optional[dict] = None,
         quiet: bool = False,
@@ -172,6 +173,8 @@ class DbtRunner(BaseDbtRunner):
             command_args.extend(["-m", models])
         if select:
             command_args.extend(["-s", select])
+        if selector:
+            command_args.extend(["--selector", selector])
         success, _ = self._run_command(
             command_args=command_args,
             vars=vars,
