@@ -16,68 +16,63 @@ The tests are configured and executed like any other tests in your project.
 
 ### Table (model / source) tests
 
-
 #### - Volume anomalies
+
 <Card href="/guides/anomaly-detection-tests/volume-anomalies">
-```
-  elementary.volume_anomalies
-```
-  Monitors the row count of your table over time per time bucket (if configured without `timestamp_column`, will count table total rows).
+  ``` elementary.volume_anomalies ``` Monitors the row count of your table over
+  time per time bucket (if configured without `timestamp_column`, will count
+  table total rows).
 </Card>
 
 #### - Freshness anomalies
+
 <Card href="/guides/anomaly-detection-tests/freshness-anomalies">
-```
-  elementary.freshness_anomalies
-```
-  Monitors the freshness of your table over time, as the expected time between data updates. 
-  Requires a [`timestamp_column`](/guides/anomaly-detection-configuration/timestamp-column) configuration. 
+  ``` elementary.freshness_anomalies ``` Monitors the freshness of your table
+  over time, as the expected time between data updates. Requires a
+  [`timestamp_column`](/guides/anomaly-detection-configuration/timestamp-column)
+  configuration.
 </Card>
 
 #### - Event freshness anomalies
+
 <Card href="/guides/anomaly-detection-tests/event-freshness-anomalies">
-```
-  elementary.event_freshness_anomalies
-```
-  Monitors the freshness of event data over time, as the expected time it takes each event to load -
-  that is, the time between when the event actually occurs (the `event timestamp`), and when it is loaded to the
-  database (the `update timestamp`). Configuring `event_timestamp_column` is required, and `update_timestamp_column` is optional.
+  ``` elementary.event_freshness_anomalies ``` Monitors the freshness of event
+  data over time, as the expected time it takes each event to load - that is,
+  the time between when the event actually occurs (the `event timestamp`), and
+  when it is loaded to the database (the `update timestamp`). Configuring
+  `event_timestamp_column` is required, and `update_timestamp_column` is
+  optional.
 </Card>
 
 #### - Dimension anomalies
+
 <Card href="/guides/anomaly-detection-tests/dimension-anomalies">
-```
-  elementary.dimension_anomalies
-```
-  This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
-  It is best to configure it on low-cardinality fields.
-  The test counts rows grouped by given `dimensions` (columns/expressions).
+  ``` elementary.dimension_anomalies ``` This test monitors the frequency of
+  values in the configured dimension over time, and alerts on unexpected changes
+  in the distribution. It is best to configure it on low-cardinality fields. The
+  test counts rows grouped by given `dimensions` (columns/expressions).
 </Card>
 
 #### - All columns anomalies
-<Card href="/guides/anomaly-detection-tests/all-columns-anomalies">
-```
-  elementary.all_columns_anomalies
-```
-  Executes column level monitors and anomaly detection on all the columns of the table. 
-  Specific monitors are [detailed here](/guides/anomaly-detection-configuration/column-anomalies).
-  You can use `column_anomalies` param to override the default monitors, and `exclude_prefix` / `exclude_regexp` to exclude columns from the test.
-</Card>
 
+<Card href="/guides/anomaly-detection-tests/all-columns-anomalies">
+  ``` elementary.all_columns_anomalies ``` Executes column level monitors and
+  anomaly detection on all the columns of the table. Specific monitors are
+  [detailed here](/guides/anomaly-detection-configuration/column-anomalies). You
+  can use `column_anomalies` param to override the default monitors, and
+  `exclude_prefix` / `exclude_regexp` to exclude columns from the test.
+</Card>
 
 ### Column tests
 
-
 #### - Columns anomalies
-<Card href="/guides/anomaly-detection-tests/column-anomalies">
-```
-  elementary.column_anomalies
-```
-  Executes column level monitors and anomaly detection on the column. 
-  Specific monitors are [detailed here](/guides/anomaly-detection-configuration/column-anomalies) and can be configured using
-  the `columns_anomalies` configuration.
-</Card>
 
+<Card href="/guides/anomaly-detection-tests/column-anomalies">
+  ``` elementary.column_anomalies ``` Executes column level monitors and anomaly
+  detection on the column. Specific monitors are [detailed
+  here](/guides/anomaly-detection-configuration/column-anomalies) and can be
+  configured using the `columns_anomalies` configuration.
+</Card>
 
 ### Adding tests examples
 

@@ -7,13 +7,12 @@ sidebarTitle: "freshness_anomalies"
 
 Monitors the freshness of your table over time, as the expected time between data updates.
 
-Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket` field), 
+Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket` field),
 and then we compute the maximum freshness value per bucket for the last `days_back` days (by default 14).
 
 The test then compares the freshness of each bucket within the detection period (last 2 days by default, controlled by the
 `backfill_days` var), and compares it to the freshness of the previous time buckets.
 If there were any anomalies during the detection period, the test will fail.
-
 
 ### Test configuration
 
@@ -21,26 +20,46 @@ _Required configuration: `timestamp_column`_
 _Default configuration: `anomaly_direction: spike` to alert only on delays._
 
 <pre>
- <code>
-  tests:
-    &nbsp;&nbsp; -- elementary.freshness_anomalies:
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/days-back"><font color="#CD7D55">days_back: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/backfill-days"><font color="#CD7D55">backfill_days: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/min-training-set-size"><font color="#CD7D55">min_training_set_size: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
- </code>
+  <code>
+    tests: &nbsp;&nbsp; -- elementary.freshness_anomalies:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    <a href="/guides/anomaly-detection-configuration/timestamp-column">
+      <font color="#CD7D55">timestamp_column: column name</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/where-expression">
+      <font color="#CD7D55">where_expression: sql expression</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity">
+      <font color="#CD7D55">anomaly_sensitivity: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/days-back">
+      <font color="#CD7D55">days_back: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    <a href="/guides/anomaly-detection-configuration/backfill-days">
+      <font color="#CD7D55">backfill_days: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/min-training-set-size">
+      <font color="#CD7D55">min_training_set_size: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    <a href="/guides/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">time_bucket:</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">period: [hour | day | week | month]</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    <a href="/guides/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">count: int</font>
+    </a>
+  </code>
 </pre>
-
 
 <RequestExample>
 
 ```yml Models
-
 models:
   - name: < model name >
     tests:
@@ -53,7 +72,6 @@ models:
 ```
 
 ```yml Models example
-
 models:
   - name: login_events
     tests:

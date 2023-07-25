@@ -1,10 +1,12 @@
 <Accordion title="Elementary supports custom tests / singular tests? How can I add configuration to custom tests?">
 
 Custom / Singular tests are supported by Elementary.
+
 - Alerts: Full support.
 - Report: Only tests that `ref` one model are presented in the report under the relevant model.
 
 You can add configuration to your custom tests with a config block:
+
 ```sql custom_test.sql
 {{ config(
     tags=["Tag1","Tag2"]
@@ -17,4 +19,5 @@ You can add configuration to your custom tests with a config block:
 <test query here>
 
 ```
+
 </Accordion>

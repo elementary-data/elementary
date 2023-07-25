@@ -5,28 +5,30 @@ sidebarTitle: "0.5.4"
 
 _November 3, 2022: [v0.5.4 Python](https://github.com/elementary-data/elementary/releases/tag/v0.5.4), [v0.5.4 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.5.4)_
 
-
 ### 🔥 What's new?
 
 - **Source freshness alerts** 🥬🔔
+
   - Elementary now provides alerts for all dbt operations, including source freshness!
   - Here are [the docs](/quickstart/send-slack-alerts#alert-on-source-freshness-failures).
 
 - **Artifacts are uploaded at on-run-end hooks** ⚡️
+
   - **You no longer need to run** `dbt run --select elementary` **on merge!**
   - This will keep metadata up-to-date and avoid inconsistency with alerts and report.
   - We also made changes to the upload method to improve performance.
 
 - **New `dbt_invocations` table** 🆕⏱
+
   - Tracks run times, command, vars, selected_resources, dbt and Elementary versions
 
 - **Improved report performance** 📊
+
   - Based on your feedback, we invested a lot in performance improvements in the report to make it slick for big envs.
   - We are still improving the lineage screen, but this is already an improvement.
 
 - **Improved lineage screen filters** 🔽
   - Thank you [@Björn van Dijkman](https://elementary-community.slack.com/team/U042EF5FP9S) for valuable product feedback!
-  
 
 ### ⭐️ Contributions & Acknowledgements
 

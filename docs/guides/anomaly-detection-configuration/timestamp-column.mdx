@@ -5,7 +5,10 @@ sidebarTitle: "timestamp_column"
 
 `timestamp_column: [column name]`
 
-<Tip>If your data set has a timestamp column that represents the creation time of a field, it is highly recommended configuring it as a `timestamp_column`.</Tip>
+<Tip>
+  If your data set has a timestamp column that represents the creation time of a
+  field, it is highly recommended configuring it as a `timestamp_column`.
+</Tip>
 
 Elementary anomaly detection tests will use this column to create time buckets and filter the table.
 It is highly recommended to configure a timestamp column (if there is one).
@@ -49,6 +52,5 @@ sources:
 vars:
   timestamp_column: loaded_at
 ```
-
 
 </RequestExample>

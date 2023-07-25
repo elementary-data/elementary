@@ -5,20 +5,19 @@ sidebarTitle: "anomaly_sensitivity"
 
 `anomaly_sensitivity: [int]`
 
-Configuration to define how the expected range is calculated. 
-A sensitivity of 3 means that the expected range is within 3 standard deviations from the average of the training set. 
-Smaller sensitivity means this range will be reduced and more values will be potentially flagged as anomalies. 
+Configuration to define how the expected range is calculated.
+A sensitivity of 3 means that the expected range is within 3 standard deviations from the average of the training set.
+Smaller sensitivity means this range will be reduced and more values will be potentially flagged as anomalies.
 Larger values will have the opposite effect and will reduce the number of anomalies as the expected range will be larger.
-
 
 - _Default: 3_
 - _Relevant tests: All anomaly detection tests_
 
 <Frame caption="anomaly_sensitivity change impact">
-    <img
+  <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1683997014/anomaly_sensitivity_n9dpof.png"
     alt="anomaly_sensitivity change impact"
-    />
+  />
 </Frame>
 
 <RequestExample>
@@ -26,17 +25,16 @@ Larger values will have the opposite effect and will reduce the number of anomal
 ```yml test
 models:
   - name: this_is_a_model
-    tests:    
+    tests:
       - elementary.volume_anomalies:
           anomaly_sensitivity: 2.5
-          
+
       - elementary.all_columns_anomalies:
           column_anomalies:
             - null_count
             - missing_count
             - zero_count
           anomaly_sensitivity: 4
-          
 ```
 
 ```yml model
@@ -44,12 +42,12 @@ models:
   - name: this_is_a_model
     config:
       elementary:
-        anomaly_sensitivity: 3.5  
+        anomaly_sensitivity: 3.5
 ```
 
 ```yml dbt_project
 vars:
-  anomaly_sensitivity: 3         
+  anomaly_sensitivity: 3
 ```
 
 </RequestExample>
