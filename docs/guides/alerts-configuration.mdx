@@ -491,6 +491,18 @@ edr monitor --select customers
 edr monitor --select orders
 ```
 
+```shell statuses filter
+edr monitor --select statuses:warn,fail
+edr monitor --select statuses:error
+edr monitor --select statuses:skipped
+```
+
+```shell resource_types filter
+edr monitor --select resource_types:model
+edr monitor --select resource_types:test
+edr monitor --select resource_types:model,test
+```
+
 </CodeGroup>
 
 #### Group alerts by table
@@ -514,7 +526,7 @@ You can now configure an alert_suppression_interval, this is a “snooze” peri
 Elementary won’t send new alerts on the same issue that are generated within suppression interval.
 
 The flag configuration is the suppression interval duration in hours, and the default is 0 hours (no alert suppression).
-If configured otherwise in the model/test config block, the model/test config block value will be used instead.
+If configured otherwise in the dbt project config block or meta, the CLI value will be ignored (unless `--override-dbt-project-config` is used).
 
 ```shell
 edr monitor --suppression-interval 24

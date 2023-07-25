@@ -4,8 +4,12 @@ from tests.unit.monitor.alerts.group_alerts_by_table.mock_classes import (
 )
 
 
-def mock_data_monitoring_alerts(mock_config):
-    return MockDataMonitoringAlerts(config=mock_config, execution_properties=dict())
+def mock_data_monitoring_alerts(mock_config, override_meta_slack_channel=False):
+    return MockDataMonitoringAlerts(
+        config=mock_config,
+        execution_properties=dict(),
+        override_meta_slack_channel=override_meta_slack_channel,
+    )
 
 
 def check_eq_group_alerts(grp1: GroupOfAlerts, grp2: GroupOfAlerts):
