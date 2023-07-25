@@ -1,0 +1,33 @@
+---
+title: "Elementary 0.8.2"
+sidebarTitle: "0.8.2"
+---
+
+_June 28, 2023: [v0.8.2 Python](https://github.com/elementary-data/elementary/releases/tag/v0.8.2), [v0.8.2 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.8.2)_
+
+### 🔥 What's new?
+
+- **Node info is now available on the lineage view** ℹ️🔗
+    - When clicking on a node on the lineage you are now able to see the node's metadata (owners, tags and description) and job info (job id and name)!
+    - See how it looks in the attached image 👀
+    - Stay tuned - next version will also include exposure info 😱📺
+
+- **We improved our table components for environments with long tables name** 🌀
+    - We've added the ability to minimize the side bar and set a default width for some of the columns
+    - Thanks [@Jon Simpson](https://elementary-community.slack.com/team/U0492SDN3NY) for bringing this up!
+
+
+### 💫 More changes
+
+- Fixed a bug where alerts tag selectors did not work. Thanks [@panapost](https://elementary-community.slack.com/team/U050WNK4SQL) and [@Noam Moskowitz](https://elementary-community.slack.com/team/U035FGRPXQX) for bringing this up!
+- Fixed a bug where the report was being sent via Slack although it was hosted. Thanks [@Javier López Tomás](https://elementary-community.slack.com/team/U059F4VHBPY) for noticing.
+- Handled a situation where the report failed to generate if there are html tags in any of the fields. Thanks [@Pedro Gillet Soares](https://elementary-community.slack.com/team/U0417704XME) for letting us know.
+- Added pg_catalog to redshift macros so they work with late binding views. Thank you [kochalex](https://github.com/kochalex) for contributing! 🤩
+
+
+<Frame caption="Node info in lineage view">
+    <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1688046620/node_info_in_lineage_oiq6es.png"
+    alt="Node info in lineage view"
+    />
+</Frame>
