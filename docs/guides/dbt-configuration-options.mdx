@@ -20,4 +20,32 @@ This option sets the number of hours to suppress alerts after an alert was sent.
 
 ## Variables
 
-(Add the variables here, following the same format as the configuration options)
+### days_back
+This variable determines the number of days back to check for anomalies. The allowed value is an integer.
+
+### slack_webhook
+This variable is used to specify the Slack webhook URL for sending alerts. The allowed value is a string.
+
+### slack_token
+This variable is used to specify the Slack token for sending alerts. The allowed value is a string.
+
+### slack_channel_name
+This variable is used to specify the Slack channel name for sending alerts. The allowed value is a string.
+
+### timezone
+This variable is used to specify the timezone of which all timestamps will be converted to. The allowed value is a string.
+
+### profiles_dir
+This variable is used to specify the directory of the DBT profiles. The allowed value is a string.
+
+### project_dir
+This variable is used to specify the directory of the DBT project. The allowed value is a string.
+
+### dbt_vars
+This variable is used to specify a raw YAML string of your dbt variables. The allowed value is a string.
+
+### test
+This variable determines whether to send a test message in case there are no alerts. The allowed values are `True` and `False`.
+
+### suppression_interval
+This variable sets the number of hours to suppress alerts after an alert was sent. This is a global default setting. The allowed value is an integer.
