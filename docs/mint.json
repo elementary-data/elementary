@@ -101,7 +101,8 @@
         },
         "guides/add-elementary-tests",
         "guides/add-schema-tests",
-        "guides/python-tests"
+        "guides/python-tests",
+        "guides/dbt-configuration-options"
       ]
     },
     {
