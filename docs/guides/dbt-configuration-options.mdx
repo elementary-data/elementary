@@ -1,0 +1,23 @@
+title: "DBT Configuration Options and Variables"
+
+---
+
+This page provides a comprehensive guide to the configuration options and variables available in DBT. Each option and variable is explained in detail, along with its allowed values.
+
+## Configuration Options
+
+### full-refresh-dbt-package
+This option forces a full refresh of all incremental models in the edr dbt package. It is usually not needed, and you can learn more in the documentation. The allowed values are `True` and `False`.
+
+### dbt-vars
+This option allows you to specify a raw YAML string of your dbt variables. The allowed value is a string.
+
+### test
+This option determines whether to send a test message in case there are no alerts. The allowed values are `True` and `False`.
+
+### suppression-interval
+This option sets the number of hours to suppress alerts after an alert was sent. This is a global default setting. The allowed value is an integer.
+
+## Variables
+
+(Add the variables here, following the same format as the configuration options)
