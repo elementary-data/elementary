@@ -4,16 +4,17 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
-  "favicon": "/elementary_logo_512x512.png",
+  "favicon": "/elementary_favicon.png",
   "colors": {
-    "primary": "#FF6B42",
-    "light": "#FE8E08",
-    "dark": "#FF4775",
+    "primary": "#F2386C",
+    "light": "#FE9356",
+    "dark": "#F2386C",
     "ultraLight": "#F3D7B4",
     "ultraDark": "#E0456C",
-    "anchors": {
-      "from": "#FE8913",
-      "to": "#FE10B0"
+    "anchors": "#F2386C",
+    "background": {
+      "dark": "#240A2D",
+      "light": "#FFFFFF"
     }
   },
   "feedback": {
