@@ -3,7 +3,7 @@ title: "Anomaly detection tests configuration"
 sidebarTitle: "Tests configuration"
 ---
 
-The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
+The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests. For a comprehensive guide on the configuration options and variables available in dbt, refer to the [DBT Configuration Options and Variables](/guides/dbt-configuration-options) page.
 
 The configuration of Elementary is dbt native and follows the same priorities and inheritance.
 The more granular and specific configuration overrides the less granular one.
@@ -75,7 +75,7 @@ Elementary searches and prioritizes configuration in the following order:
      <code>
       Expected range:
        -- <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font>></a>
+       -- <a href="/guides/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font></a>
 
       Detection period and detection set:
        -- <a href="/guides/anomaly-detection-configuration/backfill-days"><font color="#CD7D55">backfill_days: int</font>></a>
