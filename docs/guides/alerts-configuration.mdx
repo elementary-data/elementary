@@ -455,6 +455,11 @@ tests:
 
 You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
 
+<Warning>
+  Vars will be deprecated soon! We recommend filtering the alerts using [CLI
+  selectors](/guides/alerts-configuration#alerts-cli-flags) instead
+</Warning>
+
 Below are the available vars and their default config:
 
 ```yml dbt_project.yml
@@ -474,6 +479,8 @@ Elementary supports filtering alerts using a selector, and sending only the sele
 You can filter the alerts by tag, owner or model.
 
 If you run `edr` from the dbt project directory (or pass `--project-dir`), you can use any of the dbt selectors.
+
+_Note_: alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
 
 <CodeGroup>
 
@@ -504,7 +511,7 @@ edr monitor --select statuses:skipped
 ```shell resource_types filter
 edr monitor --select resource_types:model
 edr monitor --select resource_types:test
-edr monitor --select resource_types:model,test
+edr monitor --select resource_types:test,source_freshness
 ```
 
 </CodeGroup>

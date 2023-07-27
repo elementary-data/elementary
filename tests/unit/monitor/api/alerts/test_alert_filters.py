@@ -156,13 +156,13 @@ def initial_alerts():
 def test_filter_alerts():
     test_alerts, model_alerts, malformed_alerts = initial_alerts()
 
-    # Test that empty filter returns all of the alerts.
+    # Test that empty filter returns all of the alerts except for skipped.
     filter = SelectorFilterSchema()
     filter_test_alerts = filter_alerts(test_alerts, filter)
     filter_model_alerts = filter_alerts(model_alerts, filter)
     filter_malformed_alerts = filter_alerts(malformed_alerts, filter)
     assert len(filter_test_alerts) == len(test_alerts)
-    assert len(filter_model_alerts) == len(model_alerts)
+    assert len(filter_model_alerts) == len(model_alerts) - 1  # 1 skipped model alert
     assert len(filter_malformed_alerts) == len(malformed_alerts)
 
     # Test that passing no filter returns all of the alerts.
@@ -170,7 +170,7 @@ def test_filter_alerts():
     filter_model_alerts = filter_alerts(model_alerts)
     filter_malformed_alerts = filter_alerts(malformed_alerts)
     assert len(filter_test_alerts) == len(test_alerts)
-    assert len(filter_model_alerts) == len(model_alerts)
+    assert len(filter_model_alerts) == len(model_alerts) - 1  # 1 skipped model alert
     assert len(filter_malformed_alerts) == len(malformed_alerts)
 
     # Test that filter with unsupported selector returns no alert

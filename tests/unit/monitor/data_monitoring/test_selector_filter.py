@@ -146,20 +146,17 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="blabla:blublu",
     )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().tag is None
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().owner is None
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().model is None
-    assert (
-        data_monitoring_filter_with_user_dbt_runner.get_filter().last_invocation
-        is False
-    )
-    assert (
-        data_monitoring_filter_with_user_dbt_runner.get_filter().invocation_id is None
-    )
-    assert (
-        data_monitoring_filter_with_user_dbt_runner.get_filter().invocation_time is None
-    )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().node_names is None
+    dbt_runner_get_filter = data_monitoring_filter_with_user_dbt_runner.get_filter()
+    assert dbt_runner_get_filter.tag is None
+    assert dbt_runner_get_filter.owner is None
+    assert dbt_runner_get_filter.model is None
+    assert dbt_runner_get_filter.last_invocation is False
+    assert dbt_runner_get_filter.invocation_id is None
+    assert dbt_runner_get_filter.invocation_time is None
+    assert dbt_runner_get_filter.node_names is None
+    assert dbt_runner_get_filter.resource_types is None
+    assert dbt_runner_get_filter.statuses == []
+    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "blabla:blublu"
 
 
 @pytest.fixture
