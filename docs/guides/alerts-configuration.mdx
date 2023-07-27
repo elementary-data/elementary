@@ -27,34 +27,38 @@ Elementary prioritizes configuration in the following order:
 
 <pre>
   <code>
-    &nbsp;&nbsp; meta: &nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    &nbsp;&nbsp; meta: &nbsp;&nbsp;&nbsp;&nbsp;
     <a href="/guides/alerts-configuration#owner">
       <font color="#CD7D55">owner: "@jessica.jones"</font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#subscribers">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#subscribers">
       <font color="#CD7D55">
         subscribers: ["@jessica.jones", "@joe.joseph"]
       </font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a href="/guides/alerts-configuration#test-description">
       <font color="#CD7D55">description: "This is the test description"</font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#tags">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#tags">
       <font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a href="/guides/alerts-configuration#custom-channel">
       <font color="#CD7D55">channel: data_ops</font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#suppression-interval">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#suppression-interval">
       <font color="#CD7D55">alert_suppression_interval: 24</font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;{" "}
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <a href="/guides/alerts-configuration#group-alerts-by-table">
       <font color="#CD7D55">slack_group_alerts_by: table</font>
     </a>
-    &nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#alert_fields">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#alert_fields">
       <font color="#CD7D55">
         alert_fields: ["description", "owners", "tags", "subscribers"]
       </font>
@@ -451,6 +455,11 @@ tests:
 
 You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
 
+<Warning>
+  Vars will be deprecated soon! We recommend filtering the alerts using [CLI
+  selectors](/guides/alerts-configuration#alerts-cli-flags) instead
+</Warning>
+
 Below are the available vars and their default config:
 
 ```yml dbt_project.yml
@@ -470,6 +479,8 @@ Elementary supports filtering alerts using a selector, and sending only the sele
 You can filter the alerts by tag, owner or model.
 
 If you run `edr` from the dbt project directory (or pass `--project-dir`), you can use any of the dbt selectors.
+
+_Note_: alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
 
 <CodeGroup>
 
@@ -500,7 +511,7 @@ edr monitor --select statuses:skipped
 ```shell resource_types filter
 edr monitor --select resource_types:model
 edr monitor --select resource_types:test
-edr monitor --select resource_types:model,test
+edr monitor --select resource_types:test,source_freshness
 ```
 
 </CodeGroup>

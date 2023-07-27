@@ -110,6 +110,7 @@ class SelectorFilter:
                     )
                 else:
                     logger.error(f"Could not parse the given -s/--select: {selector}")
+                    return SelectorFilterSchema(selector=selector, statuses=[])
         return data_monitoring_filter
 
     def get_filter(self) -> SelectorFilterSchema:

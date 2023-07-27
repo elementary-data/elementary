@@ -52,7 +52,7 @@ class SelectorFilterSchema(BaseModel):
     tag: Optional[str] = None
     owner: Optional[str] = None
     model: Optional[str] = None
-    statuses: Optional[List[Status]] = None
+    statuses: Optional[List[Status]] = [Status.FAIL, Status.ERROR, Status.WARN]
     resource_types: Optional[List[ResourceType]] = None
     node_names: Optional[List[str]] = None
 
