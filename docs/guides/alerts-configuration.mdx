@@ -449,14 +449,16 @@ tests:
 
 </CodeGroup>
 
-
 ## Alerts global configuration
 
 #### Enable/disable alerts
 
 You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
 
-<Warning>Vars will be deprecated soon! We recommend filtering the alerts using [CLI selectors](/guides/alerts-configuration#alerts-cli-flags) instead</Warning>
+<Warning>
+  Vars will be deprecated soon! We recommend filtering the alerts using [CLI
+  selectors](/guides/alerts-configuration#alerts-cli-flags) instead
+</Warning>
 
 Below are the available vars and their default config:
 
@@ -511,8 +513,8 @@ edr monitor --select resource_types:model
 edr monitor --select resource_types:test
 edr monitor --select resource_types:test,source_freshness
 ```
-</CodeGroup>
 
+</CodeGroup>
 
 #### Group alerts by table
 
