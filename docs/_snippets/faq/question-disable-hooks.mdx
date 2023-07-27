@@ -1,11 +1,12 @@
 <Accordion title="Can I disable the `on-run-end` hooks or results uploading?">
 
 You can use the disablement vars or disable the entire package in your `dbt_project.yml`.
-It's possible to configure to disable with a condition like specific env. 
+It's possible to configure to disable with a condition like specific env.
 
 Here are examples:
 
 Disable specific hooks (the recommended method) -
+
 ```yaml dbt_project.yml
 vars:
   disable_run_results: "{{ target.name not in ['prod','analytics'] }}"
@@ -15,6 +16,7 @@ vars:
 ```
 
 Disable the whole package (Elementary tests won't work) -
+
 ```yaml dbt_project.yml
 models:
   elementary:

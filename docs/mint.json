@@ -63,10 +63,7 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": [
-            "quickstart",
-            "quickstart-cli"
-          ]
+          "pages": ["quickstart", "quickstart-cli"]
         },
         {
           "group": "Tutorial",
@@ -226,10 +223,7 @@
     },
     {
       "group": "Elementary Cloud",
-      "pages": [
-        "cloud/introduction",
-        "cloud/general/security-and-privacy"
-      ]
+      "pages": ["cloud/introduction", "cloud/general/security-and-privacy"]
     },
     {
       "group": "Getting Started",

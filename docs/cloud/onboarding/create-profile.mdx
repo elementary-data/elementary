@@ -9,6 +9,7 @@ You will need to provide Elementary cloud a `profiles.yml` file with a connectio
 - The provided credentials need to have read permissions to the elementary schema.
 
 The easiest way to generate the profile is:
+
 1. Run the following command in the dbt project where elementary dbt package is deployed (works in dbt cloud as well):
 
 ```shell
@@ -43,7 +44,7 @@ elementary:
       ## User/password auth ##
       user: [username]
       password: [password]
-  
+
       port: 5439
       role: [user role]
       database: [database name]
@@ -55,7 +56,7 @@ elementary:
 
 ```yml BigQuery
 ## BIGQUERY ##
-## Configure the database and schema of elementary models. 
+## Configure the database and schema of elementary models.
 
 elementary:
   outputs:
@@ -120,9 +121,8 @@ elementary:
       password: [password]
       port: [port]
       dbname: [database name]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      threads: [1 or more] 
-
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
 ```
 
 </CodeGroup>
