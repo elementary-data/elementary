@@ -1,9 +1,9 @@
 <p align="center">
-<img alt="Logo" src="static/header_git.png"/ width="1000">
+<img alt="Logo" src="static/github_banner.png"/ width="1000">
 </p>
 
 <h2 align="center">
- Data observability for analytics & data engineers
+ dbt native data observability for analytics & data engineers
 </h2>
 <h4 align="center">
 Monitor your data quality, operation and performance directly from your dbt project.
@@ -41,19 +41,19 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
 
 ## Features
 
-<img src="static/elementary_icon.ico" width="16"/> **Data observability report** - Generate a data observability report, host it or share with your team.
+<img src="static/happy_fire.ico" width="16"/> **Data observability report** - Generate a data observability report, host it or share with your team.
 
-<img src="static/elementary_icon.ico" width="16"/> **Anomaly detection dbt tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
+<img src="static/happy_fire.ico" width="16"/> **Anomaly detection dbt tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
 
-<img src="static/elementary_icon.ico" width="16"/> **Test results** - Enriched with details for fast triage of issues.
+<img src="static/happy_fire.ico" width="16"/> **Test results** - Enriched with details for fast triage of issues.
 
-<img src="static/elementary_icon.ico" width="16"/> **Models performance** - Visibility of execution times, easy detection of degradation and bottlenecks.
+<img src="static/happy_fire.ico" width="16"/> **Models performance** - Visibility of execution times, easy detection of degradation and bottlenecks.
 
-<img src="static/elementary_icon.ico" width="16"/> **Data lineage** - Enriched with test results, easy to navigate and filter.
+<img src="static/happy_fire.ico" width="16"/> **Data lineage** - Enriched with test results, easy to navigate and filter.
 
-<img src="static/elementary_icon.ico" width="16"/> **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
+<img src="static/happy_fire.ico" width="16"/> **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
 
-<img src="static/elementary_icon.ico" width="16"/> **Slack alerts** - Actionable alerts, including custom channels and tagging of owners and subscribers.
+<img src="static/happy_fire.ico" width="16"/> **Slack alerts** - Actionable alerts, including custom channels and tagging of owners and subscribers.
 
 ##
 
