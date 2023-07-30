@@ -15,6 +15,7 @@ class Config:
     _SLACK = "slack"
     _AWS = "aws"
     _GOOGLE = "google"
+    _AZURE = "azure"
     _CONFIG_FILE_NAME = "config.yml"
 
     # Quoting env vars
@@ -56,6 +57,8 @@ class Config:
         google_project_name: Optional[str] = None,
         google_service_account_path: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
+        azure_connection_string: Optional[str] = None,
+        azure_container_name: Optional[str] = None,
         slack_report_url: Optional[str] = None,
         env: str = "dev",
     ):
@@ -141,10 +144,22 @@ class Config:
             gcs_bucket_name,
             google_config.get("gcs_bucket_name"),
         )
+
+        azure_config = config.get(self._AZURE, {})
+        self.azure_connection_string = self._first_not_none(
+            azure_connection_string,
+            azure_config.get("azure_connection_string"),
+        )
+        self.azure_container_name = self._first_not_none(
+            azure_container_name,
+            azure_config.get("azure_container_name"),
+        )
+
         self.slack_report_url = self._first_not_none(
             slack_report_url,
             aws_config.get("slack_report_url"),
             google_config.get("slack_report_url"),
+            azure_config.get("slack_report_url"),
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
@@ -163,6 +178,7 @@ class Config:
             (self.slack_token and self.slack_channel_name)
             or self.has_s3
             or self.has_gcs
+            or self.has_blob
         )
 
     @property
@@ -172,6 +188,10 @@ class Config:
     @property
     def has_s3(self):
         return self.s3_bucket_name
+    
+    @property
+    def has_blob(self):
+        return self.azure_container_name
 
     @property
     def has_gcloud(self):
