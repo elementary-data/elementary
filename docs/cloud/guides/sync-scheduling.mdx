@@ -16,15 +16,15 @@ we allow you to trigger a sync after your data pipeline has finished running usi
 
 ## Sync Webhook
 
-The sync webhook is a simple HTTP endpoint that you can call to trigger a sync of your Elementary schema, typically after your dbt job.
+The sync webhook is a simple HTTP endpoint that you can call to trigger a sync of your Elementary schema, typically after your dbt job finishes.
 
 ### Setup
 
-In order to configure the sync webhook, open the [_Environments_](https://app.elementary-data.com/settings/environments) tab in Elementary Cloud and click on your environment's _Schedule Settings_. The next steps depend on whether you're using dbt Cloud or dbt Core.
+In order to configure the sync webhook, open the [_Environments_](https://app.elementary-data.com/settings/environments) tab in Elementary Cloud and click on your environment's _Schedule Settings_. The next step depends on whether you're using dbt Cloud or dbt Core.
 
 #### dbt Cloud
 
-In the _Schedule Settings_, you're provided with a webhook URL and you'll need to provide a secret token that will be returned from dbt Cloud.
+In the _Schedule Settings_, you're provided with a webhook URL and you'll need to provide a secret token that will be returned from dbt Cloud at the end of the next step.
 
 <img src="/pics/cloud/sync-webhook-dbt-cloud.png" />
 
@@ -50,3 +50,5 @@ webhook_url = "<WEBHOOK_URL>"
 signature = hmac.new(secret, request_body, "sha256").hexdigest()
 requests.post(webhook_url, headers={"Authorization": signature}, data=request_body)
 ```
+
+Make sure to click _Save_ after filling in the form.
