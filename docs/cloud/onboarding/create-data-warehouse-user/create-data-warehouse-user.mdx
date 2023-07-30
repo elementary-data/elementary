@@ -26,9 +26,9 @@ dbt run-operation create_elementary_user --args '{"name": "custom_elementary_use
 # BigQuery
 As BigQuery doesn't support creating users through SQL, you will need to create a service account manually, you may want to consult the [documentation](https://cloud.google.com/iam/docs/service-account-overview).
 
-Create a service acount with the following permissions:
- * query on all the tables in your `elementary` schema (usually `<dbt_schema>_elementary`)
- * query on the `INFORMATION_SCHEMA` of your `dbt_schema`
+Create a service acount with the following roles ([docs](https://cloud.google.com/bigquery/docs/control-access-to-resources-iam))
+ * Role `roles/bigquery.dataViewer` on your elementary dataset (usually `<dbt_dataset>_elementary`).
+ * Role `roles/bigquery.metadataViewer` on your dbt dataset and all of the dbt source datasets.
 
 After creating the account, use its `keyfile.json` when configuring the profile in elementary cloud. 
 
