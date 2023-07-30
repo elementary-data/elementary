@@ -1,0 +1,52 @@
+---
+title: "Scheduling data sync"
+---
+
+## Synchronizing the Elementary schema
+
+Elementary Cloud periodically synchronizes your Elementary schema every hour for the following reasons:
+
+1. Reduce the number of requests to your warehouse.
+2. Cut down query costs from you.
+3. Provide a faster user experience.
+
+Naturally, this means that within the one-hour time window, your data may not be up-to-date.
+For this reason and to avoid unnecessary syncs that query your database,
+we allow you to trigger a sync after your data pipeline has finished running using the _Sync Webhook_.
+
+## Sync Webhook
+
+The sync webhook is a simple HTTP endpoint that you can call to trigger a sync of your Elementary schema, typically after your dbt job.
+
+### Setup
+
+In order to configure the sync webhook, open the [_Environments_](https://app.elementary-data.com/settings/environments) tab in Elementary Cloud and click on your environment's _Schedule Settings_. The next steps depend on whether you're using dbt Cloud or dbt Core.
+
+#### dbt Cloud
+
+In the _Schedule Settings_, you're provided with a webhook URL and you'll need to provide a secret token that will be returned from dbt Cloud.
+
+<img src="/pics/cloud/sync-webhook-dbt-cloud.png" />
+
+Heading to dbt Cloud, you can [create a webhook subscription](https://docs.getdbt.com/docs/deploy/webhooks#create-a-webhook-subscription) that would trigger a sync after your jobs. After completing the guide, you'll be provided with the secret token that you'll need to fill in the form on Elementary Cloud. Press _Save_ and you're done!
+
+#### dbt Core
+
+If you're using dbt Core and have a custom orchestration layer such as Airflow or Prefect,
+you can use the webhook URL and the secret provided in the _Schedule Settings_ to trigger a sync after your dbt job.
+
+<img src="/pics/cloud/sync-webhook-dbt-core.png" />
+
+In the following code snippet,
+replace `<SECRET>` and `<WEBHOOK_URL>` with the secret and webhook URL provided in the _Schedule Settings_ and run it after your dbt job has finished.
+
+```python
+import hmac
+import requests
+
+request_body = b""
+secret = b"<SECRET>"
+webhook_url = "<WEBHOOK_URL>"
+signature = hmac.new(secret, request_body, "sha256").hexdigest()
+requests.post(webhook_url, headers={"Authorization": signature}, data=request_body)
+```
