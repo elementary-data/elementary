@@ -10,9 +10,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-DEFAULT_BUCKET_WEBSITE_URL = "https://storage.googleapis.com"
-
-
 class AzureClient:
     def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
