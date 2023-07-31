@@ -234,6 +234,10 @@
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
       ]
+    },
+    {
+      "group": "Guides",
+      "pages": ["cloud/guides/sync-scheduling"]
     }
   ],
   "footerSocials": {
