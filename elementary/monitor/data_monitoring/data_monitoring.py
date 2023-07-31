@@ -30,12 +30,12 @@ class DataMonitoring:
         disable_samples: bool = False,
         filter: Optional[str] = None,
     ):
+        self.execution_properties: Dict[str, Any] = {}
         self.config = config
         self.tracking = tracking
         self.internal_dbt_runner = self._init_internal_dbt_runner()
         self.user_dbt_runner = self._init_user_dbt_runner()
-
-        self.execution_properties: Dict[str, Any] = {}
+        self._download_dbt_package_if_needed(force_update_dbt_package)
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         dbt_pkg_version = latest_invocation.get("elementary_version")
@@ -59,7 +59,6 @@ class DataMonitoring:
         self.slack_client = SlackClient.create_client(
             self.config, tracking=self.tracking
         )
-        self._download_dbt_package_if_needed(force_update_dbt_package)
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
         self.disable_samples = disable_samples
