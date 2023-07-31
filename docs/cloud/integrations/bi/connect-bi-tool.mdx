@@ -6,19 +6,16 @@ sidebarTitle: "BI integration"
 After you connect your BI tool, Elementary will automatically and continuously generate [dbt exposures](https://docs.getdbt.com/docs/build/exposures) to your dbt project.
 The exposures will provide you end-to-end data lineage that will also be made available in dbt docs and dbt cloud.
 
-
 ### What are dbt exposures?
 
 dbt exposures define and describe a downstream use of your dbt project, such as dashboard, workbook or application.
 
-
-### Why are automated exposures useful? 
+### Why are automated exposures useful?
 
 - **Impact analysis** - The exposures will be added to your lineage in Elementary. You could explore which exposures are impacted by each data issue.
 - **Exposure health** - By selecting an exposure and filtering on upstream nodes, you could see the status of all it's upstream models.
-- **dbt docs enrichment** - As the exposures are created in code, they will be made available in your dbt docs lineage as well. 
-- **dbt cloud change impact** - If you develop in dbt cloud, you could visualize in your IDE the downstream exposures Elementary generates, and understand the impact of changes.  
-
+- **dbt docs enrichment** - As the exposures are created in code, they will be made available in your dbt docs lineage as well.
+- **dbt cloud change impact** - If you develop in dbt cloud, you could visualize in your IDE the downstream exposures Elementary generates, and understand the impact of changes.
 
 ### Supported BI tools
 

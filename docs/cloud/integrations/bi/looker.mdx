@@ -14,21 +14,22 @@ In order to allow Elementary to continuously generate [dbt exposures](https://do
 To follow the [least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) security principle, before creating user for Elementary, create a permission set that allows to do only what is needed for Elementary to work.
 
 - **Create a Permission Set**
-   1. In Looker, go to Admin > Roles. Click **"New Permission Set"**.
-   2. Name the Permission Set "Elementary permissions" and **check the boxes for the following permissions:**
-       - `access_data`
-       - `see_lookml_dashboards`
-       - `see_looks`
-           - `see_user_dashboards`
-           - `see_sql`
-           - `see_lookml`
+
+  1.  In Looker, go to Admin > Roles. Click **"New Permission Set"**.
+  2.  Name the Permission Set "Elementary permissions" and **check the boxes for the following permissions:**
+      - `access_data`
+      - `see_lookml_dashboards`
+      - `see_looks`
+        - `see_user_dashboards`
+        - `see_sql`
+        - `see_lookml`
 
 - **Create a role**
 
-   1. **Click "New Role".**
-   2. Name the role "Elementary Role" as well.
-   3. **Select the "**Elementary permissions**" permission set**
-   4. **Create the role.**
+  1.  **Click "New Role".**
+  2.  Name the role "Elementary Role" as well.
+  3.  **Select the "**Elementary permissions**" permission set**
+  4.  **Create the role.**
 
 ### Create a dedicated Elementary Looker user
 
@@ -55,18 +56,17 @@ Choose the Looker BI connection and provide the following details to validate an
 - **Client ID**: The client ID you generated on Looker.
 - **Client secret:** The client secret you generated on Looker.
 - **LookML code repository**:
-    - Token
-        - [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
-        - [Gitlab](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
-    - Repository - The repository name where your LookML code is.
+  - Token
+    - [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+    - [Gitlab](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
+  - Repository - The repository name where your LookML code is.
 
 <Frame caption="Connect Looker to Elementary environment">
-    <img
+  <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1690190406/looker_form_aegofu.png"
     alt="Connect Looker to Elementary environment"
-    />
+  />
 </Frame>
-
 
 ## Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo)
 
