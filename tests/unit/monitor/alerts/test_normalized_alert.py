@@ -223,7 +223,7 @@ def test_get_alert_suppression_interval():
         model_meta=json.dumps(dict()),
     )
     normalized_alert = NormalizedAlert(alert)
-    assert normalized_alert._get_alert_suppression_interval() == 0
+    assert normalized_alert._get_alert_suppression_interval() is None
 
 
 def test_get_alert_fields():

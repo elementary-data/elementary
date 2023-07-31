@@ -142,7 +142,8 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL>.",
+            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+            "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
         return func
 
@@ -215,10 +216,23 @@ def get_cli_properties() -> dict:
     help="Whether to send a test message in case there are no alerts.",
 )
 @click.option(
+    "--suppression-interval",
+    type=int,
+    default=0,
+    help="The number of hours to suppress alerts after an alert was sent (this is a global default setting).",
+)
+@click.option(
     "--group-by",
     type=click.Choice(["alert", "table"]),
     default=None,
     help="Whether to group alerts by 'alert' or by 'table'",
+)
+@click.option(
+    "--override-dbt-project-config",
+    "-oc",
+    is_flag=True,
+    help="Whether to override the settings (slack channel, suppression interval) "
+    "in the model or test meta in the dbt project with the parameters provided by the CLI.",
 )
 @click.pass_context
 def monitor(
@@ -244,6 +258,8 @@ def monitor(
     select,
     group_by,
     target_path,
+    suppression_interval,
+    override_dbt_project_config,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -275,9 +291,6 @@ def monitor(
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
-    anonymous_tracking.track_cli_start(
-        Command.MONITOR, get_cli_properties(), ctx.command.name
-    )
     try:
         config.validate_monitor()
         data_monitoring = DataMonitoringAlerts(
@@ -287,6 +300,13 @@ def monitor(
             send_test_message_on_success=test,
             disable_samples=disable_samples,
             filter=select,
+            global_suppression_interval=suppression_interval,
+            override_config=override_dbt_project_config,
+        )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking
+        # properties. This is a tech-debt that should be fixed in the future.
+        anonymous_tracking.track_cli_start(
+            Command.MONITOR, get_cli_properties(), ctx.command.name
         )
         success = data_monitoring.run_alerts(
             days_back, full_refresh_dbt_package, dbt_vars=vars
@@ -364,9 +384,6 @@ def report(
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
-    anonymous_tracking.track_cli_start(
-        Command.REPORT, get_cli_properties(), ctx.command.name
-    )
     try:
         data_monitoring = DataMonitoringReport(
             config=config,
@@ -374,6 +391,11 @@ def report(
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
             filter=select,
+        )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
+        anonymous_tracking.track_cli_start(
+            Command.REPORT, get_cli_properties(), ctx.command.name
         )
         generated_report_successfully, _ = data_monitoring.generate_report(
             days_back=days_back,
@@ -555,9 +577,6 @@ def send_report(
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
-    anonymous_tracking.track_cli_start(
-        Command.SEND_REPORT, get_cli_properties(), ctx.command.name
-    )
     try:
         config.validate_send_report()
         # bucket-file-path determines the path of the report in the bucket.
@@ -573,6 +592,11 @@ def send_report(
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
             filter=select,
+        )
+        # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
+        # This is a tech-debt that should be fixed in the future.
+        anonymous_tracking.track_cli_start(
+            Command.SEND_REPORT, get_cli_properties(), ctx.command.name
         )
         sent_report_successfully = data_monitoring.send_report(
             days_back=days_back,

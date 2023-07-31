@@ -2,8 +2,10 @@
 title: "Elementary in production"
 ---
 
-<Card title="Try Elementary cloud" href="https://app.elementary-data.com/">
-</Card>
+<Card
+  title="Try Elementary cloud"
+  href="https://app.elementary-data.com/"
+></Card>
 
 Running Elementary in production means to include the dbt package in your production dbt project,
 and setting up an automated manner to run the Elementary CLI.
@@ -18,8 +20,7 @@ You can choose any system that allows you to orchestrate a CLI execution, as lon
 ## Elementary `--env` flag
 
 When you run Elementary in production use the `--env prod` flag (By default, it is set to `dev`).
-This will show the environment as `prod` in the report and alerts. 
-
+This will show the environment as `prod` in the report and alerts.
 
 ## Elementary production deployment and jobs
 

@@ -2,9 +2,10 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 import dbt.adapters.factory
+from dbt.adapters.base import BaseAdapter, BaseConnectionManager
 from packaging import version
 
 # IMPORTANT: This must be kept before the rest of the dbt imports
@@ -78,12 +79,17 @@ class SlimDbtRunner(BaseDbtRunner):
         profiles_dir: str = DEFAULT_PROFILES_DIR,
         target: Optional[str] = None,
         vars: Optional[dict] = None,
+        secret_vars: Optional[dict] = None,
         **kwargs,
     ):
-        super().__init__(project_dir, profiles_dir, target)
-        self._load_runner(
-            project_dir=project_dir, profiles_dir=profiles_dir, target=target, vars=vars
-        )
+        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
+
+        self.config: Optional[RuntimeConfig] = None
+        self.adapter: Optional[BaseAdapter] = None
+        self.adapter_name: Optional[str] = None
+        self.connections_manager: Optional[BaseConnectionManager] = None
+        self.project_parser: Optional[ManifestLoader] = None
+        self.manifest = None
 
     def _load_runner(
         self,
@@ -123,23 +129,41 @@ class SlimDbtRunner(BaseDbtRunner):
         self.config = RuntimeConfig.from_args(self.args)
 
     def _load_adapter(self):
+        if not self.config:
+            raise Exception("Config not loaded")
+
         register_adapter(self.config)
         self.adapter_name = self.config.credentials.type
-        self.adapter = get_adapter_class_by_name(self.adapter_name)(self.config)
-        self.adapter.connections.set_connection_name()
-        self.config.adapter = self.adapter
+        self.adapter = cast(
+            BaseAdapter, get_adapter_class_by_name(self.adapter_name)(self.config)
+        )
+
+        self.connections_manager = cast(BaseConnectionManager, self.adapter.connections)
+        self.connections_manager.set_connection_name()
+
+        self.config.adapter = self.adapter  # type: ignore[attr-defined]
 
     def _load_manifest(self):
+        if not self.config:
+            raise Exception("Config not loaded")
+        if not self.adapter or not self.connections_manager:
+            raise Exception("Adapter not loaded")
+
         self.project_parser = ManifestLoader(
             self.config,
             self.config.load_dependencies(),
-            self.adapter.connections.set_query_header,
+            self.connections_manager.set_query_header,
         )
         self.manifest = self.project_parser.load()
+        if self.manifest is None:
+            raise Exception("Failed to load manifest!")
         self.manifest.build_flat_graph()
         self.project_parser.save_macros_to_adapter(self.adapter)
 
     def _execute_macro(self, macro_name, **kwargs):
+        if not self.adapter:
+            raise Exception("Adapter not loaded")
+
         if "." in macro_name:
             package_name, actual_macro_name = macro_name.split(".", 1)
         else:
@@ -154,32 +178,50 @@ class SlimDbtRunner(BaseDbtRunner):
         )
 
     def close_connection(self):
-        self.adapter.connections.cleanup_all()
+        if self.connections_manager:
+            self.connections_manager.cleanup_all()
 
     def run_operation(
         self,
         macro_name: str,
         capture_output: bool = True,
-        macro_args: dict = dict(),
+        macro_args: Optional[dict] = None,
         log_errors: bool = True,
         vars: Optional[dict] = None,
         quiet: bool = False,
         **kwargs,
     ) -> list:
-        if vars:
-            # vars are being parsed as part of the manifest
-            self._load_runner(
-                project_dir=self.args.project_dir,
-                profiles_dir=self.args.profiles_dir,
-                target=self.args.target,
-                vars=vars,
-            )
+        if self.profiles_dir is None:
+            raise Exception("profiles_dir must be passed to SlimDbtRunner")
 
-        log_message = f"Running dbt run-operation {macro_name} --args {macro_args}{f' --var {vars}' if vars else ''}"
+        macro_args = macro_args or {}
+
+        all_vars = self._get_all_vars(vars)
+        self._load_runner(
+            project_dir=self.project_dir,
+            profiles_dir=self.profiles_dir,
+            target=self.target,
+            vars=all_vars,
+        )
+        log_command = [
+            "dbt",
+            "run-operation",
+            macro_name,
+            "--args",
+            json.dumps(macro_args),
+        ]
+        if all_vars:
+            log_command.extend(
+                [
+                    "--vars",
+                    json.dumps(self._get_secret_masked_vars(all_vars)),
+                ]
+            )
+        log_msg = f"Running {' '.join(log_command)}"
         if not quiet:
-            logger.info(log_message)
+            logger.info(log_msg)
         else:
-            logger.debug(log_message)
+            logger.debug(log_msg)
 
         run_operation_results = []
         macro_output = self._execute_macro(macro_name, **macro_args)

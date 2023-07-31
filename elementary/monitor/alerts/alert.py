@@ -7,7 +7,7 @@ from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.alerts.schema.alert import AlertSuppressionSchema
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
-from elementary.utils.time import convert_utc_iso_format_to_datetime
+from elementary.utils.time import DATETIME_FORMAT, convert_utc_iso_format_to_datetime
 
 logger = get_logger(__name__)
 
@@ -57,14 +57,17 @@ class Alert:
                 )
             except Exception:
                 logger.error('Failed to parse "detected_at" field.')
+        self.detected_at_str = (
+            self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else "N/A"
+        )
         self.database_name = database_name
         self.schema_name = schema_name
-        self.owners = owners
-        self.tags = tags
+        self.owners: List[str] = owners or []
+        self.tags: List[str] = tags or []
         self.meta = test_meta
         self.model_meta = try_load_json(model_meta) or {}
         self.status = status
-        self.subscribers = subscribers
+        self.subscribers: List[str] = subscribers or []
         self.slack_channel = slack_channel
         self.alert_suppression_interval = alert_suppression_interval
         self.alert_fields = alert_fields
@@ -73,6 +76,7 @@ class Alert:
         # Defined in the base class so type checks will not complain
         self.data: Dict[str, Any] = {}
         self.model_unique_id: Optional[str] = None
+        self.alerts_table = alerts_table
 
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3
     _CONTINUATION_SYMBOL = "..."
@@ -81,7 +85,7 @@ class Alert:
         raise NotImplementedError
 
     @property
-    def consice_name(self):
+    def concise_name(self):
         return "Alert"
 
 
@@ -124,24 +128,24 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         result: Optional[SlackBlocksType] = None,
         configuration: Optional[SlackBlocksType] = None,
     ) -> SlackMessageSchema:
-        self._add_title_to_slack_alert(title)
-        self._add_preview_to_slack_alert(preview)
-        self._add_details_to_slack_alert(result, configuration)
+        self.add_title_to_slack_alert(title)
+        self.add_preview_to_slack_alert(preview)
+        self.add_details_to_slack_alert(result, configuration)
         return super().get_slack_message()
 
-    def _add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
+    def add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
         if title_blocks:
             title = [*title_blocks, self.create_divider_block()]
             self._add_always_displayed_blocks(title)
 
-    def _add_preview_to_slack_alert(
+    def add_preview_to_slack_alert(
         self, preview_blocks: Optional[SlackBlocksType] = None
     ):
         if preview_blocks:
             validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
             self._add_blocks_as_attachments(validated_preview_blocks)
 
-    def _add_details_to_slack_alert(
+    def add_details_to_slack_alert(
         self,
         result: Optional[SlackBlocksType] = None,
         configuration: Optional[SlackBlocksType] = None,

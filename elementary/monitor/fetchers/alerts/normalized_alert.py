@@ -110,27 +110,27 @@ class NormalizedAlert:
             )
             return self.alert
 
-    def _get_alert_meta_attrs(self, meta_key: str) -> List[Optional[str]]:
+    def _get_alert_meta_attrs(self, meta_key: str) -> List[str]:
         attrs = []
         test_attrs = self.test_meta.get(meta_key, [])
         model_attrs = self.model_meta.get(meta_key, [])
         if isinstance(test_attrs, list):
             attrs.extend(test_attrs)
-        else:
+        elif isinstance(test_attrs, str):
             attrs.append(test_attrs)
 
         if isinstance(model_attrs, list):
             attrs.extend(model_attrs)
-        else:
+        elif isinstance(model_attrs, str):
             attrs.append(model_attrs)
         return attrs
 
     def _get_alert_channel(self) -> Optional[str]:
         return self._get_field_from_test_meta_or_model_meta_or_default(key=CHANNEL_KEY)
 
-    def _get_alert_suppression_interval(self) -> int:
+    def _get_alert_suppression_interval(self) -> Optional[int]:
         return self._get_field_from_test_meta_or_model_meta_or_default(
-            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=0
+            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=None
         )
 
     def _get_alert_fields(self) -> Optional[List[str]]:
@@ -144,4 +144,8 @@ class NormalizedAlert:
     def _get_field_from_test_meta_or_model_meta_or_default(
         self, key: str, default_val=None
     ) -> Any:
-        return self.test_meta.get(key) or self.model_meta.get(key) or default_val
+        if self.test_meta.get(key) is not None:
+            return self.test_meta.get(key)
+        if self.model_meta.get(key) is not None:
+            return self.model_meta.get(key)
+        return default_val

@@ -25,6 +25,8 @@ class AlertsAPI(APIClient):
         dbt_runner: DbtRunner,
         config: Config,
         elementary_database_and_schema: str,
+        global_suppression_interval: int,
+        override_meta_suppression_interval: bool = False,
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -34,6 +36,8 @@ class AlertsAPI(APIClient):
             config=self.config,
             elementary_database_and_schema=self.elementary_database_and_schema,
         )
+        self.global_suppression_interval = global_suppression_interval
+        self.override_meta_suppression_interval = override_meta_suppression_interval
 
     def get_new_alerts(
         self,
@@ -147,8 +151,8 @@ class AlertsAPI(APIClient):
             alerts_to_skip=filter_alerts(alerts_to_skip, filter),
         )
 
-    @staticmethod
     def _get_suppressed_alerts(
+        self,
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
     ) -> List[str]:
@@ -162,7 +166,11 @@ class AlertsAPI(APIClient):
                 logger.debug("Alert without an id detected!")
                 continue
 
-            suppression_interval = alert.alert_suppression_interval
+            suppression_interval = self._get_suppression_interval(
+                alert.alert_suppression_interval,
+                self.global_suppression_interval,
+                self.override_meta_suppression_interval,
+            )
             last_sent_time = (
                 datetime.fromisoformat(last_alert_sent_times[alert_class_id])
                 if last_alert_sent_times.get(alert_class_id)
@@ -206,3 +214,11 @@ class AlertsAPI(APIClient):
         for alert_last_time in alert_last_times.values():
             latest_alert_ids.append(alert_last_time["alert_id"])
         return latest_alert_ids
+
+    @staticmethod
+    def _get_suppression_interval(
+        interval_from_alert, interval_from_cli, override_by_cli
+    ):
+        if interval_from_alert is None or override_by_cli:
+            return interval_from_cli
+        return interval_from_alert

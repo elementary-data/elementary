@@ -40,9 +40,9 @@ _April 12, 2023: [v0.7.7 Python](https://github.com/elementary-data/elementary/r
   - We fixed problems in artifacts caching, and implemented an incremental upload. This means that upon a change to models / tests / sources - elementary will now only update the changed resources.
   - This should improve the performance of the hooks, and we have additional ideas and planned tasks around further improvements.
   - Special thanks to [@panapost](https://elementary-community.slack.com/team/U050WNK4SQL) for helping with this effort 🤩
-  
 
 ### 🐞 Bug fixes
+
 - Added support to unsupported time buckets on Bigquery (week, month), and made buckets full and consistent to calendar times - Thank you [@Kenneth Roos](https://elementary-community.slack.com/team/U04UDU686P7) and [@Julian Schulte](https://elementary-community.slack.com/team/U04U9DAPR5L) for reporting!
 - Added log rotation to `edr.log` to prevent large log files that won't open - Thank you [@Stéphane Burwash](https://elementary-community.slack.com/team/U03R02KUP1V) and [@Grant Mehrer](https://elementary-community.slack.com/team/U04E1UTPEAE) for reporting!
 - Fixed elementary tests custom names issue - Thank you [@Fabien Traventhal](https://elementary-community.slack.com/team/U03G693L05R) for reporting!

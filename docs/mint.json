@@ -56,10 +56,7 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": [
-            "quickstart",
-            "quickstart-cli"
-          ]
+          "pages": ["quickstart", "quickstart-cli"]
         },
         {
           "group": "Tutorial",
@@ -220,10 +217,7 @@
     },
     {
       "group": "Elementary Cloud",
-      "pages": [
-        "cloud/introduction",
-        "cloud/general/security-and-privacy"
-      ]
+      "pages": ["cloud/introduction", "cloud/general/security-and-privacy"]
     },
     {
       "group": "Getting Started",
@@ -234,6 +228,10 @@
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
       ]
+    },
+    {
+      "group": "Guides",
+      "pages": ["cloud/guides/sync-scheduling"]
     },
     {
       "group": "BI tools integration",

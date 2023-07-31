@@ -1,5 +1,5 @@
 ---
-title: 'Postgres'
+title: "Postgres"
 ---
 
 ## Data monitoring
@@ -36,15 +36,13 @@ elementary:
       password: [password]
       port: [port]
       dbname: [database name]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      threads: [1 or more] 
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
       keepalives_idle: 0 # default 0 seconds
       connect_timeout: 10 # default 10 seconds
       # search_path: public # optional, not recommended
       # role: [optional, set the role dbt assumes when executing queries]
       # sslmode: [optional, set the sslmode used to connect to the database]
-
-
 ```
 
 We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to

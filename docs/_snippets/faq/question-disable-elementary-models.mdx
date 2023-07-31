@@ -4,11 +4,14 @@ Elementary only needs you to run the models once after you install, and on upgra
 On such upgrades we make schema changes, so we need you to rebuild the tables.
 
 For excluding the elementary models from your runs we suggest 2 options:
+
 1. Use the selector `--exclude elementary` when you run `dbt run`.
 2. Set a var that disables the models by default. On version upgrades you could pass it as true.
 
 Here is how you implement option 2:
+
 - on your `dbt_project.yml` add:
+
 ```yaml dbt_project.yml
 models:
   elementary:
@@ -18,6 +21,7 @@ models:
 ```
 
 - When you upgrade elementary run:
+
 ```shell
 dbt run --select elementary --vars {enable_elementary_models: true}
 ```

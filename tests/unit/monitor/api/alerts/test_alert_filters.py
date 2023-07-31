@@ -5,10 +5,16 @@ from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_model,
     _filter_alerts_by_node_names,
     _filter_alerts_by_owner,
+    _filter_alerts_by_resource_type,
+    _filter_alerts_by_status,
     _filter_alerts_by_tag,
     filter_alerts,
 )
-from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.data_monitoring.schema import (
+    ResourceType,
+    SelectorFilterSchema,
+    Status,
+)
 
 
 def initial_alerts():
@@ -22,6 +28,7 @@ def initial_alerts():
             test_created_at="2022-10-10 10:10:10",
             tags='["one", "two"]',
             owners='["jeff", "john"]',
+            status="fail",
         ),
         TestAlert(
             id="2",
@@ -32,6 +39,7 @@ def initial_alerts():
             test_created_at="2022-10-10 09:10:10",
             tags='["three"]',
             owners='["jeff", "john"]',
+            status="fail",
         ),
         TestAlert(
             id="3",
@@ -43,6 +51,7 @@ def initial_alerts():
             # invalid tag
             tags="one",
             owners='["john"]',
+            status="fail",
         ),
         TestAlert(
             id="4",
@@ -53,6 +62,7 @@ def initial_alerts():
             test_created_at="2022-10-10 09:10:10",
             tags='["three", "four"]',
             owners='["jeff"]',
+            status="warn",
         ),
     ]
     model_alerts = [
@@ -70,6 +80,7 @@ def initial_alerts():
             alert_suppression_interval=0,
             tags='["one", "two"]',
             owners='["jeff", "john"]',
+            status="error",
         ),
         ModelAlert(
             id="2",
@@ -85,6 +96,7 @@ def initial_alerts():
             alert_suppression_interval=3,
             tags='["three"]',
             owners='["john"]',
+            status="error",
         ),
         ModelAlert(
             id="3",
@@ -100,6 +112,7 @@ def initial_alerts():
             alert_suppression_interval=1,
             tags='["three", "four"]',
             owners='["jeff"]',
+            status="skipped",
         ),
     ]
     malformed_alerts = [
@@ -114,6 +127,7 @@ def initial_alerts():
                 test_created_at="2022-10-10 10:10:10",
                 tags='["one", "two"]',
                 owners='["jeff", "john"]',
+                status="fail",
             ),
         ),
         MalformedAlert(
@@ -132,6 +146,7 @@ def initial_alerts():
                 alert_suppression_interval=3,
                 tags='["three"]',
                 owners='["john"]',
+                status="fail",
             ),
         ),
     ]
@@ -141,13 +156,13 @@ def initial_alerts():
 def test_filter_alerts():
     test_alerts, model_alerts, malformed_alerts = initial_alerts()
 
-    # Test that empty filter returns all of the alerts.
+    # Test that empty filter returns all of the alerts except for skipped.
     filter = SelectorFilterSchema()
     filter_test_alerts = filter_alerts(test_alerts, filter)
     filter_model_alerts = filter_alerts(model_alerts, filter)
     filter_malformed_alerts = filter_alerts(malformed_alerts, filter)
     assert len(filter_test_alerts) == len(test_alerts)
-    assert len(filter_model_alerts) == len(model_alerts)
+    assert len(filter_model_alerts) == len(model_alerts) - 1  # 1 skipped model alert
     assert len(filter_malformed_alerts) == len(malformed_alerts)
 
     # Test that passing no filter returns all of the alerts.
@@ -155,7 +170,7 @@ def test_filter_alerts():
     filter_model_alerts = filter_alerts(model_alerts)
     filter_malformed_alerts = filter_alerts(malformed_alerts)
     assert len(filter_test_alerts) == len(test_alerts)
-    assert len(filter_model_alerts) == len(model_alerts)
+    assert len(filter_model_alerts) == len(model_alerts) - 1  # 1 skipped model alert
     assert len(filter_malformed_alerts) == len(malformed_alerts)
 
     # Test that filter with unsupported selector returns no alert
@@ -304,3 +319,45 @@ def test_filter_alerts_by_node_names():
     filter_malformed_alerts = _filter_alerts_by_node_names(malformed_alerts, filter)
     assert len(filter_malformed_alerts) == 1
     assert filter_malformed_alerts[0].id == "1"
+
+
+def test_filter_alerts_by_statuses():
+    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+
+    filter = SelectorFilterSchema(statuses=[Status.WARN])
+    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
+    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
+    filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    assert len(filter_test_alerts) == 1
+    assert filter_test_alerts[0].id == "4"
+    assert len(filter_model_alerts) == 0
+    assert len(filter_malformed_alerts) == 0
+
+    filter = SelectorFilterSchema(statuses=[Status.ERROR, Status.SKIPPED])
+    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
+    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
+    filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    assert len(filter_test_alerts) == 0
+    assert len(filter_model_alerts) == 3
+    assert len(filter_malformed_alerts) == 0
+
+    filter = SelectorFilterSchema(statuses=[Status.FAIL, Status.WARN])
+    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
+    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
+    filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    assert len(filter_test_alerts) == 4
+    assert len(filter_model_alerts) == 0
+    assert len(filter_malformed_alerts) == 2
+
+
+def test_filter_alerts_by_resource_types():
+    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    all_alerts = test_alerts + model_alerts + malformed_alerts
+
+    filter = SelectorFilterSchema(resource_types=[ResourceType.TEST])
+    filter_test_alerts = _filter_alerts_by_resource_type(all_alerts, filter)
+    assert filter_test_alerts == test_alerts
+
+    filter = SelectorFilterSchema(resource_types=[ResourceType.MODEL])
+    filter_test_alerts = _filter_alerts_by_resource_type(all_alerts, filter)
+    assert filter_test_alerts == model_alerts

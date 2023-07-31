@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.schema import (
     ExposureSchema,
     ModelSchema,
@@ -20,6 +21,7 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     # Currently its model_name to match the CLI UI.
     model_name: str
     normalized_full_path: str
+    fqn: str
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):
@@ -68,8 +70,8 @@ class ModelRunSchema(BaseModel):
 
 
 class TotalsModelRunsSchema(BaseModel):
-    errors: Optional[int] = 0
-    success: Optional[int] = 0
+    errors: int = 0
+    success: int = 0
 
 
 class ModelRunsSchema(BaseModel):
@@ -83,36 +85,6 @@ class ModelRunsSchema(BaseModel):
     exec_time_change_rate: float
     totals: TotalsModelRunsSchema
     runs: List[ModelRunSchema]
-
-
-class TotalsSchema(BaseModel):
-    errors: Optional[int] = 0
-    warnings: Optional[int] = 0
-    passed: Optional[int] = 0
-    failures: Optional[int] = 0
-
-    def add_total(self, status):
-        total_adders = {
-            "error": self._add_error,
-            "warn": self._add_warning,
-            "fail": self._add_failure,
-            "pass": self._add_passed,
-        }
-        adder = total_adders.get(status)
-        if adder:
-            adder()
-
-    def _add_error(self):
-        self.errors += 1
-
-    def _add_warning(self):
-        self.warnings += 1
-
-    def _add_passed(self):
-        self.passed += 1
-
-    def _add_failure(self):
-        self.failures += 1
 
 
 class ModelRunsWithTotalsSchema(BaseModel):

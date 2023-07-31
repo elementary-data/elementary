@@ -12,7 +12,6 @@ from elementary.monitor.alerts.schema.alert_group_component import (
 from elementary.monitor.fetchers.alerts.normalized_alert import CHANNEL_KEY
 from elementary.utils.json_utils import (
     list_of_lists_of_strings_to_comma_delimited_unique_strings,
-    try_load_json,
 )
 from elementary.utils.models import get_shortened_model_name
 
@@ -65,12 +64,18 @@ SubsComponent = NotificationComponent(
 
 class GroupOfAlerts:
     def __init__(
-        self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
+        self,
+        alerts: List[Alert],
+        default_channel_destination: str,
+        override_slack_channel: bool,
+        env: str = "dev",
     ):
-
         self.alerts = alerts
         self._title = self._get_title()
-        self._sort_channel_destination(default_channel=default_channel_destination)
+        self._sort_channel_destination(
+            default_channel=default_channel_destination,
+            override_channel=override_slack_channel,
+        )
         self._fill_components_to_alerts()
         hashtag = SlackMessageBuilder._HASHTAG
         self._components_to_attention_required: Dict[
@@ -103,14 +108,14 @@ class GroupOfAlerts:
     def set_subscribers(self, subscribers: List[str]):
         self._components_to_attention_required[SubsComponent] = ", ".join(subscribers)
 
-    def _sort_channel_destination(self, default_channel):
+    def _sort_channel_destination(self, default_channel, override_channel):
         raise NotImplementedError
 
     def _fill_components_to_alerts(self):
         test_errors = []
         test_warnings = []
         test_failures = []
-        model_errors = []
+        model_errors: List[Alert] = []
         for alert in self.alerts:
             if isinstance(alert, ModelAlert):
                 model_errors.append(alert)
@@ -165,14 +170,14 @@ class GroupOfAlerts:
                 f":{TestErrorComponent.emoji_in_summary}: {TestErrorComponent.name_in_summary}: {len(alert_list)}"
             )
         title_blocks.append(self._message_builder.create_context_block(fields_summary))
-        self._message_builder._add_title_to_slack_alert(title_blocks=title_blocks)
+        self._message_builder.add_title_to_slack_alert(title_blocks=title_blocks)
 
         # attention required : tags, owners, subscribers
         preview_blocks = [
             self._message_builder.create_text_section_block(block)
             for block in self._attention_required_blocks()
         ] + [self._message_builder.create_empty_section_block()]
-        self._message_builder._add_preview_to_slack_alert(preview_blocks=preview_blocks)
+        self._message_builder.add_preview_to_slack_alert(preview_blocks=preview_blocks)
 
         details_blocks = []
         for component, alerts_list in self._components_to_alerts.items():
@@ -238,7 +243,7 @@ class GroupOfAlerts:
         return ""
 
     def _attention_required_blocks(self):
-        preview_blocks = [f"*{self._db}.{self._schema}.{self._model}*"]
+        preview_blocks = []
 
         for component, val in sorted(
             self._components_to_attention_required.items(), key=lambda x: x[0].order
@@ -263,9 +268,12 @@ class GroupOfAlerts:
 
 class GroupOfAlertsByTable(GroupOfAlerts):
     def __init__(
-        self, alerts: List[Alert], default_channel_destination: str, env: str = "dev"
+        self,
+        alerts: List[Alert],
+        default_channel_destination: str,
+        override_slack_channel: bool,
+        env: str = "dev",
     ):
-
         # sort out model unique id
         models = set([alert.model_unique_id for alert in alerts])
         if len(models) != 1:
@@ -275,17 +283,20 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         self._model = get_shortened_model_name(list(models)[0])
         self._db = alerts[0].database_name
         self._schema = alerts[0].schema_name
-        super().__init__(alerts, default_channel_destination, env)
+        super().__init__(
+            alerts, default_channel_destination, override_slack_channel, env
+        )
 
     def _get_title(self) -> str:
         return f"Table issues detected - {self._model}"
 
-    def _sort_channel_destination(self, default_channel):
+    def _sort_channel_destination(self, default_channel, override_channel):
         """
         where do we send a group of alerts to?
         Definitions:
         1. "default_channel" is the project yaml level definition, over-rided by CLI if given
-        2. "per alert" is the definition for tests (if exists), or for the related model (if exists).
+        2. override_channel dictates whether the default channel should override the alert-specific channel
+        3. "per alert" is the definition for tests (if exists), or for the related model (if exists).
         Sorting out:
         if grouping is "by table",
          if model has specific channels configured:
@@ -294,6 +305,11 @@ class GroupOfAlertsByTable(GroupOfAlerts):
           - send it to the default channel
         """
 
+        # if override_channel is set, we just use the default channel
+        if override_channel:
+            self.channel_destination = default_channel
+            return
+
         # Check for a model level configuration.
         model_specific_channel_config = None
         for alert in self.alerts:
@@ -301,9 +317,9 @@ class GroupOfAlertsByTable(GroupOfAlerts):
                 if alert.slack_channel:
                     model_specific_channel_config = alert.slack_channel
                     break
-            model_meta_data = try_load_json(alert.model_meta)
-            if model_meta_data and isinstance(model_meta_data, dict):
-                model_specific_channel_config = model_meta_data.get(CHANNEL_KEY)
+
+            model_specific_channel_config = alert.model_meta.get(CHANNEL_KEY)
+            if model_specific_channel_config:
                 break
 
         if model_specific_channel_config:
@@ -312,11 +328,18 @@ class GroupOfAlertsByTable(GroupOfAlerts):
             self.channel_destination = default_channel
 
     def _get_tabulated_row_from_alert(self, alert: Alert) -> str:
-        return alert.consice_name
+        return alert.concise_name
+
+    def _attention_required_blocks(self):
+        preview_blocks = [f"*{self._db}.{self._schema}.{self._model}*"]
+        preview_blocks.extend(
+            super(GroupOfAlertsByTable, self)._attention_required_blocks()
+        )
+        return preview_blocks
 
 
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):
-    def _sort_channel_destination(self, default_channel):
+    def _sort_channel_destination(self, default_channel, override_channel):
         """
         where do we send a group of alerts to?
         Definitions:
@@ -326,7 +349,7 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
 
         if grouping is "by alert", test definition or model definition or CLI if given or project-yaml definition
         """
-        if self.alerts[0].slack_channel:
+        if self.alerts[0].slack_channel and not override_channel:
             self.channel_destination = self.alerts[0].slack_channel
         else:
             self.channel_destination = default_channel
@@ -335,10 +358,10 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
         return self.alerts[0].to_slack()
 
     def set_owners(self, owners: List[str]):
-        self.alerts[0].owners = ", ".join(owners)
+        self.alerts[0].owners = owners
 
     def set_subscribers(self, subscribers: List[str]):
-        self.alerts[0].subscribers = ", ".join(subscribers)
+        self.alerts[0].subscribers = subscribers
 
     def set_tags(self, tags: List[str]):
-        self.alerts[0].tags = ", ".join(tags)
+        self.alerts[0].tags = tags

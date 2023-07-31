@@ -8,16 +8,21 @@ On new releases, you will need to upgrade the Elementary CLI and the dbt package
 ## Upgrade Elementary dbt package
 
 1. On your `packages.yml` file, change the version to the latest:
+
 ```yml packages.yml
 packages:
   - package: elementary-data/elementary
     version: < latest version >
 ```
+
 2. Run the command:
+
 ```shell
 dbt deps
 ```
+
 3. If this is a change of minor version (like `0.4.X` -> `0.5.X`), run also:
+
 ```shell
 dbt run --select elementary
 ```
@@ -25,6 +30,7 @@ dbt run --select elementary
 ## Upgrade Elementary CLI
 
 Just run:
+
 ```shell
 pip install elementary-data --upgrade
 ```

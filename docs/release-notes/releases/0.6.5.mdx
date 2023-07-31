@@ -3,39 +3,37 @@ title: "Elementary 0.6.5"
 sidebarTitle: "0.6.5"
 ---
 
-_January 10, 2023: [v0.6.5 Python](https://github.com/elementary-data/elementary/releases/tag/v0.6.5), [v0.6.10 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.6.10)_ 
+_January 10, 2023: [v0.6.5 Python](https://github.com/elementary-data/elementary/releases/tag/v0.6.5), [v0.6.10 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.6.10)_
 
 ### 🔥 What's new?
 
 - **Alerts suppression** 💤🔕
-  - Don't want to get multiple alerts if the same test keeps failing? 
-  - You can now configure an alert_suppression_interval, this is a "snooze" period for alerts on the same issue.  
+  - Don't want to get multiple alerts if the same test keeps failing?
+  - You can now configure an alert_suppression_interval, this is a "snooze" period for alerts on the same issue.
   - [Docs here](/quickstart/send-slack-alerts#customize-alerts-owners-test-descriptions-tags-subscribers-layout-and-suppression)
-  
 - **Alerts filtering using selectors** 🔘
-  - You can now configure edr to send only selected alerts, using tags, owners or models selectors. 
-  - This enables you to send only the alerts you actually care about. 
+
+  - You can now configure edr to send only selected alerts, using tags, owners or models selectors.
+  - This enables you to send only the alerts you actually care about.
   - [Docs here](/quickstart/send-slack-alerts#execute-the-cli)
 
 - **Generate report for a single invocation** 1️⃣
   - Use selectors to generate a pre-filtered report with the results you want to see.
   - Try it: `edr monitor report --select last_invocation`
   - [Docs here]()
-  
 - **Granular time buckets in anomaly detection tests** ⏳
   - Now you can set time buckets that fit the updates cadence of your tables, to get better anomaly detection.
   - The new config enables to bucket by `hour | day | week` and set the interval size as well.
     - Example: 6 hours buckets for volume test
     ```yml properties.yml
-       tests:
-        - elementary.volume_anomalies:
-            timestamp_column: updated_at
-            time_bucket:
-              period: hour
-              count: 6
+    tests:
+      - elementary.volume_anomalies:
+          timestamp_column: updated_at
+          time_bucket:
+            period: hour
+            count: 6
     ```
   - This was a very popular request here on Slack, special thanks to [Rodrigo Loredo](https://github.com/rloredo) for your help with the implementation!
-
 
 ### 💫 More changes
 

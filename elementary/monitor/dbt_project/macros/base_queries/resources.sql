@@ -1,4 +1,4 @@
-{% macro model_resources(exclude_elementary=true) %}
+{% macro get_model_resources(exclude_elementary=true) %}
     {% set model_resources_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}
@@ -9,7 +9,8 @@
             name,
             schema_name as schema,
             tags,
-            owner as owners
+            owner as owners,
+            database_name as database
         from dbt_models
         {% if exclude_elementary %}
             where package_name != 'elementary'
@@ -20,7 +21,7 @@
 {% endmacro %}
 
 
-{% macro source_resources(exclude_elementary=true) %}
+{% macro get_source_resources(exclude_elementary=true) %}
     {% set source_resources_query %}
         with dbt_sources as (
             select * from {{ ref('elementary', 'dbt_sources') }}
@@ -32,7 +33,8 @@
             source_name,
             schema_name AS schema,
             tags,
-            owner AS owners
+            owner AS owners,
+            database_name as database
         from dbt_sources
         {% if exclude_elementary %}
             where package_name != 'elementary'
@@ -43,7 +45,7 @@
 {% endmacro %}
 
 
-{% macro all_resources(exclude_elementary=true) %}
+{% macro get_all_resources(exclude_elementary=true) %}
     {% set models = model_resources(exclude_elementary) %}
     {% set sources = source_resources(exclude_elementary) %}
     
@@ -57,7 +59,7 @@
 {% endmacro %}
 
 
-{% macro resources_meta() %}
+{% macro get_resources_meta() %}
     {% set resources_meta_query %}
         with dbt_models as (
             select * from {{ ref('elementary', 'dbt_models') }}
@@ -85,4 +87,32 @@
     {% endset %}
     {% set resources_meta_agate = run_query(resources_meta_query) %}
     {% do return(elementary.agate_to_dicts(resources_meta_agate)) %}
+{% endmacro %}
+
+
+{% macro get_resources_columns() %}
+    {% set resources_columns_query %}
+        with dbt_columns as (
+            select * from {{ ref('elementary', 'dbt_columns') }}
+        )
+
+        select
+            full_table_name,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            data_type
+        from dbt_columns
+    {% endset %}
+    {% set columns_agate = run_query(resources_columns_query) %}
+    {% set columns = elementary.agate_to_dicts(columns_agate) %}
+    {% set resources_columns_map = {} %}
+    {% for column in columns %}
+        {% set resource = column.get('full_table_name') %}
+        {% set resource_columns = resources_columns_map.get(resource, []) %}
+        {% do resource_columns.append({'column': column.get('column_name'), 'type': column.get('data_type')}) %}
+        {% do resources_columns_map.update({resource: resource_columns}) %} 
+    {% endfor %}
+    {% do return(resources_columns_map) %}
 {% endmacro %}

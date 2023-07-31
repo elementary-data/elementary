@@ -11,3 +11,8 @@ boto3-stubs
 google-auth-stubs
 ratelimit-stubs
 types-google-cloud-ndb
+types-protobuf
+types-pytz
+types-jsonschema
+types-PyYAML
+types-setuptools

@@ -5,10 +5,10 @@ sidebarTitle: "0.6.1"
 
 _November 28, 2022: [v0.6.1 Python](https://github.com/elementary-data/elementary/releases/tag/v0.6.1), [v0.6.1 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.6.1)_
 
-
 ### 🔥 What's new?
 
 - **Elementary is 10x Faster!!!** ⚡️🏃‍
+
   - **Report generation 10x Faster** 💪
     - We improved our mechanism of collecting test samples, greatly reducing the time it takes to run a report!
   - **Lineage screen 10x Faster** 💪
@@ -17,7 +17,7 @@ _November 28, 2022: [v0.6.1 Python](https://github.com/elementary-data/elementar
     - We now cache collected dbt artifacts locally and only upload them if they changed from the last run.
 
 - **Support for showing test descriptions** in both reports and alerts! 📃
-- 
+-
 
 ### 💫 More changes
 
@@ -27,13 +27,11 @@ _November 28, 2022: [v0.6.1 Python](https://github.com/elementary-data/elementar
 - Added a flag of whether the invocation was the first or last of the day to `model_run_results` - Contributed by [Ekaterina Khrushch](https://github.com/eKatia)! 🎉
 - Added a `--quoting` flag to the CLI to allow overriding the default dbt quoting settings in the CLI's internal dbt package - Thanks [Daniel Gaimster](https://github.com/gtmehrer) for reporting!
 
-
 ### 🐞 Bug fixes
 
 - Reduced the maximum query size on BigQuery to avoid "query too big" errors.
 - Fixed a bug that caused uploading the dbt invocations to crash.
 - Evaluate config args correctly by hierarchy even when they are False.
-
 
 ### ⭐️ Additional Contributions & Acknowledgements
 

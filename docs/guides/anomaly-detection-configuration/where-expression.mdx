@@ -25,13 +25,12 @@ models:
   - name: this_is_a_model
     config:
       elementary:
-         where_expression: "loaded_at is not null"
+        where_expression: "loaded_at is not null"
 ```
 
-```yml dbt_project.yml 
+```yml dbt_project.yml
 vars:
   where_expression: "loaded_at > '2022-01-01'"
 ```
-
 
 </RequestExample>

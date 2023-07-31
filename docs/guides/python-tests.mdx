@@ -1,7 +1,7 @@
 ---
 title: "Python tests"
 ---
-  
+
 ## Python in dbt
 
 In dbt v1.3.0, Python models were introduced in order to solve use cases that you can't solve with SQL.
@@ -22,7 +22,10 @@ ability to do so using dbt's building blocks.
 
 ## Elementary Python tests
 
-<img align="center" src="https://uploads-ssl.webflow.com/6332cf5e78da71df515ed316/635156cc485d39e1eafc00e7_dbt_python_tests_banner.png" />
+<img
+  align="center"
+  src="https://uploads-ssl.webflow.com/6332cf5e78da71df515ed316/635156cc485d39e1eafc00e7_dbt_python_tests_banner.png"
+/>
 
 _This is a beta feature, introduced in version 0.5.3 of Elementary's dbt package._
 
@@ -36,10 +39,10 @@ Let's start with a basic example and proceed gradually to show the full potentia
 A Python test is defined like any other dbt test.
 
 ```yaml models/schema.yml
-  - name: orders
-    tests:
-      - elementary.python:
-          code_macro: check_undelivered_orders
+- name: orders
+  tests:
+    - elementary.python:
+        code_macro: check_undelivered_orders
 ```
 
 Then, we need to define a macro under `macros/<macro>.sql` that contains the Python code the test will execute.
@@ -82,12 +85,12 @@ new `DataFrame`. Let's move on to demonstrate Python's true power when it comes 
 Let's compare two different tables, or views, within our warehouse.
 
 ```yaml models/schema.yml
-  - name: orders
-    tests:
-      - elementary.python:
-          code_macro: compare_tables
-          macro_args:
-            other_table: raw_orders
+- name: orders
+  tests:
+    - elementary.python:
+        code_macro: compare_tables
+        macro_args:
+          other_table: raw_orders
 ```
 
 We're passing an additional argument to the test called `macro_args`.
@@ -118,15 +121,14 @@ If the `DataFrame` is not empty, the test will fail with the amount of failed re
 In this example we'll validate a JSON column according to a pre-defined schema.
 
 ```yaml models/schema.yml
-  - name: login_events
-    tests:
-      - elementary.python:
-          code_macro: validate_json
-          macro_args:
-            schema: "{'type': 'object', 'properties': {'country': {'type': 'string'}}}"
-            column: geolocation_json
-          packages: ['jsonschema']
-
+- name: login_events
+  tests:
+    - elementary.python:
+        code_macro: validate_json
+        macro_args:
+          schema: "{'type': 'object', 'properties': {'country': {'type': 'string'}}}"
+          column: geolocation_json
+        packages: ["jsonschema"]
 ```
 
 Here we'll be testing that the `country` that is provided in the `geolocation_json` column in the `login_events`
@@ -164,25 +166,25 @@ which we returned a `DataFrame`.
 ## API Reference
 
 - `elementary.python` dbt test:
-    - `code_macro: str`: Name of the macro that returns the Python code.
-    - `macro_args: dict`: Arguments that are supplied to the macro - `{{ code_macro(macro_args) }}`.
-    - `where_expression: str`: SQL WHERE clause to limit the test scope. 
-    - All available configuration in Python models such as:
-      - `packages: list[str]`: PyPI package requirements.
-      - `submission_method: str`: `cluster` or `serverless` for BigQuery.
-      - ...
+  - `code_macro: str`: Name of the macro that returns the Python code.
+  - `macro_args: dict`: Arguments that are supplied to the macro - `{{ code_macro(macro_args) }}`.
+  - `where_expression: str`: SQL WHERE clause to limit the test scope.
+  - All available configuration in Python models such as:
+    - `packages: list[str]`: PyPI package requirements.
+    - `submission_method: str`: `cluster` or `serverless` for BigQuery.
+    - ...
 - `def test(model_df, ref, session)` Python function:
-    - Arguments
-        - `model_df: DataFrame`: The model's `DataFrame` object.
-        - `ref: Function`: A function that allows you to ref to other resources - `ref('my_other_model')`.
-        - `session: Session`: A `Session` object,
-          either [Snowpark](https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/_autosummary/snowflake.snowpark.html#snowflake.snowpark.Session)
-          or [PySpark](https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.html).
-    - Returns
-        - `DataFrame`: Either a Spark or a [Pandas](https://pandas.pydata.org/) `DataFrame`.
-          The test's failed results count will be the amount of rows in the `DataFrame`.
-        - `int`: The amount of failed results.
-        - `bool`: Whether the test passed (`True`) or failed (`False`).
+  - Arguments
+    - `model_df: DataFrame`: The model's `DataFrame` object.
+    - `ref: Function`: A function that allows you to ref to other resources - `ref('my_other_model')`.
+    - `session: Session`: A `Session` object,
+      either [Snowpark](https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/_autosummary/snowflake.snowpark.html#snowflake.snowpark.Session)
+      or [PySpark](https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.SparkSession.html).
+  - Returns
+    - `DataFrame`: Either a Spark or a [Pandas](https://pandas.pydata.org/) `DataFrame`.
+      The test's failed results count will be the amount of rows in the `DataFrame`.
+    - `int`: The amount of failed results.
+    - `bool`: Whether the test passed (`True`) or failed (`False`).
 
 ## Setup
 

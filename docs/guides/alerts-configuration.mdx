@@ -9,43 +9,71 @@ The supported attributes are: [owner](/guides/alerts-configuration#owner), [subs
 You can configure and customize your alerts by configuring:
 [custom channel](/guides/alerts-configuration#custom-channel), [suppression interval](/guides/alerts-configuration#suppression_interval), [alert fields](/guides/alerts-configuration#alert_fields), [alert grouping](/guides/alerts-configuration#group-alerts-by-table), [alert filters](/guides/alerts-configuration#filter-alerts).
 
-
 ## Alert properties in `.yml` files
 
 Elementary prioritizes configuration in the following order:
 
 **For models / sources:**
+
 1. Model config block.
 2. Model properties.
 3. Model path configuration under `models` key in `dbt_project.yml`.
 
 **For tests:**
+
 1. Test properties.
 2. Tests path configuration under `tests` key in `dbt_project.yml`.
 3. Parent model configuration.
 
 <pre>
- <code>
-&nbsp;&nbsp; meta:
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#owner"><font color="#CD7D55">owner: "@jessica.jones"</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#subscribers"><font color="#CD7D55">subscribers: ["@jessica.jones", "@joe.joseph"]</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#test-description"><font color="#CD7D55">description: "This is the test description"</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#tags"><font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#custom-channel"><font color="#CD7D55">channel: data_ops</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#suppression-interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#group-alerts-by-table"><font color="#CD7D55">slack_group_alerts_by: table</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#alert_fields"><font color="#CD7D55">alert_fields: ["description", "owners", "tags", "subscribers"]</font></a>
- </code>
+  <code>
+    &nbsp;&nbsp; meta: &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#owner">
+      <font color="#CD7D55">owner: "@jessica.jones"</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#subscribers">
+      <font color="#CD7D55">
+        subscribers: ["@jessica.jones", "@joe.joseph"]
+      </font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#test-description">
+      <font color="#CD7D55">description: "This is the test description"</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#tags">
+      <font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#custom-channel">
+      <font color="#CD7D55">channel: data_ops</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#suppression-interval">
+      <font color="#CD7D55">alert_suppression_interval: 24</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#group-alerts-by-table">
+      <font color="#CD7D55">slack_group_alerts_by: table</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/alerts-configuration#alert_fields">
+      <font color="#CD7D55">
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+      </font>
+    </a>
+  </code>
 </pre>
 
-
-### Alert content 
+### Alert content
 
 #### Owner
 
 Elementary enriches alerts with [owners for models or tests](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
+
 - If you want the owner to be tagged on slack use '@' and the email prefix of the slack user (@jessica.jones to tag jessica.jones@marvel.com).
-- You can configure a single owner or a list of owners (`["@jessica.jones", "@joe.joseph"]`). 
+- You can configure a single owner or a list of owners (`["@jessica.jones", "@joe.joseph"]`).
 
 <CodeGroup>
 
@@ -79,7 +107,7 @@ models:
     subfolder:
       +meta:
         owner: "@jessica.jones"
-        
+
 tests:
   path:
     subfolder:
@@ -92,6 +120,7 @@ tests:
 #### Subscribers
 
 If you want additional users besides the owner to be tagged on an alert, add them as subscribers.
+
 - If you want the subscriber to be tagged on slack use '@' and the email prefix of the slack user (@jessica.jones to tag jessica.jones@marvel.com).
 - You can configure a single subscriber or a list (`["@jessica.jones", "@joe.joseph"]`).
 
@@ -125,7 +154,7 @@ models:
     subfolder:
       +meta:
         subscribers: "@jessica.jones"
-        
+
 tests:
   path:
     subfolder:
@@ -134,7 +163,6 @@ tests:
 ```
 
 </CodeGroup>
-
 
 #### Test description
 
@@ -174,7 +202,7 @@ tests:
 You can use [tags](https://docs.getdbt.com/reference/resource-configs/tags) to provide context to your alerts.
 
 - You can tag a group or a channel in a slack alert by adding `#channel_name` as a tag.
-- Tags are aggregated,so a test alert will include both the test and the parent model tags. 
+- Tags are aggregated,so a test alert will include both the test and the parent model tags.
 
 <CodeGroup>
 
@@ -211,10 +239,9 @@ tests:
 
 </CodeGroup>
 
-
 ### Alerts distribution
 
-Elementary allows you to customize alerts to distribute the right information to the right people. 
+Elementary allows you to customize alerts to distribute the right information to the right people.
 This way you can ensure your alerts are valuable and avoid alert fatigue.
 
 #### Custom channel
@@ -252,7 +279,7 @@ models:
     subfolder:
       +meta:
         channel: data_ops
-        
+
 tests:
   path:
     subfolder:
@@ -302,7 +329,7 @@ models:
     subfolder:
       +meta:
         alert_suppression_interval: 24
-        
+
 tests:
   path:
     subfolder:
@@ -316,12 +343,11 @@ tests:
 
 By default, Elementary sends a single alert to notify on each failure with extensive information for fast triage.
 
-Elementary also supports grouping alerts by table. 
+Elementary also supports grouping alerts by table.
 In this case, a single Slack notification will be generated containing all issues associated with this table.
 The created notification will contain a union of the relevant owners, tags and subscribers.
 
 Due to their nature, grouped alerts will contain less information on each issue.
-
 
 <CodeGroup>
 
@@ -353,7 +379,7 @@ models:
     subfolder:
       +meta:
         slack_group_alerts_by: table
-        
+
 tests:
   path:
     subfolder:
@@ -363,12 +389,9 @@ tests:
 
 </CodeGroup>
 
-
 #### Alert fields
 
-<Warning>
-**Currently this feature is supported only by test alerts!**
-</Warning>
+<Warning>**Currently this feature is supported only by test alerts!**</Warning>
 
 You can decide which fields to include in the alert, and create a format of alert that fits your use case and recipients.  
 By default, all the fields are included in the alert.
@@ -416,7 +439,7 @@ models:
     subfolder:
       +meta:
         alert_fields: ["description", "owners", "tags", "subscribers"]
-        
+
 tests:
   path:
     subfolder:
@@ -431,6 +454,11 @@ tests:
 #### Enable/disable alerts
 
 You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
+
+<Warning>
+  Vars will be deprecated soon! We recommend filtering the alerts using [CLI
+  selectors](/guides/alerts-configuration#alerts-cli-flags) instead
+</Warning>
 
 Below are the available vars and their default config:
 
@@ -452,6 +480,8 @@ You can filter the alerts by tag, owner or model.
 
 If you run `edr` from the dbt project directory (or pass `--project-dir`), you can use any of the dbt selectors.
 
+_Note_: alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
+
 <CodeGroup>
 
 ```shell tag filter
@@ -472,16 +502,27 @@ edr monitor --select customers
 edr monitor --select orders
 ```
 
-</CodeGroup> 
+```shell statuses filter
+edr monitor --select statuses:warn,fail
+edr monitor --select statuses:error
+edr monitor --select statuses:skipped
+```
 
+```shell resource_types filter
+edr monitor --select resource_types:model
+edr monitor --select resource_types:test
+edr monitor --select resource_types:test,source_freshness
+```
+
+</CodeGroup>
 
 #### Group alerts by table
 
 By default, Elementary sends a single alert to notify on each failure with extensive information for fast triage.
 
-Elementary also supports grouping alerts by table. 
-In this case, a single Slack notification will be generated containing all issues associated with this table. 
-The created notification will contain a union of the relevant owners, tags and subscribers. 
+Elementary also supports grouping alerts by table.
+In this case, a single Slack notification will be generated containing all issues associated with this table.
+The created notification will contain a union of the relevant owners, tags and subscribers.
 
 Due to their nature, grouped alerts will contain less information on each issue.
 
@@ -491,13 +532,13 @@ edr monitor --group-by table
 
 #### Suppression interval flag
 
-Don’t want to get multiple alerts if the same test keeps failing? 
+Don’t want to get multiple alerts if the same test keeps failing?
 You can now configure an alert_suppression_interval, this is a “snooze” period for alerts on the same issue.
 Elementary won’t send new alerts on the same issue that are generated within suppression interval.
 
 The flag configuration is the suppression interval duration in hours, and the default is 0 hours (no alert suppression).
-If configured otherwise in the model/test config block, the model/test config block value will be used instead.
+If configured otherwise in the dbt project config block or meta, the CLI value will be ignored (unless `--override-dbt-project-config` is used).
 
 ```shell
-edr monitor --suppression-interval 24 
+edr monitor --suppression-interval 24
 ```

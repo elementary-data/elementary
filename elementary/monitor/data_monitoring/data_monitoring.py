@@ -7,9 +7,12 @@ from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
+from elementary.monitor.data_monitoring.schema import WarehouseInfo
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
+from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import package
+from elementary.utils.hash import hash
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -36,7 +39,16 @@ class DataMonitoring:
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         dbt_pkg_version = latest_invocation.get("elementary_version")
+        self.warehouse_info = self._get_warehouse_info(
+            hash_id=isinstance(tracking, AnonymousTracking)
+        )
         if tracking:
+            if self.warehouse_info:
+                tracking.register_group(
+                    "warehouse",
+                    self.warehouse_info.id,
+                    self.warehouse_info.dict(),
+                )
             tracking.set_env("target_name", latest_invocation.get("target_name"))
             tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
             tracking.set_env("dbt_version", latest_invocation.get("dbt_version"))
@@ -63,7 +75,7 @@ class DataMonitoring:
             dbt_project_utils.PATH,
             self.config.profiles_dir,
             self.config.profile_target,
-            dbt_env_vars=self.config.dbt_env_vars,
+            env_vars=self.config.env_vars,
         )
         return internal_dbt_runner
 
@@ -73,7 +85,7 @@ class DataMonitoring:
                 self.config.project_dir,
                 self.config.profiles_dir,
                 self.config.project_profile_target,
-                dbt_env_vars=self.config.dbt_env_vars,
+                env_vars=self.config.env_vars,
             )
         else:
             user_dbt_runner = None
@@ -111,7 +123,8 @@ class DataMonitoring:
             return relation
         except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
-            self.tracking.record_internal_exception(ex)
+            if self.tracking:
+                self.tracking.record_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
 
     def get_latest_invocation(self) -> Dict[str, Any]:
@@ -160,3 +173,24 @@ class DataMonitoring:
         logger.info(
             f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible."
         )
+
+    def _get_warehouse_info(self, hash_id: bool = False) -> Optional[WarehouseInfo]:
+        dbt_runner = DbtRunner(
+            dbt_project_utils.PATH,
+            self.config.profiles_dir,
+            self.config.profile_target,
+            env_vars=self.config.env_vars,
+        )
+        try:
+            warehouse_type, warehouse_unique_id = json.loads(
+                dbt_runner.run_operation("get_adapter_type_and_unique_id", quiet=True)[
+                    0
+                ]
+            )
+            return WarehouseInfo(
+                id=warehouse_unique_id if not hash_id else hash(warehouse_unique_id),
+                type=warehouse_type,
+            )
+        except Exception:
+            logger.debug("Could not get warehouse info.", exc_info=True)
+            return None
