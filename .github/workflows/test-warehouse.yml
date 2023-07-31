@@ -12,6 +12,7 @@ on:
           - bigquery
           - redshift
           - databricks
+          - databricks_catalog
           - spark
       elementary-ref:
         type: string
@@ -122,12 +123,12 @@ jobs:
         run: >
           pip install --pre
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          "dbt-${{ inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
+          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
           pip install -r dev-requirements.txt
-          pip install ".[${{ inputs.warehouse-type }}]"
+          pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}
