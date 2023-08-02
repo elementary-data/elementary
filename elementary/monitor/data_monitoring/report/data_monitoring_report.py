@@ -1,4 +1,4 @@
-import html
+import base64
 import json
 import os
 import os.path
@@ -65,13 +65,17 @@ class DataMonitoringReport(DataMonitoring):
             template_html_path = pkg_resources.resource_filename(__name__, "index.html")
             with open(template_html_path, "r", encoding="utf-8") as template_html_file:
                 template_html_code = template_html_file.read()
-                dumped_output_data = html.escape(json.dumps(output_data), quote=False)
+                dumped_output_data = json.dumps(output_data)
+                encoded_output_data = base64.b64encode(dumped_output_data.encode("utf-8"))
+
                 compiled_output_html = f"""
                         {template_html_code}
                         <script>
-                            var elementaryData = {dumped_output_data}
+                            window.onload = function exampleFunction() {{
+                                window.elementaryData = JSON.parse(window.atob('{encoded_output_data.decode("utf-8")}'));
+                            }}
                         </script>
-                    """
+                   """
                 html_file.write(compiled_output_html)
         with open(
             os.path.join(self.config.target_dir, "elementary_output.json"),
