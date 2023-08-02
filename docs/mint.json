@@ -21,6 +21,9 @@
     "suggestEdit": true,
     "raiseIssue": true
   },
+  "search": {
+    "prompt": "Ask me anything"
+  },
   "tabs": [
     {
       "name": "Elementary Cloud",
