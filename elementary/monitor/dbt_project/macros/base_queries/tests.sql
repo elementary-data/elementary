@@ -18,7 +18,7 @@
                 name,
                 NULL as source_name
             from dbt_models
-            union
+            union all
             select
                 unique_id,
                 name,
