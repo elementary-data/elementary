@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
 from dateutil import tz
 
@@ -32,7 +32,7 @@ class Alert:
         alert_fields: Optional[list] = None,
         timezone: Optional[str] = None,
         test_meta: Optional[dict] = None,
-        model_meta: Optional[str] = None,
+        model_meta: Optional[Union[str, dict]] = None,
         alerts_table: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
         **kwargs,
@@ -65,7 +65,10 @@ class Alert:
         self.owners: List[str] = owners or []
         self.tags: List[str] = tags or []
         self.meta = test_meta
-        self.model_meta = try_load_json(model_meta) or {}
+        if isinstance(model_meta, dict):
+            self.model_meta = model_meta
+        else:
+            self.model_meta = try_load_json(model_meta) or {}
         self.status = status
         self.subscribers: List[str] = subscribers or []
         self.slack_channel = slack_channel
