@@ -223,7 +223,6 @@
       "group": "Getting Started",
       "pages": [
         "cloud/onboarding/quickstart-dbt-package",
-        "cloud/onboarding/create-profile",
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
