@@ -11,7 +11,7 @@ from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
-
+import yaml
 
 class DbtRunner(BaseDbtRunner):
     ELEMENTARY_LOG_PREFIX = "Elementary: "
@@ -29,6 +29,7 @@ class DbtRunner(BaseDbtRunner):
         super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
+        self._run_deps_if_needed()
 
     def _run_command(
         self,
@@ -241,3 +242,28 @@ class DbtRunner(BaseDbtRunner):
 
     def source_freshness(self):
         self._run_command(command_args=["source", "freshness"])
+
+    def get_installed_packages(self):
+        dbt_packages_folder = os.path.join(os.getcwd(), 'dbt_packages')
+        try:
+            folder_names = [name for name in os.listdir(dbt_packages_folder) if os.path.isdir(os.path.join(dbt_packages_folder, name))]
+            return folder_names
+        except FileNotFoundError:
+            logger.info("'dbt_packages' folder not found.")
+            return False
+
+    def _run_deps_if_needed(self):
+        packages_yaml_file = os.path.abspath('packages.yml')
+        with open(packages_yaml_file, 'r') as file:
+            packages_data = yaml.safe_load(file)
+        package_names = [package_entry.get('package', '').split('/')[-1] for package_entry in packages_data['packages']]
+        package_names = [package for package in package_names if package != '']
+        installed_packages = self.get_installed_packages()
+        if not installed_packages:
+            self.deps()
+            return
+        for package in package_names:
+            if package in installed_packages:
+                continue
+            self.deps()
+            break
