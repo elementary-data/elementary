@@ -65,10 +65,7 @@ class Alert:
         self.owners: List[str] = owners or []
         self.tags: List[str] = tags or []
         self.meta = test_meta
-        if isinstance(model_meta, dict):
-            self.model_meta = model_meta
-        else:
-            self.model_meta = try_load_json(model_meta) or {}
+        self.model_meta = try_load_json(model_meta) or {}
         self.status = status
         self.subscribers: List[str] = subscribers or []
         self.slack_channel = slack_channel

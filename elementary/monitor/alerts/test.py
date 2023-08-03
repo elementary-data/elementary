@@ -38,10 +38,7 @@ class TestAlert(Alert):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        if isinstance(test_meta, dict):
-            self.test_meta = test_meta
-        else:
-            self.test_meta = try_load_json(test_meta) or {}
+        self.test_meta = try_load_json(test_meta) or {}
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
         self.test_created_at = test_created_at

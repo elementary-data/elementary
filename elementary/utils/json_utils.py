@@ -2,12 +2,15 @@ import json
 from typing import List, Optional, Union
 
 
-def try_load_json(string_value: Optional[str]):
-    if string_value is None:
+def try_load_json(value: Optional[Union[str, dict, list]]):
+    if value is None:
         return None
+    if isinstance(value, dict) or isinstance(value, list):
+        # Already loaded
+        return value
 
     try:
-        return json.loads(string_value)
+        return json.loads(value)
     except Exception:
         return None
 
