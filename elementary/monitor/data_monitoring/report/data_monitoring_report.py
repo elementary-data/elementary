@@ -74,7 +74,7 @@ class DataMonitoringReport(DataMonitoring):
                         {template_html_code}
                         <script>
                             window.onload = function() {{
-                                window.elementaryData = JSON.parse(window.atob('{encoded_output_data.decode("utf-8")}'));
+                                window.elementaryData = JSON.parse(atob('{encoded_output_data.decode("utf-8")}'));
                             }}
                         </script>
                    """
