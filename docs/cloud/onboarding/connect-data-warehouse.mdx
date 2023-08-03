@@ -16,6 +16,67 @@ On the `Account settings` under `Environments`, press on `Create environment`.
 
 Provide an environment name, select a data warehouse type, and fill the required fields.
 
+#### Snowflake
+
+Provide the following fields:
+
+- **Account**: Find your account by using the Snowflake account URL and removing `snowflakecomputing.com`. e.g. `example.us-east-1`. For more information, see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier.html) in the Snowflake docs.
+- **Database name**: The name of the database where your Elementary schema exist. e.g. `analytics`.
+- **Warehouse**: e.g. `ELEMENTARY_WAREHOUSE`.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+- **Role (optional)**: e.g. `ELEMENTARY_ROLE`.
+
+Elementary cloud supports the user password and key pair authentication connection methods.
+
+- **User password**:
+  - User: The user created for Elementary.
+  - Password: The password you set when creating your Snowflake account.
+- **Key pair**:
+  - User: The user created for Elementary.
+  - Private key: The private key you generated for Elementary. For more information, see [Generate Private Key](https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-authentication) in the Snowflake docs.
+  - Private key passphrase (optional)
+
+#### Redshift
+
+Provide the following fields:
+
+- **Host**: The hostname of your Redshift account to connect to. This can either be a hostname or an IP address.
+- **Port**: The port of your Redshift account to connect to. This is usually `5439`.
+- **Database name**: The name of the database where your Elementary schema exist. e.g. `analytics`.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+- **User**: The name of the for Elementary user.
+- **Password**: The password associated with the provided user.
+
+#### BigQuery
+
+Provide the following fields:
+
+- **Service account file**: The service account file you generated for Elementary. For more information, refer to [Create BigQuery service account](/integrations/bigquery#create-bigquery-service-account).
+- **Project**: The name of your BigQuery project.
+- **Elementary dateset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
+- **Location**: Use this field to configure the location of BigQuery datasets as per [the BigQuery documentation](https://cloud.google.com/bigquery/docs/locations).
+
+#### Databricks
+
+Provide the following fields:
+
+- **Host**: The hostname of your Databricks account to connect to.
+- **Http path**: The path to the Databricks cluster or SQL warehouse.
+- **Token**: The token you generated for Elementary. For more information, see [Generate a token](https://docs.databricks.com/dev-tools/api/latest/authentication.html#generate-a-token) in the Databricks docs.
+- **Catalog (optional)**: The name of the Databricks Catalog.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+
+#### Postgres
+
+Provide the following fields:
+
+- **Host**: The hostname of your Postgres account to connect to. This can either be a hostname or an IP address.
+- **Port**: The port of your Postgres account to connect to. This is usually `5432`.
+- **Database name**: The name of the database where your Elementary schema exist. e.g. `analytics`.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+- **User**: The name of the for Elementary user.
+- **Password**: The password associated with the provided user.
+
 ### Allowlist Elementary IP
 
 Elementary IP for allowlist: `3.126.156.226`
