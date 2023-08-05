@@ -26,44 +26,17 @@ Elementary prioritizes configuration in the following order:
 3. Parent model configuration.
 
 <pre>
-  <code>
-    &nbsp;&nbsp; meta: &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#owner">
-      <font color="#CD7D55">owner: "@jessica.jones"</font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#subscribers">
-      <font color="#CD7D55">
-        subscribers: ["@jessica.jones", "@joe.joseph"]
-      </font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#test-description">
-      <font color="#CD7D55">description: "This is the test description"</font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#tags">
-      <font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#custom-channel">
-      <font color="#CD7D55">channel: data_ops</font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#suppression-interval">
-      <font color="#CD7D55">alert_suppression_interval: 24</font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#group-alerts-by-table">
-      <font color="#CD7D55">slack_group_alerts_by: table</font>
-    </a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="/guides/alerts-configuration#alert_fields">
-      <font color="#CD7D55">
-        alert_fields: ["description", "owners", "tags", "subscribers"]
-      </font>
-    </a>
-  </code>
+ <code>
+&nbsp;&nbsp; meta:
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#owner"><font color="#CD7D55">owner: "@jessica.jones"</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#subscribers"><font color="#CD7D55">subscribers: ["@jessica.jones", "@joe.joseph"]</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#test-description"><font color="#CD7D55">description: "This is the test description"</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#tags"><font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#custom-channel"><font color="#CD7D55">channel: data_ops</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#suppression-interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#group-alerts-by-table"><font color="#CD7D55">slack_group_alerts_by: table</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#alert_fields"><font color="#CD7D55">alert_fields: ["description", "owners", "tags", "subscribers"]</font></a>
+ </code>
 </pre>
 
 ### Alert content
