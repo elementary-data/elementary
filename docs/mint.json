@@ -4,42 +4,40 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
-  "favicon": "/elementary_logo_512x512.png",
+  "favicon": "/elementary_favicon.png",
   "colors": {
-    "primary": "#FF6B42",
-    "light": "#FE8E08",
-    "dark": "#FF4775",
+    "primary": "#F2386C",
+    "light": "#FE9356",
+    "dark": "#F2386C",
     "ultraLight": "#F3D7B4",
     "ultraDark": "#E0456C",
-    "anchors": {
-      "from": "#FE8913",
-      "to": "#FE10B0"
+    "anchors": "#F2386C",
+    "background": {
+      "dark": "#19071F",
+      "light": "#FFFFFF"
     }
   },
   "feedback": {
     "suggestEdit": true,
     "raiseIssue": true
   },
+  "tabs": [
+    {
+      "name": "Elementary Cloud",
+      "url": "cloud"
+    }
+  ],
   "topbarCtaButton": {
     "name": "Try Elementary Cloud",
-    "url": "https://t2taztilhde.typeform.com/to/ObfMbxB5?utm_source=docs&utm_medium=cta&utm_content=v1"
+    "url": "https://app.elementary-data.com/"
   },
   "topbarLinks": [
     {
-      "name": "Blog",
-      "url": "https://www.elementary-data.com/blog"
-    },
-    {
-      "name": "Support",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+      "name": "Github",
+      "url": "https://github.com/elementary-data/elementary"
     }
   ],
   "anchors": [
-    {
-      "name": "Elementary Cloud",
-      "icon": "cloud",
-      "url": "cloud"
-    },
     {
       "name": "Community",
       "icon": "slack",
@@ -49,11 +47,6 @@
       "name": "Demo",
       "icon": "circle-play",
       "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
-    },
-    {
-      "name": "GitHub",
-      "icon": "github",
-      "url": "https://github.com/elementary-data/elementary"
     }
   ],
   "navigation": [
@@ -160,7 +153,8 @@
         "understand-elementary/elementary-overview",
         "guides/modules-overview/dbt-package",
         "dbt/dbt-artifacts",
-        "understand-elementary/elementary-report-ui"
+        "understand-elementary/elementary-report-ui",
+        "quickstart/send-slack-alerts"
       ]
     },
     {
@@ -233,6 +227,26 @@
         "cloud/onboarding/signup",
         "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": ["cloud/guides/sync-scheduling"]
+    },
+    {
+      "group": "BI tools integration",
+      "pages": [
+        "cloud/integrations/bi/connect-bi-tool",
+        "cloud/integrations/bi/looker",
+        "cloud/integrations/bi/tableau"
+      ]
+    },
+    {
+      "group": "Code repository integration",
+      "pages": [
+        "cloud/integrations/code-repo/connect-code-repo",
+        "cloud/integrations/code-repo/github",
+        "cloud/integrations/code-repo/gitlab"
       ]
     }
   ],
