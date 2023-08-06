@@ -7,9 +7,9 @@ from typing import Optional, Tuple
 
 import pkg_resources
 
+from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
-from elementary.clients.azure.client import AzureClient
 from elementary.config.config import Config
 from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
@@ -43,7 +43,9 @@ class DataMonitoringReport(DataMonitoring):
         self.report_api = ReportAPI(self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-        self.azure_client = AzureClient.create_client(self.config, tracking=self.tracking)
+        self.azure_client = AzureClient.create_client(
+            self.config, tracking=self.tracking
+        )
 
     def generate_report(
         self,

@@ -10,10 +10,11 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+
 class AzureClient:
     def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
-        
+
         self.tracking = tracking
 
     @classmethod
@@ -30,17 +31,25 @@ class AzureClient:
             if remote_bucket_file_path
             else path.basename(local_html_file_path)
         )
-        blob_service_client = BlobServiceClient.from_connection_string(self.config.azure_connection_string)
-        self.client = blob_service_client.get_blob_client(container=self.config.azure_container_name, blob=report_filename)
+        blob_service_client = BlobServiceClient.from_connection_string(
+            self.config.azure_connection_string
+        )
+        self.client = blob_service_client.get_blob_client(
+            container=self.config.azure_container_name, blob=report_filename
+        )
         bucket_website_url = None
-        logger.info(f'Uploading to Azure container "{self.config.azure_container_name}"')
+        logger.info(
+            f'Uploading to Azure container "{self.config.azure_container_name}"'
+        )
         with open(local_html_file_path, "rb") as data:
             self.client.upload_blob(data, content_type="text/html", overwrite=True)
         logger.info("Uploaded report to Azure blob storage.")
         if self.config.update_bucket_website:
-            dst_blob_client  = blob_service_client.get_blob_client(self.config.azure_container_name, blob="index.html")
+            dst_blob_client = blob_service_client.get_blob_client(
+                self.config.azure_container_name, blob="index.html"
+            )
             # Copy the uploaded file to the destination path within the same container
-            dst_blob_client .start_copy_from_url(self.client.url)
+            dst_blob_client.start_copy_from_url(self.client.url)
             # Get the website URL of the copied file
             bucket_website_url = dst_blob_client.url
             logger.info("Updated Azure container's website.")

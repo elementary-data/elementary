@@ -188,7 +188,7 @@ class Config:
     @property
     def has_s3(self):
         return self.s3_bucket_name
-    
+
     @property
     def has_blob(self):
         return self.azure_container_name
