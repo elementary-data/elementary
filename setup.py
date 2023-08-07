@@ -50,6 +50,7 @@ setup(
         "pydantic<2.0",
         "networkx>=2.3,<3",
         "packaging>=20.9,<=23.1",
+        "azure-storage-blob>=12.11.0",
     ],
     extras_require={
         **ADAPTER_EXTRA_REQUIREMENTS,
