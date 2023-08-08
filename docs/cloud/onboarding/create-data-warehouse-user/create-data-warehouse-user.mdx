@@ -8,31 +8,35 @@ It is recommended to create a read only user for the elementary schema only, and
 
 This guild will walk you through the process of creating such a user.
 
-
 # Snowflake, Redshift, Postgres
 
 Run the following `dbt` command:
+
 ```bash
 dbt run-operation create_elementary_user
 ```
+
 This command will generate a query to create a user with the necessary permissions. Run this query on your data warehouse to proceed.
 
 By default, the users name, password and role name (Snowflake) will be generated automatically, if you wish to overwrite them, you may use the following args:
+
 ```bash
 dbt run-operation create_elementary_user --args '{"name": "custom_elementary_user_name", "password": "MySuperDuperStrongPassword123", "role": "custom_elementary_role"}'
 ```
 
-
 # BigQuery
-As BigQuery doesn't support creating users through SQL, you will need to create a service account manually. Follow these steps: 
- * Create the service account ([docs](https://cloud.google.com/iam/docs/service-account-overview)).
- * Grant it the `roles/bigquery.jobUser` role on the project ([docs](https://cloud.google.com/bigquery/docs/access-control#bigquery_iam_roles)).
- * Grant is the `roles/bigquery.dataViewer` role on your elementary dataset (usually `<dbt_dataset>_elementary`).
- * Grant it the `roles/bigquery.metadataViewer` role on your dbt dataset.
 
+As BigQuery doesn't support creating users through SQL, you will need to create a service account manually. Follow these steps:
+
+- Create the service account ([docs](https://cloud.google.com/iam/docs/service-account-overview)).
+- Grant it the `roles/bigquery.jobUser` role on the project ([docs](https://cloud.google.com/bigquery/docs/access-control#bigquery_iam_roles)).
+- Grant is the `roles/bigquery.dataViewer` role on your elementary dataset (usually `<dbt_dataset>_elementary`).
+- Grant it the `roles/bigquery.metadataViewer` role on your dbt dataset.
 
 # Databricks
+
 As with BigQuery, Databricks doesn't support creating users through SQL, you will need to create a service principal manually, you may want to consult the [documentation](https://docs.databricks.com/administration-guide/users-groups/users.html).
 
 Create a service principal with the following permissions:
- * read on all the tables in your `elementary` schema (usually `<dbt_schema>_elementary`)
+
+- read on all the tables in your `elementary` schema (usually `<dbt_schema>_elementary`)
