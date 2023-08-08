@@ -60,7 +60,7 @@ Similar to Test 1, we will use the **volume_anomalies** test to detect an anomal
       tags: ["finance"]
 
     tests:
-      - elementary.volume_anomalies
+      - elementary.volume_anomalies:
           tags: ["table_anomalies"]
           timestamp_column: "order_date"
 
@@ -135,7 +135,7 @@ models:
         timestamp_column: "signup_date"
     tests:
       - elementary.volume_anomalies
-      
+
     columns:
       - name: customer_id
         description: This is a unique identifier for a customer

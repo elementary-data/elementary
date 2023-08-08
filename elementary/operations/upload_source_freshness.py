@@ -39,6 +39,9 @@ class UploadSourceFreshnessOperation:
             self.config.profiles_dir,
             self.config.profile_target,
         )
+        if not dbt_project_utils.is_dbt_package_up_to_date():
+            dbt_runner.deps()
+
         chunk_size = 100
         chunk_list = list(range(0, len(results), chunk_size))
         upload_with_progress_bar = alive_it(

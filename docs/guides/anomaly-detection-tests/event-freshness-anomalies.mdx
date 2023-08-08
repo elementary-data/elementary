@@ -24,28 +24,58 @@ _Required configuration: `event_timestamp_column`_
 _Default configuration: `anomaly_direction: spike` to alert only on delays._
 
 <pre>
- <code>
-  tests:
-    &nbsp;&nbsp; -- elementary.event_freshness_anomalies:
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/event_timestamp_column"><font color="#CD7D55">event_timestamp_column: column name</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/days-back"><font color="#CD7D55">days_back: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/backfill-days"><font color="#CD7D55">backfill_days: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/min-training-set-size"><font color="#CD7D55">min_training_set_size: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font></a>
- </code>
+  <code>
+    tests: &nbsp;&nbsp; -- elementary.event_freshness_anomalies:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/event_timestamp_column">
+      <font color="#CD7D55">event_timestamp_column: column name</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/update_timestamp_column">
+      <font color="#CD7D55">update_timestamp_column: column name</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/where-expression">
+      <font color="#CD7D55">where_expression: sql expression</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/anomaly-sensitivity">
+      <font color="#CD7D55">anomaly_sensitivity: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/days-back">
+      <font color="#CD7D55">days_back: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/backfill-days">
+      <font color="#CD7D55">backfill_days: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/min-training-set-size">
+      <font color="#CD7D55">min_training_set_size: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">time_bucket:</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">period: [hour | day | week | month]</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">count: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/guides/anomaly-detection-configuration/seasonality">
+      <font color="#CD7D55">seasonality: day_of_week</font>
+    </a>
+  </code>
 </pre>
-
 
 <RequestExample>
 
 ```yml Models
-
 models:
   - name: < model name >
     tests:
@@ -59,7 +89,6 @@ models:
 ```
 
 ```yml Models example
-
 models:
   - name: login_events
     tests:

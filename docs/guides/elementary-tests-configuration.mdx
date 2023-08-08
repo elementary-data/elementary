@@ -11,13 +11,15 @@ The more granular and specific configuration overrides the less granular one.
 Elementary searches and prioritizes configuration in the following order:
 
 **For models tests:**
+
 1. Test arguments.
 2. Tests path configuration under `tests` key in `dbt_project.yml`.
 3. Model configuration.
-4. Path configuration under `models` key in `dbt_project.yml`. 
+4. Path configuration under `models` key in `dbt_project.yml`.
 5. Global vars in `dbt_project.yml`.
 
 **For sources tests:**
+
 1. Test arguments.
 2. Tests path configuration under `tests` key in `dbt_project.yml`.
 3. Table configuration.
@@ -95,13 +97,13 @@ Elementary searches and prioritizes configuration in the following order:
        -- <a href="/guides/anomaly-detection-configuration/exclude_prefix"><font color="#CD7D55">exclude_prefix: string</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/exclude_regexp"><font color="#CD7D55">exclude_regexp: regex</font>></a>
        -- <a href="/guides/anomaly-detection-configuration/dimensions"><font color="#CD7D55">dimensions: sql expression</font>></a>
-      
+
       Data monitors:
        -- <a href="/guides/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">column_anomalies: column monitors list</font>></a>
 
       Other:
        -- <a href="/guides/anomaly-detection-configuration/event_timestamp_column"><font color="#CD7D55">event_timestamp_column: column name</font>></a>
-       -- <a href="/guides/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font>></a> 
+       -- <a href="/guides/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font>></a>
 
      </code>
     </pre>

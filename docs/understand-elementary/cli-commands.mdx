@@ -10,7 +10,7 @@ edr --help
 
 ## CLI commands
 
-Read from the test results table and send new [alerts to Slack](/understand-elementary/elementary-alerts):
+Read from the test results table and send new [alerts to Slack](/guides/alerts-configuration):
 
 ```shell
 edr monitor
@@ -88,8 +88,7 @@ Here is a list of all the available options:
 
 - **Select:**
   Filter the alerts / report using a selector.
-
-  - See all of the alerts supported selector methods [here](/quickstart/send-slack-alerts#filtering-alerts-using-selector).
+  - See all of the alerts supported selector methods [here](/guides/alerts-configuration#alerts-cli-flags).
   - See all of the report supported selector methods [here](/quickstart/generate-report-ui#generating-a-report-for-single-invocation).
 
 ```shell
@@ -103,7 +102,7 @@ Here is a list of all the available options:
 -s, --slack-webhook <slack_webhook_url>
 ```
 
-- **Slack token:**
+- **Slack token and Slack channel name:**
   Pass the Slack token and the Slack channel to edr as parameters.
 
 ```shell
@@ -192,4 +191,23 @@ Here is a list of all the available options:
 
 ```shell
 --env [dev|prod]
+```
+
+- **Suppression interval:**
+  Supress similar alerts for a given number of hours.
+  [Read more about this setting here.](/guides/alerts-configuration#suppression-interval-flag)
+  The default suppression interval is 0.
+
+```shell
+edr monitor --suppression-interval [int]
+```
+
+- **Override configuration from dbt project:**
+  Sometimes, for example during testing and development, you want all your alerts sent to a single slack channel,
+  without suppression, regardless of how they are configured in the model config block or schema.yml in your dbt project.
+  You can do this by using this flag.
+  Please note that when using this flag without passing a suppression interval parameter, the suppression interval for all the alerts will be overridden by the default value, 0.
+
+```shell
+edr monitor --override-dbt-project-config --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at> --suppression-interval 0
 ```

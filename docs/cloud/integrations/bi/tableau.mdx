@@ -1,0 +1,49 @@
+---
+title: "Tableau"
+---
+
+In order to allow Elementary to continuously generate [dbt exposures](https://docs.getdbt.com/docs/build/exposures) from Tableau you will need to setup the following integrations:
+
+1. Connect Tableau - Elementary will continuously connect to Tableau to extract metadata.
+2. Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo) - Elementary will open a pull request to add exposures to your dbt project.
+
+## Connect Tableau
+
+In order for Elementary to extract your metadata from Tableau you must meet all of the Tableau Metadata GraphQL requirements (most are set by default):
+
+- Tableau Cloud/Server 2019.3 or later.
+- Tableau REST API must not be disabled.
+- The Metadata API must be enabled.
+- The Metadata API must be accessed via an access token.
+
+### Creating a Personal Access Token
+
+Create a Personal Access Token in Tableau. For details on how to create a user token please refer to the **[Tableau guide](https://help.tableau.com/current/pro/desktop/en-us/useracct.htm#create-a-personal-access-token)**.
+
+When you generate this token, **Tableau will display a token secret only once**.
+Make sure you store this token securely for future use, you will need it when you connect Tableau to Elementary.
+
+### Connecting Tableau to Elementary
+
+Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect Looker.
+Choose the Tableau BI connection and provide the following details to validate and complete the integration.
+
+- **Token Name:** The name of the token you created in Tableau.
+- **Token Value**: The token secret you saved when generating the token in Tableau
+- **Site information:** The site URL and name can be found on the URL you see when you visit the homepage of your Tableau instance. e.g. `https://prod-useast-a.online.tableau.com/#/site/elementary/projects`
+  - **Site URL:** Copy and paste the base URL. e.g. `https://prod-useast-a.online.tableau.com/`
+  - **Site Name**: Copy and paste the site name. e.g. `elementary`
+
+<Frame caption="Connect Tableau to Elementary environment">
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1690191024/tableau-form_aaxfta.png"
+    alt="Connect Tableau to Elementary environment"
+  />
+</Frame>
+
+## Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo)
+
+To allow Elementary to open pull requests to add exposures to your dbt project, follow the relevant guide according to your code repository provider:
+
+- [Github](/cloud/integrations/code-repo/connect-code-repo/github)
+- [Gitlab](/cloud/integrations/code-repo/connect-code-repo/gitlab)

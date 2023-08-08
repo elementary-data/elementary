@@ -9,7 +9,7 @@ In this step you will setup the environment needed for running the tutorial and 
 
 <Info>
 
-  **Prerequisites**
+**Prerequisites**
 
 For the tutorial you will need:
 
@@ -26,10 +26,13 @@ We also recommend you work with a [Python virtual environment](https://docs.pyth
 <Accordion title="dbt core">
 
 ### 1. Initialize a New dbt Project:
+
 Name the project `elementary_tutorial`:
+
 ```shell
 dbt init elementary_tutorial
 ```
+
 Ensure that you have a working connection to your DWH. To troubleshoot, you can run **dbt debug**.
 
 ### 2. Download tutorial sample data and models
@@ -40,14 +43,18 @@ We created a dbt project and sample data for the tutorial.
 ### 3. Copy files to the `elementary_tutorial` project
 
 Copy the following downloaded directories to your local `elementary_tutorial` project:
-- Replace the `/seeds` folder in the project with the downloaded `/seeds` directory.   
+
+- Replace the `/seeds` folder in the project with the downloaded `/seeds` directory.
 - Replace the `/models` folder in the project with the downloaded `/models` directory.
 
 ### 4. Seed Data to the DWH
+
 Populate the sample data:
+
 ```shell
 dbt seed
 ```
+
 </Accordion>
 <br />
 <Accordion title="dbt cloud">
@@ -63,16 +70,19 @@ In order to load the tutorial project into your dbt cloud environment, you need 
 To fork the the tutorial repo, go to the [tutorial repo](https://github.com/elementary-data/tutorial) and click on the `fork` button.
 
 #### 2. Create a new dbt Project
+
 To create a new project in dbt cloud, go to `Account Settings` and click on the `New Project` button under the `Projects` section.<br/> Create a new project named `elementary_tutorial`.
-<Warning>
-**Make sure you name the project `elementary_tutorial`.**
-</Warning>
+
+<Warning>**Make sure you name the project `elementary_tutorial`.**</Warning>
 
 #### 3. Connect to the Tutorial Repo
+
 Connect to the forked repository.
 
 #### 4. Seed Data to our DWH
+
 After creating a branch, we will populate our DWH with the sample data:
+
 ```shell
 dbt seed
 ```

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       should-bump-on-success:
-        description: 'Should the version be bumped on success'
+        description: "Should the version be bumped on success"
         type: boolean
         required: false
         default: false
@@ -46,7 +46,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        warehouse-type: [ postgres, snowflake, bigquery, redshift, databricks ]
+        warehouse-type:
+          [
+            postgres,
+            snowflake,
+            bigquery,
+            redshift,
+            databricks,
+            databricks_catalog,
+          ]
     needs: get-latest-release-tags
     uses: ./.github/workflows/test-warehouse.yml
     with:
@@ -56,7 +64,7 @@ jobs:
 
   recommendation:
     runs-on: ubuntu-latest
-    needs: [ get-latest-release-tags, validate-upgrade-cli ]
+    needs: [get-latest-release-tags, validate-upgrade-cli]
     steps:
       - name: recommend unbreaking change upgrade
         run: |
@@ -69,7 +77,7 @@ jobs:
             core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards compatibility - If not possible, update minor.")
 
   bump-version:
-    needs: [ get-latest-release-tags, recommendation ]
+    needs: [get-latest-release-tags, recommendation]
     if: ${{ inputs.should-bump-on-success }}
     uses: ./.github/workflows/bump-version.yml
     with:

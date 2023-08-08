@@ -1,5 +1,5 @@
 ---
-title: 'Databricks'
+title: "Databricks"
 ---
 
 Elementary Databricks integration is supports:
@@ -7,7 +7,7 @@ Elementary Databricks integration is supports:
 1. Installing the dbt package to upload dbt artifacts, test results and run results.
 2. Data observability report generation.
 3. Slack alerts on failures in models and tests.
-4. Anomaly detection tests. 
+4. Anomaly detection tests.
 
 Elementary schema changes tests are **not supported yet**.
 
@@ -36,7 +36,7 @@ elementary:
       type: databricks
       host: [hostname, like <ID>.cloud.databricks.com]
       http_path: [like /sql/1.0/endpoints/<ID>]
-      schema: [schema name]  # elementary schema, usually [schema name]_elementary
-      token : [token]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      token: [token]
       threads: [number of threads like 8]
 ```

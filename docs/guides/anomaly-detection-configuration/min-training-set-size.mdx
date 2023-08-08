@@ -6,18 +6,17 @@ sidebarTitle: "min_training_set_size"
 `min_training_set_size: [int]`
 
 The minimal amount of data points a test requires for calculating and detecting an anomaly.
-It's recommended not to configure a value smaller than 14, so the result could be statistically significant. 
+It's recommended not to configure a value smaller than 14, so the result could be statistically significant.
 
 - _Default: 14_
 - _Relevant tests: All anomaly detection tests_
 
 <Frame caption="min_training_set_size change impact">
-    <img
+  <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1685363195/min_training_set_size_wpjemi.png"
     alt="min_training_set_size change impact"
-    />
+  />
 </Frame>
-
 
 <RequestExample>
 
@@ -44,16 +43,13 @@ vars:
 
 </RequestExample>
 
-
-
-
 #### How it works?
 
 If the test won't have at least `min_training_set_size` it will pass, as there isn't enough data to determine if there is an anomaly.
-The Elementary report will show a message saying "Not enough data to calculate anomaly score" instead of a graph. 
+The Elementary report will show a message saying "Not enough data to calculate anomaly score" instead of a graph.
 
 #### The impact of changing `min_training_set_size`
 
 If you **increase `min_training_set_size`** your test training set will be larger. This means a larger sample size for calculating the expected range, which should make the test less sensitive to outliers. This means less chance of false positive anomalies, but also less sensitivity so anomalies have a higher threshold.
 
-If you **decrease `min_training_set_size`** your test training set will be smaller. This means a smaller sample size for calculating the expected range, which might make the test more sensitive to outliers. This means more chance of false positive anomalies, but also more sensitivity as anomalies have a lower threshold.  
+If you **decrease `min_training_set_size`** your test training set will be smaller. This means a smaller sample size for calculating the expected range, which might make the test more sensitive to outliers. This means more chance of false positive anomalies, but also more sensitivity as anomalies have a lower threshold.

@@ -21,7 +21,7 @@ ADAPTER_EXTRA_REQUIREMENTS = {
 setup(
     name="elementary-data",
     description="Data monitoring and lineage",
-    version="0.9.1",
+    version="0.9.2",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.6.2",
@@ -50,6 +50,7 @@ setup(
         "pydantic<2.0",
         "networkx>=2.3,<3",
         "packaging>=20.9,<=23.1",
+        "azure-storage-blob>=12.11.0",
     ],
     extras_require={
         **ADAPTER_EXTRA_REQUIREMENTS,

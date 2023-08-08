@@ -227,6 +227,13 @@ def get_cli_properties() -> dict:
     default=None,
     help="Whether to group alerts by 'alert' or by 'table'",
 )
+@click.option(
+    "--override-dbt-project-config",
+    "-oc",
+    is_flag=True,
+    help="Whether to override the settings (slack channel, suppression interval) "
+    "in the model or test meta in the dbt project with the parameters provided by the CLI.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -252,6 +259,7 @@ def monitor(
     group_by,
     target_path,
     suppression_interval,
+    override_dbt_project_config,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -293,6 +301,7 @@ def monitor(
             disable_samples=disable_samples,
             filter=select,
             global_suppression_interval=suppression_interval,
+            override_config=override_dbt_project_config,
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking
         # properties. This is a tech-debt that should be fixed in the future.
@@ -461,6 +470,18 @@ def report(
     help="The name of the GCS bucket to upload the report to.",
 )
 @click.option(
+    "--azure-connection-string",
+    type=str,
+    default=None,
+    help="A connection string required to connect to your Azure storage account.",
+)
+@click.option(
+    "--azure-container-name",
+    type=str,
+    default=None,
+    help="The name of the Azure container to upload the report to.",
+)
+@click.option(
     "--update-bucket-website",
     type=bool,
     default=None,
@@ -527,6 +548,8 @@ def send_report(
     aws_secret_access_key,
     s3_endpoint_url,
     s3_bucket_name,
+    azure_connection_string,
+    azure_container_name,
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
@@ -558,6 +581,8 @@ def send_report(
         aws_profile_name=aws_profile_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        azure_connection_string=azure_connection_string,
+        azure_container_name=azure_container_name,
         s3_endpoint_url=s3_endpoint_url,
         s3_bucket_name=s3_bucket_name,
         google_service_account_path=google_service_account_path,
