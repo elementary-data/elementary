@@ -54,12 +54,8 @@ visibility, detect data issues, send actionable alerts, and understand the impac
 For the data monitoring and dbt artifacts collection, we developed a [dbt package](/quickstart#install-the-dbt-package).
 The monitoring configuration is configured in your dbt project, and the monitors are dbt macros and models. All the collected data is saved to an elementary schema in your DWH.
 
-[Elementary CLI](/understand-elementary/cli-install#install-and-configure) is used to generate the UI report and send Slack alerts.
+After deploying the dbt package, connect to [Elementary Cloud](/cloud/introduction) or install the [Elementary CLI](/understand-elementary/cli-install#install-and-configure) to work with the UI and send Slack alerts.
 
-<img
-  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/High-level-flow_d21jfj.png"
-  alt="High Level Flow"
-/>
 
 ## Community & Support
 
@@ -74,25 +70,3 @@ For additional information and help, you can use one of these channels:
 Thank you 🧡 Whether it’s a bug fix, new feature, or documentation changes - we greatly appreciate contributions!
 
 Check out the [contributions guide](/general/contributions).
-
-## Integrations
-
-- dbt Core (1.0.0 and above)
-- dbt Cloud
-
-Data warehouses:
-
-- Snowflake
-- BigQuery
-- Redshift
-- Databricks SQL
-- Postgres
-
-Operations:
-
-- Slack
-- GitHub Actions
-- Amazon S3
-- Google Cloud Storage
-
-Ask us for integrations on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) or as a [GitHub](https://github.com/elementary-data/elementary) issue.

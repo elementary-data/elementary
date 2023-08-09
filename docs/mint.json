@@ -59,7 +59,11 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": ["quickstart", "quickstart-cli"]
+          "pages": [
+            "quickstart",
+            "quickstart-cloud",
+            "quickstart-cli"
+          ]
         },
         {
           "group": "Tutorial",
@@ -226,9 +230,7 @@
       "group": "Getting Started",
       "pages": [
         "cloud/onboarding/quickstart-dbt-package",
-        "cloud/onboarding/create-profile",
         "cloud/onboarding/signup",
-        "cloud/onboarding/connect-data-warehouse",
         "cloud/manage-team"
       ]
     },
@@ -250,6 +252,16 @@
         "cloud/integrations/code-repo/connect-code-repo",
         "cloud/integrations/code-repo/github",
         "cloud/integrations/code-repo/gitlab"
+      ]
+    },
+    {
+      "group": "Data warehouses",
+      "pages": [
+        "cloud/integrations/dwh/snowflake",
+        "cloud/integrations/dwh/bigquery",
+        "cloud/integrations/dwh/redshift",
+        "cloud/integrations/dwh/databricks",
+        "cloud/integrations/dwh/postgres"
       ]
     }
   ],
