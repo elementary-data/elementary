@@ -71,7 +71,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
 
 jobs:
