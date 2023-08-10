@@ -1,14 +1,6 @@
 You will connect Elementary Cloud to Databricks for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-### Create a user for Elementary cloud
-
-To connect Elementary Cloud, you will need to create a service principal, you may want to consult the [documentation](https://docs.databricks.com/administration-guide/users-groups/users.html).
-
-Create a service principal with the following permissions:
-
-- Read on all the tables in your `elementary` schema (usually `<dbt_schema>_elementary`).
-
-
+<Snippet file="dwh/databricks/create_service_principal.mdx" />
 
 <Snippet file="cloud/integrations/permissions-and-security.mdx" />
 
