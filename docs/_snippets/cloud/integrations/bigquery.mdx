@@ -1,12 +1,6 @@
 You will connect Elementary Cloud to Bigquery for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-### Create a user for Elementary cloud
-
-- Create the service account ([docs](https://cloud.google.com/iam/docs/service-account-overview)).
-- Grant it the `roles/bigquery.jobUser` role on the project ([docs](https://cloud.google.com/bigquery/docs/access-control#bigquery_iam_roles)).
-- Grant it the `roles/bigquery.dataViewer` role on your elementary dataset (usually `<dbt_dataset>_elementary`).
-- Grant it the `roles/bigquery.metadataViewer` role on your dbt dataset.
-
+<Snippet file="dwh/bigquery/create_service_account.mdx" />
 
 <Snippet file="cloud/integrations/permissions-and-security.mdx" />
 
@@ -19,5 +13,15 @@ Provide the following fields:
 - **Elementary dateset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
 - **Location**: Use this field to configure the location of BigQuery datasets as per [the BigQuery documentation](https://cloud.google.com/bigquery/docs/locations).
 
+### Uploading columns data
+
+In order to let Elementary Cloud access metadata about the columns in your data warehouse, you need to run the following command:
+```
+dbt run-operation elementary.upload_dbt_columns
+```
+You may choose to run this command in one of the following ways:
+1. Manually whenever there is a schema change in your dataset - Not recommended.
+2. As part of your `dbt` pipeline - Recommended if you have one main pipeline.
+3. As an independant pipeline - Recommended if you have a lot of small pipelines running in different times.
 
 <Snippet file="cloud/integrations/ip-allowlist.mdx" />

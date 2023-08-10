@@ -1,0 +1,37 @@
+### Grant user access on a dataset level
+
+In order for a user to be able to run Elementary (cli/cloud), it requires the following permissions:
+- Role "BigQuery Data Viewer" on your Elementary dataset.
+- Role "BigQuery Metadata Viewer" on your dbt dataset.
+
+To grant a role on a specific dataset, follow these steps:
+
+1. Go to your project in [BigQuery console](https://console.cloud.google.com/bigquery)
+
+2. In the "Explorer" tab, find your desired dataset.
+
+3. Click on the three dots icon next to the dataset name, then Share.
+
+<img
+src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/bigquery/dataset_share"
+alt="Dataset share"
+/>
+
+4. Click the "ADD PRINCIPAL" button on the top right corner.
+
+<img
+src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/bigquery/add_principal_button"
+alt="Add principal"
+/>
+
+5. Fill out the form:
+    - In the "New principals" textbox, write the **email address** of your user.
+    - In the "Select a role" dropdown menu, choose the desired role (BigQuery Data Viewer for your Elementary dataset, BigQuery Metadata Viewer for your dbt dataset).
+    - Click "Save".
+
+<img
+src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/bigquery/grant_access_form"
+alt="Grant access"
+/>
+
+Make sure to grant the correct access to your Elementary dataset **and** your dbt dataset. 
