@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 
 import pkg_resources
 
+from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
@@ -42,6 +43,9 @@ class DataMonitoringReport(DataMonitoring):
         self.report_api = ReportAPI(self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
+        self.azure_client = AzureClient.create_client(
+            self.config, tracking=self.tracking
+        )
 
     def generate_report(
         self,
@@ -191,7 +195,7 @@ class DataMonitoringReport(DataMonitoring):
         bucket_website_url = None
         upload_succeeded = False
         # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
-        if self.s3_client or self.gcs_client:
+        if self.s3_client or self.gcs_client or self.azure_client:
             upload_succeeded, bucket_website_url = self.upload_report(
                 local_html_path=local_html_path, remote_file_path=remote_file_path
             )
@@ -246,6 +250,14 @@ class DataMonitoringReport(DataMonitoring):
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
             self.execution_properties["sent_to_s3_successfully"] = send_succeded
+            if not send_succeded:
+                self.success = False
+
+        if self.azure_client:
+            send_succeded, bucket_website_url = self.azure_client.send_report(
+                local_html_path, remote_bucket_file_path=remote_file_path
+            )
+            self.execution_properties["sent_to_azure_successfully"] = send_succeded
             if not send_succeded:
                 self.success = False
 

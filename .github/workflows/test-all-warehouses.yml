@@ -16,6 +16,11 @@ on:
         type: string
         required: false
         description: dbt's version to test with
+      generate-data:
+        type: boolean
+        required: false
+        default: false
+        description: Whether to generate new data
 
 jobs:
   test:
@@ -37,4 +42,5 @@ jobs:
       elementary-ref: ${{ inputs.elementary-ref }}
       dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
       dbt-version: ${{ inputs.dbt-version }}
+      generate-data: ${{ inputs.generate-data || false }}
     secrets: inherit

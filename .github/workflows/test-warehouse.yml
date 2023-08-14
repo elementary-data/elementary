@@ -71,7 +71,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
 
 jobs:
@@ -194,6 +194,7 @@ jobs:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AZURE_CONNECTION_STRING: ${{ secrets.AZURE_CONNECTION_STRING }}
         run: >
           edr monitor send-report 
           -t "${{ inputs.warehouse-type }}"
@@ -208,6 +209,8 @@ jobs:
           --s3-bucket-name elementary-ci-artifacts
           --google-service-account-path /tmp/gcs_keyfile.json
           --gcs-bucket-name elementary_ci_artifacts
+          --azure-connection-string "$AZURE_CONNECTION_STRING"
+          --azure-container-name reports
           --update-bucket-website true
 
       - name: Upload edr log

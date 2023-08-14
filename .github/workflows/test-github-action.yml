@@ -18,7 +18,7 @@ on:
         description: dbt's version to test with
 
 env:
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
 
 jobs:
   test:
