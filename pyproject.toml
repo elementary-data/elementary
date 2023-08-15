@@ -6,8 +6,9 @@ authors = ["Elementary"]
 keywords = ["data", "lineage", "data lineage", "data warehouse", "DWH", "observability", "data monitoring", "data observability", "Snowflake", "BigQuery", "Redshift", "data reliability", "analytics engineering"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/elementary-data/elementary"
-repository = "https://github.com/elementary-data/elementary.git"
+homepage = "https://www.elementary-data.com"
+repository = "https://github.com/elementary-data/elementary"
+documentation = "https://docs.elementary-data.com"
 
 packages = [{include = "elementary"}]
 
