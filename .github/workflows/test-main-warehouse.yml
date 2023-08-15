@@ -4,7 +4,7 @@ on:
     branches: ["master"]
     paths:
       - elementary/**
-      - setup.py
+      - pyproject.toml
   workflow_dispatch:
 
 jobs:
