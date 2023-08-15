@@ -232,7 +232,7 @@ def initial_alerts():
 
 
 def test_filter_alerts():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    test_alerts, model_alerts, malformed_alerts, _ = initial_alerts()
 
     # Test that empty filter returns all of the alerts except for skipped.
     filter = SelectorFilterSchema()
@@ -262,7 +262,7 @@ def test_filter_alerts():
 
 
 def test_filter_alerts_by_tag():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    test_alerts, model_alerts, malformed_alerts, _ = initial_alerts()
 
     filter = SelectorFilterSchema(tag="one")
     filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
@@ -300,7 +300,7 @@ def test_filter_alerts_by_tag():
 
 
 def test_filter_alerts_by_owner():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    test_alerts, model_alerts, malformed_alerts, _ = initial_alerts()
 
     filter = SelectorFilterSchema(owner="jeff")
     filter_test_alerts = _filter_alerts_by_owner(test_alerts, filter)
@@ -333,7 +333,7 @@ def test_filter_alerts_by_owner():
 
 
 def test_filter_alerts_by_model():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    test_alerts, model_alerts, malformed_alerts, _ = initial_alerts()
 
     filter = SelectorFilterSchema(model="model_id_1")
     filter_test_alerts = _filter_alerts_by_model(test_alerts, filter)
@@ -362,7 +362,7 @@ def test_filter_alerts_by_model():
 
 
 def test_filter_alerts_by_node_names():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    test_alerts, model_alerts, malformed_alerts, _ = initial_alerts()
 
     filter = SelectorFilterSchema(node_names=["test_3", "model_id_1"])
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
@@ -444,7 +444,7 @@ def test_filter_alerts_by_statuses():
 
 
 def test_filter_alerts_by_resource_types():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    test_alerts, model_alerts, malformed_alerts, _ = initial_alerts()
     all_alerts = test_alerts + model_alerts + malformed_alerts
 
     filter = SelectorFilterSchema(resource_types=[ResourceType.TEST])
