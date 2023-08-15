@@ -1,4 +1,4 @@
-{% macro get_model_latest_invocation() %}
+{% macro get_models_latest_invocation() %}
   {% set query %}
     with ordered_run_results as (
       select

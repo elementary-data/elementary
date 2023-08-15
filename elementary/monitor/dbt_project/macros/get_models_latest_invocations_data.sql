@@ -1,4 +1,4 @@
-{% macro get_model_latest_invocations_data() %}
+{% macro get_models_latest_invocations_data() %}
   {% set invocations_relation = ref("elementary", "dbt_invocations") %}
   {% set column_exists = elementary.column_exists_in_relation(invocations_relation, 'job_url') %}
 
