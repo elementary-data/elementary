@@ -1,1 +1,0 @@
-recursive-include elementary *.py *.sql *.yml *.html *.md .gitkeep .gitignore py.typed
