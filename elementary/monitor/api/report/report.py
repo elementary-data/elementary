@@ -90,12 +90,8 @@ class ReportAPI(APIClient):
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
 
-            resources_latest_invocation = (
-                invocations_api.get_resources_latest_invocation()
-            )
-            invocations = invocations_api.get_invocations_by_ids(
-                invocations_ids=list(set(resources_latest_invocation.values()))
-            )
+            resources_latest_invocation = invocations_api.get_model_latest_invocation()
+            invocations = invocations_api.get_model_latest_invocations_data()
 
             invocations_job_identification = defaultdict(list)
             for invocation in invocations:
