@@ -90,7 +90,7 @@ class ReportAPI(APIClient):
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
 
-            resources_latest_invocation = invocations_api.get_models_latest_invocation()
+            models_latest_invocation = invocations_api.get_models_latest_invocation()
             invocations = invocations_api.get_models_latest_invocations_data()
 
             invocations_job_identification = defaultdict(list)
@@ -115,7 +115,7 @@ class ReportAPI(APIClient):
                 filters=serializable_filters,
                 lineage=serializable_lineage,
                 invocations=invocations,
-                resources_latest_invocation=resources_latest_invocation,
+                resources_latest_invocation=models_latest_invocation,
                 invocations_job_identification=invocations_job_identification,
                 env=ReportDataEnvSchema(
                     project_name=project_name, env=env, warehouse_type=warehouse_type

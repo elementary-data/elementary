@@ -39,12 +39,10 @@ class InvocationsFetcher(FetcherClient):
         response = self.dbt_runner.run_operation(
             macro_name="get_models_latest_invocation"
         )
-        resources_latest_invocation_results = (
-            json.loads(response[0]) if response else []
-        )
+        models_latest_invocation_results = json.loads(response[0]) if response else []
 
-        resources_latest_invocation_map = {
+        models_latest_invocation_map = {
             result["unique_id"]: result["invocation_id"]
-            for result in resources_latest_invocation_results
+            for result in models_latest_invocation_results
         }
-        return resources_latest_invocation_map
+        return models_latest_invocation_map
