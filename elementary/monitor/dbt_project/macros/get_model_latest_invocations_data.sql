@@ -29,7 +29,6 @@
       job_id,
       orchestrator
     from {{ invocations_relation }}
-    where invocation_id in {{ elementary.strings_list_to_tuple(ids) }}
   {% endset %}
   {% set result = elementary.run_query(query) %}
   {% do return(elementary.agate_to_dicts(result)) %}
