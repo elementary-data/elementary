@@ -3,7 +3,7 @@
     with ordered_run_results as (
       select
         *,
-        row_number() over (partition by run_results.unique_id order by run_results.generated_at desc) as row_number
+        row_number() over (partition by unique_id order by run_results.generated_at desc) as row_number
       from {{ ref("elementary", "dbt_run_results") }} run_results
       join {{ ref("elementary", "dbt_models") }} using (unique_id)
     ),
