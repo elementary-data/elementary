@@ -11,8 +11,8 @@
       join {{ ref("elementary", "dbt_models") }} using (unique_id)
     ),
 
-    latest_run_results as (
-      select *
+    latest_models_invocations as (
+      select distinct invocation_id
       from ordered_run_results
       where row_number = 1
     )
@@ -28,7 +28,8 @@
       job_name,
       job_id,
       orchestrator
-    from {{ invocations_relation }}
+    from {{ invocations_relation }} invocations
+    join latest_models_invocations using (invocation_id)
   {% endset %}
   {% set result = elementary.run_query(query) %}
   {% do return(elementary.agate_to_dicts(result)) %}
