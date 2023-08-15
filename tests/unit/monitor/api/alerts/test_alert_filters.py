@@ -1,5 +1,6 @@
 from elementary.monitor.alerts.malformed import MalformedAlert
 from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_model,
@@ -150,7 +151,84 @@ def initial_alerts():
             ),
         ),
     ]
-    return test_alerts, model_alerts, malformed_alerts
+    source_freshness_alerts = [
+        SourceFreshnessAlert(
+            id="1",
+            alert_class_id="elementary.model_id_1",
+            model_unique_id="elementary.model_id_1",
+            alias="modely",
+            path="my/path",
+            original_path="",
+            materialization="table",
+            message="",
+            full_refresh=False,
+            detected_at="2022-10-10 10:00:00",
+            alert_suppression_interval=0,
+            tags='["one", "two"]',
+            owners='["jeff", "john"]',
+            status="error",
+            snapshotted_at="2023-08-15T12:26:06.884065+00:00",
+            max_loaded_at="1969-12-31T00:00:00+00:00",
+            max_loaded_at_time_ago_in_s=1692188766.884065,
+            source_name="elementary_integration_tests",
+            identifier="any_type_column_anomalies_validation",
+            freshness_error_after='{"count": null, "period": null}',
+            freshness_warn_after='{"count": 1, "period": "minute"}',
+            freshness_filter="null",
+            error="problemz",
+        ),
+        SourceFreshnessAlert(
+            id="2",
+            alert_class_id="elementary.model_id_2",
+            model_unique_id="elementary.model_id_2",
+            alias="modely",
+            path="my/path",
+            original_path="",
+            materialization="table",
+            message="",
+            full_refresh=False,
+            detected_at="2022-10-10 10:00:00",
+            alert_suppression_interval=0,
+            tags='["one", "two"]',
+            owners='["jeff", "john"]',
+            status="warn",
+            snapshotted_at="2023-08-15T12:26:06.884065+00:00",
+            max_loaded_at="1969-12-31T00:00:00+00:00",
+            max_loaded_at_time_ago_in_s=1692188766.884065,
+            source_name="elementary_integration_tests",
+            identifier="any_type_column_anomalies_validation",
+            freshness_error_after='{"count": null, "period": null}',
+            freshness_warn_after='{"count": 1, "period": "minute"}',
+            freshness_filter="null",
+            error="problemz",
+        ),
+        SourceFreshnessAlert(
+            id="3",
+            alert_class_id="elementary.model_id_3",
+            model_unique_id="elementary.model_id_3",
+            alias="modely",
+            path="my/path",
+            original_path="",
+            materialization="table",
+            message="",
+            full_refresh=False,
+            detected_at="2022-10-10 10:00:00",
+            alert_suppression_interval=0,
+            tags='["one", "two"]',
+            owners='["jeff", "john"]',
+            status="runtime error",
+            snapshotted_at="2023-08-15T12:26:06.884065+00:00",
+            max_loaded_at="1969-12-31T00:00:00+00:00",
+            max_loaded_at_time_ago_in_s=1692188766.884065,
+            source_name="elementary_integration_tests",
+            identifier="any_type_column_anomalies_validation",
+            freshness_error_after='{"count": null, "period": null}',
+            freshness_warn_after='{"count": 1, "period": "minute"}',
+            freshness_filter="null",
+            error="problemz",
+        ),
+    ]
+    return test_alerts, model_alerts, malformed_alerts, source_freshness_alerts
 
 
 def test_filter_alerts():
@@ -322,16 +400,25 @@ def test_filter_alerts_by_node_names():
 
 
 def test_filter_alerts_by_statuses():
-    test_alerts, model_alerts, malformed_alerts = initial_alerts()
+    (
+        test_alerts,
+        model_alerts,
+        malformed_alerts,
+        source_freshness_alerts,
+    ) = initial_alerts()
 
     filter = SelectorFilterSchema(statuses=[Status.WARN])
     filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    filter_source_freshness_alerts = _filter_alerts_by_status(
+        source_freshness_alerts, filter
+    )
     assert len(filter_test_alerts) == 1
     assert filter_test_alerts[0].id == "4"
     assert len(filter_model_alerts) == 0
     assert len(filter_malformed_alerts) == 0
+    assert len(filter_source_freshness_alerts) == 1
 
     filter = SelectorFilterSchema(statuses=[Status.ERROR, Status.SKIPPED])
     filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
@@ -341,13 +428,19 @@ def test_filter_alerts_by_statuses():
     assert len(filter_model_alerts) == 3
     assert len(filter_malformed_alerts) == 0
 
-    filter = SelectorFilterSchema(statuses=[Status.FAIL, Status.WARN])
+    filter = SelectorFilterSchema(
+        statuses=[Status.FAIL, Status.WARN, Status.RUNTIME_ERROR]
+    )
     filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
     filter_malformed_alerts = _filter_alerts_by_status(malformed_alerts, filter)
+    filter_source_freshness_alerts = _filter_alerts_by_status(
+        source_freshness_alerts, filter
+    )
     assert len(filter_test_alerts) == 4
     assert len(filter_model_alerts) == 0
     assert len(filter_malformed_alerts) == 2
+    assert len(filter_source_freshness_alerts) == 2
 
 
 def test_filter_alerts_by_resource_types():
