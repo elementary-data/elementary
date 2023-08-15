@@ -3,9 +3,9 @@
     with ordered_run_results as (
       select
         *,
-        ROW_NUMBER() OVER (PARTITION BY unique_id ORDER BY generated_at DESC) AS row_number
-      from {{ ref("elementary", "dbt_run_results") }}
-      where resource_type = 'model'
+        row_number() over (partition by run_results.unique_id order by run_results.generated_at desc) as row_number
+      from {{ ref("elementary", "dbt_run_results") }} run_results
+      join {{ ref("elementary", "dbt_models") }} using (unique_id)
     ),
 
     latest_run_results as (
