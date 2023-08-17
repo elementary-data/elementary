@@ -1,4 +1,4 @@
-{% macro get_critical_tables(
+{% macro get_recommended_tests(
     depends_on_count=none,
     dependant_on_count=none,
     exposure_count=none,
@@ -7,8 +7,8 @@
 ) %}
     {# TODO: Decide if those should be OR or AND operators. #}
     {% set query %}
-        select resource_name, source_name, timestamp_columns
-        from {{ ref("table_timestamp_columns") }}
+        select resource_name, source_name, test_name, timestamp_column
+        from {{ ref("pending_test_recommendations") }}
         where 1=1
 
         {% if depends_on_count %}
@@ -33,6 +33,8 @@
             and table_type in ('{{ table_types | join("','") }}')
         {% endif %}
     {% endset %}
+
+    {# TODO: Implement tags and owner filters (JSONs) #}
 
     {% set result = elementary.run_query(query) %}
     {% do return(elementary.agate_to_dicts(result)) %}
