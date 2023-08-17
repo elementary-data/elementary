@@ -1,3 +1,4 @@
+{# TODO: Freshness anomalies should not return if there's no timestamp column. #}
 {% set recommended_tests = [("elementary", "volume_anomalies"), ("elementary", "freshness_anomalies")] %}
 
 with

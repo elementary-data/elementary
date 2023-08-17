@@ -7,7 +7,7 @@
 ) %}
     {# TODO: Decide if those should be OR or AND operators. #}
     {% set query %}
-        select resource_name, source_name, test_name, timestamp_column
+        select resource_name, source_name, test_namespace, test_name, timestamp_column
         from {{ ref("pending_test_recommendations") }}
         where 1=1
 
