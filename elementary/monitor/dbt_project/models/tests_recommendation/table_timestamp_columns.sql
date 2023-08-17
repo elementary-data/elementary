@@ -101,7 +101,7 @@ with
                 partition by database_name, schema_name, table_name
                 order by absolute_confidence
             ) as relative_confidence
-        from rated_timestamp_columns
+        from absolute_rated_timestamp_columns
     ),
 
     best_rated_timestamp_columns as (
