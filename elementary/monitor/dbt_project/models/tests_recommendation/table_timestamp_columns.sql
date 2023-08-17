@@ -6,7 +6,6 @@
     "create_date",
     "created",
     "db_insert_time",
-    "last_modified_datetime",
     "create_ts",
     "created_ts",
     "update_ts",
@@ -24,6 +23,8 @@
     "_etl_loaded_at",
     "__etl_loaded_at",
     "_etl_inserted_at",
+    "_ingestion_time",
+    "last_modified_datetime",
 ] %}
 {% set timestamp_like_column_names = [
     "%_updated_at",
@@ -60,7 +61,6 @@ with
                         {% if not loop.last %},{% endif %}
                     {% endfor %}
             ) as timestamp_column_names(column_name, confidence) using (column_name)
-        order by timestamp_column_names.confidence
     ),
 
     source_provided_timestamp_columns as (
