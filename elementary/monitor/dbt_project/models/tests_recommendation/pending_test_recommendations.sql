@@ -1,4 +1,4 @@
-{% set recommended_tests = ["volume_anomalies", "freshness_anomalies"] %}
+{% set recommended_tests = [("elementary", "volume_anomalies"), ("elementary", "freshness_anomalies")] %}
 
 with
     tables_criticality as (
@@ -19,28 +19,28 @@ with
     ),
 
     potentinal_recommended_tests as (
-        select id, database_name, schema_name, table_name, short_name
+        select id, test_namespace, short_name
         from tables_criticality
-        -- This is probably not warehouse agnostic.
         cross join
             (
-                select
-                    unnest(array['{{ recommended_tests|join("', '") }}']) as short_name
+                {% for recommended_test in recommended_tests %}
+                    select '{{ recommended_test[0] }}' as test_namespace, '{{ recommended_test[1] }}' as short_name
+                    {% if not loop.last %}union all{% endif %}
+                {% endfor %}
             ) rt
     ),
 
     existing_recommended_tests as (
-        select parent_model_unique_id, short_name
+        select parent_model_unique_id, test_namespace, short_name
         from {{ ref("elementary", "dbt_tests") }}
-        where test_namespace = 'elementary'
     ),
 
     pending_recommended_tests as (
-        select id, short_name
+        select id, test_namespace, short_name
         from potentinal_recommended_tests
         where
-            (id, short_name) not in (
-                select parent_model_unique_id, short_name
+            (id, test_namespace, short_name) not in (
+                select parent_model_unique_id, test_namespace, short_name
                 from existing_recommended_tests
             )
     ),
@@ -54,6 +54,7 @@ with
         select
             resource_name,
             source_name,
+            test_namespace,
             short_name as test_name,
             timestamp_column,
             tags,
