@@ -22,14 +22,9 @@ class InvocationsFetcher(FetcherClient):
             logger.warning(f"Could not find invocation by filter: {macro_args}")
             return DbtInvocationSchema()
 
-    def get_invocations_by_ids(
-        self, invocations_ids: List[str]
-    ) -> List[DbtInvocationSchema]:
+    def get_models_latest_invocations_data(self) -> List[DbtInvocationSchema]:
         invocations_response = self.dbt_runner.run_operation(
-            macro_name="get_invocations_by_ids",
-            macro_args={
-                "ids": invocations_ids,
-            },
+            macro_name="get_models_latest_invocations_data"
         )
         invocation_results = (
             json.loads(invocations_response[0]) if invocations_response else []
@@ -40,16 +35,14 @@ class InvocationsFetcher(FetcherClient):
         ]
         return invocation_results
 
-    def get_resources_latest_invocation(self) -> Dict[str, str]:
+    def get_models_latest_invocation(self) -> Dict[str, str]:
         response = self.dbt_runner.run_operation(
-            macro_name="get_resources_latest_invocation"
+            macro_name="get_models_latest_invocation"
         )
-        resources_latest_invocation_results = (
-            json.loads(response[0]) if response else []
-        )
+        models_latest_invocation_results = json.loads(response[0]) if response else []
 
-        resources_latest_invocation_map = {
+        models_latest_invocation_map = {
             result["unique_id"]: result["invocation_id"]
-            for result in resources_latest_invocation_results
+            for result in models_latest_invocation_results
         }
-        return resources_latest_invocation_map
+        return models_latest_invocation_map
