@@ -26,10 +26,6 @@
     "_ingestion_time",
     "last_modified_datetime",
 ] %}
-{% set timestamp_like_column_names = [
-    "%_updated_at",
-    "%_created_at",
-] %}
 {% set joined_timestamp_column_names = "'{}'".format(
     "', '".join(timestamp_column_names)
 ) %}
