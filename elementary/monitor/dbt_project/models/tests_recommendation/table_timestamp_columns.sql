@@ -73,7 +73,7 @@ with
         where loaded_at_field is not null
     ),
 
-    rated_timestamp_columns as (
+    absolute_rated_timestamp_columns as (
         -- Combine inferred and source-provided timestamp columns,
         -- giving priority to source-provided ones.
         select
@@ -91,7 +91,7 @@ with
             )
     ),
 
-    best_rated_timestamp_columns as (
+    relative_rated_timestamp_columns as (
         select
             database_name,
             schema_name,
@@ -102,8 +102,13 @@ with
                 order by absolute_confidence
             ) as relative_confidence
         from rated_timestamp_columns
+    ),
+
+    best_rated_timestamp_columns as (
+        select database_name, schema_name, table_name, column_name
+        from relative_rated_timestamp_columns
+        where relative_confidence = 1
     )
 
 select database_name, schema_name, table_name, column_name as timestamp_column
 from best_rated_timestamp_columns
-where relative_confidence = 1
