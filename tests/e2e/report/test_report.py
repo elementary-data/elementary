@@ -106,7 +106,7 @@ def test_test_runs_are_sorted():
 #         expected_ammount=1,
 #     )
 #
-#     # Currently scehma changes tests are not supported at databricks
+#     # Currently schema changes tests are not supported at databricks
 #     if warehouse_type != "databricks":
 #         # e2e contains 1 passed schema change test for groups table
 #         assert_test_counter(
