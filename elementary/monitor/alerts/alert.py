@@ -103,7 +103,7 @@ class PreviewIsTooLongError(Exception):
         super().__init__(self.message)
 
     def __str__(self) -> str:
-        return f"{len(self.preview_blocks)} provieded -> {self.message}"
+        return f"{len(self.preview_blocks)} provided -> {self.message}"
 
 
 class SlackAlertMessageBuilder(SlackMessageBuilder):
@@ -179,7 +179,7 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         """
         if (
             not preview_blocks
-        ):  # this condition captures case of Null and also of a list with legnth 0
+        ):  # this condition captures case of Null and also of a list with length 0
             return
 
         preview_blocks_count = len(preview_blocks)
