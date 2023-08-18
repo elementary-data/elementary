@@ -159,7 +159,7 @@ class SlackMessageBuilder:
         """
         Receives a list of strings, either JSON dumped or not, dedups and sorts it, and returns it as a comma-separated
         string.
-        This is useful for various lists we include in slack messages (owners, subscribers, etc)
+        This is useful for various lists we include in Slack messages (owners, subscribers, etc.)
         """
         if isinstance(str_list, str):
             str_list = unpack_and_flatten_str_to_list(str_list)

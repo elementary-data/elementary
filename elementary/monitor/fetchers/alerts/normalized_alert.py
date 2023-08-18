@@ -66,7 +66,7 @@ class NormalizedAlert:
         key in data ( or default val)  -- > key in normalized alert
         SUBSCRIBERS_KEY (or []) --> SUBSCRIBERS_KEY
         "owner" (or []) --> OWNERS_KEY
-        CHANNEL_KEY (or None) --> "slack channel"
+        CHANNEL_KEY (or None) --> "Slack channel"
         ALERT_FIELDS_KEY (or DEFAULT_ALERT_FIELDS)--> ALERT_FIELDS_KEY
         "group" (or None) --> SLACK_GROUP_ALERTS_BY_KEY
 

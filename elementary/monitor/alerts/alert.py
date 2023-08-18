@@ -173,7 +173,7 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
          0/ For None, returns None. Otherwise :
          1/ makes sure preview_blocks number is not bigger than the max num of blocks set in SlackMessageBuilder
          2/ pads with empty blocks in case there's not enough preview blocks
-                                          (we want to control the cutoff so we need an exact number of preview blocks)
+                                          (we want to control the cutoff, so we need an exact number of preview blocks)
         :param preview_blocks:
         :return:
         """
