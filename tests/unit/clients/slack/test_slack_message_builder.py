@@ -8,8 +8,8 @@ from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 
 
 def test_create_divider_block():
-    devider_block = SlackMessageBuilder.create_divider_block()
-    assert json.dumps(devider_block, sort_keys=True) == json.dumps(
+    divider_block = SlackMessageBuilder.create_divider_block()
+    assert json.dumps(divider_block, sort_keys=True) == json.dumps(
         {"type": "divider"}, sort_keys=True
     )
 
