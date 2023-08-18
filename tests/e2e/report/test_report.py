@@ -96,14 +96,14 @@ def test_test_runs_are_sorted():
 #         test_type="anomaly_detection",
 #         name="dimension_anomalies",
 #         status="fail",
-#         expected_ammount=2,
+#         expected_amount=2,
 #     )
 #     assert_test_counter(
 #         report_data=report_data,
 #         test_type="anomaly_detection",
 #         name="dimension_anomalies",
 #         status="pass",
-#         expected_ammount=1,
+#         expected_amount=1,
 #     )
 #
 #     # Currently schema changes tests are not supported at databricks
@@ -122,7 +122,7 @@ def test_test_runs_are_sorted():
 #             test_type="schema_change",
 #             name="schema_changes",
 #             table="stats_players",
-#             expected_ammount=3,
+#             expected_amount=3,
 #         )
 #         assert_test_counter(
 #             report_data=report_data,
@@ -130,7 +130,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes",
 #             table="stats_players",
 #             column="offsides",
-#             expected_ammount=1,
+#             expected_amount=1,
 #         )
 #         assert_test_counter(
 #             report_data=report_data,
@@ -138,7 +138,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes",
 #             table="stats_players",
 #             column="red_cards",
-#             expected_ammount=1,
+#             expected_amount=1,
 #         )
 #         assert_test_counter(
 #             report_data=report_data,
@@ -146,7 +146,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes",
 #             table="stats_players",
 #             column="key_crosses",
-#             expected_ammount=1,
+#             expected_amount=1,
 #         )
 #
 #         # e2e contains 1 passed schema change test for stats_team table
@@ -180,7 +180,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes_from_baseline",
 #             table="groups",
 #             status="fail",
-#             expected_ammount=2,
+#             expected_amount=2,
 #         )
 #         assert_test_counter(
 #             report_data=report_data,
@@ -188,7 +188,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes_from_baseline",
 #             table="groups",
 #             status="error",
-#             expected_ammount=1,
+#             expected_amount=1,
 #         )
 #
 #         # e2e contains 2 schema changes from baseline tests for goals column at stats_players table (2 different tests)
@@ -198,7 +198,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes_from_baseline",
 #             table="stats_players",
 #             column="goals",
-#             expected_ammount=2,
+#             expected_amount=2,
 #         )
 #
 #         # e2e contains 2 schema changes from baseline tests for coffee_cups_consumed column at stats_players table (2 different tests)
@@ -208,7 +208,7 @@ def test_test_runs_are_sorted():
 #             name="schema_changes_from_baseline",
 #             table="stats_players",
 #             column="coffee_cups_consumed",
-#             expected_ammount=2,
+#             expected_amount=2,
 #         )
 #
 #     # e2e contains only 4 singular failed tests
@@ -217,13 +217,13 @@ def test_test_runs_are_sorted():
 #         test_type="dbt_test",
 #         test_sub_type="singular",
 #         status="fail",
-#         expected_ammount=4,
+#         expected_amount=4,
 #     )
 #     assert_test_counter(
 #         report_data=report_data,
 #         test_type="dbt_test",
 #         test_sub_type="singular",
-#         expected_ammount=4,
+#         expected_amount=4,
 #     )
 #
 #     #     # e2e contains 58 all columns anomalies tests
@@ -231,7 +231,7 @@ def test_test_runs_are_sorted():
 #     #         report_data=report_data,
 #     #         test_type="anomaly_detection",
 #     #         name="all_columns_anomalies",
-#     #         expected_ammount=58,
+#     #         expected_amount=58,
 #     #     )
 #
 #     #     # All of the tests are defined on the table any_type_column_anomalies
@@ -240,7 +240,7 @@ def test_test_runs_are_sorted():
 #     #         test_type="anomaly_detection",
 #     #         name="all_columns_anomalies",
 #     #         table="any_type_column_anomalies",
-#     #         expected_ammount=58,
+#     #         expected_amount=58,
 #     #     )
 #
 #     # occurred_at column should have 2 passed test results.
@@ -252,7 +252,7 @@ def test_test_runs_are_sorted():
 #         table="any_type_column_anomalies",
 #         column="occurred_at",
 #         status="pass",
-#         expected_ammount=2,
+#         expected_amount=2,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -272,7 +272,7 @@ def test_test_runs_are_sorted():
 #         table="any_type_column_anomalies",
 #         column="updated_at",
 #         status="pass",
-#         expected_ammount=2,
+#         expected_amount=2,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -291,7 +291,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_percent_str",
-#         expected_ammount=7,
+#         expected_amount=7,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -318,7 +318,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_percent_int",
-#         expected_ammount=9,
+#         expected_amount=9,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -347,7 +347,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_percent_float",
-#         expected_ammount=9,
+#         expected_amount=9,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -376,7 +376,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_percent_bool",
-#         expected_ammount=2,
+#         expected_amount=2,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -395,7 +395,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_count_str",
-#         expected_ammount=7,
+#         expected_amount=7,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -422,7 +422,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_count_int",
-#         expected_ammount=9,
+#         expected_amount=9,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -451,7 +451,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_count_float",
-#         expected_ammount=9,
+#         expected_amount=9,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -480,7 +480,7 @@ def test_test_runs_are_sorted():
 #         name="all_columns_anomalies",
 #         table="any_type_column_anomalies",
 #         column="null_count_bool",
-#         expected_ammount=2,
+#         expected_amount=2,
 #     )
 #     assert_test_sub_types_occurre_only_once(
 #         report_data=report_data,
@@ -500,7 +500,7 @@ def assert_test_counter(
     test_sub_type=None,
     status=None,
     name=None,
-    expected_ammount=1,
+    expected_amount=1,
 ):
     test_results = report_data.get("test_results")
     tests_found = 0
@@ -536,7 +536,7 @@ def assert_test_counter(
                 and match_name
             ):
                 tests_found += 1
-    assert tests_found == expected_ammount
+    assert tests_found == expected_amount
 
 
 def assert_test_sub_types_occurre_only_once(
@@ -550,7 +550,7 @@ def assert_test_sub_types_occurre_only_once(
             table=table,
             column=column,
             name=name,
-            expected_ammount=1,
+            expected_amount=1,
         )
 
 

@@ -350,11 +350,11 @@ def test_prettify_and_dedup_list():
 
 def test_slack_message_attachments_limit():
     very_short_attachments = ["attachment"] * (
-        SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS - 1
+        SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS - 1
     )
-    short_attachments = ["attachment"] * SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS
+    short_attachments = ["attachment"] * SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS
     long_attachments = ["attachment"] * (
-        SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS + 1
+        SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS + 1
     )
 
     assert (

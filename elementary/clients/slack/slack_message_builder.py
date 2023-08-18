@@ -11,7 +11,7 @@ class SlackMessageBuilder:
     _CONTINUATION_SYMBOL = "..."
     _MAX_SLACK_SECTION_SIZE = 2
     _MAX_ALERT_PREVIEW_BLOCKS = 5
-    _MAX_AMMOUNT_OF_ATTACHMENTS = 50
+    _MAX_AMOUNT_OF_ATTACHMENTS = 50
     _HASHTAG = "#"
 
     def __init__(self) -> None:
