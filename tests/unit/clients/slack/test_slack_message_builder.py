@@ -158,7 +158,7 @@ def test_create_compacted_sections_blocks():
         [{"type": "section", "fields": []}], sort_keys=True
     )
 
-    # even secations
+    # even sections
     section_messages = ["One", "Two", "Three", "Four"]
     compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
         section_messages

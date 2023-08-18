@@ -174,7 +174,7 @@ def test_results_summary() -> List[TestResultSummarySchema]:
             results_counter=None,
         )
     ]
-    warrning_test_results = [
+    warning_test_results = [
         TestResultSummarySchema(
             test_unique_id="test_id_8",
             elementary_unique_id="elementary_unique_id_8",
@@ -184,7 +184,7 @@ def test_results_summary() -> List[TestResultSummarySchema]:
             owners=["Ron"],
             tags=[],
             subscribers=[],
-            description="Not importent",
+            description="Not important",
             test_name="warn me",
             status="warning",
             results_counter=7,
@@ -223,7 +223,7 @@ def test_results_summary() -> List[TestResultSummarySchema]:
     return [
         *schema_changes_test_results,
         *passed_test_results,
-        *warrning_test_results,
+        *warning_test_results,
         *error_test_results,
         *failed_test_results,
     ]
