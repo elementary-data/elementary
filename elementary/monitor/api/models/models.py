@@ -61,7 +61,7 @@ class ModelsAPI(APIClient):
                 )
                 for model_run in model_runs
             ]
-            # The median should be based only on succesfull model runs.
+            # The median should be based only on successful model runs.
             successful_execution_times = [
                 model_run.execution_time
                 for model_run in model_runs
