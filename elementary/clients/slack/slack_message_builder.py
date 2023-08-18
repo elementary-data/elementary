@@ -28,7 +28,7 @@ class SlackMessageBuilder:
     def _add_blocks_as_attachments(self, blocks: SlackBlocksType):
         # The first 5 attachments Blocks are always displayed.
         # The rest of the attachments Blocks are hidden behind "show more" button.
-        # NOTICE: attachments blocks are depricated by Slack.
+        # NOTICE: attachments blocks are deprecated by Slack.
         self.slack_message["attachments"][0]["blocks"].extend(blocks)
 
     @staticmethod
@@ -122,7 +122,7 @@ class SlackMessageBuilder:
     @staticmethod
     def create_compacted_sections_blocks(section_msgs: list) -> List[dict]:
         # Compacting sections into attachments.
-        # Each section can contian _MAX_SLACK_SECTION_SIZE fields.
+        # Each section can contain _MAX_SLACK_SECTION_SIZE fields.
         attachments = []
         section_fields: List[dict] = []
 
