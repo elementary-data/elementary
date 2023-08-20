@@ -8,8 +8,8 @@ from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 
 
 def test_create_divider_block():
-    devider_block = SlackMessageBuilder.create_divider_block()
-    assert json.dumps(devider_block, sort_keys=True) == json.dumps(
+    divider_block = SlackMessageBuilder.create_divider_block()
+    assert json.dumps(divider_block, sort_keys=True) == json.dumps(
         {"type": "divider"}, sort_keys=True
     )
 
@@ -158,7 +158,7 @@ def test_create_compacted_sections_blocks():
         [{"type": "section", "fields": []}], sort_keys=True
     )
 
-    # even secations
+    # even sections
     section_messages = ["One", "Two", "Three", "Four"]
     compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
         section_messages
@@ -350,11 +350,11 @@ def test_prettify_and_dedup_list():
 
 def test_slack_message_attachments_limit():
     very_short_attachments = ["attachment"] * (
-        SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS - 1
+        SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS - 1
     )
-    short_attachments = ["attachment"] * SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS
+    short_attachments = ["attachment"] * SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS
     long_attachments = ["attachment"] * (
-        SlackMessageBuilder._MAX_AMMOUNT_OF_ATTACHMENTS + 1
+        SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS + 1
     )
 
     assert (

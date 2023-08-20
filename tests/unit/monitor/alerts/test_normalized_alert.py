@@ -114,7 +114,7 @@ def test_get_alert_meta_attrs():
     assert normalized_alert._get_alert_meta_attrs(SUBSCRIBERS_KEY) == []
 
 
-def test_get_alert_chennel():
+def test_get_alert_channel():
     # Channel both for the test and the model
     alert = {
         TEST_META_KEY: json.dumps(

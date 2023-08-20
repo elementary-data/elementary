@@ -61,7 +61,7 @@ class ModelsAPI(APIClient):
                 )
                 for model_run in model_runs
             ]
-            # The median should be based only on succesfull model runs.
+            # The median should be based only on successful model runs.
             successful_execution_times = [
                 model_run.execution_time
                 for model_run in model_runs
@@ -109,8 +109,8 @@ class ModelsAPI(APIClient):
         runs: List[FetcherModelRunSchema],
     ) -> TotalsModelRunsSchema:
         error_runs = len([run for run in runs if run.status in ["error", "fail"]])
-        seccuss_runs = len([run for run in runs if run.status == "success"])
-        return TotalsModelRunsSchema(errors=error_runs, success=seccuss_runs)
+        success_runs = len([run for run in runs if run.status == "success"])
+        return TotalsModelRunsSchema(errors=error_runs, success=success_runs)
 
     def get_models(
         self, exclude_elementary_models: bool = False

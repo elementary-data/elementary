@@ -207,7 +207,7 @@ class DataMonitoringReport(DataMonitoring):
         ) or disable_html_attachment:
             should_send_report_over_slack = False
 
-        # If a Slack client is provided, we want send a results summary and attachment of the report if needed.
+        # If a Slack client is provided, we want to send a results summary and attachment of the report if needed.
         if self.slack_client:
             # Send test results summary
             self.send_test_results_summary(
@@ -296,7 +296,7 @@ class DataMonitoringReport(DataMonitoring):
             send_succeeded = False
 
         self.execution_properties[
-            "sent_test_results_summary_succesfully"
+            "sent_test_results_summary_successfully"
         ] = send_succeeded
         self.success = send_succeeded
 
