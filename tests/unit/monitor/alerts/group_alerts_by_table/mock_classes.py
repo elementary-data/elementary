@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 
 @dataclass
 class MockAlert:
-    status: Optional[str]  # should be in "warn", "error" , "fail[ure]"
+    status: Optional[str]  # should be in "warn", "error" , "fail"
     slack_group_alerts_by: Optional[str]
     model_unique_id: Optional[str]
     slack_channel: Optional[str]
