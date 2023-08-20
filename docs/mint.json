@@ -275,6 +275,9 @@
     },
     "posthog": {
       "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
+    },
+    "gtm": {
+      "tagId": "GTM-TKR4HS3Q"
     }
   }
 }
