@@ -76,7 +76,7 @@ with
             database_name,
             schema_name,
             table_name,
-            coalesce(source.column_name, inferred.column_name) as column_name,
+            column_name,
             case
                 when source.column_name is not null then 0 else inferred.confidence
             end as absolute_confidence
