@@ -1,5 +1,8 @@
 {# TODO: Freshness anomalies should not return if there's no timestamp column. #}
-{% set recommended_tests = [("elementary", "volume_anomalies"), ("elementary", "freshness_anomalies")] %}
+{% set recommended_tests = [
+    ("elementary", "volume_anomalies"),
+    ("elementary", "freshness_anomalies"),
+] %}
 
 with
     tables_criticality as (
@@ -25,8 +28,12 @@ with
         cross join
             (
                 {% for recommended_test in recommended_tests %}
-                    select '{{ recommended_test[0] }}' as test_namespace, '{{ recommended_test[1] }}' as short_name
-                    {% if not loop.last %}union all{% endif %}
+                    select
+                        '{{ recommended_test[0] }}' as test_namespace,
+                        '{{ recommended_test[1] }}' as short_name
+                    {% if not loop.last %}
+                        union all
+                    {% endif %}
                 {% endfor %}
             ) rt
     ),

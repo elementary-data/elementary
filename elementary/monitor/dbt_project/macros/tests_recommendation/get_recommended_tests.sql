@@ -35,7 +35,6 @@
     {% endset %}
 
     {# TODO: Implement tags and owner filters (JSONs) #}
-
     {% set result = elementary.run_query(query) %}
     {% do return(elementary.agate_to_dicts(result)) %}
 {% endmacro %}

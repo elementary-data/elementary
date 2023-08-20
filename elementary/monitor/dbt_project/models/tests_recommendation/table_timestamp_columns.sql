@@ -70,21 +70,21 @@ with
     ),
 
     absolute_rated_timestamp_columns as (
-        -- Combine inferred and source-provided timestamp columns,
-        -- giving priority to source-provided ones.
         select
             database_name,
             schema_name,
             table_name,
             column_name,
-            case
-                when source.column_name is not null then 0 else inferred.confidence
-            end as absolute_confidence
+            inferred.confidence as absolute_confidence
         from inferred_timestamp_columns inferred
-        full outer join
-            source_provided_timestamp_columns source using (
-                database_name, schema_name, table_name, column_name
-            )
+        union all
+        select
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            0 as absolute_confidence
+        from source_provided_timestamp_columns
     ),
 
     relative_rated_timestamp_columns as (
