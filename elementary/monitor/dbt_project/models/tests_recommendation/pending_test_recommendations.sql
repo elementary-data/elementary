@@ -1,7 +1,7 @@
-{# TODO: Freshness anomalies should not return if there's no timestamp column. #}
+{# Object structure is [test_namespace, test_name, requires_timestamp_column] #}
 {% set recommended_tests = [
-    ("elementary", "volume_anomalies"),
-    ("elementary", "freshness_anomalies"),
+    ("elementary", "volume_anomalies", false),
+    ("elementary", "freshness_anomalies", true),
 ] %}
 
 with
@@ -23,14 +23,15 @@ with
     ),
 
     potentinal_recommended_tests as (
-        select id, test_namespace, short_name
+        select id, test_namespace, short_name, requires_timestamp_column
         from tables_criticality
         cross join
             (
                 {% for recommended_test in recommended_tests %}
                     select
                         '{{ recommended_test[0] }}' as test_namespace,
-                        '{{ recommended_test[1] }}' as short_name
+                        '{{ recommended_test[1] }}' as short_name,
+                        {{ recommended_test[2] }} as requires_timestamp_column
                     {% if not loop.last %}
                         union all
                     {% endif %}
@@ -44,7 +45,7 @@ with
     ),
 
     pending_recommended_tests as (
-        select id, test_namespace, short_name
+        select id, test_namespace, short_name, requires_timestamp_column
         from potentinal_recommended_tests
         where
             (id, test_namespace, short_name) not in (
@@ -74,6 +75,7 @@ with
         from pending_recommended_tests
         join tables_criticality using (id)
         left join timestamp_columns using (database_name, schema_name, table_name)
+        where requires_timestamp_column = false or timestamp_column is not null
     )
 
 select *
