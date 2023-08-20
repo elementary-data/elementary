@@ -2,7 +2,7 @@ import json
 
 from elementary.monitor.fetchers.alerts.normalized_alert import (
     ALERT_FIELDS_KEY,
-    ALERT_SUPRESSION_INTERVAL_KEY,
+    ALERT_SUPPRESSION_INTERVAL_KEY,
     ALERTS_CONFIG_KEY,
     CHANNEL_KEY,
     COLUMN_FIELD,
@@ -24,7 +24,7 @@ def test_flatten_meta():
                 SUBSCRIBERS_KEY: ["freddie", "dredd"],
                 CHANNEL_KEY: "my_channel",
                 ALERTS_CONFIG_KEY: {
-                    ALERT_SUPRESSION_INTERVAL_KEY: 1,
+                    ALERT_SUPPRESSION_INTERVAL_KEY: 1,
                     CHANNEL_KEY: "my_other_channel",
                 },
             }
@@ -42,7 +42,7 @@ def test_flatten_meta():
         {
             SUBSCRIBERS_KEY: ["freddie", "dredd"],
             CHANNEL_KEY: "my_other_channel",
-            ALERT_SUPRESSION_INTERVAL_KEY: 1,
+            ALERT_SUPPRESSION_INTERVAL_KEY: 1,
         },
         sort_keys=True,
     )
@@ -176,14 +176,14 @@ def test_get_alert_suppression_interval():
         TEST_META_KEY: json.dumps(
             {
                 ALERTS_CONFIG_KEY: {
-                    ALERT_SUPRESSION_INTERVAL_KEY: 1,
+                    ALERT_SUPPRESSION_INTERVAL_KEY: 1,
                 }
             }
         ),
         MODEL_META_KEY: json.dumps(
             {
                 ALERTS_CONFIG_KEY: {
-                    ALERT_SUPRESSION_INTERVAL_KEY: 2,
+                    ALERT_SUPPRESSION_INTERVAL_KEY: 2,
                 }
             }
         ),
@@ -196,7 +196,7 @@ def test_get_alert_suppression_interval():
         TEST_META_KEY: json.dumps(
             {
                 ALERTS_CONFIG_KEY: {
-                    ALERT_SUPRESSION_INTERVAL_KEY: 1,
+                    ALERT_SUPPRESSION_INTERVAL_KEY: 1,
                 }
             }
         ),
@@ -209,7 +209,7 @@ def test_get_alert_suppression_interval():
         MODEL_META_KEY: json.dumps(
             {
                 ALERTS_CONFIG_KEY: {
-                    ALERT_SUPRESSION_INTERVAL_KEY: 2,
+                    ALERT_SUPPRESSION_INTERVAL_KEY: 2,
                 }
             }
         ),

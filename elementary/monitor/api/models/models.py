@@ -220,22 +220,22 @@ class ModelsAPI(APIClient):
         if artifact.full_path is None:
             raise Exception("Artifact full path can't be null")
 
-        splited_artifact_path = artifact.full_path.split(os.path.sep)
-        artifact_file_name = splited_artifact_path[-1]
+        split_artifact_path = artifact.full_path.split(os.path.sep)
+        artifact_file_name = split_artifact_path[-1]
 
         # If source, change models directory into sources and file extension from .yml to .sql
         if isinstance(artifact, SourceSchema):
-            if splited_artifact_path[0] == "models":
-                splited_artifact_path[0] = "sources"
+            if split_artifact_path[0] == "models":
+                split_artifact_path[0] = "sources"
             if artifact_file_name.endswith(YAML_FILE_EXTENSION):
                 head, _sep, tail = artifact_file_name.rpartition(YAML_FILE_EXTENSION)
-                splited_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
+                split_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
 
         # Add package name to model path
         if artifact.package_name:
-            splited_artifact_path.insert(0, artifact.package_name)
+            split_artifact_path.insert(0, artifact.package_name)
 
-        return os.path.sep.join(splited_artifact_path)
+        return os.path.sep.join(split_artifact_path)
 
     @classmethod
     def _fqn(

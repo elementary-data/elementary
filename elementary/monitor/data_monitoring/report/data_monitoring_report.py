@@ -224,11 +224,11 @@ class DataMonitoringReport(DataMonitoring):
 
     def send_report_attachment(self, local_html_path: str) -> bool:
         if self.slack_client:
-            send_succeded = self.slack_client.send_report(
+            send_succeeded = self.slack_client.send_report(
                 self.config.slack_channel_name, local_html_path
             )
-            self.execution_properties["sent_to_slack_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_slack_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         self.execution_properties["success"] = self.success
@@ -238,27 +238,27 @@ class DataMonitoringReport(DataMonitoring):
         self, local_html_path: str, remote_file_path: Optional[str] = None
     ) -> Tuple[bool, Optional[str]]:
         if self.gcs_client:
-            send_succeded, bucket_website_url = self.gcs_client.send_report(
+            send_succeeded, bucket_website_url = self.gcs_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
-            self.execution_properties["sent_to_gcs_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_gcs_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         if self.s3_client:
-            send_succeded, bucket_website_url = self.s3_client.send_report(
+            send_succeeded, bucket_website_url = self.s3_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
-            self.execution_properties["sent_to_s3_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_s3_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         if self.azure_client:
-            send_succeded, bucket_website_url = self.azure_client.send_report(
+            send_succeeded, bucket_website_url = self.azure_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
-            self.execution_properties["sent_to_azure_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_azure_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         self.execution_properties["success"] = self.success
