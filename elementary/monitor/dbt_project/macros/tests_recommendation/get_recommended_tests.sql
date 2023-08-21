@@ -10,7 +10,7 @@
     {% set query %}
         select resource_name, source_name, test_namespace, test_name, timestamp_column
         from {{ ref("pending_test_recommendations") }}
-        where 1=1
+        where 1=0
 
         {% if depends_on_count %}
             or depends_on_count >= {{ depends_on_count }}
