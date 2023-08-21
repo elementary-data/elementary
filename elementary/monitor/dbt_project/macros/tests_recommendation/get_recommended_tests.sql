@@ -39,7 +39,7 @@
         {% endif %}
 
         {% if owners %}
-            or owner ?| array['{{ tags | join("','") }}']
+            or owner ?| array['{{ owners | join("','") }}']
         {% endif %}
     {% endset %}
 
