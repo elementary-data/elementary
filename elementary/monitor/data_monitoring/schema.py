@@ -72,7 +72,7 @@ class SelectorFilterSchema(BaseModel):
                 return invocation_datetime.strftime(DATETIME_FORMAT)
             except ValueError as err:
                 logger.error(
-                    f"Failed to parse invocaton time filter: {err}\nPlease use a valid ISO 8601 format"
+                    f"Failed to parse invocation time filter: {err}\nPlease use a valid ISO 8601 format"
                 )
                 raise
         return None
