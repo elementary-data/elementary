@@ -211,7 +211,7 @@ class GroupOfAlerts:
         return f":small_red_triangle: {self._title}"
 
     def _get_banner_block(self, env):
-        return None  # Keeping this placeholder since it's supposed to be over-rided very soon
+        return None  # Keeping this placeholder since it's supposed to be overridden very soon
 
     def _get_model_error_block_header(self) -> List:
         model_error_alert_list = self._components_to_alerts[ModelErrorComponent]
@@ -294,7 +294,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         """
         where do we send a group of alerts to?
         Definitions:
-        1. "default_channel" is the project yaml level definition, over-rided by CLI if given
+        1. "default_channel" is the project yaml level definition, overridden by CLI if given
         2. override_channel dictates whether the default channel should override the alert-specific channel
         3. "per alert" is the definition for tests (if exists), or for the related model (if exists).
         Sorting out:
@@ -343,7 +343,7 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
         """
         where do we send a group of alerts to?
         Definitions:
-        1. "default_channel" is the project yaml level definition, over-rided by CLI if given
+        1. "default_channel" is the project yaml level definition, overridden by CLI if given
         2. "per alert" is the definition for tests (if exists), or for the related model (if exists).
         Sorting out:
 
