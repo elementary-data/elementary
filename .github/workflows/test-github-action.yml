@@ -101,3 +101,17 @@ jobs:
         with:
           name: edr.log
           path: edr_target/edr.log
+
+  notify_failures:
+    name: Notify Slack
+    needs: test
+    if: |
+      always() &&
+      contains(needs.test.result, 'failure') &&
+      ! cancelled() &&
+      ${{ github.event_name == 'schedule' }}
+    uses: ./.github/workflows/notify_slack.yml
+    with:
+      result: "failure"
+      run_id: ${{ github.run_id }}
+      workflow_name: "Test Elementary GitHub action"
