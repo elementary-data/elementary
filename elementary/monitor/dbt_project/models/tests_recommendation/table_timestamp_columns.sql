@@ -41,6 +41,7 @@ with
         from {{ ref("elementary", "dbt_columns") }}
     ),
 
+    -- Inferring the timestamp column based on their names and assigning a confidence score.
     inferred_timestamp_columns as (
         select
             database_name,
@@ -59,6 +60,8 @@ with
             ) as timestamp_column_names(column_name, confidence) using (column_name)
     ),
 
+    -- Users can provide the timestamp columns for their sources,
+    -- if provided, we assign a confidence score of 0 (certain).
     source_provided_timestamp_columns as (
         select
             lower(database_name) as database_name,
@@ -69,6 +72,7 @@ with
         where loaded_at_field is not null
     ),
 
+    -- Combining the inferred and source provided timestamp columns.
     absolute_rated_timestamp_columns as (
         select
             database_name,
@@ -87,6 +91,7 @@ with
         from source_provided_timestamp_columns
     ),
 
+    -- Sort the timestamp columns by confidence and assign a rank.
     relative_rated_timestamp_columns as (
         select
             database_name,
@@ -100,6 +105,7 @@ with
         from absolute_rated_timestamp_columns
     ),
 
+    -- Select the timestamp columns with the highest confidence.
     best_rated_timestamp_columns as (
         select database_name, schema_name, table_name, column_name
         from relative_rated_timestamp_columns
