@@ -102,14 +102,6 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: docker-compose up -d postgres
 
-      - name: Write dbt profiles
-        env:
-          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
-        run: |
-          mkdir -p ~/.dbt
-          UNDERSCORED_REF_NAME=$(echo "${{ env.BRANCH_NAME }}" | head -c 32 | sed "s/-/_/g")
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
-
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -129,6 +121,15 @@ jobs:
         run: |
           pip install -r dev-requirements.txt
           pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+
+      - name: Write dbt profiles
+        env:
+          PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
+        run: |
+          mkdir -p ~/.dbt
+          DBT_VERSION=$(pip show dbt-core | grep -i version | awk '{print $2}' | sed 's/\.//g')
+          UNDERSCORED_REF_NAME=$(echo "dbt_$DBT_VERSION_$BRANCH_NAME" | head -c 32 | sed "s/-/_/g")
+          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}
