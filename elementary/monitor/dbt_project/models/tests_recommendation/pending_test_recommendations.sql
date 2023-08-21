@@ -22,7 +22,7 @@ with
         from {{ ref("tables_criticality") }}
     ),
 
-    potentinal_recommended_tests as (
+    potential_recommended_tests as (
         select id, test_namespace, short_name, requires_timestamp_column
         from tables_criticality
         cross join
@@ -46,7 +46,7 @@ with
 
     pending_recommended_tests as (
         select id, test_namespace, short_name, requires_timestamp_column
-        from potentinal_recommended_tests
+        from potential_recommended_tests
         where
             (id, test_namespace, short_name) not in (
                 select parent_model_unique_id, test_namespace, short_name
