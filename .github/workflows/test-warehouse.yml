@@ -128,7 +128,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           DBT_VERSION=$(pip show dbt-core | grep -i version | awk '{print $2}' | sed 's/\.//g')
-          UNDERSCORED_REF_NAME=$(echo "dbt_$DBT_VERSION_$BRANCH_NAME" | head -c 32 | sed "s/-/_/g")
+          UNDERSCORED_REF_NAME=$(echo "dbt_${DBT_VERSION}_${BRANCH_NAME}" | head -c 32 | sed "s/-/_/g")
           echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Run Python package unit tests
