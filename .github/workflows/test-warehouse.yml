@@ -81,6 +81,7 @@ jobs:
       run:
         working-directory: elementary
     concurrency:
+      # This is what eventually defines the schema name in the data platform.
       group: tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
     steps:
