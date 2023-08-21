@@ -3,7 +3,9 @@
     dependant_on_count=none,
     exposure_count=none,
     critical_name_like_patterns=none,
-    table_types=none
+    table_types=none,
+    tags=none,
+    owners=none
 ) %}
     {% set query %}
         select resource_name, source_name, test_namespace, test_name, timestamp_column
@@ -31,9 +33,16 @@
         {% if table_types %}
             or table_type in ('{{ table_types | join("','") }}')
         {% endif %}
+
+        {% if tags %}
+            or tags ?| array['{{ tags | join("','") }}']
+        {% endif %}
+
+        {% if owners %}
+            or owner ?| array['{{ tags | join("','") }}']
+        {% endif %}
     {% endset %}
 
-    {# TODO: Implement tags and owner filters (JSONs) #}
     {% set result = elementary.run_query(query) %}
     {% do return(elementary.agate_to_dicts(result)) %}
 {% endmacro %}

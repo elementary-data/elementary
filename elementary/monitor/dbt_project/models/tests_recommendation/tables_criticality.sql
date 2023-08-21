@@ -8,9 +8,9 @@ with
             name as resource_name,
             null as source_name,
             'model' as table_type,
-            tags,
-            owner,
-            cast(depends_on_nodes as json) as depends_on
+            cast(tags as jsonb) as tags,
+            cast(owner as jsonb) as owner,
+            cast(depends_on_nodes as jsonb) as depends_on
         from {{ ref("elementary", "dbt_models") }}
     ),
 
@@ -23,9 +23,9 @@ with
             name as resource_name,
             source_name,
             'source' as table_type,
-            tags,
-            owner,
-            cast('[]' as json) as depends_on
+            cast(tags as jsonb) as tags,
+            cast(owner as jsonb) as owner,
+            cast('[]' as jsonb) as depends_on
         from {{ ref("elementary", "dbt_sources") }}
     ),
 
@@ -39,35 +39,24 @@ with
 
     dependant_on_counts as (
         select t1.id, count(*) as dependant_on_count
-        from tables_information as t1
-        join
-            tables_information as t2
-            on exists (
-                select 1
-                from json_array_elements(t2.depends_on) as t2_depends_on
-                where t2_depends_on::text = concat('"', t1.id, '"')
-            )
+        from tables_information t1
+        join tables_information t2 on t2.depends_on ? t1.id
         group by t1.id
     ),
 
     exposure_counts as (
         select t.id, count(*) as exposure_count
-        from tables_information as t
+        from tables_information t
         join
-            {{ ref("elementary", "dbt_exposures") }} as e
-            on exists (
-                select 1
-                from
-                    json_array_elements(e.depends_on_nodes::json) as exposure_depends_on
-                where exposure_depends_on::text = concat('"', t.id, '"')
-            )
+            {{ ref("elementary", "dbt_exposures") }} e
+            on e.depends_on_nodes::jsonb ? t.id
         group by t.id
     ),
 
     tables as (
         select
             tables_information.*,
-            json_array_length(tables_information.depends_on) as depends_on_count,
+            jsonb_array_length(tables_information.depends_on) as depends_on_count,
             coalesce(dependant_on_counts.dependant_on_count, 0) as dependant_on_count,
             coalesce(exposure_counts.exposure_count, 0) as exposure_count
         from tables_information
