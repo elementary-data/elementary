@@ -72,7 +72,7 @@ with
             exposure_count,
             table_type,
             case
-                when requires_timestamp_column
+                when timestamp_column is not null
                 then cast('{"timestamp_column": "' || timestamp_column || '"}' as jsonb)
                 else null
             end as test_args
