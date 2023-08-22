@@ -40,10 +40,8 @@ class InvocationsAPI(APIClient):
         else:
             raise NotImplementedError
 
-    def get_invocations_by_ids(
-        self, invocations_ids: List[str]
-    ) -> List[DbtInvocationSchema]:
-        return self.invocations_fetcher.get_invocations_by_ids(invocations_ids)
+    def get_models_latest_invocations_data(self) -> List[DbtInvocationSchema]:
+        return self.invocations_fetcher.get_models_latest_invocations_data()
 
-    def get_resources_latest_invocation(self) -> Dict[str, str]:
-        return self.invocations_fetcher.get_resources_latest_invocation()
+    def get_models_latest_invocation(self) -> Dict[str, str]:
+        return self.invocations_fetcher.get_models_latest_invocation()

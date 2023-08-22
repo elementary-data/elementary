@@ -4,7 +4,7 @@ on:
     branches: ["master"]
     paths:
       - elementary/**
-      - setup.py
+      - pyproject.toml
   workflow_dispatch:
 
 jobs:
@@ -12,5 +12,4 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: postgres
-      dbt-version: 1.0.2
     secrets: inherit

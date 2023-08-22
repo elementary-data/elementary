@@ -60,7 +60,7 @@ jobs:
           git config user.email noreply@github.com
       - name: Bump version
         run: |
-          sed -i 's/version="[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version="${{ inputs.cli-version }}"/' ./setup.py
+          sed -i 's/^version = "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version = "${{ inputs.cli-version }}"/' ./pyproject.toml
       - name: Bump version for package (using input)
         if: ${{ needs.validate-version.outputs.validated-dbt-package-version != ''}}
         run: |
