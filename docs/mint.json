@@ -59,11 +59,7 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": [
-            "quickstart",
-            "quickstart-cloud",
-            "quickstart-cli"
-          ]
+          "pages": ["quickstart", "quickstart-cloud", "quickstart-cli"]
         },
         {
           "group": "Tutorial",
