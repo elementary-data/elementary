@@ -7,7 +7,6 @@ You will connect Elementary Cloud to Bigquery for syncing the Elementary schema 
 - Grant it the `roles/bigquery.dataViewer` role on your elementary dataset (usually `<dbt_dataset>_elementary`).
 - Grant it the `roles/bigquery.metadataViewer` role on your dbt dataset.
 
-
 <Snippet file="cloud/integrations/permissions-and-security.mdx" />
 
 ### Fill the connection form
@@ -16,8 +15,7 @@ Provide the following fields:
 
 - **Service account file**: The service account file you generated for Elementary. For more information, refer to [Create BigQuery service account](/integrations/bigquery#create-bigquery-service-account).
 - **Project**: The name of your BigQuery project.
-- **Elementary dateset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
+- **Elementary dataset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
 - **Location**: Use this field to configure the location of BigQuery datasets as per [the BigQuery documentation](https://cloud.google.com/bigquery/docs/locations).
-
 
 <Snippet file="cloud/integrations/ip-allowlist.mdx" />

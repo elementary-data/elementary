@@ -1,12 +1,11 @@
-
 ### Signup to Elementary cloud
 
 Anyone can [signup to Elementary Cloud](https://elementary-data.frontegg.com/oauth/account/sign-up) via Google SSO or by creating an account.
 
 <Note>
-If you are interested in advanced authentication such as MFA, Okta SSO, Microsoft AD - please contact us at cloud@elementary-data.com
+  If you are interested in advanced authentication such as MFA, Okta SSO,
+  Microsoft AD - please contact us at cloud@elementary-data.com
 </Note>
-
 
 ### Create your first environment
 
@@ -19,7 +18,6 @@ Press `Create environment`, and provide an environment name:
   <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1691523923/create_env_wsovvr.png" />
 </Frame>
 
-
 ### Connect data warehouse
 
 You can connect Elementary to a data warehouse that has an Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
@@ -29,29 +27,24 @@ Elementary Cloud needs:
 - Read permissions to the Elementary schema (and not the rest of your data)
 - Network access (might require to allowlist Elementary IP address)
 
-
 Which data warehouse do you wish to connect?
 
 <Snippet file="cloud/integrations/cards-groups/connect-dwh-cards.mdx" />
-
 
 ### Allowlist Elementary IP
 
 Elementary IP for allowlist: `3.126.156.226`
 
-
 ### Need help with onboarding?
 
 We can provide [support on Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) or hop on an [onboarding call](https://savvycal.com/MaayanSa/df29881c).
-
 
 ### What happens now?
 
 Once Elementary Cloud successfully connects to you data warehouse, it will start syncing data from the Elementary schema to cloud. This data includes tests results, run results, metadata and configuration.
 If you see data in the Elementary Dashboard you completed your connection (Congrats! 🎉).
 
-The syncs happen by default once an hour, but you can also [configure a triggered sync](/cloud/guides/sync-scheduling) to get a near real time experience. 
-
+The syncs happen by default once an hour, but you can also [configure a triggered sync](/cloud/guides/sync-scheduling) to get a near real time experience.
 
 ## What's next?
 
