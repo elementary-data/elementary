@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 from pydantic.typing import Literal
 
-SEED_PATH_PATERN = re.compile(r"^seed\.")
+SEED_PATH_PATTERN = re.compile(r"^seed\.")
 
 NodeUniqueIdType = str
 NodeType = Literal["model", "source", "exposure"]
@@ -27,6 +27,6 @@ class NodeDependsOnNodesSchema(BaseModel):
     def _format_node_id(cls, node_id: str):
         # Currently we don't save seeds in our artifacts.
         # We remove seeds from the lineage graph (as long as we don't support them).
-        if re.search(SEED_PATH_PATERN, node_id):
+        if re.search(SEED_PATH_PATTERN, node_id):
             return None
         return node_id
