@@ -1,0 +1,38 @@
+Elementary Databricks integration supports:
+
+1. Installing the dbt package to upload dbt artifacts, test results and run results.
+2. Data observability report generation.
+3. Slack alerts on failures in models and tests.
+4. Anomaly detection tests.
+
+Elementary schema changes tests are **not supported yet**.
+
+## Databricks connection profile
+
+After installing Elementary's dbt package upon running `dbt deps`,
+you can generate Elementary's profile for usage with `edr` by running the following command within your project:
+
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
+[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-setups/databricks-setup#set-up-a-databricks-target)
+in the output and copy it to `~/.dbt/profiles.yml`.
+
+The `profiles.yml` file to connect to Databricks should contain a profile in the following format:
+
+```yml Databricks
+## DATABRICKS ##
+## By default, edr expects the profile name 'elementary'.      ##
+
+elementary:
+  outputs:
+    default:
+      type: databricks
+      host: [hostname, like <ID>.cloud.databricks.com]
+      http_path: [like /sql/1.0/endpoints/<ID>]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      token: [token]
+      threads: [number of threads like 8]
+```
