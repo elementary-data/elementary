@@ -18,7 +18,7 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     owners: Optional[List[str]] = []
     tags: Optional[List[str]] = []
     # Should be changed to artifact_name.
-    # Currently its model_name to match the CLI UI.
+    # Currently, it's model_name to match the CLI UI.
     model_name: str
     normalized_full_path: str
     fqn: str

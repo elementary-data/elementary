@@ -18,7 +18,7 @@ on:
         description: dbt's version to test with
 
 env:
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
 
 jobs:
   test:
@@ -101,3 +101,17 @@ jobs:
         with:
           name: edr.log
           path: edr_target/edr.log
+
+  notify_failures:
+    name: Notify Slack
+    needs: test
+    if: |
+      always() &&
+      contains(needs.test.result, 'failure') &&
+      ! cancelled() &&
+      ${{ github.event_name == 'schedule' }}
+    uses: ./.github/workflows/notify_slack.yml
+    with:
+      result: "failure"
+      run_id: ${{ github.run_id }}
+      workflow_name: "Test Elementary GitHub action"

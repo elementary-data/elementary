@@ -36,7 +36,7 @@ def assert_new_alerts(new_alerts):
     alerts_to_send = new_alerts.alerts
     alerts_to_skip = new_alerts.alerts_to_skip
 
-    # Test the following tests are not suppresed:
+    # Test the following tests are not suppressed:
     #   - Alert after suppression interval
     #   - Alert without suppression interval
     #   - First occurrence alert with suppression interval
@@ -44,8 +44,8 @@ def assert_new_alerts(new_alerts):
         [alert.id for alert in alerts_to_send], sort_keys=True
     ) == json.dumps(["alert_id_2", "alert_id_3", "alert_id_4"], sort_keys=True)
 
-    # Test the following tests are suppresed:
-    #   - alert_id_1 (Alert whithin suppression interval)
+    # Test the following tests are suppressed:
+    #   - alert_id_1 (Alert within suppression interval)
     # Test the following tests are skipped due to dedup:
     #   - alert_id_5 (Duplication of alert_id_4 with earlier detected time)
     assert json.dumps(

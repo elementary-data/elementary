@@ -13,7 +13,9 @@ PATH = os.path.join(_MONITOR_DIR, "dbt_project")
 
 # Compatibility for previous dbt versions
 _MODULES_PATH = os.path.join(PATH, "dbt_modules")
-_PACKAGES_PATH = os.path.join(PATH, "dbt_packages")
+_PACKAGES_PATH = os.path.join(
+    PATH, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
+)
 
 
 def is_dbt_package_up_to_date() -> bool:

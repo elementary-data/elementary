@@ -19,7 +19,7 @@ jobs:
       dbt-bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}
       py-bumped: ${{ steps.bump-tag.outputs.py-bumped }}
     steps:
-      - name: Get lastest release tag
+      - name: Get latest release tag
         id: get-tag
         run: |
           echo "py=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq '.tag_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
