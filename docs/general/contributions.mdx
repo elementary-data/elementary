@@ -36,16 +36,33 @@ Thank you again, we value your support!
 
 ### How to test my code?
 
-There is a dbt project inside the dbt package repository that is called [integration_tests](https://github.com/elementary-data/dbt-data-reliability/tree/master/integration_tests). Inside of it there are two python files that are responsible for unit tests and e2e tests.
+We have a test project under the [integration_tests](https://github.com/elementary-data/dbt-data-reliability/tree/master/integration_tests) which
+includes various tests for different features in the dbt package.
+The tests are written in Python using the [py.test](https://docs.pytest.org/) framework.
 
 #### Tests Requirements
 
-- Both unit tests and end-to-end tests run dbt behind the scene so you need to have a dbt profile named 'elementary' with a target named 'snowflake', 'bigquery' or 'redshift' based on your existing platform (when we deploy a new version we run it against all platforms but to get your PR merged you only need to run it against one platform, the platform you already have in your organization).
+- The tests run dbt behind the scene and therefore you need to have a dbt profile named 'elementary' with a target named according to the data warehouse you are using (e.g. 'snowflake' or 'bigquery').
 
-- Both unit-tests and end-to-end tests require Elementary's CLI code installed on your local machine, to install it simply run:
+- The tests require Elementary's CLI python package to be installed on your local machine, to install it simply run:
 
 ```
 pip install elementary-data
+```
+
+- Please run the following commands to install a couple of other test dependencies:
+
+```
+dbt deps --project-dir dbt_project
+pip install -r requirements.txt
+```
+
+### How to run the tests
+
+In order to
+
+```
+
 ```
 
 ### Unit tests
