@@ -65,13 +65,17 @@ with
             source_name,
             test_namespace,
             short_name as test_name,
-            timestamp_column,
             tags,
             owner,
             depends_on_count,
             dependant_on_count,
             exposure_count,
-            table_type
+            table_type,
+            case
+                when timestamp_column is not null
+                then cast('{"timestamp_column": "' || timestamp_column || '"}' as jsonb)
+                else null
+            end as test_args
         from pending_recommended_tests
         join tables_criticality using (id)
         left join timestamp_columns using (database_name, schema_name, table_name)
