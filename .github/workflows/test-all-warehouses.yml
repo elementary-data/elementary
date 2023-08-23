@@ -50,6 +50,9 @@ jobs:
     name: Print Conditions
     needs: test
     runs-on: ubuntu-latest
+    if: |
+      always() &&
+      ! cancelled()
     steps:
       - name: print conditions
         run: |
