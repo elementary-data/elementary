@@ -149,6 +149,8 @@ class SlackMessageBuilder:
             icon = ":warning:"
         elif status == "error":
             icon = ":x:"
+        elif status == "pass":
+            icon = ":white_check_mark:"
         return icon
 
     def get_slack_message(self, *args, **kwargs) -> SlackMessageSchema:

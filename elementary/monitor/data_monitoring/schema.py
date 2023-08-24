@@ -25,6 +25,7 @@ class Status(Enum):
     SKIPPED = "skipped"
     ERROR = "error"
     RUNTIME_ERROR = "runtime error"
+    PASS = "pass"
 
 
 class ResourceType(Enum):
@@ -58,6 +59,7 @@ class SelectorFilterSchema(BaseModel):
         Status.ERROR,
         Status.RUNTIME_ERROR,
         Status.WARN,
+        Status.PASS,
     ]
     resource_types: Optional[List[ResourceType]] = None
     node_names: Optional[List[str]] = None

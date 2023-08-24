@@ -51,6 +51,13 @@ TestFailureComponent = AlertGroupComponent(
     emoji_in_full="small_red_triangle",
 )
 
+TestPassComponent = AlertGroupComponent(
+    name_in_summary="Test passes",
+    emoji_in_summary="white_check_mark",
+    name_in_full="Test passes after failing",
+    emoji_in_full="white_check_mark",
+)
+
 TagsComponent = NotificationComponent(
     order=0, name_in_summary="Tags", empty_section_content="No tags"
 )
@@ -102,6 +109,9 @@ class GroupOfAlerts:
         )  # only place it should be used is inside to_slack
         self._env = env
 
+    def is_only_passes(self) -> bool:
+        return all([alert.status == "pass" for alert in self.alerts])
+
     def set_owners(self, owners: List[str]):
         self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
 
@@ -115,6 +125,7 @@ class GroupOfAlerts:
         test_errors = []
         test_warnings = []
         test_failures = []
+        test_passes = []
         model_errors: List[Alert] = []
         for alert in self.alerts:
             if isinstance(alert, ModelAlert):
@@ -123,6 +134,8 @@ class GroupOfAlerts:
                 test_errors.append(alert)
             elif alert.status == "warn":
                 test_warnings.append(alert)
+            elif alert.status == "pass":
+                test_passes.append(alert)
             else:
                 test_failures.append(alert)
         self._components_to_alerts: Dict[AlertGroupComponent, List[Alert]] = dict()
@@ -134,6 +147,8 @@ class GroupOfAlerts:
             self._components_to_alerts[TestWarningComponent] = test_warnings
         if test_errors:
             self._components_to_alerts[TestErrorComponent] = test_errors
+        if test_passes:
+            self._components_to_alerts[TestPassComponent] = test_passes
 
     def to_slack(self) -> SlackMessageSchema:
         title_blocks = []  # title, [banner], number of passed or failed,
@@ -148,27 +163,18 @@ class GroupOfAlerts:
 
         # summary of number of failed, errors, etc.
         fields_summary = []
-        # this would have been a loop but the order matters.
-        alert_list = self._components_to_alerts.get(ModelErrorComponent)
-        if alert_list:
-            fields_summary.append(
-                f":{ModelErrorComponent.emoji_in_summary}: {ModelErrorComponent.name_in_summary}: {len(alert_list)}    |"
-            )
-        alert_list = self._components_to_alerts.get(TestFailureComponent)
-        if alert_list:
-            fields_summary.append(
-                f":{TestFailureComponent.emoji_in_summary}: {TestFailureComponent.name_in_summary}: {len(alert_list)}    |"
-            )
-        alert_list = self._components_to_alerts.get(TestWarningComponent)
-        if alert_list:
-            fields_summary.append(
-                f":{TestWarningComponent.emoji_in_summary}: {TestWarningComponent.name_in_summary}: {len(alert_list)}    |"
-            )
-        alert_list = self._components_to_alerts.get(TestErrorComponent)
-        if alert_list:
-            fields_summary.append(
-                f":{TestErrorComponent.emoji_in_summary}: {TestErrorComponent.name_in_summary}: {len(alert_list)}"
-            )
+        for component in [
+            ModelErrorComponent,
+            TestFailureComponent,
+            TestWarningComponent,
+            TestErrorComponent,
+            TestPassComponent,
+        ]:
+            alert_list = self._components_to_alerts.get(component)
+            if alert_list:
+                fields_summary.append(
+                    f":{component.emoji_in_summary}: {component.name_in_summary}: {len(alert_list)}    |"
+                )
         title_blocks.append(self._message_builder.create_context_block(fields_summary))
         self._message_builder.add_title_to_slack_alert(title_blocks=title_blocks)
 
@@ -208,7 +214,8 @@ class GroupOfAlerts:
         return self._message_builder.get_slack_message()
 
     def _title_block(self) -> str:
-        return f":small_red_triangle: {self._title}"
+        icon = ":white_check_mark:" if self.is_only_passes() else ":small_red_triangle:"
+        return f"{icon} {self._title}"
 
     def _get_banner_block(self, env):
         return None  # Keeping this placeholder since it's supposed to be overridden very soon
@@ -288,6 +295,8 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         )
 
     def _get_title(self) -> str:
+        if self.is_only_passes():
+            return f"Table issues resolved - {self._model}"
         return f"Table issues detected - {self._model}"
 
     def _sort_channel_destination(self, default_channel, override_channel):
