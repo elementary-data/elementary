@@ -64,9 +64,8 @@ jobs:
     needs: test
     if: |
       always() &&
-      contains(needs.test.result, 'failure') &&
-      ! cancelled() &&
-      ${{ github.event_name == 'schedule' }}
+      ${{ needs.test.result == 'failure' }} &&
+      ! cancelled()
     uses: ./.github/workflows/notify_slack.yml
     with:
       result: "failure"
