@@ -39,7 +39,7 @@ OWNERS_KEY = "owners"
 SUBSCRIBERS_KEY = "subscribers"
 CHANNEL_KEY = "channel"
 ALERT_FIELDS_KEY = "alert_fields"
-ALERT_SUPRESSION_INTERVAL_KEY = "alert_suppression_interval"
+ALERT_SUPPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 SLACK_GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
 
 
@@ -66,7 +66,7 @@ class NormalizedAlert:
         key in data ( or default val)  -- > key in normalized alert
         SUBSCRIBERS_KEY (or []) --> SUBSCRIBERS_KEY
         "owner" (or []) --> OWNERS_KEY
-        CHANNEL_KEY (or None) --> "slack channel"
+        CHANNEL_KEY (or None) --> "Slack channel"
         ALERT_FIELDS_KEY (or DEFAULT_ALERT_FIELDS)--> ALERT_FIELDS_KEY
         "group" (or None) --> SLACK_GROUP_ALERTS_BY_KEY
 
@@ -93,7 +93,7 @@ class NormalizedAlert:
 
             normalized_alert["slack_channel"] = self._get_alert_channel()
             normalized_alert[
-                ALERT_SUPRESSION_INTERVAL_KEY
+                ALERT_SUPPRESSION_INTERVAL_KEY
             ] = self._get_alert_suppression_interval()
             normalized_alert[ALERT_FIELDS_KEY] = self._get_alert_fields()
 
@@ -130,7 +130,7 @@ class NormalizedAlert:
 
     def _get_alert_suppression_interval(self) -> Optional[int]:
         return self._get_field_from_test_meta_or_model_meta_or_default(
-            key=ALERT_SUPRESSION_INTERVAL_KEY, default_val=None
+            key=ALERT_SUPPRESSION_INTERVAL_KEY, default_val=None
         )
 
     def _get_alert_fields(self) -> Optional[List[str]]:

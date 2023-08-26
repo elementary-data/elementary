@@ -1,0 +1,16 @@
+You will connect Elementary Cloud to Postgres for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
+
+<Snippet file="cloud/integrations/create-user-operation.mdx" />
+
+### Fill the connection form
+
+Provide the following fields:
+
+- **Host**: The hostname of your Postgres account to connect to. This can either be a hostname or an IP address.
+- **Port**: The port of your Postgres account to connect to. This is usually `5432`.
+- **Database name**: The name of the database where your Elementary schema exist. e.g. `analytics`.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+- **User**: The name of the for Elementary user.
+- **Password**: The password associated with the provided user.
+
+<Snippet file="cloud/integrations/ip-allowlist.mdx" />

@@ -78,5 +78,5 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     @validator("failures", pre=True)
     def parse_failures(cls, failures, values):
         test_type = values.get("test_type")
-        # Elementary's tests dosen't return correct failures.
+        # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None

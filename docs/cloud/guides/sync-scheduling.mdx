@@ -1,19 +1,19 @@
 ---
-title: "Setting environment schedule"
+title: "Environment syncs schedule"
 ---
 
 ## Synchronizing the Elementary schema
 
-The data you see on your Elementary cloud environments is updated by synchronizing your Elementary schema. There are 2 possible scheduling options:
+The data on your Elementary cloud environments is updated by syncing the local Elementary schema from the data warehouse.
 
-1. By default, Elementary Cloud synchronizes data from your Elementary schema on an hourly basis. This means that within the one-hour time window, your data may not be up-to-date.
-2. Configure a webhook that will trigger a sync after your data pipeline has finished running.
+There are 2 available scheduling options:
 
-## Sync Webhook
+1. **Hourly syncs** - By default, Elementary Cloud syncs data from your Elementary schema on an hourly basis. This means that within the one-hour time window, your data may not be up-to-date.
+2. **Triggered syncs** - Configure a webhook that will trigger a sync after your data pipeline has finished running. This configuration is recommended, as it's as close as possible to real time.
 
-When configuring a webhook, the environment will update as soon as new data is available, ensuring you see the most recent data while minimizing unnecessary updates and therefore, cost.
+## Triggered syncs using webhook
 
-### Setup
+When configuring a webhook, the environment will update as soon as new data is available, ensuring you see the most recent data while minimizing unnecessary updates and therefore cost.
 
 To configure the webhook, navigate to the relevant environment on your [_Environments_](https://app.elementary-data.com/settings/environments) page in Elementary Cloud. Click the environment's _Schedule Settings_ and change the environment update method to "Webhook triggered".
 The next step depends on whether you're using dbt Cloud or dbt Core.
