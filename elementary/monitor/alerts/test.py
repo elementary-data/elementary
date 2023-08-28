@@ -32,6 +32,7 @@ class TestAlert(Alert):
         self,
         model_unique_id: str,
         test_unique_id: str,
+        elementary_unique_id: str,
         test_name: str,
         test_created_at: Optional[str] = None,
         test_meta: Optional[str] = None,
@@ -41,6 +42,7 @@ class TestAlert(Alert):
         self.test_meta = try_load_json(test_meta) or {}
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
+        self.elementary_unique_id = elementary_unique_id
         self.test_created_at = test_created_at
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ""
