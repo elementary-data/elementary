@@ -51,6 +51,24 @@ class TestAlert(Alert):
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
 
+    def get_test_runs_report_link(self):
+        test_runs_report_link = None
+
+        if self.elementary_unique_id and self.report_url:
+            report_url = (
+                self.report_url[:-1]
+                if self.report_url.endswith("/")
+                else f"{self.report_url}"
+            )
+            url = f"{report_url}/report/test-runs/{self.elementary_unique_id}/"
+            test_runs_report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{url}|See history of runs>",
+                ],
+            )
+
+        return test_runs_report_link
+
     @staticmethod
     def display_name(str_value: str) -> str:
         return str_value.replace("_", " ").title()
@@ -157,6 +175,10 @@ class DbtTestAlert(TestAlert):
                     ],
                 ),
             )
+
+        test_runs_report_link = self.get_test_runs_report_link()
+        if test_runs_report_link:
+            title.append(test_runs_report_link)
 
         if self.alert_fields is None:
             self.alert_fields = []
@@ -319,6 +341,10 @@ class ElementaryTestAlert(DbtTestAlert):
                     ],
                 ),
             )
+
+        test_runs_report_link = self.get_test_runs_report_link()
+        if test_runs_report_link:
+            title.append(test_runs_report_link)
 
         if self.alert_fields is None:
             self.alert_fields = []
