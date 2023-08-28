@@ -113,7 +113,8 @@
                                  'model_meta': alert.model_meta,
                                  'suppression_status': alert.suppression_status,
                                  'sent_at': alert.sent_at,
-                                 'status': status} %}
+                                 'status': status,
+                                 'elementary_unique_id': alert.elementary_unique_id} %}
         {% do pending_alerts.append(pending_alert_dict) %}
     {% endfor %}
     {% do return(pending_alerts) %}
