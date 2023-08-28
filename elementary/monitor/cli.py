@@ -275,12 +275,12 @@ def monitor(
         slack_webhook = deprecated_slack_webhook
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
-        config_dir,
-        profiles_dir,
-        project_dir,
-        profile_target,
-        project_profile_target,
-        target_path,
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        project_dir=project_dir,
+        profile_target=profile_target,
+        project_profile_target=project_profile_target,
+        target_path=target_path,
         dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
@@ -583,12 +583,12 @@ def send_report(
         report_url = slack_report_url
 
     config = Config(
-        config_dir,
-        profiles_dir,
-        project_dir,
-        profile_target,
-        project_profile_target,
-        target_path,
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        project_dir=project_dir,
+        profile_target=profile_target,
+        project_profile_target=project_profile_target,
+        target_path=target_path,
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
