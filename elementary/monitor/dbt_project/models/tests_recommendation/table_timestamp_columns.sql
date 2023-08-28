@@ -1,6 +1,8 @@
 {% set timestamp_column_names = [
     "updated_at",
+    "updated_at_utc",
     "created_at",
+    "created_at_utc",
     "_fivetran_synced",
     "_airbyte_emitted_at",
     "create_date",
