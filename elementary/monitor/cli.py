@@ -504,6 +504,12 @@ def report(
     "--slack-report-url",
     type=str,
     default=None,
+    help="DEPRECATED! - The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+)
+@click.option(
+    "--report-url",
+    type=str,
+    default=None,
     help="The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
 )
 @click.option(
@@ -541,6 +547,7 @@ def send_report(
     executions_limit,
     bucket_file_path,
     slack_report_url,
+    report_url,
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
@@ -567,6 +574,14 @@ def send_report(
     The current options are Slack, AWS S3, and Google Cloud Storage.
     Each specified platform will be sent a report.
     """
+    if slack_report_url is not None:
+        click.secho(
+            '\n"--slack-report-url" is deprecated and won\'t be supported in the near future.\n'
+            'Please use "--report-url" for passing report URL.\n',
+            fg="bright_red",
+        )
+        report_url = slack_report_url
+
     config = Config(
         config_dir,
         profiles_dir,
@@ -588,7 +603,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
-        report_url=slack_report_url,
+        report_url=report_url,
         env=env,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
