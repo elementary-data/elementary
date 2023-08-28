@@ -588,7 +588,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
-        slack_report_url=slack_report_url,
+        report_url=slack_report_url,
         env=env,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
