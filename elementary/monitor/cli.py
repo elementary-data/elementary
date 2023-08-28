@@ -234,6 +234,12 @@ def get_cli_properties() -> dict:
     help="Whether to override the settings (slack channel, suppression interval) "
     "in the model or test meta in the dbt project with the parameters provided by the CLI.",
 )
+@click.option(
+    "--report-url",
+    type=str,
+    default=None,
+    help="The report URL for the alert attached links.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -260,6 +266,7 @@ def monitor(
     target_path,
     suppression_interval,
     override_dbt_project_config,
+    report_url,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -288,6 +295,7 @@ def monitor(
         timezone=timezone,
         env=env,
         slack_group_alerts_by=group_by,
+        report_url=report_url,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
