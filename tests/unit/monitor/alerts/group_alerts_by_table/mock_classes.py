@@ -14,6 +14,7 @@ class MockAlert:
     owners: Optional[List[str]]
     subscribers: Optional[List[str]]
     tags: Optional[List[str]]
+    report_url: Optional[str]
     database_name: str = "elementary_test_db"
     schema_name: str = "master_elementary"
     concise_name: str = "Alert"
