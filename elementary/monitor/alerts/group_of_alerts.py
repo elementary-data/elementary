@@ -145,14 +145,9 @@ class GroupOfAlerts:
         title_blocks.append(
             self._message_builder.create_header_block(self._title_block())
         )
-        banner_block = self._get_banner_block(self._env)
-        if banner_block:
-            title_blocks.append(
-                self._message_builder.create_text_section_block(banner_block)
-            )
 
         # summary of number of failed, errors, etc.
-        fields_summary = []
+        fields_summary: List[str] = []
         # this would have been a loop but the order matters.
         alert_list = self._components_to_alerts.get(ModelErrorComponent)
         if alert_list:
@@ -224,9 +219,6 @@ class GroupOfAlerts:
 
     def _title_block(self) -> str:
         return f":small_red_triangle: {self._title}"
-
-    def _get_banner_block(self, env):
-        return None  # Keeping this placeholder since it's supposed to be overridden very soon
 
     def _get_model_error_block_header(self) -> List:
         model_error_alert_list = self._components_to_alerts[ModelErrorComponent]
@@ -392,6 +384,3 @@ class GroupOfAlertsBySingleAlert(GroupOfAlerts):
 
     def set_subscribers(self, subscribers: List[str]):
         self.alerts[0].subscribers = subscribers
-
-    def set_tags(self, tags: List[str]):
-        self.alerts[0].tags = tags
