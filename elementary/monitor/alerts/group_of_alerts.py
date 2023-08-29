@@ -1,10 +1,15 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
+from elementary.monitor.alerts.report_link_utils import (
+    get_model_runs_report_link,
+    get_model_test_runs_report_link,
+)
+from elementary.monitor.alerts.schema.alert import ReportLinkData
 from elementary.monitor.alerts.schema.alert_group_component import (
     AlertGroupComponent,
     NotificationComponent,
@@ -170,6 +175,16 @@ class GroupOfAlerts:
                 f":{TestErrorComponent.emoji_in_summary}: {TestErrorComponent.name_in_summary}: {len(alert_list)}"
             )
         title_blocks.append(self._message_builder.create_context_block(fields_summary))
+
+        report_slack_link = self._get_report_link()
+        if report_slack_link:
+            report_link = self._message_builder.create_context_block(
+                [
+                    f"<{report_slack_link.url}|{report_slack_link.text}>",
+                ],
+            )
+            title_blocks.append(report_link)
+
         self._message_builder.add_title_to_slack_alert(title_blocks=title_blocks)
 
         # attention required : tags, owners, subscribers
@@ -265,6 +280,9 @@ class GroupOfAlerts:
     def _get_title(self):
         return None
 
+    def _get_report_link(self) -> Optional[ReportLinkData]:
+        return None
+
 
 class GroupOfAlertsByTable(GroupOfAlerts):
     def __init__(
@@ -273,6 +291,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         default_channel_destination: str,
         override_slack_channel: bool,
         env: str = "dev",
+        report_url: Optional[str] = None,
     ):
         # sort out model unique id
         models = set([alert.model_unique_id for alert in alerts])
@@ -280,7 +299,10 @@ class GroupOfAlertsByTable(GroupOfAlerts):
             raise ValueError(
                 f"failed initializing a GroupOfAlertsByTable, for alerts with multiple models: {list(models)}"
             )
-        self._model = get_shortened_model_name(list(models)[0])
+
+        self._report_url = report_url
+        self._model_unique_id = list(models)[0]
+        self._model = get_shortened_model_name(self._model_unique_id)
         self._db = alerts[0].database_name
         self._schema = alerts[0].schema_name
         super().__init__(
@@ -336,6 +358,14 @@ class GroupOfAlertsByTable(GroupOfAlerts):
             super(GroupOfAlertsByTable, self)._attention_required_blocks()
         )
         return preview_blocks
+
+    def _get_report_link(self) -> Optional[ReportLinkData]:
+        if self._components_to_alerts.get(ModelErrorComponent):
+            return get_model_runs_report_link(self._report_url, self._model_unique_id)
+        else:
+            return get_model_test_runs_report_link(
+                self._report_url, self._model_unique_id
+            )
 
 
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):
