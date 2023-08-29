@@ -6,6 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.report_link_utils import get_test_runs_report_link
 from elementary.monitor.fetchers.alerts.normalized_alert import (
     COLUMN_FIELD,
     DESCRIPTION_FIELD,
@@ -50,24 +51,6 @@ class TestAlert(Alert):
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
         raise NotImplementedError
-
-    def get_test_runs_report_link(self):
-        test_runs_report_link = None
-
-        if self.elementary_unique_id and self.report_url:
-            report_url = (
-                self.report_url[:-1]
-                if self.report_url.endswith("/")
-                else f"{self.report_url}"
-            )
-            url = f"{report_url}/report/test-runs/{self.elementary_unique_id}/"
-            test_runs_report_link = self.slack_message_builder.create_context_block(
-                [
-                    f"<{url}|See history of runs>",
-                ],
-            )
-
-        return test_runs_report_link
 
     @staticmethod
     def display_name(str_value: str) -> str:
@@ -176,9 +159,16 @@ class DbtTestAlert(TestAlert):
                 ),
             )
 
-        test_runs_report_link = self.get_test_runs_report_link()
+        test_runs_report_link = get_test_runs_report_link(
+            self.report_url, self.elementary_unique_id
+        )
         if test_runs_report_link:
-            title.append(test_runs_report_link)
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{test_runs_report_link.url}|{test_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         if self.alert_fields is None:
             self.alert_fields = []
@@ -342,9 +332,16 @@ class ElementaryTestAlert(DbtTestAlert):
                 ),
             )
 
-        test_runs_report_link = self.get_test_runs_report_link()
+        test_runs_report_link = get_test_runs_report_link(
+            self.report_url, self.elementary_unique_id
+        )
         if test_runs_report_link:
-            title.append(test_runs_report_link)
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{test_runs_report_link.url}|{test_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         if self.alert_fields is None:
             self.alert_fields = []

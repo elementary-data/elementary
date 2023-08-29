@@ -2,6 +2,7 @@ import json
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.report_link_utils import get_model_runs_report_link
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -76,6 +77,17 @@ class ModelAlert(Alert):
                     ],
                 ),
             )
+
+        model_runs_report_link = get_model_runs_report_link(
+            self.report_url, self.model_unique_id
+        )
+        if model_runs_report_link:
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{model_runs_report_link.url}|{model_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
@@ -167,6 +179,17 @@ class ModelAlert(Alert):
                     ],
                 ),
             )
+
+        model_runs_report_link = get_model_runs_report_link(
+            self.report_url, self.model_unique_id
+        )
+        if model_runs_report_link:
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{model_runs_report_link.url}|{model_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
