@@ -470,6 +470,18 @@ def report(
     help="The name of the GCS bucket to upload the report to.",
 )
 @click.option(
+    "--azure-connection-string",
+    type=str,
+    default=None,
+    help="A connection string required to connect to your Azure storage account.",
+)
+@click.option(
+    "--azure-container-name",
+    type=str,
+    default=None,
+    help="The name of the Azure container to upload the report to.",
+)
+@click.option(
     "--update-bucket-website",
     type=bool,
     default=None,
@@ -536,6 +548,8 @@ def send_report(
     aws_secret_access_key,
     s3_endpoint_url,
     s3_bucket_name,
+    azure_connection_string,
+    azure_container_name,
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
@@ -567,6 +581,8 @@ def send_report(
         aws_profile_name=aws_profile_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        azure_connection_string=azure_connection_string,
+        azure_container_name=azure_container_name,
         s3_endpoint_url=s3_endpoint_url,
         s3_bucket_name=s3_bucket_name,
         google_service_account_path=google_service_account_path,

@@ -141,13 +141,13 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(error_tests_details)
 
-        ammount_of_details_blocks = len(details_blocks)
-        if details_blocks and ammount_of_details_blocks <= (
-            self._MAX_AMMOUNT_OF_ATTACHMENTS - self._MAX_ALERT_PREVIEW_BLOCKS
+        amount_of_details_blocks = len(details_blocks)
+        if details_blocks and amount_of_details_blocks <= (
+            self._MAX_AMOUNT_OF_ATTACHMENTS - self._MAX_ALERT_PREVIEW_BLOCKS
         ):
             self._add_blocks_as_attachments(details_blocks)
-        elif details_blocks and ammount_of_details_blocks > (
-            self._MAX_AMMOUNT_OF_ATTACHMENTS - self._MAX_ALERT_PREVIEW_BLOCKS
+        elif details_blocks and amount_of_details_blocks > (
+            self._MAX_AMOUNT_OF_ATTACHMENTS - self._MAX_ALERT_PREVIEW_BLOCKS
         ):
             too_many_test_results_message = f"_The amount of results exceeded Slack’s limitation. Please {f'<{bucket_website_url}|visit the report>' if bucket_website_url else 'check out the attached report'} to see result’s details{'._' if bucket_website_url else '_ :point_down:'}"
             self._add_blocks_as_attachments(

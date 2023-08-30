@@ -1,0 +1,23 @@
+You will connect Elementary Cloud to Databricks for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
+
+### Create a user for Elementary cloud
+
+To connect Elementary Cloud, you will need to create a service principal, you may want to consult the [documentation](https://docs.databricks.com/administration-guide/users-groups/users.html).
+
+Create a service principal with the following permissions:
+
+- Read on all the tables in your `elementary` schema (usually `<dbt_schema>_elementary`).
+
+<Snippet file="cloud/integrations/permissions-and-security.mdx" />
+
+### Fill the connection form
+
+Provide the following fields:
+
+- **Host**: The hostname of your Databricks account to connect to.
+- **Http path**: The path to the Databricks cluster or SQL warehouse.
+- **Token**: The token you generated for Elementary. For more information, see [Generate a token](https://docs.databricks.com/dev-tools/api/latest/authentication.html#generate-a-token) in the Databricks docs.
+- **Catalog (optional)**: The name of the Databricks Catalog.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+
+<Snippet file="cloud/integrations/ip-allowlist.mdx" />

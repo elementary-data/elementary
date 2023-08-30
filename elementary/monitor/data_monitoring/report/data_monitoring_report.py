@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 
 import pkg_resources
 
+from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.config.config import Config
@@ -42,6 +43,9 @@ class DataMonitoringReport(DataMonitoring):
         self.report_api = ReportAPI(self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
+        self.azure_client = AzureClient.create_client(
+            self.config, tracking=self.tracking
+        )
 
     def generate_report(
         self,
@@ -191,7 +195,7 @@ class DataMonitoringReport(DataMonitoring):
         bucket_website_url = None
         upload_succeeded = False
         # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
-        if self.s3_client or self.gcs_client:
+        if self.s3_client or self.gcs_client or self.azure_client:
             upload_succeeded, bucket_website_url = self.upload_report(
                 local_html_path=local_html_path, remote_file_path=remote_file_path
             )
@@ -203,7 +207,7 @@ class DataMonitoringReport(DataMonitoring):
         ) or disable_html_attachment:
             should_send_report_over_slack = False
 
-        # If a Slack client is provided, we want send a results summary and attachment of the report if needed.
+        # If a Slack client is provided, we want to send a results summary and attachment of the report if needed.
         if self.slack_client:
             # Send test results summary
             self.send_test_results_summary(
@@ -220,11 +224,11 @@ class DataMonitoringReport(DataMonitoring):
 
     def send_report_attachment(self, local_html_path: str) -> bool:
         if self.slack_client:
-            send_succeded = self.slack_client.send_report(
+            send_succeeded = self.slack_client.send_report(
                 self.config.slack_channel_name, local_html_path
             )
-            self.execution_properties["sent_to_slack_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_slack_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         self.execution_properties["success"] = self.success
@@ -234,19 +238,27 @@ class DataMonitoringReport(DataMonitoring):
         self, local_html_path: str, remote_file_path: Optional[str] = None
     ) -> Tuple[bool, Optional[str]]:
         if self.gcs_client:
-            send_succeded, bucket_website_url = self.gcs_client.send_report(
+            send_succeeded, bucket_website_url = self.gcs_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
-            self.execution_properties["sent_to_gcs_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_gcs_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         if self.s3_client:
-            send_succeded, bucket_website_url = self.s3_client.send_report(
+            send_succeeded, bucket_website_url = self.s3_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
             )
-            self.execution_properties["sent_to_s3_successfully"] = send_succeded
-            if not send_succeded:
+            self.execution_properties["sent_to_s3_successfully"] = send_succeeded
+            if not send_succeeded:
+                self.success = False
+
+        if self.azure_client:
+            send_succeeded, bucket_website_url = self.azure_client.send_report(
+                local_html_path, remote_bucket_file_path=remote_file_path
+            )
+            self.execution_properties["sent_to_azure_successfully"] = send_succeeded
+            if not send_succeeded:
                 self.success = False
 
         self.execution_properties["success"] = self.success
@@ -284,7 +296,7 @@ class DataMonitoringReport(DataMonitoring):
             send_succeeded = False
 
         self.execution_properties[
-            "sent_test_results_summary_succesfully"
+            "sent_test_results_summary_successfully"
         ] = send_succeeded
         self.success = send_succeeded
 

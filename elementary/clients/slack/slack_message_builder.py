@@ -11,7 +11,7 @@ class SlackMessageBuilder:
     _CONTINUATION_SYMBOL = "..."
     _MAX_SLACK_SECTION_SIZE = 2
     _MAX_ALERT_PREVIEW_BLOCKS = 5
-    _MAX_AMMOUNT_OF_ATTACHMENTS = 50
+    _MAX_AMOUNT_OF_ATTACHMENTS = 50
     _HASHTAG = "#"
 
     def __init__(self) -> None:
@@ -28,7 +28,7 @@ class SlackMessageBuilder:
     def _add_blocks_as_attachments(self, blocks: SlackBlocksType):
         # The first 5 attachments Blocks are always displayed.
         # The rest of the attachments Blocks are hidden behind "show more" button.
-        # NOTICE: attachments blocks are depricated by Slack.
+        # NOTICE: attachments blocks are deprecated by Slack.
         self.slack_message["attachments"][0]["blocks"].extend(blocks)
 
     @staticmethod
@@ -122,7 +122,7 @@ class SlackMessageBuilder:
     @staticmethod
     def create_compacted_sections_blocks(section_msgs: list) -> List[dict]:
         # Compacting sections into attachments.
-        # Each section can contian _MAX_SLACK_SECTION_SIZE fields.
+        # Each section can contain _MAX_SLACK_SECTION_SIZE fields.
         attachments = []
         section_fields: List[dict] = []
 
@@ -159,7 +159,7 @@ class SlackMessageBuilder:
         """
         Receives a list of strings, either JSON dumped or not, dedups and sorts it, and returns it as a comma-separated
         string.
-        This is useful for various lists we include in slack messages (owners, subscribers, etc)
+        This is useful for various lists we include in Slack messages (owners, subscribers, etc.)
         """
         if isinstance(str_list, str):
             str_list = unpack_and_flatten_str_to_list(str_list)

@@ -392,11 +392,11 @@ class ElementaryTestAlert(DbtTestAlert):
                     ["*Test results sample*"]
                 )
             )
-            messagess = []
+            messages = []
             if self.column_name:
-                messagess.append(f"*Column*: {self.column_name}     |")
-            messagess.append(f"*Anomalous Values*: {anomalous_value}")
-            result.append(self.slack_message_builder.create_context_block(messagess))
+                messages.append(f"*Column*: {self.column_name}     |")
+            messages.append(f"*Anomalous Values*: {anomalous_value}")
+            result.append(self.slack_message_builder.create_context_block(messages))
 
         configuration = []
         if TEST_PARAMS_FIELD in self.alert_fields and self.test_params:

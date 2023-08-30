@@ -72,30 +72,26 @@ class ReportAPI(APIClient):
             )
 
             serializable_groups = groups.dict()
-            serializable_models = self._serilize_models(models, sources, exposures)
-            serializable_model_runs = self._serilize_models_runs(models_runs.runs)
+            serializable_models = self._serialize_models(models, sources, exposures)
+            serializable_model_runs = self._serialize_models_runs(models_runs.runs)
             serializable_model_runs_totals = models_runs.dict(include={"totals"})[
                 "totals"
             ]
-            serializable_models_coverages = self._serilize_coverages(coverages)
-            serializable_test_results = self._serilize_test_results(
+            serializable_models_coverages = self._serialize_coverages(coverages)
+            serializable_test_results = self._serialize_test_results(
                 test_results.results
             )
             serializable_test_results_totals = self._serialize_totals(
                 test_results.totals
             )
-            serializable_test_runs = self._serilize_test_runs(test_runs.runs)
+            serializable_test_runs = self._serialize_test_runs(test_runs.runs)
             serializable_test_runs_totals = self._serialize_totals(test_runs.totals)
             serializable_invocation = test_results.invocation.dict()
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
 
-            resources_latest_invocation = (
-                invocations_api.get_resources_latest_invocation()
-            )
-            invocations = invocations_api.get_invocations_by_ids(
-                invocations_ids=list(set(resources_latest_invocation.values()))
-            )
+            models_latest_invocation = invocations_api.get_models_latest_invocation()
+            invocations = invocations_api.get_models_latest_invocations_data()
 
             invocations_job_identification = defaultdict(list)
             for invocation in invocations:
@@ -119,7 +115,7 @@ class ReportAPI(APIClient):
                 filters=serializable_filters,
                 lineage=serializable_lineage,
                 invocations=invocations,
-                resources_latest_invocation=resources_latest_invocation,
+                resources_latest_invocation=models_latest_invocation,
                 invocations_job_identification=invocations_job_identification,
                 env=ReportDataEnvSchema(
                     project_name=project_name, env=env, warehouse_type=warehouse_type
@@ -129,7 +125,7 @@ class ReportAPI(APIClient):
         except Exception as error:
             return ReportDataSchema(), error
 
-    def _serilize_models(
+    def _serialize_models(
         self,
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
@@ -141,15 +137,15 @@ class ReportAPI(APIClient):
             serializable_nodes[key] = dict(nodes[key])
         return serializable_nodes
 
-    def _serilize_coverages(
+    def _serialize_coverages(
         self, coverages: Dict[str, ModelCoverageSchema]
     ) -> Dict[str, dict]:
         return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
-    def _serilize_models_runs(self, models_runs: List[ModelRunsSchema]) -> List[dict]:
+    def _serialize_models_runs(self, models_runs: List[ModelRunsSchema]) -> List[dict]:
         return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
-    def _serilize_test_results(
+    def _serialize_test_results(
         self, test_results: Dict[Optional[str], List[TestResultSchema]]
     ) -> Dict[Optional[str], List[dict]]:
         serializable_test_results = defaultdict(list)
@@ -159,7 +155,7 @@ class ReportAPI(APIClient):
             )
         return serializable_test_results
 
-    def _serilize_test_runs(
+    def _serialize_test_runs(
         self, test_runs: Dict[Optional[str], List[TestRunSchema]]
     ) -> Dict[Optional[str], List[dict]]:
         serializable_test_runs = defaultdict(list)

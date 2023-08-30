@@ -103,7 +103,7 @@ class PreviewIsTooLongError(Exception):
         super().__init__(self.message)
 
     def __str__(self) -> str:
-        return f"{len(self.preview_blocks)} provieded -> {self.message}"
+        return f"{len(self.preview_blocks)} provided -> {self.message}"
 
 
 class SlackAlertMessageBuilder(SlackMessageBuilder):
@@ -173,13 +173,13 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
          0/ For None, returns None. Otherwise :
          1/ makes sure preview_blocks number is not bigger than the max num of blocks set in SlackMessageBuilder
          2/ pads with empty blocks in case there's not enough preview blocks
-                                          (we want to control the cutoff so we need an exact number of preview blocks)
+                                          (we want to control the cutoff, so we need an exact number of preview blocks)
         :param preview_blocks:
         :return:
         """
         if (
             not preview_blocks
-        ):  # this condition captures case of Null and also of a list with legnth 0
+        ):  # this condition captures case of Null and also of a list with length 0
             return
 
         preview_blocks_count = len(preview_blocks)
