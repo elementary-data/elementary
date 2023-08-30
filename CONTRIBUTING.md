@@ -1,7 +1,7 @@
-# Contributing guidelines
+# Contribution guidelines
 
-_Note_: This document is for the Python package (`edr`).
-For the dbt package, refer to the [dbt package contributing guidelines](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md).
+**Note**: This document contains contribution guidelines for the Elementary CLI. If you wish to contribute
+to the Elementary dbt package, please refer to the [dbt package contribution guidelines](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md).
 
 ## Getting started with development
 
@@ -71,3 +71,37 @@ The best pull requests are focused, clearly describe what they're for
 and why they're correct, and contain tests for whatever changes they
 make to the code's behavior. As a bonus these are easiest for someone
 to review, which helps your pull request get merged quickly!
+
+## Running tests
+
+For every PR we merge, we require our unit-tests to pass successfully. We also
+encourage you to add new unit-tests for any new functionality you added.
+
+The tests are located under the `tests/unit` directory, and written using the
+[py-test](https://docs.pytest.org/en/stable/) framework.
+In order to run them, please follow these steps:
+
+1. Install dependencies:
+
+```bash
+# Run in the root directory of the repository
+pip install -r dev-requirements.txt
+```
+
+2. Run the tests:
+
+```bash
+cd tests
+py.test -vvv --target <your_target>
+```
+
+## Pre-commit hooks
+
+We use several pre-commit hooks in order to ensure code quality. These will also
+run in the CI, but we also recommend to install them locally using the following command (requires
+installing the dev-requirements as shown in the previous section):
+
+```bash
+# Run in the root directory of the repository
+pre-commit install
+```
