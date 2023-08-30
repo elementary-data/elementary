@@ -2,6 +2,8 @@ from typing import Optional
 
 from elementary.monitor.alerts.schema.alert import ReportLinkData
 
+LINK_TEXT = "Runs history"
+
 
 def _get_formatted_report_url(report_url: str) -> str:
     return report_url[:-1] if report_url.endswith("/") else f"{report_url}"
@@ -15,7 +17,7 @@ def _get_run_history_report_link(
     if unique_id and report_url:
         formatted_report_url = _get_formatted_report_url(report_url)
         url = f"{formatted_report_url}/report/{path}/{unique_id}/"
-        report_link = ReportLinkData(url=url, text="See history of runs")
+        report_link = ReportLinkData(url=url, text=LINK_TEXT)
 
     return report_link
 
@@ -40,6 +42,6 @@ def get_model_test_runs_report_link(
     if model_unique_id and report_url:
         formatted_report_url = _get_formatted_report_url(report_url)
         url = f'{formatted_report_url}/report/test-runs/?treeNode={{"id":"{model_unique_id}"}}'
-        report_link = ReportLinkData(url=url, text="See history of runs")
+        report_link = ReportLinkData(url=url, text=LINK_TEXT)
 
     return report_link
