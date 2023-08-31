@@ -6,8 +6,8 @@ from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 from elementary.monitor.alerts.alert import Alert, SlackAlertMessageBuilder
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.report_link_utils import (
-    get_model_runs_report_link,
-    get_model_test_runs_report_link,
+    get_model_runs_link,
+    get_model_test_runs_link,
 )
 from elementary.monitor.alerts.schema.alert import ReportLinkData
 from elementary.monitor.alerts.schema.alert_group_component import (
@@ -353,11 +353,9 @@ class GroupOfAlertsByTable(GroupOfAlerts):
 
     def _get_report_link(self) -> Optional[ReportLinkData]:
         if self._components_to_alerts.get(ModelErrorComponent):
-            return get_model_runs_report_link(self._report_url, self._model_unique_id)
+            return get_model_runs_link(self._report_url, self._model_unique_id)
         else:
-            return get_model_test_runs_report_link(
-                self._report_url, self._model_unique_id
-            )
+            return get_model_test_runs_link(self._report_url, self._model_unique_id)
 
 
 class GroupOfAlertsBySingleAlert(GroupOfAlerts):

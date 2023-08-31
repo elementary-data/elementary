@@ -6,7 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
-from elementary.monitor.alerts.report_link_utils import get_test_runs_report_link
+from elementary.monitor.alerts.report_link_utils import get_test_runs_link
 from elementary.monitor.fetchers.alerts.normalized_alert import (
     COLUMN_FIELD,
     DESCRIPTION_FIELD,
@@ -159,7 +159,7 @@ class DbtTestAlert(TestAlert):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_report_link(
+        test_runs_report_link = get_test_runs_link(
             self.report_url, self.elementary_unique_id
         )
         if test_runs_report_link:
@@ -332,7 +332,7 @@ class ElementaryTestAlert(DbtTestAlert):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_report_link(
+        test_runs_report_link = get_test_runs_link(
             self.report_url, self.elementary_unique_id
         )
         if test_runs_report_link:

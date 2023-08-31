@@ -22,19 +22,19 @@ def _get_run_history_report_link(
     return report_link
 
 
-def get_test_runs_report_link(
+def get_test_runs_link(
     report_url: Optional[str], elementary_unique_id: Optional[str]
 ) -> Optional[ReportLinkData]:
     return _get_run_history_report_link(report_url, "test-runs", elementary_unique_id)
 
 
-def get_model_runs_report_link(
+def get_model_runs_link(
     report_url: Optional[str], model_unique_id: Optional[str]
 ) -> Optional[ReportLinkData]:
     return _get_run_history_report_link(report_url, "model-runs", model_unique_id)
 
 
-def get_model_test_runs_report_link(
+def get_model_test_runs_link(
     report_url: Optional[str], model_unique_id: Optional[str]
 ) -> Optional[ReportLinkData]:
     report_link = None
