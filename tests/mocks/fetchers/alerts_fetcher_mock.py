@@ -52,6 +52,7 @@ class MockAlertsFetcher(AlertsFetcher):
                 suppression_status="pending",
                 sent_at=None,
                 test_created_at="2022-10-09 10:10:10",
+                elementary_unique_id="elementary.model_id_1.test_id_1.9cf2f5f6ad.None.generic",
             ),
             # Alert after suppression interval
             dict(
@@ -82,6 +83,7 @@ class MockAlertsFetcher(AlertsFetcher):
                 suppression_status="pending",
                 sent_at=None,
                 test_created_at="2022-10-09 10:10:10",
+                elementary_unique_id="elementary.model_id_1.test_id_4.9cf2f5f6ad.None.generic",
             ),
             # Alert without suppression interval
             dict(
@@ -112,6 +114,7 @@ class MockAlertsFetcher(AlertsFetcher):
                 suppression_status="pending",
                 sent_at=None,
                 test_created_at="2022-10-09 10:10:10",
+                elementary_unique_id="elementary.model_id_1.test_id_2.9cf2f5f6ad.None.generic",
             ),
             # First occurrence alert with suppression interval
             dict(
@@ -142,6 +145,7 @@ class MockAlertsFetcher(AlertsFetcher):
                 suppression_status="pending",
                 sent_at=None,
                 test_created_at="2022-10-09 10:10:10",
+                elementary_unique_id="elementary.model_id_1.test_id_3.9cf2f5f6ad.None.generic",
             ),
             # Duplicated alert that should be deduped
             dict(
@@ -174,6 +178,7 @@ class MockAlertsFetcher(AlertsFetcher):
                 suppression_status="pending",
                 sent_at=None,
                 test_created_at="2022-10-09 10:10:10",
+                elementary_unique_id="elementary.model_id_1.test_id_5.9cf2f5f6ad.None.generic",
             ),
         ]
 
