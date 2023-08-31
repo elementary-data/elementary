@@ -53,7 +53,6 @@ def _filter_alerts_by_tag(
     alerts: List[AlertType],
     tag_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-
     if tag_filter.tag is None:
         return alerts
 
@@ -75,7 +74,6 @@ def _filter_alerts_by_owner(
     alerts: List[AlertType],
     owner_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-
     if owner_filter.owner is None:
         return alerts
 
@@ -99,7 +97,6 @@ def _filter_alerts_by_model(
     alerts: List[AlertType],
     model_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-
     if model_filter.model is None:
         return alerts
 
@@ -115,7 +112,6 @@ def _filter_alerts_by_node_names(
     alerts: List[AlertType],
     node_name_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-
     if node_name_filter.node_names is None:
         return alerts
 
@@ -146,7 +142,6 @@ def _filter_alerts_by_status(
     alerts: List[AlertType],
     status_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-
     if status_filter.statuses is None:
         return alerts
 
@@ -161,7 +156,6 @@ def _filter_alerts_by_resource_type(
     alerts: List[AlertType],
     resource_type_filter: SelectorFilterSchema,
 ) -> List[AlertType]:
-
     if resource_type_filter.resource_types is None:
         return alerts
 
