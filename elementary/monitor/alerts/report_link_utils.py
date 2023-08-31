@@ -6,7 +6,7 @@ LINK_TEXT = "Runs history"
 
 
 def _get_formatted_report_url(report_url: str) -> str:
-    return report_url[:-1] if report_url.endswith("/") else f"{report_url}"
+    return report_url.strip("/")
 
 
 def _get_run_history_report_link(
