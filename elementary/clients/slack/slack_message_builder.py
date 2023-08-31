@@ -149,7 +149,7 @@ class SlackMessageBuilder:
             icon = ":warning:"
         elif status == "error":
             icon = ":x:"
-        elif status == "pass":
+        elif status == "resolved":
             icon = ":white_check_mark:"
         return icon
 

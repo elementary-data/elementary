@@ -68,8 +68,11 @@ class AlertsAPI(APIClient):
         last_alert_sent_times = self.alerts_fetcher.query_last_test_alert_times(
             days_back
         )
+        last_alert_statuses = self.alerts_fetcher.query_last_test_alert_status(
+            days_back
+        )
         test_alerts = self._sort_alerts(
-            pending_test_alerts, last_alert_sent_times, filter
+            pending_test_alerts, last_alert_sent_times, last_alert_statuses, filter
         )
         return test_alerts
 
@@ -83,7 +86,7 @@ class AlertsAPI(APIClient):
             days_back
         )
         model_alerts = self._sort_alerts(
-            pending_model_alerts, last_alert_sent_times, filter
+            pending_model_alerts, last_alert_sent_times, filter=filter
         )
         return model_alerts
 
@@ -99,7 +102,7 @@ class AlertsAPI(APIClient):
             self.alerts_fetcher.query_last_source_freshness_alert_times(days_back)
         )
         source_freshness_alerts = self._sort_alerts(
-            pending_source_freshness_alerts, last_alert_sent_times, filter
+            pending_source_freshness_alerts, last_alert_sent_times, filter=filter
         )
         return source_freshness_alerts
 
@@ -117,10 +120,11 @@ class AlertsAPI(APIClient):
         self,
         pending_alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
+        last_alert_statuses: Dict[str, str] = None,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
     ) -> AlertsQueryResult[AlertType]:
         suppressed_alerts = self._get_suppressed_alerts(
-            pending_alerts, last_alert_sent_times
+            pending_alerts, last_alert_sent_times, last_alert_statuses
         )
         latest_alert_ids = self._get_latest_alerts(pending_alerts)
         alerts_to_skip: List[Union[AlertType, MalformedAlert]] = []
@@ -155,7 +159,10 @@ class AlertsAPI(APIClient):
         self,
         alerts: AlertsQueryResult[AlertType],
         last_alert_sent_times: Dict[str, str],
+        last_alert_statuses: Dict[str, str] = None,
     ) -> List[str]:
+        last_alert_statuses = (last_alert_statuses or {}).copy()
+        last_alert_sent_times = (last_alert_sent_times or {}).copy()
         suppressed_alerts = []
         current_time_utc = datetime.utcnow()
         all_alerts: List[Alert] = [*alerts.alerts, *alerts.malformed_alerts]
@@ -164,6 +171,12 @@ class AlertsAPI(APIClient):
             if alert_class_id is None:
                 # Shouldn't happen, but logging in any case
                 logger.debug("Alert without an id detected!")
+                continue
+            last_alert_status = last_alert_statuses and last_alert_statuses.get(
+                alert_class_id
+            )
+            if last_alert_status and last_alert_status != alert.status:
+                # Alert status has changed since last time - no suppression
                 continue
 
             suppression_interval = self._get_suppression_interval(
@@ -176,14 +189,21 @@ class AlertsAPI(APIClient):
                 if last_alert_sent_times.get(alert_class_id)
                 else None
             )
-            is_alert_in_suppression = (
-                (current_time_utc - last_sent_time).total_seconds() / 3600
-                <= suppression_interval
-                if last_sent_time
-                else False
-            )
+            if suppression_interval < 0:
+                # Infinate suppression
+                is_alert_in_suppression = True
+            else:
+                is_alert_in_suppression = (
+                    (current_time_utc - last_sent_time).total_seconds() / 3600
+                    <= suppression_interval
+                    if last_sent_time
+                    else False
+                )
             if is_alert_in_suppression:
                 suppressed_alerts.append(alert.id)
+            else:
+                last_alert_sent_times[alert_class_id] = current_time_utc.isoformat()
+                last_alert_statuses[alert_class_id] = alert.status
 
         return suppressed_alerts
 

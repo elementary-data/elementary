@@ -51,10 +51,10 @@ TestFailureComponent = AlertGroupComponent(
     emoji_in_full="small_red_triangle",
 )
 
-TestPassComponent = AlertGroupComponent(
-    name_in_summary="Test passes",
+TestResolutionComponent = AlertGroupComponent(
+    name_in_summary="Test resolutions",
     emoji_in_summary="white_check_mark",
-    name_in_full="Test passes after failing",
+    name_in_full="Test resolutions",
     emoji_in_full="white_check_mark",
 )
 
@@ -109,8 +109,8 @@ class GroupOfAlerts:
         )  # only place it should be used is inside to_slack
         self._env = env
 
-    def is_only_passes(self) -> bool:
-        return all([alert.status == "pass" for alert in self.alerts])
+    def is_only_resolutions(self) -> bool:
+        return all([alert.status == "resolved" for alert in self.alerts])
 
     def set_owners(self, owners: List[str]):
         self._components_to_attention_required[OwnersComponent] = ", ".join(owners)
@@ -125,7 +125,7 @@ class GroupOfAlerts:
         test_errors = []
         test_warnings = []
         test_failures = []
-        test_passes = []
+        test_resolutions = []
         model_errors: List[Alert] = []
         for alert in self.alerts:
             if isinstance(alert, ModelAlert):
@@ -134,8 +134,8 @@ class GroupOfAlerts:
                 test_errors.append(alert)
             elif alert.status == "warn":
                 test_warnings.append(alert)
-            elif alert.status == "pass":
-                test_passes.append(alert)
+            elif alert.status == "resolved":
+                test_resolutions.append(alert)
             else:
                 test_failures.append(alert)
         self._components_to_alerts: Dict[AlertGroupComponent, List[Alert]] = dict()
@@ -147,8 +147,8 @@ class GroupOfAlerts:
             self._components_to_alerts[TestWarningComponent] = test_warnings
         if test_errors:
             self._components_to_alerts[TestErrorComponent] = test_errors
-        if test_passes:
-            self._components_to_alerts[TestPassComponent] = test_passes
+        if test_resolutions:
+            self._components_to_alerts[TestResolutionComponent] = test_resolutions
 
     def to_slack(self) -> SlackMessageSchema:
         title_blocks = []  # title, [banner], number of passed or failed,
@@ -168,7 +168,7 @@ class GroupOfAlerts:
             TestFailureComponent,
             TestWarningComponent,
             TestErrorComponent,
-            TestPassComponent,
+            TestResolutionComponent,
         ]:
             alert_list = self._components_to_alerts.get(component)
             if alert_list:
@@ -214,7 +214,11 @@ class GroupOfAlerts:
         return self._message_builder.get_slack_message()
 
     def _title_block(self) -> str:
-        icon = ":white_check_mark:" if self.is_only_passes() else ":small_red_triangle:"
+        icon = (
+            ":white_check_mark:"
+            if self.is_only_resolutions()
+            else ":small_red_triangle:"
+        )
         return f"{icon} {self._title}"
 
     def _get_banner_block(self, env):
@@ -295,7 +299,7 @@ class GroupOfAlertsByTable(GroupOfAlerts):
         )
 
     def _get_title(self) -> str:
-        if self.is_only_passes():
+        if self.is_only_resolutions():
             return f"Table issues resolved - {self._model}"
         return f"Table issues detected - {self._model}"
 

@@ -7,54 +7,53 @@
   )
 }}
 
-{% set anomaly_detection_relation = adapter.get_relation(this.database, this.schema, 'alerts_anomaly_detection') %}
-{# Backwards compatibility support for a renamed model. #}
-{% set data_monitoring_relation = adapter.get_relation(this.database, this.schema, 'alerts_data_monitoring') %}
-{% set schema_changes_relation = adapter.get_relation(this.database, this.schema, 'alerts_schema_changes') %}
-{% set alerts_relation = adapter.get_relation(this.database, this.schema, 'alerts') %}
-
 with all_tests as (
-    select *
-    from {{ ref('elementary', 'alerts_dbt_tests') }}
-    {% if schema_changes_relation %}
-        union all
-        select * from {{ schema_changes_relation }}
-    {% endif %}
-
-    {% if anomaly_detection_relation %}
-        union all
-        select * from {{ anomaly_detection_relation }}
-    {% elif data_monitoring_relation %}
-        union all
-        select * from {{ data_monitoring_relation }}
-    {% endif %}
+    select id as alert_id,
+        data_issue_id,
+        test_execution_id,
+        test_unique_id,
+        model_unique_id,
+        detected_at,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        test_type as alert_type,
+        test_sub_type as sub_type,
+        test_results_description as alert_description,
+        owners,
+        tags,
+        test_results_query as alert_results_query,
+        other,
+        test_name,
+        test_short_name,
+        test_params,
+        severity,
+        case 
+            when lower(status) = 'pass' then 'resolved'
+            else status
+        end as status,
+        lower(lag(status) over (
+            partition by coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(test_sub_type, 'None') 
+            order by detected_at
+        )) as previous_status,
+        result_rows
+    from {{ ref("elementary_test_results") }}
+    {#wouldnt it be more performant to put the incremental block here?#}
 )
 
 , failed_tests as (
-    select * from all_tests
-    where status != 'pass'
+    select * 
+    from all_tests
+    where status != 'resoved'
 )
 
-{% if alerts_relation %}
-, latest_alert_status as (
-    SELECT model_unique_id, test_name, status, detected_at
-    FROM (
-        SELECT model_unique_id, test_name, status, detected_at,
-            ROW_NUMBER() OVER (PARTITION BY model_unique_id, test_name ORDER BY detected_at DESC) AS rn
-        FROM {{ alerts_relation }}
-    ) ranked
-    WHERE rn = 1
-)
 , resolved_tests as (
-    select current_alerts.* 
-    from all_tests as current_alerts
-    join latest_alert_status as latest_alerts
-        on current_alerts.model_unique_id = latest_alerts.model_unique_id
-        and current_alerts.test_name = latest_alerts.test_name
-    where current_alerts.status = 'pass'
-        and latest_alerts.status != 'pass'
-  )
-{% endif %}
+    select *
+    from all_tests
+    where status = 'resolved'
+      and previous_status in ('error', 'fail', 'warn')
+)
 
 select 
     *,
@@ -63,12 +62,9 @@ select
     {{ elementary.edr_cast_as_string('NULL') }} as sent_at
 from (
     select * from failed_tests
-    {% if alerts_relation %}
     union all
     select * from resolved_tests
-    {% endif %}
-) as all_tests
-
+) as all_test_alerts
 {%- if is_incremental() %}
     {{ get_new_alerts_where_clause(this) }}
 {%- endif %}

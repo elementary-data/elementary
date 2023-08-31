@@ -90,6 +90,14 @@ class AlertsFetcher(FetcherClient):
         )
         return json.loads(response[0])
 
+    def query_last_test_alert_status(self, days_back: int) -> Dict[str, str]:
+        logger.info("Querying test alerts last status times.")
+        response = self.dbt_runner.run_operation(
+            macro_name="get_last_test_alert_status",
+            macro_args={"days_back": days_back},
+        )
+        return json.loads(response[0])
+
     def query_last_model_alert_times(self, days_back: int) -> Dict[str, str]:
         logger.info("Querying model alerts last sent times.")
         response = self.dbt_runner.run_operation(

@@ -114,21 +114,28 @@
 {% endmacro %}
 
 
+{% macro get_alerts_in_time_limit_query(days_back) %}
+    select
+        {# Generate elementary unique id which is used to identify between tests, and set it as alert_class_id #}
+        coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(sub_type, 'None') as alert_class_id,
+        case
+            when suppression_status is NULL and alert_sent = TRUE then 'sent'
+            when suppression_status is NULL and alert_sent = FALSE then 'pending'
+            else suppression_status
+        end as suppression_status,
+        sent_at,
+        detected_at,
+        status
+    from {{ ref('alerts') }}
+    where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
+{% endmacro %}
+
+
 {% macro get_last_test_alert_sent_times(days_back) %}
     -- depends_on: {{ ref('alerts') }}
     {% set select_last_alert_sent_times_query %}
         with alerts_in_time_limit as (
-            select
-                {# Generate elementary unique id which is used to identify between tests, and set it as alert_class_id #}
-                coalesce(test_unique_id, 'None') || '.' || coalesce(column_name, 'None') || '.' || coalesce(sub_type, 'None') as alert_class_id,
-                case
-                    when suppression_status is NULL and alert_sent = TRUE then 'sent'
-                    when suppression_status is NULL and alert_sent = FALSE then 'pending'
-                    else suppression_status
-                end as suppression_status,
-                sent_at
-            from {{ ref('alerts') }}
-            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ get_alerts_time_limit(days_back) }}
+            {{ get_alerts_in_time_limit_query(days_back) }}
         )
 
         select 
@@ -148,4 +155,36 @@
         }) %}
     {% endfor %}
     {% do return(last_alert_times) %}
+{% endmacro %}
+
+
+{% macro get_last_test_alert_status(days_back) %}
+    -- depends_on: {{ ref('alerts') }}
+    {% set select_last_alert_status_query %}
+        with alerts_in_time_limit as (
+            {{ get_alerts_in_time_limit_query(days_back) }}
+        )
+
+        , latest_test_alerts AS (
+            SELECT
+                *,
+                ROW_NUMBER() OVER(PARTITION BY alert_class_id ORDER BY detected_at DESC) AS row_number
+            FROM alerts_in_time_limit
+            where suppression_status = 'sent'
+        )
+        SELECT
+        *
+        FROM latest_test_alerts
+        WHERE row_number = 1;
+    {% endset %}
+
+    {% set alerts_agate = run_query(select_last_alert_status_query) %}
+    {% set last_alert_status_result_dicts = elementary.agate_to_dicts(alerts_agate) %}
+    {% set last_alert_statuses = {} %}
+    {% for last_alert_status_result_dict in last_alert_status_result_dicts %}
+        {% do last_alert_statuses.update({
+            last_alert_status_result_dict.get('alert_class_id'): last_alert_status_result_dict.get('status')
+        }) %}
+    {% endfor %}
+    {% do return(last_alert_statuses) %}
 {% endmacro %}
