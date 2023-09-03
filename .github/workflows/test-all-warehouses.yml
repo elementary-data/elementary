@@ -53,8 +53,8 @@ jobs:
     if: |
       always() &&
       ! cancelled() &&
-      !contains(needs.test.result, 'success') &&
-      !contains(needs.test.result, 'cancelled')
+      ! contains(needs.test.result, 'success') &&
+      ! contains(needs.test.result, 'cancelled')
     uses: ./.github/workflows/notify_slack.yml
     with:
       result: "failure"
