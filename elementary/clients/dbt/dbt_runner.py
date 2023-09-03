@@ -254,7 +254,7 @@ class DbtRunner(BaseDbtRunner):
     def source_freshness(self):
         self._run_command(command_args=["source", "freshness"])
 
-    def get_installed_packages_names(self):
+    def _get_installed_packages_names(self):
         try:
             folder_names = [name for name in os.listdir(_PACKAGES_PATH) if os.path.isdir(os.path.join(_PACKAGES_PATH, name))]
             return folder_names
@@ -267,7 +267,7 @@ class DbtRunner(BaseDbtRunner):
         with open(packages_yaml_file, 'r') as file:
             packages_data = yaml.safe_load(file)
         required_package_names = [package_entry['package'].split('/')[-1] for package_entry in packages_data['packages'] if 'package' in package_entry]
-        installed_package_names = self.get_installed_packages_names()
+        installed_package_names = self._get_installed_packages_names()
         if set(required_package_names) != set(installed_package_names):
             self.deps()
             return
