@@ -6,6 +6,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.report_link_utils import get_test_runs_link
 from elementary.monitor.fetchers.alerts.normalized_alert import (
     COLUMN_FIELD,
     DESCRIPTION_FIELD,
@@ -32,6 +33,7 @@ class TestAlert(Alert):
         self,
         model_unique_id: str,
         test_unique_id: str,
+        elementary_unique_id: str,
         test_name: str,
         test_created_at: Optional[str] = None,
         test_meta: Optional[str] = None,
@@ -41,6 +43,7 @@ class TestAlert(Alert):
         self.test_meta = try_load_json(test_meta) or {}
         self.model_unique_id = model_unique_id
         self.test_unique_id = test_unique_id
+        self.elementary_unique_id = elementary_unique_id
         self.test_created_at = test_created_at
         self.test_name = test_name
         self.test_display_name = self.display_name(test_name) if test_name else ""
@@ -155,6 +158,17 @@ class DbtTestAlert(TestAlert):
                     ],
                 ),
             )
+
+        test_runs_report_link = get_test_runs_link(
+            self.report_url, self.elementary_unique_id
+        )
+        if test_runs_report_link:
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{test_runs_report_link.url}|{test_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         if self.alert_fields is None:
             self.alert_fields = []
@@ -317,6 +331,17 @@ class ElementaryTestAlert(DbtTestAlert):
                     ],
                 ),
             )
+
+        test_runs_report_link = get_test_runs_link(
+            self.report_url, self.elementary_unique_id
+        )
+        if test_runs_report_link:
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{test_runs_report_link.url}|{test_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         if self.alert_fields is None:
             self.alert_fields = []

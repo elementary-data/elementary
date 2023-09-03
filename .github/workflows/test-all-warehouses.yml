@@ -46,26 +46,15 @@ jobs:
       generate-data: ${{ inputs.generate-data || false }}
     secrets: inherit
 
-  temporary_debug:
-    name: Print Conditions
-    needs: test
-    runs-on: ubuntu-latest
-    if: |
-      always() &&
-      ! cancelled()
-    steps:
-      - name: print conditions
-        run: |
-          echo "Tests result: ${{ needs.test.result }}"
-          echo "event name: ${{ github.event_name }}"
-
   notify_failures:
     name: Notify Slack
-    needs: test
+    secrets: inherit
+    needs: [test]
     if: |
       always() &&
-      ${{ needs.test.result == 'failure' }} &&
-      ! cancelled()
+      ! cancelled() &&
+      ! contains(needs.test.result, 'success') &&
+      ! contains(needs.test.result, 'cancelled')
     uses: ./.github/workflows/notify_slack.yml
     with:
       result: "failure"

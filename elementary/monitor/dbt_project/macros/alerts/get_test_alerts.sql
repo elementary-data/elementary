@@ -29,6 +29,12 @@
                 alerts_in_time_limit.alert_id,
                 {# Generate elementary unique id which is used to identify between tests, and set it as alert_class_id #}
                 coalesce(alerts_in_time_limit.test_unique_id, 'None') || '.' || coalesce(alerts_in_time_limit.column_name, 'None') || '.' || coalesce(alerts_in_time_limit.sub_type, 'None') as alert_class_id,
+                case
+                    when alerts_in_time_limit.alert_type = 'schema_change' then alerts_in_time_limit.test_unique_id
+                    {# In old versions of elementary, elementary_test_results doesn't contain test_short_name, so we use dbt_test short_name. #}
+                    when tests.short_name = 'dimension_anomalies' then alerts_in_time_limit.test_unique_id
+                    else coalesce(alerts_in_time_limit.test_unique_id, 'None') || '.' || coalesce(alerts_in_time_limit.column_name, 'None') || '.' || coalesce(alerts_in_time_limit.sub_type, 'None')
+                end as elementary_unique_id,
                 alerts_in_time_limit.data_issue_id,
                 alerts_in_time_limit.test_execution_id,
                 alerts_in_time_limit.test_unique_id,
@@ -107,7 +113,8 @@
                                  'model_meta': alert.model_meta,
                                  'suppression_status': alert.suppression_status,
                                  'sent_at': alert.sent_at,
-                                 'status': status} %}
+                                 'status': status,
+                                 'elementary_unique_id': alert.elementary_unique_id} %}
         {% do pending_alerts.append(pending_alert_dict) %}
     {% endfor %}
     {% do return(pending_alerts) %}

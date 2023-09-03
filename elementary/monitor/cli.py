@@ -234,6 +234,12 @@ def get_cli_properties() -> dict:
     help="Whether to override the settings (slack channel, suppression interval) "
     "in the model or test meta in the dbt project with the parameters provided by the CLI.",
 )
+@click.option(
+    "--report-url",
+    type=str,
+    default=None,
+    help="The report URL for the alert attached links.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -260,6 +266,7 @@ def monitor(
     target_path,
     suppression_interval,
     override_dbt_project_config,
+    report_url,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -275,12 +282,12 @@ def monitor(
         slack_webhook = deprecated_slack_webhook
     vars = yaml.loads(dbt_vars) if dbt_vars else None
     config = Config(
-        config_dir,
-        profiles_dir,
-        project_dir,
-        profile_target,
-        project_profile_target,
-        target_path,
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        project_dir=project_dir,
+        profile_target=profile_target,
+        project_profile_target=project_profile_target,
+        target_path=target_path,
         dbt_quoting=dbt_quoting,
         slack_webhook=slack_webhook,
         slack_token=slack_token,
@@ -288,6 +295,7 @@ def monitor(
         timezone=timezone,
         env=env,
         slack_group_alerts_by=group_by,
+        report_url=report_url,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
@@ -504,6 +512,12 @@ def report(
     "--slack-report-url",
     type=str,
     default=None,
+    help="DEPRECATED! - The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+)
+@click.option(
+    "--report-url",
+    type=str,
+    default=None,
     help="The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
 )
 @click.option(
@@ -541,6 +555,7 @@ def send_report(
     executions_limit,
     bucket_file_path,
     slack_report_url,
+    report_url,
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
@@ -567,13 +582,21 @@ def send_report(
     The current options are Slack, AWS S3, and Google Cloud Storage.
     Each specified platform will be sent a report.
     """
+    if slack_report_url is not None:
+        click.secho(
+            '\n"--slack-report-url" is deprecated and won\'t be supported in the near future.\n'
+            'Please use "--report-url" for passing report URL.\n',
+            fg="bright_red",
+        )
+        report_url = slack_report_url
+
     config = Config(
-        config_dir,
-        profiles_dir,
-        project_dir,
-        profile_target,
-        project_profile_target,
-        target_path,
+        config_dir=config_dir,
+        profiles_dir=profiles_dir,
+        project_dir=project_dir,
+        profile_target=profile_target,
+        project_profile_target=project_profile_target,
+        target_path=target_path,
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
@@ -588,7 +611,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
-        slack_report_url=slack_report_url,
+        report_url=report_url,
         env=env,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)

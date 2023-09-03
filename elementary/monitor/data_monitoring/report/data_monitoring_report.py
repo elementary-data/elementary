@@ -58,31 +58,32 @@ class DataMonitoringReport(DataMonitoring):
         project_name: Optional[str] = None,
     ) -> Tuple[bool, str]:
         html_path = self._get_report_file_path(file_path)
-        with open(html_path, "w", encoding="utf-8") as html_file:
-            output_data = self.get_report_data(
-                days_back=days_back,
-                test_runs_amount=test_runs_amount,
-                disable_passed_test_metrics=disable_passed_test_metrics,
-                exclude_elementary_models=exclude_elementary_models,
-                project_name=project_name,
-            )
-            template_html_path = pkg_resources.resource_filename(__name__, "index.html")
-            with open(template_html_path, "r", encoding="utf-8") as template_html_file:
-                template_html_code = template_html_file.read()
-                dumped_output_data = json.dumps(output_data)
-                encoded_output_data = base64.b64encode(
-                    dumped_output_data.encode("utf-8")
-                )
+        output_data = self.get_report_data(
+            days_back=days_back,
+            test_runs_amount=test_runs_amount,
+            disable_passed_test_metrics=disable_passed_test_metrics,
+            exclude_elementary_models=exclude_elementary_models,
+            project_name=project_name,
+        )
+        template_html_path = pkg_resources.resource_filename(__name__, "index.html")
 
-                compiled_output_html = f"""
-                        {template_html_code}
-                        <script>
-                            window.onload = function() {{
-                                window.elementaryData = JSON.parse(atob('{encoded_output_data.decode("utf-8")}'));
-                            }}
-                        </script>
-                   """
-                html_file.write(compiled_output_html)
+        with open(template_html_path, "r", encoding="utf-8") as template_html_file:
+            template_html_code = template_html_file.read()
+
+        dumped_output_data = json.dumps(output_data)
+        encoded_output_data = base64.b64encode(dumped_output_data.encode("utf-8"))
+        compiled_output_html = f"""
+                {template_html_code}
+                <script>
+                    window.onload = function() {{
+                        window.elementaryData = JSON.parse(atob('{encoded_output_data.decode("utf-8")}'));
+                    }}
+                </script>
+           """
+
+        with open(html_path, "w", encoding="utf-8") as html_file:
+            html_file.write(compiled_output_html)
+
         with open(
             os.path.join(self.config.target_dir, "elementary_output.json"),
             "w",
