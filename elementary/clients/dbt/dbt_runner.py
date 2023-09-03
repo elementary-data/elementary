@@ -13,6 +13,17 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 import yaml
 
+_MONITOR_DIR = os.path.dirname(os.path.realpath(__file__))
+
+_PACKAGES_FILENAME = "packages.yml"
+
+PATH = os.path.join(_MONITOR_DIR, "dbt_project")
+
+# Compatibility for previous dbt versions
+_PACKAGES_PATH = os.path.join(
+    PATH, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
+)
+
 class DbtRunner(BaseDbtRunner):
     ELEMENTARY_LOG_PREFIX = "Elementary: "
 
@@ -243,27 +254,20 @@ class DbtRunner(BaseDbtRunner):
     def source_freshness(self):
         self._run_command(command_args=["source", "freshness"])
 
-    def get_installed_packages(self):
-        dbt_packages_folder = os.path.join(os.getcwd(), 'dbt_packages')
+    def get_installed_packages_names(self):
         try:
-            folder_names = [name for name in os.listdir(dbt_packages_folder) if os.path.isdir(os.path.join(dbt_packages_folder, name))]
+            folder_names = [name for name in os.listdir(_PACKAGES_PATH) if os.path.isdir(os.path.join(_PACKAGES_PATH, name))]
             return folder_names
         except FileNotFoundError:
             logger.info("'dbt_packages' folder not found.")
             return False
 
     def _run_deps_if_needed(self):
-        packages_yaml_file = os.path.abspath('packages.yml')
+        packages_yaml_file = os.path.join(PATH , _PACKAGES_FILENAME)
         with open(packages_yaml_file, 'r') as file:
             packages_data = yaml.safe_load(file)
-        package_names = [package_entry.get('package', '').split('/')[-1] for package_entry in packages_data['packages']]
-        package_names = [package for package in package_names if package != '']
-        installed_packages = self.get_installed_packages()
-        if not installed_packages:
+        required_package_names = [package_entry['package'].split('/')[-1] for package_entry in packages_data['packages'] if 'package' in package_entry]
+        installed_package_names = self.get_installed_packages_names()
+        if set(required_package_names) != set(installed_package_names):
             self.deps()
             return
-        for package in package_names:
-            if package in installed_packages:
-                continue
-            self.deps()
-            break
