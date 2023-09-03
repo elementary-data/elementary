@@ -59,11 +59,7 @@
         "introduction",
         {
           "group": "Quickstart",
-          "pages": [
-            "quickstart",
-            "quickstart-cloud",
-            "quickstart-cli"
-          ]
+          "pages": ["quickstart", "quickstart-cloud", "quickstart-cli"]
         },
         {
           "group": "Tutorial",
@@ -89,6 +85,7 @@
             "guides/share-observability-report/share-via-slack",
             "guides/share-observability-report/host-on-s3",
             "guides/share-observability-report/host-on-gcs",
+            "guides/share-observability-report/host-on-azure",
             "guides/share-observability-report/send-report-summary"
           ]
         },
@@ -275,6 +272,9 @@
     },
     "posthog": {
       "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
+    },
+    "gtm": {
+      "tagId": "GTM-TKR4HS3Q"
     }
   }
 }

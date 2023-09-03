@@ -7,7 +7,7 @@ You can enrich your alerts by adding properties to tests and models in your `.ym
 The supported attributes are: [owner](/guides/alerts-configuration#owner), [subscribers](/guides/alerts-configuration#subscribers), [description](/guides/alerts-configuration#test-description), [tags](/guides/alerts-configuration#tags).
 
 You can configure and customize your alerts by configuring:
-[custom channel](/guides/alerts-configuration#custom-channel), [suppression interval](/guides/alerts-configuration#suppression_interval), [alert fields](/guides/alerts-configuration#alert_fields), [alert grouping](/guides/alerts-configuration#group-alerts-by-table), [alert filters](/guides/alerts-configuration#filter-alerts).
+[custom channel](/guides/alerts-configuration#custom-channel), [suppression interval](/guides/alerts-configuration#suppression_interval), [alert fields](/guides/alerts-configuration#alert-fields), [alert grouping](/guides/alerts-configuration#group-alerts-by-table), [alert filters](/guides/alerts-configuration#filter-alerts).
 
 ## Alert properties in `.yml` files
 
@@ -25,18 +25,19 @@ Elementary prioritizes configuration in the following order:
 2. Tests path configuration under `tests` key in `dbt_project.yml`.
 3. Parent model configuration.
 
+{/* prettier-ignore */}
 <pre>
- <code>
-&nbsp;&nbsp; meta:
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#owner"><font color="#CD7D55">owner: "@jessica.jones"</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#subscribers"><font color="#CD7D55">subscribers: ["@jessica.jones", "@joe.joseph"]</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#test-description"><font color="#CD7D55">description: "This is the test description"</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#tags"><font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#custom-channel"><font color="#CD7D55">channel: data_ops</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#suppression-interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#group-alerts-by-table"><font color="#CD7D55">slack_group_alerts_by: table</font></a>
-&nbsp;&nbsp;&nbsp;&nbsp; <a href="/guides/alerts-configuration#alert_fields"><font color="#CD7D55">alert_fields: ["description", "owners", "tags", "subscribers"]</font></a>
- </code>
+  <code>
+  meta:
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#owner"><font color="#CD7D55">owner: "@jessica.jones"</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#subscribers"><font color="#CD7D55">subscribers: ["@jessica.jones", "@joe.joseph"]</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#test-description"><font color="#CD7D55">description: "This is the test description"</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#tags"><font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#custom-channel"><font color="#CD7D55">channel: data_ops</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#suppression-interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#group-alerts-by-table"><font color="#CD7D55">slack_group_alerts_by: table</font></a>
+  &nbsp;&nbsp;<a href="/guides/alerts-configuration#alert-fields"><font color="#CD7D55">alert_fields: ["description", "owners", "tags", "subscribers", ...]</font></a>
+  </code>
 </pre>
 
 ### Alert content
