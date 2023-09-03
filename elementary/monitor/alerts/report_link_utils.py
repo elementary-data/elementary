@@ -2,7 +2,7 @@ from typing import Optional
 
 from elementary.monitor.alerts.schema.alert import ReportLinkData
 
-LINK_TEXT = "Run history"
+LINK_TEXT = "See run history"
 
 
 def _get_formatted_report_url(report_url: str) -> str:
