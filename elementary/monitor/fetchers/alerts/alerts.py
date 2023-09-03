@@ -121,6 +121,7 @@ class AlertsFetcher(FetcherClient):
                         alert_factory_func(
                             elementary_database_and_schema=self.elementary_database_and_schema,
                             timezone=self.config.timezone,
+                            report_url=self.config.report_url,
                             **normalized_alert,
                         )
                     )

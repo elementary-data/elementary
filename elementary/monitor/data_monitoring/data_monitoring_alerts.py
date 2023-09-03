@@ -142,6 +142,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 default_channel_destination=self.config.slack_channel_name,
                 override_slack_channel=self.override_meta_slack_channel,
                 env=self.config.env,
+                report_url=self.config.report_url,
             )
             for model_unique_id in table_to_alerts.keys()
         ]

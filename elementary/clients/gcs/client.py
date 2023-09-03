@@ -68,8 +68,8 @@ class GCSClient:
     ) -> Optional[str]:
         bucket_website_url = None
         if self.config.update_bucket_website:
-            if self.config.slack_report_url:
-                bucket_website_url = self.config.slack_report_url
+            if self.config.report_url:
+                bucket_website_url = self.config.report_url
             else:
                 full_bucket_path = (
                     f"{destination_bucket}/{bucket_name}"
