@@ -13,16 +13,7 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 import yaml
 
-_MONITOR_DIR = os.path.dirname(os.path.realpath(__file__))
-
 _PACKAGES_FILENAME = "packages.yml"
-
-PATH = os.path.join(_MONITOR_DIR, "dbt_project")
-
-# Compatibility for previous dbt versions
-_PACKAGES_PATH = os.path.join(
-    PATH, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
-)
 
 class DbtRunner(BaseDbtRunner):
     ELEMENTARY_LOG_PREFIX = "Elementary: "
@@ -256,14 +247,17 @@ class DbtRunner(BaseDbtRunner):
 
     def _get_installed_packages_names(self):
         try:
+            _PACKAGES_PATH = os.path.join(
+                self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
+            )
             folder_names = [name for name in os.listdir(_PACKAGES_PATH) if os.path.isdir(os.path.join(_PACKAGES_PATH, name))]
             return folder_names
         except FileNotFoundError:
             logger.info("'dbt_packages' folder not found.")
-            return False
+            return []
 
     def _run_deps_if_needed(self):
-        packages_yaml_file = os.path.join(PATH , _PACKAGES_FILENAME)
+        packages_yaml_file = os.path.join(self.project_dir , _PACKAGES_FILENAME)
         with open(packages_yaml_file, 'r') as file:
             packages_data = yaml.safe_load(file)
         required_package_names = [package_entry['package'].split('/')[-1] for package_entry in packages_data['packages'] if 'package' in package_entry]
