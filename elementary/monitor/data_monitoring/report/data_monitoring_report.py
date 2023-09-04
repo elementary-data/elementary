@@ -72,15 +72,12 @@ class DataMonitoringReport(DataMonitoring):
 
         dumped_output_data = json.dumps(output_data)
         encoded_output_data = base64.b64encode(dumped_output_data.encode("utf-8"))
-        compiled_output_html = f"""
-                {template_html_code}
-                <script>
-                    window.onload = function() {{
-                        window.elementaryData = JSON.parse(atob('{encoded_output_data.decode("utf-8")}'));
-                    }}
-                </script>
-           """
-
+        compiled_output_html = (
+            f"<script>"
+            f"window.elementaryData = JSON.parse(atob('{encoded_output_data.decode('utf-8')}'));"
+            f"</script>"
+            f"{template_html_code}"
+        )
         with open(html_path, "w", encoding="utf-8") as html_file:
             html_file.write(compiled_output_html)
 
