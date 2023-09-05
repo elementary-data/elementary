@@ -71,7 +71,7 @@ class ReportAPI(APIClient):
                 test_results.totals, test_runs.totals, models, sources, models_runs.runs
             )
 
-            serializable_groups = groups.dict()
+            serializable_groups = groups.model_dump()
             serializable_models = self._serialize_models(models, sources, exposures)
             serializable_model_runs = self._serialize_models_runs(models_runs.runs)
             serializable_model_runs_totals = models_runs.dict(include={"totals"})[
@@ -86,9 +86,9 @@ class ReportAPI(APIClient):
             )
             serializable_test_runs = self._serialize_test_runs(test_runs.runs)
             serializable_test_runs_totals = self._serialize_totals(test_runs.totals)
-            serializable_invocation = test_results.invocation.dict()
-            serializable_filters = filters.dict()
-            serializable_lineage = lineage.dict()
+            serializable_invocation = test_results.invocation.model_dump()
+            serializable_filters = filters.model_dump()
+            serializable_lineage = lineage.model_dump()
 
             models_latest_invocation = invocations_api.get_models_latest_invocation()
             invocations = invocations_api.get_models_latest_invocations_data()
@@ -151,7 +151,7 @@ class ReportAPI(APIClient):
         serializable_test_results = defaultdict(list)
         for model_unique_id, test_result in test_results.items():
             serializable_test_results[model_unique_id].extend(
-                [result.dict() for result in test_result]
+                [result.model_dump() for result in test_result]
             )
         return serializable_test_results
 
@@ -161,7 +161,7 @@ class ReportAPI(APIClient):
         serializable_test_runs = defaultdict(list)
         for model_unique_id, test_run in test_runs.items():
             serializable_test_runs[model_unique_id].extend(
-                [run.dict() for run in test_run]
+                [run.model_dump() for run in test_run]
             )
         return serializable_test_runs
 
@@ -170,5 +170,5 @@ class ReportAPI(APIClient):
     ) -> Dict[Optional[str], dict]:
         serialized_totals = dict()
         for model_unique_id, total in totals.items():
-            serialized_totals[model_unique_id] = total.dict()
+            serialized_totals[model_unique_id] = total.model_dump()
         return serialized_totals

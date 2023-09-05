@@ -1,8 +1,8 @@
 import os
 import posixpath
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.schema import (
@@ -23,32 +23,32 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     normalized_full_path: str
     fqn: str
 
-    @validator("tags", pre=True)
+    @field_validator("tags", mode="before")
     def load_tags(cls, tags):
         return cls._load_var_to_list(tags)
 
-    @validator("owners", pre=True)
+    @field_validator("owners", mode="before")
     def load_owners(cls, owners):
         return cls._load_var_to_list(owners)
 
-    @validator("normalized_full_path", pre=True)
+    @field_validator("normalized_full_path", mode="before")
     def format_normalized_full_path_sep(cls, normalized_full_path: str) -> str:
         return posixpath.sep.join(normalized_full_path.split(os.path.sep))
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
-    artifact_type: str = Field("model", const=True)
+    artifact_type: Literal["model"] = "model"
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
-    artifact_type: str = Field("source", const=True)
+    artifact_type: Literal["source"] = "source"
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
-    artifact_type: str = Field("exposure", const=True)
+    artifact_type: Literal["exposure"] = "exposure"
 
 
 class ModelCoverageSchema(BaseModel):
@@ -64,7 +64,7 @@ class ModelRunSchema(BaseModel):
     materialization: Optional[str]
     execution_time: float
 
-    @validator("time_utc", pre=True)
+    @field_validator("time_utc", mode="before")
     def format_time_utc(cls, time_utc):
         return convert_partial_iso_format_to_full_iso_format(time_utc)
 
