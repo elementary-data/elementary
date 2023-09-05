@@ -260,6 +260,9 @@ class DbtRunner(BaseDbtRunner):
 
     def _get_required_packages_names(self):
         packages_yaml_path = os.path.join(self.project_dir, "packages.yml")
+        if not os.path.exists(packages_yaml_path):
+            return []
+
         with open(packages_yaml_path) as packages_yaml_file:
             packages_data = yaml.safe_load(packages_yaml_file)
         return [
