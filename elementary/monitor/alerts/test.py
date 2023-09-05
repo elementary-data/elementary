@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Optional
+from typing import Optional, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -36,7 +36,7 @@ class TestAlert(Alert):
         elementary_unique_id: str,
         test_name: str,
         test_created_at: Optional[str] = None,
-        test_meta: Optional[str] = None,
+        test_meta: Optional[Union[str, dict]] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
