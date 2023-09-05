@@ -272,7 +272,7 @@ class DbtRunner(BaseDbtRunner):
         ]
 
     def _run_deps_if_needed(self):
-        installed_package_names = self._get_installed_packages_names()
-        required_package_names = self._get_required_packages_names()
-        if set(required_package_names) != set(installed_package_names):
+        installed_package_names = set(self._get_installed_packages_names())
+        required_package_names = set(self._get_required_packages_names())
+        if not required_package_names.issubset(installed_package_names):
             self.deps(quiet=True)
