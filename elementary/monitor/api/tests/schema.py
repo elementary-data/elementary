@@ -21,7 +21,7 @@ class DbtTestResultSchema(BaseModel):
 
 
 class InvocationSchema(BaseModel):
-    affected_rows: Optional[int]
+    affected_rows: Optional[int] = None
     time_utc: str
     id: str
     status: str
@@ -75,7 +75,7 @@ class TestResultsWithTotalsSchema(BaseModel):
 
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
-    test_runs: Optional[InvocationsSchema]
+    test_runs: Optional[InvocationsSchema] = None
 
 
 class TestRunsWithTotalsSchema(BaseModel):

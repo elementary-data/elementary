@@ -44,7 +44,7 @@ class TestModel(BaseModel):
     tags: List[str] = Field(default_factory=list)
     model_tags: List[str] = Field(default_factory=list)
     meta: dict = Field(default_factory=dict)
-    description: Optional[str]
+    description: Optional[str] = None
     is_singular: bool
     updated_at: str
     updated_by: Optional[str] = None

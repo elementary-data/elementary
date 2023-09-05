@@ -60,8 +60,8 @@ class ModelRunSchema(BaseModel):
     id: str
     time_utc: str
     status: str
-    full_refresh: Optional[bool]
-    materialization: Optional[str]
+    full_refresh: Optional[bool] = None
+    materialization: Optional[str] = None
     execution_time: float
 
     @field_validator("time_utc", mode="before")

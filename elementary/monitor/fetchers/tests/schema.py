@@ -20,17 +20,17 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     database_name: Optional[str] = None
     schema_name: str
     table_name: Optional[str] = None
-    column_name: Optional[str]
+    column_name: Optional[str] = None
     test_type: str
     test_sub_type: str
-    test_results_description: Optional[str]
-    owners: Optional[List[str]]
+    test_results_description: Optional[str] = None
+    owners: Optional[List[str]] = None
     model_owner: Optional[List[str]] = None
-    tags: Optional[List[str]]
+    tags: Optional[List[str]] = None
     meta: dict
     model_meta: dict
     test_results_query: Optional[str] = None
-    other: Optional[str]
+    other: Optional[str] = None
     test_name: str
     test_params: dict
     severity: str
