@@ -48,7 +48,7 @@ class NormalizedAlert:
         self.alert = alert
         self.test_meta = self._flatten_meta(TEST_META_KEY)
         self.model_meta = self._flatten_meta(MODEL_META_KEY)
-        self.normalized_alert = self._normalize_alert()
+        self.normalized_alert = self._normalize_alert(self.model_meta, self.test_meta)
 
     def get_normalized_alert(self) -> dict:
         return self.normalized_alert
@@ -60,7 +60,9 @@ class NormalizedAlert:
         flatten_meta.pop(ALERTS_CONFIG_KEY, None)
         return flatten_meta
 
-    def _normalize_alert(self):
+    def _normalize_alert(
+        self, flattened_model_meta: dict, flattened_test_meta: dict
+    ) -> dict:
         """
         extract from the test+model jsons:
         key in data ( or default val)  -- > key in normalized alert
@@ -78,6 +80,8 @@ class NormalizedAlert:
 
         try:
             normalized_alert = copy.deepcopy(self.alert)
+            normalized_alert[MODEL_META_KEY] = flattened_model_meta
+            normalized_alert[TEST_META_KEY] = flattened_test_meta
 
             normalized_alert[
                 SUBSCRIBERS_KEY

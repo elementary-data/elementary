@@ -3,6 +3,8 @@ import os
 import subprocess
 from typing import Any, Dict, List, Optional, Tuple
 
+import yaml
+
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
@@ -29,6 +31,7 @@ class DbtRunner(BaseDbtRunner):
         super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
+        self._run_deps_if_needed()
 
     def _run_command(
         self,
@@ -75,7 +78,7 @@ class DbtRunner(BaseDbtRunner):
                 env=self._get_command_env(),
             )
         except subprocess.CalledProcessError as err:
-            logs = list(parse_dbt_output(err.output.decode()))
+            logs = list(parse_dbt_output(err.output.decode())) if err.output else []
             if capture_output and (log_output or is_debug()):
                 for log in logs:
                     logger.info(log.msg)
@@ -241,3 +244,35 @@ class DbtRunner(BaseDbtRunner):
 
     def source_freshness(self):
         self._run_command(command_args=["source", "freshness"])
+
+    def _get_installed_packages_names(self):
+        packages_dir = os.path.join(
+            self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
+        )
+        try:
+            return [
+                name
+                for name in os.listdir(packages_dir)
+                if os.path.isdir(os.path.join(packages_dir, name))
+            ]
+        except FileNotFoundError:
+            return []
+
+    def _get_required_packages_names(self):
+        packages_yaml_path = os.path.join(self.project_dir, "packages.yml")
+        if not os.path.exists(packages_yaml_path):
+            return []
+
+        with open(packages_yaml_path) as packages_yaml_file:
+            packages_data = yaml.safe_load(packages_yaml_file)
+        return [
+            package_entry["package"].split("/")[-1]
+            for package_entry in packages_data["packages"]
+            if "package" in package_entry
+        ]
+
+    def _run_deps_if_needed(self):
+        installed_package_names = set(self._get_installed_packages_names())
+        required_package_names = set(self._get_required_packages_names())
+        if not required_package_names.issubset(installed_package_names):
+            self.deps(quiet=True)

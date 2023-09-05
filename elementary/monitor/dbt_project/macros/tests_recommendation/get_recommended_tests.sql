@@ -4,7 +4,7 @@
     {% endif %}
 
     {% set query %}
-        select resource_name, source_name, test_namespace, test_name, timestamp_column
+        select resource_name, source_name, test_namespace, test_name, test_args
         from {{ ref("test_recommendations") }}
         where {{ where_expression }}
     {% endset %}

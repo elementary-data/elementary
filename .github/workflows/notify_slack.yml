@@ -13,15 +13,27 @@ on:
         required: true
 
 jobs:
+  print_inputs:
+    timeout-minutes: 2
+    name: print inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: print
+        run: |
+          echo "${{ inputs.run_id }}"
+          echo "${{ inputs.workflow_name }}"
+          echo "${{ inputs.result }}"
+
   notify:
     name: Notify Slack Failure
+    timeout-minutes: 3
     runs-on: ubuntu-latest
     if: ${{ inputs.result == 'failure' }}
     steps:
       - name: Slack Notification
         uses: tokorom/action-slack-incoming-webhook@main
         env:
-          INCOMING_WEBHOOK_URL: ${{ secrets.DEPLOY_SLACK_WEBHOOK_URL }}
+          INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
           text: Scheduled Run Failed - ${{ inputs.workflow_name }}
           attachments: |
