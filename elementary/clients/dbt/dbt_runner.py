@@ -3,6 +3,8 @@ import os
 import subprocess
 from typing import Any, Dict, List, Optional, Tuple
 
+import yaml
+
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
@@ -11,9 +13,7 @@ from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
-import yaml
 
-_PACKAGES_FILENAME = "packages.yml"
 
 class DbtRunner(BaseDbtRunner):
     ELEMENTARY_LOG_PREFIX = "Elementary: "
@@ -246,22 +246,30 @@ class DbtRunner(BaseDbtRunner):
         self._run_command(command_args=["source", "freshness"])
 
     def _get_installed_packages_names(self):
+        packages_dir = os.path.join(
+            self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
+        )
         try:
-            _PACKAGES_PATH = os.path.join(
-                self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
-            )
-            folder_names = [name for name in os.listdir(_PACKAGES_PATH) if os.path.isdir(os.path.join(_PACKAGES_PATH, name))]
-            return folder_names
+            return [
+                name
+                for name in os.listdir(packages_dir)
+                if os.path.isdir(os.path.join(packages_dir, name))
+            ]
         except FileNotFoundError:
-            logger.info("'dbt_packages' folder not found.")
             return []
 
+    def _get_required_packages_names(self):
+        packages_yaml_path = os.path.join(self.project_dir, "packages.yml")
+        with open(packages_yaml_path) as packages_yaml_file:
+            packages_data = yaml.safe_load(packages_yaml_file)
+        return [
+            package_entry["package"].split("/")[-1]
+            for package_entry in packages_data["packages"]
+            if "package" in package_entry
+        ]
+
     def _run_deps_if_needed(self):
-        packages_yaml_file = os.path.join(self.project_dir , _PACKAGES_FILENAME)
-        with open(packages_yaml_file, 'r') as file:
-            packages_data = yaml.safe_load(file)
-        required_package_names = [package_entry['package'].split('/')[-1] for package_entry in packages_data['packages'] if 'package' in package_entry]
         installed_package_names = self._get_installed_packages_names()
+        required_package_names = self._get_required_packages_names()
         if set(required_package_names) != set(installed_package_names):
-            self.deps()
-            return
+            self.deps(quiet=True)
