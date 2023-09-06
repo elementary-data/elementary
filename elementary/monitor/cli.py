@@ -159,7 +159,6 @@ def get_cli_properties() -> dict:
     if params is None:
         return dict()
 
-    reload_monitoring_configuration = params.get("reload_monitoring_configuration")
     target_path = params.get("target_path")
     update_dbt_package = params.get("update_dbt_package")
     full_refresh_dbt_package = params.get("full_refresh_dbt_package")
@@ -167,7 +166,6 @@ def get_cli_properties() -> dict:
 
     return {
         "target_path": target_path,
-        "reload_monitoring_configuration": reload_monitoring_configuration,
         "update_dbt_package": update_dbt_package,
         "full_refresh_dbt_package": full_refresh_dbt_package,
         "select": select,
