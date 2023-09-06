@@ -58,15 +58,21 @@ class SelectorFilter:
                 resource_types_match = resource_types_regex.search(selector)
 
                 if last_invocation_match:
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "last_invocation")
                     data_monitoring_filter = SelectorFilterSchema(
                         last_invocation=True, selector=selector
                     )
                 elif invocation_id_match:
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "invocation_id")
                     data_monitoring_filter = SelectorFilterSchema(
                         invocation_id=invocation_id_match.group(1),
                         selector=selector,
                     )
                 elif invocation_time_match:
+                    if self.tracking:
+                        self.tracking.set_env("select_method", "invocation_time")
                     data_monitoring_filter = SelectorFilterSchema(
                         invocation_time=invocation_time_match.group(1),
                         selector=selector,
