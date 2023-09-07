@@ -14,6 +14,9 @@ Elementary anomaly detection tests will use this column to create time buckets a
 It is highly recommended to configure a timestamp column (if there is one).
 The best column for this would be an `updated_at`/`created_at`/`loaded_at` timestamp for each row (date type also works).
 
+ - When you specify a `timestamp_column`, when the test runs it splits the data to buckets according to the timestamp in this column, calculates the metric for each bucket and checks for anomalies between these buckets.
+ - When you do not specify a `timestamp_column`, each time the test runs it calculates the metric for all of the data in the table, and checks for anomalies between the metric from previous runs.
+
 If undefined, default is null (no time buckets).
 
 - _Default: none_
