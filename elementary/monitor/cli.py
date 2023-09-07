@@ -163,12 +163,22 @@ def get_cli_properties() -> dict:
     update_dbt_package = params.get("update_dbt_package")
     full_refresh_dbt_package = params.get("full_refresh_dbt_package")
     select = params.get("select")
+    days_back = params.get("days_back")
+    timezone = params.get("timezone")
+    group_by = params.get("group_by")
+    suppression_interval = params.get("suppression_interval")
+    override_dbt_project_config = params.get("override_dbt_project_config")
 
     return {
         "target_path": target_path,
         "update_dbt_package": update_dbt_package,
         "full_refresh_dbt_package": full_refresh_dbt_package,
         "select": select,
+        "days_back": days_back,
+        "timezone": timezone,
+        "group_by": group_by,
+        "suppression_interval": suppression_interval,
+        "override_dbt_project_config": override_dbt_project_config,
     }
 
 
