@@ -29,7 +29,7 @@ def filter_alerts(
         logger.warning("Invalid filter for alerts: %s", alerts_filter.selector)
         return []
 
-    # If the filter is empty, we want to return all the alerts
+    # If the filter is empty, we want to return all of the alerts
     filtered_alerts = alerts
     if alerts_filter.tag is not None:
         filtered_alerts = _filter_alerts_by_tag(filtered_alerts, alerts_filter)

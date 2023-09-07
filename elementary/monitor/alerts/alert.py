@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
 from dateutil import tz
 
@@ -32,9 +32,10 @@ class Alert:
         alert_fields: Optional[list] = None,
         timezone: Optional[str] = None,
         test_meta: Optional[dict] = None,
-        model_meta: Optional[str] = None,
+        model_meta: Optional[Union[str, dict]] = None,
         alerts_table: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
+        report_url: Optional[str] = None,
         **kwargs,
     ):
         self.slack_message_builder = SlackAlertMessageBuilder()
@@ -72,6 +73,7 @@ class Alert:
         self.alert_suppression_interval = alert_suppression_interval
         self.alert_fields = alert_fields
         self.slack_group_alerts_by = slack_group_alerts_by
+        self.report_url = report_url
 
         # Defined in the base class so type checks will not complain
         self.data: Dict[str, Any] = {}
