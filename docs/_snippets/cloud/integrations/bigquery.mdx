@@ -16,12 +16,15 @@ Provide the following fields:
 ### Uploading columns data
 
 In order to let Elementary Cloud access metadata about the columns in your data warehouse, you need to run the following command:
+
 ```
 dbt run-operation elementary.upload_dbt_columns
 ```
+
 You may choose to run this command in one of the following ways:
+
 1. Manually whenever there is a schema change in your dataset - Not recommended.
 2. As part of your `dbt` pipeline - Recommended if you have one main pipeline.
-3. As an independant pipeline - Recommended if you have a lot of small pipelines running in different times.
+3. As an independent pipeline - Recommended if you have a lot of small pipelines running in different times.
 
 <Snippet file="cloud/integrations/ip-allowlist.mdx" />
