@@ -77,7 +77,7 @@
     {% endset %}
 
     {% set alerts_agate = elementary.run_query(select_pending_alerts_query) %}
-    {% set test_result_rows_agate = elementary_internal.get_result_rows_agate(days_back) %}
+    {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back) %}
     {% set test_result_alert_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set pending_alerts = [] %}
     {% for alert in test_result_alert_dicts %}
@@ -86,7 +86,7 @@
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_internal.get_test_rows_sample(alert.result_rows, test_result_rows_agate.get(alert.alert_id)) %}
+            {% set test_rows_sample = elementary_cli.get_test_rows_sample(alert.result_rows, test_result_rows_agate.get(alert.alert_id)) %}
         {%- endif -%}
         {% set pending_alert_dict = {'id': alert.alert_id,
                                  'alert_class_id': alert.alert_class_id,

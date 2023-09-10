@@ -22,7 +22,7 @@ class ModelsFetcher(FetcherClient):
         self, days_back: Optional[int] = 7, exclude_elementary_models: bool = False
     ) -> List[ModelRunSchema]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_models_runs",
+            macro_name="elementary_cli.get_models_runs",
             macro_args={
                 "days_back": days_back,
                 "exclude_elementary": exclude_elementary_models,
@@ -36,7 +36,7 @@ class ModelsFetcher(FetcherClient):
 
     def get_models(self, exclude_elementary_models: bool = False) -> List[ModelSchema]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_models",
+            macro_name="elementary_cli.get_models",
             macro_args={"exclude_elementary": exclude_elementary_models},
         )
         models = json.loads(run_operation_response[0]) if run_operation_response else []
@@ -44,7 +44,9 @@ class ModelsFetcher(FetcherClient):
         return models
 
     def get_sources(self) -> List[SourceSchema]:
-        run_operation_response = self.dbt_runner.run_operation(macro_name="get_sources")
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="elementary_cli.get_sources"
+        )
         sources = (
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
@@ -53,7 +55,7 @@ class ModelsFetcher(FetcherClient):
 
     def get_exposures(self) -> List[ExposureSchema]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_exposures"
+            macro_name="elementary_cli.get_exposures"
         )
         exposures = (
             json.loads(run_operation_response[0]) if run_operation_response else []
@@ -63,7 +65,7 @@ class ModelsFetcher(FetcherClient):
 
     def get_test_coverages(self) -> List[ModelTestCoverage]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_dbt_models_test_coverage"
+            macro_name="elementary_cli.get_dbt_models_test_coverage"
         )
         coverages = (
             json.loads(run_operation_response[0]) if run_operation_response else []
