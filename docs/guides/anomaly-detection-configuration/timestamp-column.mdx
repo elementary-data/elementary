@@ -15,9 +15,9 @@ It is highly recommended to configure a timestamp column (if there is one).
 The best column for this would be an `updated_at`/`created_at`/`loaded_at` timestamp for each row (date type also works).
 
 - When you specify a `timestamp_column`, when the test runs it splits the data to buckets according to the timestamp in this column, calculates the metric for each bucket and checks for anomalies between these buckets.
-This also means that if the table has enough historical data, the test can start working right away.
+  This also means that if the table has enough historical data, the test can start working right away.
 - When you do not specify a `timestamp_column`, each time the test runs it calculates the metric for all of the data in the table, and checks for anomalies between the metric from previous runs.
-This also means that it will take the test `days_back` days to start working, as it needs to the time to collect the necessary metrics.
+  This also means that it will take the test `days_back` days to start working, as it needs to the time to collect the necessary metrics.
 
 If undefined, default is null (no time buckets).
 
