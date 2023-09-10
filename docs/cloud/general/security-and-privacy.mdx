@@ -3,6 +3,16 @@ title: "Security and Privacy"
 sidebarTitle: "Security and privacy"
 ---
 
+## Security highlights
+
+Our product is designed with security and compliance in mind.
+
+- Elementary Cloud does not have read access to raw data in your data warehouse.
+- Elementary Cloud only extracts and stores metadata, logs and aggregated metrics.
+- All data is encrypted at rest and in transit using industry standard protocols.
+- Elementary uses service accounts or authentication tokens with granular and minimal permissions.
+- Elementary offers deployment options in which no direct access is required from Elementary Cloud to your data warehouse and third-party tools.
+
 <Check>
   **SOC 2 certification:** Elementary Cloud is SOC2 type II certified!
 </Check>
@@ -11,13 +21,13 @@ sidebarTitle: "Security and privacy"
 
 Elementary Cloud is designed with the core principle of least privilege.
 Our cloud service does not require permissions to access the customer data.
-Therefor, we instruct our customers to create a dedicated role for Elementary with `read only` access only to the Elementary schema in your data warehouse.
+Therefore, we instruct our customers to create a dedicated role for Elementary with `read only` access only to the Elementary schema in your data warehouse.
 
 As long as you follow the onboarding process instructions, it will be impossible for Elementary Cloud to read data from your warehouse that does not reside in the Elementary schema.
 This ensures that Elementary cloud will not mistakenly access your data, and minimizes the risk in case of a data breach.
 Our product and architecture are always evolving, but our commitment to secure design always remains.
 
-## How it works
+## How it works?
 
 1. You install the Elementary dbt package in your dbt project and configure it to write to it's own schema, the Elementary schema.
 2. The package writes test results, run results, logs and metadata to the Elementary schema.
@@ -28,16 +38,36 @@ Our product and architecture are always evolving, but our commitment to secure d
   <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1691406627/elementary_cloud_architecture.png"
     alt="Elementary cloud security"
+    width="200"
   />
 </Frame>
 
-## What is stored in the Elementary schema?
+
+## What information does Elementary collect?
+
+### Elementary Schema
 
 The Elementary schema stores only metadata, aggregated metrics and logs.
-You can find the details of the tables [here](/guides/modules-overview/dbt-package).
 
 The only exception to that is the `test_results_samples` which can be disabled. This is a feature that shows a sample of a few raw failed rows for failed tests, to help them triage and understand the problem.
 To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
+
+
+| information        | Description                           | Usage        |
+| ------------------ | ------------------------------------- |--------------| 
+| Metadata           | Table names, column names and types,                      |
+| Configuration      |
+| Run results        | Reported age                          |
+| Metrics            | Whether the user joined the community |
+| Aggregated metrics | Whether the user joined the community |
+| Query logs         | Whether the user joined the community |
+| Results sample     | Whether the user joined the community |
+
+
+
+### Elementary Integrations
+
+
 
 ## Secrets and data protection
 
@@ -48,7 +78,15 @@ To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_pro
 
 <Check>**SOC 2 certification:** Elementary Cloud is SOC2 certified!</Check>
 
-[Contact us](mailto:legal@elementary-data.com) for auditing reports and penetration testing results.
+Contact us at `legal@elementary-data.com` for auditing reports and penetration testing results.
+
+
+## Privacy and data protection
+
+We continuously implement evolving privacy and data protection processes, procedures, and best practices. 
+For more information, see our [Data Protection Agreement](https://www.elementary-data.com/privacy).
+
+Contact us at `legal@elementary-data.com` if you need us to review and sign your company's DPA and MNDA.
 
 ## Have more questions?
 
