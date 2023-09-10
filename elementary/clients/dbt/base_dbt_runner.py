@@ -10,12 +10,14 @@ class BaseDbtRunner(ABC):
         target: Optional[str] = None,
         vars: Optional[dict] = None,
         secret_vars: Optional[dict] = None,
+        allow_macros_without_package_prefix: bool = False,
     ) -> None:
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
         self.vars = vars or {}
         self.secret_vars = secret_vars or {}
+        self.allow_macros_without_package_prefix = allow_macros_without_package_prefix
 
     @abstractmethod
     def deps(self, *args, **kwargs):
