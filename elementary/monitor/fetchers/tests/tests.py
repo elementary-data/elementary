@@ -20,7 +20,7 @@ class TestsFetcher(FetcherClient):
         disable_passed_test_metrics: bool = False,
     ) -> List[TestResultDBRowSchema]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_test_results",
+            macro_name="elementary_cli.get_test_results",
             macro_args=dict(
                 days_back=days_back,
                 invocations_per_test=invocations_per_test,

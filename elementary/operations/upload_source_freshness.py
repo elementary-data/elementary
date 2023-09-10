@@ -50,7 +50,7 @@ class UploadSourceFreshnessOperation:
         for chunk in upload_with_progress_bar:
             results_segment = results[chunk : chunk + chunk_size]
             dbt_runner.run_operation(
-                "elementary_internal.upload_source_freshness",
+                "elementary_cli.upload_source_freshness",
                 macro_args={"results": json.dumps(results_segment)},
                 quiet=True,
             )
