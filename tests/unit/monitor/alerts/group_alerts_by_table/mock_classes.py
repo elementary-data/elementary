@@ -27,6 +27,7 @@ class MockConfig:
     slack_group_alerts_by: Optional[str]
     slack_channel_name: Optional[str]
     env: str = "dev"
+    report_url: Optional[str] = None
 
 
 @dataclass

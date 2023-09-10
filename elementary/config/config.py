@@ -59,7 +59,7 @@ class Config:
         gcs_bucket_name: Optional[str] = None,
         azure_connection_string: Optional[str] = None,
         azure_container_name: Optional[str] = None,
-        slack_report_url: Optional[str] = None,
+        report_url: Optional[str] = None,
         env: str = "dev",
     ):
         self.config_dir = config_dir
@@ -155,11 +155,11 @@ class Config:
             azure_config.get("azure_container_name"),
         )
 
-        self.slack_report_url = self._first_not_none(
-            slack_report_url,
-            aws_config.get("slack_report_url"),
-            google_config.get("slack_report_url"),
-            azure_config.get("slack_report_url"),
+        self.report_url = self._first_not_none(
+            report_url,
+            aws_config.get("report_url"),
+            google_config.get("report_url"),
+            azure_config.get("report_url"),
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)

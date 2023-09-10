@@ -48,12 +48,13 @@ jobs:
 
   notify_failures:
     name: Notify Slack
-    needs: test
+    secrets: inherit
+    needs: [test]
     if: |
       always() &&
-      contains(needs.test.result, 'failure') &&
-      # ! cancelled() &&
-      ${{ github.event_name == 'schedule' }}
+      ! cancelled() &&
+      ! contains(needs.test.result, 'success') &&
+      ! contains(needs.test.result, 'cancelled')
     uses: ./.github/workflows/notify_slack.yml
     with:
       result: "failure"

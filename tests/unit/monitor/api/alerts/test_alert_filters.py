@@ -30,6 +30,7 @@ def initial_alerts():
             tags='["one", "two"]',
             owners='["jeff", "john"]',
             status="fail",
+            elementary_unique_id="elementary.model_id_1.test_id_1.9cf2f5f6ad.None.generic",
         ),
         TestAlert(
             id="2",
@@ -41,6 +42,7 @@ def initial_alerts():
             tags='["three"]',
             owners='["jeff", "john"]',
             status="fail",
+            elementary_unique_id="elementary.model_id_1.test_id_2.9cf2f5f6ad.None.generic",
         ),
         TestAlert(
             id="3",
@@ -53,6 +55,7 @@ def initial_alerts():
             tags="one",
             owners='["john"]',
             status="fail",
+            elementary_unique_id="elementary.model_id_1.test_id_3.9cf2f5f6ad.None.generic",
         ),
         TestAlert(
             id="4",
@@ -64,6 +67,7 @@ def initial_alerts():
             tags='["three", "four"]',
             owners='["jeff"]',
             status="warn",
+            elementary_unique_id="elementary.model_id_1.test_id_4.9cf2f5f6ad.None.generic",
         ),
     ]
     model_alerts = [
