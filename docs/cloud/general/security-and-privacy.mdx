@@ -38,7 +38,7 @@ Our product and architecture are always evolving, but our commitment to secure d
   <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1691406627/elementary_cloud_architecture.png"
     alt="Elementary cloud security"
-    width="200"
+    width="400"
   />
 </Frame>
 
@@ -46,7 +46,7 @@ Our product and architecture are always evolving, but our commitment to secure d
 ## What information does Elementary collect?
 
 Elementary collects and stores metadata, aggregated metrics and logs.
-The different information types are detailed in the table bellow.
+The collected information is detailed in the table below.
 
 You can see all the data that Elementary collects and stores in your local Elementary schema.
 
@@ -54,7 +54,7 @@ In general, Elementary does not collect any raw data. The only exception is the 
 This is an opt-out feature that shows a sample of a few raw failed rows for failed tests, to help them triage and understand the problem.
 To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
 
-| Information type   | Examples                                                                                                                                                                          | Usage                                                                                                                                                                               |
+| Information        | Examples                                                                                                                                                                          | Usage                                                                                                                                                                               |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Metadata           | Table names, column names and types, names of BI dashboards, query code of tables, etc.                                                                                           | Present data issues with context, such as data lineage (dependencies).                                                                                                              |
 | Configuration      | Technical configuration of how tables and tests should be executed, and configuration such as owners, descriptions, tags, etc.                                                    | Add context to data reliability issues and alerts for fast resolution.                                                                                                              |
@@ -73,7 +73,7 @@ To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_pro
 
 ## Compliance
 
-<Check>**SOC 2 certification:** Elementary Cloud is SOC2 certified!</Check>
+<Check>**SOC 2 certification:** Elementary Cloud is SOC2 type II certified!</Check>
 
 Contact us at `legal@elementary-data.com` for auditing reports and penetration testing results.
 
