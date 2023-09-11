@@ -57,8 +57,8 @@ _Not supported in dbt cloud_
 To alert on source freshness, you will need to run `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
 This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
 
-- Note that it needs to be from the same machine.
-- Note that this requires passing `--project-dir` argument.
+- Note that `dbt source freshness` and `upload-source-freshness` needs to run from the same machine.
+- Note that `upload-source-freshness` requires passing `--project-dir` argument.
 
 ## Continuous alerting
 
