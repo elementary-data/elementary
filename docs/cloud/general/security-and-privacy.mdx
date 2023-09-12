@@ -50,10 +50,10 @@ The collected information is detailed in the table below.
 You can see all the data that Elementary collects and stores in your local Elementary schema.
 
 In general, Elementary does not collect any raw data. The only exception is the failed rows sample (stored in table `test_results_samples`) which can be disabled.
-This is an opt-out feature that shows a sample of a few raw failed rows for failed tests, to help them triage and understand the problem.
+This is an opt-out feature that shows a sample of a few raw failed rows for failed tests, to help users triage and understand the problem.
 To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
 
-| Information        | Examples                                                                                                                                                                          | Usage                                                                                                                                                                              |
+| Information        | Details                                                                                                                                                                          | Usage                                                                                                                                                                              |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Metadata           | Table names, column names and types, names of BI dashboards, query code of tables, etc.                                                                                           | Present data issues with context, such as data lineage (dependencies).                                                                                                             |
 | Configuration      | Technical configuration of how tables and tests should be executed, and configuration such as owners, descriptions, tags, etc.                                                    | Add context to data reliability issues and alerts for fast resolution.                                                                                                             |
@@ -63,10 +63,11 @@ To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_pro
 | Aggregated metrics | **Opt-in collection** of aggregated statistics on data in selected field and tables. For example: null rates, uniqueness rate, distribution of values, and other similar metrics. | Monitor data reliability using anomaly detection on the collected metrics.                                                                                                         |
 | Failed rows sample | **Opt-out collection** of small sample of raw rows or values that have a data reliability issue. These are attached to the issue for troubleshooting.                             | Enable users to quickly understand and investigate data issues. Users can opt-out completely or exclude specific tables, limit the sample size and limit the retention of samples. |
 
-## Secrets and data protection
+## Secrets and encryption
 
 - **Tokens and credentials** - For customer secrets (tokens and credentials) we use [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html). Secrets Manager uses envelope encryption with AWS KMS keys and data keys to protect each secret value. Whenever the secret value in a secret changes, Secrets Manager generates a new data key to protect it. The data key is encrypted under a KMS key and stored in the metadata of the secret. [See this link for more details](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html).
 - **Customer data (Elementary schema replica)** - The synced customer data is encrypted at rest using server-side encryption (AES-256).
+- **Network connections** - All connections to Elementary Cloud are encrypted by default, in both directions using modern ciphers and cryptographic systems. We encrypt in transit utilizing TLS 1.2. Any attempt to connect over HTTP is redirected to HTTPS.
 
 ## Compliance
 
