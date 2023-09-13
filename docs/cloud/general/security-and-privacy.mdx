@@ -3,6 +3,16 @@ title: "Security and Privacy"
 sidebarTitle: "Security and privacy"
 ---
 
+## Security highlights
+
+Our product is designed with security and compliance in mind.
+
+- Elementary Cloud does not have read access to raw data in your data warehouse.
+- Elementary Cloud only extracts and stores metadata, logs and aggregated metrics.
+- All data is encrypted at rest and in transit using industry standard protocols.
+- Elementary uses service accounts or authentication tokens with granular and minimal permissions.
+- Elementary offers deployment options with no direct access from Elementary Cloud to your data warehouse and third-party tools.
+
 <Check>
   **SOC 2 certification:** Elementary Cloud is SOC2 type II certified!
 </Check>
@@ -11,13 +21,13 @@ sidebarTitle: "Security and privacy"
 
 Elementary Cloud is designed with the core principle of least privilege.
 Our cloud service does not require permissions to access the customer data.
-Therefor, we instruct our customers to create a dedicated role for Elementary with `read only` access only to the Elementary schema in your data warehouse.
+Therefore, we instruct our customers to create a dedicated role for Elementary with `read only` access only to the Elementary schema in your data warehouse.
 
 As long as you follow the onboarding process instructions, it will be impossible for Elementary Cloud to read data from your warehouse that does not reside in the Elementary schema.
 This ensures that Elementary cloud will not mistakenly access your data, and minimizes the risk in case of a data breach.
 Our product and architecture are always evolving, but our commitment to secure design always remains.
 
-## How it works
+## How it works?
 
 1. You install the Elementary dbt package in your dbt project and configure it to write to it's own schema, the Elementary schema.
 2. The package writes test results, run results, logs and metadata to the Elementary schema.
@@ -28,27 +38,51 @@ Our product and architecture are always evolving, but our commitment to secure d
   <img
     src="https://res.cloudinary.com/diuctyblm/image/upload/v1691406627/elementary_cloud_architecture.png"
     alt="Elementary cloud security"
+    width="400"
   />
 </Frame>
 
-## What is stored in the Elementary schema?
+## What information does Elementary collect?
 
-The Elementary schema stores only metadata, aggregated metrics and logs.
-You can find the details of the tables [here](/guides/modules-overview/dbt-package).
+Elementary collects and stores metadata, aggregated metrics and logs.
+The collected information is detailed in the table below.
 
-The only exception to that is the `test_results_samples` which can be disabled. This is a feature that shows a sample of a few raw failed rows for failed tests, to help them triage and understand the problem.
+You can see all the data that Elementary collects and stores in your local Elementary schema.
+
+In general, Elementary does not collect any raw data. The only exception is the failed rows sample (stored in table `test_results_samples`) which can be disabled.
+This is an opt-out feature that shows a sample of a few raw failed rows for failed tests, to help users triage and understand the problem.
 To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
 
-## Secrets and data protection
+| Information        | Details                                                                                                                                                                          | Usage                                                                                                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metadata           | Table names, column names and types, names of BI dashboards, query code of tables, etc.                                                                                           | Present data issues with context, such as data lineage (dependencies).                                                                                                             |
+| Configuration      | Technical configuration of how tables and tests should be executed, and configuration such as owners, descriptions, tags, etc.                                                    | Add context to data reliability issues and alerts for fast resolution.                                                                                                             |
+| Run results        | Run results of tests and pipelines, including run time, errors, invocation origin, etc.                                                                                           | Alert on data reliability issues and identify performance bottle necks.                                                                                                            |
+| Query logs         | Executed queries and their metadata such as user performing the query, resources, run time, etc.                                                                                  | Track usage to help troubleshooting and optimizing resources usage.                                                                                                                |
+| Table metrics      | Row count, last modification time, size, and similar table-level metrics.                                                                                                         | Monitor volume, freshness and similar data reliability factors.                                                                                                                    |
+| Aggregated metrics | **Opt-in collection** of aggregated statistics on data in selected field and tables. For example: null rates, uniqueness rate, distribution of values, and other similar metrics. | Monitor data reliability using anomaly detection on the collected metrics.                                                                                                         |
+| Failed rows sample | **Opt-out collection** of small sample of raw rows or values that have a data reliability issue. These are attached to the issue for troubleshooting.                             | Enable users to quickly understand and investigate data issues. Users can opt-out completely or exclude specific tables, limit the sample size and limit the retention of samples. |
+
+## Secrets and encryption
 
 - **Tokens and credentials** - For customer secrets (tokens and credentials) we use [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html). Secrets Manager uses envelope encryption with AWS KMS keys and data keys to protect each secret value. Whenever the secret value in a secret changes, Secrets Manager generates a new data key to protect it. The data key is encrypted under a KMS key and stored in the metadata of the secret. [See this link for more details](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html).
 - **Customer data (Elementary schema replica)** - The synced customer data is encrypted at rest using server-side encryption (AES-256).
+- **Network connections** - All connections to Elementary Cloud are encrypted by default, in both directions using modern ciphers and cryptographic systems. We encrypt in transit utilizing TLS 1.2. Any attempt to connect over HTTP is redirected to HTTPS.
 
 ## Compliance
 
-<Check>**SOC 2 certification:** Elementary Cloud is SOC2 certified!</Check>
+<Check>
+  **SOC 2 certification:** Elementary Cloud is SOC2 type II certified!
+</Check>
 
-[Contact us](mailto:legal@elementary-data.com) for auditing reports and penetration testing results.
+Contact us at `legal@elementary-data.com` for auditing reports and penetration testing results.
+
+## Privacy and data protection
+
+We continuously implement evolving privacy and data protection processes, procedures, and best practices.
+For more information, see our [Data Protection Agreement](https://www.elementary-data.com/privacy).
+
+Contact us at `legal@elementary-data.com` if you need us to review and sign your company's DPA and MNDA.
 
 ## Have more questions?
 
