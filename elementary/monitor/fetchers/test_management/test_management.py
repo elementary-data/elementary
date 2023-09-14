@@ -29,7 +29,7 @@ class TestManagementFetcher(FetcherClient):
         columns: Optional[DefaultDict[str, List[ResourceColumnModel]]] = None,
     ) -> List[ResourceModel]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_model_resources",
+            macro_name="elementary_cli.get_model_resources",
             macro_args=dict(exclude_elementary=exclude_elementary),
         )
         models_results = (
@@ -43,7 +43,7 @@ class TestManagementFetcher(FetcherClient):
         columns: Optional[DefaultDict[str, List[ResourceColumnModel]]] = None,
     ) -> List[ResourceModel]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_source_resources",
+            macro_name="elementary_cli.get_source_resources",
             macro_args=dict(exclude_elementary=exclude_elementary),
         )
         sources_results = (
@@ -53,7 +53,7 @@ class TestManagementFetcher(FetcherClient):
 
     def get_resources_columns(self) -> DefaultDict[str, List[ResourceColumnModel]]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_resources_columns"
+            macro_name="elementary_cli.get_resources_columns"
         )
         resources_columns_results = (
             json.loads(run_operation_response[0]) if run_operation_response else {}
@@ -109,7 +109,7 @@ class TestManagementFetcher(FetcherClient):
 
     def get_tags(self) -> TagsModel:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_project_tags"
+            macro_name="elementary_cli.get_project_tags"
         )
         tags_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
@@ -121,7 +121,9 @@ class TestManagementFetcher(FetcherClient):
         return TagsModel(tags=all_tags)
 
     def get_tests(self) -> List[TestModel]:
-        run_operation_response = self.dbt_runner.run_operation(macro_name="get_tests")
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="elementary_cli.get_tests"
+        )
         test_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
@@ -163,7 +165,7 @@ class TestManagementFetcher(FetcherClient):
 
     def get_project_owners(self) -> List[str]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_project_owners"
+            macro_name="elementary_cli.get_project_owners"
         )
         owners_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
@@ -179,7 +181,7 @@ class TestManagementFetcher(FetcherClient):
 
     def get_project_subscribers(self) -> List[str]:
         run_operation_response = self.dbt_runner.run_operation(
-            macro_name="get_resources_meta"
+            macro_name="elementary_cli.get_resources_meta"
         )
         resources_meta_results = (
             json.loads(run_operation_response[0]) if run_operation_response else []
