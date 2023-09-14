@@ -17,8 +17,8 @@
       {{ elementary.edr_cast_as_string('NULL') }} as sent_at
     from {{ alerts_source_freshness_relation }}
     {% if is_incremental() %}
-        {{ get_new_alerts_where_clause(this) }}
+        {{ elementary_cli.get_new_alerts_where_clause(this) }}
     {% endif %}
 {% else %}
-    {{ empty_alerts_source_freshness() }}
+    {{ elementary_cli.empty_alerts_source_freshness() }}
 {% endif %}
