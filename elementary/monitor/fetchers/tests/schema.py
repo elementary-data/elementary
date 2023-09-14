@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, FieldValidationInfo, field_validator
 
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
@@ -74,7 +74,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
         return cls._load_var_to_list(model_owner)
 
     @field_validator("failures", mode="before")
-    def parse_failures(cls, failures, values):
-        test_type = values.get("test_type")
+    def parse_failures(cls, failures, info: FieldValidationInfo):
+        test_type = info.data.get("test_type")
         # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None
