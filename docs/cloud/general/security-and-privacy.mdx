@@ -51,7 +51,7 @@ You can see all the data that Elementary collects and stores in your local Eleme
 
 In general, Elementary does not collect any raw data. The only exception is the failed rows sample (stored in table `test_results_samples`) which can be disabled.
 This is an opt-out feature that shows a sample of a few raw failed rows for failed tests, to help users triage and understand the problem.
-To avoid this sampling, set the var `test_sample_rows_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
+To avoid this sampling, set the var `test_sample_row_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
 
 | Information        | Details                                                                                                                                                                           | Usage                                                                                                                                                                              |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
