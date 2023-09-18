@@ -16,6 +16,8 @@ class FilterSchema(BaseModel):
 
 
 class FiltersSchema(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     test_results: List[FilterSchema] = list()
     test_runs: List[FilterSchema] = list()
     model_runs: List[FilterSchema] = list()

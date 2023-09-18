@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
@@ -39,6 +39,8 @@ class InvocationsSchema(BaseModel):
 
 
 class TestMetadataSchema(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     test_unique_id: str
     elementary_unique_id: str
     database_name: Optional[str] = None

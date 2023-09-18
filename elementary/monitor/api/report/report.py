@@ -74,7 +74,7 @@ class ReportAPI(APIClient):
             serializable_groups = groups.model_dump()
             serializable_models = self._serialize_models(models, sources, exposures)
             serializable_model_runs = self._serialize_models_runs(models_runs.runs)
-            serializable_model_runs_totals = models_runs.dict(include={"totals"})[
+            serializable_model_runs_totals = models_runs.model_dump(include={"totals"})[
                 "totals"
             ]
             serializable_models_coverages = self._serialize_coverages(coverages)
@@ -143,7 +143,7 @@ class ReportAPI(APIClient):
         return {model_id: dict(coverage) for model_id, coverage in coverages.items()}
 
     def _serialize_models_runs(self, models_runs: List[ModelRunsSchema]) -> List[dict]:
-        return [model_runs.dict(by_alias=True) for model_runs in models_runs]
+        return [model_runs.model_dump(by_alias=True) for model_runs in models_runs]
 
     def _serialize_test_results(
         self, test_results: Dict[Optional[str], List[TestResultSchema]]

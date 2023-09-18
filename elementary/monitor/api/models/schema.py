@@ -2,7 +2,7 @@ import os
 import posixpath
 from typing import Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.schema import (
@@ -15,6 +15,8 @@ from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class NormalizedArtifactSchema(ExtendedBaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     owners: Optional[List[str]] = []
     tags: Optional[List[str]] = []
     # Should be changed to artifact_name.
