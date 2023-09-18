@@ -16,8 +16,6 @@ logger = get_logger(__name__)
 
 
 class TestManagementAPI(APIClient):
-    __test__ = False
-
     def __init__(
         self,
         dbt_runner: BaseDbtRunner,

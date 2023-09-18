@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class GroupItemSchema(BaseModel):
-    node_id: Optional[str] = None
-    resource_type: Optional[str] = None
+    node_id: Optional[str]
+    resource_type: Optional[str]
 
 
 DbtGroupSchema = Dict[str, dict]

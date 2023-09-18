@@ -1,7 +1,8 @@
-from typing import List, Literal, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import networkx as nx
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
+from pydantic.typing import Literal
 
 NodeUniqueIdType = str
 NodeType = Literal["model", "source", "exposure"]
@@ -16,11 +17,11 @@ class LineageSchema(BaseModel):
     nodes: Optional[List[LineageNodeSchema]] = None
     edges: Optional[List[Tuple[NodeUniqueIdType, NodeUniqueIdType]]] = None
 
-    @field_validator("nodes", mode="before")
+    @validator("nodes", pre=True, always=True)
     def set_nodes(cls, nodes):
         return nodes or []
 
-    @field_validator("edges", mode="before")
+    @validator("edges", pre=True, always=True)
     def set_edges(cls, edges):
         return edges or []
 

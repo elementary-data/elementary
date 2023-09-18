@@ -1,3 +1,4 @@
+import json
 import os
 import statistics
 from collections import defaultdict
@@ -202,7 +203,7 @@ class ModelsAPI(APIClient):
             SourceSchema: NormalizedSourceSchema,
         }
         artifact_name = artifact.name
-        normalized_artifact = artifact.model_dump()
+        normalized_artifact = json.loads(artifact.json())
         normalized_artifact["model_name"] = artifact_name
         normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(
             artifact

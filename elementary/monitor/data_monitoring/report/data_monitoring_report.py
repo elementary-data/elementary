@@ -125,7 +125,7 @@ class DataMonitoringReport(DataMonitoring):
             )
             self.success = False
 
-        report_data_dict = report_data.model_dump()
+        report_data_dict = report_data.dict()
         return report_data_dict
 
     def _add_report_tracking(
