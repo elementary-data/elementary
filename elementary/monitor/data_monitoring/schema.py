@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
@@ -62,7 +62,7 @@ class SelectorFilterSchema(BaseModel):
     resource_types: Optional[List[ResourceType]] = None
     node_names: Optional[List[str]] = None
 
-    @validator("invocation_time", pre=True)
+    @field_validator("invocation_time", mode="before")
     def format_invocation_time(cls, invocation_time):
         if invocation_time:
             try:

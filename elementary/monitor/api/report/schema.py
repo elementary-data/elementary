@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ReportDataEnvSchema(BaseModel):
@@ -10,6 +10,8 @@ class ReportDataEnvSchema(BaseModel):
 
 
 class ReportDataSchema(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     creation_time: Optional[str] = None
     days_back: Optional[int] = None
     models: dict = dict()

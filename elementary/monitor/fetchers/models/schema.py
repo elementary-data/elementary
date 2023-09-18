@@ -2,7 +2,7 @@ import os
 import posixpath
 from typing import Any, Dict, List, Optional, TypeVar
 
-from pydantic import Field, validator
+from pydantic import ConfigDict, Field, field_validator
 
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
@@ -19,7 +19,7 @@ class ModelRunSchema(ExtendedBaseModel):
     materialization: Optional[str] = None
     generated_at: str
 
-    @validator("generated_at", pre=True)
+    @field_validator("generated_at", mode="before")
     def format_generated_at(cls, generated_at):
         return convert_partial_iso_format_to_full_iso_format(generated_at)
 
@@ -34,19 +34,19 @@ class ArtifactSchema(ExtendedBaseModel):
     full_path: Optional[str] = None
     meta: Optional[Dict[str, Any]] = None
 
-    @validator("tags", pre=True)
+    @field_validator("tags", mode="before")
     def load_tags(cls, tags):
         return cls._load_var_to_list(tags)
 
-    @validator("owners", pre=True)
+    @field_validator("owners", mode="before")
     def load_owners(cls, owners):
         return cls._load_var_to_list(owners)
 
-    @validator("full_path", pre=True)
+    @field_validator("full_path", mode="before")
     def format_full_path_sep(cls, full_path: str) -> str:
         return posixpath.sep.join(full_path.split(os.path.sep))
 
-    @validator("meta", pre=True)
+    @field_validator("meta", mode="before")
     def load_meta(cls, meta):
         return cls._load_var_to_dict(meta)
 
@@ -88,6 +88,8 @@ class ExposureSchema(ArtifactSchema):
 
 
 class ModelTestCoverage(ExtendedBaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     model_unique_id: Optional[str] = None
     column_tests: int = 0
     table_tests: int = 0

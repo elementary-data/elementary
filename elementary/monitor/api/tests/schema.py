@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
@@ -12,9 +12,6 @@ class ElementaryTestResultSchema(BaseModel):
     metrics: Optional[Union[list, dict]] = None
     result_description: Optional[str] = None
 
-    class Config:
-        smart_union = True
-
 
 class DbtTestResultSchema(BaseModel):
     display_name: Optional[str] = None
@@ -24,12 +21,12 @@ class DbtTestResultSchema(BaseModel):
 
 
 class InvocationSchema(BaseModel):
-    affected_rows: Optional[int]
+    affected_rows: Optional[int] = None
     time_utc: str
     id: str
     status: str
 
-    @validator("time_utc", pre=True)
+    @field_validator("time_utc", mode="before")
     def format_time_utc(cls, time_utc):
         return convert_partial_iso_format_to_full_iso_format(time_utc)
 
@@ -42,6 +39,8 @@ class InvocationsSchema(BaseModel):
 
 
 class TestMetadataSchema(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     test_unique_id: str
     elementary_unique_id: str
     database_name: Optional[str] = None
@@ -69,9 +68,6 @@ class TestResultSchema(BaseModel):
     metadata: TestMetadataSchema
     test_results: Union[DbtTestResultSchema, ElementaryTestResultSchema]
 
-    class Config:
-        smart_union = True
-
 
 class TestResultsWithTotalsSchema(BaseModel):
     results: Dict[Optional[str], List[TestResultSchema]] = dict()
@@ -81,7 +77,7 @@ class TestResultsWithTotalsSchema(BaseModel):
 
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
-    test_runs: Optional[InvocationsSchema]
+    test_runs: Optional[InvocationsSchema] = None
 
 
 class TestRunsWithTotalsSchema(BaseModel):
