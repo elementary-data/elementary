@@ -7,8 +7,8 @@ from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class TestResultDBRowSchema(ExtendedBaseModel):
-    model_config = ConfigDict(protected_namespaces=())
     __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+    model_config = ConfigDict(protected_namespaces=())
 
     id: str
     invocation_id: Optional[str] = None

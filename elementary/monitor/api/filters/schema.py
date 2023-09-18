@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 class FilterSchema(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
+
     name: str
     display_name: str
     model_unique_ids: List[Optional[str]] = []
