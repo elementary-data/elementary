@@ -45,6 +45,20 @@ class UploadSourceFreshnessOperation:
         if not dbt_project_utils.is_dbt_package_up_to_date():
             dbt_runner.deps()
 
+        invocation_id = metadata.get("invocation_id")
+        if not invocation_id:
+            raise click.ClickException("No invocation id found in sources.json.")
+
+        response = dbt_runner.run_operation(
+            "elementary_cli.validate_source_freshness_invocation",
+            macro_args={"invocation_id": invocation_id},
+            quiet=True,
+        )
+        if not response:
+            raise click.ClickException(
+                f"Source freshness for invocation id {invocation_id} were already uploaded."
+            )
+
         chunk_size = 100
         chunk_list = list(range(0, len(results), chunk_size))
         upload_with_progress_bar = alive_it(
