@@ -20,20 +20,23 @@ class UploadSourceFreshnessOperation:
             raise click.ClickException(
                 "Path to dbt project is missing. Please run the command with `--project-dir <DBT_PROJECT_DIR>`."
             )
-        results = self.get_results()
-        self.upload_results(results)
-        click.echo("Uploaded source freshness results successfully.")
+        sources_file_contents = self.get_sources_file_contents()
+        if sources_file_contents:
+            results = sources_file_contents["results"]
+            metadata = sources_file_contents["metadata"]
+            self.upload_results(results, metadata)
+            click.echo("Uploaded source freshness results successfully.")
 
-    def get_results(self) -> dict:
+    def get_sources_file_contents(self) -> dict:
         source_path = self.get_target_path() / "sources.json"
         if not source_path.exists():
             raise click.ClickException(
                 f"Could not find sources.json at {source_path}. "
                 "Please run `dbt source freshness` before running this command."
             )
-        return json.loads(source_path.read_text())["results"]
+        return json.loads(source_path.read_text())
 
-    def upload_results(self, results: dict):
+    def upload_results(self, results: dict, metadata: dict):
         dbt_runner = DbtRunner(
             dbt_project_utils.PATH,
             self.config.profiles_dir,
@@ -49,6 +52,10 @@ class UploadSourceFreshnessOperation:
         )
         for chunk in upload_with_progress_bar:
             results_segment = results[chunk : chunk + chunk_size]
+
+            for result in results_segment:
+                result["metadata"] = metadata
+
             dbt_runner.run_operation(
                 "elementary_cli.upload_source_freshness",
                 macro_args={"results": json.dumps(results_segment)},
