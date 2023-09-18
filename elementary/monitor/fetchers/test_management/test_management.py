@@ -18,8 +18,6 @@ logger = get_logger(__name__)
 
 
 class TestManagementFetcher(FetcherClient):
-    __test__ = False
-
     def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
 

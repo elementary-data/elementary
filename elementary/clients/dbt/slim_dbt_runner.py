@@ -17,7 +17,7 @@ from dbt.flags import set_from_args
 from dbt.parser.manifest import ManifestLoader
 from dbt.tracking import disable_tracking
 from dbt.version import __version__ as dbt_version_string
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.utils.log import get_logger
@@ -65,7 +65,7 @@ class ConfigArgs(BaseModel):
     threads: Optional[int] = 1
     vars: Optional[Union[str, Dict[str, Any]]] = DEFAULT_VARS
 
-    @field_validator("vars", mode="before")
+    @validator("vars", pre=True)
     def validate_vars(cls, vars):
         if not vars:
             return DEFAULT_VARS
