@@ -50,7 +50,7 @@ class UploadSourceFreshnessOperation:
             raise click.ClickException("No invocation id found in sources.json.")
 
         response = dbt_runner.run_operation(
-            "elementary_cli.validate_source_freshness_invocation",
+            "elementary_cli.can_upload_source_freshness",
             macro_args={"invocation_id": invocation_id},
             quiet=True,
         )

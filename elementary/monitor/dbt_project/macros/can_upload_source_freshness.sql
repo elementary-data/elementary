@@ -1,5 +1,5 @@
-{% macro validate_source_freshness_invocation(invocation_id, days_back=14) %}
-    {% set query %}
+{% macro can_upload_source_freshness(invocation_id, days_back=14) %}
+    {% set counter_query %}
         with invocations as (
             select invocation_id
             from {{ ref("elementary", "dbt_source_freshness_results") }}
@@ -7,12 +7,12 @@
         )
         select count(*) as count
         from invocations
-        where invocation_id = {{ "'" ~ invocation_id ~ "'" }}
+        where invocation_id = {{ elementary.edr_quote(invocation_id) }}
     {% endset %}
 
-    {% set result = elementary.run_query(query) %}
+    {% set records_count = elementary.result_value(counter_query) %}
 
-    {% if result[0][0] == 0 %}
+    {% if records_count == 0 %}
         {% do return(true) %}
     {% endif %}
     {% do return(none) %}
