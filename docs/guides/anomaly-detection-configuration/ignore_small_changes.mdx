@@ -1,0 +1,62 @@
+---
+title: "ignore_small_changes"
+sidebarTitle: "ignore_small_changes"
+---
+
+```
+ignore_small_changes:
+  spike_failure_percent_threshold: [int]
+  drop_failure_percent_threshold: [int]
+```
+
+If defined, an anomaly test will fail only if all the following conditions hold:
+- The z-score of the metric within the detection period is anomoulous
+- The metric within the detection period is higher than `spike_failure_percent_threshold` percentages of the mean value in the training period, if defined.
+- The metric within the detection period is lower than `drop_failure_percent_threshold` percentages of the mean value in the training period, if defined
+
+Those settings can help to deal with 
+
+If undefined, default is null for both spike and drop.
+
+- _Default: none_
+- _Relevant tests: All anomaly detection tests_
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      ignore_small_changes:
+        spike_failure_percent_threshold: 2
+        drop_failure_percent_threshold: 50
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        ignore_small_changes:
+          spike_failure_percent_threshold: 2
+```
+
+```yml source
+sources:
+  - name: my_non_dbt_tables
+    schema: raw
+    tables:
+      - name: source_table
+        meta:
+          elementary:
+            ignore_small_changes:
+              drop_failure_percent_threshold: 50
+```
+
+```yml dbt_project.yml
+vars:
+  ignore_small_changes:
+    spike_failure_percent_threshold: 10
+```
+
+</RequestExample>
