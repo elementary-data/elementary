@@ -1,35 +1,40 @@
+{# Prioritization: 1. event time, 2. insertion time, 3. update time. #}
 {% set timestamp_column_names = [
+    "event_time",
+    "event_date",
+    "event_created_at",
+    "event_event_time",
+
+    "timestamp",
     "created_at",
     "created_at_utc",
     "inserted_at",
     "inserted_at_utc",
-    "updated_at",
-    "updated_at_utc",
-    "_fivetran_synced",
-    "_airbyte_emitted_at",
     "create_date",
     "created",
     "db_insert_time",
     "create_ts",
     "created_ts",
-    "update_ts",
-    "updated_ts",
     "load_ts",
     "loaded_at",
     "date_created",
-    "dbt_updated_at",
-    "update_datetime",
-    "event_time",
-    "event_date",
-    "event_created_at",
-    "event_updated_at",
-    "event_event_time",
     "_etl_loaded_at",
     "__etl_loaded_at",
     "_etl_inserted_at",
     "_ingestion_time",
+    "_fivetran_synced",
+    "_airbyte_emitted_at",
+
+    "updated_at",
+    "updated_at_utc",
+    "update_ts",
+    "updated_ts",
+    "dbt_updated_at",
+    "update_datetime",
+    "event_updated_at",
     "last_modified_datetime",
 ] %}
+
 {% set joined_timestamp_column_names = "'{}'".format(
     "', '".join(timestamp_column_names)
 ) %}
