@@ -81,6 +81,18 @@ with
         where loaded_at_field is not null
     ),
 
+    -- Users can provide the timestamp columns for their models,
+    -- if provided, we assign a confidence score of 0 (certain).
+    model_provided_timestamp_columns as (
+        select
+            lower(database_name) as database_name,
+            lower(schema_name) as schema_name,
+            lower(name) as table_name,
+            lower(partition_by_field) as column_name
+        from {{ ref("elementary", "dbt_models") }}
+        where partition_by_field is not null
+    ),
+
     -- Combining the inferred and source provided timestamp columns.
     absolute_rated_timestamp_columns as (
         select
@@ -98,6 +110,14 @@ with
             column_name,
             0 as absolute_confidence
         from source_provided_timestamp_columns
+        union all
+        select
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            0 as absolute_confidence
+        from model_provided_timestamp_columns
     ),
 
     -- Sort the timestamp columns by confidence and assign a rank.
