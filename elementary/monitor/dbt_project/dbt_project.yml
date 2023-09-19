@@ -35,10 +35,3 @@ quoting:
   database: "{{ env_var('DATABASE_QUOTING', 'None') | as_native }}"
   schema: "{{ env_var('SCHEMA_QUOTING', 'None')  | as_native }}"
   identifier: "{{ env_var('IDENTIFIER_QUOTING', 'None') | as_native }}"
-
-# In this example config, we tell dbt to build all models in the example/ directory
-# as tables. These settings can be overridden in the individual model files
-# using the `{{ config(...) }}` macro.
-models:
-  # Required in order to apply table schema changes in the table materialization.
-  +on_schema_change: "append_new_columns"
