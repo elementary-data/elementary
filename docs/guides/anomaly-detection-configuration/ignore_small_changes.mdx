@@ -11,10 +11,11 @@ ignore_small_changes:
 
 If defined, an anomaly test will fail only if all the following conditions hold:
 - The z-score of the metric within the detection period is anomoulous
-- The metric within the detection period is higher than `spike_failure_percent_threshold` percentages of the mean value in the training period, if defined.
-- The metric within the detection period is lower than `drop_failure_percent_threshold` percentages of the mean value in the training period, if defined
+- One of the following holds:
+  - The metric within the detection period is higher than `spike_failure_percent_threshold` percentages of the mean value in the training period, if defined.
+  - The metric within the detection period is lower than `drop_failure_percent_threshold` percentages of the mean value in the training period, if defined
 
-Those settings can help to deal with 
+Those settings can help to deal with situations where your metrics are stable and small changes causes to high z-scores, and therefore to anomaly.
 
 If undefined, default is null for both spike and drop.
 
