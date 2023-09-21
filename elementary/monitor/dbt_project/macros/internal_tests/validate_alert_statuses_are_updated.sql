@@ -16,13 +16,13 @@
         ),
 
         all_alerts as (
-            select alert_id, suppression_status
+            select alert_id, suppression_status, sub_type
             from alerts
             union all
-            select alert_id, suppression_status
+            select alert_id, suppression_status, sub_type
             from alerts_models
             union all
-            select alert_id, suppression_status
+            select alert_id, suppression_status, sub_type
             from alerts_source_freshness
         )
 
