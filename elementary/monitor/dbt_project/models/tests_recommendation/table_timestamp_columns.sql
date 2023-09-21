@@ -1,10 +1,5 @@
-{# Prioritization: 1. event time, 2. insertion time, 3. update time. #}
+{# Prioritization: 1. insertion time, 2. update time. #}
 {% set timestamp_column_names = [
-    "event_time",
-    "event_date",
-    "event_created_at",
-    "event_event_time",
-
     "timestamp",
     "created_at",
     "created_at_utc",
