@@ -29,6 +29,8 @@
         select alert_id
         from all_alerts
         where suppression_status not in ('sent', 'skipped')
+        -- When using --group-by table, singular test alerts are not sent.
+        and sub_type != 'singular'
     {% endset %}
     {% set alerts_agate = run_query(alerts_with_no_updated_status_query) %}
     {% set alerts_with_no_updated_status = elementary.agate_to_dicts(alerts_agate) %}
