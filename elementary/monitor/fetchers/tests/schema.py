@@ -80,3 +80,67 @@ class TestResultDBRowSchema(ExtendedBaseModel):
         test_type = values.get("test_type")
         # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None
+
+
+class SourceFreshnessResultDBRowSchema(ExtendedBaseModel):
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+
+    source_freshness_execution_id: str
+    unique_id: str
+    max_loaded_at: Optional[str] = None
+    generated_at: str
+    execute_started_at: Optional[str] = None
+    status: str
+    normalized_status: str
+    error: Optional[str] = None
+    invocation_id: str
+    database_name: Optional[str] = None
+    schema_name: str
+    source_name: str
+    table_name: str
+    test_type: str
+    test_sub_type: str
+    loaded_at_field: str
+    meta: dict
+    owners: Optional[List[str]]
+    tags: Optional[List[str]]
+    error_after: dict
+    warn_after: dict
+    filter: Optional[str] = None
+    relation_name: str
+    invocations_rank_index: int
+
+    class Config:
+        smart_union = True
+
+    @validator("generated_at", pre=True)
+    def format_generated_at(cls, generated_at):
+        return convert_partial_iso_format_to_full_iso_format(generated_at)
+
+    @validator("max_loaded_at", pre=True)
+    def format_max_loaded_at(cls, max_loaded_at):
+        return convert_partial_iso_format_to_full_iso_format(max_loaded_at)
+
+    @validator("execute_started_at", pre=True)
+    def format_execute_started_at(cls, execute_started_at):
+        return convert_partial_iso_format_to_full_iso_format(execute_started_at)
+
+    @validator("meta", pre=True)
+    def load_meta(cls, meta):
+        return cls._load_var_to_dict(meta)
+
+    @validator("tags", pre=True)
+    def load_tags(cls, tags):
+        return cls._load_var_to_list(tags)
+
+    @validator("owners", pre=True)
+    def load_owners(cls, owners):
+        return cls._load_var_to_list(owners)
+
+    @validator("error_after", pre=True)
+    def load_error_after(cls, error_after):
+        return cls._load_var_to_dict(error_after)
+
+    @validator("warn_after", pre=True)
+    def load_warn_after(cls, warn_after):
+        return cls._load_var_to_dict(warn_after)

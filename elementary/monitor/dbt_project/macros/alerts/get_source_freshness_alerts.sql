@@ -2,22 +2,12 @@
     -- depends_on: {{ ref('alerts_source_freshness') }}
     {% set select_pending_alerts_query %}
         with alerts_in_time_limit as (
-            select * from {{ ref('alerts_source_freshness') }}
+            select *, {{ elementary_cli.normalized_source_freshness_status()}} from {{ ref('alerts_source_freshness') }}
             where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ elementary_cli.get_alerts_time_limit(days_back) }}
-        ),
-
-        models as (
-            select * from {{ ref('elementary', 'dbt_models') }}
         ),
 
         sources as (
             select * from {{ ref('elementary', 'dbt_sources') }}
-        ),
-
-        artifacts_meta as (
-            select unique_id, meta from models
-            union all
-            select unique_id, meta from sources
         ),
 
         extended_alerts as (
@@ -28,7 +18,8 @@
                 alerts_in_time_limit.detected_at,
                 alerts_in_time_limit.max_loaded_at_time_ago_in_s,
                 alerts_in_time_limit.status,
-                alerts_in_time_limit.error,
+                alerts_in_time_limit.normalized_status,
+                alerts_in_time_limit.result_description,
                 alerts_in_time_limit.unique_id,
                 {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
                 alerts_in_time_limit.unique_id as alert_class_id,
@@ -36,9 +27,9 @@
                 alerts_in_time_limit.schema_name,
                 alerts_in_time_limit.source_name,
                 alerts_in_time_limit.identifier,
-                alerts_in_time_limit.freshness_error_after,
-                alerts_in_time_limit.freshness_warn_after,
-                alerts_in_time_limit.freshness_filter,
+                alerts_in_time_limit.warn_after,
+                alerts_in_time_limit.error_after,
+                alerts_in_time_limit.filter,
                 alerts_in_time_limit.tags,
                 alerts_in_time_limit.meta,
                 alerts_in_time_limit.owner,
@@ -51,9 +42,12 @@
                     else suppression_status
                 end as suppression_status,
                 alerts_in_time_limit.sent_at,
-                artifacts_meta.meta as model_meta 
+                sources.meta as model_meta,
+                sources.freshness_error_after,
+                sources.freshness_warn_after,
+                sources.freshness_filter
             from alerts_in_time_limit
-            left join artifacts_meta on alerts_in_time_limit.unique_id = artifacts_meta.unique_id
+            left join sources on alerts_in_time_limit.unique_id = sources.unique_id
         )
 
         select *
@@ -65,6 +59,10 @@
     {% set alerts_dicts = elementary.agate_to_dicts(alerts_agate) %}
     {% set pending_alerts = [] %}
     {% for alert_dict in alerts_dicts %}
+        {% set error_after = alert_dict.get('error_after') %}
+        {% set warn_after = alert_dict.get('warn_after') %}
+        {% set filter = alert_dict.get('filter') %}
+
         {% set pending_alert_dict = {'id': alert_dict.get('alert_id'),
                                  'model_unique_id': alert_dict.get('unique_id'),
                                  'alert_class_id': alert_dict.get('alert_class_id'),
@@ -76,13 +74,15 @@
                                  'schema_name': alert_dict.get('schema_name'),
                                  'source_name': alert_dict.get('source_name'),
                                  'identifier': alert_dict.get('identifier'),
-                                 'freshness_error_after': alert_dict.get('freshness_error_after'),
-                                 'freshness_warn_after': alert_dict.get('freshness_warn_after'),
-                                 'freshness_filter': alert_dict.get('freshness_filter'),
+                                 'error_after': error_after if error_after is not none else alert_dict.get('freshness_error_after'),
+                                 'warn_after': warn_after if warn_after is not none else alert_dict.get('freshness_warn_after'),
+                                 'filter': filter if filter is not none else alert_dict.get('freshness_filter'),
                                  'status': alert_dict.get('status'),
+                                 'normalized_status': alert_dict.get('normalized_status'),
                                  'owners': alert_dict.get('owner'),
                                  'path': alert_dict.get('path'),
                                  'error': alert_dict.get('error'),
+                                 'result_description': alert_dict.get('result_description'),
                                  'tags': alert_dict.get('tags'),
                                  'model_meta': alert_dict.get('model_meta'),
                                  'suppression_status': alert_dict.get('suppression_status'),
