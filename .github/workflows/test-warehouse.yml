@@ -163,6 +163,7 @@ jobs:
         run: >
           edr monitor 
           -t "${{ inputs.warehouse-type }}"
+          --group-by table
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-webhook "$SLACK_WEBHOOK"
