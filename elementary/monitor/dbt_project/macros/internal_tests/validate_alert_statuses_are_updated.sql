@@ -3,6 +3,8 @@
         with alerts as (
             select *
             from {{ ref('alerts') }}
+            -- When using --group-by table, singular test alerts are not sent.
+            where sub_type != 'singular'
         ),
 
         alerts_models as (
@@ -16,21 +18,19 @@
         ),
 
         all_alerts as (
-            select alert_id, suppression_status, sub_type
+            select alert_id, suppression_status
             from alerts
             union all
-            select alert_id, suppression_status, sub_type
+            select alert_id, suppression_status
             from alerts_models
             union all
-            select alert_id, suppression_status, sub_type
+            select alert_id, suppression_status
             from alerts_source_freshness
         )
 
         select alert_id
         from all_alerts
         where suppression_status not in ('sent', 'skipped')
-        -- When using --group-by table, singular test alerts are not sent.
-        and sub_type != 'singular'
     {% endset %}
     {% set alerts_agate = run_query(alerts_with_no_updated_status_query) %}
     {% set alerts_with_no_updated_status = elementary.agate_to_dicts(alerts_agate) %}
