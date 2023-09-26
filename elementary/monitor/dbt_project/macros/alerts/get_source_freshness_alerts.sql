@@ -19,7 +19,7 @@
                 alerts_in_time_limit.max_loaded_at_time_ago_in_s,
                 alerts_in_time_limit.status,
                 alerts_in_time_limit.normalized_status,
-                alerts_in_time_limit.result_description,
+                alerts_in_time_limit.error,
                 alerts_in_time_limit.unique_id,
                 {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
                 alerts_in_time_limit.unique_id as alert_class_id,
@@ -82,7 +82,6 @@
                                  'owners': alert_dict.get('owner'),
                                  'path': alert_dict.get('path'),
                                  'error': alert_dict.get('error'),
-                                 'result_description': alert_dict.get('result_description'),
                                  'tags': alert_dict.get('tags'),
                                  'model_meta': alert_dict.get('model_meta'),
                                  'suppression_status': alert_dict.get('suppression_status'),
