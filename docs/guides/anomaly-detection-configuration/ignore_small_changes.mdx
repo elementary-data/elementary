@@ -10,6 +10,7 @@ ignore_small_changes:
 ```
 
 If defined, an anomaly test will fail only if all the following conditions hold:
+
 - The z-score of the metric within the detection period is anomoulous
 - One of the following holds:
   - The metric within the detection period is higher than `spike_failure_percent_threshold` percentages of the mean value in the training period, if defined.
