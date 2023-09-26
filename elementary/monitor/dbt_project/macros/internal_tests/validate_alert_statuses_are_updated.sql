@@ -3,6 +3,8 @@
         with alerts as (
             select *
             from {{ ref('alerts') }}
+            -- When using --group-by table, singular test alerts are not sent.
+            where sub_type != 'singular'
         ),
 
         alerts_models as (
