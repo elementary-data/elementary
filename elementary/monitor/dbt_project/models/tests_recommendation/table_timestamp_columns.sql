@@ -82,9 +82,9 @@ with
             lower(database_name) as database_name,
             lower(schema_name) as schema_name,
             lower(name) as table_name,
-            lower(bigquery_partition_by_field) as column_name
+            bigquery_partition_by::json ->> 'field' as column_name
         from {{ ref("elementary", "dbt_models") }}
-        where bigquery_partition_by_field is not null
+        where bigquery_partition_by::json ->> 'data_type' != 'int64'
     ),
 
     -- Combining the inferred and source provided timestamp columns.
