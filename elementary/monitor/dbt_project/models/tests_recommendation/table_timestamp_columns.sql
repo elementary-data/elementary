@@ -1,6 +1,5 @@
 {# Prioritization: 1. insertion time, 2. update time. #}
 {% set timestamp_column_names = [
-    "timestamp",
     "created_at",
     "created_at_utc",
     "inserted_at",
