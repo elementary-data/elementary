@@ -45,8 +45,7 @@
                 sources.meta as model_meta,
                 sources.freshness_error_after,
                 sources.freshness_warn_after,
-                sources.freshness_filter,
-                sources.freshness_description
+                sources.freshness_filter
             from alerts_in_time_limit
             left join sources on alerts_in_time_limit.unique_id = sources.unique_id
         )
@@ -86,8 +85,7 @@
                                  'tags': alert_dict.get('tags'),
                                  'model_meta': alert_dict.get('model_meta'),
                                  'suppression_status': alert_dict.get('suppression_status'),
-                                 'sent_at': alert_dict.get('sent_at'),
-                                 'freshness_description': alert_dict.get('freshness_description')
+                                 'sent_at': alert_dict.get('sent_at')
                                 } %}
         {% do pending_alerts.append(pending_alert_dict) %}
     {% endfor %}

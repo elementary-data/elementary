@@ -26,7 +26,6 @@ class SourceFreshnessAlert(Alert):
         filter: Optional[str],
         path: str,
         error: str,
-        freshness_description: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
