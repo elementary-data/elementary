@@ -96,9 +96,9 @@ with
         where
         short_name = 'volume_anomalies'
         or
-        short_name = 'freshness_anomalies' and timestamp_column is not null
+        (short_name = 'freshness_anomalies' and timestamp_column is not null)
         or
-        short_name = 'schema_changes_from_baseline' and table_columns.columns is not null
+        (short_name = 'schema_changes_from_baseline' and table_columns.columns is not null)
     )
 
 select *
