@@ -26,6 +26,7 @@ class SourceFreshnessAlert(Alert):
         filter: Optional[str],
         path: str,
         error: str,
+        freshness_description: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -49,6 +50,7 @@ class SourceFreshnessAlert(Alert):
         self.filter = filter
         self.path = path
         self.error = error
+        self.freshness_description = freshness_description
         self.alerts_table = SourceFreshnessAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
@@ -99,6 +101,24 @@ class SourceFreshnessAlert(Alert):
                 f"*Subscribers*\n{subscribers or '_No subscribers_'}",
             ]
         )
+
+        if self.freshness_description:
+            preview.extend(
+                [
+                    self.slack_message_builder.create_text_section_block(
+                        "*Description*"
+                    ),
+                    self.slack_message_builder.create_context_block(
+                        [self.freshness_description]
+                    ),
+                ]
+            )
+        else:
+            preview.append(
+                self.slack_message_builder.create_text_section_block(
+                    "*Description*\n_No description_"
+                )
+            )
 
         result = []
         if self.status == "runtime error":
