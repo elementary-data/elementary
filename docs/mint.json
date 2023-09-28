@@ -221,7 +221,11 @@
     },
     {
       "group": "Introduction",
-      "pages": ["cloud/introduction", "cloud/general/security-and-privacy"]
+      "pages": [
+        "cloud/introduction",
+        "cloud/general/security-and-privacy",
+        "cloud/general/ci"
+      ]
     },
     {
       "group": "Getting Started",
