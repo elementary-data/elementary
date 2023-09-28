@@ -20,11 +20,13 @@ class SourceFreshnessAlert(Alert):
         max_loaded_at_time_ago_in_s: Optional[float],
         source_name: str,
         identifier: str,
-        freshness_error_after: str,
-        freshness_warn_after: str,
-        freshness_filter: str,
+        normalized_status: str,
+        error_after: str,
+        warn_after: str,
+        filter: Optional[str],
         path: str,
         error: str,
+        freshness_description: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -42,11 +44,13 @@ class SourceFreshnessAlert(Alert):
         self.max_loaded_at_time_ago_in_s = max_loaded_at_time_ago_in_s
         self.source_name = source_name
         self.identifier = identifier
-        self.freshness_error_after = freshness_error_after
-        self.freshness_warn_after = freshness_warn_after
-        self.freshness_filter = freshness_filter
+        self.normalized_status = normalized_status
+        self.error_after = error_after
+        self.warn_after = warn_after
+        self.filter = filter
         self.path = path
         self.error = error
+        self.freshness_description = freshness_description
         self.alerts_table = SourceFreshnessAlert.TABLE_NAME
 
     def to_slack(self, is_slack_workflow: bool = False) -> SlackMessageSchema:
@@ -55,7 +59,7 @@ class SourceFreshnessAlert(Alert):
         subscribers = self.slack_message_builder.prettify_and_dedup_list(
             self.subscribers or []
         )
-        icon = self.slack_message_builder.get_slack_status_icon(self.status)
+        icon = self.slack_message_builder.get_slack_status_icon(self.normalized_status)
 
         title = [
             self.slack_message_builder.create_header_block(
@@ -68,7 +72,7 @@ class SourceFreshnessAlert(Alert):
                     self.slack_message_builder.create_context_block(
                         [
                             f"*Source:* {self.source_name}.{self.identifier}     |",
-                            f"*Status:* {self.status}",
+                            f"*Status:* {self.normalized_status}",
                         ],
                     ),
                     self.slack_message_builder.create_context_block(
@@ -84,7 +88,7 @@ class SourceFreshnessAlert(Alert):
                 self.slack_message_builder.create_context_block(
                     [
                         f"*Source:* {self.source_name}.{self.identifier}     |",
-                        f"*Status:* {self.status}     |",
+                        f"*Status:* {self.normalized_status}     |",
                         f"*{self.detected_at_str}*",
                     ],
                 ),
@@ -97,6 +101,24 @@ class SourceFreshnessAlert(Alert):
                 f"*Subscribers*\n{subscribers or '_No subscribers_'}",
             ]
         )
+
+        if self.freshness_description:
+            preview.extend(
+                [
+                    self.slack_message_builder.create_text_section_block(
+                        "*Description*"
+                    ),
+                    self.slack_message_builder.create_context_block(
+                        [self.freshness_description]
+                    ),
+                ]
+            )
+        else:
+            preview.append(
+                self.slack_message_builder.create_text_section_block(
+                    "*Description*\n_No description_"
+                )
+            )
 
         result = []
         if self.status == "runtime error":
@@ -123,32 +145,31 @@ class SourceFreshnessAlert(Alert):
             )
 
         configuration = []
-        if self.freshness_error_after:
+
+        if self.error_after:
             configuration.append(
                 self.slack_message_builder.create_context_block(["*Error after*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
-                    f"`{self.freshness_error_after}`"
+                    f"`{self.error_after}`"
                 )
             )
-        if self.freshness_warn_after:
+        if self.warn_after:
             configuration.append(
                 self.slack_message_builder.create_context_block(["*Warn after*"])
             )
             configuration.append(
                 self.slack_message_builder.create_text_section_block(
-                    f"`{self.freshness_warn_after}`"
+                    f"`{self.warn_after}`"
                 )
             )
-        if self.freshness_filter:
+        if self.filter:
             configuration.append(
                 self.slack_message_builder.create_context_block(["*Filter*"])
             )
             configuration.append(
-                self.slack_message_builder.create_text_section_block(
-                    f"`{self.freshness_filter}`"
-                )
+                self.slack_message_builder.create_text_section_block(f"`{self.filter}`")
             )
         if self.path:
             configuration.append(
