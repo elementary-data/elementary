@@ -8,6 +8,7 @@ from elementary.utils.time import (
     DATETIME_FORMAT,
     DATETIME_WITH_TIMEZONE_FORMAT,
     convert_datetime_utc_str_to_timezone_datatime,
+    convert_datetime_utc_str_to_timezone_str,
     get_formatted_timedelta,
 )
 
@@ -36,14 +37,9 @@ class SourceFreshnessAlert(Alert):
     ) -> None:
         super().__init__(**kwargs)
         self.model_unique_id = model_unique_id
-        self.snapshotted_at = (
-            convert_datetime_utc_str_to_timezone_datatime(snapshotted_at, self.timezone)
-            if snapshotted_at
-            else None
-        )
         self.snapshotted_at_str = (
-            self.snapshotted_at.strftime(DATETIME_FORMAT)
-            if self.snapshotted_at
+            convert_datetime_utc_str_to_timezone_str(snapshotted_at, self.timezone)
+            if snapshotted_at
             else None
         )
 
@@ -63,15 +59,15 @@ class SourceFreshnessAlert(Alert):
             if self.max_loaded_at
             else "N/A"
         )
-        formatted_snapshotted_at = (
-            self.snapshotted_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT)
-            if self.snapshotted_at
+        formatted_detected_at = (
+            self.detected_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT)
+            if self.detected_at
             else "N/A"
         )
         self.result_description = (
             error
             if error
-            else f"The table was updated {get_formatted_timedelta(self.max_loaded_at_time_ago_in_s or 0)} ago when the test executed at {formatted_snapshotted_at}. The most recent record found was at {formatted_max_loaded_at}."
+            else f"The table was updated {get_formatted_timedelta(self.max_loaded_at_time_ago_in_s or 0)} ago when the test executed at {formatted_detected_at}. The most recent record found was at {formatted_max_loaded_at}."
         )
 
         self.source_name = source_name
