@@ -1,10 +1,15 @@
-import datetime
+from datetime import timedelta
 from typing import Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
-from elementary.utils.time import convert_datetime_utc_str_to_timezone_str
+from elementary.utils.time import (
+    DATETIME_FORMAT,
+    DATETIME_WITH_TIMEZONE_FORMAT,
+    convert_datetime_utc_str_to_timezone_datatime,
+    get_formatted_timedelta,
+)
 
 logger = get_logger(__name__)
 
@@ -32,16 +37,43 @@ class SourceFreshnessAlert(Alert):
         super().__init__(**kwargs)
         self.model_unique_id = model_unique_id
         self.snapshotted_at = (
-            convert_datetime_utc_str_to_timezone_str(snapshotted_at, self.timezone)
+            convert_datetime_utc_str_to_timezone_datatime(snapshotted_at, self.timezone)
             if snapshotted_at
             else None
         )
+        self.snapshotted_at_str = (
+            self.snapshotted_at.strftime(DATETIME_FORMAT)
+            if self.snapshotted_at
+            else None
+        )
+
         self.max_loaded_at = (
-            convert_datetime_utc_str_to_timezone_str(max_loaded_at, self.timezone)
+            convert_datetime_utc_str_to_timezone_datatime(max_loaded_at, self.timezone)
             if max_loaded_at
             else None
         )
+        self.max_loaded_at_str = (
+            self.max_loaded_at.strftime(DATETIME_FORMAT) if self.max_loaded_at else None
+        )
+
         self.max_loaded_at_time_ago_in_s = max_loaded_at_time_ago_in_s
+
+        formatted_max_loaded_at = (
+            self.max_loaded_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT)
+            if self.max_loaded_at
+            else "N/A"
+        )
+        formatted_snapshotted_at = (
+            self.snapshotted_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT)
+            if self.snapshotted_at
+            else "N/A"
+        )
+        self.result_description = (
+            error
+            if error
+            else f"The table was updated {get_formatted_timedelta(self.max_loaded_at_time_ago_in_s or 0)} ago when the test executed at {formatted_snapshotted_at}. The most recent record found was at {formatted_max_loaded_at}."
+        )
+
         self.source_name = source_name
         self.identifier = identifier
         self.normalized_status = normalized_status
@@ -135,11 +167,21 @@ class SourceFreshnessAlert(Alert):
             )
         else:
             result.extend(
+                [
+                    self.slack_message_builder.create_context_block(
+                        ["*Result message*"]
+                    ),
+                    self.slack_message_builder.create_text_section_block(
+                        f"```{self.result_description}```"
+                    ),
+                ]
+            )
+            result.extend(
                 self.slack_message_builder.create_compacted_sections_blocks(
                     [
-                        f"*Time Elapsed*\n{datetime.timedelta(seconds=self.max_loaded_at_time_ago_in_s) if self.max_loaded_at_time_ago_in_s else 'N/A'}",
-                        f"*Last Record At*\n{self.max_loaded_at}",
-                        f"*Sampled At*\n{self.snapshotted_at}",
+                        f"*Time Elapsed*\n{timedelta(seconds=self.max_loaded_at_time_ago_in_s) if self.max_loaded_at_time_ago_in_s else 'N/A'}",
+                        f"*Last Record At*\n{self.max_loaded_at_str}",
+                        f"*Sampled At*\n{self.snapshotted_at_str}",
                     ]
                 )
             )
