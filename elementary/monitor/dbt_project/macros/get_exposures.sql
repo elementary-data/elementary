@@ -1,7 +1,7 @@
 {% macro get_exposures() %}
-    {% set dbt_exposures_relation = ref('elementary', 'dbt_exposures') %}
-    {% set label_column_exists = elementary.column_exists_in_relation(dbt_exposures_relation, 'label') %}
-    {%- if elementary.relation_exists(dbt_exposures_relation) -%}
+    {% set enriched_exposures_relation = ref('elementary', 'enriched_exposures') %}
+    {% set label_column_exists = elementary.column_exists_in_relation(enriched_exposures_relation, 'label') %}
+    {%- if elementary.relation_exists(enriched_exposures_relation) -%}
         --{# TODO: should we group by #}
         {% set get_exposures_query %}
               with dbt_artifacts_exposures as (
@@ -20,8 +20,9 @@
                   package_name,
                   description,
                   meta,
-                  original_path as full_path
-                from {{ dbt_exposures_relation }}
+                  original_path as full_path,
+                  raw_queries
+                from {{ enriched_exposures_relation }}
               )
 
              select * from dbt_artifacts_exposures
