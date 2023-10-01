@@ -48,7 +48,7 @@ with
         select t.id, count(*) as exposure_count
         from tables_information t
         join
-            {{ ref("elementary", "dbt_exposures") }} e
+            {{ ref("elementary", "enriched_exposures") }} e
             on e.depends_on_nodes::jsonb ? t.id
         group by t.id
     ),
