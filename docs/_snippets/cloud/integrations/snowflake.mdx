@@ -32,3 +32,9 @@ CREATE NETWORK POLICY ELEMENTARY_CLOUD
 	BLOCKED_IP_LIST=()
 COMMENT='IP used by Elementary Cloud to sync the Elementary schema';
 ```
+
+If your company implemented other Account level network policies you can always activate the network policy for the specific user:
+
+```sql
+ALTER USER <user_name> SET NETWORK_POLICY = ELEMENTARY_CLOUD;
+```
