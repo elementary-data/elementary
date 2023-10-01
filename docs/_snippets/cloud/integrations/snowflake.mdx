@@ -32,3 +32,9 @@ CREATE NETWORK POLICY ELEMENTARY_CLOUD
 	BLOCKED_IP_LIST=()
 COMMENT='IP used by Elementary Cloud to sync the Elementary schema';
 ```
+
+After creating a network policy you would need to activate it. To activate a network policy for the elementary user simply run the following command -
+
+```sql
+ALTER USER <user_name> SET NETWORK_POLICY = ELEMENTARY_CLOUD;
+```
