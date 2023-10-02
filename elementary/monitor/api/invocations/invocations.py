@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -43,8 +43,9 @@ class InvocationsAPI(APIClient):
 
     def get_test_invocation_from_filter(
         self, selector_filter: SelectorFilterSchema
-    ) -> Optional[DbtInvocationSchema]:
-        invocation = None
+    ) -> DbtInvocationSchema:
+        # If none of the following filter options exists, the invocation is empty and there is no filter.
+        invocation = DbtInvocationSchema()
 
         if selector_filter.invocation_id:
             invocation = self.get_invocation_by_id(

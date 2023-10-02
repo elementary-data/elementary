@@ -61,6 +61,8 @@ class ReportAPI(APIClient):
             )
             coverages = models_api.get_test_coverages()
 
+            test_invocation = invocations_api.get_test_invocation_from_filter(filter)
+
             test_results = tests_api.get_test_results(
                 filter=filter, disable_samples=disable_samples
             )
@@ -86,7 +88,7 @@ class ReportAPI(APIClient):
             )
             serializable_test_runs = self._serialize_test_runs(test_runs.runs)
             serializable_test_runs_totals = self._serialize_totals(test_runs.totals)
-            serializable_invocation = test_results.invocation.dict()
+            serializable_invocation = test_invocation.dict()
             serializable_filters = filters.dict()
             serializable_lineage = lineage.dict()
 
