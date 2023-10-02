@@ -71,11 +71,9 @@ class ReportAPI(APIClient):
                 invocation_id=test_invocation.invocation_id,
                 disable_samples=disable_samples,
             )
-
             test_results_totals = get_total_test_results(test_results)
 
             test_runs = tests_api.get_test_runs()
-
             test_runs_totals = get_total_test_runs(test_runs)
 
             lineage = lineage_api.get_lineage(exclude_elementary_models)
