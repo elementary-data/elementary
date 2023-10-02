@@ -21,7 +21,6 @@ from elementary.monitor.api.tests.schema import (
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
@@ -130,16 +129,16 @@ class TestsAPI(APIClient):
 
     def get_test_results(
         self,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        invocation_id: Optional[str],
         disable_samples: bool = False,
     ) -> TestResultsWithTotalsSchema:
         filtered_test_results_db_rows = self.test_results_db_rows
-        invocation = self._get_invocation_from_filter(filter)
-        if invocation.invocation_id:
+
+        if invocation_id:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
-                if test_result.invocation_id == invocation.invocation_id
+                if test_result.invocation_id == invocation_id
             ]
 
         filtered_test_results_db_rows = [
@@ -176,7 +175,6 @@ class TestsAPI(APIClient):
         return TestResultsWithTotalsSchema(
             results=tests_results,
             totals=test_results_totals,
-            invocation=invocation,
         )
 
     def get_test_runs(self) -> TestRunsWithTotalsSchema:
@@ -289,24 +287,6 @@ class TestsAPI(APIClient):
             return int(affected_rows)
         except Exception:
             return None
-
-    def _get_invocation_from_filter(
-        self, filter: SelectorFilterSchema
-    ) -> DbtInvocationSchema:
-        # If none of the following filter options exists, the invocation is empty and there is no filter.
-        invocation = DbtInvocationSchema()
-        if filter.invocation_id:
-            invocation = self.invocations_api.get_invocation_by_id(
-                type="test", invocation_id=filter.invocation_id
-            )
-        elif filter.invocation_time:
-            invocation = self.invocations_api.get_invocation_by_time(
-                type="test", invocation_max_time=filter.invocation_time
-            )
-        elif filter.last_invocation:
-            invocation = self.invocations_api.get_last_invocation(type="test")
-
-        return invocation
 
     @staticmethod
     def _get_test_metadata_from_test_result_db_row(

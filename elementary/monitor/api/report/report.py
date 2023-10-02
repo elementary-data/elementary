@@ -64,7 +64,8 @@ class ReportAPI(APIClient):
             test_invocation = invocations_api.get_test_invocation_from_filter(filter)
 
             test_results = tests_api.get_test_results(
-                filter=filter, disable_samples=disable_samples
+                invocation_id=test_invocation.invocation_id,
+                disable_samples=disable_samples,
             )
             test_runs = tests_api.get_test_runs()
 

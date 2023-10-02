@@ -1,9 +1,8 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
-from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
@@ -76,7 +75,6 @@ class TestResultSchema(BaseModel):
 class TestResultsWithTotalsSchema(BaseModel):
     results: Dict[Optional[str], List[TestResultSchema]] = dict()
     totals: Dict[Optional[str], TotalsSchema] = dict()
-    invocation: DbtInvocationSchema = Field(default_factory=DbtInvocationSchema)
 
 
 class TestRunSchema(BaseModel):
