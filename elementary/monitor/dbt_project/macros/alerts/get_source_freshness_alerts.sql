@@ -1,5 +1,11 @@
 {% macro get_pending_source_freshness_alerts(days_back) %}
     -- depends_on: {{ ref('alerts_source_freshness') }}
+    {% set alerts_source_freshness_relation = ref('alerts_source_freshness') %}
+    {% set error_after_column_exists = elementary.column_exists_in_relation(alerts_source_freshness_relation, 'error_after') %}
+
+    {% set sources_relation = ref('elementary', 'dbt_sources')} %}
+    {% set freshness_description_column_exists = elementary.column_exists_in_relation(sources_relation, 'freshness_description') %}
+
     {% set select_pending_alerts_query %}
         with alerts_in_time_limit as (
             select *, {{ elementary_cli.normalized_source_freshness_status()}} from {{ ref('alerts_source_freshness') }}
@@ -27,9 +33,12 @@
                 alerts_in_time_limit.schema_name,
                 alerts_in_time_limit.source_name,
                 alerts_in_time_limit.identifier,
-                alerts_in_time_limit.warn_after,
-                alerts_in_time_limit.error_after,
-                alerts_in_time_limit.filter,
+                {# backwards compatibility - these fields were added together #}
+                {% if error_after_column_exists %}
+                    alerts_in_time_limit.warn_after,
+                    alerts_in_time_limit.error_after,
+                    alerts_in_time_limit.filter,
+                {% endif %}
                 alerts_in_time_limit.tags,
                 alerts_in_time_limit.meta,
                 alerts_in_time_limit.owner,
@@ -46,7 +55,12 @@
                 sources.freshness_error_after,
                 sources.freshness_warn_after,
                 sources.freshness_filter,
-                sources.freshness_description
+                {# backwards compatibility #}
+                {% if freshness_description_column_exists %}
+                    sources.freshness_description
+                {% else %}
+                    "dbt source freshness validates if the data in a table is not updated by calculating if the time elapsed between the test execution to the latest record is above an acceptable SLA threshold." as freshness_description
+                {% endif %}
             from alerts_in_time_limit
             left join sources on alerts_in_time_limit.unique_id = sources.unique_id
         )
