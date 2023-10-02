@@ -3,7 +3,7 @@
     {% set alerts_source_freshness_relation = ref('alerts_source_freshness') %}
     {% set error_after_column_exists = elementary.column_exists_in_relation(alerts_source_freshness_relation, 'error_after') %}
 
-    {% set sources_relation = ref('elementary', 'dbt_sources')} %}
+    {% set sources_relation = ref('elementary', 'dbt_sources') %}
     {% set freshness_description_column_exists = elementary.column_exists_in_relation(sources_relation, 'freshness_description') %}
 
     {% set select_pending_alerts_query %}
