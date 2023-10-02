@@ -1,0 +1,37 @@
+---
+title: "fail_on_zero"
+sidebarTitle: "fail_on_zero"
+---
+
+`fail_on_zero: true/false`
+
+Elementary anomaly detection tests will fail if there is a zero metric value within the detection period.
+If undefined, default is false.
+
+- _Default: false_
+- _Relevant tests: All anomaly detection tests_
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          fail_on_zero: true
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        fail_on_zero: true
+```
+
+```yml dbt_project.yml
+vars:
+  fail_on_zero: true
+```
+
+</RequestExample>
