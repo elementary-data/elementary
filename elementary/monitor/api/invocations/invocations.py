@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.invocations.invocations import InvocationsFetcher
 from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.utils.log import get_logger
@@ -39,6 +40,24 @@ class InvocationsAPI(APIClient):
             )
         else:
             raise NotImplementedError
+
+    def get_test_invocation_from_filter(
+        self, selector_filter: SelectorFilterSchema
+    ) -> Optional[DbtInvocationSchema]:
+        invocation = None
+
+        if selector_filter.invocation_id:
+            invocation = self.get_invocation_by_id(
+                type="test", invocation_id=selector_filter.invocation_id
+            )
+        elif selector_filter.invocation_time:
+            invocation = self.get_invocation_by_time(
+                type="test", invocation_max_time=selector_filter.invocation_time
+            )
+        elif selector_filter.last_invocation:
+            invocation = self.get_last_invocation(type="test")
+
+        return invocation
 
     def get_models_latest_invocations_data(self) -> List[DbtInvocationSchema]:
         return self.invocations_fetcher.get_models_latest_invocations_data()
