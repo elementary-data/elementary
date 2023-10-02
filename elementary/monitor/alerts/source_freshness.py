@@ -67,7 +67,7 @@ class SourceFreshnessAlert(Alert):
         self.result_description = (
             error
             if error
-            else f"The table was updated {get_formatted_timedelta(self.max_loaded_at_time_ago_in_s or 0)} ago when the test executed at {formatted_detected_at}. The most recent record found was at {formatted_max_loaded_at}."
+            else f"When the test ran at {formatted_detected_at}, the most recent record in the table had occurred {get_formatted_timedelta(self.max_loaded_at_time_ago_in_s or 0)}. The most recent record found was at {formatted_max_loaded_at}."
         )
 
         self.source_name = source_name
