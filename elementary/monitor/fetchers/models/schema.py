@@ -85,6 +85,7 @@ class ExposureSchema(ArtifactSchema):
     maturity: Optional[str] = None
     depends_on: Optional[List[str]] = None
     owner: Optional[OwnerSchema] = None
+    raw_queries: Optional[List[str]] = None
 
 
 class ModelTestCoverage(ExtendedBaseModel):
