@@ -15,6 +15,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedSourceSchema,
 )
 from elementary.monitor.api.report.schema import ReportDataEnvSchema, ReportDataSchema
+from elementary.monitor.api.report.totals_utils import get_total_tests_results
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
@@ -67,11 +68,14 @@ class ReportAPI(APIClient):
                 invocation_id=test_invocation.invocation_id,
                 disable_samples=disable_samples,
             )
+
+            test_results_totals = get_total_tests_results(test_results)
+
             test_runs = tests_api.get_test_runs()
 
             lineage = lineage_api.get_lineage(exclude_elementary_models)
             filters = filters_api.get_filters(
-                test_results.totals, test_runs.totals, models, sources, models_runs.runs
+                test_results_totals, test_runs.totals, models, sources, models_runs.runs
             )
 
             serializable_groups = groups.dict()
@@ -81,11 +85,9 @@ class ReportAPI(APIClient):
                 "totals"
             ]
             serializable_models_coverages = self._serialize_coverages(coverages)
-            serializable_test_results = self._serialize_test_results(
-                test_results.results
-            )
+            serializable_test_results = self._serialize_test_results(test_results)
             serializable_test_results_totals = self._serialize_totals(
-                test_results.totals
+                test_results_totals
             )
             serializable_test_runs = self._serialize_test_runs(test_runs.runs)
             serializable_test_runs_totals = self._serialize_totals(test_runs.totals)

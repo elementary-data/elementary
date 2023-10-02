@@ -15,7 +15,6 @@ from elementary.monitor.api.tests.schema import (
     TestMetadataSchema,
     TestResultSchema,
     TestResultSummarySchema,
-    TestResultsWithTotalsSchema,
     TestRunSchema,
     TestRunsWithTotalsSchema,
 )
@@ -131,7 +130,7 @@ class TestsAPI(APIClient):
         self,
         invocation_id: Optional[str],
         disable_samples: bool = False,
-    ) -> TestResultsWithTotalsSchema:
+    ) -> Dict[Optional[str], List[TestResultSchema]]:
         filtered_test_results_db_rows = self.test_results_db_rows
 
         if invocation_id:
@@ -168,14 +167,7 @@ class TestsAPI(APIClient):
                 )
             )
 
-        test_metadatas = []
-        for test_results in tests_results.values():
-            test_metadatas.extend([result.metadata for result in test_results])
-        test_results_totals = self._get_total_tests_results(test_metadatas)
-        return TestResultsWithTotalsSchema(
-            results=tests_results,
-            totals=test_results_totals,
-        )
+        return tests_results
 
     def get_test_runs(self) -> TestRunsWithTotalsSchema:
         tests_invocations = self._get_invocations(self.test_results_db_rows)
@@ -429,19 +421,6 @@ class TestsAPI(APIClient):
                 failed_rows_count = int(found_rows_number)
         return failed_rows_count
 
-    def _get_total_tests_results(
-        self,
-        test_metadatas: List[TestMetadataSchema],
-    ) -> Dict[Optional[str], TotalsSchema]:
-        totals: Dict[Optional[str], TotalsSchema] = dict()
-        for test in test_metadatas:
-            self._update_test_results_totals(
-                totals_dict=totals,
-                model_unique_id=test.model_unique_id,
-                status=test.latest_run_status,
-            )
-        return totals
-
     def _get_total_tests_runs(
         self, tests_runs: Dict[Optional[str], List[TestRunSchema]]
     ) -> Dict[Optional[str], TotalsSchema]:
@@ -474,14 +453,3 @@ class TestsAPI(APIClient):
 
         for test_invocation in test_invocations:
             totals_dict[model_unique_id].add_total(test_invocation.status)
-
-    @staticmethod
-    def _update_test_results_totals(
-        totals_dict: Dict[Optional[str], TotalsSchema],
-        model_unique_id: Optional[str],
-        status: str,
-    ):
-        if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = TotalsSchema()
-
-        totals_dict[model_unique_id].add_total(status)

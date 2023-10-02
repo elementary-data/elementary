@@ -72,11 +72,6 @@ class TestResultSchema(BaseModel):
         smart_union = True
 
 
-class TestResultsWithTotalsSchema(BaseModel):
-    results: Dict[Optional[str], List[TestResultSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
-
-
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
     test_runs: Optional[InvocationsSchema]
