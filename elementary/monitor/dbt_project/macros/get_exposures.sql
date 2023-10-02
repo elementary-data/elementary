@@ -30,7 +30,7 @@
                   {% else %}
                     NULL as raw_queries
                   {% endif %}
-                from {{ enriched_exposures_relation }}
+                from {{ exposures_relation }}
               )
 
              select * from dbt_artifacts_exposures
