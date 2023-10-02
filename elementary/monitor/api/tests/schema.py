@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, validator
 
@@ -75,11 +75,6 @@ class TestResultSchema(BaseModel):
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
     test_runs: Optional[InvocationsSchema]
-
-
-class TestRunsWithTotalsSchema(BaseModel):
-    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
 
 
 class TestResultSummarySchema(BaseModel):

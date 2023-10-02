@@ -16,7 +16,6 @@ from elementary.monitor.api.tests.schema import (
     TestResultSchema,
     TestResultSummarySchema,
     TestRunSchema,
-    TestRunsWithTotalsSchema,
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -169,7 +168,7 @@ class TestsAPI(APIClient):
 
         return tests_results
 
-    def get_test_runs(self) -> TestRunsWithTotalsSchema:
+    def get_test_runs(self) -> Dict[Optional[str], List[TestRunSchema]]:
         tests_invocations = self._get_invocations(self.test_results_db_rows)
         latest_test_results = [
             test_result
@@ -189,8 +188,7 @@ class TestsAPI(APIClient):
                 test_runs=test_invocations,
             )
             test_runs[test_result_db_row.model_unique_id].append(test_run)
-        test_runs_totals = self._get_total_tests_runs(tests_runs=test_runs)
-        return TestRunsWithTotalsSchema(runs=test_runs, totals=test_runs_totals)
+        return test_runs
 
     def _get_invocations(
         self, test_result_db_rows: List[TestResultDBRowSchema]
@@ -420,36 +418,3 @@ class TestsAPI(APIClient):
                 found_rows_number = found_rows_number_match.group()
                 failed_rows_count = int(found_rows_number)
         return failed_rows_count
-
-    def _get_total_tests_runs(
-        self, tests_runs: Dict[Optional[str], List[TestRunSchema]]
-    ) -> Dict[Optional[str], TotalsSchema]:
-        totals: Dict[Optional[str], TotalsSchema] = dict()
-        for test_runs in tests_runs.values():
-            for test_run in test_runs:
-                # It's possible test_runs will be None if we didn't find any invocations associated
-                # with this test, in that case it also makes sense to skip it.
-                if not test_run.test_runs:
-                    continue
-
-                test_invocations = test_run.test_runs.invocations
-                self._update_test_runs_totals(
-                    totals_dict=totals,
-                    test=test_run.metadata,
-                    test_invocations=test_invocations,
-                )
-        return totals
-
-    @staticmethod
-    def _update_test_runs_totals(
-        totals_dict: Dict[Optional[str], TotalsSchema],
-        test: TestMetadataSchema,
-        test_invocations: List[InvocationSchema],
-    ):
-        model_unique_id = test.model_unique_id
-
-        if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = TotalsSchema()
-
-        for test_invocation in test_invocations:
-            totals_dict[model_unique_id].add_total(test_invocation.status)
