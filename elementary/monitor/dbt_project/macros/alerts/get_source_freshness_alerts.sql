@@ -59,7 +59,7 @@
                 {% if freshness_description_column_exists %}
                     sources.freshness_description
                 {% else %}
-                    "dbt source freshness validates if the data in a table is not updated by calculating if the time elapsed between the test execution to the latest record is above an acceptable SLA threshold." as freshness_description
+                    'dbt source freshness validates if the data in a table is not updated by calculating if the time elapsed between the test execution to the latest record is above an acceptable SLA threshold.' as freshness_description
                 {% endif %}
             from alerts_in_time_limit
             left join sources on alerts_in_time_limit.unique_id = sources.unique_id
