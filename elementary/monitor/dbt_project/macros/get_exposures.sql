@@ -1,7 +1,7 @@
 {% macro get_exposures() %}
     {% set exposures_relation = ref('elementary', 'enriched_exposures') %}
     {% if not elementary.relation_exists(exposures_relation) %}
-        {% set exposures_relation = ref('elementary', 'dbt_exposures')} %}
+        {% set exposures_relation = ref('elementary', 'dbt_exposures') %}
     {% endif %}
     {% set label_column_exists = elementary.column_exists_in_relation(exposures_relation, 'label') %}
     {% set raw_queries_column_exists = elementary.column_exists_in_relation(exposures_relation, 'raw_queries') %}

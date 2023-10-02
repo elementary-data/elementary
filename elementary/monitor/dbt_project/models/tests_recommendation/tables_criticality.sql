@@ -1,9 +1,6 @@
-{% if not execute %}
-    {% do return(none) %}
-{% endif %}
-{% set exposures_relation = ref('elementary', 'enriched_exposures') %}
-{% if not elementary.relation_exists(exposures_relation) %}
-    {% set exposures_relation = ref('elementary', 'dbt_exposures') %}
+{% set exposures_relation = elementary.get_elementary_relation("enriched_exposures") %}
+{% if not exposures_relation %}
+    {% set exposures_relation = ref("elementary", "dbt_exposures") %}
 {% endif %}
 
 with
