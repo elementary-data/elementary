@@ -19,11 +19,11 @@ from elementary.monitor.api.report.totals_utils import (
     get_total_test_results,
     get_total_test_runs,
 )
-from elementary.monitor.api.tests.schema import (
-    SourceFreshnessResultSchema,
-    TestResultSchema,
-    TestRunSchema,
+from elementary.monitor.api.source_freshnesses.schema import SourceFreshnessResultSchema
+from elementary.monitor.api.source_freshnesses.source_freshnesses import (
+    SourceFreshnessesAPI,
 )
+from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -50,6 +50,11 @@ class ReportAPI(APIClient):
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
+            source_freshnesses_api = SourceFreshnessesAPI(
+                dbt_runner=self.dbt_runner,
+                days_back=days_back,
+                invocations_per_test=test_runs_amount,
+            )
             models_api = ModelsAPI(dbt_runner=self.dbt_runner)
             groups_api = GroupsAPI(dbt_runner=self.dbt_runner)
             lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
@@ -75,7 +80,9 @@ class ReportAPI(APIClient):
                 invocation_id=test_invocation.invocation_id,
                 disable_samples=disable_samples,
             )
-            source_freshness_results = tests_api.get_source_freshness_results()
+            source_freshness_results = (
+                source_freshnesses_api.get_source_freshness_results()
+            )
 
             union_test_results = {
                 x: test_results.get(x, []) + source_freshness_results.get(x, [])
