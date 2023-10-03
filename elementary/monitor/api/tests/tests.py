@@ -19,7 +19,10 @@ from elementary.monitor.api.tests.schema import (
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from elementary.monitor.fetchers.tests.schema import (
+    SourceFreshnessResultDBRowSchema,
+    TestResultDBRowSchema,
+)
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
@@ -43,6 +46,12 @@ class TestsAPI(APIClient):
             invocations_per_test=invocations_per_test,
             disable_passed_test_metrics=disable_passed_test_metrics,
         )
+        self.source_freshness_results_db_rows = (
+            self._get_source_freshness_results_db_rows(
+                days_back=days_back,
+                invocations_per_test=invocations_per_test,
+            )
+        )
 
     def _get_test_results_db_rows(
         self,
@@ -54,6 +63,16 @@ class TestsAPI(APIClient):
             days_back=days_back,
             invocations_per_test=invocations_per_test,
             disable_passed_test_metrics=disable_passed_test_metrics,
+        )
+
+    def _get_source_freshness_results_db_rows(
+        self,
+        days_back: Optional[int] = 7,
+        invocations_per_test: int = 720,
+    ) -> List[SourceFreshnessResultDBRowSchema]:
+        return self.tests_fetcher.get_source_freshness_results_db_rows(
+            days_back=days_back,
+            invocations_per_test=invocations_per_test,
         )
 
     def get_test_results_summary(
