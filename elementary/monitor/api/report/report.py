@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
@@ -19,7 +19,11 @@ from elementary.monitor.api.report.totals_utils import (
     get_total_test_results,
     get_total_test_runs,
 )
-from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
+from elementary.monitor.api.tests.schema import (
+    SourceFreshnessResultSchema,
+    TestResultSchema,
+    TestRunSchema,
+)
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -71,7 +75,14 @@ class ReportAPI(APIClient):
                 invocation_id=test_invocation.invocation_id,
                 disable_samples=disable_samples,
             )
-            test_results_totals = get_total_test_results(test_results)
+            source_freshness_results = tests_api.get_source_freshness_results()
+
+            union_test_results = {
+                x: test_results.get(x, []) + source_freshness_results.get(x, [])
+                for x in set(test_results).union(source_freshness_results)
+            }
+
+            test_results_totals = get_total_test_results(union_test_results)
 
             test_runs = tests_api.get_test_runs()
             test_runs_totals = get_total_test_runs(test_runs)
@@ -88,7 +99,7 @@ class ReportAPI(APIClient):
                 "totals"
             ]
             serializable_models_coverages = self._serialize_coverages(coverages)
-            serializable_test_results = self._serialize_test_results(test_results)
+            serializable_test_results = self._serialize_test_results(union_test_results)
             serializable_test_results_totals = self._serialize_totals(
                 test_results_totals
             )
@@ -154,7 +165,10 @@ class ReportAPI(APIClient):
         return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
     def _serialize_test_results(
-        self, test_results: Dict[Optional[str], List[TestResultSchema]]
+        self,
+        test_results: Dict[
+            Optional[str], List[Union[TestResultSchema, SourceFreshnessResultSchema]]
+        ],
     ) -> Dict[Optional[str], List[dict]]:
         serializable_test_results = defaultdict(list)
         for model_unique_id, test_result in test_results.items():
