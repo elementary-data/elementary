@@ -61,25 +61,20 @@ def format_milliseconds(duration: int) -> str:
 
 
 def convert_datetime_utc_str_to_timezone_str(
-    isoformat_datetime: str, timezone: Optional[str]
+    isoformat_datetime: str, timezone: Optional[str], include_timezone: bool = False
 ) -> str:
     try:
         parsed_time = datetime.fromisoformat(isoformat_datetime)
-        return convert_utc_time_to_timezone(parsed_time, timezone).strftime(
-            DATETIME_FORMAT
-        )
+        datetime_with_timezone = convert_utc_time_to_timezone(parsed_time, timezone)
+        return datetime_strftime(datetime_with_timezone, include_timezone)
     except Exception:
         return isoformat_datetime
 
 
-def convert_datetime_utc_str_to_timezone_datatime(
-    isoformat_datetime: str, timezone: Optional[str]
-) -> datetime:
-    parsed_time = datetime.fromisoformat(isoformat_datetime)
-    try:
-        return convert_utc_time_to_timezone(parsed_time, timezone)
-    except Exception:
-        return parsed_time
+def datetime_strftime(datetime: datetime, include_timezone: bool = False) -> str:
+    return datetime.strftime(
+        DATETIME_FORMAT if not include_timezone else DATETIME_WITH_TIMEZONE_FORMAT
+    )
 
 
 def convert_partial_iso_format_to_full_iso_format(partial_iso_format_time: str) -> str:

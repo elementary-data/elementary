@@ -5,10 +5,8 @@ from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
-    DATETIME_FORMAT,
-    DATETIME_WITH_TIMEZONE_FORMAT,
-    convert_datetime_utc_str_to_timezone_datatime,
     convert_datetime_utc_str_to_timezone_str,
+    datetime_strftime,
     get_formatted_timedelta,
 )
 
@@ -44,23 +42,22 @@ class SourceFreshnessAlert(Alert):
         )
 
         self.max_loaded_at = (
-            convert_datetime_utc_str_to_timezone_datatime(max_loaded_at, self.timezone)
+            convert_datetime_utc_str_to_timezone_str(max_loaded_at, self.timezone)
             if max_loaded_at
             else None
-        )
-        self.max_loaded_at_str = (
-            self.max_loaded_at.strftime(DATETIME_FORMAT) if self.max_loaded_at else None
         )
 
         self.max_loaded_at_time_ago_in_s = max_loaded_at_time_ago_in_s
 
         formatted_max_loaded_at = (
-            self.max_loaded_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT)
-            if self.max_loaded_at
-            else "N/A"
+            convert_datetime_utc_str_to_timezone_str(
+                max_loaded_at, self.timezone, include_timezone=True
+            )
+            if max_loaded_at
+            else None
         )
         formatted_detected_at = (
-            self.detected_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT)
+            datetime_strftime(self.detected_at, include_timezone=True)
             if self.detected_at
             else "N/A"
         )
@@ -176,7 +173,7 @@ class SourceFreshnessAlert(Alert):
                 self.slack_message_builder.create_compacted_sections_blocks(
                     [
                         f"*Time Elapsed*\n{timedelta(seconds=self.max_loaded_at_time_ago_in_s) if self.max_loaded_at_time_ago_in_s else 'N/A'}",
-                        f"*Last Record At*\n{self.max_loaded_at_str}",
+                        f"*Last Record At*\n{self.max_loaded_at}",
                         f"*Sampled At*\n{self.snapshotted_at_str}",
                     ]
                 )
