@@ -19,7 +19,10 @@ from elementary.monitor.api.report.totals_utils import (
     get_total_test_results,
     get_total_test_runs,
 )
-from elementary.monitor.api.source_freshnesses.schema import SourceFreshnessResultSchema
+from elementary.monitor.api.source_freshnesses.schema import (
+    SourceFreshnessResultSchema,
+    SourceFreshnessRunSchema,
+)
 from elementary.monitor.api.source_freshnesses.source_freshnesses import (
     SourceFreshnessesAPI,
 )
@@ -92,7 +95,17 @@ class ReportAPI(APIClient):
             test_results_totals = get_total_test_results(union_test_results)
 
             test_runs = tests_api.get_test_runs()
-            test_runs_totals = get_total_test_runs(test_runs)
+            source_freshness_runs = source_freshnesses_api.get_source_freshness_runs()
+
+            union_test_runs = dict()
+            for key in set(test_runs).union(source_freshness_runs):
+                test_run = test_runs.get(key, [])
+                source_freshness_run = (
+                    source_freshness_runs.get(key, []) if key is not None else []
+                )
+                union_test_runs[key] = test_run + source_freshness_run
+
+            test_runs_totals = get_total_test_runs(union_test_runs)
 
             lineage = lineage_api.get_lineage(exclude_elementary_models)
             filters = filters_api.get_filters(
@@ -110,7 +123,7 @@ class ReportAPI(APIClient):
             serializable_test_results_totals = self._serialize_totals(
                 test_results_totals
             )
-            serializable_test_runs = self._serialize_test_runs(test_runs)
+            serializable_test_runs = self._serialize_test_runs(union_test_runs)
             serializable_test_runs_totals = self._serialize_totals(test_runs_totals)
             serializable_invocation = test_invocation.dict()
             serializable_filters = filters.dict()
@@ -185,7 +198,10 @@ class ReportAPI(APIClient):
         return serializable_test_results
 
     def _serialize_test_runs(
-        self, test_runs: Dict[Optional[str], List[TestRunSchema]]
+        self,
+        test_runs: Dict[
+            Optional[str], List[Union[TestRunSchema, SourceFreshnessRunSchema]]
+        ],
     ) -> Dict[Optional[str], List[dict]]:
         serializable_test_runs = defaultdict(list)
         for model_unique_id, test_run in test_runs.items():

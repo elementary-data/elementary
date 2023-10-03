@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import DefaultDict, List, Optional
+from typing import DefaultDict, Dict, List, Optional
 
 from dateutil import tz
 
@@ -7,9 +7,13 @@ from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.monitor.api.source_freshnesses.schema import (
     DbtSourceFreshnessResultSchema,
+    SourceFreshnessInvocationSchema,
+    SourceFreshnessInvocationsSchema,
     SourceFreshnessMetadataSchema,
     SourceFreshnessResultSchema,
+    SourceFreshnessRunSchema,
 )
+from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.source_freshnesses.schema import (
     SourceFreshnessResultDBRowSchema,
 )
@@ -45,19 +49,18 @@ class SourceFreshnessesAPI(APIClient):
             invocations_per_test=invocations_per_test,
         )
 
-    def get_source_freshness_results(self):
-        filtered_source_freshness_results_db_rows = (
-            self.source_freshness_results_db_rows
-        )
-
+    def get_source_freshness_results(
+        self,
+    ) -> Dict[Optional[str], List[SourceFreshnessResultSchema]]:
         filtered_source_freshness_results_db_rows = [
             test_result
-            for test_result in filtered_source_freshness_results_db_rows
+            for test_result in self.source_freshness_results_db_rows
             if test_result.invocations_rank_index == 1
         ]
         tests_results: DefaultDict[
             Optional[str], List[SourceFreshnessResultSchema]
         ] = defaultdict(list)
+
         for (
             source_freshness_results_db_row
         ) in filtered_source_freshness_results_db_rows:
@@ -78,6 +81,72 @@ class SourceFreshnessesAPI(APIClient):
             )
 
         return tests_results
+
+    def get_source_freshness_runs(self) -> Dict[str, List[SourceFreshnessRunSchema]]:
+        source_freshness_invocations = self._get_source_freshness_invocations(
+            self.source_freshness_results_db_rows
+        )
+
+        latest_source_freshness_results = [
+            test_result
+            for test_result in self.source_freshness_results_db_rows
+            if test_result.invocations_rank_index == 1
+        ]
+
+        source_freshness_runs: Dict[str, List[SourceFreshnessRunSchema]] = defaultdict(
+            list
+        )
+        for source_freshness_result in latest_source_freshness_results:
+            source_freshness_runs[source_freshness_result.unique_id].append(
+                SourceFreshnessRunSchema(
+                    metadata=self._get_test_metadata_from_source_freshness_results_db_row(
+                        source_freshness_result
+                    ),
+                    test_runs=source_freshness_invocations[
+                        source_freshness_result.unique_id
+                    ],
+                )
+            )
+
+        return source_freshness_runs
+
+    @staticmethod
+    def _get_source_freshness_invocations(
+        source_freshness_results: List[SourceFreshnessResultDBRowSchema],
+    ) -> Dict[str, SourceFreshnessInvocationsSchema]:
+        invocations_by_source_freshness_unique_id: Dict[
+            str, Dict[str, SourceFreshnessInvocationSchema]
+        ] = defaultdict(dict)
+
+        for source_freshness_results_db_row in source_freshness_results:
+            unique_id = source_freshness_results_db_row.unique_id
+            invocation_id = source_freshness_results_db_row.invocation_id
+
+            invocations_by_source_freshness_unique_id[unique_id][
+                invocation_id
+            ] = SourceFreshnessInvocationSchema(
+                id=invocation_id,
+                time_utc=source_freshness_results_db_row.generated_at,
+                status=source_freshness_results_db_row.normalized_status,
+            )
+
+        source_freshness_invocations = dict()
+
+        for unique_id, invocations in invocations_by_source_freshness_unique_id.items():
+            totals = TotalsSchema()
+            for run in invocations.values():
+                totals.add_total(run.status)
+
+            source_freshness_invocations[unique_id] = SourceFreshnessInvocationsSchema(
+                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2)
+                if invocations
+                else 0,
+                totals=totals,
+                invocations=list(invocations.values()),
+                description=f"There were {totals.failures or 'no'} failures, {totals.errors or 'no'} errors and {totals.warnings or 'no'} warnings on the last {len(invocations)} source freshness runs.",
+            )
+
+        return source_freshness_invocations
 
     @staticmethod
     def _get_test_metadata_from_source_freshness_results_db_row(

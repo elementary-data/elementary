@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+from elementary.monitor.api.totals_schema import TotalsSchema
+from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class DbtSourceFreshnessResultSchema(BaseModel):
@@ -29,3 +32,25 @@ class SourceFreshnessMetadataSchema(BaseModel):
 class SourceFreshnessResultSchema(BaseModel):
     metadata: SourceFreshnessMetadataSchema
     test_results: DbtSourceFreshnessResultSchema
+
+
+class SourceFreshnessInvocationSchema(BaseModel):
+    id: str
+    time_utc: str
+    status: str
+
+    @validator("time_utc", pre=True)
+    def format_time_utc(cls, time_utc):
+        return convert_partial_iso_format_to_full_iso_format(time_utc)
+
+
+class SourceFreshnessInvocationsSchema(BaseModel):
+    fail_rate: float
+    totals: TotalsSchema
+    invocations: List[SourceFreshnessInvocationSchema]
+    description: str
+
+
+class SourceFreshnessRunSchema(BaseModel):
+    metadata: SourceFreshnessMetadataSchema
+    test_runs: Optional[SourceFreshnessInvocationsSchema]

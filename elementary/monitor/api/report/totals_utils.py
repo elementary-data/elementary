@@ -1,6 +1,11 @@
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
+from elementary.monitor.api.source_freshnesses.schema import (
+    SourceFreshnessMetadataSchema,
+    SourceFreshnessResultSchema,
+    SourceFreshnessRunSchema,
+)
 from elementary.monitor.api.tests.schema import (
     TestMetadataSchema,
     TestResultSchema,
@@ -10,17 +15,21 @@ from elementary.monitor.api.totals_schema import TotalsSchema
 
 
 def get_total_test_results(
-    tests_results: Dict[Optional[str], List[TestResultSchema]]
+    test_results: Dict[
+        Optional[str], List[Union[TestResultSchema, SourceFreshnessResultSchema]]
+    ],
 ) -> Dict[Optional[str], TotalsSchema]:
     test_metadatas = []
-    for test_results in tests_results.values():
-        test_metadatas.extend([result.metadata for result in test_results])
+    for test_result in test_results.values():
+        test_metadatas.extend([result.metadata for result in test_result])
 
     return _calculate_test_results_totals(test_metadatas)
 
 
 def get_total_test_runs(
-    tests_runs: Dict[Optional[str], List[TestRunSchema]]
+    tests_runs: Dict[
+        Optional[str], List[Union[TestRunSchema, SourceFreshnessRunSchema]]
+    ]
 ) -> Dict[Optional[str], TotalsSchema]:
     totals: Dict[Optional[str], TotalsSchema] = defaultdict(TotalsSchema)
     for test_runs in tests_runs.values():
@@ -39,7 +48,7 @@ def get_total_test_runs(
 
 
 def _calculate_test_results_totals(
-    test_metadatas: List[TestMetadataSchema],
+    test_metadatas: List[Union[TestMetadataSchema, SourceFreshnessMetadataSchema]],
 ) -> Dict[Optional[str], TotalsSchema]:
     totals: Dict[Optional[str], TotalsSchema] = defaultdict(TotalsSchema)
     for test in test_metadatas:
