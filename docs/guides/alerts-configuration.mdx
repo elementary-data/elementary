@@ -221,7 +221,9 @@ This way you can ensure your alerts are valuable and avoid alert fatigue.
 #### Custom channel
 
 Elementary supports configuring custom Slack channels for models and tests.
-By default, Elementary uses the Slack channel that was configured in the Slack integration.
+By default, Elementary uses the Slack channel that was configured in the Slack integration. Even if
+a custom channel is defined for every test, you must specify a default fallback channel, either using
+the CLI or the `config.yml` file.
 
 <CodeGroup>
 

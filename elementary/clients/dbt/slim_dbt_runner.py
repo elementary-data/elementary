@@ -80,9 +80,17 @@ class SlimDbtRunner(BaseDbtRunner):
         target: Optional[str] = None,
         vars: Optional[dict] = None,
         secret_vars: Optional[dict] = None,
+        allow_macros_without_package_prefix: bool = False,
         **kwargs,
     ):
-        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
+        super().__init__(
+            project_dir,
+            profiles_dir,
+            target,
+            vars,
+            secret_vars,
+            allow_macros_without_package_prefix,
+        )
 
         self.config: Optional[RuntimeConfig] = None
         self.adapter: Optional[BaseAdapter] = None
@@ -193,6 +201,12 @@ class SlimDbtRunner(BaseDbtRunner):
     ) -> list:
         if self.profiles_dir is None:
             raise Exception("profiles_dir must be passed to SlimDbtRunner")
+
+        if "." not in macro_name and not self.allow_macros_without_package_prefix:
+            raise ValueError(
+                f"Macro name '{macro_name}' is missing package prefix. "
+                f"Please use the following format: <package_name>.<macro_name>"
+            )
 
         macro_args = macro_args or {}
 

@@ -116,7 +116,7 @@ class DataMonitoring:
     def get_elementary_database_and_schema(self):
         try:
             relation = self.internal_dbt_runner.run_operation(
-                "get_elementary_database_and_schema", quiet=True
+                "elementary_cli.get_elementary_database_and_schema", quiet=True
             )[0]
             logger.info(f"Elementary's database and schema: '{relation}'")
             return relation
@@ -129,7 +129,7 @@ class DataMonitoring:
     def get_latest_invocation(self) -> Dict[str, Any]:
         try:
             latest_invocation = self.internal_dbt_runner.run_operation(
-                "get_latest_invocation", quiet=True
+                "elementary_cli.get_latest_invocation", quiet=True
             )[0]
             return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
@@ -177,7 +177,7 @@ class DataMonitoring:
         try:
             warehouse_type, warehouse_unique_id = json.loads(
                 self.internal_dbt_runner.run_operation(
-                    "get_adapter_type_and_unique_id", quiet=True
+                    "elementary_cli.get_adapter_type_and_unique_id", quiet=True
                 )[0]
             )
             return WarehouseInfo(

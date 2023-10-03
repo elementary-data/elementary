@@ -37,7 +37,7 @@ def test_update_sent_alerts(
         # Test that update_sent_alerts has been called with alert_ids as arguments.
         assert call_args[0][0][1] == "run"
         assert call_args[0][0][2] == "-s"
-        assert call_args[0][0][3] == "update_alerts.update_sent_alerts"
+        assert call_args[0][0][3] == "elementary_cli.update_alerts.update_sent_alerts"
         dbt_run_params = json.loads(call_args[0][0][9])
         assert "alert_ids" in dbt_run_params
         assert "table_name" in dbt_run_params
@@ -62,7 +62,9 @@ def test_skip_alerts(mock_subprocess_run, alerts_fetcher_mock: MockAlertsFetcher
         # Test that update_skipped_alerts has been called with alert_ids as arguments.
         assert call_args[0][0][1] == "run"
         assert call_args[0][0][2] == "-s"
-        assert call_args[0][0][3] == "update_alerts.update_skipped_alerts"
+        assert (
+            call_args[0][0][3] == "elementary_cli.update_alerts.update_skipped_alerts"
+        )
         dbt_run_params = json.loads(call_args[0][0][9])
         assert "alert_ids" in dbt_run_params
         assert "table_name" in dbt_run_params

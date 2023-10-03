@@ -37,5 +37,5 @@ select
 from failed_tests
 
 {%- if is_incremental() %}
-    {{ get_new_alerts_where_clause(this) }}
+    {{ elementary_cli.get_new_alerts_where_clause(this) }}
 {%- endif %}

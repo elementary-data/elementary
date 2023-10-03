@@ -11,7 +11,7 @@ class LineageFetcher(FetcherClient):
     ) -> List[NodeDependsOnNodesSchema]:
         nodes_depends_on_nodes = []
         nodes_depends_on_nodes_results = self.dbt_runner.run_operation(
-            macro_name="get_nodes_depends_on_nodes",
+            macro_name="elementary_cli.get_nodes_depends_on_nodes",
             macro_args={"exclude_elementary": exclude_elementary_models},
         )
         if nodes_depends_on_nodes_results:

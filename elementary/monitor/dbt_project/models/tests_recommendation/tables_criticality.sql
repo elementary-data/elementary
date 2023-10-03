@@ -1,3 +1,8 @@
+{% set exposures_relation = elementary.get_elementary_relation("enriched_exposures") %}
+{% if not exposures_relation %}
+    {% set exposures_relation = ref("elementary", "dbt_exposures") %}
+{% endif %}
+
 with
     dbt_models_data as (
         select
@@ -48,7 +53,7 @@ with
         select t.id, count(*) as exposure_count
         from tables_information t
         join
-            {{ ref("elementary", "dbt_exposures") }} e
+            {{ exposures_relation }} e
             on e.depends_on_nodes::jsonb ? t.id
         group by t.id
     ),

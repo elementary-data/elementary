@@ -34,7 +34,7 @@ class AlertsFetcher(FetcherClient):
         logger.info(f'Update skipped alerts at "{table_name}"')
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run(
-                select="update_alerts.update_skipped_alerts",
+                select="elementary_cli.update_alerts.update_skipped_alerts",
                 vars={
                     "alert_ids": alert_ids_chunk,
                     "table_name": table_name,
@@ -48,7 +48,7 @@ class AlertsFetcher(FetcherClient):
         logger.info("Querying test alerts.")
         return self._query_alert_type(
             {
-                "macro_name": "get_pending_test_alerts",
+                "macro_name": "elementary_cli.get_pending_test_alerts",
                 "macro_args": {
                     "days_back": days_back,
                     "disable_samples": disable_samples,
@@ -63,7 +63,7 @@ class AlertsFetcher(FetcherClient):
         logger.info("Querying model alerts.")
         res = self._query_alert_type(
             {
-                "macro_name": "get_pending_model_alerts",
+                "macro_name": "elementary_cli.get_pending_model_alerts",
                 "macro_args": {"days_back": days_back},
             },
             ModelAlert,
@@ -76,7 +76,7 @@ class AlertsFetcher(FetcherClient):
         logger.info("Querying source freshness alerts.")
         return self._query_alert_type(
             {
-                "macro_name": "get_pending_source_freshness_alerts",
+                "macro_name": "elementary_cli.get_pending_source_freshness_alerts",
                 "macro_args": {"days_back": days_back},
             },
             SourceFreshnessAlert,
@@ -85,7 +85,7 @@ class AlertsFetcher(FetcherClient):
     def query_last_test_alert_times(self, days_back: int) -> Dict[str, str]:
         logger.info("Querying test alerts last sent times.")
         response = self.dbt_runner.run_operation(
-            macro_name="get_last_test_alert_sent_times",
+            macro_name="elementary_cli.get_last_test_alert_sent_times",
             macro_args={"days_back": days_back},
         )
         return json.loads(response[0])
@@ -93,7 +93,7 @@ class AlertsFetcher(FetcherClient):
     def query_last_model_alert_times(self, days_back: int) -> Dict[str, str]:
         logger.info("Querying model alerts last sent times.")
         response = self.dbt_runner.run_operation(
-            macro_name="get_last_model_alert_sent_times",
+            macro_name="elementary_cli.get_last_model_alert_sent_times",
             macro_args={"days_back": days_back},
         )
         return json.loads(response[0])
@@ -101,7 +101,7 @@ class AlertsFetcher(FetcherClient):
     def query_last_source_freshness_alert_times(self, days_back: int) -> Dict[str, str]:
         logger.info("Querying source freshness alerts last sent times.")
         response = self.dbt_runner.run_operation(
-            macro_name="get_last_source_freshness_alert_sent_times",
+            macro_name="elementary_cli.get_last_source_freshness_alert_sent_times",
             macro_args={"days_back": days_back},
         )
         return json.loads(response[0])
@@ -142,7 +142,7 @@ class AlertsFetcher(FetcherClient):
         logger.info(f'Update sent alerts at "{table_name}"')
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run(
-                select="update_alerts.update_sent_alerts",
+                select="elementary_cli.update_alerts.update_sent_alerts",
                 vars={
                     "alert_ids": alert_ids_chunk,
                     "sent_at": get_now_utc_str(),

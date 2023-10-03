@@ -239,7 +239,7 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.internal_dbt_runner.run(
-            models="alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
+            models="elementary_cli.alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
         )
         self.execution_properties["alerts_run_success"] = success
         if not success:

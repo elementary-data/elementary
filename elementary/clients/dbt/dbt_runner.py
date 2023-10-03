@@ -27,8 +27,16 @@ class DbtRunner(BaseDbtRunner):
         env_vars: Optional[Dict[str, str]] = None,
         vars: Optional[Dict[str, Any]] = None,
         secret_vars: Optional[Dict[str, Any]] = None,
+        allow_macros_without_package_prefix: bool = False,
     ) -> None:
-        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
+        super().__init__(
+            project_dir,
+            profiles_dir,
+            target,
+            vars,
+            secret_vars,
+            allow_macros_without_package_prefix,
+        )
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
         self._run_deps_if_needed()
@@ -126,6 +134,11 @@ class DbtRunner(BaseDbtRunner):
         should_log: bool = True,
         log_output: bool = False,
     ) -> list:
+        if "." not in macro_name and not self.allow_macros_without_package_prefix:
+            raise ValueError(
+                f"Macro name '{macro_name}' is missing package prefix. "
+                f"Please use the following format: <package_name>.<macro_name>"
+            )
         macro_to_run = macro_name
         macro_to_run_args = macro_args if macro_args else dict()
         if should_log:
