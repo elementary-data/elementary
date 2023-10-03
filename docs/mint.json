@@ -147,7 +147,9 @@
             "guides/anomaly-detection-configuration/exclude_regexp",
             "guides/anomaly-detection-configuration/dimensions",
             "guides/anomaly-detection-configuration/event_timestamp_column",
-            "guides/anomaly-detection-configuration/update_timestamp_column"
+            "guides/anomaly-detection-configuration/update_timestamp_column",
+            "guides/anomaly-detection-configuration/ignore_small_changes",
+            "guides/anomaly-detection-configuration/fail_on_zero"
           ]
         }
       ]
