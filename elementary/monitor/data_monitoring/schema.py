@@ -1,18 +1,12 @@
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
 from elementary.monitor.alerts.model import ModelAlert
 from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
-from elementary.monitor.api.tests.schema import (
-    InvocationSchema,
-    TestResultSchema,
-    TestRunSchema,
-)
-from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
@@ -76,17 +70,6 @@ class SelectorFilterSchema(BaseModel):
                 )
                 raise
         return None
-
-
-class DataMonitoringReportTestResultsSchema(BaseModel):
-    results: Dict[Optional[str], List[TestResultSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
-    invocation: InvocationSchema
-
-
-class DataMonitoringReportTestRunsSchema(BaseModel):
-    runs: Dict[Optional[str], List[TestRunSchema]] = dict()
-    totals: Dict[Optional[str], TotalsSchema] = dict()
 
 
 class WarehouseInfo(BaseModel):
