@@ -1,4 +1,11 @@
 {% macro get_source_freshness_results(days_back = 7, invocations_per_test = 720) %}
+    {% set source_freshness_results_relation = ref('elementary', 'dbt_source_freshness_results') %}
+    {% set error_after_column_exists = elementary.column_exists_in_relation(source_freshness_results_relation, 'error_after') %}
+
+    {% set sources_relation = ref('elementary', 'dbt_sources') %}
+    {% set freshness_description_column_exists = elementary.column_exists_in_relation(sources_relation, 'freshness_description') %}
+
+
     {% set select_source_freshness_results %}
         with dbt_source_freshness_results as (
             select
@@ -22,9 +29,12 @@
             freshness.generated_at,
             freshness.status,
             freshness.normalized_status,
-            freshness.warn_after,
-            freshness.error_after,
-            freshness.filter,
+            {# backwards compatibility - these fields were added together #}
+            {% if error_after_column_exists %}
+                freshness.error_after,
+                freshness.warn_after,
+                freshness.filter,
+            {% endif %}
             freshness.max_loaded_at_time_ago_in_s,
             freshness.snapshotted_at,
             freshness.invocation_id,
@@ -41,8 +51,13 @@
             sources.freshness_error_after as source_freshness_error_after,
             sources.freshness_warn_after as source_freshness_warn_after,
             sources.freshness_filter as source_freshness_filter,
-            sources.freshness_description,
-            sources.relation_name
+            sources.relation_name,
+            {# backwards compatibility #}
+            {% if freshness_description_column_exists %}
+                sources.freshness_description
+            {% else %}
+                'dbt source freshness validates if the data in a table is not updated by calculating if the time elapsed between the test execution to the latest record is above an acceptable SLA threshold.' as freshness_description
+            {% endif %}
         from dbt_source_freshness_results freshness
         join dbt_sources sources on freshness.unique_id = sources.unique_id
         where invocations_rank_index <= {{ invocations_per_test }}
