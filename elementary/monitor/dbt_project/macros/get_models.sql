@@ -1,6 +1,8 @@
 {% macro get_models(exclude_elementary=false) %}
     {% set dbt_models_relation = ref('elementary', 'dbt_models') %}
     {%- if elementary.relation_exists(dbt_models_relation) -%}
+        {% set patch_path_column_exists = elementary.column_exists_in_relation(dbt_models_relation, 'patch_path') %}
+
         --{# TODO: should we group by #}
         {% set get_models_query %}
               with dbt_artifacts_models as (
@@ -15,6 +17,11 @@
                   tags,
                   package_name,
                   description,
+                  materialization,
+                  {# backwards compatibility #}
+                  {% if patch_path_column_exists %}
+                    patch_path,
+                  {% endif %}
                   original_path as full_path
                 from {{ dbt_models_relation }}
                 {% if exclude_elementary %}
