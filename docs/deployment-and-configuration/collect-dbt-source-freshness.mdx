@@ -26,5 +26,5 @@ The command needs to be executed after you run `dbt source freshness` and before
 
 This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
 
-- Note that it needs to be from the same machine.
-- Note that this requires passing `--project-dir` argument.
+- Note that `dbt source freshness` and `upload-source-freshness` needs to run from the same machine.
+- Note that `upload-source-freshness` requires passing `--project-dir` argument.
