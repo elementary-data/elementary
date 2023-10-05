@@ -15,6 +15,7 @@ class ModelRunSchema(ExtendedBaseModel):
     schema_name: Optional[str] = Field(alias="schema", default=None)
     status: str
     execution_time: float
+    compiled_code: Optional[str] = None
     full_refresh: Optional[bool] = None
     materialization: Optional[str] = None
     generated_at: str

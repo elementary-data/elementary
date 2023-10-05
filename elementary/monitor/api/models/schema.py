@@ -82,6 +82,8 @@ class ModelRunsSchema(BaseModel):
     status: str
     last_exec_time: float
     median_exec_time: float
+    compiled_code: Optional[str] = None
+    last_generated_at: str
     exec_time_change_rate: float
     totals: TotalsModelRunsSchema
     runs: List[ModelRunSchema]
