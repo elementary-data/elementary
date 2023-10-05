@@ -83,11 +83,11 @@ with
             table_type,
             case
                 when short_name in ('volume_anomalies', 'freshness_anomalies') and timestamp_column is not null
-                then cast('{"timestamp_column": "' || timestamp_column || '"}' as jsonb)
+                then jsonb_build_object('timestamp_column', timestamp_column)
             end as test_args,
             case
                 when short_name = 'schema_changes_from_baseline'
-                then cast(json_build_object('columns', table_columns.columns) as jsonb)
+                then jsonb_build_object('columns', table_columns.columns)
             end as table_args
         from pending_recommended_tests
         join tables_criticality using (id)
