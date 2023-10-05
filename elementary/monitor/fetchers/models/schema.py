@@ -34,6 +34,7 @@ class ArtifactSchema(ExtendedBaseModel):
     description: Optional[str] = None
     full_path: Optional[str] = None
     meta: Optional[Dict[str, Any]] = None
+    materialization: Optional[str] = None
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):
@@ -59,6 +60,7 @@ class ModelSchema(ArtifactSchema):
     database_name: Optional[str] = None
     schema_name: str
     table_name: str
+    patch_path: Optional[str] = None
 
     def ref(self):
         return f"ref('{self.name}')"
