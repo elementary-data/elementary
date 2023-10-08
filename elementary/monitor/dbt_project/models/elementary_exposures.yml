@@ -1,0 +1,6 @@
+version: 2
+
+models:
+  - name: elementary_exposures
+    description: >
+      Elementary enriched exposure metadata

@@ -1,4 +1,4 @@
-{% set exposures_relation = elementary.get_elementary_relation("enriched_exposures") %}
+{% set exposures_relation = ref('elementary_cli', 'enriched_exposures') %}
 {% if not exposures_relation %}
     {% set exposures_relation = ref("elementary", "dbt_exposures") %}
 {% endif %}
