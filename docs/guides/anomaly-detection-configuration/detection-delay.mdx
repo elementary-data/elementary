@@ -10,6 +10,7 @@ detection_delay:
 ```
 
 The duration for retracting the detection period.
+That's useful in cases which the latest data should be excluded from the test. For example, this can happen because of scheduling issues- if the test is running before the table is populated for some reason. The detection delay is the period of time to ignore, after the detection period.
 
 - _Default: 0_
 - _Relevant tests: Anomaly detection tests with `timestamp_column`_
