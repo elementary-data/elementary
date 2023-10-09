@@ -522,13 +522,13 @@ def report(
     "--slack-report-url",
     type=str,
     default=None,
-    help="DEPRECATED! - The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+    help="DEPRECATED! - The URL for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
 )
 @click.option(
     "--report-url",
     type=str,
     default=None,
-    help="The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+    help="The URL for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
 )
 @click.option(
     "--disable-passed-test-metrics",

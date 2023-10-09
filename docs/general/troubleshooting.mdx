@@ -17,7 +17,7 @@ If you get an empty report, there are several steps to understand what went wron
 - If the table does not exist - refer to the [dbt package installation guide](/quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
 - If the table exists but has no data - Did you execute `dbt test` since deploying the package and creating the models?
 - If yes, make sure the table was created as an incremental table (not a regular table or view).
-- If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
+- If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full-refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
 
 - Still no data in the table? Reach out to the elementary team at [#support](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) on Slack.
 
