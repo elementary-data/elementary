@@ -288,4 +288,4 @@ class DbtRunner(BaseDbtRunner):
         installed_package_names = set(self._get_installed_packages_names())
         required_package_names = set(self._get_required_packages_names())
         if not required_package_names.issubset(installed_package_names):
-            self.deps(quiet=True)
+            self.deps()
