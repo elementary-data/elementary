@@ -106,8 +106,10 @@ class DbtRunner(BaseDbtRunner):
             return False, output
         return True, output
 
-    def deps(self, quiet: bool = False) -> bool:
-        success, _ = self._run_command(command_args=["deps"], quiet=quiet)
+    def deps(self, quiet: bool = False, capture_output: bool = True) -> bool:
+        success, _ = self._run_command(
+            command_args=["deps"], quiet=quiet, capture_output=capture_output
+        )
         return success
 
     def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
