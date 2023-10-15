@@ -1,5 +1,5 @@
 {% macro get_exposures() %}
-    {% set exposures_relation = ref('elementary', 'enriched_exposures') %}
+    {% set exposures_relation = ref('elementary_cli', 'enriched_exposures') %}
     {% if not elementary.relation_exists(exposures_relation) %}
         {% set exposures_relation = ref('elementary', 'dbt_exposures') %}
     {% endif %}
