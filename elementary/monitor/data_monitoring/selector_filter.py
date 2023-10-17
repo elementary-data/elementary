@@ -134,4 +134,13 @@ class SelectorFilter:
 
     @staticmethod
     def _can_use_fetcher(selector):
-        return "statuses" not in selector and "resource_types" not in selector
+        non_dbt_selectors = [
+            "last_invocation",
+            "invocation_id",
+            "invocation_time",
+            "statuses",
+            "resource_types",
+        ]
+        return all(
+            [selector_type not in selector for selector_type in non_dbt_selectors]
+        )
