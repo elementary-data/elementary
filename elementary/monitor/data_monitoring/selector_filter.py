@@ -31,7 +31,7 @@ class SelectorFilter:
     def _parse_selector(self, selector: Optional[str] = None) -> SelectorFilterSchema:
         data_monitoring_filter = SelectorFilterSchema()
         if selector:
-            if self.selector_fetcher:
+            if self.selector_fetcher and self._can_use_fetcher(selector):
                 if self.tracking:
                     self.tracking.set_env("select_method", "dbt selector")
                 node_names = self.selector_fetcher.get_selector_results(
@@ -131,3 +131,7 @@ class SelectorFilter:
                 if value and selector != "selector":
                     return False
         return True
+
+    @staticmethod
+    def _can_use_fetcher(selector):
+        return "statuses" not in selector and "resource_types" not in selector
