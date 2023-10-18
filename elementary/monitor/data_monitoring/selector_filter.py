@@ -152,6 +152,9 @@ class SelectorFilter:
     @staticmethod
     def validate_report_selector(selector):
         # If we start supporting multiple selectors we need to change this logic
+        if not selector:
+            return
+
         valid_report_selectors = ["last_invocation", "invocation_id", "invocation_time"]
         if all(
             [selector_type not in selector for selector_type in valid_report_selectors]
@@ -161,6 +164,9 @@ class SelectorFilter:
     @staticmethod
     def validate_alert_selector(selector):
         # If we start supporting multiple selectors we need to change this logic
+        if not selector:
+            return
+
         invalid_alert_selectors = [
             "last_invocation",
             "invocation_id",

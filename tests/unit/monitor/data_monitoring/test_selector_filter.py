@@ -164,6 +164,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
 
 @Parametrization.autodetect_parameters()
+@Parametrization.case(name="None", selector=None, should_raise=False)
 @Parametrization.case(
     name="report filter1",
     selector="invocation_id:mock_invocation_id",
@@ -191,6 +192,7 @@ def test_validate_report_selector(selector, should_raise):
 
 
 @Parametrization.autodetect_parameters()
+@Parametrization.case(name="None", selector=None, should_raise=False)
 @Parametrization.case(
     name="report filter1",
     selector="invocation_id:mock_invocation_id",
