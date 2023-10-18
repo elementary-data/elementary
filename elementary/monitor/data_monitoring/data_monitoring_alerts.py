@@ -22,6 +22,7 @@ from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
 from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -43,6 +44,8 @@ class DataMonitoringAlerts(DataMonitoring):
         global_suppression_interval: int = 0,
         override_config: bool = False,
     ):
+
+        SelectorFilter.validate_alert_selector(filter)
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
