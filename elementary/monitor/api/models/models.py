@@ -27,9 +27,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-YAML_FILE_EXTENSION = ".yml"
-SQL_FILE_EXTENSION = ".sql"
-
 
 class ModelsAPI(APIClient):
     def __init__(self, dbt_runner: BaseDbtRunner):
