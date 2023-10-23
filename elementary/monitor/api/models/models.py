@@ -223,15 +223,16 @@ class ModelsAPI(APIClient):
             raise Exception("Artifact full path can't be null")
 
         split_artifact_path = artifact.full_path.split(os.path.sep)
-        artifact_file_name = split_artifact_path[-1]
 
-        # If source, change models directory into sources and file extension from .yml to .sql
+        # If source, change models directory into sources
         if isinstance(artifact, SourceSchema):
             if split_artifact_path[0] == "models":
                 split_artifact_path[0] = "sources"
-            if artifact_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail = artifact_file_name.rpartition(YAML_FILE_EXTENSION)
-                split_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
+
+        # If source, change models directory into sources
+        if isinstance(artifact, ExposureSchema):
+            if split_artifact_path[0] == "models":
+                split_artifact_path[0] = "exposures"
 
         # Add package name to model path
         if artifact.package_name:

@@ -49,26 +49,20 @@ class GroupsAPI(APIClient):
         dbt_group: dict,
         artifact: GROUPABLE_ARTIFACT,
     ) -> None:
-        if (
-            artifact.unique_id is None
-            or artifact.normalized_full_path is None
-            or not artifact.normalized_full_path.endswith(".sql")
-        ):
+        if artifact.unique_id is None or artifact.normalized_full_path is None:
             return
+
         artifact_full_path_split = artifact.normalized_full_path.split(posixpath.sep)
-        for part in artifact_full_path_split:
-            if part.endswith(".sql"):
-                if FILES_GROUP_KEYWORD in dbt_group:
-                    if artifact.unique_id not in dbt_group[FILES_GROUP_KEYWORD]:
-                        dbt_group[FILES_GROUP_KEYWORD].append(
-                            self._get_group_item(artifact)
-                        )
-                else:
-                    dbt_group[FILES_GROUP_KEYWORD] = [self._get_group_item(artifact)]
-            else:
-                if part not in dbt_group:
-                    dbt_group[part] = {}
-                dbt_group = dbt_group[part]
+        for part in artifact_full_path_split[:-1]:
+            if part not in dbt_group:
+                dbt_group[part] = {}
+            dbt_group = dbt_group[part]
+
+        if FILES_GROUP_KEYWORD in dbt_group:
+            if artifact.unique_id not in dbt_group[FILES_GROUP_KEYWORD]:
+                dbt_group[FILES_GROUP_KEYWORD].append(self._get_group_item(artifact))
+        else:
+            dbt_group[FILES_GROUP_KEYWORD] = [self._get_group_item(artifact)]
 
     def get_tags_group(
         self,
