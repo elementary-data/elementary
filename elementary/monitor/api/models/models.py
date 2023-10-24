@@ -226,7 +226,7 @@ class ModelsAPI(APIClient):
             if split_artifact_path[0] == "models":
                 split_artifact_path[0] = "sources"
 
-        # If source, change models directory into sources
+        # If exposure, change models directory into exposures
         if isinstance(artifact, ExposureSchema):
             if split_artifact_path[0] == "models":
                 split_artifact_path[0] = "exposures"
