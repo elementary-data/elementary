@@ -1,9 +1,13 @@
 from unittest import mock
 
 import pytest
+from parametrization import Parametrization
 
 from elementary.monitor.data_monitoring.schema import ResourceType, Status
-from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
+from elementary.monitor.data_monitoring.selector_filter import (
+    InvalidSelectorError,
+    SelectorFilter,
+)
 from tests.mocks.anonymous_tracking_mock import MockAnonymousTracking
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
@@ -157,6 +161,64 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     assert dbt_runner_get_filter.resource_types is None
     assert dbt_runner_get_filter.statuses == []
     assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "blabla:blublu"
+
+
+@Parametrization.autodetect_parameters()
+@Parametrization.case(name="None", selector=None, should_raise=False)
+@Parametrization.case(
+    name="report filter1",
+    selector="invocation_id:mock_invocation_id",
+    should_raise=False,
+)
+@Parametrization.case(
+    name="report filter2",
+    selector="invocation_time:mock_invocation_time",
+    should_raise=False,
+)
+@Parametrization.case(
+    name="report filter3", selector="last_invocation", should_raise=False
+)
+@Parametrization.case(name="alerts filter1", selector="model=blabla", should_raise=True)
+@Parametrization.case(name="alerts filter2", selector="tag=blabla", should_raise=True)
+@Parametrization.case(
+    name="alerts filter3", selector="statuses=blabla", should_raise=True
+)
+def test_validate_report_selector(selector, should_raise):
+    if should_raise:
+        with pytest.raises(InvalidSelectorError):
+            SelectorFilter.validate_report_selector(selector)
+    else:
+        SelectorFilter.validate_report_selector(selector)
+
+
+@Parametrization.autodetect_parameters()
+@Parametrization.case(name="None", selector=None, should_raise=False)
+@Parametrization.case(
+    name="report filter1",
+    selector="invocation_id:mock_invocation_id",
+    should_raise=True,
+)
+@Parametrization.case(
+    name="report filter2",
+    selector="invocation_time:mock_invocation_time",
+    should_raise=True,
+)
+@Parametrization.case(
+    name="report filter3", selector="last_invocation", should_raise=True
+)
+@Parametrization.case(
+    name="alerts filter1", selector="model=blabla", should_raise=False
+)
+@Parametrization.case(name="alerts filter2", selector="tag=blabla", should_raise=False)
+@Parametrization.case(
+    name="alerts filter3", selector="statuses=blabla", should_raise=False
+)
+def test_validate_alerts_selector(selector, should_raise):
+    if should_raise:
+        with pytest.raises(InvalidSelectorError):
+            SelectorFilter.validate_alert_selector(selector)
+    else:
+        SelectorFilter.validate_alert_selector(selector)
 
 
 @pytest.fixture
