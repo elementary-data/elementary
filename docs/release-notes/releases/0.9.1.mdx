@@ -1,0 +1,40 @@
+---
+title: "Elementary 0.9.1"
+sidebarTitle: "0.9.1"
+---
+
+_July 20, 2023: [v0.9.1 Python](https://github.com/elementary-data/elementary/releases/tag/v0.9.1), [v0.9.0 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.9.0)_
+
+### 🔥 What's new?
+
+- **New Seasonality Options: hour_of_day and hour_of_week** 🌞🌙
+  - Thanks to the brilliant contribution from [Moss Pauly](https://elementary-community.slack.com/team/U04A3D7GKTQ), you now have two new seasonality options: hour_of_day and hour_of_week.
+  - These options will help in making the anomaly detection tests more accurate for datasets with strong seasonality impact.
+  - Check out the [docs](https://docs.elementary-data.com/guides/anomaly-detection-configuration/seasonality)
+- **Data for calculating Quality Score** 📊
+  - We made the following changes to help calculating data sets quality score (refer to [this great article](https://www.getdbt.com/blog/data-quality-dimensions/) for more info):
+    - We've added two new columns, elementary_test_results.failed_row_count and dbt_tests.quality_dimension. This data enables you to gain deeper insights into data quality and better track your data pipeline's health.
+    - We automatically fill these fields for common test (dbt, dbt_utils, and dbt_expectations), if you would like them to work for other test, or overwrite the default ones, you will need to fill the test's meta with:
+      - quality_dimension - Name of the quality dimension this test measures.
+      - failed_row_count_calc - An SQL expression to calculate the amount of failed rows from the test (count(\*), sum(n_records), etc).
+    - Thank you [Saurabh Jha](https://elementary-community.slack.com/team/U04BKHPH4HY) for working with us on this!
+    - This feature is still experimental, and is not reflected in the report nor the alerts.
+- **Alert Suppression in CLI** 🚦
+  - Now, you can suppress alerts in the Command Line Interface (CLI) using the --suppression-interval flag.
+  - This feature gives you more control over your alerts and helps you manage notifications effectively.
+  - Check out the [docs](https://docs.elementary-data.com/quickstart/send-slack-alerts)
+
+### 💫 More changes
+
+- **Order Slack messages by test run time** ⏰
+  - We've added a new option to order Slack messages by test run time. This makes it easier to track test results and prioritize action items - Thanks [Willi Mueller](https://elementary-community.slack.com/team/U04NG6HNZC4) for suggesting!
+- **Set SQL expression as timestamp_column**
+  - You can now set an SQL expression as the timestamp column, offering more flexibility in handling time-based data. Fantastic idea from [Sham Sreedharan](https://elementary-community.slack.com/team/U04RSS9U9TL), and solves use cases raised by [Shay Misgav](https://elementary-community.slack.com/team/U059UGE5HJ7), [Renee Cooper](https://elementary-community.slack.com/team/U057SD8CBEY), [Steve Luk](https://elementary-community.slack.com/team/U04E19YNSEB) and [FABIEN RYCKOORT](https://elementary-community.slack.com/team/U05BPE6DETX).
+- **Support for dbt where Parameter**
+  - Thanks [Taha Bel Khayate](https://elementary-community.slack.com/team/U05EVCEM1EJ) for surfacing.
+
+### 🐛 Bugfix 🐛
+
+- We've resolved a pesky bug that caused dbt_columns to malfunction in specific access configurations when using BigQuery.
+- Table anomalies tests fix - Reported by [Scott Anderson](https://elementary-community.slack.com/team/U05654UL877) !
+- New dimension values will no linger cause dimension anomalies test to fail - Thanks [Jason Deng](https://elementary-community.slack.com/team/U055Q3Y3PEE) for reporting!
