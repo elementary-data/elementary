@@ -65,7 +65,7 @@ with
             lower(schema_name) as schema_name,
             lower(table_name) as table_name,
             json_agg(json_build_object('name', lower(column_name), 'data_type', lower(data_type))) as columns
-        from {{ ref("elementary", "dbt_columns") }}
+        from {{ ref("elementary", "information_schema_columns") }}
         group by 1, 2, 3
     ),
 
@@ -83,11 +83,11 @@ with
             table_type,
             case
                 when short_name in ('volume_anomalies', 'freshness_anomalies') and timestamp_column is not null
-                then cast('{"timestamp_column": "' || timestamp_column || '"}' as jsonb)
+                then jsonb_build_object('timestamp_column', timestamp_column)
             end as test_args,
             case
                 when short_name = 'schema_changes_from_baseline'
-                then cast(json_build_object('columns', table_columns.columns) as jsonb)
+                then jsonb_build_object('columns', table_columns.columns)
             end as table_args
         from pending_recommended_tests
         join tables_criticality using (id)

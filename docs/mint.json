@@ -149,7 +149,8 @@
             "guides/anomaly-detection-configuration/event_timestamp_column",
             "guides/anomaly-detection-configuration/update_timestamp_column",
             "guides/anomaly-detection-configuration/ignore_small_changes",
-            "guides/anomaly-detection-configuration/fail_on_zero"
+            "guides/anomaly-detection-configuration/fail_on_zero",
+            "guides/anomaly-detection-configuration/detection-delay"
           ]
         }
       ]

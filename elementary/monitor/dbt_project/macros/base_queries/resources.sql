@@ -92,8 +92,8 @@
 
 {% macro get_resources_columns() %}
     {% set resources_columns_query %}
-        with dbt_columns as (
-            select * from {{ ref('elementary', 'dbt_columns') }}
+        with information_schema_columns as (
+            select * from {{ ref('elementary', 'information_schema_columns') }}
         )
 
         select
@@ -103,7 +103,7 @@
             table_name,
             column_name,
             data_type
-        from dbt_columns
+        from information_schema_columns
     {% endset %}
     {% set columns_agate = run_query(resources_columns_query) %}
     {% set columns = elementary.agate_to_dicts(columns_agate) %}

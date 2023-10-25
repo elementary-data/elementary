@@ -27,9 +27,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-YAML_FILE_EXTENSION = ".yml"
-SQL_FILE_EXTENSION = ".sql"
-
 
 class ModelsAPI(APIClient):
     def __init__(self, dbt_runner: BaseDbtRunner):
@@ -85,6 +82,8 @@ class ModelsAPI(APIClient):
                     name=last_model_run.name,
                     status=last_model_run.status,
                     last_exec_time=last_model_run.execution_time,
+                    last_generated_at=last_model_run.generated_at,
+                    compiled_code=last_model_run.compiled_code,
                     median_exec_time=median_execution_time,
                     exec_time_change_rate=execution_time_change_rate,
                     totals=totals,
@@ -221,15 +220,16 @@ class ModelsAPI(APIClient):
             raise Exception("Artifact full path can't be null")
 
         split_artifact_path = artifact.full_path.split(os.path.sep)
-        artifact_file_name = split_artifact_path[-1]
 
-        # If source, change models directory into sources and file extension from .yml to .sql
+        # If source, change models directory into sources
         if isinstance(artifact, SourceSchema):
             if split_artifact_path[0] == "models":
                 split_artifact_path[0] = "sources"
-            if artifact_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail = artifact_file_name.rpartition(YAML_FILE_EXTENSION)
-                split_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
+
+        # If exposure, change models directory into exposures
+        if isinstance(artifact, ExposureSchema):
+            if split_artifact_path[0] == "models":
+                split_artifact_path[0] = "exposures"
 
         # Add package name to model path
         if artifact.package_name:
