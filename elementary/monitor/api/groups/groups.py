@@ -53,6 +53,12 @@ class GroupsAPI(APIClient):
             return
 
         artifact_full_path_split = artifact.normalized_full_path.split(posixpath.sep)
+        if isinstance(artifact, NormalizedExposureSchema):
+            # For exposures, we want the path to be the path in the BI
+            artifact_full_path_split = artifact_full_path_split[
+                :2
+            ] + artifact.fqn.split("/")
+
         for part in artifact_full_path_split[:-1]:
             if part not in dbt_group:
                 dbt_group[part] = {}
