@@ -91,19 +91,22 @@
 
 
 {% macro get_resources_columns() %}
-    {% set resources_columns_query %}
-        with information_schema_columns as (
-            select * from {{ ref('elementary', 'information_schema_columns') }}
-        )
+    {% set columns_relation = ref('elementary', 'enriched_columns') %}
+    {% set column_name_field = 'name' %}
+    {% if not elementary.relation_exists(columns_relation) %}
+        {% set columns_relation = ref('elementary', 'dbt_columns') %}
+        {% set column_name_field = 'column_name' %}
+    {% endif %}
 
+    {% set resources_columns_query %}
         select
             full_table_name,
             database_name,
             schema_name,
             table_name,
-            column_name,
+            {{ column_name_field }} as column_name,
             data_type
-        from information_schema_columns
+        from {{ columns_relation }}
     {% endset %}
     {% set columns_agate = run_query(resources_columns_query) %}
     {% set columns = elementary.agate_to_dicts(columns_agate) %}
