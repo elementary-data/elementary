@@ -54,7 +54,9 @@ class GroupsAPI(APIClient):
 
         artifact_full_path_split = artifact.normalized_full_path.split(posixpath.sep)
         if isinstance(artifact, NormalizedExposureSchema):
-            # For exposures, we want the path to be the path in the BI
+            # For exposures, we want the path to be the path in the BI.
+            # We want to append to it the first 2 elements of the full path - which are always <package name>/exposures.
+            # NOTE - if there is no path provided in the BI, the FQN will just be the exposure name.
             artifact_full_path_split = artifact_full_path_split[
                 :2
             ] + artifact.fqn.split("/")
