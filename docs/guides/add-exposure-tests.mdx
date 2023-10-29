@@ -33,13 +33,12 @@ exposures:
 ```
 
 <Tip>
-  You can read up about exposures and how to add them at [the dbt docs
-  site](https://docs.getdbt.com/docs/build/exposures)
+  You can read up about exposures and how to add them at [dbt documentation](https://docs.getdbt.com/docs/build/exposures)
 </Tip>
 
 ### Adding the Elementary exposure information
 
-For each exposure wish to be verified, you add a new property called `meta`:
+For each exposure you wish to verify, add a new property called `meta`:
 
 ```yml
 version: 2
@@ -65,8 +64,7 @@ exposures:
 ```
 
 <Tip>
-  In the Elementary Cloud, the exposures and exposure validation tests are added
-  automatically, according to the actual dependency if your BI tool.
+  In Elementary Cloud, the exposures and exposure validation tests are added automatically, leveraging an integration with your BI tool.
 </Tip>
 
 You can optionally also specify the column data type (`data_type`)
@@ -143,7 +141,7 @@ For each module schema you wish to verify the exposure dependencies, add the ele
 
 ```
 
-We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
+We recommend adding a tag to the tests so you can execute these in a dedicated run using the selection parameter `--select tag:elementary`.
 
 Upon running the tests, if breaking changes are detected in the model, the test will fail and in the test result query you'll be able to see the reasons:
 
@@ -154,4 +152,4 @@ UNION ALL SELECT 'customers' as exposure, 'https://your.bi.tool/dashboards/1' as
 
 ## What does it mean when a test fails?
 
-When a test fails, it means that an exposure is potentially broken due to a missing or wrongly-typed column. Open the your BI tool to validate, and if you make any changes to your dashboards be sure to update the `exposures.yml` and your model schema accordingly.
+When a test fails, it means that an exposure is potentially broken due to a missing or wrongly-typed column. Open your BI tool to validate, and if you make any changes to your dashboards be sure to update the `exposures.yml` and your model schema accordingly.
