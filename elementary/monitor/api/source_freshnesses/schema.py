@@ -11,6 +11,7 @@ class DbtSourceFreshnessResultSchema(BaseModel):
     error_message: Optional[str] = None
     max_loaded_at_time_ago_in_s: Optional[float] = None
     max_loaded_at: Optional[str] = None
+    detected_at: Optional[str] = None
 
 
 class SourceFreshnessMetadataSchema(BaseModel):
@@ -27,6 +28,7 @@ class SourceFreshnessMetadataSchema(BaseModel):
     test_sub_type: str
     description: Optional[str] = None
     configuration: dict
+    elementary_unique_id: str
 
 
 class SourceFreshnessResultSchema(BaseModel):
@@ -54,3 +56,4 @@ class SourceFreshnessInvocationsSchema(BaseModel):
 class SourceFreshnessRunSchema(BaseModel):
     metadata: SourceFreshnessMetadataSchema
     test_runs: Optional[SourceFreshnessInvocationsSchema]
+    test_results: DbtSourceFreshnessResultSchema

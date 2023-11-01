@@ -76,6 +76,7 @@ class SourceFreshnessesAPI(APIClient):
                         error_message=source_freshness_results_db_row.error,
                         max_loaded_at_time_ago_in_s=source_freshness_results_db_row.max_loaded_at_time_ago_in_s,
                         max_loaded_at=source_freshness_results_db_row.max_loaded_at,
+                        detected_at=source_freshness_results_db_row.generated_at,
                     ),
                 )
             )
@@ -105,6 +106,13 @@ class SourceFreshnessesAPI(APIClient):
                     test_runs=source_freshness_invocations[
                         source_freshness_result.unique_id
                     ],
+                    test_results=DbtSourceFreshnessResultSchema(
+                        status=source_freshness_result.normalized_status,
+                        error_message=source_freshness_result.error,
+                        max_loaded_at_time_ago_in_s=source_freshness_result.max_loaded_at_time_ago_in_s,
+                        max_loaded_at=source_freshness_result.max_loaded_at,
+                        detected_at=source_freshness_result.generated_at,
+                    ),
                 )
             )
 
@@ -167,6 +175,7 @@ class SourceFreshnessesAPI(APIClient):
 
         return SourceFreshnessMetadataSchema(
             test_unique_id=source_freshness_results_db_row.unique_id,
+            elementary_unique_id=source_freshness_results_db_row.source_freshness_execution_id,
             database_name=source_freshness_results_db_row.database_name,
             schema_name=source_freshness_results_db_row.schema_name,
             table_name=source_freshness_results_db_row.table_name,
