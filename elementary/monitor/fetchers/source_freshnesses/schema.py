@@ -23,12 +23,12 @@ class SourceFreshnessResultDBRowSchema(ExtendedBaseModel):
     table_name: str
     test_type: str
     test_sub_type: str
-    loaded_at_field: str
+    loaded_at_field: Optional[str] = None
     meta: dict
     owners: Optional[List[str]]
     tags: Optional[List[str]]
-    error_after: dict
-    warn_after: dict
+    error_after: Optional[dict] = None
+    warn_after: Optional[dict] = None
     filter: Optional[str] = None
     relation_name: str
     invocations_rank_index: int
