@@ -58,7 +58,7 @@ ArtifactSchemaType = TypeVar("ArtifactSchemaType", bound=ArtifactSchema)
 
 class ModelSchema(ArtifactSchema):
     database_name: Optional[str] = None
-    schema_name: str
+    schema_name: Optional[str] = None
     table_name: str
     patch_path: Optional[str] = None
 
@@ -69,7 +69,7 @@ class ModelSchema(ArtifactSchema):
 class SourceSchema(ArtifactSchema):
     source_name: Optional[str] = None
     database_name: Optional[str] = None
-    schema_name: str
+    schema_name: Optional[str] = None
     table_name: str
 
     def ref(self):

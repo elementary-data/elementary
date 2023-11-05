@@ -44,7 +44,7 @@ class TestMetadataSchema(BaseModel):
     test_unique_id: str
     elementary_unique_id: str
     database_name: Optional[str] = None
-    schema_name: str
+    schema_name: Optional[str] = None
     table_name: Optional[str] = None
     column_name: Optional[str] = None
     test_name: str

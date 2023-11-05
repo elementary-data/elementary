@@ -17,7 +17,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     elementary_unique_id: str
     detected_at: str
     database_name: Optional[str] = None
-    schema_name: str
+    schema_name: Optional[str] = None
     table_name: Optional[str] = None
     column_name: Optional[str]
     test_type: str
