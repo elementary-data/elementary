@@ -1,0 +1,54 @@
+---
+title: "JSON schema"
+---
+
+#### JSON schema
+
+`elementary.json_schema`
+
+Allows validating that a string column matches a given JSON schema. The test expects a JSON schema as input,
+defined according to the [JSON schema standard](https://json-schema.org/), defined in YAML format (see an example below).
+
+This test along with the relevant JSON schema can be [auto-generated](/guides/add-schema-tests#auto-generate-schema-tests).
+
+_Note: This test relies on our [Python tests capability](/guides/python-tests), and is currently only supported for
+Snowflake and BigQuery data warehouses._
+
+<CodeGroup>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.json_schema: <json schema parameters>
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    columns:
+      - name: raw_event_data
+        tests:
+          - elementary.json_schema:
+              type: object
+              properties:
+                event_id:
+                  type: integer
+                event_name:
+                  type: string
+                event_args:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - event_id
+                - event_name
+```
+
+</CodeGroup>

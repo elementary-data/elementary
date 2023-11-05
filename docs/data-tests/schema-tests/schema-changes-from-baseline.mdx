@@ -1,0 +1,89 @@
+---
+title: "Schema Changes From Baseline"
+---
+
+#### Schema changes from baseline
+
+`elementary.schema_changes_from_baseline`
+
+Checks for schema changes against baseline columns defined in a source's or model's configuration.
+For this test to work, the configuration should contain columns and data types.
+
+The initial configuration needed for this test can be [auto-generated](/guides/add-schema-tests#auto-generate-schema-tests) (see details below).
+
+Supported parameters for the test:
+
+- `fail_on_added` - If set, the test will fail if there are columns in the table that do not exist in the baseline (default:
+  False - meaning added columns won't cause the test to fail).
+- `enforce_types` - If set, the test will raise an error if there are columns that are defined without a data type (default:
+  False - in this case the test will not fail, but instead will only verify that the column exists and not its type)
+
+<CodeGroup>
+
+```yml Sources
+version: 2
+
+sources:
+  - name: < source name >
+    database: < database name >
+    schema: < schema name >
+    tables:
+      - name: < table name >
+        columns:
+          - name: < column 1 >
+            data_type: < data type 1 >
+          - name: < column 2 >
+            data_type: < data type 2 >
+        tests:
+          - elementary.schema_changes_from_baseline
+```
+
+```yml Sources example
+version: 2
+
+sources:
+  - name: 'my_non_dbt_data'
+    database: 'raw_events'
+    schema: 'product'
+    tables:
+      - name: 'raw_product_login_events'
+        columns:
+          - name: event_name
+            data_type: text
+          - name: event_id
+            data_type: integer
+        tests:
+          - elementary.schema_changes_from_baseline
+              tags: ["elementary"]
+```
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column 1 >
+        data_type: < data type 1 >
+      - name: < column 2 >
+        data_type: < data type 1 >
+    tests:
+      - elementary.schema_changes_from_baseline
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    columns:
+      - name: event_name
+        data_type: text
+      - name: event_id
+        data_type: integer
+    tests:
+      - elementary.schema_changes_from_baseline:
+          tags: ["elementary"]
+```
+
+</CodeGroup>
