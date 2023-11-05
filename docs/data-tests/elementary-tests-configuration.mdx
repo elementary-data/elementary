@@ -1,34 +1,43 @@
 ---
-title: "Anomaly detection tests configuration"
-sidebarTitle: "Tests configuration"
+title: "Tests configuration"
 ---
 
-The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
+<Tabs>
+    <Tab title="Elementary Cloud">
+        In Elementary Cloud you can configure your tests in the UI.
+        This requires you to [connect a code repository](/cloud/integrations/code-repo/connect-code-repo) to your project.
+        Configuring a test will open a pull request / merge request in your code repository.
+    </Tab>
+    <Tab title="Elementary OSS">
+        The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
 
-The configuration of Elementary is dbt native and follows the same priorities and inheritance.
-The more granular and specific configuration overrides the less granular one.
+        The configuration of Elementary is dbt native and follows the same priorities and inheritance.
+        The more granular and specific configuration overrides the less granular one.
 
-Elementary searches and prioritizes configuration in the following order:
+        Elementary searches and prioritizes configuration in the following order:
 
-**For models tests:**
+        **For models tests:**
 
-1. Test arguments.
-2. Tests path configuration under `tests` key in `dbt_project.yml`.
-3. Model configuration.
-4. Path configuration under `models` key in `dbt_project.yml`.
-5. Global vars in `dbt_project.yml`.
+        1. Test arguments.
+        2. Tests path configuration under `tests` key in `dbt_project.yml`.
+        3. Model configuration.
+        4. Path configuration under `models` key in `dbt_project.yml`.
+        5. Global vars in `dbt_project.yml`.
 
-**For sources tests:**
+        **For sources tests:**
 
-1. Test arguments.
-2. Tests path configuration under `tests` key in `dbt_project.yml`.
-3. Table configuration.
-4. Source configuration.
-5. Global vars in `dbt_project.yml`.
+        1. Test arguments.
+        2. Tests path configuration under `tests` key in `dbt_project.yml`.
+        3. Table configuration.
+        4. Source configuration.
+        5. Global vars in `dbt_project.yml`.
+    </Tab>
+
+</Tabs>
 
 ---
 
-## Tests configuration params
+## Anomaly Tests configuration params
 
 <Tip>
   If your data set has a timestamp column that represents the creation time of a
