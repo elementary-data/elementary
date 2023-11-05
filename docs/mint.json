@@ -31,6 +31,10 @@
     {
       "name": "Elementary Cloud",
       "url": "cloud"
+    },
+    {
+      "name": "Data tests",
+      "url": "data-tests"
     }
   ],
   "topbarCtaButton": {
@@ -104,12 +108,12 @@
             "quickstart/send-slack-alerts",
             "guides/alerts-configuration"
           ]
-        },
-        "guides/add-elementary-tests",
-        "guides/add-schema-tests",
-        "guides/add-exposure-tests",
-        "guides/python-tests"
+        }
       ]
+    },
+    {
+      "group": "Features",
+      "pages": ["data-tests", "features/ci"]
     },
     {
       "group": "Deployment and Configuration",
@@ -120,48 +124,6 @@
         "deployment-and-configuration/collect-dbt-source-freshness",
         "understand-elementary/cli-install",
         "understand-elementary/cli-commands"
-      ]
-    },
-    {
-      "group": "Data Anomaly Detection Tests",
-      "pages": [
-        "guides/how-anomaly-detection-works",
-        "guides/data-anomaly-detection",
-        {
-          "group": "Anomaly detection tests",
-          "pages": [
-            "guides/anomaly-detection-tests/volume-anomalies",
-            "guides/anomaly-detection-tests/freshness-anomalies",
-            "guides/anomaly-detection-tests/event-freshness-anomalies",
-            "guides/anomaly-detection-tests/dimension-anomalies",
-            "guides/anomaly-detection-tests/all-columns-anomalies",
-            "guides/anomaly-detection-tests/column-anomalies"
-          ]
-        },
-        "guides/elementary-tests-configuration",
-        {
-          "group": "Tests params",
-          "pages": [
-            "guides/anomaly-detection-configuration/timestamp-column",
-            "guides/anomaly-detection-configuration/where-expression",
-            "guides/anomaly-detection-configuration/anomaly-sensitivity",
-            "guides/anomaly-detection-configuration/anomaly-direction",
-            "guides/anomaly-detection-configuration/days-back",
-            "guides/anomaly-detection-configuration/backfill-days",
-            "guides/anomaly-detection-configuration/time-bucket",
-            "guides/anomaly-detection-configuration/seasonality",
-            "guides/anomaly-detection-configuration/min-training-set-size",
-            "guides/anomaly-detection-configuration/column-anomalies",
-            "guides/anomaly-detection-configuration/exclude_prefix",
-            "guides/anomaly-detection-configuration/exclude_regexp",
-            "guides/anomaly-detection-configuration/dimensions",
-            "guides/anomaly-detection-configuration/event_timestamp_column",
-            "guides/anomaly-detection-configuration/update_timestamp_column",
-            "guides/anomaly-detection-configuration/ignore_small_changes",
-            "guides/anomaly-detection-configuration/fail_on_zero",
-            "guides/anomaly-detection-configuration/detection-delay"
-          ]
-        }
       ]
     },
     {
@@ -237,6 +199,66 @@
     },
     {
       "group": "Introduction",
+      "pages": ["data-tests/introduction"]
+    },
+    {
+      "group": "Data Anomaly Detection Tests",
+      "pages": [
+        "data-tests/how-anomaly-detection-works",
+        "data-tests/data-anomaly-detection",
+        {
+          "group": "Anomaly detection tests",
+          "pages": [
+            "data-tests/anomaly-detection-tests/volume-anomalies",
+            "data-tests/anomaly-detection-tests/freshness-anomalies",
+            "data-tests/anomaly-detection-tests/event-freshness-anomalies",
+            "data-tests/anomaly-detection-tests/dimension-anomalies",
+            "data-tests/anomaly-detection-tests/all-columns-anomalies",
+            "data-tests/anomaly-detection-tests/column-anomalies"
+          ]
+        },
+        "data-tests/elementary-tests-configuration",
+        {
+          "group": "Tests params",
+          "pages": [
+            "data-tests/anomaly-detection-configuration/timestamp-column",
+            "data-tests/anomaly-detection-configuration/where-expression",
+            "data-tests/anomaly-detection-configuration/anomaly-sensitivity",
+            "data-tests/anomaly-detection-configuration/anomaly-direction",
+            "data-tests/anomaly-detection-configuration/days-back",
+            "data-tests/anomaly-detection-configuration/backfill-days",
+            "data-tests/anomaly-detection-configuration/time-bucket",
+            "data-tests/anomaly-detection-configuration/seasonality",
+            "data-tests/anomaly-detection-configuration/min-training-set-size",
+            "data-tests/anomaly-detection-configuration/column-anomalies",
+            "data-tests/anomaly-detection-configuration/exclude_prefix",
+            "data-tests/anomaly-detection-configuration/exclude_regexp",
+            "data-tests/anomaly-detection-configuration/dimensions",
+            "data-tests/anomaly-detection-configuration/event_timestamp_column",
+            "data-tests/anomaly-detection-configuration/update_timestamp_column",
+            "data-tests/anomaly-detection-configuration/ignore_small_changes",
+            "data-tests/anomaly-detection-configuration/fail_on_zero",
+            "data-tests/anomaly-detection-configuration/detection-delay"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Schema Tests",
+      "pages": [
+        "data-tests/schema-tests/schema-changes",
+        "data-tests/schema-tests/schema-changes-from-baseline",
+        "data-tests/schema-tests/json-schema",
+        "data-tests/schema-tests/generate-schema-tests",
+        "data-tests/schema-tests/exposure-tests"
+      ]
+    },
+    {
+      "group": "Other Tests",
+      "pages": ["data-tests/python-tests"]
+    },
+    {
+      "group": "Introduction",
       "pages": ["cloud/introduction", "cloud/general/security-and-privacy"]
     },
     {
@@ -254,10 +276,6 @@
         "cloud/guides/sync-scheduling",
         "cloud/guides/troubleshoot"
       ]
-    },
-    {
-      "group": "Features",
-      "pages": ["cloud/general/ci"]
     },
     {
       "group": "BI tools integration",
