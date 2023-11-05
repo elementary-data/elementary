@@ -113,7 +113,13 @@
     },
     {
       "group": "Features",
-      "pages": ["data-tests", "features/ci"]
+      "pages": [
+        "features/automated-monitors",
+        "features/multi-env",
+        "features/lineage",
+        "features/catalog",
+        "features/ci"
+      ]
     },
     {
       "group": "Deployment and Configuration",
