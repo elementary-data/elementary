@@ -205,7 +205,10 @@
     },
     {
       "group": "Introduction",
-      "pages": ["data-tests/introduction"]
+      "pages": [
+        "data-tests/introduction",
+        "data-tests/elementary-tests-configuration"
+      ]
     },
     {
       "group": "Data Anomaly Detection Tests",
@@ -223,7 +226,6 @@
             "data-tests/anomaly-detection-tests/column-anomalies"
           ]
         },
-        "data-tests/elementary-tests-configuration",
         {
           "group": "Tests params",
           "pages": [
