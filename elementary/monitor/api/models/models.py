@@ -204,32 +204,32 @@ class ModelsAPI(APIClient):
         artifact_name = artifact.name
         normalized_artifact = json.loads(artifact.json())
         normalized_artifact["model_name"] = artifact_name
+
+        fqn = self._fqn(artifact)
+        normalized_artifact["fqn"] = fqn
         normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(
-            artifact
+            artifact, fqn
         )
-        normalized_artifact["fqn"] = self._fqn(artifact)
 
         return schema_to_normalized_schema_map[type(artifact)](**normalized_artifact)
 
     @classmethod
-    def _normalize_artifact_path(
-        cls,
-        artifact: ArtifactSchemaType,
-    ) -> str:
+    def _normalize_artifact_path(cls, artifact: ArtifactSchemaType, fqn: str) -> str:
         if artifact.full_path is None:
             raise Exception("Artifact full path can't be null")
 
-        split_artifact_path = artifact.full_path.split(os.path.sep)
-
-        # If source, change models directory into sources
-        if isinstance(artifact, SourceSchema):
-            if split_artifact_path[0] == "models":
-                split_artifact_path[0] = "sources"
-
-        # If exposure, change models directory into exposures
         if isinstance(artifact, ExposureSchema):
-            if split_artifact_path[0] == "models":
-                split_artifact_path[0] = "exposures"
+            # For exposures, we want the path to be based on the path in the BI rather than
+            # the file system path of the exposures yaml.
+            # NOTE - if there is no path provided in the BI, the FQN will just be the exposure name.
+            split_artifact_path = ["exposures"] + fqn.split("/")
+        else:
+            split_artifact_path = artifact.full_path.split(os.path.sep)
+
+            # If source, change models directory into sources
+            if isinstance(artifact, SourceSchema):
+                if split_artifact_path[0] == "models":
+                    split_artifact_path[0] = "sources"
 
         # Add package name to model path
         if artifact.package_name:
