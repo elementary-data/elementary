@@ -58,8 +58,14 @@
       "pages": [
         "introduction",
         {
-          "group": "Quickstart",
-          "pages": ["quickstart", "quickstart-cloud", "quickstart-cli"]
+          "group": "Quickstart: Elementary",
+          "icon": "cloud",
+          "pages":["quickstart", "quickstart-cloud"]
+        },
+        {
+          "group": "Quickstart: OSS",
+          "icon": "square-terminal",
+          "pages":["quickstart-cli-package", "quickstart-cli"]
         },
         {
           "group": "Tutorial",
