@@ -229,6 +229,7 @@
         {
           "group": "Tests params",
           "pages": [
+            "data-tests/anomaly-detection-configuration/anomaly-params",
             "data-tests/anomaly-detection-configuration/timestamp-column",
             "data-tests/anomaly-detection-configuration/where-expression",
             "data-tests/anomaly-detection-configuration/anomaly-sensitivity",
