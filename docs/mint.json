@@ -60,12 +60,12 @@
         {
           "group": "Quickstart: Elementary",
           "icon": "cloud",
-          "pages":["quickstart", "quickstart-cloud"]
+          "pages": ["quickstart", "quickstart-cloud"]
         },
         {
           "group": "Quickstart: OSS",
           "icon": "square-terminal",
-          "pages":["quickstart-cli-package", "quickstart-cli"]
+          "pages": ["quickstart-cli-package", "quickstart-cli"]
         },
         {
           "group": "Tutorial",
