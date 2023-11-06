@@ -7,8 +7,6 @@ from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
 class SourceFreshnessResultDBRowSchema(ExtendedBaseModel):
-    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
-
     source_freshness_execution_id: str
     unique_id: str
     max_loaded_at: Optional[str] = None
