@@ -4,6 +4,9 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
+  "modeToggle": {
+    "default": "dark"
+  },
   "favicon": "/elementary_favicon.png",
   "colors": {
     "primary": "#F2386C",
@@ -13,7 +16,7 @@
     "ultraDark": "#E0456C",
     "anchors": "#F2386C",
     "background": {
-      "dark": "#19071F",
+      "dark": "#0F0513",
       "light": "#FFFFFF"
     }
   },
