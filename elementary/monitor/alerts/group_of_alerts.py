@@ -2,11 +2,9 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from elementary.monitor.alerts_v2.model_alert import ModelAlertModel
-from elementary.monitor.alerts_v2.source_freshness_alert import (
-    SourceFreshnessAlertModel,
-)
-from elementary.monitor.alerts_v2.test_alert import TestAlertModel
+from elementary.monitor.alerts.model_alert import ModelAlertModel
+from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
+from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.utils.models import get_shortened_model_name
 
 

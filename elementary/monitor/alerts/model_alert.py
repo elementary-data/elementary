@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from elementary.monitor.alerts_v2.alert import AlertModel
+from elementary.monitor.alerts.alert import AlertModel
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)

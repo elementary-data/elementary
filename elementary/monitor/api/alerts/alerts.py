@@ -5,8 +5,8 @@ from typing import DefaultDict, Dict, List, Union
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.api.alerts.v2.alert_filters import filter_alerts
-from elementary.monitor.api.alerts.v2.schema import (
+from elementary.monitor.api.alerts.alert_filters import filter_alerts
+from elementary.monitor.api.alerts.schema import (
     AlertsSchema,
     ModelAlertsSchema,
     SortedAlertsSchema,
