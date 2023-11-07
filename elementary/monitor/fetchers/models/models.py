@@ -60,6 +60,15 @@ class ModelsFetcher(FetcherClient):
         exposures = (
             json.loads(run_operation_response[0]) if run_operation_response else []
         )
+        exposures = [
+            {
+                **exposure,
+                "raw_queries": json.loads(exposure["raw_queries"])
+                if exposure.get("raw_queries")
+                else None,
+            }
+            for exposure in exposures
+        ]
         exposures = [ExposureSchema(**exposure) for exposure in exposures]
         return exposures
 
