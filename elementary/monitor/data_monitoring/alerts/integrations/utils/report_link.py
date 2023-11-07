@@ -1,10 +1,15 @@
 from enum import Enum
 from typing import Optional
 
-from elementary.monitor.alerts.schema.alert import ReportLinkData
+from pydantic import BaseModel
 
 TEST_RUNS_LINK_TEXT = "View test runs"
 MODEL_RUNS_LINK_TEXT = "View model runs"
+
+
+class ReportLinkData(BaseModel):
+    url: str
+    text: str
 
 
 class ReportPath(Enum):

@@ -3,7 +3,7 @@ import sys
 import click
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring.data_monitoring_alerts import (
+from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
