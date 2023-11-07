@@ -16,7 +16,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.fetchers.alerts.v2.schema import (
+from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,

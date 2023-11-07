@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.api.alerts.v2.alerts import ALERT_TABLES
+from elementary.monitor.api.alerts.alerts import ALERT_TABLES
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 

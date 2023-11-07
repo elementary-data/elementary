@@ -5,7 +5,7 @@ from elementary.monitor.data_monitoring.schema import (
     SelectorFilterSchema,
     Status,
 )
-from elementary.monitor.fetchers.alerts.v2.schema import (
+from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,

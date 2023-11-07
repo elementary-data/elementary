@@ -2,7 +2,7 @@ from typing import List, Union
 
 from pydantic import BaseModel
 
-from elementary.monitor.fetchers.alerts.v2.schema import (
+from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,
