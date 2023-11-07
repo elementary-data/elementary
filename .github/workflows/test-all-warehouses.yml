@@ -38,6 +38,9 @@ jobs:
             databricks_catalog,
             athena,
           ]
+        exclude:
+          - dbt-version: "1.3.0"
+            warehouse-type: athena
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
