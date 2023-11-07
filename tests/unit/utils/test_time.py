@@ -32,3 +32,8 @@ def test_get_formatted_timedelta_hours_delta():
 def test_get_formatted_timedelta_minutes_delta():
     formatted_timedelta = get_formatted_timedelta(3001)
     assert formatted_timedelta == "50 minutes 1s"
+
+
+def test_get_formatted_timedelta_seconds_delta():
+    formatted_timedelta = get_formatted_timedelta(12)
+    assert formatted_timedelta == "12 seconds"
