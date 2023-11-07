@@ -10,12 +10,13 @@ from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts, Grou
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
-from elementary.monitor.api.alerts.alerts import ALERT_TABLES, AlertsAPI
+from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.api.alerts.schema import AlertsSchema
 from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
+from elementary.monitor.data_monitoring.schema import ALERT_TABLES
 from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,

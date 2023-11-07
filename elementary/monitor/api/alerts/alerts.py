@@ -25,11 +25,6 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-ALERT_TABLES = dict(
-    tests="alerts", models="alerts_models", source_freshnesses="alerts_source_freshness"
-)
-
-
 class AlertsAPI(APIClient):
     def __init__(
         self,

@@ -4,11 +4,15 @@ from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.api.alerts.alerts import ALERT_TABLES
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
 logger = get_logger(__name__)
+
+
+ALERT_TABLES = dict(
+    tests="alerts", models="alerts_models", source_freshnesses="alerts_source_freshness"
+)
 
 
 class Status(Enum):
