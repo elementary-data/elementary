@@ -8,12 +8,10 @@ from slack_sdk.models.blocks import SectionBlock
 from elementary.clients.slack.client import SlackClient
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
-from elementary.monitor.alerts_v2.group_of_alerts import GroupedByTableAlerts
-from elementary.monitor.alerts_v2.model_alert import ModelAlertModel
-from elementary.monitor.alerts_v2.source_freshness_alert import (
-    SourceFreshnessAlertModel,
-)
-from elementary.monitor.alerts_v2.test_alert import TestAlertModel
+from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.model_alert import ModelAlertModel
+from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
+from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
 )
