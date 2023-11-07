@@ -89,7 +89,7 @@ class NormalizedAlert:
                 self._get_alert_meta_attrs(SUBSCRIBERS_KEY)
             )
             normalized_alert[OWNERS_KEY] = unpack_and_flatten_and_dedup_list_of_strings(
-                self._get_alert_meta_attrs("owner")
+                normalized_alert.get(OWNERS_KEY)
             )
             normalized_alert[TAGS_FIELD] = unpack_and_flatten_and_dedup_list_of_strings(
                 normalized_alert.get(TAGS_FIELD)

@@ -19,6 +19,7 @@ from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
+from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
@@ -38,6 +39,7 @@ class DataMonitoringReport(DataMonitoring):
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
     ):
+        SelectorFilter.validate_report_selector(filter)
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )

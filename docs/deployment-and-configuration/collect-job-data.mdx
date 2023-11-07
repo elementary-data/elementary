@@ -58,11 +58,11 @@ You can pass job info to Elementary from any orchestration tool as long as you c
 
 The following default environment variables are supported out of the box:
 
-| Orchestrator   | Env vars                                                                                                                                                                                                                                                     |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| dbt cloud      | orchestrator<br/>job_id: `DBT_CLOUD_JOB_ID`<br/>job_run_id: `DBT_CLOUD_RUN_ID`<br/>job_url: generated from `ACCOUNT_ID`, `DBT_CLOUD_PROJECT_ID`, `DBT_CLOUD_JOB_ID`<br/>job_run_url: generated from `ACCOUNT_ID`, `DBT_CLOUD_PROJECT_ID`, `DBT_CLOUD_RUN_ID` |
-| Github actions | orchestrator<br/>job_run_id: `GITHUB_RUN_ID`<br/>job_url: generated from `GITHUB_SERVER_URL`, `GITHUB_REPOSITORY`, `GITHUB_RUN_ID`                                                                                                                           |
-| Airflow        | orchestrator                                                                                                                                                                                                                                                 |
+| Orchestrator   | Env vars                                                                                                                                                                                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| dbt cloud      | orchestrator<br/>job_id: `DBT_CLOUD_JOB_ID`<br/>job_run_id: `DBT_CLOUD_RUN_ID`<br/>job_url: generated from `DBT_ACCOUNT_ID`, `DBT_CLOUD_PROJECT_ID`, `DBT_CLOUD_JOB_ID`<br/>job_run_url: generated from `ACCOUNT_ID`, `DBT_CLOUD_PROJECT_ID`, `DBT_CLOUD_RUN_ID` |
+| Github actions | orchestrator<br/>job_run_id: `GITHUB_RUN_ID`<br/>job_url: generated from `GITHUB_SERVER_URL`, `GITHUB_REPOSITORY`, `GITHUB_RUN_ID`                                                                                                                               |
+| Airflow        | orchestrator                                                                                                                                                                                                                                                     |
 
 ## What if I use dbt cloud + orchestrator?
 

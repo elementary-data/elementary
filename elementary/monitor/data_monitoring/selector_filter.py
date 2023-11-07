@@ -14,6 +14,10 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
+class InvalidSelectorError(Exception):
+    pass
+
+
 class SelectorFilter:
     def __init__(
         self,
@@ -31,7 +35,7 @@ class SelectorFilter:
     def _parse_selector(self, selector: Optional[str] = None) -> SelectorFilterSchema:
         data_monitoring_filter = SelectorFilterSchema()
         if selector:
-            if self.selector_fetcher:
+            if self.selector_fetcher and self._can_use_fetcher(selector):
                 if self.tracking:
                     self.tracking.set_env("select_method", "dbt selector")
                 node_names = self.selector_fetcher.get_selector_results(
@@ -131,3 +135,44 @@ class SelectorFilter:
                 if value and selector != "selector":
                     return False
         return True
+
+    @staticmethod
+    def _can_use_fetcher(selector):
+        non_dbt_selectors = [
+            "last_invocation",
+            "invocation_id",
+            "invocation_time",
+            "statuses",
+            "resource_types",
+        ]
+        return all(
+            [selector_type not in selector for selector_type in non_dbt_selectors]
+        )
+
+    @staticmethod
+    def validate_report_selector(selector):
+        # If we start supporting multiple selectors we need to change this logic
+        if not selector:
+            return
+
+        valid_report_selectors = ["last_invocation", "invocation_id", "invocation_time"]
+        if all(
+            [selector_type not in selector for selector_type in valid_report_selectors]
+        ):
+            raise InvalidSelectorError("Selector is invalid for report: ", selector)
+
+    @staticmethod
+    def validate_alert_selector(selector):
+        # If we start supporting multiple selectors we need to change this logic
+        if not selector:
+            return
+
+        invalid_alert_selectors = [
+            "last_invocation",
+            "invocation_id",
+            "invocation_time",
+        ]
+        if any(
+            [selector_type in selector for selector_type in invalid_alert_selectors]
+        ):
+            raise InvalidSelectorError("Selector is invalid for alerts: ", selector)

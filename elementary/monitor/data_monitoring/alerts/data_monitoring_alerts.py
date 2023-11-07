@@ -6,17 +6,12 @@ from typing import Any, Dict, List, Optional, Union
 from alive_progress import alive_it
 
 from elementary.config.config import Config
-from elementary.monitor.alerts_v2.group_of_alerts import (
-    GroupedByTableAlerts,
-    GroupingType,
-)
-from elementary.monitor.alerts_v2.model_alert import ModelAlertModel
-from elementary.monitor.alerts_v2.source_freshness_alert import (
-    SourceFreshnessAlertModel,
-)
-from elementary.monitor.alerts_v2.test_alert import TestAlertModel
-from elementary.monitor.api.alerts.v2.alerts import ALERT_TABLES, AlertsAPI
-from elementary.monitor.api.alerts.v2.schema import AlertsSchema
+from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts, GroupingType
+from elementary.monitor.alerts.model_alert import ModelAlertModel
+from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
+from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.api.alerts.alerts import ALERT_TABLES, AlertsAPI
+from elementary.monitor.api.alerts.schema import AlertsSchema
 from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )

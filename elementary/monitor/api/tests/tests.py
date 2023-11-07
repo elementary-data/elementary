@@ -6,7 +6,6 @@ from dateutil import tz
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.tests.schema import (
     DbtTestResultSchema,
     ElementaryTestResultSchema,
@@ -37,7 +36,6 @@ class TestsAPI(APIClient):
     ):
         super().__init__(dbt_runner)
         self.tests_fetcher = TestsFetcher(dbt_runner=self.dbt_runner)
-        self.invocations_api = InvocationsAPI(dbt_runner)
         self.test_results_db_rows = self._get_test_results_db_rows(
             days_back=days_back,
             invocations_per_test=invocations_per_test,
