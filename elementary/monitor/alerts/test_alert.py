@@ -64,7 +64,7 @@ class TestAlertModel(AlertModel):
         self.test_type = test_type
         self.test_sub_type = test_sub_type
         self.test_results_description = test_results_description.capitalize()
-        self.test_results_query = test_results_query.strip()
+        self.test_results_query = test_results_query and test_results_query.strip()
         self.test_short_name = test_short_name
         self.other = other or {}
         self.test_params = test_params or {}
