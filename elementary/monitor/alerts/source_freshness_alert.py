@@ -112,7 +112,7 @@ class SourceFreshnessAlertModel(AlertModel):
             id=self.id,
             alert_class_id=self.alert_class_id,
             model_unique_id=self.model_unique_id,
-            detected_at=self.detected_at,
+            detected_at=self.detected_at_str,
             database_name=self.database_name,
             schema_name=self.schema_name,
             owners=self.owners,

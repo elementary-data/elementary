@@ -912,6 +912,7 @@ class SlackIntegration(BaseIntegration):
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)
+            print(template)
             sent_successfully = self.client.send_message(
                 channel_name=channel_name, message=template
             )
