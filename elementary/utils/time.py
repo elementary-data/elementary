@@ -110,8 +110,11 @@ def get_formatted_timedelta(time_ago_in_s: float) -> str:
                 f"{pluralize_string(hours, 'hour', 'hours')} {minutes}m {seconds}s"
             )
         else:
-            duration_sentence = (
-                f"{pluralize_string(minutes, 'minute', 'minutes')} {seconds}s"
-            )
+            if minutes > 0:
+                duration_sentence = (
+                    f"{pluralize_string(minutes, 'minute', 'minutes')} {seconds}s"
+                )
+            else:
+                duration_sentence = f"{pluralize_string(seconds, 'second', 'seconds')}"
 
     return duration_sentence
