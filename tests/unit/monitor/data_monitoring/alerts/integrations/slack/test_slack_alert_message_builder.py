@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from elementary.monitor.alerts.alert import (
+from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builder import (
     PreviewIsTooLongError,
     SlackAlertMessageBuilder,
 )

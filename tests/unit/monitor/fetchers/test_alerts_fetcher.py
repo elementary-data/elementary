@@ -48,7 +48,7 @@ def test_update_sent_alerts(
 def test_skip_alerts(mock_subprocess_run, alerts_fetcher_mock: MockAlertsFetcher):
     # Create 100 alerts
     test_alerts = alerts_fetcher_mock.query_pending_test_alerts()
-    mock_alerts_ids_to_skip = test_alerts.alerts * 20
+    mock_alerts_ids_to_skip = test_alerts * 20
 
     alerts_fetcher_mock.skip_alerts(
         alerts_to_skip=mock_alerts_ids_to_skip, table_name="mock_table"
