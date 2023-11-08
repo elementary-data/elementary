@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, Dict, List, Union
+from typing import DefaultDict, Dict, List, Optional, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -209,12 +209,14 @@ class AlertsAPI(APIClient):
     ) -> List[str]:
         alert_last_times: DefaultDict[
             str,
-            Union[
-                PendingModelAlertSchema,
-                PendingSourceFreshnessAlertSchema,
-                PendingTestAlertSchema,
+            Optional[
+                Union[
+                    PendingModelAlertSchema,
+                    PendingSourceFreshnessAlertSchema,
+                    PendingTestAlertSchema,
+                ]
             ],
-        ] = defaultdict(None)
+        ] = defaultdict(lambda: None)
         latest_alert_ids = []
         for alert in alerts:
             alert_class_id = alert.alert_class_id
@@ -232,5 +234,6 @@ class AlertsAPI(APIClient):
                 alert_last_times[alert_class_id] = alert
 
         for alert_last_time in alert_last_times.values():
-            latest_alert_ids.append(alert_last_time.id)
+            if alert_last_time:
+                latest_alert_ids.append(alert_last_time.id)
         return latest_alert_ids

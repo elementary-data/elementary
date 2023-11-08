@@ -6,6 +6,7 @@ from pydantic import BaseModel, validator
 from elementary.utils.json_utils import (
     try_load_json,
     unpack_and_flatten_and_dedup_list_of_strings,
+    unpack_and_flatten_str_to_list,
 )
 
 ALERTS_CONFIG_KEY = "alerts_config"
@@ -27,7 +28,7 @@ class BasePendingAlertSchema(BaseModel):
     database_name: str
     schema_name: str
     tags: Optional[List[str]] = None
-    model_meta: Dict
+    model_meta: Optional[Dict] = None
     suppression_status: str
     sent_at: Optional[datetime] = None
     status: str
@@ -143,7 +144,7 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
     def validate_test_rows_sample(cls, test_rows_sample):
         if not test_rows_sample:
             return []
-        return test_rows_sample
+        return unpack_and_flatten_str_to_list(test_rows_sample)
 
     @validator("test_params", pre=True, always=True)
     def validate_test_params(cls, test_params: Optional[Dict]) -> Dict:
@@ -194,4 +195,4 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
     normalized_status: str
     path: str
     error: str
-    freshness_description: str
+    freshness_description: Optional[str] = None

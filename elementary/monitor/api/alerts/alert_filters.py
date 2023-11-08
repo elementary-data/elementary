@@ -74,8 +74,7 @@ def _filter_alerts_by_tag(
 
     filtered_alerts = []
     for alert in alerts:
-        raw_tags = alert.tags
-        alert_tags = try_load_json(raw_tags) if isinstance(raw_tags, str) else raw_tags
+        alert_tags = alert.tags
 
         if alert_tags and tag_filter.tag in alert_tags:
             filtered_alerts.append(alert)

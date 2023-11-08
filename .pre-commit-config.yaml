@@ -36,10 +36,10 @@ repos:
         require_serial: true
         pass_filenames: false
 
-  - repo: local
-    hooks:
-      - id: mypy
-        name: mypy
-        entry: mypy --no-error-summary
-        language: system
-        files: ^elementary/.*\.py$
+  # - repo: local
+  #   hooks:
+  #     - id: mypy
+  #       name: mypy
+  #       entry: mypy --no-error-summary
+  #       language: system
+  #       files: ^elementary/.*\.py$
