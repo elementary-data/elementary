@@ -118,7 +118,7 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
     test_type: str
     test_sub_type: str
     test_results_description: str
-    test_results_query: str
+    test_results_query: Optional[str] = None
     test_rows_sample: Optional[List[Dict]] = None
     other: Optional[Dict] = None
     test_name: str
