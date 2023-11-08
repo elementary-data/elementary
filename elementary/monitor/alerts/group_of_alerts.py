@@ -26,7 +26,7 @@ class GroupedByTableAlerts:
         self._sort_alerts()
 
     @property
-    def model_unique_id(self) -> str:
+    def model_unique_id(self) -> Optional[str]:
         return self.alerts[0].model_unique_id
 
     @property

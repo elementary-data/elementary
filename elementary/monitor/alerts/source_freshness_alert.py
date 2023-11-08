@@ -19,7 +19,7 @@ class SourceFreshnessAlertModel(AlertModel):
         path: str,
         error: str,
         alert_class_id: str,
-        model_unique_id: str,
+        model_unique_id: Optional[str] = None,
         error_after: Optional[str] = None,
         warn_after: Optional[str] = None,
         snapshotted_at: Optional[datetime] = None,

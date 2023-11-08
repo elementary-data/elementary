@@ -14,7 +14,7 @@ class AlertModel:
         self,
         id: str,
         alert_class_id: str,
-        model_unique_id: str,
+        model_unique_id: Optional[str] = None,
         detected_at: Optional[datetime] = None,
         database_name: Optional[str] = None,
         schema_name: Optional[str] = None,

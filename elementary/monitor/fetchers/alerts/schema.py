@@ -23,7 +23,7 @@ GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
 class BasePendingAlertSchema(BaseModel):
     id: str
     alert_class_id: str
-    model_unique_id: str
+    model_unique_id: Optional[str] = None
     detected_at: datetime
     database_name: str
     schema_name: str
@@ -113,7 +113,7 @@ class BasePendingAlertSchema(BaseModel):
 
 class PendingTestAlertSchema(BasePendingAlertSchema):
     test_unique_id: str
-    table_name: str
+    table_name: Optional[str] = None
     column_name: Optional[str] = None
     test_type: str
     test_sub_type: str
