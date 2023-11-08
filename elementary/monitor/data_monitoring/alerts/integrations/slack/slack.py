@@ -838,7 +838,12 @@ class SlackIntegration(BaseIntegration):
 
     def _get_fallback_template(
         self,
-        alert: Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel],
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
         *args,
         **kwargs,
     ) -> SlackMessageSchema:
@@ -874,14 +879,32 @@ class SlackIntegration(BaseIntegration):
         ]
 
     def _fix_owners_and_subscribers(
-        self, alert: Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
     ):
-        alert.owners = self._parse_emails_to_ids(alert.owners)
-        alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
+        if isinstance(alert, GroupedByTableAlerts):
+            for grouped_alert in alert.alerts:
+                grouped_alert.owners = self._parse_emails_to_ids(grouped_alert.owners)
+                grouped_alert.subscribers = self._parse_emails_to_ids(
+                    grouped_alert.subscribers
+                )
+        else:
+            alert.owners = self._parse_emails_to_ids(alert.owners)
+            alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
 
     def send_alert(
         self,
-        alert: Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel],
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
         *args,
         **kwargs,
     ) -> bool:
@@ -903,8 +926,10 @@ class SlackIntegration(BaseIntegration):
                 )
             except Exception:
                 fallback_sent_successfully = False
+            self.message_builder.reset_slack_message()
             return fallback_sent_successfully
 
+        self.message_builder.reset_slack_message()
         return sent_successfully
 
     def send_test_message(self, channel_name: str, *args, **kwargs) -> bool:
