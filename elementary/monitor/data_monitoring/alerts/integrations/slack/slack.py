@@ -776,41 +776,45 @@ class SlackIntegration(BaseIntegration):
 
         details_blocks = []
         # Model errors
-        details_blocks.append(
-            self.message_builder.create_text_section_block("*Model errors*")
-        )
-        details_blocks.append(self.message_builder.create_divider_block())
-        block_header = self.message_builder.create_context_block(
-            self._get_model_error_block_header(alert.model_errors)
-        )
-        block_body = self.message_builder.create_text_section_block(
-            self._get_model_error_block_body(alert.model_errors)
-        )
-        details_blocks.extend([block_header, block_body])
+        if alert.model_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Model errors*")
+            )
+            details_blocks.append(self.message_builder.create_divider_block())
+            block_header = self.message_builder.create_context_block(
+                self._get_model_error_block_header(alert.model_errors)
+            )
+            block_body = self.message_builder.create_text_section_block(
+                self._get_model_error_block_body(alert.model_errors)
+            )
+            details_blocks.extend([block_header, block_body])
 
         # Test failures
-        details_blocks.append(
-            self.message_builder.create_text_section_block("*Test failures*")
-        )
-        rows = [alert.concise_name for alert in alert.test_failures]
-        text = "\n".join([f":small_red_triangle: {row}" for row in rows])
-        details_blocks.append(self.message_builder.create_text_section_block(text))
+        if alert.test_failures:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test failures*")
+            )
+            rows = [alert.concise_name for alert in alert.test_failures]
+            text = "\n".join([f":small_red_triangle: {row}" for row in rows])
+            details_blocks.append(self.message_builder.create_text_section_block(text))
 
         # Test warnings
-        details_blocks.append(
-            self.message_builder.create_text_section_block("*Test warnings*")
-        )
-        rows = [alert.concise_name for alert in alert.test_warnings]
-        text = "\n".join([f":warning: {row}" for row in rows])
-        details_blocks.append(self.message_builder.create_text_section_block(text))
+        if alert.test_warnings:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test warnings*")
+            )
+            rows = [alert.concise_name for alert in alert.test_warnings]
+            text = "\n".join([f":warning: {row}" for row in rows])
+            details_blocks.append(self.message_builder.create_text_section_block(text))
 
         # Test errors
-        details_blocks.append(
-            self.message_builder.create_text_section_block("*Test errors*")
-        )
-        rows = [alert.concise_name for alert in alert.test_errors]
-        text = "\n".join([f":exclamation: {row}" for row in rows])
-        details_blocks.append(self.message_builder.create_text_section_block(text))
+        if alert.test_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test errors*")
+            )
+            rows = [alert.concise_name for alert in alert.test_errors]
+            text = "\n".join([f":exclamation: {row}" for row in rows])
+            details_blocks.append(self.message_builder.create_text_section_block(text))
 
         self.message_builder._add_blocks_as_attachments(details_blocks)
         return self.message_builder.get_slack_message()
@@ -912,7 +916,6 @@ class SlackIntegration(BaseIntegration):
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)
-            print(template)
             sent_successfully = self.client.send_message(
                 channel_name=channel_name, message=template
             )
