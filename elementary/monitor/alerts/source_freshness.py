@@ -3,6 +3,7 @@ from typing import Optional
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.monitor.alerts.alert import Alert
+from elementary.monitor.alerts.report_link_utils import get_test_runs_link
 from elementary.utils.log import get_logger
 from elementary.utils.time import (
     convert_datetime_utc_str_to_timezone_str,
@@ -120,6 +121,17 @@ class SourceFreshnessAlert(Alert):
                     ],
                 ),
             )
+
+        test_runs_report_link = get_test_runs_link(
+            self.report_url, self.source_freshness_execution_id
+        )
+        if test_runs_report_link:
+            report_link = self.slack_message_builder.create_context_block(
+                [
+                    f"<{test_runs_report_link.url}|{test_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
 
         preview = self.slack_message_builder.create_compacted_sections_blocks(
             [
