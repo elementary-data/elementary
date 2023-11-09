@@ -72,7 +72,12 @@ class BaseIntegration(ABC):
     @abstractmethod
     def _get_fallback_template(
         self,
-        alert: Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel],
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
         *args,
         **kwargs
     ):
@@ -81,7 +86,12 @@ class BaseIntegration(ABC):
     @abstractmethod
     def send_alert(
         self,
-        alert: Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel],
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
         *args,
         **kwargs
     ) -> bool:
