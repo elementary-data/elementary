@@ -19,6 +19,7 @@ class SourceFreshnessAlert(Alert):
     def __init__(
         self,
         model_unique_id: str,
+        source_freshness_execution_id: str,
         snapshotted_at: Optional[str],
         max_loaded_at: Optional[str],
         max_loaded_at_time_ago_in_s: Optional[float],
@@ -67,6 +68,7 @@ class SourceFreshnessAlert(Alert):
             else f"When the test ran at {formatted_detected_at}, the most recent record found in the table was {get_formatted_timedelta(self.max_loaded_at_time_ago_in_s or 0)} earlier ({formatted_max_loaded_at})."
         )
 
+        self.source_freshness_execution_id = source_freshness_execution_id
         self.source_name = source_name
         self.identifier = identifier
         self.normalized_status = normalized_status
