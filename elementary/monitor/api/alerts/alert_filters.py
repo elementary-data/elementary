@@ -201,7 +201,7 @@ def _filter_alerts_by_status(
     ] = (
         lambda alert: Status(alert.status) in statuses
     )
-    return list(filter(filter_func, alerts))
+    return list(filter(filter_func, alerts))  # type: ignore[return-value]
 
 
 def _filter_alerts_by_resource_type(
@@ -233,7 +233,7 @@ def _filter_alerts_by_resource_type(
         lambda alert: ResourceType.from_table_name(_get_alert_table(alert))
         in resource_types
     )
-    return list(filter(filter_func, alerts))
+    return list(filter(filter_func, alerts))  # type: ignore[return-value]
 
 
 def _get_alert_table(

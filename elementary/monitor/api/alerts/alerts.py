@@ -78,7 +78,8 @@ class AlertsAPI(APIClient):
         test_alerts = self._sort_alerts(
             filtered_pending_test_alerts, last_alert_sent_times
         )
-        return TestAlertsSchema(send=test_alerts.send, skip=test_alerts.skip)
+        # Mypy issues with Union types. We need to ignore the are-type
+        return TestAlertsSchema(send=test_alerts.send, skip=test_alerts.skip)  # type: ignore[arg-type]
 
     def get_model_alerts(
         self,
@@ -93,7 +94,8 @@ class AlertsAPI(APIClient):
         model_alerts = self._sort_alerts(
             filtered_pending_model_alerts, last_alert_sent_times
         )
-        return ModelAlertsSchema(send=model_alerts.send, skip=model_alerts.skip)
+        # Mypy issues with Union types. We need to ignore the are-type
+        return ModelAlertsSchema(send=model_alerts.send, skip=model_alerts.skip)  # type: ignore[arg-type]
 
     def get_source_freshness_alerts(
         self,
@@ -112,8 +114,9 @@ class AlertsAPI(APIClient):
         source_freshness_alerts = self._sort_alerts(
             filtered_pending_source_freshness_alert, last_alert_sent_times
         )
+        # Mypy issues with Union types. We need to ignore the are-type
         return SourceFreshnessAlertsSchema(
-            send=source_freshness_alerts.send, skip=source_freshness_alerts.skip
+            send=source_freshness_alerts.send, skip=source_freshness_alerts.skip  # type: ignore[arg-type]
         )
 
     def skip_alerts(
@@ -159,7 +162,8 @@ class AlertsAPI(APIClient):
             else:
                 alerts_to_send.append(valid_alert)
 
-        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)
+        # Mypy issues with Union types. We need to ignore the are-type
+        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)  # type: ignore[arg-type]
 
     def _get_suppressed_alerts(
         self,
