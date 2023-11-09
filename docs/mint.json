@@ -47,7 +47,7 @@
     {
       "name": "Community",
       "icon": "slack",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA"
+      "url": "https://elementary-data.com/community"
     },
     {
       "name": "Demo",
@@ -284,7 +284,7 @@
   ],
   "footerSocials": {
     "website": "https://www.elementary-data.com",
-    "slack": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    "slack": "https://elementary-data.com/community"
   },
   "analytics": {
     "ga4": {
