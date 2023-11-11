@@ -6,6 +6,7 @@ from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+from slack_sdk.web.async_slack_response import AsyncSlackResponse
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
@@ -93,6 +94,7 @@ class SlackWebClient(SlackClient):
                 attachments=json.dumps(message.attachments)
                 if message.attachments
                 else None,
+                **kwargs,
             )
             return True
         except SlackApiError as err:
@@ -101,6 +103,35 @@ class SlackWebClient(SlackClient):
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             return False
+
+    @sleep_and_retry
+    @limits(calls=1, period=ONE_SECOND)
+    def start_thread(
+        self, channel_name: str, message: SlackMessageSchema
+    ) -> (bool, Optional[AsyncSlackResponse]):
+        try:
+            response = self.client.chat_postMessage(
+                channel=channel_name,
+                text=message.text,
+                blocks=json.dumps(message.blocks) if message.blocks else None,
+                attachments=json.dumps(message.attachments)
+                if message.attachments
+                else None,
+            )
+            return True, response.get("ts")
+        except SlackApiError as err:
+            if self._handle_send_err(err, channel_name):
+                return self.send_message(channel_name, message)
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            return False, None
+
+    @sleep_and_retry
+    @limits(calls=1, period=ONE_SECOND)
+    def reply_thread(
+        self, channel_name: str, thread_ts: str, message: SlackMessageSchema
+    ) -> bool:
+        return self.send_message(channel_name, message, thread_ts=thread_ts)
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)

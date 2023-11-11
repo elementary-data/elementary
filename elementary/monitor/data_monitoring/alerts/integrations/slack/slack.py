@@ -913,6 +913,8 @@ class SlackIntegration(BaseIntegration):
         **kwargs,
     ) -> bool:
         channel_name = alert.integration_params.get("channel")
+        if isinstance(alert, GroupedByTableAlerts):
+            return self.send_alert_group_in_thread(alert)
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)
@@ -939,3 +941,23 @@ class SlackIntegration(BaseIntegration):
     def send_test_message(self, channel_name: str, *args, **kwargs) -> bool:
         test_message = self._get_test_message_template()
         return self.client.send_message(channel_name=channel_name, message=test_message)
+
+    def send_alert_group_in_thread(self, grouped_alert: GroupedByTableAlerts) -> bool:
+        channel_name = grouped_alert.integration_params.get("channel")
+        self._fix_owners_and_subscribers(grouped_alert)
+        template = self._get_alert_template(grouped_alert)
+        sent_successfully, thread_ts = self.client.start_thread(
+            channel_name=channel_name, message=template
+        )
+        self.message_builder.reset_slack_message()
+        if sent_successfully and thread_ts is not None:
+            for alert in grouped_alert.alerts:
+                self._fix_owners_and_subscribers(alert)
+                sub_alert_template = self._get_alert_template(alert)
+                self.client.reply_thread(
+                    channel_name=channel_name,
+                    thread_ts=thread_ts,
+                    message=sub_alert_template,
+                )
+                self.message_builder.reset_slack_message()
+        return sent_successfully
