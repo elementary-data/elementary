@@ -14,7 +14,7 @@ dbt.adapters.factory.get_adapter = lambda config: config.adapter  # type: ignore
 from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
 from dbt.config import RuntimeConfig
 from dbt.flags import set_from_args
-from dbt.parser.manifest import ManifestLoader
+from dbt.parser.manifest import Manifest, ManifestLoader
 from dbt.tracking import disable_tracking
 from dbt.version import __version__ as dbt_version_string
 from pydantic import BaseModel, validator
@@ -97,7 +97,7 @@ class SlimDbtRunner(BaseDbtRunner):
         self.adapter_name: Optional[str] = None
         self.connections_manager: Optional[BaseConnectionManager] = None
         self.project_parser: Optional[ManifestLoader] = None
-        self.manifest = None
+        self.manifest: Optional[Manifest] = None
 
     def _load_runner(
         self,
