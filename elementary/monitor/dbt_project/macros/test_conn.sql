@@ -1,5 +1,5 @@
 {% macro test_conn() %}
-    {% do return([target.type, adapter.dispatch('test_conn')()]) %}
+    {% do return([target.type, adapter.dispatch('test_conn', 'elementary_cli')()]) %}
 {%- endmacro %}
 
 {% macro default__test_conn() %}
