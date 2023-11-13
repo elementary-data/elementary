@@ -7,6 +7,8 @@ DBT_TEST_TYPE = "dbt_test"
 
 
 class TestAlertModel(AlertModel):
+    __test__ = False  # prevent pytests warnings
+
     def __init__(
         self,
         id: str,

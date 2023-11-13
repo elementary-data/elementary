@@ -14,7 +14,6 @@ CHANNEL_KEY = "channel"
 DESCRIPTION_KEY = "description"
 OWNERS_KEY = "owners"
 SUBSCRIBERS_KEY = "subscribers"
-CHANNEL_KEY = "channel"
 ALERT_FIELDS_KEY = "alert_fields"
 ALERT_SUPPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
@@ -158,7 +157,7 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
     def validate_other(cls, other: Optional[Dict]) -> Dict:
         return cls._validate_dict(other)
 
-    def get_alert_meta_attrs(self, meta_key: str) -> List[str]:
+    def _get_alert_meta_attrs(self, meta_key: str) -> List[str]:
         attrs = []
         test_attrs = self.flatten_test_meta.get(meta_key, [])
         model_attrs = self.flatten_model_meta.get(meta_key, [])
