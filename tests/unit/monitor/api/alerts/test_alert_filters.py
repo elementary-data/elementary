@@ -158,6 +158,7 @@ def initial_alerts():
     source_freshness_alerts = [
         SourceFreshnessAlert(
             id="1",
+            source_freshness_execution_id="1",
             alert_class_id="elementary.model_id_1",
             model_unique_id="elementary.model_id_1",
             alias="modely",
@@ -184,6 +185,7 @@ def initial_alerts():
         ),
         SourceFreshnessAlert(
             id="2",
+            source_freshness_execution_id="2",
             alert_class_id="elementary.model_id_2",
             model_unique_id="elementary.model_id_2",
             alias="modely",
@@ -210,6 +212,7 @@ def initial_alerts():
         ),
         SourceFreshnessAlert(
             id="3",
+            source_freshness_execution_id="3",
             alert_class_id="elementary.model_id_3",
             model_unique_id="elementary.model_id_3",
             alias="modely",
