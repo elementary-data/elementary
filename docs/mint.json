@@ -249,7 +249,11 @@
     },
     {
       "group": "Guides",
-      "pages": ["cloud/guides/sync-scheduling", "cloud/guides/troubleshoot"]
+      "pages": [
+        "cloud/guides/enable-slack-alerts",
+        "cloud/guides/sync-scheduling",
+        "cloud/guides/troubleshoot"
+      ]
     },
     {
       "group": "Features",
