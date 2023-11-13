@@ -2,7 +2,7 @@
 	{{ elementary.empty_table([
 	  ('alert_id', 'string'),
 	  ('unique_id', 'string'),
-	  ('detected_at', 'string'),
+	  ('detected_at', 'timestamp'),
 	  ('database_name', 'string'),
 	  ('materialization', 'string'),
 	  ('path', 'string'),
@@ -25,7 +25,7 @@
 	  ('alert_id', 'string'),
 	  ('max_loaded_at', 'string'),
 	  ('snapshotted_at', 'string'),
-	  ('detected_at', 'string'),
+	  ('detected_at', 'timestamp'),
 	  ('max_loaded_at_time_ago_in_s', 'float'),
 	  ('status', 'string'),
 	  ('error', 'string'),
