@@ -100,32 +100,6 @@ def test_test_format(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
         )
 
 
-def test_get_integration_params(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
-    alerts = data_monitoring_alerts_mock._fetch_data(days_back=1)
-    alert_with_slack_channel = alerts.all_alerts[0]
-    alert_with_slack_channel.model_meta = dict(channel="channel_1")
-    alert_without_slack_channel = alerts.all_alerts[1]
-    # override config
-    data_monitoring_alerts_mock = DataMonitoringAlertsMock(override_config=True)
-    data_monitoring_alerts_mock.config.slack_channel_name = "channel_2"
-    assert data_monitoring_alerts_mock._get_integration_params(
-        alert_with_slack_channel
-    ) == dict(channel="channel_2")
-    assert data_monitoring_alerts_mock._get_integration_params(
-        alert_without_slack_channel
-    ) == dict(channel="channel_2")
-
-    # done't override config
-    data_monitoring_alerts_mock = DataMonitoringAlertsMock(override_config=False)
-    data_monitoring_alerts_mock.config.slack_channel_name = "channel_2"
-    assert data_monitoring_alerts_mock._get_integration_params(
-        alert_with_slack_channel
-    ) == dict(channel="channel_1")
-    assert data_monitoring_alerts_mock._get_integration_params(
-        alert_without_slack_channel
-    ) == dict(channel="channel_2")
-
-
 @pytest.fixture
 def data_monitoring_alerts_mock() -> DataMonitoringAlertsMock:
     return DataMonitoringAlertsMock()

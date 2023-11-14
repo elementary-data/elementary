@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from elementary.monitor.alerts.alert import AlertModel
 
@@ -27,6 +27,7 @@ class TestAlertModel(AlertModel):
         test_description: Optional[str] = None,
         other: Optional[Dict] = None,
         test_params: Optional[Dict] = None,
+        test_meta: Optional[Dict] = None,
         test_rows_sample: Optional[List[Dict]] = None,
         column_name: Optional[str] = None,
         detected_at: Optional[datetime] = None,
@@ -36,12 +37,12 @@ class TestAlertModel(AlertModel):
         tags: Optional[List[str]] = None,
         subscribers: Optional[List[str]] = None,
         status: Optional[str] = None,
+        model_meta: Optional[Dict] = None,
         suppression_interval: Optional[int] = None,
         timezone: Optional[str] = None,
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
-        integration_params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         super().__init__(
@@ -55,12 +56,12 @@ class TestAlertModel(AlertModel):
             tags,
             subscribers,
             status,
+            model_meta,
             suppression_interval,
             timezone,
             report_url,
             alert_fields,
             elementary_database_and_schema,
-            integration_params,
         )
         self.table_name = table_name
         self.test_type = test_type
@@ -68,8 +69,9 @@ class TestAlertModel(AlertModel):
         self.test_results_description = test_results_description.capitalize()
         self.test_results_query = test_results_query and test_results_query.strip()
         self.test_short_name = test_short_name
-        self.other = other or {}
-        self.test_params = test_params or {}
+        self.other = other or dict()
+        self.test_params = test_params or dict()
+        self.test_meta = test_meta or dict()
         self.test_rows_sample = test_rows_sample or []
         self.column_name = column_name
         self.test_unique_id = test_unique_id
@@ -103,6 +105,10 @@ class TestAlertModel(AlertModel):
     @staticmethod
     def display_name(str_value: str) -> str:
         return str_value.replace("_", " ").title()
+
+    @property
+    def unified_meta(self) -> Dict:
+        return {**self.model_meta, **self.test_meta}
 
     @property
     def data(self) -> Dict:

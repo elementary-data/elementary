@@ -43,20 +43,20 @@ class GroupedByTableAlerts:
         return self.alerts[0].report_url
 
     @property
-    def integration_params(self) -> Dict:
-        # If a model level integration params are defined, we use them.
-        # Else we use one of the tests level integration params.
-        model_integration_params = dict()
-        test_integration_params = dict()
+    def unified_meta(self) -> Dict:
+        # If a model level unified meta is defined, we use is.
+        # Else we use one of the tests level unified metas.
+        model_unified_meta = dict()
+        test_unified_meta = dict()
         for alert in self.alerts:
-            alert_integration_params = alert.integration_params
-            if alert_integration_params:
+            alert_unified_meta = alert.unified_meta
+            if alert_unified_meta:
                 if isinstance(alert, ModelAlertModel):
-                    model_integration_params = alert_integration_params
+                    model_unified_meta = alert_unified_meta
                     break
 
-                test_integration_params = alert_integration_params
-        return model_integration_params or test_integration_params
+                test_unified_meta = alert_unified_meta
+        return model_unified_meta or test_unified_meta
 
     @property
     def data(self) -> List[Dict]:

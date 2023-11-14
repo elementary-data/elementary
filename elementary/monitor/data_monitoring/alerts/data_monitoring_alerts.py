@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from alive_progress import alive_it
 
@@ -55,26 +55,14 @@ class DataMonitoringAlerts(DataMonitoring):
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
-        self.override_meta_slack_channel = override_config
+        self.override_config_defaults = override_config
         self.alerts_integraion = self._get_integration_client()
 
     def _get_integration_client(self):
-        return SlackIntegration(config=self.config, tracking=self.tracking)
-
-    def _get_integration_params(
-        self,
-        alert: Union[
-            PendingTestAlertSchema,
-            PendingModelAlertSchema,
-            PendingSourceFreshnessAlertSchema,
-        ],
-    ) -> Dict[str, Any]:
-        return dict(
-            channel=(
-                self.config.slack_channel_name
-                if self.override_meta_slack_channel
-                else (alert.alert_channel or self.config.slack_channel_name)
-            )
+        return SlackIntegration(
+            config=self.config,
+            tracking=self.tracking,
+            override_config_defaults=self.override_config_defaults,
         )
 
     def _fetch_data(self, days_back: int) -> AlertsSchema:
@@ -92,7 +80,6 @@ class DataMonitoringAlerts(DataMonitoring):
             PendingSourceFreshnessAlertSchema,
         ],
     ) -> Union[ModelAlertModel, TestAlertModel, SourceFreshnessAlertModel]:
-        integration_params = self._get_integration_params(alert)
         if isinstance(alert, PendingTestAlertSchema):
             return TestAlertModel(
                 id=alert.id,
@@ -120,6 +107,8 @@ class DataMonitoringAlerts(DataMonitoring):
                 tags=alert.tags,
                 subscribers=alert.subscribers,
                 status=alert.status,
+                model_meta=alert.flatten_model_meta,
+                test_meta=alert.flatten_test_meta,
                 suppression_interval=alert.get_suppression_interval(
                     self.global_suppression_interval, self.override_config
                 ),
@@ -127,7 +116,6 @@ class DataMonitoringAlerts(DataMonitoring):
                 report_url=self.config.report_url,
                 alert_fields=alert.alert_fields,
                 elementary_database_and_schema=self.elementary_database_and_schema,
-                integration_params=integration_params,
             )
         elif isinstance(alert, PendingModelAlertSchema):
             return ModelAlertModel(
@@ -147,6 +135,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 tags=alert.tags,
                 subscribers=alert.subscribers,
                 status=alert.status,
+                model_meta=alert.flatten_model_meta,
                 suppression_interval=alert.get_suppression_interval(
                     self.global_suppression_interval, self.override_config
                 ),
@@ -154,7 +143,6 @@ class DataMonitoringAlerts(DataMonitoring):
                 report_url=self.config.report_url,
                 alert_fields=alert.alert_fields,
                 elementary_database_and_schema=self.elementary_database_and_schema,
-                integration_params=integration_params,
             )
         else:
             return SourceFreshnessAlertModel(
@@ -181,6 +169,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 tags=alert.tags,
                 subscribers=alert.subscribers,
                 status=alert.status,
+                model_meta=alert.flatten_model_meta,
                 suppression_interval=alert.get_suppression_interval(
                     self.global_suppression_interval, self.override_config
                 ),
@@ -188,7 +177,6 @@ class DataMonitoringAlerts(DataMonitoring):
                 report_url=self.config.report_url,
                 alert_fields=alert.alert_fields,
                 elementary_database_and_schema=self.elementary_database_and_schema,
-                integration_params=integration_params,
             )
 
     def _format_alerts(

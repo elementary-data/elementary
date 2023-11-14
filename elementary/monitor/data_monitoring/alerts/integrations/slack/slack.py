@@ -1,11 +1,11 @@
 import json
 import re
 from datetime import datetime, timedelta
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
-from elementary.clients.slack.client import SlackClient
+from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
@@ -53,9 +53,17 @@ DEFAULT_ALERT_FIELDS = [
 
 
 class SlackIntegration(BaseIntegration):
-    def __init__(self, config: Config, tracking: Optional[Tracking] = None) -> None:
+    def __init__(
+        self,
+        config: Config,
+        tracking: Optional[Tracking] = None,
+        override_config_defaults=False,
+        *args,
+        **kwargs,
+    ) -> None:
         self.config = config
         self.tracking = tracking
+        self.override_config_defaults = override_config_defaults
         self.message_builder = SlackAlertMessageBuilder()
         super().__init__()
 
@@ -923,7 +931,8 @@ class SlackIntegration(BaseIntegration):
         *args,
         **kwargs,
     ) -> bool:
-        channel_name = alert.integration_params.get("channel")
+        integration_params = self.get_integration_params(alert=alert)
+        channel_name = integration_params.get("channel")
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)
@@ -950,3 +959,30 @@ class SlackIntegration(BaseIntegration):
     def send_test_message(self, channel_name: str, *args, **kwargs) -> bool:
         test_message = self._get_test_message_template()
         return self.client.send_message(channel_name=channel_name, message=test_message)
+
+    def get_integration_params(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
+        *args,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        integration_params = dict()
+        if isinstance(self.client, SlackWebClient):
+            integration_params.update(
+                dict(
+                    channel=(
+                        self.config.slack_channel_name
+                        if self.override_config_defaults
+                        else (
+                            alert.unified_meta.get("channel")
+                            or self.config.slack_channel_name
+                        )
+                    )
+                )
+            )
+        return integration_params

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from dateutil import tz
 
@@ -22,12 +22,12 @@ class AlertModel:
         tags: Optional[List[str]] = None,
         subscribers: Optional[List[str]] = None,
         status: Optional[str] = None,
+        model_meta: Optional[Dict] = None,
         suppression_interval: Optional[int] = None,
         timezone: Optional[str] = None,
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
-        integration_params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         self.id = id
@@ -50,6 +50,7 @@ class AlertModel:
         self.owners: List[str] = owners or []
         self.tags: List[str] = tags or []
         self.subscribers: List[str] = subscribers or []
+        self.model_meta = model_meta or dict()
         self.status = status
         self.model_unique_id = model_unique_id
         self.suppression_interval = suppression_interval
@@ -57,7 +58,10 @@ class AlertModel:
         self.report_url = report_url
         self.alert_fields = alert_fields
         self.elementary_database_and_schema = elementary_database_and_schema
-        self.integration_params = integration_params or dict()
+
+    @property
+    def unified_meta(self) -> Dict:
+        return self.model_meta
 
     @property
     def data(self) -> Dict:

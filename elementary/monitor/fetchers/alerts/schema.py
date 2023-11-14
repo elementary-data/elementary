@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field, validator
 
 from elementary.monitor.data_monitoring.schema import ResourceType
+from elementary.utils.dicts import flatten_dict_by_key, merge_dicts_attribute
 from elementary.utils.json_utils import (
     try_load_json,
     unpack_and_flatten_and_dedup_list_of_strings,
@@ -65,10 +66,6 @@ class BasePendingAlertSchema(BaseModel):
     def alert_fields(self) -> List[str]:
         return self.unified_meta.get(ALERT_FIELDS_KEY, [])
 
-    @property
-    def alert_channel(self) -> Optional[str]:
-        return self.unified_meta.get(CHANNEL_KEY)
-
     @validator("model_meta", pre=True, always=True)
     def validate_model_meta(cls, model_meta: Optional[Dict]) -> Dict:
         return cls._validate_dict(model_meta)
@@ -79,19 +76,12 @@ class BasePendingAlertSchema(BaseModel):
 
     @staticmethod
     def _flatten_meta(meta: Optional[Dict] = None) -> Dict:
-        unflatten_meta = meta or dict()
-        # backwards compatibility for alert configuration
-        flatten_meta = {**unflatten_meta, **unflatten_meta.get(ALERTS_CONFIG_KEY, {})}
-        flatten_meta.pop(ALERTS_CONFIG_KEY, None)
-        return flatten_meta
+        return flatten_dict_by_key(meta, ALERTS_CONFIG_KEY) if meta else dict()
 
     def _get_alert_meta_attrs(self, meta_key: str) -> List[str]:
-        attrs = []
-        model_attrs = self.flatten_model_meta.get(meta_key, [])
-        if isinstance(model_attrs, list):
-            attrs.extend(model_attrs)
-        elif isinstance(model_attrs, str):
-            attrs.append(model_attrs)
+        attrs: List[str] = merge_dicts_attribute(
+            dicts=[self.flatten_model_meta], attribute_key=meta_key
+        )
         return unpack_and_flatten_and_dedup_list_of_strings(attrs)
 
     def get_suppression_interval(
@@ -160,18 +150,10 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
         return cls._validate_dict(other)
 
     def _get_alert_meta_attrs(self, meta_key: str) -> List[str]:
-        attrs = []
-        test_attrs = self.flatten_test_meta.get(meta_key, [])
-        model_attrs = self.flatten_model_meta.get(meta_key, [])
-        if isinstance(test_attrs, list):
-            attrs.extend(test_attrs)
-        elif isinstance(test_attrs, str):
-            attrs.append(test_attrs)
-
-        if isinstance(model_attrs, list):
-            attrs.extend(model_attrs)
-        elif isinstance(model_attrs, str):
-            attrs.append(model_attrs)
+        attrs: List[str] = merge_dicts_attribute(
+            dicts=[self.flatten_model_meta, self.flatten_test_meta],
+            attribute_key=meta_key,
+        )
         return unpack_and_flatten_and_dedup_list_of_strings(attrs)
 
 

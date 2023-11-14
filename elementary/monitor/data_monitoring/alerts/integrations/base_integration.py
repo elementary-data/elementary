@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Any, Dict, Union
 
 from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -99,4 +99,8 @@ class BaseIntegration(ABC):
 
     @abstractmethod
     def send_test_message(self, *args, **kwargs) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_integration_params(self, *args, **kwargs) -> Dict[str, Any]:
         raise NotImplementedError

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from elementary.monitor.alerts.alert import AlertModel
 from elementary.utils.time import (
@@ -35,12 +35,12 @@ class SourceFreshnessAlertModel(AlertModel):
         tags: Optional[List[str]] = None,
         subscribers: Optional[List[str]] = None,
         status: Optional[str] = None,
+        model_meta: Optional[Dict] = None,
         suppression_interval: Optional[int] = None,
         timezone: Optional[str] = None,
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
-        integration_params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         super().__init__(
@@ -54,12 +54,12 @@ class SourceFreshnessAlertModel(AlertModel):
             tags,
             subscribers,
             status,
+            model_meta,
             suppression_interval,
             timezone,
             report_url,
             alert_fields,
             elementary_database_and_schema,
-            integration_params,
         )
         self.snapshotted_at_str = (
             convert_datetime_utc_str_to_timezone_str(
