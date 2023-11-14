@@ -608,6 +608,17 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
+        test_runs_report_link = get_test_runs_link(
+            alert.report_url, alert.source_freshness_execution_id
+        )
+        if test_runs_report_link:
+            report_link = self.message_builder.create_context_block(
+                [
+                    f"<{test_runs_report_link.url}|{test_runs_report_link.text}>",
+                ],
+            )
+            title.append(report_link)
+
         preview = self.message_builder.create_compacted_sections_blocks(
             [
                 f"*Tags*\n{tags or '_No tags_'}",

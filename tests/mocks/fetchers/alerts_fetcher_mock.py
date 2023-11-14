@@ -311,6 +311,7 @@ class MockAlertsFetcher(AlertsFetcher):
             # Alert within suppression interval
             dict(
                 id="alert_id_1",
+                source_freshness_execution_id="alert_id_1",
                 alert_class_id="source_id_1",
                 model_unique_id="source_id_1",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -337,6 +338,7 @@ class MockAlertsFetcher(AlertsFetcher):
             # Alert after suppression interval
             dict(
                 id="alert_id_2",
+                source_freshness_execution_id="alert_id_2",
                 alert_class_id="source_id_4",
                 model_unique_id="source_id_4",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -363,6 +365,7 @@ class MockAlertsFetcher(AlertsFetcher):
             # Alert without suppression interval
             dict(
                 id="alert_id_3",
+                source_freshness_execution_id="alert_id_3",
                 alert_class_id="source_id_2",
                 model_unique_id="source_id_2",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -389,6 +392,7 @@ class MockAlertsFetcher(AlertsFetcher):
             # First occurrence alert with suppression interval
             dict(
                 id="alert_id_4",
+                source_freshness_execution_id="alert_id_4",
                 alert_class_id="source_id_3",
                 model_unique_id="source_id_3",
                 detected_at=CURRENT_TIMESTAMP_UTC,
@@ -415,6 +419,7 @@ class MockAlertsFetcher(AlertsFetcher):
             # Duplicated alert that should be deduped
             dict(
                 id="alert_id_5",
+                source_freshness_execution_id="alert_id_5",
                 alert_class_id="source_id_3",
                 model_unique_id="source_id_3",
                 detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(

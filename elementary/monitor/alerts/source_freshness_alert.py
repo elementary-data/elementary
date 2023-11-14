@@ -19,6 +19,7 @@ class SourceFreshnessAlertModel(AlertModel):
         path: str,
         error: str,
         alert_class_id: str,
+        source_freshness_execution_id: str,
         model_unique_id: Optional[str] = None,
         error_after: Optional[str] = None,
         warn_after: Optional[str] = None,
@@ -105,6 +106,7 @@ class SourceFreshnessAlertModel(AlertModel):
         self.path = path
         self.error = error
         self.freshness_description = freshness_description
+        self.source_freshness_execution_id = source_freshness_execution_id
 
     @property
     def data(self) -> Dict:

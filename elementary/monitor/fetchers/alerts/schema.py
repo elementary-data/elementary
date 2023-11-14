@@ -183,6 +183,7 @@ class PendingModelAlertSchema(BasePendingAlertSchema):
 
 
 class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
+    source_freshness_execution_id: str
     snapshotted_at: datetime
     max_loaded_at: datetime
     max_loaded_at_time_ago_in_s: int

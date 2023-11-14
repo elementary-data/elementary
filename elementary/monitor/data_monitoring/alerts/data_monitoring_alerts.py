@@ -166,6 +166,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 warn_after=alert.warn_after,
                 path=alert.path,
                 error=alert.error,
+                source_freshness_execution_id=alert.source_freshness_execution_id,
                 snapshotted_at=alert.snapshotted_at,
                 max_loaded_at=alert.max_loaded_at,
                 max_loaded_at_time_ago_in_s=alert.max_loaded_at_time_ago_in_s,
