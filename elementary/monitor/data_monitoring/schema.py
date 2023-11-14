@@ -10,11 +10,6 @@ from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezon
 logger = get_logger(__name__)
 
 
-ALERT_TABLES = dict(
-    tests="alerts", models="alerts_models", source_freshnesses="alerts_source_freshness"
-)
-
-
 class Status(Enum):
     WARN = "warn"
     FAIL = "fail"
@@ -27,18 +22,6 @@ class ResourceType(Enum):
     TEST = "test"
     MODEL = "model"
     SOURCE_FRESHNESS = "source_freshness"
-
-    @staticmethod
-    def from_table_name(table_name):
-        if table_name == ALERT_TABLES["tests"]:
-            return ResourceType.TEST
-        elif table_name == ALERT_TABLES["models"]:
-            return ResourceType.MODEL
-        elif table_name == ALERT_TABLES["sources_freshnesses"]:
-            return ResourceType.SOURCE_FRESHNESS
-        else:
-            logger.warning(f"Unknown table name: {table_name}")
-            return None
 
 
 class SelectorFilterSchema(BaseModel):

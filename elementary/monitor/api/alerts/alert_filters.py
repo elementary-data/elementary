@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Union
 
 from elementary.monitor.data_monitoring.schema import (
     ResourceType,
@@ -230,24 +230,6 @@ def _filter_alerts_by_resource_type(
         ],
         bool,
     ] = (
-        lambda alert: ResourceType.from_table_name(_get_alert_table(alert))
-        in resource_types
+        lambda alert: alert.resource_type in resource_types
     )
     return list(filter(filter_func, alerts))  # type: ignore[return-value]
-
-
-def _get_alert_table(
-    alert: Union[
-        PendingTestAlertSchema,
-        PendingModelAlertSchema,
-        PendingSourceFreshnessAlertSchema,
-    ]
-) -> Optional[str]:
-    if isinstance(alert, PendingTestAlertSchema):
-        return "alerts"
-    elif isinstance(alert, PendingModelAlertSchema):
-        return "alerts_models"
-    elif isinstance(alert, PendingSourceFreshnessAlertSchema):
-        return "alerts_source_freshness"
-    else:
-        return None

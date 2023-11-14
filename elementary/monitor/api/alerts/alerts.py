@@ -13,7 +13,7 @@ from elementary.monitor.api.alerts.schema import (
     SourceFreshnessAlertsSchema,
     TestAlertsSchema,
 )
-from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.data_monitoring.schema import ResourceType, SelectorFilterSchema
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
@@ -126,15 +126,17 @@ class AlertsAPI(APIClient):
             List[PendingModelAlertSchema],
             List[PendingSourceFreshnessAlertSchema],
         ],
-        table_name: str,
+        resource_type: ResourceType,
     ) -> None:
         self.alerts_fetcher.skip_alerts(
-            alerts_to_skip=alerts_to_skip, table_name=table_name
+            alerts_to_skip=alerts_to_skip, resource_type=resource_type
         )
 
-    def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
+    def update_sent_alerts(
+        self, alert_ids: List[str], resource_type: ResourceType
+    ) -> None:
         self.alerts_fetcher.update_sent_alerts(
-            alert_ids=alert_ids, table_name=table_name
+            alert_ids=alert_ids, resource_type=resource_type
         )
 
     def _sort_alerts(

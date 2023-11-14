@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.config.config import Config
+from elementary.monitor.data_monitoring.schema import ResourceType
 from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
@@ -33,8 +34,9 @@ class AlertsFetcher(FetcherClient):
             List[PendingModelAlertSchema],
             List[PendingSourceFreshnessAlertSchema],
         ],
-        table_name: str,
+        resource_type: ResourceType,
     ):
+        table_name = self._resource_type_to_table(resource_type)
         alert_ids = [alert.id for alert in alerts_to_skip]
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
         logger.info(f'Update skipped alerts at "{table_name}"')
@@ -114,7 +116,10 @@ class AlertsFetcher(FetcherClient):
         )
         return json.loads(response[0])
 
-    def update_sent_alerts(self, alert_ids: List[str], table_name: str) -> None:
+    def update_sent_alerts(
+        self, alert_ids: List[str], resource_type: ResourceType
+    ) -> None:
+        table_name = self._resource_type_to_table(resource_type)
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
         logger.info(f'Update sent alerts at "{table_name}"')
         for alert_ids_chunk in alert_ids_chunks:
@@ -134,3 +139,12 @@ class AlertsFetcher(FetcherClient):
         for i in range(0, len(items), chunk_size):
             chunk_list.append(items[i : i + chunk_size])
         return chunk_list
+
+    @staticmethod
+    def _resource_type_to_table(resource_type: ResourceType) -> str:
+        if resource_type == ResourceType.TEST:
+            return "alerts"
+        elif resource_type == ResourceType.MODEL:
+            return "alerts_models"
+        else:
+            return "alerts_source_freshness"

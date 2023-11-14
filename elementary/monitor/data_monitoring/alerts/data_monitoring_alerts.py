@@ -16,7 +16,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import ALERT_TABLES
+from elementary.monitor.data_monitoring.schema import ResourceType
 from elementary.monitor.fetchers.alerts.schema import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
@@ -260,11 +260,11 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
 
-        sent_alert_ids_by_type: Dict[str, List[str]] = dict(
-            tests=[],
-            models=[],
-            source_freshnesses=[],
-        )
+        sent_alert_ids_by_type: Dict[ResourceType, List[str]] = {
+            ResourceType.TEST: [],
+            ResourceType.MODEL: [],
+            ResourceType.SOURCE_FRESHNESS: [],
+        }
 
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
@@ -289,26 +289,28 @@ class DataMonitoringAlerts(DataMonitoring):
 
         for sent_alert in sent_successfully_alerts:
             if isinstance(sent_alert, TestAlertModel):
-                sent_alert_ids_by_type["tests"].append(sent_alert.id)
+                sent_alert_ids_by_type[ResourceType.TEST].append(sent_alert.id)
             elif isinstance(sent_alert, ModelAlertModel):
-                sent_alert_ids_by_type["models"].append(sent_alert.id)
+                sent_alert_ids_by_type[ResourceType.MODEL].append(sent_alert.id)
             elif isinstance(sent_alert, SourceFreshnessAlertModel):
-                sent_alert_ids_by_type["source_freshnesses"].append(sent_alert.id)
+                sent_alert_ids_by_type[ResourceType.SOURCE_FRESHNESS].append(
+                    sent_alert.id
+                )
 
         # Now update as sent:
-        for alert_type, alert_ids in sent_alert_ids_by_type.items():
+        for resource_type, alert_ids in sent_alert_ids_by_type.items():
             self.sent_alert_count += len(alert_ids)
-            self.alerts_api.update_sent_alerts(alert_ids, ALERT_TABLES[alert_type])
+            self.alerts_api.update_sent_alerts(alert_ids, resource_type)
 
         # Now update sent alerts counter:
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: AlertsSchema):
-        self.alerts_api.skip_alerts(alerts.tests.skip, ALERT_TABLES["tests"])
-        self.alerts_api.skip_alerts(alerts.models.skip, ALERT_TABLES["models"])
+        self.alerts_api.skip_alerts(alerts.tests.skip, ResourceType.TEST)
+        self.alerts_api.skip_alerts(alerts.models.skip, ResourceType.MODEL)
         self.alerts_api.skip_alerts(
             alerts.source_freshnesses.skip,
-            ALERT_TABLES["source_freshnesses"],
+            ResourceType.SOURCE_FRESHNESS,
         )
 
     def run_alerts(
