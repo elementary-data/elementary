@@ -18,7 +18,7 @@ class DataMonitoringAlertsMock(DataMonitoringAlerts):
         global_suppression_interval: int = 0,
         override_config: bool = False,
     ):
-        config = Config(slack_token="mock")
+        config = Config(slack_token="mock", slack_channel_name="mock")
         tracking = None
         super().__init__(
             config,
