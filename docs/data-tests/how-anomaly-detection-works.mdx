@@ -1,15 +1,18 @@
 ---
 title: "Elementary anomaly detection tests"
-sidebarTitle: "Data anomaly detection"
+sidebarTitle: "Elementary anomaly detection"
 ---
 
-Elementary dbt package includes **anomaly detection tests, implemented as [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests)**.
-The tests are configured and executed like any other tests in your project.
+Elementary data anomaly detection tests monitor a specific metric (like row count, null rate, average value, etc.) and compare recent values to historical values.
+This is done to detect [significant changes and deviations](/guides/data-anomaly-detection), that are probably data reliability issues.
 
-## Core concepts
+## What happens on each test?
 
-In data anomaly detection tests Elementary monitors a specific metric (like row count, null rate, average value, etc.) and compare recent values to historical values.
-This is done to detect significant changes and deviations, that are probably data reliability issues.
+Upon running a test, your data is split into time buckets based on the [`time_bucket`](/guides/anomaly-detection-configuration/time-bucket) field and is limited by
+the [`days_back`](/guides/anomaly-detection-configuration/days-back) var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
+period ([`backfill_days`](/guides/anomaly-detection-configuration/backfill-days)) to the row count of all the previous time buckets within the [`days_back`](/guides/anomaly-detection-configuration/days-back) period.
+If there were any anomalies in the detection period, the test will fail.
+On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
 
 <Tooltip tip="Anomaly detection tests core concepts">
   <img
@@ -17,6 +20,14 @@ This is done to detect significant changes and deviations, that are probably dat
     alt="Elementary anomaly detection tests core concepts"
   />
 </Tooltip>
+
+To learn more, refer to [core concepts](/guides/how-anomaly-detection-works).
+
+## What does it mean when a test fails?
+
+When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection method](/guides/data-anomaly-detection).
+
+## Core concepts
 
 ### Anomaly
 
@@ -62,7 +73,7 @@ For example, if we use daily time bucket and monitor for row count anomalies, we
 
 ### Detection algorithm
 
-Read about it in [data anomaly detection](/guides/data-anomaly-detection).
+Read about it in [data anomaly detection method](/guides/data-anomaly-detection).
 
 ## Tests configuration and core concepts
 

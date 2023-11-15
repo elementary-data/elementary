@@ -114,6 +114,7 @@
     {
       "group": "Features",
       "pages": [
+        "features/data-tests",
         "features/automated-monitors",
         "features/multi-env",
         "features/lineage",
@@ -204,30 +205,24 @@
       ]
     },
     {
-      "group": "Introduction",
+      "group": "Elementary Data tests",
       "pages": [
         "data-tests/introduction",
         "data-tests/elementary-tests-configuration"
       ]
     },
     {
-      "group": "Data Anomaly Detection Tests",
+      "group": "Anomaly Detection Tests",
       "pages": [
-        "data-tests/how-anomaly-detection-works",
-        "data-tests/data-anomaly-detection",
         {
-          "group": "Anomaly detection tests",
+          "group": "How it works?",
           "pages": [
-            "data-tests/anomaly-detection-tests/volume-anomalies",
-            "data-tests/anomaly-detection-tests/freshness-anomalies",
-            "data-tests/anomaly-detection-tests/event-freshness-anomalies",
-            "data-tests/anomaly-detection-tests/dimension-anomalies",
-            "data-tests/anomaly-detection-tests/all-columns-anomalies",
-            "data-tests/anomaly-detection-tests/column-anomalies"
+            "data-tests/how-anomaly-detection-works",
+            "data-tests/data-anomaly-detection"
           ]
         },
         {
-          "group": "Tests params",
+          "group": "Anomaly tests params",
           "pages": [
             "data-tests/anomaly-detection-configuration/anomaly-params",
             "data-tests/anomaly-detection-configuration/timestamp-column",
@@ -249,7 +244,13 @@
             "data-tests/anomaly-detection-configuration/fail_on_zero",
             "data-tests/anomaly-detection-configuration/detection-delay"
           ]
-        }
+        },
+        "data-tests/anomaly-detection-tests/volume-anomalies",
+        "data-tests/anomaly-detection-tests/freshness-anomalies",
+        "data-tests/anomaly-detection-tests/event-freshness-anomalies",
+        "data-tests/anomaly-detection-tests/dimension-anomalies",
+        "data-tests/anomaly-detection-tests/all-columns-anomalies",
+        "data-tests/anomaly-detection-tests/column-anomalies"
       ]
     },
     {
@@ -258,7 +259,6 @@
         "data-tests/schema-tests/schema-changes",
         "data-tests/schema-tests/schema-changes-from-baseline",
         "data-tests/schema-tests/json-schema",
-        "data-tests/schema-tests/generate-schema-tests",
         "data-tests/schema-tests/exposure-tests"
       ]
     },
