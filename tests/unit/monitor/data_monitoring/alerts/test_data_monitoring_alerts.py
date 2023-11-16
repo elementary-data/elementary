@@ -10,7 +10,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
-from tests.mocks.data_monitoring.data_monitoring_alerts_mock import (
+from tests.mocks.data_monitoring.alerts.data_monitoring_alerts_mock import (
     DataMonitoringAlertsMock,
 )
 

@@ -86,12 +86,11 @@ class SlackIntegration(BaseIntegration):
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
         ],
-        is_slack_workflow: bool = False,
         *args,
         **kwargs,
     ) -> SlackMessageSchema:
-        if is_slack_workflow:
-            return SlackMessageSchema(text=json.dumps(alert.__dict__))
+        if self.config.is_slack_workflow:
+            return SlackMessageSchema(text=json.dumps(alert.data, sort_keys=True))
         return super()._get_alert_template(alert, *args, **kwargs)
 
     def _get_dbt_test_template(
@@ -931,7 +930,7 @@ class SlackIntegration(BaseIntegration):
         *args,
         **kwargs,
     ) -> bool:
-        integration_params = self.get_integration_params(alert=alert)
+        integration_params = self._get_integration_params(alert=alert)
         channel_name = integration_params.get("channel")
         try:
             self._fix_owners_and_subscribers(alert)
@@ -960,7 +959,7 @@ class SlackIntegration(BaseIntegration):
         test_message = self._get_test_message_template()
         return self.client.send_message(channel_name=channel_name, message=test_message)
 
-    def get_integration_params(
+    def _get_integration_params(
         self,
         alert: Union[
             TestAlertModel,
