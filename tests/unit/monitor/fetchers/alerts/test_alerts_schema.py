@@ -1,7 +1,9 @@
 import json
 from datetime import datetime
 
-from elementary.monitor.fetchers.alerts.schema import (
+import pytest
+
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     BasePendingAlertSchema,
     PendingTestAlertSchema,
 )
@@ -55,37 +57,27 @@ def test_flatten_meta():
     )
 
 
-def test_get_alert_meta_attrs():
-    base_alert = BasePendingAlertSchema(**{**BASE_ALERT, "model_meta": dict(attr="a")})
-    assert base_alert._get_alert_meta_attrs("attr") == ["a"]
-
-    base_alert = BasePendingAlertSchema(
-        **{**BASE_ALERT, "model_meta": dict(attr="a, b")}
+@pytest.mark.parametrize(
+    "model_meta,test_meta,expected",
+    [
+        (dict(attr="a"), None, ["a"]),
+        (dict(attr="a, b"), None, ["a", "b"]),
+        (dict(), None, []),
+        (dict(attr=["a"]), None, ["a"]),
+        (dict(attr=["a", "b"]), None, ["a", "b"]),
+        (dict(attr=["a", "b", "b"]), None, ["a", "b"]),
+        (dict(attr="a"), dict(attr="b"), ["a", "b"]),
+    ],
+)
+def test_get_alert_meta_attrs(model_meta, test_meta, expected):
+    alert = (
+        BasePendingAlertSchema(**{**BASE_ALERT, "model_meta": model_meta})
+        if test_meta is None
+        else PendingTestAlertSchema(
+            **{**TEST_ALERT, "model_meta": model_meta, "test_meta": test_meta}
+        )
     )
-    assert sorted(base_alert._get_alert_meta_attrs("attr")) == sorted(["a", "b"])
-
-    base_alert = BasePendingAlertSchema(**{**BASE_ALERT, "model_meta": dict()})
-    assert base_alert._get_alert_meta_attrs("attr") == []
-
-    base_alert = BasePendingAlertSchema(
-        **{**BASE_ALERT, "model_meta": dict(attr=["a"])}
-    )
-    assert base_alert._get_alert_meta_attrs("attr") == ["a"]
-
-    base_alert = BasePendingAlertSchema(
-        **{**BASE_ALERT, "model_meta": dict(attr=["a", "b"])}
-    )
-    assert sorted(base_alert._get_alert_meta_attrs("attr")) == sorted(["a", "b"])
-
-    base_alert = BasePendingAlertSchema(
-        **{**BASE_ALERT, "model_meta": dict(attr=["a", "b", "b"])}
-    )
-    assert sorted(base_alert._get_alert_meta_attrs("attr")) == sorted(["a", "b"])
-
-    test_alert = PendingTestAlertSchema(
-        **{**TEST_ALERT, "model_meta": dict(attr=["a"]), "test_meta": dict(attr=["b"])}
-    )
-    assert sorted(test_alert._get_alert_meta_attrs("attr")) == sorted(["a", "b"])
+    assert sorted(alert._get_alert_meta_attrs("attr")) == sorted(expected)
 
 
 def test_get_suppression_interval():

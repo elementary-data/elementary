@@ -78,28 +78,6 @@ def test_format_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     assert len(sorted_formatted_alerts[6].alerts) == 1
 
 
-def test_test_format(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
-    alerts = data_monitoring_alerts_mock._fetch_data(days_back=1)
-
-    # format test alerts
-    for alert in alerts.tests.send + alerts.tests.skip:
-        assert isinstance(
-            data_monitoring_alerts_mock._format_alert(alert), TestAlertModel
-        )
-
-    # format model alerts
-    for alert in alerts.models.send + alerts.models.skip:
-        assert isinstance(
-            data_monitoring_alerts_mock._format_alert(alert), ModelAlertModel
-        )
-
-    # format source_freshness alerts
-    for alert in alerts.source_freshnesses.send + alerts.source_freshnesses.skip:
-        assert isinstance(
-            data_monitoring_alerts_mock._format_alert(alert), SourceFreshnessAlertModel
-        )
-
-
 @pytest.fixture
 def data_monitoring_alerts_mock() -> DataMonitoringAlertsMock:
     return DataMonitoringAlertsMock()

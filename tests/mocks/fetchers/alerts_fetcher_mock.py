@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from elementary.config.config import Config
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
-from elementary.monitor.fetchers.alerts.schema import (
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,

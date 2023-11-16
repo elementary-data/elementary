@@ -17,11 +17,6 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import ResourceType
-from elementary.monitor.fetchers.alerts.schema import (
-    PendingModelAlertSchema,
-    PendingSourceFreshnessAlertSchema,
-    PendingTestAlertSchema,
-)
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -72,113 +67,6 @@ class DataMonitoringAlerts(DataMonitoring):
             filter=self.filter.get_filter(),
         )
 
-    def _format_alert(
-        self,
-        alert: Union[
-            PendingTestAlertSchema,
-            PendingModelAlertSchema,
-            PendingSourceFreshnessAlertSchema,
-        ],
-    ) -> Union[ModelAlertModel, TestAlertModel, SourceFreshnessAlertModel]:
-        if isinstance(alert, PendingTestAlertSchema):
-            return TestAlertModel(
-                id=alert.id,
-                test_unique_id=alert.test_unique_id,
-                elementary_unique_id=alert.elementary_unique_id,
-                test_name=alert.test_name,
-                severity=alert.severity,
-                table_name=alert.table_name,
-                test_type=alert.test_type,
-                test_sub_type=alert.test_sub_type,
-                test_results_description=alert.test_results_description,
-                test_results_query=alert.test_results_query,
-                test_short_name=alert.test_short_name,
-                test_description=alert.description,
-                other=alert.other,
-                test_params=alert.test_params,
-                test_rows_sample=alert.test_rows_sample,
-                column_name=alert.column_name,
-                alert_class_id=alert.alert_class_id,
-                model_unique_id=alert.model_unique_id,
-                detected_at=alert.detected_at,
-                database_name=alert.database_name,
-                schema_name=alert.schema_name,
-                owners=alert.owners,
-                tags=alert.tags,
-                subscribers=alert.subscribers,
-                status=alert.status,
-                model_meta=alert.flatten_model_meta,
-                test_meta=alert.flatten_test_meta,
-                suppression_interval=alert.get_suppression_interval(
-                    self.global_suppression_interval, self.override_config
-                ),
-                timezone=self.config.timezone,
-                report_url=self.config.report_url,
-                alert_fields=alert.alert_fields,
-                elementary_database_and_schema=self.elementary_database_and_schema,
-            )
-        elif isinstance(alert, PendingModelAlertSchema):
-            return ModelAlertModel(
-                id=alert.id,
-                alias=alert.alias,
-                path=alert.path,
-                original_path=alert.original_path,
-                materialization=alert.materialization,
-                message=alert.message,
-                full_refresh=alert.full_refresh,
-                alert_class_id=alert.alert_class_id,
-                model_unique_id=alert.model_unique_id,
-                detected_at=alert.detected_at,
-                database_name=alert.database_name,
-                schema_name=alert.schema_name,
-                owners=alert.owners,
-                tags=alert.tags,
-                subscribers=alert.subscribers,
-                status=alert.status,
-                model_meta=alert.flatten_model_meta,
-                suppression_interval=alert.get_suppression_interval(
-                    self.global_suppression_interval, self.override_config
-                ),
-                timezone=self.config.timezone,
-                report_url=self.config.report_url,
-                alert_fields=alert.alert_fields,
-                elementary_database_and_schema=self.elementary_database_and_schema,
-            )
-        else:
-            return SourceFreshnessAlertModel(
-                id=alert.id,
-                source_name=alert.source_name,
-                identifier=alert.identifier,
-                normalized_status=alert.normalized_status,
-                error_after=alert.error_after,
-                warn_after=alert.warn_after,
-                path=alert.path,
-                error=alert.error,
-                source_freshness_execution_id=alert.source_freshness_execution_id,
-                snapshotted_at=alert.snapshotted_at,
-                max_loaded_at=alert.max_loaded_at,
-                max_loaded_at_time_ago_in_s=alert.max_loaded_at_time_ago_in_s,
-                filter=alert.filter,
-                freshness_description=alert.freshness_description,
-                alert_class_id=alert.alert_class_id,
-                model_unique_id=alert.model_unique_id,
-                detected_at=alert.detected_at,
-                database_name=alert.database_name,
-                schema_name=alert.schema_name,
-                owners=alert.owners,
-                tags=alert.tags,
-                subscribers=alert.subscribers,
-                status=alert.status,
-                model_meta=alert.flatten_model_meta,
-                suppression_interval=alert.get_suppression_interval(
-                    self.global_suppression_interval, self.override_config
-                ),
-                timezone=self.config.timezone,
-                report_url=self.config.report_url,
-                alert_fields=alert.alert_fields,
-                elementary_database_and_schema=self.elementary_database_and_schema,
-            )
-
     def _format_alerts(
         self,
         alerts: AlertsSchema,
@@ -199,7 +87,13 @@ class DataMonitoringAlerts(DataMonitoring):
         )
         for alert in alerts.all_alerts:
             group_alerts_by = alert.group_alerts_by or default_alerts_group_by_strategy
-            formatted_alert = self._format_alert(alert)
+            formatted_alert = alert.format_alert(
+                timezone=self.config.timezone,
+                report_url=self.config.report_url,
+                elementary_database_and_schema=self.elementary_database_and_schema,
+                global_suppression_interval=self.global_suppression_interval,
+                override_config=self.override_config,
+            )
             try:
                 grouping_type = GroupingType(group_alerts_by)
                 if grouping_type == GroupingType.BY_TABLE:

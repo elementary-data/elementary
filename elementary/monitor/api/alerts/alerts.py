@@ -15,7 +15,7 @@ from elementary.monitor.api.alerts.schema import (
 )
 from elementary.monitor.data_monitoring.schema import ResourceType, SelectorFilterSchema
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
-from elementary.monitor.fetchers.alerts.schema import (
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,

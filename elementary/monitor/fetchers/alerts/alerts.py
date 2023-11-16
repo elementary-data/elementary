@@ -5,7 +5,7 @@ from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.schema import ResourceType
-from elementary.monitor.fetchers.alerts.schema import (
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,
