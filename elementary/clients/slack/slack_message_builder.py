@@ -21,6 +21,9 @@ class SlackMessageBuilder:
     def _initial_slack_message(cls) -> dict:
         return {"blocks": [], "attachments": [{"blocks": []}]}
 
+    def reset_slack_message(self):
+        self.slack_message = self._initial_slack_message()
+
     def _add_always_displayed_blocks(self, blocks: SlackBlocksType):
         # In oppose to attachments Blocks are always displayed, use this for parts that should always be displayed in the message
         self.slack_message["blocks"].extend(blocks)

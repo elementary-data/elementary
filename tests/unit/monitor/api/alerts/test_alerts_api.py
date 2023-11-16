@@ -1,8 +1,6 @@
 import json
-from typing import Optional
 
 import pytest
-from parametrization import Parametrization
 
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 
@@ -35,41 +33,46 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
     )
 
 
-@Parametrization.autodetect_parameters()
-@Parametrization.case(
-    name="meta is none- cli wins",
-    cli_interval=1,
-    alert_interval=None,
-    expected_interval=1,
-    override_suppression_interval=False,
-)
-@Parametrization.case(
-    name="meta is not none- meta wins",
-    cli_interval=2,
-    alert_interval=10,
-    expected_interval=10,
-    override_suppression_interval=False,
-)
-@Parametrization.case(
-    name="meta is not none but override is set- cli wins",
-    cli_interval=2,
-    alert_interval=10,
-    expected_interval=2,
-    override_suppression_interval=True,
-)
-def test_get_suppression_interval(
-    alerts_api_mock: MockAlertsAPI,
-    cli_interval: int,
-    alert_interval: Optional[int],
-    override_suppression_interval: bool,
-    expected_interval: Optional[int],
-):
-    assert (
-        alerts_api_mock._get_suppression_interval(
-            alert_interval, cli_interval, override_suppression_interval
-        )
-        == expected_interval
+def test_sort_alerts(alerts_api_mock: MockAlertsAPI):
+    last_test_alert_sent_times = (
+        alerts_api_mock.alerts_fetcher.query_last_test_alert_times()
     )
+    last_model_alert_sent_times = (
+        alerts_api_mock.alerts_fetcher.query_last_model_alert_times()
+    )
+
+    test_alerts = alerts_api_mock.alerts_fetcher.query_pending_test_alerts()
+    model_alerts = alerts_api_mock.alerts_fetcher.query_pending_model_alerts()
+
+    sorted_test_alerts = alerts_api_mock._sort_alerts(
+        test_alerts,
+        last_test_alert_sent_times,
+    )
+    sorted_model_alerts = alerts_api_mock._sort_alerts(
+        model_alerts,
+        last_model_alert_sent_times,
+    )
+
+    # alert_id_1 is suppressed and alert_id_5 is duplicated
+    assert [alert.id for alert in sorted_test_alerts.skip].sort() == [
+        "alert_id_1",
+        "alert_id_5",
+    ].sort()
+    assert [alert.id for alert in sorted_test_alerts.send].sort() == [
+        "alert_id_2",
+        "alert_id_3",
+        "alert_id_4",
+    ].sort()
+    # alert_id_1 is suppressed and alert_id_5 is duplicated
+    assert [alert.id for alert in sorted_model_alerts.skip].sort() == [
+        "alert_id_1",
+        "alert_id_5",
+    ].sort()
+    assert [alert.id for alert in sorted_model_alerts.send].sort() == [
+        "alert_id_2",
+        "alert_id_3",
+        "alert_id_4",
+    ].sort()
 
 
 def test_get_latest_alerts(alerts_api_mock: MockAlertsAPI):

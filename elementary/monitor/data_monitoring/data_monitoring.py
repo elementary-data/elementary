@@ -4,7 +4,6 @@ from typing import Any, Dict, Optional, cast
 from packaging import version
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.data_monitoring.schema import WarehouseInfo
@@ -55,10 +54,6 @@ class DataMonitoring:
             tracking.set_env("dbt_pkg_version", dbt_pkg_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
-        # slack client is optional
-        self.slack_client = SlackClient.create_client(
-            self.config, tracking=self.tracking
-        )
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
         self.disable_samples = disable_samples

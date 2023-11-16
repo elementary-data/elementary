@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts import AlertsQueryResult
-from elementary.monitor.alerts.model import ModelAlert
-from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
+    PendingModelAlertSchema,
+    PendingSourceFreshnessAlertSchema,
+    PendingTestAlertSchema,
+)
 from elementary.utils.time import DATETIME_FORMAT
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
@@ -183,12 +184,10 @@ class MockAlertsFetcher(AlertsFetcher):
         ]
 
         pending_test_alerts = [
-            TestAlert.create_test_alert_from_dict(
-                **self._normalize_alert(pending_alert)
-            )
+            PendingTestAlertSchema(**pending_alert)
             for pending_alert in PENDDING_TEST_ALERTS_MOCK_DATA
         ]
-        return AlertsQueryResult(alerts=pending_test_alerts, malformed_alerts=[])
+        return pending_test_alerts
 
     def query_pending_model_alerts(self, *args, **kwargs):
         PENDDING_MODEL_ALERTS_MOCK_DATA = [
@@ -302,10 +301,10 @@ class MockAlertsFetcher(AlertsFetcher):
         ]
 
         pending_model_alerts = [
-            ModelAlert(**self._normalize_alert(pending_alert))
+            PendingModelAlertSchema(**pending_alert)
             for pending_alert in PENDDING_MODEL_ALERTS_MOCK_DATA
         ]
-        return AlertsQueryResult(alerts=pending_model_alerts, malformed_alerts=[])
+        return pending_model_alerts
 
     def query_pending_source_freshness_alerts(self, *args, **kwargs):
         PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA = [
@@ -449,12 +448,10 @@ class MockAlertsFetcher(AlertsFetcher):
         ]
 
         pending_source_freshness_alerts = [
-            SourceFreshnessAlert(**self._normalize_alert(pending_alert))
+            PendingSourceFreshnessAlertSchema(**pending_alert)
             for pending_alert in PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA
         ]
-        return AlertsQueryResult(
-            alerts=pending_source_freshness_alerts, malformed_alerts=[]
-        )
+        return pending_source_freshness_alerts
 
     def query_last_test_alert_times(self, *args, **kwargs):
         return {

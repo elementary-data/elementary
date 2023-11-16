@@ -4,9 +4,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.alerts.model import ModelAlert
-from elementary.monitor.alerts.source_freshness import SourceFreshnessAlert
-from elementary.monitor.alerts.test import TestAlert
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
@@ -25,18 +22,6 @@ class ResourceType(Enum):
     TEST = "test"
     MODEL = "model"
     SOURCE_FRESHNESS = "source_freshness"
-
-    @staticmethod
-    def from_table_name(table_name):
-        if table_name == TestAlert.TABLE_NAME:
-            return ResourceType.TEST
-        elif table_name == ModelAlert.TABLE_NAME:
-            return ResourceType.MODEL
-        elif table_name == SourceFreshnessAlert.TABLE_NAME:
-            return ResourceType.SOURCE_FRESHNESS
-        else:
-            logger.warning(f"Unknown table name: {table_name}")
-            return None
 
 
 class SelectorFilterSchema(BaseModel):
