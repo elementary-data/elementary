@@ -8,6 +8,38 @@ from elementary.utils.time import DATETIME_FORMAT
 
 logger = get_logger(__name__)
 
+TABLE_FIELD = "table"
+COLUMN_FIELD = "column"
+DESCRIPTION_FIELD = "description"
+OWNERS_FIELD = "owners"
+TAGS_FIELD = "tags"
+SUBSCRIBERS_FIELD = "subscribers"
+RESULT_MESSAGE_FIELD = "result_message"
+TEST_PARAMS_FIELD = "test_parameters"
+TEST_QUERY_FIELD = "test_query"
+TEST_RESULTS_SAMPLE_FIELD = "test_results_sample"
+
+DEFAULT_ALERT_FIELDS = [
+    TABLE_FIELD,
+    COLUMN_FIELD,
+    DESCRIPTION_FIELD,
+    OWNERS_FIELD,
+    TAGS_FIELD,
+    SUBSCRIBERS_FIELD,
+    RESULT_MESSAGE_FIELD,
+    TEST_PARAMS_FIELD,
+    TEST_QUERY_FIELD,
+    TEST_RESULTS_SAMPLE_FIELD,
+]
+
+RED = "#ff0000"
+YELLOW = "#ffcc00"
+STATUS_DISPLAYS = {
+    "fail": {"color": RED, "display_name": "Failed"},
+    "warn": {"color": YELLOW, "display_name": "Warning"},
+    "error": {"color": RED, "display_name": "Error"},
+}
+
 
 class AlertModel:
     def __init__(
@@ -70,3 +102,10 @@ class AlertModel:
     @property
     def concise_name(self):
         return "Alert"
+
+    @property
+    def summary(self):
+        return self.concise_name
+
+    def get_report_link(self):
+        return self.report_url

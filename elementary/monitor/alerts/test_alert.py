@@ -2,8 +2,16 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 from elementary.monitor.alerts.alert import AlertModel
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    get_test_runs_link,
+)
 
 DBT_TEST_TYPE = "dbt_test"
+TEST_QUERY_QUERY_TEMPLATE = (
+    "_The test query was too long, here's a query to get it._\n"
+    "```SELECT test_results_query FROM {db_and_schema}"
+    ".elementary_test_results WHERE test_execution_id = '{alert_id}'```"
+)
 
 
 class TestAlertModel(AlertModel):
@@ -150,3 +158,13 @@ class TestAlertModel(AlertModel):
             return f"{self.test_short_name or self.test_name} - {self.test_sub_type_display_name}"
         else:
             return f"{self.test_short_name or self.test_name}"
+
+    @property
+    def summary(self):
+        return (
+            f"*{self.concise_name}* test failed on "
+            f"`{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}`"
+        )
+
+    def get_report_link(self):
+        get_test_runs_link(self.report_url, self.elementary_unique_id)

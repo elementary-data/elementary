@@ -1,8 +1,11 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
+)
 from elementary.utils.json_utils import unpack_and_flatten_str_to_list
 
 
@@ -99,6 +102,18 @@ class SlackMessageBuilder:
         return {"type": "context", "elements": fields}
 
     @staticmethod
+    def create_section_with_button(text: str, url: ReportLinkData) -> dict:
+        return {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": text},
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": url.text, "emoji": True},
+                "url": url.url,
+            },
+        }
+
+    @staticmethod
     def create_header_block(msg: str) -> dict:
         return {
             "type": "header",
@@ -144,15 +159,6 @@ class SlackMessageBuilder:
         attachment = {"type": "section", "fields": section_fields}
         attachments.append(attachment)
         return attachments
-
-    @staticmethod
-    def get_slack_status_icon(status: Optional[str]) -> str:
-        icon = ":small_red_triangle:"
-        if status == "warn":
-            icon = ":warning:"
-        elif status == "error":
-            icon = ":x:"
-        return icon
 
     def get_slack_message(self, *args, **kwargs) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
