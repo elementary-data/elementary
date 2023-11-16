@@ -50,6 +50,7 @@ class Config:
         slack_group_alerts_by: Optional[str] = None,
         timezone: Optional[str] = None,
         aws_profile_name: Optional[str] = None,
+        aws_region_name: Optional[str] = None,
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
         s3_endpoint_url: Optional[str] = None,
@@ -122,6 +123,10 @@ class Config:
         self.aws_profile_name = self._first_not_none(
             aws_profile_name,
             aws_config.get("profile_name"),
+        )
+        self.aws_region_name = self._first_not_none(
+            aws_region_name,
+            aws_config.get("region_name"),
         )
         self.s3_endpoint_url = self._first_not_none(
             s3_endpoint_url, aws_config.get("s3_endpoint_url")
