@@ -1,3 +1,4 @@
+# Exasol fork 1.0
 <p align="center">
 <img alt="Logo" src="static/github_banner.png"/ width="1000">
 </p>
