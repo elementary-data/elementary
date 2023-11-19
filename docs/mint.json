@@ -29,12 +29,16 @@
   },
   "tabs": [
     {
+      "name": "Data tests",
+      "url": "data-tests"
+    },
+    {
       "name": "Elementary Cloud",
       "url": "cloud"
     },
     {
-      "name": "Data tests",
-      "url": "data-tests"
+      "name": "Elementary OSS",
+      "url": "oss"
     }
   ],
   "topbarCtaButton": {
@@ -64,49 +68,23 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        {
-          "group": "Quickstart: Elementary",
-          "icon": "cloud",
-          "pages": ["quickstart", "quickstart-cloud"]
-        },
-        {
-          "group": "Quickstart: OSS",
-          "icon": "square-terminal",
-          "pages": ["quickstart-cli-package", "quickstart-cli"]
-        },
-        {
-          "group": "Tutorial",
-          "pages": [
-            "tutorial/tutorial-start",
-            "tutorial/setup",
-            "tutorial/installing-elementary",
-            "tutorial/viewing-artifacts",
-            "tutorial/adding-elementary-tests",
-            "tutorial/running-elementary"
-          ]
-        }
+        "key-features",
+        "quickstart"
       ]
     },
     {
-      "group": "Guides",
+      "group": "Overview",
       "pages": [
-        "quickstart/generate-report-ui",
+        "overview/elementary-cloud",
+        "overview/elementary-oss",
         {
-          "group": "Share observability report",
+          "group": "dbt package",
+          "icon": "cube",
           "pages": [
-            "quickstart/share-report-ui",
-            "guides/share-observability-report/share-via-slack",
-            "guides/share-observability-report/host-on-s3",
-            "guides/share-observability-report/host-on-gcs",
-            "guides/share-observability-report/host-on-azure",
-            "guides/share-observability-report/send-report-summary"
-          ]
-        },
-        {
-          "group": "Send Slack alerts",
-          "pages": [
-            "quickstart/send-slack-alerts",
-            "guides/alerts-configuration"
+            "guides/modules-overview/dbt-package",
+            "dbt/on-run-end_hooks",
+            "dbt/dbt-artifacts",
+            "dbt/package-models"
           ]
         }
       ]
@@ -120,52 +98,6 @@
         "features/lineage",
         "features/catalog",
         "features/ci"
-      ]
-    },
-    {
-      "group": "Deployment and Configuration",
-      "pages": [
-        "deployment-and-configuration/elementary-in-production",
-        "dbt/on-run-end_hooks",
-        "deployment-and-configuration/collect-job-data",
-        "deployment-and-configuration/collect-dbt-source-freshness",
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands"
-      ]
-    },
-    {
-      "group": "Understand Elementary",
-      "pages": [
-        "understand-elementary/elementary-overview",
-        "guides/modules-overview/dbt-package",
-        "dbt/dbt-artifacts",
-        "understand-elementary/elementary-report-ui",
-        "quickstart/send-slack-alerts"
-      ]
-    },
-    {
-      "group": "Integrations",
-      "pages": [
-        "integrations/dbt",
-        "integrations/slack",
-        {
-          "group": "Data Warehouses",
-          "pages": [
-            "integrations/snowflake",
-            "integrations/bigquery",
-            "integrations/redshift",
-            "integrations/databricks",
-            "integrations/postgres"
-          ]
-        },
-        {
-          "group": "Deployment",
-          "pages": [
-            "deployment-and-configuration/docker",
-            "deployment-and-configuration/github-actions",
-            "deployment-and-configuration/gitlab-ci"
-          ]
-        }
       ]
     },
     {
@@ -267,15 +199,18 @@
       "pages": ["data-tests/python-tests"]
     },
     {
-      "group": "Introduction",
-      "pages": ["cloud/introduction", "cloud/general/security-and-privacy"]
-    },
-    {
-      "group": "Getting Started",
+      "group": "Elementary Cloud",
       "pages": [
-        "cloud/onboarding/quickstart-dbt-package",
-        "cloud/onboarding/signup",
-        "cloud/manage-team"
+        "cloud/introduction",
+        {
+          "group": "Quickstart",
+          "icon": "circle-play",
+          "pages": [
+            "cloud/onboarding/quickstart-dbt-package",
+            "cloud/onboarding/signup"
+          ]
+        },
+        "cloud/general/security-and-privacy"
       ]
     },
     {
@@ -310,6 +245,60 @@
         "cloud/integrations/dwh/redshift",
         "cloud/integrations/dwh/databricks",
         "cloud/integrations/dwh/postgres"
+      ]
+    },
+    {
+      "group": "Elementary OSS",
+      "pages": [
+        "oss/oss-introduction",
+        {
+          "group": "Quickstart",
+          "icon": "circle-play",
+          "pages": [
+            "oss/quickstart/quickstart-cli-package",
+            "oss/quickstart/quickstart-cli"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "oss/guides/generate-report-ui",
+        {
+          "group": "Share observability report",
+          "pages": [
+            "oss/guides/share-report-ui",
+            "oss/guides/share-observability-report/share-via-slack",
+            "oss/guides/share-observability-report/host-on-s3",
+            "oss/guides/share-observability-report/host-on-gcs",
+            "oss/guides/share-observability-report/host-on-azure",
+            "oss/guides/share-observability-report/send-report-summary"
+          ]
+        },
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "oss/guides/send-slack-alerts",
+            "oss/guides/alerts-configuration"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Configuration & usage",
+      "pages": [
+        "oss/cli-install",
+        "oss/cli-commands"
+      ]
+    },
+    {
+      "group": "Production deployment",
+      "pages": [
+        "oss/deployment-and-configuration/elementary-in-production",
+        "oss/deployment-and-configuration/docker",
+        "oss/deployment-and-configuration/github-actions",
+        "oss/deployment-and-configuration/gitlab-ci"
       ]
     }
   ],
