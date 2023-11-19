@@ -5,6 +5,7 @@ import click
 from pyfiglet import Figlet
 
 import elementary.cli.upgrade
+from elementary.cli.e2e.cli import e2e_monitor
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
@@ -36,6 +37,7 @@ class ElementaryCLI(click.MultiCommand):
         "report": report,
         "send-report": send_report,
         "run-operation": run_operation,
+        "e2e-monitor": e2e_monitor,
     }
 
     def list_commands(self, ctx):

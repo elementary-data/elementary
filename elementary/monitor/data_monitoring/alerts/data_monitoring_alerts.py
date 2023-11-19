@@ -48,6 +48,7 @@ class DataMonitoringAlerts(DataMonitoring):
             self.global_suppression_interval,
             self.override_config,
         )
+        self.alerts_to_send_count = 0
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
         self.override_config_defaults = override_config
@@ -141,6 +142,8 @@ class DataMonitoringAlerts(DataMonitoring):
         if not alerts:
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
+
+        self.alerts_to_send_count = len(alerts)
 
         sent_alert_ids_by_type: Dict[ResourceType, List[str]] = {
             ResourceType.TEST: [],

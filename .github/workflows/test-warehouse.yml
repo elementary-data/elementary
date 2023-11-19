@@ -159,14 +159,15 @@ jobs:
 
       - name: Run monitor
         env:
-          SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
+          SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
         run: >
-          edr monitor 
+          edr e2e-monitor 
           -t "${{ inputs.warehouse-type }}"
           --group-by table
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
-          --slack-webhook "$SLACK_WEBHOOK"
+          --slack-token "$SLACK_TOKEN"
+          --slack-channel-name data-ops
 
       - name: Validate alerts statuses were updated
         working-directory: ${{ env.ELMENTARY_INTERNAL_DBT_PKG_DIR }}
