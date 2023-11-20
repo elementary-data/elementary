@@ -94,8 +94,15 @@
       "pages": [
         "features/data-tests",
         "features/automated-monitors",
+        {
+          "group": "End-to-End Lineage",
+          "pages": [
+            "features/lineage",
+            "features/exposures-lineage",
+            "features/column-level-lineage"
+          ]
+        },
         "features/multi-env",
-        "features/lineage",
         "features/catalog",
         "features/ci"
       ]
@@ -218,6 +225,7 @@
       "pages": [
         "cloud/guides/enable-slack-alerts",
         "cloud/guides/sync-scheduling",
+        "cloud/guides/collect-job-data",
         "cloud/guides/troubleshoot"
       ]
     },
@@ -282,7 +290,8 @@
             "oss/guides/send-slack-alerts",
             "oss/guides/alerts-configuration"
           ]
-        }
+        },
+        "oss/guides/collect-job-data"
       ]
     },
     {

@@ -1,11 +1,4 @@
----
-title: "Collect jobs info from orchestrator"
-sidebarTitle: "Jobs name & info"
----
-
-_Supported in Elementary 0.8.0 and above_
-
-Elementary can collect metadata about your jobs from the orchestrator you are using, and enrich the Elementary report with this information.
+Elementary can collect metadata about your jobs from the orchestrator you are using, and enrich the Elementary UI with this information.
 
 The goal is to provide context that is useful to triage and resolve data issues, such as:
 
@@ -76,7 +69,7 @@ dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_loa
 ## Where can I see my job info?
 
 - In your Elementary schema, the raw fields are stored in the table `dbt_invocations`. You could also use the view `job_run_results` which groups invocation by job.
-- In the Elementary report, if the info was collected successfully, you can filter the lineage by job and see the details in the node info.
+- In the Elementary UI, if the info was collected successfully, you can filter the lineage by job and see the details in the node info.
 
 ## Can't find your orchestrator? Missing info?
 
