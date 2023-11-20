@@ -17,7 +17,7 @@ class SourceFreshnessAlertModel(AlertModel):
         identifier: str,
         normalized_status: str,
         path: str,
-        error: str,
+        error: Optional[str],
         alert_class_id: str,
         source_freshness_execution_id: str,
         model_unique_id: Optional[str] = None,

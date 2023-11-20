@@ -272,7 +272,7 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
     filter: Optional[str] = None
     normalized_status: str
     path: str
-    error: str
+    error: Optional[str] = None
     freshness_description: Optional[str] = None
     resource_type: ResourceType = Field(ResourceType.SOURCE_FRESHNESS, const=True)
 
