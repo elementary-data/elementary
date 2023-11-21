@@ -1,0 +1,46 @@
+---
+title: "Host the report on Azure Blob Storage"
+sidebarTitle: "Host on Azure"
+---
+
+<Info>
+
+**Prerequisites**
+
+- [Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal)
+- [Azure Container](https://learn.microsoft.com/en-us/azure/storage/blobs/blob-containers-portal)
+- [Access Keys](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal)
+
+</Info>
+
+You can send the report to your Azure Blob Storage by running the command:
+
+```shell
+edr send-report --azure-container-name <AZURE_CONTAINER_NAME> --azure-connection-string <AZURE_CONNECTION_STRING>
+```
+
+You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` (the report's file name should end with `.html`).
+
+### Hosting the report as a website
+
+You can host the report as the container's website so that you can browse to it with a constant URL
+like `https://<Account-Name>.blob.core.windows.net/<Azure-Container-Name>/index.html`.
+
+In order to do that, pass `--update-bucket-website true` to `send-report` in order to update the `index.html` file in
+the container.
+
+### Configuration in file
+
+If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
+
+```yml
+azure:
+  azure_connection_string: [Azure connection string]
+  azure_container_name: [Azure container name]
+
+update_bucket_website: [true | false]
+```
+
+### Send report summary to Slack
+
+In addition to hosting the report, you can send a [report summary notification to Slack](/oss/guides/share-observability-report/send-report-summary) every time the report is updated.

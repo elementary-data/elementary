@@ -1,0 +1,89 @@
+---
+title: "Elementary in production"
+---
+
+<Card
+  title="Try Elementary cloud"
+  href="https://app.elementary-data.com/"
+></Card>
+
+Running Elementary OSS in production means to include the dbt package in your production dbt project,
+and setting up an automated manner to run the Elementary CLI.
+
+You can choose any system that allows you to orchestrate a CLI execution, as long as it can meet the following requirements:
+
+- Full installation of Elementary Python package and dependencies.
+- Network access to the data warehouse.
+- Access to a `profiles.yml` file with `elementary` profile name.
+- Read and write permissions to the Elementary schema.
+
+## Elementary `--env` flag
+
+When you run Elementary in production use the `--env prod` flag (By default, it is set to `dev`).
+This will show the environment as `prod` in the report and alerts.
+
+## Elementary production deployment and jobs
+
+Your deployment of Elementary has two parts:
+
+**Part 1 - Elementary package in your production dbt project**
+
+In your dbt jobs, after you deploy the Elementary dbt package:
+
+1. **Run and test results** - Collected by default as part of your runs.
+2. **Elementary tests** - Make sure your dbt test runs include elementary tests.
+3. **Update dbt artifacts** - Elementary uses the dbt artifacts models to enrich the report, alerts and lineage. To update the artifacts data, run the elementary dbt artifacts models.
+
+**Part 2 - Elementary CLI**
+
+On an orchestration system of your choice, run the CLI to:
+
+1. **Send Slack alerts** - Use the `edr monitor --env prod` command and Slack integration.
+2. **Generate a report** - Use the `edr report --env prod` or `edr send-report --env prod` that has built in support for sending the report to Slack / GCS / S3.
+
+## What permissions Elementary requires?
+
+The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile,
+and network access to the data warehouse.
+
+Also, in the `elementary` profile, the credentials should have permissions to:
+
+- Read all project schemas
+- Write to the elementary schema
+
+On your dbt project, make sure that Elementary dbt package can:
+
+- Read all project schemas
+- Write to the elementary schema
+- Create a schema (alternatively, you can create the elementary schema in advance)
+
+<Snippet file="faq/question-schema.mdx" />
+
+## When to run Elementary?
+
+For sending alerts or generating a report, there are two options:
+
+1. **Run Elementary CLI after each relevant dbt job** (`dbt test` / `dbt build` / `dbt run`).
+2. **Run Elementary CLI periodically** in a frequency that fits your dbt job executions.
+
+## Ways to run Elementary in production
+
+If your organization is using dbt-core, it would probably be a good choice to orchestrate Elementary using the same system that orchestrates dbt.
+
+Any automation server / orchestration tool supports running a CLI tool like Elementary.
+
+Some options include:
+
+1. [Elementary cloud](/cloud/introduction)
+2. GitHub Actions - Checkout the [Elementary GitHub Action](https://github.com/elementary-data/run-elementary-action) we created.
+3. [Docker](/oss/deployment-and-configuration/docker)
+4. [GitLab CI](/oss/deployment-and-configuration/gitlab-ci)
+5. Airflow
+6. Prefect
+7. Meltano - Checkout the [custom Elementary integration](https://hub.meltano.com/utilities/elementary) developed by [Stéphane Burwash](https://github.com/SBurwash) - [Potloc](https://www.potloc.com/).
+8. Using cron
+
+## Need help?
+
+If you want to consult on production deployment, we would love to help!  
+Please reach out to us on [Slack](https://elementary-data.com/community), we could talk there or schedule a deployment video call.

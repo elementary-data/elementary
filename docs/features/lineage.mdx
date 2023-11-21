@@ -1,0 +1,29 @@
+---
+title: End-to-End Data Lineage
+sidebarTitle: Data Lineage
+---
+
+Elementary Cloud UI and Elementary OSS Report include a rich data lineage graph.
+The graph is enriched with the latest test results, to enable easy impact and root cause analysis of data issues.
+
+In Elementary Cloud lineage includes [Column Level Lineage](/features/column-level-lineage) and [BI integrations](/features/exposures-lineage#automated-bi-lineage).
+
+## Node info and test results
+
+To see additional information in the lineage view, use the `...` menu right to the column:
+
+- **Test results**: Access the table latest test results in the lineage view.
+- **Node info**: See details such as description, owner and tags. If collected, it will include the latest job info.
+
+<Frame>
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1700489805/lineage_q75rks.gif"
+    alt="Elementary Lineage"
+  />
+</Frame>
+
+## Job info in lineage
+
+You can configure Elementary to collect jobs names and information to present in the lineage _Node info_ tab. Job names can also be used to filter the lineage graph.
+
+Read how to configure jobs info collection for [Elementary Cloud](/cloud/guides/collect-job-data) or [OSS](/oss/guides/collect-job-data).

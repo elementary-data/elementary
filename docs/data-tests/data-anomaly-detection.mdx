@@ -1,0 +1,22 @@
+---
+title: "Data anomaly detection method"
+sidebarTitle: "Detection method"
+---
+
+Elementary uses "[standard score](https://en.wikipedia.org/wiki/Standard_score)", also known as "Z-score" for anomaly detection. This score represents the number of standard deviations of a value from the average of a set of values.
+
+According to the [empirical rule](https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/empirical-rule-2/), in a standard normal distribution:
+
+- **~68%** of values have an absolute **z-score of 1 or less.**
+- **~95%** of values have an absolute **z-score of 2 or less.**
+- **~99.7%** of values have an absolute **z-score of 3 or less.**
+
+Values with a **standard score of 3 and above are [considered outliers](https://www.ctspedia.org/do/view/CTSpedia/OutLier)**, and this is a recommended threshold for anomaly detection.
+This is the default Elementary uses as well, and it can be changed using the var `anomaly_score_threshold` in the [global configuration](/data-tests/elementary-tests-configuration).
+
+You can use the model `anomaly_sensitivity` to see if values of metrics from your last run would have been considered anomalies in different scores. **This can help you decide if there is a need to adjust the sensitivity:**
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304882/elementary/z-score_so2djq.png"
+  alt="Z Score"
+/>
