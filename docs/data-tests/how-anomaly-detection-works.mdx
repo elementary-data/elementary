@@ -4,13 +4,13 @@ sidebarTitle: "Elementary anomaly detection"
 ---
 
 Elementary data anomaly detection tests monitor a specific metric (like row count, null rate, average value, etc.) and compare recent values to historical values.
-This is done to detect [significant changes and deviations](/guides/data-anomaly-detection), that are probably data reliability issues.
+This is done to detect [significant changes and deviations](/data-tests/data-anomaly-detection), that are probably data reliability issues.
 
 ## What happens on each test?
 
-Upon running a test, your data is split into time buckets based on the [`time_bucket`](/guides/anomaly-detection-configuration/time-bucket) field and is limited by
-the [`days_back`](/guides/anomaly-detection-configuration/days-back) var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
-period ([`backfill_days`](/guides/anomaly-detection-configuration/backfill-days)) to the row count of all the previous time buckets within the [`days_back`](/guides/anomaly-detection-configuration/days-back) period.
+Upon running a test, your data is split into time buckets based on the [`time_bucket`](/data-tests/anomaly-detection-configuration/time-bucket) field and is limited by
+the [`days_back`](/data-tests/anomaly-detection-configuration/days-back) var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
+period ([`backfill_days`](/data-tests/anomaly-detection-configuration/backfill-days)) to the row count of all the previous time buckets within the [`days_back`](/data-tests/anomaly-detection-configuration/days-back) period.
 If there were any anomalies in the detection period, the test will fail.
 On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
 
@@ -21,11 +21,11 @@ On each test elementary package executes the relevant monitors, and searches for
   />
 </Tooltip>
 
-To learn more, refer to [core concepts](/guides/how-anomaly-detection-works).
+To learn more, refer to [core concepts](/data-tests/how-anomaly-detection-works).
 
 ## What does it mean when a test fails?
 
-When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection method](/guides/data-anomaly-detection).
+When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection method](/data-tests/data-anomaly-detection).
 
 ## Core concepts
 
@@ -73,7 +73,7 @@ For example, if we use daily time bucket and monitor for row count anomalies, we
 
 ### Detection algorithm
 
-Read about it in [data anomaly detection method](/guides/data-anomaly-detection).
+Read about it in [data anomaly detection method](/data-tests/data-anomaly-detection).
 
 ## Tests configuration and core concepts
 
@@ -84,28 +84,28 @@ Configuration params related directly to the test's core concepts:
 
 **Data monitors**
 
-- [column_anomalies](/guides/anomaly-detection-configuration/column-anomalies)
+- [column_anomalies](/data-tests/anomaly-detection-configuration/column-anomalies)
 
 **Expected range**
 
-- [anomaly_sensitivity](/guides/anomaly-detection-configuration/anomaly-sensitivity)
-- [anomaly_direction](/guides/anomaly-detection-configuration/anomaly-direction)
+- [anomaly_sensitivity](/data-tests/anomaly-detection-configuration/anomaly-sensitivity)
+- [anomaly_direction](/data-tests/anomaly-detection-configuration/anomaly-direction)
 
 **Detection period and detection set**
 
-- [backfill_days](/guides/anomaly-detection-configuration/backfill-days)
+- [backfill_days](/data-tests/anomaly-detection-configuration/backfill-days)
 
 **Training period and training set**
 
-- [days_back](/guides/anomaly-detection-configuration/days-back)
-- [seasonality](/guides/anomaly-detection-configuration/seasonality)
+- [days_back](/data-tests/anomaly-detection-configuration/days-back)
+- [seasonality](/data-tests/anomaly-detection-configuration/seasonality)
 
 **Time buckets**
 
-- [timestamp_column](/guides/anomaly-detection-configuration/timestamp-column)
-- [time_bucket](/guides/anomaly-detection-configuration/time-bucket)
+- [timestamp_column](/data-tests/anomaly-detection-configuration/timestamp-column)
+- [time_bucket](/data-tests/anomaly-detection-configuration/time-bucket)
 
 **Monitored data set**
 
-- [where_expression](/guides/anomaly-detection-configuration/where-expression)
-- [dimensions](/guides/anomaly-detection-configuration/dimensions)
+- [where_expression](/data-tests/anomaly-detection-configuration/where-expression)
+- [dimensions](/data-tests/anomaly-detection-configuration/dimensions)

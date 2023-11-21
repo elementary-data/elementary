@@ -12,7 +12,7 @@ periodically and send alerts to your Slack, and much more.
 ### Profile
 
 `edr` requires a dbt connection profile called `elementary` that points to your Elementary schema in the warehouse.
-More information on that can be found [here](/quickstart-cli).
+More information on that can be found [here](/oss/quickstart/quickstart-cli).
 Accordingly, we'll need to provide the pipeline with that profile.
 
 If you already have a `profiles.yml` in your repository, simply add the `elementary` profile to it, and make sure the credentials are [loaded as variables](https://docs.gitlab.com/ee/ci/variables/#define-a-cicd-variable-in-the-ui).
@@ -40,7 +40,7 @@ elementary:
 ```
 
 The `image` property defines the Docker image to be used within the pipeline.
-In this case, we'll be using [Elementary's official Docker image](/deployment-and-configuration/docker).
+In this case, we'll be using [Elementary's official Docker image](/oss/deployment-and-configuration/docker).
 
 The `elementary` property defines the job and the `edr` commands that will be ran.
 It also uploads the `edr.log` as a [job artifact](https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html) which can be useful for debugging purposes.

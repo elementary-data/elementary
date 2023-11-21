@@ -18,7 +18,7 @@ The tests are configured and executed like any other tests in your project.
 
 #### - Volume anomalies
 
-<Card href="/guides/anomaly-detection-tests/volume-anomalies">
+<Card href="/data-tests/anomaly-detection-tests/volume-anomalies">
   ``` elementary.volume_anomalies ``` Monitors the row count of your table over
   time per time bucket (if configured without `timestamp_column`, will count
   table total rows).
@@ -26,16 +26,16 @@ The tests are configured and executed like any other tests in your project.
 
 #### - Freshness anomalies
 
-<Card href="/guides/anomaly-detection-tests/freshness-anomalies">
+<Card href="/data-tests/anomaly-detection-tests/freshness-anomalies">
   ``` elementary.freshness_anomalies ``` Monitors the freshness of your table
   over time, as the expected time between data updates. Requires a
-  [`timestamp_column`](/guides/anomaly-detection-configuration/timestamp-column)
+  [`timestamp_column`](/data-tests/anomaly-detection-configuration/timestamp-column)
   configuration.
 </Card>
 
 #### - Event freshness anomalies
 
-<Card href="/guides/anomaly-detection-tests/event-freshness-anomalies">
+<Card href="/data-tests/anomaly-detection-tests/event-freshness-anomalies">
   ``` elementary.event_freshness_anomalies ``` Monitors the freshness of event
   data over time, as the expected time it takes each event to load - that is,
   the time between when the event actually occurs (the `event timestamp`), and
@@ -46,7 +46,7 @@ The tests are configured and executed like any other tests in your project.
 
 #### - Dimension anomalies
 
-<Card href="/guides/anomaly-detection-tests/dimension-anomalies">
+<Card href="/data-tests/anomaly-detection-tests/dimension-anomalies">
   ``` elementary.dimension_anomalies ``` This test monitors the frequency of
   values in the configured dimension over time, and alerts on unexpected changes
   in the distribution. It is best to configure it on low-cardinality fields. The
@@ -55,10 +55,10 @@ The tests are configured and executed like any other tests in your project.
 
 #### - All columns anomalies
 
-<Card href="/guides/anomaly-detection-tests/all-columns-anomalies">
+<Card href="/data-tests/anomaly-detection-tests/all-columns-anomalies">
   ``` elementary.all_columns_anomalies ``` Executes column level monitors and
   anomaly detection on all the columns of the table. Specific monitors are
-  [detailed here](/guides/anomaly-detection-configuration/column-anomalies). You
+  [detailed here](/data-tests/anomaly-detection-configuration/column-anomalies). You
   can use `column_anomalies` param to override the default monitors, and
   `exclude_prefix` / `exclude_regexp` to exclude columns from the test.
 </Card>
@@ -67,10 +67,10 @@ The tests are configured and executed like any other tests in your project.
 
 #### - Columns anomalies
 
-<Card href="/guides/anomaly-detection-tests/column-anomalies">
+<Card href="/data-tests/anomaly-detection-tests/column-anomalies">
   ``` elementary.column_anomalies ``` Executes column level monitors and anomaly
   detection on the column. Specific monitors are [detailed
-  here](/guides/anomaly-detection-configuration/column-anomalies) and can be
+  here](/data-tests/anomaly-detection-configuration/column-anomalies) and can be
   configured using the `columns_anomalies` configuration.
 </Card>
 
@@ -229,16 +229,16 @@ sources:
 </Tip>
 
 To support different types of data sets, the tests have configuration that can be used to customize their behavior.
-Read more about [data anomaly detection tests configuration here](/guides/elementary-tests-configuration).
+Read more about [data anomaly detection tests configuration here](/data-tests/elementary-tests-configuration).
 
 We recommend adding a tag to the tests so you could execute these in a dedicated run using the selection parameter `--select tag:elementary`.
 If you wish to only be warned on anomalies, configure the `severity` of the tests to `warn`.
 
 ## What happens on each test?
 
-Upon running a test, your data is split into time buckets based on the [`time_bucket`](/guides/anomaly-detection-configuration/time-bucket) field and is limited by
-the [`days_back`](/guides/anomaly-detection-configuration/days-back) var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
-period ([`backfill_days`](/guides/anomaly-detection-configuration/backfill-days)) to the row count of all the previous time buckets within the [`days_back`](/guides/anomaly-detection-configuration/days-back) period.
+Upon running a test, your data is split into time buckets based on the [`time_bucket`](/data-tests/anomaly-detection-configuration/time-bucket) field and is limited by
+the [`days_back`](/data-tests/anomaly-detection-configuration/days-back) var. The test then compares a certain metric (e.g. row count) of the buckets that are within the detection
+period ([`backfill_days`](/data-tests/anomaly-detection-configuration/backfill-days)) to the row count of all the previous time buckets within the [`days_back`](/data-tests/anomaly-detection-configuration/days-back) period.
 If there were any anomalies in the detection period, the test will fail.
 On each test elementary package executes the relevant monitors, and searches for anomalies by comparing to historical metrics.
 
@@ -249,8 +249,8 @@ On each test elementary package executes the relevant monitors, and searches for
   />
 </Tooltip>
 
-To learn more, refer to [core concepts](/guides/how-anomaly-detection-works).
+To learn more, refer to [core concepts](/data-tests/how-anomaly-detection-works).
 
 ## What does it mean when a test fails?
 
-When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [core concepts](/guides/how-anomaly-detection-works) and [anomaly detection](/guides/data-anomaly-detection).
+When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [core concepts](/data-tests/how-anomaly-detection-works) and [anomaly detection](/data-tests/data-anomaly-detection).

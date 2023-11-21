@@ -82,8 +82,8 @@
           "icon": "cube",
           "pages": [
             "guides/modules-overview/dbt-package",
-            "dbt/on-run-end_hooks",
             "dbt/dbt-artifacts",
+            "dbt/on-run-end_hooks",
             "dbt/package-models"
           ]
         }
@@ -93,17 +93,22 @@
       "group": "Features",
       "pages": [
         "features/data-tests",
-        "features/automated-monitors",
+        "features/elementary-alerts",
+        "features/data-observability-dashboard",
         {
           "group": "End-to-End Lineage",
+          "icon": "arrow-progress",
+          "iconType": "solid",
           "pages": [
             "features/lineage",
             "features/exposures-lineage",
             "features/column-level-lineage"
           ]
         },
-        "features/multi-env",
+        "features/automated-monitors",
+        "features/config-as-code",
         "features/catalog",
+        "features/multi-env",
         "features/ci"
       ]
     },
@@ -223,7 +228,13 @@
     {
       "group": "Guides",
       "pages": [
-        "cloud/guides/enable-slack-alerts",
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "cloud/guides/enable-slack-alerts",
+            "cloud/guides/alerts-configuration"
+            ]
+        },
         "cloud/guides/sync-scheduling",
         "cloud/guides/collect-job-data",
         "cloud/guides/troubleshoot"
@@ -302,13 +313,26 @@
       ]
     },
     {
-      "group": "Production deployment",
+      "group": "Deployment",
       "pages": [
         "oss/deployment-and-configuration/elementary-in-production",
-        "oss/deployment-and-configuration/docker",
-        "oss/deployment-and-configuration/github-actions",
-        "oss/deployment-and-configuration/gitlab-ci"
+        {
+          "group": "Deployment options",
+          "pages": [
+            "oss/deployment-and-configuration/docker",
+            "oss/deployment-and-configuration/github-actions",
+            "oss/deployment-and-configuration/gitlab-ci"
+          ]
+        },
+        "oss/deployment-and-configuration/slack"
       ]
+    },
+    {
+    "group": "Integrations",
+    "pages": [
+      "oss/integrations/dbt",
+      "oss/integrations/slack"
+    ]
     }
   ],
   "footerSocials": {

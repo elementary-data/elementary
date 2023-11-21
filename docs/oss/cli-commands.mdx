@@ -10,19 +10,19 @@ edr --help
 
 ## CLI commands
 
-Read from the test results table and send new [alerts to Slack](/guides/alerts-configuration):
+Read from the test results table and send new [alerts to Slack](/oss/guides/alerts-configuration):
 
 ```shell
 edr monitor
 ```
 
-Read from the test results table and generate the [Elementary UI](/understand-elementary/elementary-report-ui):
+Read from the test results table and generate the [Elementary UI](/features/data-observability-dashboard):
 
 ```shell
 edr report
 ```
 
-Read from the test results table and generate the [Elementary UI](/understand-elementary/elementary-report-ui) and send
+Read from the test results table and generate the [Elementary UI](/features/data-observability-dashboard) and send
 it to external
 platforms such as Slack, S3, GCS:
 
@@ -88,8 +88,8 @@ Here is a list of all the available options:
 
 - **Select:**
   Filter the alerts / report using a selector.
-  - See all of the alerts supported selector methods [here](/guides/alerts-configuration#alerts-cli-flags).
-  - See all of the report supported selector methods [here](/quickstart/generate-report-ui#generating-a-report-for-single-invocation).
+  - See all of the alerts supported selector methods [here](/oss/guides/alerts-configuration#alerts-cli-flags).
+  - See all of the report supported selector methods [here](/oss/guides/generate-report-ui#generating-a-report-for-single-invocation).
 
 ```shell
 --select <selector_method>:<value>
@@ -195,7 +195,7 @@ Here is a list of all the available options:
 
 - **Suppression interval:**
   Suppress similar alerts for a given number of hours.
-  [Read more about this setting here.](/guides/alerts-configuration#suppression-interval-flag)
+  [Read more about this setting here.](/oss/guides/alerts-configuration#suppression-interval-flag)
   The default suppression interval is 0.
 
 ```shell

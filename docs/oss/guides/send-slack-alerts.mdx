@@ -10,7 +10,7 @@ title: "Setup Slack alerts"
 
 **Before you start**
 
-Before you can start using the alerts, make sure to [install the dbt package](/quickstart), [configure a profile and install the CLI](/quickstart-cli).
+Before you can start using the alerts, make sure to [install the dbt package](/oss/quickstart/quickstart-cli-package), [configure a profile and install the CLI](/oss/quickstart/quickstart-cli).
 This is **required for the alerts to work.**
 
 <br />
@@ -30,7 +30,7 @@ Or just `edr monitor` if you used `config.yml`. Please note that when you specif
 default channel name to which all the alerts will be sent that are not attributed to any custom channel. Therefore,
 if you execute several `edr monitor` commands at the same time with different `slack-channel-name` arguments, they can
 be sent to the wrong one due to the overlap accessing the backend table of elementary. For avoiding this problem,
-[the guide](/guides/alerts-configuration#custom-channel) can be followed.
+[the guide](/oss/guides/alerts-configuration#custom-channel) can be followed.
 
 ---
 
@@ -49,6 +49,6 @@ This operation will upload the results to a table, and the execution of `edr mon
 In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after
 your dbt job ends to monitor the latest data updates).
 
-Read more about how to deploy [Elementary in production](/deployment-and-configuration/elementary-in-production).
+Read more about how to deploy [Elementary in production](/oss/deployment-and-configuration/elementary-in-production).
 If you need help or wish to consult on this, reach out to us
 on [Slack](https://elementary-data.com/community).
