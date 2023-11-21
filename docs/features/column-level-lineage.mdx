@@ -3,9 +3,9 @@ title: Column Level Lineage
 sidebarTitle: Column Level Lineage
 ---
 
-
 <Snippet file="cloud/cloud-feature-tag.mdx" />
-The table nodes in Elementary lineage can be expanded to show the columns. When you select a column, the lineage of that specific column will be highlighted.
+The table nodes in Elementary lineage can be expanded to show the columns. When you
+select a column, the lineage of that specific column will be highlighted.
 
 Column level lineage is useful for answering questions such as:
 
@@ -14,15 +14,16 @@ Column level lineage is useful for answering questions such as:
 - Will changing this column impact a dashboard?
 
 <Frame>
-    <img
-        src="https://res.cloudinary.com/diuctyblm/image/upload/v1700474778/CLL-for-docs_bcsvcb.gif"
-        alt="Elementary Column Level Lineage"
-    />
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1700474778/CLL-for-docs_bcsvcb.gif"
+    alt="Elementary Column Level Lineage"
+  />
 </Frame>
 
 ### Filter and highlight columns path
 
 To help navigate graphs with large amount of columns per table, use the `...` menu right to the column:
+
 - **Filter**: Will show a graph of only the selected column and it's dependencies.
 - **Highlight**: Will highlight only the selected column and it's dependencies.
 
@@ -32,12 +33,13 @@ Elementary parses SQL queries to determine the dependencies between columns.
 Note that the lineage is only of the columns that directly contribute data to the column.
 
 For example for the query:
+
 ```sql
-create or replace table db.schema.users as 
+create or replace table db.schema.users as
 select
   user_name,
   count(distinct login_time) as total_logins
-from db.schema.login_events 
+from db.schema.login_events
 where user_type != 'test_user'
 ```
 

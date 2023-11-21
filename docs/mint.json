@@ -66,11 +66,7 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": [
-        "introduction",
-        "key-features",
-        "quickstart"
-      ]
+      "pages": ["introduction", "key-features", "quickstart"]
     },
     {
       "group": "Overview",
@@ -233,7 +229,7 @@
           "pages": [
             "cloud/guides/enable-slack-alerts",
             "cloud/guides/alerts-configuration"
-            ]
+          ]
         },
         "cloud/guides/sync-scheduling",
         "cloud/guides/collect-job-data",
@@ -307,10 +303,7 @@
     },
     {
       "group": "Configuration & usage",
-      "pages": [
-        "oss/cli-install",
-        "oss/cli-commands"
-      ]
+      "pages": ["oss/cli-install", "oss/cli-commands"]
     },
     {
       "group": "Deployment",
@@ -328,11 +321,8 @@
       ]
     },
     {
-    "group": "Integrations",
-    "pages": [
-      "oss/integrations/dbt",
-      "oss/integrations/slack"
-    ]
+      "group": "Integrations",
+      "pages": ["oss/integrations/dbt", "oss/integrations/slack"]
     }
   ],
   "footerSocials": {
