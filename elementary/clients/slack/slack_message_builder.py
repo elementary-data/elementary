@@ -123,6 +123,20 @@ class SlackMessageBuilder:
         }
 
     @staticmethod
+    def create_section_with_button(
+        section_text: str, button_text: str, url: str
+    ) -> dict:
+        return {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": section_text},
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": button_text, "emoji": True},
+                "url": url,
+            },
+        }
+
+    @staticmethod
     def create_compacted_sections_blocks(section_msgs: list) -> List[dict]:
         # Compacting sections into attachments.
         # Each section can contain _MAX_SLACK_SECTION_SIZE fields.

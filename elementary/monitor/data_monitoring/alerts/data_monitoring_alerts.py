@@ -12,8 +12,11 @@ from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAler
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.api.alerts.alerts import AlertsAPI
 from elementary.monitor.api.alerts.schema import AlertsSchema
-from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
-    SlackIntegration,
+from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
+    BaseIntegration,
+)
+from elementary.monitor.data_monitoring.alerts.integrations.integrations import (
+    Integrations,
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import ResourceType
@@ -53,8 +56,8 @@ class DataMonitoringAlerts(DataMonitoring):
         self.override_config_defaults = override_config
         self.alerts_integraion = self._get_integration_client()
 
-    def _get_integration_client(self):
-        return SlackIntegration(
+    def _get_integration_client(self) -> BaseIntegration:
+        return Integrations.get_integration(
             config=self.config,
             tracking=self.tracking,
             override_config_defaults=self.override_config_defaults,
