@@ -2,6 +2,10 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 from elementary.monitor.alerts.alert import AlertModel
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
+    get_test_runs_link,
+)
 
 DBT_TEST_TYPE = "dbt_test"
 
@@ -145,8 +149,18 @@ class TestAlertModel(AlertModel):
         )
 
     @property
-    def concise_name(self):
+    def concise_name(self) -> str:
         if self.is_elementary_test:
             return f"{self.test_short_name or self.test_name} - {self.test_sub_type_display_name}"
         else:
             return f"{self.test_short_name or self.test_name}"
+
+    @property
+    def summary(self) -> str:
+        return (
+            f"*{self.concise_name}* test failed on "
+            f"`{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}`"
+        )
+
+    def get_report_link(self) -> Optional[ReportLinkData]:
+        return get_test_runs_link(self.report_url, self.elementary_unique_id)

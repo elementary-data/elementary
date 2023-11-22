@@ -65,7 +65,7 @@ class SlackIntegration(BaseIntegration):
         self.tracking = tracking
         self.override_config_defaults = override_config_defaults
         self.message_builder = SlackAlertMessageBuilder()
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
         # Enforce typing
         self.client: SlackClient

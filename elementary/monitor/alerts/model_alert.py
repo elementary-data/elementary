@@ -2,6 +2,10 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 from elementary.monitor.alerts.alert import AlertModel
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
+    get_model_runs_link,
+)
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -82,9 +86,16 @@ class ModelAlertModel(AlertModel):
         )
 
     @property
-    def concise_name(self):
+    def concise_name(self) -> str:
         if self.materialization == "snapshot":
             dbt_type = "snapshot"
         else:
             dbt_type = "model"
         return f"dbt {dbt_type} alert - {self.alias}"
+
+    @property
+    def summary(self):
+        return f"dbt failed to build {self.materialization} {self.alias}"
+
+    def get_report_link(self) -> Optional[ReportLinkData]:
+        return get_model_runs_link(self.report_url, self.model_unique_id)

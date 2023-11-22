@@ -5,6 +5,10 @@ from typing import Dict, List, Optional, Union
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
+    get_model_test_runs_link,
+)
 from elementary.utils.models import get_shortened_model_name
 
 
@@ -61,6 +65,16 @@ class GroupedByTableAlerts:
     @property
     def data(self) -> List[Dict]:
         return [alert.data for alert in self.alerts]
+
+    @property
+    def summary(self) -> str:
+        return f"{self.model}: {len(self.alerts)} issues detected"
+
+    def get_report_link(self) -> Optional[ReportLinkData]:
+        if not self.model_errors:
+            return get_model_test_runs_link(self.report_url, self.model_unique_id)
+
+        return None
 
     def _sort_alerts(self):
         for alert in self.alerts:
