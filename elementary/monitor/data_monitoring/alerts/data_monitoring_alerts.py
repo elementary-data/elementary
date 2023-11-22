@@ -57,7 +57,7 @@ class DataMonitoringAlerts(DataMonitoring):
         self.alerts_integraion = self._get_integration_client()
 
     def _get_integration_client(self) -> BaseIntegration:
-        return Integrations.create_integration(
+        return Integrations.get_integration(
             config=self.config,
             tracking=self.tracking,
             override_config_defaults=self.override_config_defaults,

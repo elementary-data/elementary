@@ -22,7 +22,7 @@ class UnsupportedAlertIntegrationError(Error):
 
 class Integrations:
     @staticmethod
-    def create_integration(
+    def get_integration(
         config: Config,
         tracking: Optional[Tracking] = None,
         override_config_defaults: bool = False,
