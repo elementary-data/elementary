@@ -70,6 +70,15 @@ class GroupedByTableAlerts:
     def summary(self) -> str:
         return f"{self.model}: {len(self.alerts)} issues detected"
 
+    @property
+    def status(self) -> str:
+        if self.model_errors or self.test_errors:
+            return "error"
+        elif self.test_failures:
+            return "failure"
+        else:
+            return "warn"
+
     def get_report_link(self) -> Optional[ReportLinkData]:
         if not self.model_errors:
             return get_model_test_runs_link(self.report_url, self.model_unique_id)
