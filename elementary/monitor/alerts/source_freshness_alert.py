@@ -152,7 +152,9 @@ class SourceFreshnessAlertModel(AlertModel):
 
     @property
     def summary(self) -> str:
-        return f"Failed to calculate the source freshness of `{self.source_name}`"
+        if self.status == "runtime error":
+            return f"Failed to calculate the source freshness of `{self.source_name}`"
+        return f"Freshness exceeded the acceptable times on source `{self.source_name}`"
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         return get_test_runs_link(self.report_url, self.source_freshness_execution_id)
