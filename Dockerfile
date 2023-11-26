@@ -21,4 +21,7 @@ COPY . /app
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir "/app[all]"
 
+RUN chmod +x /app/scripts/run_dbt_deps.sh
+RUN /app/scripts/run_dbt_deps.sh
+
 ENTRYPOINT ["edr"]
