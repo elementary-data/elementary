@@ -182,7 +182,8 @@
             "data-tests/anomaly-detection-configuration/update_timestamp_column",
             "data-tests/anomaly-detection-configuration/ignore_small_changes",
             "data-tests/anomaly-detection-configuration/fail_on_zero",
-            "data-tests/anomaly-detection-configuration/detection-delay"
+            "data-tests/anomaly-detection-configuration/detection-delay",
+            "data-tests/anomaly-detection-configuration/anomaly-exclude-metrics"
           ]
         },
         "data-tests/anomaly-detection-tests/volume-anomalies",

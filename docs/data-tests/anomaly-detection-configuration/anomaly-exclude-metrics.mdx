@@ -3,7 +3,7 @@ title: "anomaly_exclude_metrics"
 sidebarTitle: "anomaly_exclude_metrics"
 ---
 
-`anomaly_exclude_metrics: [where expression filtering metric_date / metric_time_bucket / metric_value]`
+`anomaly_exclude_metrics: [SQL where expression on fields metric_date / metric_time_bucket / metric_value]`
 
 By default, data points are compared to the all data points in the training set. 
 Using this param, you can exclude metrics from the training set, to improve the test accuracy.
