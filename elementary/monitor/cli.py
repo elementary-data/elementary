@@ -450,6 +450,12 @@ def report(
     help="AWS profile name",
 )
 @click.option(
+    "--aws-region-name",
+    type=str,
+    default=None,
+    help="AWS region name",
+)
+@click.option(
     "--aws-access-key-id", type=str, default=None, help="The access key ID for AWS"
 )
 @click.option(
