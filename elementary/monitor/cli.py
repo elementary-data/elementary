@@ -489,6 +489,12 @@ def report(
     help="The name of the GCS bucket to upload the report to.",
 )
 @click.option(
+    "--gcs-timeout-limit",
+    type=int,
+    default=None,
+    help="GCS requests timeout limit in seconds. If not provided the default is 60.",
+)
+@click.option(
     "--azure-connection-string",
     type=str,
     default=None,
@@ -579,6 +585,7 @@ def send_report(
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
+    gcs_timeout_limit,
     exclude_elementary_models,
     disable_samples,
     project_name,
@@ -622,6 +629,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        gcs_timeout_limit=gcs_timeout_limit,
         report_url=report_url,
         env=env,
     )
