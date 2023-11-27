@@ -1,0 +1,51 @@
+---
+title: "anomaly_exclude_metrics"
+sidebarTitle: "anomaly_exclude_metrics"
+---
+
+`anomaly_exclude_metrics: [where expression filtering metric_date / metric_time_bucket / metric_value]`
+
+By default, data points are compared to the all data points in the training set. 
+Using this param, you can exclude metrics from the training set, to improve the test accuracy.
+
+The filter can be configured using an SQL where expression syntax, and the following fields:  
+
+1. `metric_date` - The date of the relevant bucket (even if the bucket is not daily).
+2. `metric_time_bucket` - The exact time bucket.
+3. `metric_value` - The value of the metric.
+
+- _Supported values: valid SQL where expression on the columns metric_date / metric_time_bucket / metric_value_
+- _Relevant tests: All anomaly detection tests_
+
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          anomaly_exclude_metrics: metric_value < 10
+
+      - elementary.all_columns_anomalies:
+          column_anomalies:
+            - null_count
+            - missing_count
+            - zero_count
+          anomaly_exclude_metrics: metric_time_bucket >= '2023-10-01 06:00:00' and metric_time_bucket <= '2023-10-01 07:00:00'
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        anomaly_exclude_metrics: metric_date = '2023-10-01'
+```
+
+```yml dbt_project
+vars:
+  anomaly_exclude_metrics: metric_date = '2023-10-01'
+```
+
+</RequestExample>
