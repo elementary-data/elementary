@@ -10,6 +10,7 @@ import pkg_resources
 from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
+from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
@@ -38,7 +39,6 @@ class DataMonitoringReport(DataMonitoring):
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
     ):
-        SelectorFilter.validate_report_selector(filter)
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, filter
         )
@@ -46,6 +46,9 @@ class DataMonitoringReport(DataMonitoring):
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
         self.azure_client = AzureClient.create_client(
+            self.config, tracking=self.tracking
+        )
+        self.slack_client = SlackClient.create_client(
             self.config, tracking=self.tracking
         )
 
@@ -130,6 +133,9 @@ class DataMonitoringReport(DataMonitoring):
         report_data_dict = report_data.dict()
         return report_data_dict
 
+    def validate_report_selector(self):
+        SelectorFilter.validate_report_selector(self.filter.selector)
+
     def _add_report_tracking(
         self, report_data: ReportDataSchema, error: Optional[Exception] = None
     ):
@@ -196,6 +202,7 @@ class DataMonitoringReport(DataMonitoring):
         upload_succeeded = False
         # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
         if self.s3_client or self.gcs_client or self.azure_client:
+            self.validate_report_selector()
             upload_succeeded, bucket_website_url = self.upload_report(
                 local_html_path=local_html_path, remote_file_path=remote_file_path
             )
@@ -218,6 +225,7 @@ class DataMonitoringReport(DataMonitoring):
                 include_description=include_description,
             )
             if should_send_report_over_slack:
+                self.validate_report_selector()
                 self.send_report_attachment(local_html_path=local_html_path)
 
         return self.success

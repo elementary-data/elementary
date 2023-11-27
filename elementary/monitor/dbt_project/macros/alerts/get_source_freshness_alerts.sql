@@ -79,6 +79,7 @@
         {% set filter = alert_dict.get('filter') %}
 
         {% set pending_alert_dict = {'id': alert_dict.get('alert_id'),
+                                 'source_freshness_execution_id': alert_dict.get('alert_id'),
                                  'model_unique_id': alert_dict.get('unique_id'),
                                  'alert_class_id': alert_dict.get('alert_class_id'),
                                  'detected_at': alert_dict.get('detected_at'),

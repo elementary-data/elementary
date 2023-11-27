@@ -3,7 +3,7 @@ import sys
 import click
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring.data_monitoring_alerts import (
+from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
@@ -410,6 +410,7 @@ def report(
             disable_samples=disable_samples,
             filter=select,
         )
+        data_monitoring.validate_report_selector()
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.
         anonymous_tracking.track_cli_start(
