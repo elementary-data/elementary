@@ -19,7 +19,7 @@ If you get an empty report, there are several steps to understand what went wron
 - If yes, make sure the table was created as an incremental table (not a regular table or view).
 - If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full-refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
 
-- Still no data in the table? Reach out to the elementary team at [#support](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) on Slack.
+- Still no data in the table? Reach out to the elementary team at [#support](https://elementary-data.com/community) on Slack.
 
 **2. Validate that the CLI was properly installed**
 
@@ -37,7 +37,7 @@ If you get an empty report, there are several steps to understand what went wron
 - **Check that the connection profile exists in the right path and format**
 - **Check that the connection profile points to the elementary package schema**
 
-**4. Still not working? Collect the following logs and reach our to the elementary team at [#support](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) on Slack**
+**4. Still not working? Collect the following logs and reach our to the elementary team at [#support](https://elementary-data.com/community) on Slack**
 
 - **edr.log** - Created on the execution folder of the CLI.
 - **dbt.log** - Created under the package location at
@@ -176,4 +176,4 @@ If you're experiencing issues of any kind, please contact us on the [#support](h
 
 ## Other issues?
 
-Ask us on [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg), we are very responsive!
+Ask us on [Slack](https://elementary-data.com/community), we are very responsive!

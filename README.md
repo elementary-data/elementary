@@ -10,7 +10,7 @@ Monitor your data quality, operation and performance directly from your dbt proj
 </h4>
 
 <p align="center">
-<a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
+<a href="https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
 <a href="https://docs.elementary-data.com/quickstart"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
@@ -19,7 +19,7 @@ Monitor your data quality, operation and performance directly from your dbt proj
 
 ⭐️ Star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="45"/></a> ⭐
 
-[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg)
+[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA)
 
 </div>
 
@@ -57,7 +57,7 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
 
 ##
 
-Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
+Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) to learn more on Elementary.
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
 
@@ -71,7 +71,7 @@ Elementary [dbt package](https://github.com/elementary-data/dbt-data-reliability
 
 For additional information and help, you can use one of these channels:
 
-- [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(Live chat with the team, support, discussions, etc.\)
+- [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) \(Live chat with the team, support, discussions, etc.\)
 - [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
 - [Twitter](https://twitter.com/ElementaryData) \(Updates on new releases and stuff)
 

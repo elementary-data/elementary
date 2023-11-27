@@ -1,0 +1,54 @@
+---
+title: "Send report summary notification to Slack"
+sidebarTitle: "Send report summary"
+---
+
+In addition to distributing the report itself, you can send a report summary notification to Slack.
+
+This is useful for you and your team members to understand quickly if there is something in the new report you should address.
+
+- **Share via Slack**: The summary is sent by default.
+- **Hosting on S3 or GCS**: You need to provide slack token and channel to in order to enable the Slack results summary.
+
+<Frame>
+  <img src="/pics/report_slack_summary.png" alt="Demo" />
+</Frame>
+
+### Enabling report summary for hosted report
+
+After you [set up a Slack app and token](/oss/deployment-and-configuration/slack#slack-integration-setup) you can run the following command:
+
+AWS S3:
+
+```shell
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME> --update-bucket-website true
+```
+
+GCS:
+
+```shell
+edr send-report --google-service-account-path <SERVICE_ACCOUNT_PATH> --gcs-bucket-name <BUCKET_NAME> --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+A link to the hosted report is included in the summary, which can be accessed based on the permissions you have set on your hosting platform (AWS/GCS).
+
+### Report summary configuration
+
+#### Filter results summary
+
+<Warning>
+  The report itself cannot be filtered by tag, owner or model! To use those
+  filters for the summary you need to disable the report attachment by adding
+  `--disable html_attachment` to your command.
+</Warning>
+
+You can filter your results summary by a specific tag, owner or model.
+
+To filter by tag:
+
+```shell send-report selectors
+edr send-report --select tag:finance
+edr send-report --select config.meta.owner:@jeff
+edr send-report --select model:customers
+edr send-report --select customers
+```

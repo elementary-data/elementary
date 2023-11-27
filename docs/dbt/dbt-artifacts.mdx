@@ -21,6 +21,8 @@ Some artifacts are updated by an [on-run-end](https://docs.getdbt.com/reference/
 - **`dbt run` that includes elementary models:**
   - `dbt_models`, `dbt_tests`, `dbt_sources`, `dbt_exposures`, `dbt_metrics` - Metadata and configuration. It is recommended to run these models when you make changes in your projects.
 
+<Tip>Read more about [Elementary on-run-end hooks](/dbt/on-run-end_hooks)</Tip>
+
 ## Which artifacts are uploaded and modeled?
 
 Elementary uploads fields from the run-results, and the graph object (includes data of manifest, catalog and sources).
@@ -69,4 +71,9 @@ Each time the model is executed, the data is replaced with data from the project
 
 Data about all the snapshots in the project and project packages.
 Each row contains information about the properties of a single snapshot, including columns like tags, owner, depends_on, and description.
+Each time the model is executed, the data is replaced with data from the project's current graph.
+
+### dbt_columns
+
+Data about all the columns that are documented in the yml files. Each row contains information about the properties of a single column, including data type and description.
 Each time the model is executed, the data is replaced with data from the project's current graph.

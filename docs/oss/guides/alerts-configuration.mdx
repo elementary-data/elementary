@@ -1,0 +1,78 @@
+---
+title: "Alerts Configuration and Customization"
+sidebarTitle: "Alerts configuration"
+---
+
+<Snippet file="guides/alerts-code-configuration.mdx" />
+
+## Alerts CLI flags
+
+#### Filter alerts
+
+Elementary supports filtering alerts using a selector, and sending only the selected alerts.
+You can filter the alerts by tag, owner or model.
+
+If you run `edr` from the dbt project directory (or pass `--project-dir`), you can use any of the dbt selectors.
+
+_Note_: alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
+
+<CodeGroup>
+
+```shell tag filter
+edr monitor --select tag:critical
+edr monitor --select tag:finance
+```
+
+```shell owner filter
+edr monitor --select config.meta.owner:@jeff
+edr monitor --select config.meta.owner:@jessy
+```
+
+```shell model filter
+edr monitor --select model:customers
+edr monitor --select model:orders
+
+edr monitor --select customers
+edr monitor --select orders
+```
+
+```shell statuses filter
+edr monitor --select statuses:warn,fail
+edr monitor --select statuses:error
+edr monitor --select statuses:skipped
+```
+
+```shell resource_types filter
+edr monitor --select resource_types:model
+edr monitor --select resource_types:test
+edr monitor --select resource_types:test,source_freshness
+```
+
+</CodeGroup>
+
+#### Group alerts by table
+
+By default, Elementary sends a single alert to notify on each failure with extensive information for fast triage.
+
+Elementary also supports grouping alerts by table.
+In this case, a single Slack notification will be generated containing all issues associated with this table.
+The created notification will contain a union of the relevant owners, tags and subscribers.
+
+Due to their nature, grouped alerts will contain less information on each issue.
+
+```shell
+edr monitor --group-by table
+```
+
+#### Suppression interval flag
+
+Don’t want to get multiple alerts if the same test keeps failing?
+You can now configure an alert_suppression_interval, this is a “snooze” period for alerts on the same issue.
+Elementary won’t send new alerts on the same issue that are generated within suppression interval.
+
+The flag configuration is the suppression interval duration in hours, and the default is 0 hours (no alert suppression).
+If configured otherwise in the dbt project config block or meta, the CLI value will be ignored (unless `--override-dbt-project-config` is used).
+
+```shell
+edr monitor --suppression-interval 24
+```

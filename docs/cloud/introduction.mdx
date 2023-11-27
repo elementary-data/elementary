@@ -1,37 +1,18 @@
 ---
 title: "Elementary Cloud"
+sidebarTitle: "Introduction"
+icon: "cloud"
 ---
 
-Elementary Cloud is a data observability and data testing solution for teams using dbt. Monitor data pipelines, detect anomalies and test data in minutes, in your dbt project.
+<Snippet file="cloud/introduction-opening.mdx" />
 
-### Quick start
+<CardGroup cols={1}>
+  <Card
+    title="Quickstart Elementary Cloud"
+    href="/cloud/onboarding/quickstart-dbt-package"
+  >
+    Start 30 days free trial, no credit card is required.
+  </Card>
+</CardGroup>
 
-<Snippet file="cloud/quick-start-cards.mdx" />
-
-### Elementary Cloud integrations
-
-<Snippet file="cloud/integrations/cards-groups/cloud-integrations-cards.mdx" />
-
-<br />
-
-<Frame>
-  <img
-    src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
-    alt="Demo"
-  />
-</Frame>
-
-## How does it work?
-
-The Elementary dbt package runs as part of your dbt invocations.
-The package collects and stores data such as run results, test results, anomaly detection results and more.
-
-This data is saved to an Elementary schema in the DWH.
-The Elementary cloud service requires access only to this schema, to connect and generates a report UI and Slack alerts.
-
-## Want to learn more?
-
-<Card
-  title="Schedule a call"
-  href="https://calendly.com/maayansa/call-with-elementary-data"
-></Card>
+<Snippet file="cloud/introduction.mdx" />

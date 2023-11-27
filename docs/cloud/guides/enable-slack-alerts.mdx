@@ -1,0 +1,88 @@
+---
+title: "Enable Slack alerts"
+---
+
+## About Slack alerts
+
+<Snippet file="alerts/alerts-introduction.mdx" />
+
+## Setup Slack Integration
+
+<Steps>
+  <Step title="Slack App">
+    First create a Slack app:
+
+    <Accordion title="Create a Slack App">
+
+    ## 1. Create a Slack app
+
+    Go to the [Slack page to create apps](https://api.slack.com/apps?new_app=1) and create a new app (from scratch).
+    Call it "[Elementary](#slack-app-display)" and connect it to the workspace of your choice.
+
+    <img
+      src="https://res.cloudinary.com/mintlify/image/upload/v1659304879/elementary/slack-app_zpn7jc.png"
+      alt="Slack app"
+    />
+
+    ## 2. Optional - Slack app display
+
+    To change the display of the Elementary slack app, scroll down on the Slack app basic information page to the 'Display Information' section:
+
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1690367739/slack_app_customize_movkxg.png"
+      alt="Slack display"
+    />
+
+    Here is the Elementary icon for your use (click to download):
+
+    <a
+      href="https://res.cloudinary.com/diuctyblm/image/upload/v1690367713/elementary_alert_dzibc7.png"
+      download
+    >
+      <img
+        src="https://res.cloudinary.com/diuctyblm/image/upload/v1690367713/elementary_alert_dzibc7.png"
+        alt="Elementary logo"
+        width="200"
+      />
+    </a>
+
+    </Accordion>
+
+  </Step>
+  <Step title="Slack Token">
+    After the app is ready, create a Slack Token:
+
+<Accordion title="Create Slack Token">
+
+## 1. Create a Slack token
+
+Go to the "OAauth & Permissions" page for your newly-created app, and add the following scopes under "Bot Token Scopes":
+
+- `channels:join` - Join public channels in a workspace
+  - `channels:read` - View basic information about public channels in a workspace
+  - `chat:write` - Send messages as \<app\>
+  - `files:write` - Upload, edit, and delete files as \<app\>
+  - `users:read` - View people in a workspace
+  - `users:read.email` - View email addresses of people in a workspace
+  - `groups:read` - View basic information about private channels that your slack app has been added to
+
+<img
+  src="https://res.cloudinary.com/diuctyblm/image/upload/v1695889115/slack-app-permissions-new_bysiso.png"
+  alt="Slack scopes"
+/>
+
+## 2. Install app at your Workspace
+
+At the "OAuth & Permissions" page, press on "Install to Workspace" in order to generate Slack token:
+
+<img
+  src="https://res.cloudinary.com/mintlify/image/upload/v1659304881/elementary/slack-oauth_g6p5jj.png"
+  alt="Slack OAuth"
+/>
+
+</Accordion>
+  </Step>
+  <Step title="Connect Slack">
+    On the environment configuration in Elementary Cloud, add the Slack token and configure a default channel. 
+  </Step>
+</Steps>
