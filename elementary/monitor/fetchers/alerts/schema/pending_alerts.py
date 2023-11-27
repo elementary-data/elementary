@@ -29,7 +29,7 @@ class BasePendingAlertSchema(BaseModel):
     alert_class_id: str
     model_unique_id: Optional[str] = None
     detected_at: datetime
-    database_name: str
+    database_name: Optional[str] = None
     schema_name: str
     tags: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
