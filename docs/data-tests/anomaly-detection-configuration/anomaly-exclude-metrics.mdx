@@ -5,10 +5,10 @@ sidebarTitle: "anomaly_exclude_metrics"
 
 `anomaly_exclude_metrics: [SQL where expression on fields metric_date / metric_time_bucket / metric_value]`
 
-By default, data points are compared to the all data points in the training set. 
+By default, data points are compared to the all data points in the training set.
 Using this param, you can exclude metrics from the training set, to improve the test accuracy.
 
-The filter can be configured using an SQL where expression syntax, and the following fields:  
+The filter can be configured using an SQL where expression syntax, and the following fields:
 
 1. `metric_date` - The date of the relevant bucket (even if the bucket is not daily).
 2. `metric_time_bucket` - The exact time bucket.
@@ -16,7 +16,6 @@ The filter can be configured using an SQL where expression syntax, and the follo
 
 - _Supported values: valid SQL where expression on the columns metric_date / metric_time_bucket / metric_value_
 - _Relevant tests: All anomaly detection tests_
-
 
 <RequestExample>
 
