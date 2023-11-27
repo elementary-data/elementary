@@ -1,0 +1,213 @@
+---
+title: "CLI commands and usage"
+---
+
+With any of the CLI commands, you can use the `--help` flag and get instructions and available options:
+
+```shell
+edr --help
+```
+
+## CLI commands
+
+Read from the test results table and send new [alerts to Slack](/oss/guides/alerts-configuration):
+
+```shell
+edr monitor
+```
+
+Read from the test results table and generate the [Elementary UI](/features/data-observability-dashboard):
+
+```shell
+edr report
+```
+
+Read from the test results table and generate the [Elementary UI](/features/data-observability-dashboard) and send
+it to external
+platforms such as Slack, S3, GCS:
+
+```shell
+edr send-report
+```
+
+## CLI Options
+
+You can define options either via the CLI or using environment variables in the following
+format: `EDR_<COMMAND>_<OPTION>=<VALUE>`.
+
+```shell
+export EDR_REPORT_FILE_PATH="my_report.html"
+edr report
+# Equivalent to: edr report --file-path "my_report.html"
+```
+
+Here is a list of all the available options:
+
+- **dbt project path:**
+  The path of the directory in which your `dbt_project.yml` file is located. Default is the working directory.
+
+```shell
+--project-dir <PATH>
+```
+
+- **Profile directory path:**
+  The path of the directory in which your `profiles.yml` file is located. Default is `HOME_DIR/.dbt`.
+- This option must be configured together with profile name.
+
+```shell
+-p, --profiles-dir <PATH>
+```
+
+- **Configuration directory path:**
+  The path of the directory in which your `config.yml` file is located. Default is `HOME_DIR/.edr`.
+
+```shell
+-c, --config-dir <PATH>
+```
+
+- **Target directory path**
+  The path where all output files such as logs and reports will be saved. If not configured, the default is ./edr_target.
+
+```shell
+--target-path <PATH>
+```
+
+- **Profile target:**
+  Choose a specific target in case you have multiple targets for Elementary.
+
+```shell
+-t, --profile-target <target_name>
+```
+
+- **Profile target of your dbt project:**
+  Choose a specific target in case you have multiple targets for your dbt project.
+
+```shell
+--project-profile-target <target_name>
+```
+
+- **Select:**
+  Filter the alerts / report using a selector.
+  - See all of the alerts supported selector methods [here](/oss/guides/alerts-configuration#alerts-cli-flags).
+  - See all of the report supported selector methods [here](/oss/guides/generate-report-ui#generating-a-report-for-single-invocation).
+
+```shell
+--select <selector_method>:<value>
+```
+
+- **Slack webhook URL:**
+  Pass the webhook URL of your Slack channel to edr as a parameter.
+
+```shell
+-s, --slack-webhook <slack_webhook_url>
+```
+
+- **Slack token and Slack channel name:**
+  Pass the Slack token and the Slack channel to edr as parameters.
+
+```shell
+-st, --slack-token <slack_token>
+-ch, --slack-channel-name <slack_channel_name_to_send_the_file_to>
+```
+
+- **Full refresh dbt package models:**
+  Force running a full refresh of all incremental models in the edr dbt package.
+
+```shell
+ -f, --full-refresh-dbt-package BOOLEAN
+```
+
+- **Days back:**
+  Set a limit to how far back Elementary should collect dbt and Elementary results while generating alerts/report.
+
+```shell
+-d, --days-back INTEGER
+```
+
+- **Report file path:**
+  The local file path where Elementary's report will be saved.
+
+```shell
+--file-path TEXT
+```
+
+- **Report remote file name:**
+  The report's file name, this is how it will be called on Slack, S3, GCS when using `send-report`.
+
+```shell
+--file-name TEXT
+```
+
+- **S3 endpoint url:**
+  The endpoint of the S3 bucket when using `send-report` with any S3 compatible cloud storage service.
+
+```shell
+--s3-endpoint-url TEXT
+```
+
+- **Timezone:**
+  The timezone that will be used upon calculating the alerts' time field.  
+  A list of timezones can be found [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) under _TZ
+  database name_.
+
+```shell
+-tz, --timezone TEXT
+```
+
+- **dbt Quoting:**
+  Optionally control the [quoting setting](https://docs.getdbt.com/reference/project-configs/quoting) of the
+  internal dbt package of the elementary CLI.
+  You should use this setting if you are overriding dbt's default quoting in your main dbt package.
+
+```shell
+-q, --dbt-quoting [all|none|combination of any of: database,schema,identifier]
+
+# Examples:
+# * --dbt-quoting all
+# * --dbt-quoting none
+# * --dbt-quoting identifier
+# * --dbt-quoting schema,identifier
+```
+
+- **Disable samples:**
+  Disable sampling of data in the report and alerts.
+  Useful if your data is sensitive or contains PII.
+
+```shell
+--disable-samples BOOLEAN
+```
+
+- **Project name:**
+  You can optionally pass a custom project name that will be shown in the report.
+  The default value is the name of your dbt project.
+
+```shell
+--project-name TEXT
+```
+
+- **Environment:**
+  This flag indicates if you are running Elementary in a production or development environment and will be reflected
+  accordingly in the report.
+
+```shell
+--env [dev|prod]
+```
+
+- **Suppression interval:**
+  Suppress similar alerts for a given number of hours.
+  [Read more about this setting here.](/oss/guides/alerts-configuration#suppression-interval-flag)
+  The default suppression interval is 0.
+
+```shell
+edr monitor --suppression-interval [int]
+```
+
+- **Override configuration from dbt project:**
+  Sometimes, for example during testing and development, you want all your alerts sent to a single slack channel,
+  without suppression, regardless of how they are configured in the model config block or schema.yml in your dbt project.
+  You can do this by using this flag.
+  Please note that when using this flag without passing a suppression interval parameter, the suppression interval for all the alerts will be overridden by the default value, 0.
+
+```shell
+edr monitor --override-dbt-project-config --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at> --suppression-interval 0
+```

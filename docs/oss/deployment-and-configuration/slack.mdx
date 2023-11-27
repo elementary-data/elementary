@@ -1,0 +1,55 @@
+---
+title: "Slack setup for Elementary CLI"
+sidebarTitle: "Slack"
+---
+
+Elementary Slack integration includes sending [Slack alerts](/oss/guides/send-slack-alerts) on failures in dbt tests and models, and the option to distribute the [data observability report](/oss/guides/generate-report-ui) as a message attachment.
+
+## Token vs Webhook
+
+There are two integration options: Token or Webhook.
+Both methods let you receive alerts from Elementary, but there are several features that are only supported in one of the two.
+Below is features support comparison table, to help you select the integration method.
+
+<Info>
+  If possible, Token is the preferred way. It allows more flexibility and
+  supports more features than Webhook.
+</Info>
+
+| Slack integration | Elementary alerts | Elementary report | Multiple channels | Slack workflows |
+| ----------------- | ----------------- | ----------------- | ----------------- | --------------- |
+| Token             | ✅                | ✅                | ✅                | ❌              |
+| Webhook           | ✅                | ❌                | ❌                | ✅              |
+
+## Slack integration setup
+
+<Snippet file="setup-slack-integration.mdx" />
+
+---
+
+## Slack Workflows
+
+If you use [Slack Workflows](https://slack.com/features/workflow-automation), add the following configuration to your `config.yml` under the slack tag:
+
+```yml config.yml
+slack:
+  notification_webhook: <your_slack_webhook_url>
+  workflows: true
+```
+
+This flag `workflows: true` changes the format in which edr sends Slack alerts to the key-value pairs format supported by Slack Workflows.
+The alert keys can be used to build a [Slack workflow](https://slack.com/help/articles/360053571454-Set-up-a-workflow-in-Slack).
+
+The alert format is:
+
+```json
+{
+  "alert_description": str,
+  "table_name": str,
+  "detected_at": str,
+  "type": str,
+  "description": str
+}
+```
+
+---
