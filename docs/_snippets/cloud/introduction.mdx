@@ -1,0 +1,58 @@
+### Why choose Elementary Cloud?
+
+<AccordionGroup>
+  <Accordion title="Built for data developers" icon="code" iconType="solid">
+    Elementary configuration is managed in your dbt code. 
+    Elementary Cloud syncs configuration changes from the UI back to the dbt project code repository.
+
+    You won't need to duplicate configuration - all your existing tests, owners, tags, and descriptions are leveraged.
+
+  </Accordion>
+
+  <Accordion title="Secure by design" icon="lock" iconType="solid">
+    Elementary Cloud can't access your data.
+
+    The dbt package creates a schema for logs, results and metadata, and Elementary only requires access to the Elementary schema.
+
+    [Read about Security and Privacy >>>](/cloud/general/security-and-privacy)
+
+  </Accordion>
+
+  <Accordion title="dbt native" icon="cube">
+    Elementary dbt package automatically collects results and artifacts from your dbt project. All of your Elementary configuration is managed in your dbt code.
+
+    By combining the package and Elementary Cloud, you get full dbt observability. All your tests and results in one dashboard and interface.
+
+  </Accordion>
+
+  <Accordion title="Cloud only features and integrations" icon="stars" iconType="solid">
+    Elementary Cloud includes Cloud only features, such as:
+    - Automated volume, freshness and schema monitoring
+    - Column level lineage
+    - Automated lineage to BI tools dashboards
+    - Multiple environments
+    - Test management
+    - Data catalog
+    - Webhook triggered syncs
+    - And more...
+  </Accordion>
+</AccordionGroup>
+
+### Elementary Cloud integrations
+
+<Snippet file="cloud/integrations/cards-groups/cloud-integrations-cards.mdx" />
+
+### How does it work?
+
+The Elementary dbt package runs as part of your dbt invocations.
+The package collects and stores data such as run results, test results, anomaly detection results and more.
+
+This data is saved to an Elementary schema in the DWH.
+The Elementary cloud service requires access only to this schema, to connect and generates a report UI and Slack alerts.
+
+### Want to learn more?
+
+<Card
+  title="Schedule a demo call"
+  href="https://savvycal.com/MaayanSa/c86d4771"
+></Card>

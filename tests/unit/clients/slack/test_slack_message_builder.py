@@ -228,7 +228,7 @@ def test_get_slack_message():
     slack_message_builder = SlackMessageBuilder()
     slack_message = slack_message_builder.get_slack_message()
     assert isinstance(slack_message, SlackMessageSchema)
-    assert json.dumps(slack_message.model_dump(), sort_keys=True) == json.dumps(
+    assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
         {"blocks": [], "attachments": [{"blocks": []}], "text": None}, sort_keys=True
     )
 
@@ -240,7 +240,7 @@ def test_add_blocks_as_attachments():
     slack_message_builder._add_blocks_as_attachments([first_block])
     slack_message_builder._add_blocks_as_attachments([second_block])
     slack_message = slack_message_builder.get_slack_message()
-    assert json.dumps(slack_message.model_dump(), sort_keys=True) == json.dumps(
+    assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
         {
             "blocks": [],
             "attachments": [
@@ -270,7 +270,7 @@ def test_add_always_displayed_blocks():
     slack_message_builder._add_always_displayed_blocks([first_block])
     slack_message_builder._add_always_displayed_blocks([second_block])
     slack_message = slack_message_builder.get_slack_message()
-    assert json.dumps(slack_message.model_dump(), sort_keys=True) == json.dumps(
+    assert json.dumps(slack_message.dict(), sort_keys=True) == json.dumps(
         {
             "blocks": [
                 {"type": "divider"},

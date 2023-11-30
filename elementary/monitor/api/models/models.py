@@ -27,9 +27,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-YAML_FILE_EXTENSION = ".yml"
-SQL_FILE_EXTENSION = ".sql"
-
 
 class ModelsAPI(APIClient):
     def __init__(self, dbt_runner: BaseDbtRunner):
@@ -85,6 +82,8 @@ class ModelsAPI(APIClient):
                     name=last_model_run.name,
                     status=last_model_run.status,
                     last_exec_time=last_model_run.execution_time,
+                    last_generated_at=last_model_run.generated_at,
+                    compiled_code=last_model_run.compiled_code,
                     median_exec_time=median_execution_time,
                     exec_time_change_rate=execution_time_change_rate,
                     totals=totals,
@@ -205,31 +204,32 @@ class ModelsAPI(APIClient):
         artifact_name = artifact.name
         normalized_artifact = json.loads(artifact.json())
         normalized_artifact["model_name"] = artifact_name
+
+        fqn = self._fqn(artifact)
+        normalized_artifact["fqn"] = fqn
         normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(
-            artifact
+            artifact, fqn
         )
-        normalized_artifact["fqn"] = self._fqn(artifact)
 
         return schema_to_normalized_schema_map[type(artifact)](**normalized_artifact)
 
     @classmethod
-    def _normalize_artifact_path(
-        cls,
-        artifact: ArtifactSchemaType,
-    ) -> str:
+    def _normalize_artifact_path(cls, artifact: ArtifactSchemaType, fqn: str) -> str:
         if artifact.full_path is None:
             raise Exception("Artifact full path can't be null")
 
-        split_artifact_path = artifact.full_path.split(os.path.sep)
-        artifact_file_name = split_artifact_path[-1]
+        if isinstance(artifact, ExposureSchema):
+            # For exposures, we want the path to be based on the path in the BI rather than
+            # the file system path of the exposures yaml.
+            # NOTE - if there is no path provided in the BI, the FQN will just be the exposure name.
+            split_artifact_path = ["exposures"] + fqn.split("/")
+        else:
+            split_artifact_path = artifact.full_path.split(os.path.sep)
 
-        # If source, change models directory into sources and file extension from .yml to .sql
-        if isinstance(artifact, SourceSchema):
-            if split_artifact_path[0] == "models":
-                split_artifact_path[0] = "sources"
-            if artifact_file_name.endswith(YAML_FILE_EXTENSION):
-                head, _sep, tail = artifact_file_name.rpartition(YAML_FILE_EXTENSION)
-                split_artifact_path[-1] = head + SQL_FILE_EXTENSION + tail
+            # If source, change models directory into sources
+            if isinstance(artifact, SourceSchema):
+                if split_artifact_path[0] == "models":
+                    split_artifact_path[0] = "sources"
 
         # Add package name to model path
         if artifact.package_name:

@@ -1,0 +1,49 @@
+---
+title: "Tests configuration"
+---
+
+<Tabs>
+    <Tab title="Elementary Cloud">
+        In Elementary Cloud you can configure your tests in the UI.
+        This requires you to [connect a code repository](/cloud/integrations/code-repo/connect-code-repo) to your project.
+        Configuring a test will open a pull request / merge request in your code repository.
+
+        **Step 1 - Choose a target**
+        <img src="/pics/cloud/test_config_1.png"/>
+
+        **Step 2 - Choose a test**
+        <img src="/pics/cloud/test_config_2.png"/>
+
+        **Step 3 - Configure the test**
+        <img src="/pics/cloud/test_config_3.png"/>
+
+        **Step 4 - Review and submit**
+        <img src="/pics/cloud/test_config_4.png"/>
+
+    </Tab>
+    <Tab title="Elementary OSS">
+        The anomaly detection tests configuration is defined in `.yml` files in your dbt project, just like in native dbt tests.
+
+        The configuration of Elementary is dbt native and follows the same priorities and inheritance.
+        The more granular and specific configuration overrides the less granular one.
+
+        Elementary searches and prioritizes configuration in the following order:
+
+        **For models tests:**
+
+        1. Test arguments.
+        2. Tests path configuration under `tests` key in `dbt_project.yml`.
+        3. Model configuration.
+        4. Path configuration under `models` key in `dbt_project.yml`.
+        5. Global vars in `dbt_project.yml`.
+
+        **For sources tests:**
+
+        1. Test arguments.
+        2. Tests path configuration under `tests` key in `dbt_project.yml`.
+        3. Table configuration.
+        4. Source configuration.
+        5. Global vars in `dbt_project.yml`.
+    </Tab>
+
+</Tabs>

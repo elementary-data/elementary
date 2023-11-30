@@ -3,7 +3,7 @@ import sys
 import click
 
 from elementary.config.config import Config
-from elementary.monitor.data_monitoring.data_monitoring_alerts import (
+from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
@@ -159,16 +159,26 @@ def get_cli_properties() -> dict:
     if params is None:
         return dict()
 
-    reload_monitoring_configuration = params.get("reload_monitoring_configuration")
     target_path = params.get("target_path")
     update_dbt_package = params.get("update_dbt_package")
     full_refresh_dbt_package = params.get("full_refresh_dbt_package")
+    select = params.get("select")
+    days_back = params.get("days_back")
+    timezone = params.get("timezone")
+    group_by = params.get("group_by")
+    suppression_interval = params.get("suppression_interval")
+    override_dbt_project_config = params.get("override_dbt_project_config")
 
     return {
         "target_path": target_path,
-        "reload_monitoring_configuration": reload_monitoring_configuration,
         "update_dbt_package": update_dbt_package,
         "full_refresh_dbt_package": full_refresh_dbt_package,
+        "select": select,
+        "days_back": days_back,
+        "timezone": timezone,
+        "group_by": group_by,
+        "suppression_interval": suppression_interval,
+        "override_dbt_project_config": override_dbt_project_config,
     }
 
 
@@ -400,6 +410,7 @@ def report(
             disable_samples=disable_samples,
             filter=select,
         )
+        data_monitoring.validate_report_selector()
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.
         anonymous_tracking.track_cli_start(
@@ -437,6 +448,12 @@ def report(
     type=str,
     default=None,
     help="AWS profile name",
+)
+@click.option(
+    "--aws-region-name",
+    type=str,
+    default=None,
+    help="AWS region name",
 )
 @click.option(
     "--aws-access-key-id", type=str, default=None, help="The access key ID for AWS"
@@ -478,6 +495,12 @@ def report(
     help="The name of the GCS bucket to upload the report to.",
 )
 @click.option(
+    "--gcs-timeout-limit",
+    type=int,
+    default=None,
+    help="GCS requests timeout limit in seconds. If not provided the default is 60.",
+)
+@click.option(
     "--azure-connection-string",
     type=str,
     default=None,
@@ -512,13 +535,13 @@ def report(
     "--slack-report-url",
     type=str,
     default=None,
-    help="DEPRECATED! - The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+    help="DEPRECATED! - The URL for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
 )
 @click.option(
     "--report-url",
     type=str,
     default=None,
-    help="The URL the for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
+    help="The URL for the report at the Slack summary message (if not provided edr will assume the default bucket website url).",
 )
 @click.option(
     "--disable-passed-test-metrics",
@@ -559,6 +582,7 @@ def send_report(
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
+    aws_region_name,
     aws_access_key_id,
     aws_secret_access_key,
     s3_endpoint_url,
@@ -568,6 +592,7 @@ def send_report(
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
+    gcs_timeout_limit,
     exclude_elementary_models,
     disable_samples,
     project_name,
@@ -602,6 +627,7 @@ def send_report(
         slack_channel_name=slack_channel_name,
         update_bucket_website=update_bucket_website,
         aws_profile_name=aws_profile_name,
+        aws_region_name=aws_region_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         azure_connection_string=azure_connection_string,
@@ -611,6 +637,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        gcs_timeout_limit=gcs_timeout_limit,
         report_url=report_url,
         env=env,
     )

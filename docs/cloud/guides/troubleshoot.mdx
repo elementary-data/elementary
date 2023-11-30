@@ -1,0 +1,22 @@
+---
+title: "Troubleshooting"
+---
+
+### Column information cannot be retrieved
+
+This error can happen because of a few reasons:
+
+1. check that your elementary dbt package version is 0.12.0 or higher
+2. check that the user you are using to connect to your database has permissions to access the information schema
+
+For more information on the permissions required by each data warehouse:
+
+[Snowflake](/cloud/integrations/dwh/snowflake#permissions-and-security)
+
+[Bigquery](/cloud/integrations/dwh/bigquery#permissions-and-security)
+
+[Redshift](/cloud/integrations/dwh/redshift#permissions-and-security)
+
+[Databricks](/cloud/integrations/dwh/databricks#permissions-and-security)
+
+[Postgres](/cloud/integrations/dwh/postgres#permissions-and-security)

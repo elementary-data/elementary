@@ -21,6 +21,9 @@ class SlackMessageBuilder:
     def _initial_slack_message(cls) -> dict:
         return {"blocks": [], "attachments": [{"blocks": []}]}
 
+    def reset_slack_message(self):
+        self.slack_message = self._initial_slack_message()
+
     def _add_always_displayed_blocks(self, blocks: SlackBlocksType):
         # In oppose to attachments Blocks are always displayed, use this for parts that should always be displayed in the message
         self.slack_message["blocks"].extend(blocks)
@@ -117,6 +120,20 @@ class SlackMessageBuilder:
                     "url": url,
                 }
             ],
+        }
+
+    @staticmethod
+    def create_section_with_button(
+        section_text: str, button_text: str, url: str
+    ) -> dict:
+        return {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": section_text},
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": button_text, "emoji": True},
+                "url": url,
+            },
         }
 
     @staticmethod

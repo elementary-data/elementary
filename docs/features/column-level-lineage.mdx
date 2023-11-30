@@ -1,0 +1,49 @@
+---
+title: Column Level Lineage
+sidebarTitle: Column Level Lineage
+---
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+The table nodes in Elementary lineage can be expanded to show the columns. When you
+select a column, the lineage of that specific column will be highlighted.
+
+Column level lineage is useful for answering questions such as:
+
+- Which downstream columns are actually impacted by a data quality issue?
+- Can we deprecate or rename a column?
+- Will changing this column impact a dashboard?
+
+<Frame>
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1700474778/CLL-for-docs_bcsvcb.gif"
+    alt="Elementary Column Level Lineage"
+  />
+</Frame>
+
+### Filter and highlight columns path
+
+To help navigate graphs with large amount of columns per table, use the `...` menu right to the column:
+
+- **Filter**: Will show a graph of only the selected column and it's dependencies.
+- **Highlight**: Will highlight only the selected column and it's dependencies.
+
+### Column level lineage generation
+
+Elementary parses SQL queries to determine the dependencies between columns.
+Note that the lineage is only of the columns that directly contribute data to the column.
+
+For example for the query:
+
+```sql
+create or replace table db.schema.users as
+select
+  user_name,
+  count(distinct login_time) as total_logins
+from db.schema.login_events
+where user_type != 'test_user'
+```
+
+The direct dependency of `total_logins` is `login_events.login_time`.
+The column `login_events.user_type` filter the data of `total_logins`, but it is an indirect dependency and will not show in lineage.
+
+If you want a different approach in your Elementary Cloud instance - Contact us.

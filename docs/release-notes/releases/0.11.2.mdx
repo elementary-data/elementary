@@ -1,0 +1,37 @@
+---
+title: "Elementary 0.11.2"
+sidebarTitle: "0.11.2"
+---
+
+_October 24, 2023: [v0.11.0 Python](https://github.com/elementary-data/elementary/releases/tag/v0.11.0), [v0.11.2 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.11.2)_
+
+### 🔥 What's New?
+
+- **We added many cool new features to our anomaly detection tests!**
+
+  - `fail_on_zero` - You can now configure your volume anomaly tests to fail if there are exactly 0 new records, in addition to the anomaly detection algorithm. Read more [here](https://docs.elementary-data.com/data-tests/anomaly-detection-configuration/fail_on_zero)
+  - `detection_delay` - If your data loads with an expected delay, you can now [delay the detection period](https://docs.elementary-data.com/data-tests/anomaly-detection-configuration/detection-delay). This will prevent false alerts on freshness and volume. Thanks [Francois Forster](https://github.com/francoisforster) for raising the issue and making this amazing contribution!
+  - `ignore_small_changes` - If your data set is very static, and even a small change can cause a false anomaly detection, you can now use percentiles to ignore small changes. Read more about this [here](https://docs.elementary-data.com/data-tests/anomaly-detection-configuration/ignore_small_changes)
+
+- ✨ **New test!** ✨ **[exposure_schema_validity](https://docs.elementary-data.com/guides/add-exposure-tests)** 👓
+
+  - This test helps to make sure your exposures are not broken by any changes in the upstream models and sources! If a column the exposure depends on changes or gets deleted, the test will fail and alert about the change to those who need to know.
+
+- Alerts linked to the report! ⚠️🔗📊
+
+  - If you are hosting your Elementary report on a server or a bucket, just add `--report-url link/to/report` to your `edr monitor` command and each alert will have a link to the results of the test in your hosted report
+
+- **Crazy performance improvements** ⌚️
+  - You should see the impact in runtimes of -
+    - dbt tests hook - Reduced the duration of tests failed row sampling and failed rows count
+    - Schema changes test - Code was optimized, significantly improving performance
+    - Anomaly detection tests - Metrics backfill process was optimized, also reducing the time it takes them to run
+
+### Other Changes and Bug fixes 🐞
+
+- We added a new contribution guide for both the [dbt package](https://github.com/elementary-data/dbt-data-reliability/blob/master/CONTRIBUTING.md) and [CLI](https://github.com/elementary-data/elementary/blob/master/CONTRIBUTING.md)
+- Source Freshness Alerts now contain more accurate details of the dbt source freshness invocation
+- Fix quote for temp table name by [@Trevor Osborne](https://github.com/trevdoz)
+- Some code refactors by [@kovaacs](https://github.com/kovaacs)
+- Fixing Dependencies in DbtRunner for Uninstalled Packages by [@Arun K C](https://github.com/Arun-kc)
+- Further document custom slack channels by [@Javier López Tomás](https://github.com/JavierLopezT)

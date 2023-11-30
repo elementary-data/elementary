@@ -4,7 +4,6 @@ from typing import Any, Dict, Optional, cast
 from packaging import version
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
-from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.data_monitoring.schema import WarehouseInfo
@@ -47,7 +46,7 @@ class DataMonitoring:
                 tracking.register_group(
                     "warehouse",
                     self.warehouse_info.id,
-                    self.warehouse_info.model_dump(),
+                    self.warehouse_info.dict(),
                 )
             tracking.set_env("target_name", latest_invocation.get("target_name"))
             tracking.set_env("dbt_orchestrator", latest_invocation.get("orchestrator"))
@@ -55,10 +54,6 @@ class DataMonitoring:
             tracking.set_env("dbt_pkg_version", dbt_pkg_version)
         if dbt_pkg_version:
             self._check_dbt_package_compatibility(dbt_pkg_version)
-        # slack client is optional
-        self.slack_client = SlackClient.create_client(
-            self.config, tracking=self.tracking
-        )
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
         self.disable_samples = disable_samples
@@ -116,7 +111,7 @@ class DataMonitoring:
     def get_elementary_database_and_schema(self):
         try:
             relation = self.internal_dbt_runner.run_operation(
-                "get_elementary_database_and_schema", quiet=True
+                "elementary_cli.get_elementary_database_and_schema", quiet=True
             )[0]
             logger.info(f"Elementary's database and schema: '{relation}'")
             return relation
@@ -129,7 +124,7 @@ class DataMonitoring:
     def get_latest_invocation(self) -> Dict[str, Any]:
         try:
             latest_invocation = self.internal_dbt_runner.run_operation(
-                "get_latest_invocation", quiet=True
+                "elementary_cli.get_latest_invocation", quiet=True
             )[0]
             return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
@@ -177,7 +172,7 @@ class DataMonitoring:
         try:
             warehouse_type, warehouse_unique_id = json.loads(
                 self.internal_dbt_runner.run_operation(
-                    "get_adapter_type_and_unique_id", quiet=True
+                    "elementary_cli.get_adapter_type_and_unique_id", quiet=True
                 )[0]
             )
             return WarehouseInfo(

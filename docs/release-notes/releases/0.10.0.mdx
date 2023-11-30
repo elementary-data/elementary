@@ -1,0 +1,38 @@
+---
+title: "Elementary 0.10.0"
+sidebarTitle: "0.10.0"
+---
+
+_August 24, 2023: [v0.10.0 Python](https://github.com/elementary-data/elementary/releases/tag/v0.10.0), [v0.10.0 dbt package](https://github.com/elementary-data/dbt-data-reliability/releases/tag/0.10.0)_
+
+### 🔥 What's New?
+
+- **We now officially support Spark and Databricks Unity Catalog!**
+  - Huge thanks to [Rom Shitrit](https://elementary-community.slack.com/team/U05G2NHMNRL) for working with us on Spark, it was a pleasure!
+  - Thanks so much [Chinnu](https://elementary-community.slack.com/team/U0571A75LP9) for making the Databricks Catalog support contribution, much appreciated!
+  - These integrations are very new so there may be some hiccups, please contact us in [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) if you notice anything funny 🙏🏼
+- **Elementary reports can now be [uploaded to Azure Blob](https://docs.elementary-data.com/oss/guides/share-observability-reporthost-on-azure)!** ☁️
+  - Thanks [Dharit Sura](https://elementary-community.slack.com/team/U047ZFZRDCH) for opening this issue and huge kudos to [Arun K C](https://elementary-community.slack.com/team/U05K8141BF1) for taking this on and making it happen! 💪🏼
+- **New selector filters for alerts**
+  - We added 2 new filters to `edr monitor`, `resource_type` and `status`!
+  - This means it is now possible to run `edr monitor` separately for warnings and failures, and send them to different slack channels!
+  - Thanks [Josh Elston-Green](https://elementary-community.slack.com/team/U04CSH84TBN) for requesting this, and also [Pascal Moreau](https://elementary-community.slack.com/team/U04GR7G5G0K) for opening the [issue on Github](https://github.com/elementary-data/elementary/issues/630)
+  - See the [docs](https://docs.elementary-data.com/guides/alerts-configuration#filter-alerts) for more details
+- **Test your alerts in "dev" mode**
+  - You can now run alerts that ignore your custom channels and suppression settings. This is intended for testing alerts in dev that you don't want everyone to panic about. Just try `edr monitor --override-dbt-project-config`
+  - Thanks [Snir Israeli](https://elementary-community.slack.com/team/U04HZGN1AAY) for opening this feature request!
+
+### Other Changes ✨
+
+- **As of this version we will no longer support dbt versions prior to 1.3**
+  - This means you shouldn't upgrade Elementary to 0.10.0 if you're using an older version of dbt 🙅🏽‍♀️
+  - Older versions of Elementary are not affected by this
+
+### Bugfixes 🐛
+
+- **Table name missing in some generic tests**
+  - Fixed by [Ronan OBERT](https://elementary-community.slack.com/team/U053CF0BX71)'s contribution 🙌
+- Fixed a bunch of typos in the docs
+  - Thanks to [Marcell Kovács](https://github.com/kovaacs) for noticing and fixing! We also added a typo checker, so you can except our docs to be typo free going forward ✅
+- Fixed some character encoding issues in the report
+  - Thanks [Assaf Haim](https://elementary-community.slack.com/team/U056LD1BJ74), [Christopher Ekfeldt](https://elementary-community.slack.com/team/U04BMS39WRL), [Ilya Michlin](https://elementary-community.slack.com/team/U05FS239ER1) and everyone else who raised this

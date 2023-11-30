@@ -6,7 +6,6 @@ from dateutil import tz
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.tests.schema import (
     DbtTestResultSchema,
     ElementaryTestResultSchema,
@@ -15,13 +14,10 @@ from elementary.monitor.api.tests.schema import (
     TestMetadataSchema,
     TestResultSchema,
     TestResultSummarySchema,
-    TestResultsWithTotalsSchema,
     TestRunSchema,
-    TestRunsWithTotalsSchema,
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
@@ -40,7 +36,6 @@ class TestsAPI(APIClient):
     ):
         super().__init__(dbt_runner)
         self.tests_fetcher = TestsFetcher(dbt_runner=self.dbt_runner)
-        self.invocations_api = InvocationsAPI(dbt_runner)
         self.test_results_db_rows = self._get_test_results_db_rows(
             days_back=days_back,
             invocations_per_test=invocations_per_test,
@@ -130,16 +125,16 @@ class TestsAPI(APIClient):
 
     def get_test_results(
         self,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        invocation_id: Optional[str],
         disable_samples: bool = False,
-    ) -> TestResultsWithTotalsSchema:
+    ) -> Dict[Optional[str], List[TestResultSchema]]:
         filtered_test_results_db_rows = self.test_results_db_rows
-        invocation = self._get_invocation_from_filter(filter)
-        if invocation.invocation_id:
+
+        if invocation_id:
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
-                if test_result.invocation_id == invocation.invocation_id
+                if test_result.invocation_id == invocation_id
             ]
 
         filtered_test_results_db_rows = [
@@ -169,17 +164,9 @@ class TestsAPI(APIClient):
                 )
             )
 
-        test_metadatas = []
-        for test_results in tests_results.values():
-            test_metadatas.extend([result.metadata for result in test_results])
-        test_results_totals = self._get_total_tests_results(test_metadatas)
-        return TestResultsWithTotalsSchema(
-            results=tests_results,
-            totals=test_results_totals,
-            invocation=invocation,
-        )
+        return tests_results
 
-    def get_test_runs(self) -> TestRunsWithTotalsSchema:
+    def get_test_runs(self) -> Dict[Optional[str], List[TestRunSchema]]:
         tests_invocations = self._get_invocations(self.test_results_db_rows)
         latest_test_results = [
             test_result
@@ -199,8 +186,7 @@ class TestsAPI(APIClient):
                 test_runs=test_invocations,
             )
             test_runs[test_result_db_row.model_unique_id].append(test_run)
-        test_runs_totals = self._get_total_tests_runs(tests_runs=test_runs)
-        return TestRunsWithTotalsSchema(runs=test_runs, totals=test_runs_totals)
+        return test_runs
 
     def _get_invocations(
         self, test_result_db_rows: List[TestResultDBRowSchema]
@@ -289,24 +275,6 @@ class TestsAPI(APIClient):
             return int(affected_rows)
         except Exception:
             return None
-
-    def _get_invocation_from_filter(
-        self, filter: SelectorFilterSchema
-    ) -> DbtInvocationSchema:
-        # If none of the following filter options exists, the invocation is empty and there is no filter.
-        invocation = DbtInvocationSchema()
-        if filter.invocation_id:
-            invocation = self.invocations_api.get_invocation_by_id(
-                type="test", invocation_id=filter.invocation_id
-            )
-        elif filter.invocation_time:
-            invocation = self.invocations_api.get_invocation_by_time(
-                type="test", invocation_max_time=filter.invocation_time
-            )
-        elif filter.last_invocation:
-            invocation = self.invocations_api.get_last_invocation(type="test")
-
-        return invocation
 
     @staticmethod
     def _get_test_metadata_from_test_result_db_row(
@@ -448,60 +416,3 @@ class TestsAPI(APIClient):
                 found_rows_number = found_rows_number_match.group()
                 failed_rows_count = int(found_rows_number)
         return failed_rows_count
-
-    def _get_total_tests_results(
-        self,
-        test_metadatas: List[TestMetadataSchema],
-    ) -> Dict[Optional[str], TotalsSchema]:
-        totals: Dict[Optional[str], TotalsSchema] = dict()
-        for test in test_metadatas:
-            self._update_test_results_totals(
-                totals_dict=totals,
-                model_unique_id=test.model_unique_id,
-                status=test.latest_run_status,
-            )
-        return totals
-
-    def _get_total_tests_runs(
-        self, tests_runs: Dict[Optional[str], List[TestRunSchema]]
-    ) -> Dict[Optional[str], TotalsSchema]:
-        totals: Dict[Optional[str], TotalsSchema] = dict()
-        for test_runs in tests_runs.values():
-            for test_run in test_runs:
-                # It's possible test_runs will be None if we didn't find any invocations associated
-                # with this test, in that case it also makes sense to skip it.
-                if not test_run.test_runs:
-                    continue
-
-                test_invocations = test_run.test_runs.invocations
-                self._update_test_runs_totals(
-                    totals_dict=totals,
-                    test=test_run.metadata,
-                    test_invocations=test_invocations,
-                )
-        return totals
-
-    @staticmethod
-    def _update_test_runs_totals(
-        totals_dict: Dict[Optional[str], TotalsSchema],
-        test: TestMetadataSchema,
-        test_invocations: List[InvocationSchema],
-    ):
-        model_unique_id = test.model_unique_id
-
-        if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = TotalsSchema()
-
-        for test_invocation in test_invocations:
-            totals_dict[model_unique_id].add_total(test_invocation.status)
-
-    @staticmethod
-    def _update_test_results_totals(
-        totals_dict: Dict[Optional[str], TotalsSchema],
-        model_unique_id: Optional[str],
-        status: str,
-    ):
-        if model_unique_id not in totals_dict:
-            totals_dict[model_unique_id] = TotalsSchema()
-
-        totals_dict[model_unique_id].add_total(status)

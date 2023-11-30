@@ -18,7 +18,7 @@ class Debug:
         )
 
         try:
-            dbt_runner.run_operation("test_conn", quiet=True)
+            dbt_runner.run_operation("elementary_cli.test_conn", quiet=True)
         except DbtCommandError as err:
             logs = (
                 "\n".join(str(log) for log in err.logs)

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
@@ -15,6 +15,17 @@ from elementary.monitor.api.models.schema import (
     NormalizedSourceSchema,
 )
 from elementary.monitor.api.report.schema import ReportDataEnvSchema, ReportDataSchema
+from elementary.monitor.api.report.totals_utils import (
+    get_total_test_results,
+    get_total_test_runs,
+)
+from elementary.monitor.api.source_freshnesses.schema import (
+    SourceFreshnessResultSchema,
+    SourceFreshnessRunSchema,
+)
+from elementary.monitor.api.source_freshnesses.source_freshnesses import (
+    SourceFreshnessesAPI,
+)
 from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
@@ -42,6 +53,11 @@ class ReportAPI(APIClient):
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
             )
+            source_freshnesses_api = SourceFreshnessesAPI(
+                dbt_runner=self.dbt_runner,
+                days_back=days_back,
+                invocations_per_test=test_runs_amount,
+            )
             models_api = ModelsAPI(dbt_runner=self.dbt_runner)
             groups_api = GroupsAPI(dbt_runner=self.dbt_runner)
             lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
@@ -61,34 +77,57 @@ class ReportAPI(APIClient):
             )
             coverages = models_api.get_test_coverages()
 
+            test_invocation = invocations_api.get_test_invocation_from_filter(filter)
+
             test_results = tests_api.get_test_results(
-                filter=filter, disable_samples=disable_samples
+                invocation_id=test_invocation.invocation_id,
+                disable_samples=disable_samples,
             )
+            source_freshness_results = (
+                source_freshnesses_api.get_source_freshness_results()
+            )
+
+            union_test_results = {
+                x: test_results.get(x, []) + source_freshness_results.get(x, [])
+                for x in set(test_results).union(source_freshness_results)
+            }
+
+            test_results_totals = get_total_test_results(union_test_results)
+
             test_runs = tests_api.get_test_runs()
+            source_freshness_runs = source_freshnesses_api.get_source_freshness_runs()
+
+            union_test_runs = dict()
+            for key in set(test_runs).union(source_freshness_runs):
+                test_run = test_runs.get(key, [])
+                source_freshness_run = (
+                    source_freshness_runs.get(key, []) if key is not None else []
+                )
+                union_test_runs[key] = test_run + source_freshness_run
+
+            test_runs_totals = get_total_test_runs(union_test_runs)
 
             lineage = lineage_api.get_lineage(exclude_elementary_models)
             filters = filters_api.get_filters(
-                test_results.totals, test_runs.totals, models, sources, models_runs.runs
+                test_results_totals, test_runs_totals, models, sources, models_runs.runs
             )
 
-            serializable_groups = groups.model_dump()
+            serializable_groups = groups.dict()
             serializable_models = self._serialize_models(models, sources, exposures)
             serializable_model_runs = self._serialize_models_runs(models_runs.runs)
             serializable_model_runs_totals = models_runs.dict(include={"totals"})[
                 "totals"
             ]
             serializable_models_coverages = self._serialize_coverages(coverages)
-            serializable_test_results = self._serialize_test_results(
-                test_results.results
-            )
+            serializable_test_results = self._serialize_test_results(union_test_results)
             serializable_test_results_totals = self._serialize_totals(
-                test_results.totals
+                test_results_totals
             )
-            serializable_test_runs = self._serialize_test_runs(test_runs.runs)
-            serializable_test_runs_totals = self._serialize_totals(test_runs.totals)
-            serializable_invocation = test_results.invocation.model_dump()
-            serializable_filters = filters.model_dump()
-            serializable_lineage = lineage.model_dump()
+            serializable_test_runs = self._serialize_test_runs(union_test_runs)
+            serializable_test_runs_totals = self._serialize_totals(test_runs_totals)
+            serializable_invocation = test_invocation.dict()
+            serializable_filters = filters.dict()
+            serializable_lineage = lineage.dict()
 
             models_latest_invocation = invocations_api.get_models_latest_invocation()
             invocations = invocations_api.get_models_latest_invocations_data()
@@ -146,22 +185,28 @@ class ReportAPI(APIClient):
         return [model_runs.dict(by_alias=True) for model_runs in models_runs]
 
     def _serialize_test_results(
-        self, test_results: Dict[Optional[str], List[TestResultSchema]]
+        self,
+        test_results: Dict[
+            Optional[str], List[Union[TestResultSchema, SourceFreshnessResultSchema]]
+        ],
     ) -> Dict[Optional[str], List[dict]]:
         serializable_test_results = defaultdict(list)
         for model_unique_id, test_result in test_results.items():
             serializable_test_results[model_unique_id].extend(
-                [result.model_dump() for result in test_result]
+                [result.dict() for result in test_result]
             )
         return serializable_test_results
 
     def _serialize_test_runs(
-        self, test_runs: Dict[Optional[str], List[TestRunSchema]]
+        self,
+        test_runs: Dict[
+            Optional[str], List[Union[TestRunSchema, SourceFreshnessRunSchema]]
+        ],
     ) -> Dict[Optional[str], List[dict]]:
         serializable_test_runs = defaultdict(list)
         for model_unique_id, test_run in test_runs.items():
             serializable_test_runs[model_unique_id].extend(
-                [run.model_dump() for run in test_run]
+                [run.dict() for run in test_run]
             )
         return serializable_test_runs
 
@@ -170,5 +215,5 @@ class ReportAPI(APIClient):
     ) -> Dict[Optional[str], dict]:
         serialized_totals = dict()
         for model_unique_id, total in totals.items():
-            serialized_totals[model_unique_id] = total.model_dump()
+            serialized_totals[model_unique_id] = total.dict()
         return serialized_totals

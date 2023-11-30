@@ -1,0 +1,54 @@
+---
+title: "detection_delay"
+sidebarTitle: "detection_delay"
+---
+
+```
+detection_delay:
+  period: < time period > # supported periods: hour, day, week, month
+  count: < number of periods >
+```
+
+The duration for retracting the detection period.
+That's useful in cases which the latest data should be excluded from the test. For example, this can happen because of scheduling issues- if the test is running before the table is populated for some reason. The detection delay is the period of time to ignore, after the detection period.
+
+- _Default: 0_
+- _Relevant tests: Anomaly detection tests with `timestamp_column`_
+
+<img src="/pics/anomalies/detection-delay.png" alt="Detection Delay" />
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          detection_delay:
+            period: day
+            count: 1
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        detection_delay:
+          period: day
+          count: 1
+```
+
+```yml dbt_project.yml
+vars:
+  detection_delay:
+    period: day
+    count: 1
+```
+
+</RequestExample>
+
+#### How it works?
+
+The `detection_delay` param only works for tests that have `timestamp_column` configuration.
+It does not affect the other duration parameters, like `detection_period` or `training_period`.

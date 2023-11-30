@@ -14,10 +14,10 @@ dbt.adapters.factory.get_adapter = lambda config: config.adapter  # type: ignore
 from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
 from dbt.config import RuntimeConfig
 from dbt.flags import set_from_args
-from dbt.parser.manifest import ManifestLoader
+from dbt.parser.manifest import Manifest, ManifestLoader
 from dbt.tracking import disable_tracking
 from dbt.version import __version__ as dbt_version_string
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.utils.log import get_logger
@@ -65,7 +65,7 @@ class ConfigArgs(BaseModel):
     threads: Optional[int] = 1
     vars: Optional[Union[str, Dict[str, Any]]] = DEFAULT_VARS
 
-    @field_validator("vars", mode="before")
+    @validator("vars", pre=True)
     def validate_vars(cls, vars):
         if not vars:
             return DEFAULT_VARS
@@ -80,16 +80,24 @@ class SlimDbtRunner(BaseDbtRunner):
         target: Optional[str] = None,
         vars: Optional[dict] = None,
         secret_vars: Optional[dict] = None,
+        allow_macros_without_package_prefix: bool = False,
         **kwargs,
     ):
-        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
+        super().__init__(
+            project_dir,
+            profiles_dir,
+            target,
+            vars,
+            secret_vars,
+            allow_macros_without_package_prefix,
+        )
 
         self.config: Optional[RuntimeConfig] = None
         self.adapter: Optional[BaseAdapter] = None
         self.adapter_name: Optional[str] = None
         self.connections_manager: Optional[BaseConnectionManager] = None
         self.project_parser: Optional[ManifestLoader] = None
-        self.manifest = None
+        self.manifest: Optional[Manifest] = None
 
     def _load_runner(
         self,
@@ -193,6 +201,12 @@ class SlimDbtRunner(BaseDbtRunner):
     ) -> list:
         if self.profiles_dir is None:
             raise Exception("profiles_dir must be passed to SlimDbtRunner")
+
+        if "." not in macro_name and not self.allow_macros_without_package_prefix:
+            raise ValueError(
+                f"Macro name '{macro_name}' is missing package prefix. "
+                f"Please use the following format: <package_name>.<macro_name>"
+            )
 
         macro_args = macro_args or {}
 

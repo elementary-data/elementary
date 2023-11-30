@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
 
 from elementary.utils.log import get_logger
 
@@ -17,7 +17,7 @@ class SlackMessageSchema(BaseModel):
     attachments: Optional[list] = None
     blocks: Optional[list] = None
 
-    @field_validator("attachments", mode="before")
+    @validator("attachments", pre=True)
     def validate_attachments(cls, attachments):
         if (
             isinstance(attachments, list)

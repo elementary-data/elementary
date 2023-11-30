@@ -10,6 +10,7 @@ import pkg_resources
 from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
+from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
@@ -18,6 +19,7 @@ from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
+from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
@@ -44,6 +46,9 @@ class DataMonitoringReport(DataMonitoring):
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
         self.azure_client = AzureClient.create_client(
+            self.config, tracking=self.tracking
+        )
+        self.slack_client = SlackClient.create_client(
             self.config, tracking=self.tracking
         )
 
@@ -125,8 +130,11 @@ class DataMonitoringReport(DataMonitoring):
             )
             self.success = False
 
-        report_data_dict = report_data.model_dump()
+        report_data_dict = report_data.dict()
         return report_data_dict
+
+    def validate_report_selector(self):
+        SelectorFilter.validate_report_selector(self.filter.selector)
 
     def _add_report_tracking(
         self, report_data: ReportDataSchema, error: Optional[Exception] = None
@@ -194,6 +202,7 @@ class DataMonitoringReport(DataMonitoring):
         upload_succeeded = False
         # If a s3 client or a gcs client is provided, we want to upload the report to the bucket.
         if self.s3_client or self.gcs_client or self.azure_client:
+            self.validate_report_selector()
             upload_succeeded, bucket_website_url = self.upload_report(
                 local_html_path=local_html_path, remote_file_path=remote_file_path
             )
@@ -216,6 +225,7 @@ class DataMonitoringReport(DataMonitoring):
                 include_description=include_description,
             )
             if should_send_report_over_slack:
+                self.validate_report_selector()
                 self.send_report_attachment(local_html_path=local_html_path)
 
         return self.success

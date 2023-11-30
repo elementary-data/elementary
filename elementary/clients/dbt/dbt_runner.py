@@ -27,8 +27,16 @@ class DbtRunner(BaseDbtRunner):
         env_vars: Optional[Dict[str, str]] = None,
         vars: Optional[Dict[str, Any]] = None,
         secret_vars: Optional[Dict[str, Any]] = None,
+        allow_macros_without_package_prefix: bool = False,
     ) -> None:
-        super().__init__(project_dir, profiles_dir, target, vars, secret_vars)
+        super().__init__(
+            project_dir,
+            profiles_dir,
+            target,
+            vars,
+            secret_vars,
+            allow_macros_without_package_prefix,
+        )
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
         self._run_deps_if_needed()
@@ -98,8 +106,10 @@ class DbtRunner(BaseDbtRunner):
             return False, output
         return True, output
 
-    def deps(self, quiet: bool = False) -> bool:
-        success, _ = self._run_command(command_args=["deps"], quiet=quiet)
+    def deps(self, quiet: bool = False, capture_output: bool = True) -> bool:
+        success, _ = self._run_command(
+            command_args=["deps"], quiet=quiet, capture_output=capture_output
+        )
         return success
 
     def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
@@ -126,6 +136,11 @@ class DbtRunner(BaseDbtRunner):
         should_log: bool = True,
         log_output: bool = False,
     ) -> list:
+        if "." not in macro_name and not self.allow_macros_without_package_prefix:
+            raise ValueError(
+                f"Macro name '{macro_name}' is missing package prefix. "
+                f"Please use the following format: <package_name>.<macro_name>"
+            )
         macro_to_run = macro_name
         macro_to_run_args = macro_args if macro_args else dict()
         if should_log:
@@ -275,4 +290,4 @@ class DbtRunner(BaseDbtRunner):
         installed_package_names = set(self._get_installed_packages_names())
         required_package_names = set(self._get_required_packages_names())
         if not required_package_names.issubset(installed_package_names):
-            self.deps(quiet=True)
+            self.deps()

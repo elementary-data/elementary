@@ -33,8 +33,8 @@ def test_get_new_alerts():
 
 
 def assert_new_alerts(new_alerts):
-    alerts_to_send = new_alerts.alerts
-    alerts_to_skip = new_alerts.alerts_to_skip
+    alerts_to_send = new_alerts.send
+    alerts_to_skip = new_alerts.skip
 
     # Test the following tests are not suppressed:
     #   - Alert after suppression interval

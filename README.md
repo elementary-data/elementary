@@ -10,7 +10,7 @@ Monitor your data quality, operation and performance directly from your dbt proj
 </h4>
 
 <p align="center">
-<a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
+<a href="https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
 <a href="https://docs.elementary-data.com/quickstart"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads"/>
@@ -19,7 +19,7 @@ Monitor your data quality, operation and performance directly from your dbt proj
 
 ⭐️ Star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="45"/></a> ⭐
 
-[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg)
+[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA)
 
 </div>
 
@@ -57,7 +57,7 @@ Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cl
 
 ##
 
-Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) to learn more on Elementary.
+Join [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) to learn more on Elementary.
 
 Our full documentation is [available here](https://docs.elementary-data.com/).
 
@@ -71,7 +71,7 @@ Elementary [dbt package](https://github.com/elementary-data/dbt-data-reliability
 
 For additional information and help, you can use one of these channels:
 
-- [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) \(Live chat with the team, support, discussions, etc.\)
+- [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) \(Live chat with the team, support, discussions, etc.\)
 - [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
 - [Twitter](https://twitter.com/ElementaryData) \(Updates on new releases and stuff)
 
@@ -120,6 +120,9 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/NoyaArie"><img src="https://avatars.githubusercontent.com/u/31591071?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/ellakz"><img src="https://avatars.githubusercontent.com/u/18530437?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/ofek1weiss"><img src="https://avatars.githubusercontent.com/u/55920061?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/erikzaadi"><img src="https://avatars.githubusercontent.com/u/77775?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/dapollak"><img src="https://avatars.githubusercontent.com/u/13542197?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Adamgo23"><img src="https://avatars.githubusercontent.com/u/125807478?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/RoiTabach"><img src="https://avatars.githubusercontent.com/u/25003091?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/hahnbeelee"><img src="https://avatars.githubusercontent.com/u/55263191?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/seanglynn-thrive"><img src="https://avatars.githubusercontent.com/u/93200565?v=4" width="50" height="50" alt=""/></a>
@@ -180,6 +183,11 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/kovaacs"><img src="https://avatars.githubusercontent.com/u/20384210?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/Arun-kc"><img src="https://avatars.githubusercontent.com/u/22231409?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/pbadeer"><img src="https://avatars.githubusercontent.com/u/467756?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/JavierLopezT"><img src="https://avatars.githubusercontent.com/u/11339132?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/trevdoz"><img src="https://avatars.githubusercontent.com/u/34779611?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/francoisforster"><img src="https://avatars.githubusercontent.com/u/1295590?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/LePeti"><img src="https://avatars.githubusercontent.com/u/19508797?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/belle-crisp"><img src="https://avatars.githubusercontent.com/u/126576963?v=4" width="50" height="50" alt=""/></a>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
