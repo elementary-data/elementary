@@ -450,6 +450,12 @@ def report(
     help="AWS profile name",
 )
 @click.option(
+    "--aws-region-name",
+    type=str,
+    default=None,
+    help="AWS region name",
+)
+@click.option(
     "--aws-access-key-id", type=str, default=None, help="The access key ID for AWS"
 )
 @click.option(
@@ -576,6 +582,7 @@ def send_report(
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
+    aws_region_name,
     aws_access_key_id,
     aws_secret_access_key,
     s3_endpoint_url,
@@ -620,6 +627,7 @@ def send_report(
         slack_channel_name=slack_channel_name,
         update_bucket_website=update_bucket_website,
         aws_profile_name=aws_profile_name,
+        aws_region_name=aws_region_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         azure_connection_string=azure_connection_string,
