@@ -149,7 +149,7 @@ class DbtRunner(BaseDbtRunner):
                 macro_name=macro_name, macro_args=macro_args if macro_args else dict()
             )
         command_args = ["run-operation", macro_to_run]
-        json_args = json.dumps(macro_to_run_args)
+        json_args = json.dumps(macro_to_run_args, ensure_ascii=False)
         command_args.extend(["--args", json_args])
         success, command_output = self._run_command(
             command_args=command_args,
