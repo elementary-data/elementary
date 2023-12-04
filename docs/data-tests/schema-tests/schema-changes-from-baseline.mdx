@@ -16,6 +16,11 @@ Supported parameters for the test:
 - `enforce_types` - If set, the test will raise an error if there are columns that are defined without a data type (default:
   False - in this case the test will not fail, but instead will only verify that the column exists and not its type)
 
+<Info>
+  Supported in Databricks with Unity Catalog only. <br/>
+  Not supported in Athena.
+</Info>
+
 ### Auto-generate baseline schema
 
 To make it easier to configure schema tests, Elementary provides dbt operations to auto generate tests configuration based on the existing schemas.
