@@ -222,7 +222,7 @@ class SlimDbtRunner(BaseDbtRunner):
             "run-operation",
             macro_name,
             "--args",
-            json.dumps(macro_args),
+            json.dumps(macro_args, ensure_ascii=False),
         ]
         if all_vars:
             log_command.extend(
