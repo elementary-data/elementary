@@ -9,12 +9,11 @@
   )
 }}
 
-
 {% set error_models_relation = adapter.get_relation(this.database, this.schema, 'alerts_dbt_models') %}
 {% if error_models_relation %}
     select
       {{ dbt_utils.star(from=error_models_relation, except=["detected_at"]) }},
-      {{ elementary.edr_cast_as_timestamp("detected_at") }} as detected_at,
+      {{ elementary_cli.get_alerts_model_detected_at_expr(this) }} as detected_at,
       false as alert_sent,  {# backwards compatibility #}
       'pending' as suppression_status,
       {{ elementary.edr_cast_as_string('NULL') }} as sent_at
