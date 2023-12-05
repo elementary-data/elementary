@@ -260,7 +260,8 @@
         "cloud/integrations/dwh/bigquery",
         "cloud/integrations/dwh/redshift",
         "cloud/integrations/dwh/databricks",
-        "cloud/integrations/dwh/postgres"
+        "cloud/integrations/dwh/postgres",
+        "cloud/integrations/dwh/athena"
       ]
     },
     {
