@@ -234,6 +234,7 @@
         },
         "cloud/guides/sync-scheduling",
         "cloud/guides/collect-job-data",
+        "cloud/guides/collect-source-freshness",
         "cloud/guides/troubleshoot"
       ]
     },
@@ -290,7 +291,8 @@
             "oss/guides/share-observability-report/host-on-s3",
             "oss/guides/share-observability-report/host-on-gcs",
             "oss/guides/share-observability-report/host-on-azure",
-            "oss/guides/share-observability-report/send-report-summary"
+            "oss/guides/share-observability-report/send-report-summary",
+            "oss/guides/collect-dbt-source-freshness"
           ]
         },
         {
