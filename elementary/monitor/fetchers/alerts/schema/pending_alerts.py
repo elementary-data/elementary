@@ -32,6 +32,7 @@ class BasePendingAlertSchema(BaseModel):
     database_name: Optional[str] = None
     schema_name: str
     tags: Optional[List[str]] = None
+    owners: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
     suppression_status: str
     sent_at: Optional[datetime] = None
@@ -54,8 +55,11 @@ class BasePendingAlertSchema(BaseModel):
         return self.unified_meta.get(GROUP_ALERTS_BY_KEY)
 
     @property
-    def owners(self) -> List[str]:
-        return self._get_alert_meta_attrs(OWNER_KEY)
+    def unified_owners(self) -> List[str]:
+        # Make sure we return both meta defined owners and config defined owners.
+        config_owners = self.owners or []
+        meta_owners = self._get_alert_meta_attrs(OWNER_KEY)
+        return list(set(config_owners + meta_owners))
 
     @property
     def subscribers(self) -> List[str]:
@@ -76,6 +80,10 @@ class BasePendingAlertSchema(BaseModel):
     @validator("tags", pre=True, always=True)
     def validate_tags(cls, tags: Optional[Union[List[str], str]]):
         return unpack_and_flatten_and_dedup_list_of_strings(tags)
+
+    @validator("owners", pre=True, always=True)
+    def validate_owners(cls, owners: Optional[Union[List[str], str]]):
+        return unpack_and_flatten_and_dedup_list_of_strings(owners)
 
     @staticmethod
     def _flatten_meta(meta: Optional[Dict] = None) -> Dict:
@@ -199,7 +207,7 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
             detected_at=self.detected_at,
             database_name=self.database_name,
             schema_name=self.schema_name,
-            owners=self.owners,
+            owners=self.unified_owners,
             tags=self.tags,
             subscribers=self.subscribers,
             status=self.status,
@@ -245,7 +253,7 @@ class PendingModelAlertSchema(BasePendingAlertSchema):
             detected_at=self.detected_at,
             database_name=self.database_name,
             schema_name=self.schema_name,
-            owners=self.owners,
+            owners=self.unified_owners,
             tags=self.tags,
             subscribers=self.subscribers,
             status=self.status,
@@ -304,7 +312,7 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
             detected_at=self.detected_at,
             database_name=self.database_name,
             schema_name=self.schema_name,
-            owners=self.owners,
+            owners=self.unified_owners,
             tags=self.tags,
             subscribers=self.subscribers,
             status=self.status,
