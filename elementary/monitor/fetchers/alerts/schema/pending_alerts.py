@@ -17,7 +17,7 @@ from elementary.utils.json_utils import (
 ALERTS_CONFIG_KEY = "alerts_config"
 CHANNEL_KEY = "channel"
 DESCRIPTION_KEY = "description"
-OWNERS_KEY = "owners"
+OWNER_KEY = "owner"
 SUBSCRIBERS_KEY = "subscribers"
 ALERT_FIELDS_KEY = "alert_fields"
 ALERT_SUPPRESSION_INTERVAL_KEY = "alert_suppression_interval"
@@ -55,7 +55,7 @@ class BasePendingAlertSchema(BaseModel):
 
     @property
     def owners(self) -> List[str]:
-        return self._get_alert_meta_attrs(OWNERS_KEY)
+        return self._get_alert_meta_attrs(OWNER_KEY)
 
     @property
     def subscribers(self) -> List[str]:
