@@ -17,7 +17,7 @@
     {% endset %}
     {% set current_warehouse = elementary.agate_to_dicts(elementary.run_query(current_warehouse_query))[0].get("current_warehouse") %}
     {% if not current_warehouse %}
-        {{ exceptions.raise_compiler_error("Could not access cuurent warehouse. Permission is missing.") }}
+        {{ exceptions.raise_compiler_error("Could not access current warehouse. Permission is missing.") }}
     {% endif %}
     {% do elementary_cli.default__test_conn() %}
 {% endmacro %}

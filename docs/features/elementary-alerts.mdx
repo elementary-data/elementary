@@ -1,0 +1,28 @@
+---
+title: "Slack Alerts"
+icon: "slack"
+---
+
+<Tip>
+  More alerts integrations are coming soon, reach out to us for details!
+</Tip>
+
+<Snippet file="alerts/alerts-introduction.mdx" />
+
+## Elementary alerts setup
+
+<AccordionGroup>
+  <Accordion title="Elementary Cloud" icon="cloud" iconType="solid">
+    Signup to cloud, and activate the [Slack integration](/cloud/guides/enable-slack-alerts).
+
+    All [alerts configuration](/cloud/guides/alerts-configuration) is as code in your project YML files.
+
+  </Accordion>
+  <Accordion title="Elementary OSS" icon="square-terminal" iconType="solid">
+    Install the CLI tool, and configure a profile. Use the `edr monitor` command to [send Slack alerts](/oss/quickstart/quickstart-cli).
+    If you want continuous alerting, you will need to orchestrate the CLI and [deploy it to production](/oss/deployment-and-configuration/elementary-in-production).
+
+    All [alerts configuration](/oss/guides/alerts-configuration) is as code in your project YML files.
+
+  </Accordion>
+</AccordionGroup>

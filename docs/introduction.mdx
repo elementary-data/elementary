@@ -1,66 +1,47 @@
 ---
-title: "Introduction"
+title: "Welcome to Elementary"
+sidebarTitle: "Introduction"
+description: "dbt native data observability, built for data and analytics engineers"
+icon: "fire"
 ---
+
+With Elementary you can monitor your data pipelines in minutes, in your dbt project.
+
+Gain immediate visibility to your jobs, models runs and test results.
+Detect data issues with freshness, volume, anomaly detection and schema tests.
+Explore all your test results and data health in a single interface and understand impact and root cause with rich lineage.
+Distribute actionable alerts to different channels and owners, and be on top of your data health.
+
+Start by deploying the dbt package, and then setup Elementary Cloud **or** Elementary OSS.
 
 <div className="dark:#4A165C rounded-md p-0">
   <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1690364864/banner_docs_wwquqj.png"
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1699193505/mintlify_header_eqa3jy.png"
     alt="Elementary banner"
   />
 </div>
 
-## What is Elementary?
+## Elementary Products
 
-Elementary is an open-source data observability solution for data & analytics engineers.
+<Snippet file="products-cards.mdx" />
 
-Monitor your dbt project and data in minutes, and be the first to know of data issues. Gain immediate
-visibility, detect data issues, send actionable alerts, and understand the impact and root cause.
+## Quick start
 
-<Frame>
-  <img
-    src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
-    alt="Demo"
-  />
-</Frame>
-
-## Key features
-
-- **Data observability report ([live demo](https://storage.googleapis.com/elementary_static/elementary_demo.html))**
-
-  Generate a data observability report, host it or share with your team.
-
-- **Data anomaly detection as dbt tests**
-
-  Monitoring of data quality metrics, freshness, volume and schema changes, including anomaly detection. Elementary data monitors are configured and executed like native tests in dbt your project.
-
-- **Models performance**
-
-  Visibility of execution times, easy detection of degradation and bottlenecks.
-
-- **dbt artifacts and run results**
-
-  Uploading and modeling of dbt artifacts, run and test results to tables as part of your runs.
-
-- **Slack alerts**
-
-  Get informative notifications on data issues, schema changes, models and tests failures.
-
-- **Data lineage**
-
-  Inspect upstream and downstream dependencies to understand impact and root cause of data issues.
+<Snippet file="quickstart/quickstart-cards.mdx" />
 
 ## How it works?
 
-For the data monitoring and dbt artifacts collection, we developed a [dbt package](/quickstart#install-the-dbt-package).
-The monitoring configuration is configured in your dbt project, and the monitors are dbt macros and models. All the collected data is saved to an elementary schema in your DWH.
+In your dbt project, you install the [Elementary dbt package](/guides/modules-overview/dbt-package).
+The package will collect metadata and run results to a dedicated Elementary schema.
+You can use elementary tests in your dbt project, configured just like native dbt tests.
 
-After deploying the dbt package, connect to [Elementary Cloud](/cloud/introduction) or install the [Elementary CLI](/understand-elementary/cli-install#install-and-configure) to work with the UI and send Slack alerts.
+[Elementary Cloud](/cloud/introduction) or [Elementary CLI](/oss/oss-introduction) will connect to your data warehouse, read from the Elementary schema, and present the results in the UI / alerts.
 
 ## Community & Support
 
 For additional information and help, you can use one of these channels:
 
-- [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg) (live chat with the team, support, consult with us, etc.)
+- [Slack](https://elementary-data.com/community) (live chat with the team, support, consult with us, etc.)
 - [GitHub issues](https://github.com/elementary-data/elementary-lineage/issues) (bug reports, feature requests, contributions)
 - [Twitter](https://twitter.com/ElementaryData) (updates on new releases and stuff)
 

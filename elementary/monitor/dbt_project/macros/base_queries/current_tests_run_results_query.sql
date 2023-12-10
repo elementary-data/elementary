@@ -14,6 +14,16 @@
         select * from {{ ref('elementary', 'dbt_models') }}
     ),
 
+    dbt_sources as (
+        select * from {{ ref('elementary', 'dbt_sources') }}
+    ),
+
+    dbt_artifacts as (
+        select unique_id, meta, tags, owner from dbt_models
+        union all
+        select unique_id, meta, tags, owner from dbt_sources
+    ),
+
     first_time_test_occurred as (
         select 
             min(detected_at) as first_time_occurred,
@@ -64,12 +74,12 @@
         elementary_test_results.failures,
         elementary_test_results.result_rows,
         dbt_tests.meta,
-        dbt_models.meta as model_meta,
-        dbt_models.tags as model_tags,
-        dbt_models.owner as model_owner,
+        dbt_artifacts.meta as model_meta,
+        dbt_artifacts.tags as model_tags,
+        dbt_artifacts.owner as model_owner,
         first_occurred.first_time_occurred as test_created_at
     from elementary_test_results
     join dbt_tests on elementary_test_results.test_unique_id = dbt_tests.unique_id
     left join first_time_test_occurred first_occurred on elementary_test_results.test_unique_id = first_occurred.test_unique_id
-    left join dbt_models on elementary_test_results.model_unique_id = dbt_models.unique_id
+    left join dbt_artifacts on elementary_test_results.model_unique_id = dbt_artifacts.unique_id
 {% endmacro %}

@@ -118,4 +118,23 @@ elementary:
       # sslmode: [optional, set the sslmode used to connect to the database]
 ```
 
+```yml Athena
+## ATHENA ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: athena
+      work_group: [athena workgroup]
+      s3_staging_dir: [s3_staging_dir] # Location to store query results & metadata
+      s3_data_dir: [s3 data dir] # Location to store table data (if not specified, s3_staging_dir is used)
+      region_name: [aws region name] # AWS region, e.g. eu-west-1
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [number of threads like 8]
+```
+
 </CodeGroup>

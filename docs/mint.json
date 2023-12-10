@@ -4,6 +4,9 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
+  "modeToggle": {
+    "default": "dark"
+  },
   "favicon": "/elementary_favicon.png",
   "colors": {
     "primary": "#F2386C",
@@ -13,7 +16,7 @@
     "ultraDark": "#E0456C",
     "anchors": "#F2386C",
     "background": {
-      "dark": "#19071F",
+      "dark": "#0F0513",
       "light": "#FFFFFF"
     }
   },
@@ -26,8 +29,16 @@
   },
   "tabs": [
     {
+      "name": "Data tests",
+      "url": "data-tests"
+    },
+    {
       "name": "Elementary Cloud",
       "url": "cloud"
+    },
+    {
+      "name": "Elementary OSS",
+      "url": "oss"
     }
   ],
   "topbarCtaButton": {
@@ -44,7 +55,7 @@
     {
       "name": "Community",
       "icon": "slack",
-      "url": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+      "url": "https://elementary-data.com/community"
     },
     {
       "name": "Demo",
@@ -55,139 +66,46 @@
   "navigation": [
     {
       "group": "Getting Started",
+      "pages": ["introduction", "key-features", "quickstart"]
+    },
+    {
+      "group": "Overview",
       "pages": [
-        "introduction",
+        "overview/elementary-cloud",
+        "overview/elementary-oss",
         {
-          "group": "Quickstart",
-          "pages": ["quickstart", "quickstart-cloud", "quickstart-cli"]
-        },
-        {
-          "group": "Tutorial",
+          "group": "dbt package",
+          "icon": "cube",
           "pages": [
-            "tutorial/tutorial-start",
-            "tutorial/setup",
-            "tutorial/installing-elementary",
-            "tutorial/viewing-artifacts",
-            "tutorial/adding-elementary-tests",
-            "tutorial/running-elementary"
+            "guides/modules-overview/dbt-package",
+            "dbt/dbt-artifacts",
+            "dbt/on-run-end_hooks",
+            "dbt/package-models"
           ]
         }
       ]
     },
     {
-      "group": "Guides",
+      "group": "Features",
       "pages": [
-        "quickstart/generate-report-ui",
+        "features/data-tests",
+        "features/elementary-alerts",
+        "features/data-observability-dashboard",
         {
-          "group": "Share observability report",
+          "group": "End-to-End Lineage",
+          "icon": "arrow-progress",
+          "iconType": "solid",
           "pages": [
-            "quickstart/share-report-ui",
-            "guides/share-observability-report/share-via-slack",
-            "guides/share-observability-report/host-on-s3",
-            "guides/share-observability-report/host-on-gcs",
-            "guides/share-observability-report/host-on-azure",
-            "guides/share-observability-report/send-report-summary"
+            "features/lineage",
+            "features/exposures-lineage",
+            "features/column-level-lineage"
           ]
         },
-        {
-          "group": "Send Slack alerts",
-          "pages": [
-            "quickstart/send-slack-alerts",
-            "guides/alerts-configuration"
-          ]
-        },
-        "guides/add-elementary-tests",
-        "guides/add-schema-tests",
-        "guides/add-exposure-tests",
-        "guides/python-tests"
-      ]
-    },
-    {
-      "group": "Deployment and Configuration",
-      "pages": [
-        "deployment-and-configuration/elementary-in-production",
-        "dbt/on-run-end_hooks",
-        "deployment-and-configuration/collect-job-data",
-        "deployment-and-configuration/collect-dbt-source-freshness",
-        "understand-elementary/cli-install",
-        "understand-elementary/cli-commands"
-      ]
-    },
-    {
-      "group": "Data Anomaly Detection Tests",
-      "pages": [
-        "guides/how-anomaly-detection-works",
-        "guides/data-anomaly-detection",
-        {
-          "group": "Anomaly detection tests",
-          "pages": [
-            "guides/anomaly-detection-tests/volume-anomalies",
-            "guides/anomaly-detection-tests/freshness-anomalies",
-            "guides/anomaly-detection-tests/event-freshness-anomalies",
-            "guides/anomaly-detection-tests/dimension-anomalies",
-            "guides/anomaly-detection-tests/all-columns-anomalies",
-            "guides/anomaly-detection-tests/column-anomalies"
-          ]
-        },
-        "guides/elementary-tests-configuration",
-        {
-          "group": "Tests params",
-          "pages": [
-            "guides/anomaly-detection-configuration/timestamp-column",
-            "guides/anomaly-detection-configuration/where-expression",
-            "guides/anomaly-detection-configuration/anomaly-sensitivity",
-            "guides/anomaly-detection-configuration/anomaly-direction",
-            "guides/anomaly-detection-configuration/training-period",
-            "guides/anomaly-detection-configuration/detection-period",
-            "guides/anomaly-detection-configuration/time-bucket",
-            "guides/anomaly-detection-configuration/seasonality",
-            "guides/anomaly-detection-configuration/min-training-set-size",
-            "guides/anomaly-detection-configuration/column-anomalies",
-            "guides/anomaly-detection-configuration/exclude_prefix",
-            "guides/anomaly-detection-configuration/exclude_regexp",
-            "guides/anomaly-detection-configuration/dimensions",
-            "guides/anomaly-detection-configuration/event_timestamp_column",
-            "guides/anomaly-detection-configuration/update_timestamp_column",
-            "guides/anomaly-detection-configuration/ignore_small_changes",
-            "guides/anomaly-detection-configuration/fail_on_zero",
-            "guides/anomaly-detection-configuration/detection-delay"
-          ]
-        }
-      ]
-    },
-    {
-      "group": "Understand Elementary",
-      "pages": [
-        "understand-elementary/elementary-overview",
-        "guides/modules-overview/dbt-package",
-        "dbt/dbt-artifacts",
-        "understand-elementary/elementary-report-ui",
-        "quickstart/send-slack-alerts"
-      ]
-    },
-    {
-      "group": "Integrations",
-      "pages": [
-        "integrations/dbt",
-        "integrations/slack",
-        {
-          "group": "Data Warehouses",
-          "pages": [
-            "integrations/snowflake",
-            "integrations/bigquery",
-            "integrations/redshift",
-            "integrations/databricks",
-            "integrations/postgres"
-          ]
-        },
-        {
-          "group": "Deployment",
-          "pages": [
-            "deployment-and-configuration/docker",
-            "deployment-and-configuration/github-actions",
-            "deployment-and-configuration/gitlab-ci"
-          ]
-        }
+        "features/automated-monitors",
+        "features/config-as-code",
+        "features/catalog",
+        "features/multi-env",
+        "features/ci"
       ]
     },
     {
@@ -227,24 +145,96 @@
       ]
     },
     {
-      "group": "Introduction",
-      "pages": ["cloud/introduction", "cloud/general/security-and-privacy"]
+      "group": "Elementary Data tests",
+      "pages": [
+        "data-tests/introduction",
+        "data-tests/elementary-tests-configuration"
+      ]
     },
     {
-      "group": "Getting Started",
+      "group": "Anomaly Detection Tests",
       "pages": [
-        "cloud/onboarding/quickstart-dbt-package",
-        "cloud/onboarding/signup",
-        "cloud/manage-team"
+        {
+          "group": "How it works?",
+          "pages": [
+            "data-tests/how-anomaly-detection-works",
+            "data-tests/data-anomaly-detection"
+          ]
+        },
+        {
+          "group": "Anomaly tests params",
+          "pages": [
+            "data-tests/anomaly-detection-configuration/anomaly-params",
+            "data-tests/anomaly-detection-configuration/timestamp-column",
+            "data-tests/anomaly-detection-configuration/where-expression",
+            "data-tests/anomaly-detection-configuration/anomaly-sensitivity",
+            "data-tests/anomaly-detection-configuration/anomaly-direction",
+            "data-tests/anomaly-detection-configuration/days-back",
+            "data-tests/anomaly-detection-configuration/backfill-days",
+            "data-tests/anomaly-detection-configuration/time-bucket",
+            "data-tests/anomaly-detection-configuration/seasonality",
+            "data-tests/anomaly-detection-configuration/min-training-set-size",
+            "data-tests/anomaly-detection-configuration/column-anomalies",
+            "data-tests/anomaly-detection-configuration/exclude_prefix",
+            "data-tests/anomaly-detection-configuration/exclude_regexp",
+            "data-tests/anomaly-detection-configuration/dimensions",
+            "data-tests/anomaly-detection-configuration/event_timestamp_column",
+            "data-tests/anomaly-detection-configuration/update_timestamp_column",
+            "data-tests/anomaly-detection-configuration/ignore_small_changes",
+            "data-tests/anomaly-detection-configuration/fail_on_zero",
+            "data-tests/anomaly-detection-configuration/detection-delay"
+          ]
+        },
+        "data-tests/anomaly-detection-tests/volume-anomalies",
+        "data-tests/anomaly-detection-tests/freshness-anomalies",
+        "data-tests/anomaly-detection-tests/event-freshness-anomalies",
+        "data-tests/anomaly-detection-tests/dimension-anomalies",
+        "data-tests/anomaly-detection-tests/all-columns-anomalies",
+        "data-tests/anomaly-detection-tests/column-anomalies"
+      ]
+    },
+    {
+      "group": "Schema Tests",
+      "pages": [
+        "data-tests/schema-tests/schema-changes",
+        "data-tests/schema-tests/schema-changes-from-baseline",
+        "data-tests/schema-tests/json-schema",
+        "data-tests/schema-tests/exposure-tests"
+      ]
+    },
+    {
+      "group": "Other Tests",
+      "pages": ["data-tests/python-tests"]
+    },
+    {
+      "group": "Elementary Cloud",
+      "pages": [
+        "cloud/introduction",
+        {
+          "group": "Quickstart",
+          "icon": "circle-play",
+          "pages": [
+            "cloud/onboarding/quickstart-dbt-package",
+            "cloud/onboarding/signup"
+          ]
+        },
+        "cloud/general/security-and-privacy"
       ]
     },
     {
       "group": "Guides",
-      "pages": ["cloud/guides/sync-scheduling", "cloud/guides/troubleshoot"]
-    },
-    {
-      "group": "Features",
-      "pages": ["cloud/general/ci"]
+      "pages": [
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "cloud/guides/enable-slack-alerts",
+            "cloud/guides/alerts-configuration"
+          ]
+        },
+        "cloud/guides/sync-scheduling",
+        "cloud/guides/collect-job-data",
+        "cloud/guides/troubleshoot"
+      ]
     },
     {
       "group": "BI tools integration",
@@ -269,13 +259,76 @@
         "cloud/integrations/dwh/bigquery",
         "cloud/integrations/dwh/redshift",
         "cloud/integrations/dwh/databricks",
-        "cloud/integrations/dwh/postgres"
+        "cloud/integrations/dwh/postgres",
+        "cloud/integrations/dwh/athena"
       ]
+    },
+    {
+      "group": "Elementary OSS",
+      "pages": [
+        "oss/oss-introduction",
+        {
+          "group": "Quickstart",
+          "icon": "circle-play",
+          "pages": [
+            "oss/quickstart/quickstart-cli-package",
+            "oss/quickstart/quickstart-cli"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "oss/guides/generate-report-ui",
+        {
+          "group": "Share observability report",
+          "pages": [
+            "oss/guides/share-report-ui",
+            "oss/guides/share-observability-report/share-via-slack",
+            "oss/guides/share-observability-report/host-on-s3",
+            "oss/guides/share-observability-report/host-on-gcs",
+            "oss/guides/share-observability-report/host-on-azure",
+            "oss/guides/share-observability-report/send-report-summary"
+          ]
+        },
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "oss/guides/send-slack-alerts",
+            "oss/guides/alerts-configuration"
+          ]
+        },
+        "oss/guides/collect-job-data"
+      ]
+    },
+    {
+      "group": "Configuration & usage",
+      "pages": ["oss/cli-install", "oss/cli-commands"]
+    },
+    {
+      "group": "Deployment",
+      "pages": [
+        "oss/deployment-and-configuration/elementary-in-production",
+        {
+          "group": "Deployment options",
+          "pages": [
+            "oss/deployment-and-configuration/docker",
+            "oss/deployment-and-configuration/github-actions",
+            "oss/deployment-and-configuration/gitlab-ci"
+          ]
+        },
+        "oss/deployment-and-configuration/slack"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": ["oss/integrations/dbt", "oss/integrations/slack"]
     }
   ],
   "footerSocials": {
     "website": "https://www.elementary-data.com",
-    "slack": "https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"
+    "slack": "https://elementary-data.com/community"
   },
   "analytics": {
     "ga4": {

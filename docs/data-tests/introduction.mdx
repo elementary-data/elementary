@@ -1,0 +1,103 @@
+---
+title: "Elementary Data Tests"
+sidebarTitle: "Introduction"
+---
+
+Elementary provides tests for detection of data quality issues.
+Elementary data tests are configured and executed like native tests in your dbt project.
+
+Elementary tests can be used in addition to dbt tests, packages tests (such as dbt-expectations), and custom tests.
+All of these test results will be presented in the Elementary UI and alerts.
+
+<Snippet file="data-tests/tests-cards.mdx" />
+
+## Anomaly detection tests
+
+Tests to detect anomalies in data quality metrics such as volume, freshness, null rates, and anomalies in specific dimensions.
+
+<Tooltip tip="Anomaly detection test result example from Elementary report">
+  <img src="/pics/anomalies/anomaly-example.png" alt="Demo" />
+</Tooltip>
+
+<Tip>
+  [How Elementary anomaly detection tests
+  work?](/data-tests/how-anomaly-detection-works)
+</Tip>
+
+<Card
+  title="Volume anomalies"
+  href="/data-tests/anomaly-detection-tests/volume-anomalies"
+>
+  Monitors table row count over time to detect drops or spikes in volume.
+</Card>
+<Card
+  title="Freshness anomalies"
+  href="/data-tests/anomaly-detection-tests/freshness-anomalies"
+>
+  Monitors the latest timestamp of a table to detect data delays.
+</Card>
+
+<Card
+  title="Event freshness anomalies"
+  href="/data-tests/anomaly-detection-tests/event-freshness-anomalies"
+>
+  Monitors the gap between the latest event timestamp and it's loading time, to
+  detect event freshness issues.
+</Card>
+
+<Card
+  title="Dimension anomalies"
+  href="/data-tests/anomaly-detection-tests/dimension-anomalies"
+>
+  Monitors the row count per dimension over time, and alerts on unexpected
+  changes in the distribution. It is best to configure it on low-cardinality
+  fields.
+</Card>
+
+<Card
+  title="Column anomalies"
+  href="/data-tests/anomaly-detection-tests/column-anomalies"
+>
+  Monitors a column for anomalies in metrics such as null rate, length, max and
+  min, and more. Read more about [specific column
+  metrics](/data-tests/anomaly-detection-configuration/column-anomalies).
+</Card>
+
+<Card
+  title="All columns anomalies"
+  href="/data-tests/anomaly-detection-tests/all-columns-anomalies"
+>
+  Activates the column anomalies test on all the columns of the table. It's
+  possible to exclude specific columns.
+</Card>
+
+## Schema tests
+
+<Card title="Schema changes" href="/data-tests/schema-tests/schema-changes">
+  Fails on changes in schema: deleted or added columns, or change of data type
+  of a column.
+</Card>
+
+<Card
+  title="Schema changes from baseline"
+  href="/data-tests/schema-tests/schema-changes-from-baseline"
+>
+  Fails if the table schema is different in columns names or column types than a
+  configured baseline (can be generated with a macro).
+</Card>
+
+<Card title="JSON schema" href="/data-tests/schema-tests/json-schema">
+  Monitors a JSON type column and fails id there are JSON events that don't
+  match a configured JSON schema (can be generated with a macro).
+</Card>
+
+<Card title="Exposure schema" href="/data-tests/schema-tests/exposure-tests">
+  Monitors changes in your models' columns that break schema for downstream
+  exposures, such as BI dashboards.
+</Card>
+
+## Other tests
+
+<Card title="Python tests" href="/data-tests/python-tests">
+  Write your own custom tests using Python scripts.
+</Card>

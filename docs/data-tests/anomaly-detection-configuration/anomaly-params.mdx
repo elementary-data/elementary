@@ -1,0 +1,181 @@
+---
+title: Anomaly Tests configuration params
+sidebarTitle: "All configuration params"
+---
+
+<Tip>
+  If your data set has a timestamp column that represents the creation time of a
+  field, it is highly recommended configuring it as a `timestamp_column`.
+</Tip>
+
+<pre>
+  <code>
+    All anomaly detection tests: --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/timestamp-column">
+      <font color="#CD7D55">timestamp_column: column name</font>
+    </a>
+    -- <a href="/data-tests/anomaly-detection-configuration/where-expression">
+      <font color="#CD7D55">where_expression: sql expression</font>
+    </a>
+    --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/anomaly-sensitivity">
+      <font color="#CD7D55">anomaly_sensitivity: int</font>
+    </a>
+    -- <a href="/data-tests/anomaly-detection-configuration/min-training-set-size">
+      <font color="#CD7D55">min_training_set_size: int</font>
+    </a>
+    --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/anomaly-direction">
+      <font color="#CD7D55">anomaly_direction: [both | spike | drop]</font>
+    </a>
+    -- <a href="/data-tests/anomaly-detection-configuration/ignore_small_changes">
+      <font color="#CD7D55">ignore_small_changes:</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/data-tests/anomaly-detection-configuration/ignore_small_changes">
+      <font color="#CD7D55">spike_failure_percent_threshold: int</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/data-tests/anomaly-detection-configuration/ignore_small_changes">
+      <font color="#CD7D55">drop_failure_percent_threshold: int</font>
+    </a>
+    Anomaly detection tests with timestamp_column: --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/days-back">
+      <font color="#CD7D55">days_back: int</font>
+    </a>
+    -- <a href="/data-tests/anomaly-detection-configuration/backfill-days">
+      <font color="#CD7D55">backfill_days: int</font>
+    </a>
+    --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">time_bucket:</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/data-tests/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">period: [hour | day | week | month]</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/data-tests/anomaly-detection-configuration/time-bucket">
+      <font color="#CD7D55">count: int</font>
+    </a>
+    -- <a href="/data-tests/anomaly-detection-configuration/seasonality">
+      <font color="#CD7D55">seasonality: day_of_week</font>
+    </a>
+    --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/detection-delay">
+      <font color="#CD7D55">detection_delay:</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay">
+      <font color="#CD7D55">period: [hour | day | week | month]</font>
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/data-tests/anomaly-detection-configuration/detection-delay">
+      <font color="#CD7D55">count: int</font>
+    </a>
+    volume_anomalies test: --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/fail_on_zero">
+      <font color="#CD7D55">fail_on_zero: [true | false]</font>
+    </a>
+    all_columns_anomalies test: -- <a href="/data-tests/anomaly-detection-configuration/column-anomalies">
+      <font color="#CD7D55">column_anomalies: column monitors list</font>
+    </a>
+    --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/exclude_prefix">
+      <font color="#CD7D55">exclude_prefix: string</font>
+    </a>
+    -- <a href="/data-tests/anomaly-detection-configuration/exclude_regexp">
+      <font color="#CD7D55">exclude_regexp: regex</font>
+    </a>
+    dimension_anomalies test: --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/dimensions">
+      <font color="#CD7D55">dimensions: sql expression</font>
+    </a>
+    event_freshness_anomalies: -- <a href="/data-tests/anomaly-detection-configuration/event_timestamp_column">
+      <font color="#CD7D55">event_timestamp_column: column name</font>
+    </a>
+    --{" "}
+    <a href="/data-tests/anomaly-detection-configuration/update_timestamp_column">
+      <font color="#CD7D55">update_timestamp_column: column name</font>
+    </a>
+  </code>
+</pre>
+
+## Example configurations
+
+<CodeGroup>
+
+```yml properties.yml
+version: 2
+
+models:
+  - name: <model_name>
+    config:
+      elementary:
+        timestamp_column: < model timestamp column >
+    tests: < here you will add elementary monitors as tests >
+
+  - name: <your model with no timestamp>
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests: <here you will add elementary monitors as tests>
+```
+
+```yml Example
+version: 2
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: updated_at
+    tests:
+      - elementary.freshness_anomalies:
+          tags: ["elementary"]
+      - elementary.all_columns_anomalies:
+          tags: ["elementary"]
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+      - elementary.volume_anomalies:
+          tags: ["elementary"]
+```
+
+```yml sources_properties.yml
+sources:
+  - name: < some name >
+    database: < database >
+    schema: < schema >
+    tables:
+      - name: < table_name >
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: < source timestamp column >
+        tests: <here you will add elementary monitors as tests>
+```
+
+```yml Example
+sources:
+  - name: "my_non_dbt_table"
+    database: "raw_events"
+    schema: "product"
+    tables:
+      - name: "raw_product_login_events"
+        ## sources don't have config, so elementary config is placed under 'meta'
+        meta:
+          elementary:
+            timestamp_column: "loaded_at"
+        tests:
+          - elementary.volume_anomalies
+          - elementary.all_columns_anomalies:
+              column_anomalies:
+                - null_count
+                - missing_count
+                - zero_count
+        columns:
+          - name: user_id
+            tests:
+              - elementary.column_anomalies
+```
+
+</CodeGroup>

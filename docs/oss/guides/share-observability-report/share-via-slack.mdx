@@ -1,0 +1,28 @@
+---
+title: "Share the report via Slack"
+sidebarTitle: "Share via Slack"
+---
+
+You can share the report via Slack as html attachment.
+
+By default, sharing the Slack message will include a [report summary](/oss/guides/share-observability-report/send-report-summary).
+
+#### CLI `send-report` command
+
+After you [set up a Slack app and token](/oss/deployment-and-configuration/slack#slack-integration-setup), run the command:
+
+```shell
+edr send-report --slack-token <SLACK_TOKEN> --slack-channel-name <CHANNEL_NAME>
+```
+
+You can control the name of the report by using `--slack-file-name <REPORT_NAME>` (the report name you provide needs to ends with `.html`).
+
+#### Configuration in file
+
+If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
+
+```yml
+slack:
+  token: [Slack token]
+  channel_name: [Slack channel]
+```

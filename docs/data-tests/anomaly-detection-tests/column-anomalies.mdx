@@ -1,0 +1,117 @@
+---
+title: "column_anomalies"
+sidebarTitle: "Column anomalies"
+---
+
+`elementary.column_anomalies`
+
+Executes column level monitors and anomaly detection on the column.
+Specific monitors are detailed in the table below and can be configured using the `columns_anomalies` configuration.
+
+The test checks the data type of the column and only executes monitors that are relevant to it.
+
+<Snippet file="column-metrics.mdx" />
+
+### Test configuration
+
+No mandatory configuration, however it is highly recommended to configure a `timestamp_column`.
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  tests:
+    &nbsp;&nbsp;-- elementary.column_anomalies:
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">column_anomalies: column monitors list</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/days-back"><font color="#CD7D55">days_back: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/backfill-days"><font color="#CD7D55">backfill_days: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/min-training-set-size"><font color="#CD7D55">min_training_set_size: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">detection_delay:</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">count: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">ignore_small_changes:</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">spike_failure_percent_threshold: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">drop_failure_percent_threshold: int</font></a>
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies: < specific monitors, all if null >
+              where_expression: < sql expression >
+              time_bucket: # Daily by default
+                period: < time period >
+                count: < number of periods >
+
+  - name: < model name >
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies: < specific monitors, all if null >
+              where_expression: < sql expression >
+```
+
+```yml Models example
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    columns:
+      - name: user_name
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - missing_count
+                - min_length
+              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+              time_bucket:
+                period: day
+                count: 1
+              tags: ['elementary']
+
+  - name: users
+    ## if no timestamp is configured, elementary will monitor without time filtering
+    tests:
+        elementary.volume_anomalies
+          tags: ['elementary']
+    columns:
+      - name: user_id
+        tests:
+          - elementary.column_anomalies:
+              tags: ['elementary']
+              timestamp_column: 'updated_at'
+              where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+              time_bucket:
+                period: < time period >
+                count: < number of periods >
+      - name: user_name
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - missing_count
+                - min_length
+              tags: ['elementary']
+```
+
+</RequestExample>

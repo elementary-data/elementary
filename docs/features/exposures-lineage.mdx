@@ -1,0 +1,59 @@
+---
+title: Lineage to Downstream Exposures
+sidebarTitle: Exposures & BI Integrations
+---
+
+Some of your data is used downstream in dashboards, applications, data science pipelines, reverse ETLs, etc.
+These downstream data consumers are called _exposures_.
+
+Elementary lineage graph presents downstream exposures of two origins:
+
+1. Elementary Cloud Automated BI integrations
+2. Exposures configured in your dbt project. Read about [how to configure exposures](https://docs.getdbt.com/docs/build/exposures) in code.
+
+<Accordion title="Supported exposures YML fields">
+
+```yaml
+exposures:
+  - name: returns_dashboard
+    label: Returned Orders # Pretty name, will be used if provided
+    type: dashboard
+    url: https://your.bi.tool/dashboards/2
+    description: >
+      Returned orders over time
+    platform: Tableau # Elementary field
+    path: Tableau # For the UI folders tree, elementary field
+
+    depends_on:
+      - ref('returned_orders')
+
+    owner:
+      name: Callum McData
+      email: data@jaffleshop.com
+
+    tags: ["finance"]
+
+    meta:
+      referenced_columns: # Used for exposure validation test
+        - column_name: "order_id"
+          data_type: "numeric"
+```
+
+</Accordion>
+
+### Automated BI lineage
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+Elementary Cloud integrated with BI tools to automatically extend the lineage up to the dashboard level.
+
+**Supported BI tools:**
+
+<Snippet file="cloud/integrations/cards-groups/bi-cards.mdx" />
+
+### Why are exposures useful?
+
+- **Incidents impact analysis**: You could explore which exposures are impacted by each data issue.
+- **Exposure health**: By selecting an exposure and filtering on upstream nodes, you could see the status of all it’s upstream datasets.
+- **Change impact**: Analyze which exposures will be impacted by a planned change.
+- **Unused datasets**: Detect datasets that no exposure consumes, that might be removed to save costs.

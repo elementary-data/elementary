@@ -1,4 +1,4 @@
-To start using Elementary to monitor you tests, executions and data, you need to add our dbt package to your dbt project.
+To start using Elementary, you need to add our dbt package to your dbt project.
 
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
@@ -8,7 +8,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </Accordion>
 
-## How to install Elementary dbt package?
+## Video: How to install Elementary dbt package?
 
 <Frame>
   <div style={{ paddingBottom: "64.98194945848375%" }}>
@@ -29,50 +29,87 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
   </div>
 </Frame>
 
-## Install dbt package
+## Step-by-step: Install Elementary dbt package
 
-### 1. Add elementary to `packages.yml`
+<Steps>
+  <Step title="Add elementary to `packages.yml`">
+    
+    Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
+    
+    ```yml packages.yml
+    packages:
+      - package: elementary-data/elementary
+        version: 0.13.0
+        ## Docs: https://docs.elementary-data.com
+    ```
+  </Step>
+  <Step title="Add to your `dbt_project.yml`">
+    <Info>
+        This means Elementary models will have their own schema.
+        Depending on your project [custom schema macro](https://docs.getdbt.com/docs/build/custom-schemas), the schema will be named `elementary` or `<target_schema>_elementary`. 
+        Make sure your user has permissions to create schemas.
+    </Info>
+    
+    <Accordion title="Important: Materialization config">
+        
+        For elementary to work, it needs to create some of the models as incremental tables.
+        Make sure that there are no global materialization configurations that affect elementary, such as:
+        
+        ```yml dbt_project.yml
+        materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
+        ```
+        
+        Make sure to place the 'elementary' configuration under the models key, and other configs under your project name.
+        
+        Example:
+        
+        ```yml dbt_project.yml
+        models:
+          my_project:
+            materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
+        
+          elementary:
+            +schema: "elementary"
+        ```
+        
+        **If you change materialization settings, make sure to run `dbt run -s elementary --full-refresh`.**
+        
+    </Accordion>
+    
+    ```yml dbt_project.yml
+    models:
+      ## see docs: https://docs.elementary-data.com/
+      elementary:
+        ## elementary models will be created in the schema '<your_schema>_elementary'
+        +schema: "elementary"
+        ## To disable elementary for dev, uncomment this:
+        # enabled: "{{ target.name in ['prod','analytics'] }}"
+    ```
+  </Step>
+  <Step title="Import the package and build Elementary models">
 
-Add the following to your `packages.yml` file (if missing, create it where `dbt_project.yml` is):
+    ```shell Terminal
+    dbt deps
+    dbt run --select elementary
+    ```
+    This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt executions.
 
-```yml packages.yml
-packages:
-  - package: elementary-data/elementary
-    version: 0.12.0
-    ## Docs: https://docs.elementary-data.com
-```
+  </Step>
+  <Step title="Run tests">
 
-### 2. Add to your `dbt_project.yml`
+    Validate the installation by running some tests:
 
-<Info>
-This means Elementary models will have their own schema.
-Depending on your project custom schema rules (see [dbt custom schema docs](https://docs.getdbt.com/docs/build/custom-schemas)), the schema will be named `elementary` or `<target_schema>_elementary` (being `<target_schema> = analytics` very often).
+    ```shell Terminal
+    dbt test
+    ```
 
-Make sure your user (or the orchestrator user) has permissions to create schemas.
-If not, ask your admin to create both schemas and grant permissions to the relevant users / groups.
+    After you ran your tests, we recommend that you ensure that the results were loaded to `elementary_test_results` table.
 
-</Info>
+  </Step>
+</Steps>
 
-```yml dbt_project.yml
-models:
-  ## see docs: https://docs.elementary-data.com/
-  elementary:
-    ## elementary models will be created in the schema '<your_schema>_elementary'
-    +schema: "elementary"
-    ## To disable elementary for dev, uncomment this:
-    # enabled: "{{ target.name in ['prod','analytics'] }}"
-```
+## What happens now?
 
-### 3. Import the package
+Once the elementary dbt package has been installed and configured, your test results, run results and [dbt artifacts](/dbt/dbt-artifacts) will be loaded to elementary schema tables.
 
-```shell Terminal
-dbt deps
-```
-
-### 4. Run to create the package models
-
-```shell Terminal
-dbt run --select elementary
-```
-
-This will mostly create empty tables, that will be updated with artifacts, metrics and test results in your future dbt executions.
+If you see data in these models you completed the package deployment (Congrats! 🎉).

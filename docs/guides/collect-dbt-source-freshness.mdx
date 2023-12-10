@@ -1,0 +1,30 @@
+---
+title: "Collect dbt source freshness results"
+sidebarTitle: "dbt source freshness"
+---
+
+You can leverage Elementary to send Slack notifications on failures in [dbt source freshness](https://docs.getdbt.com/docs/deploy/source-freshness) checks.
+
+<Warning>
+  Since dbt 1.3.2 this collecting source freshness results is only supported in
+  dbt core, not in dbt cloud.
+</Warning>
+
+Elementary data observability report currently does not show this results, only the results of Elementary [freshness anomalies](/data-tests/anomaly-detection-tests/freshness-anomalies) tests.
+
+## Alert on source freshness failures
+
+_Not supported in dbt cloud_
+
+To alert on source freshness, you will need to run the following command:
+
+```shell
+edr run-operation upload-source-freshness --project-dir <path to your project>
+```
+
+The command needs to be executed after you run `dbt source freshness` and before executing `edr monitor`.
+
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
+
+- Note that `dbt source freshness` and `upload-source-freshness` needs to run from the same machine.
+- Note that `upload-source-freshness` requires passing `--project-dir` argument.

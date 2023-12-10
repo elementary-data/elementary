@@ -1,0 +1,450 @@
+You can enrich your alerts by adding properties to tests, models and sources in your `.yml` files.
+The supported attributes are: [owner](./alerts-configuration/#owner),
+[subscribers](./alerts-configuration#subscribers),
+[description](./alerts-configuration#test-description),
+[tags](./alerts-configuration#tags).
+
+You can configure and customize your alerts by configuring:
+[custom channel](./alerts-configuration#custom-channel),
+[suppression interval](./alerts-configuration#suppression_interval),
+[alert fields](./alerts-configuration#alert_fields)(for test alerts only), [alert grouping](./alerts-configuration#group-alerts-by-table),
+[alert filters](./alerts-configuration#filter-alerts).
+
+## Alert properties in `.yml` files
+
+Elementary prioritizes configuration in the following order:
+
+**For models / sources:**
+
+1. Model config block.
+2. Model properties.
+3. Model path configuration under `models` key in `dbt_project.yml`.
+
+**For tests:**
+
+1. Test properties.
+2. Tests path configuration under `tests` key in `dbt_project.yml`.
+3. Parent model configuration.
+
+{/* prettier-ignore */}
+<pre>
+  <code>
+  meta:
+  &nbsp;&nbsp;<a href="./alerts-configuration#owner"><font color="#CD7D55">owner: "@jessica.jones"</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#subscribers"><font color="#CD7D55">subscribers: ["@jessica.jones", "@joe.joseph"]</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#test-description"><font color="#CD7D55">description: "This is the test description"</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#tags"><font color="#CD7D55">tags: ["#marketing", "#data_ops"]</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#custom-channel"><font color="#CD7D55">channel: data_ops</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#suppression-interval"><font color="#CD7D55">alert_suppression_interval: 24</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#group-alerts-by-table"><font color="#CD7D55">slack_group_alerts_by: table</font></a>
+  &nbsp;&nbsp;<a href="./alerts-configuration#alert-fields"><font color="#CD7D55">alert_fields: ["description", "owners", "tags", "subscribers", ...]</font></a>
+  </code>
+</pre>
+
+### Alert content
+
+#### Owner
+
+Elementary enriches alerts with [owners for models or tests](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
+
+- If you want the owner to be tagged on slack use '@' and the email prefix of the slack user (@jessica.jones to tag jessica.jones@marvel.com).
+- You can configure a single owner or a list of owners (`["@jessica.jones", "@joe.joseph"]`).
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      owner: ["@jessica.jones", "@joe.joseph"]
+```
+
+```yml test/model config block
+{{ config(
+    tags=["Tag1","Tag2"]
+    meta={
+        "description": "This is a description",
+        "owner": "@jessica.jones"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        owner: "@jessica.jones"
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        owner: "@jessica.jones"
+```
+
+</CodeGroup>
+
+#### Subscribers
+
+If you want additional users besides the owner to be tagged on an alert, add them as subscribers.
+
+- If you want the subscriber to be tagged on slack use '@' and the email prefix of the slack user (@jessica.jones to tag jessica.jones@marvel.com).
+- You can configure a single subscriber or a list (`["@jessica.jones", "@joe.joseph"]`).
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      subscribers: "@jessica.jones"
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      subscribers: ["@jessica.jones", "@joe.joseph"]
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "subscribers": "@jessica.jones"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        subscribers: "@jessica.jones"
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        subscribers: "@jessica.jones"
+```
+
+</CodeGroup>
+
+#### Test description
+
+Elementary supports configuring description for tests that are included in alerts.
+It's recommended to add an explanation of what does it mean if this test fails, so alert will include this context.
+
+<CodeGroup>
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      description: "This is the test description"
+```
+
+```yml test config block
+{{ config(
+    tags=["Tag1","Tag2"]
+    meta={
+        description: "This is the test description"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+tests:
+  path:
+    subfolder:
+      +meta:
+        description: "This is the test description"
+```
+
+</CodeGroup>
+
+#### Tags
+
+You can use [tags](https://docs.getdbt.com/reference/resource-configs/tags) to provide context to your alerts.
+
+- You can tag a group or a channel in a slack alert by adding `#channel_name` as a tag.
+- Tags are aggregated,so a test alert will include both the test and the parent model tags.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    tags: ["#marketing", "#data_ops"]
+```
+
+```yml test
+tests:
+  - not_null:
+    tags: ["#marketing", "#data_ops"]
+```
+
+```yml test/model config block
+{{ config(
+    tags=["#marketing", "#data_ops"]
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      tags: ["#marketing", "#data_ops"]
+
+tests:
+  path:
+    subfolder:
+      tags: ["#marketing", "#data_ops"]
+```
+
+</CodeGroup>
+
+### Alerts distribution
+
+Elementary allows you to customize alerts to distribute the right information to the right people.
+This way you can ensure your alerts are valuable and avoid alert fatigue.
+
+#### Custom channel
+
+Elementary supports configuring custom Slack channels for models and tests.
+By default, Elementary uses the Slack channel that was configured in the Slack integration. Even if
+a custom channel is defined for every test, you must specify a default fallback channel, either using
+the CLI or the `config.yml` file.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      channel: data_ops
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      channel: data_ops
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "channel": "data_ops"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        channel: data_ops
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        channel: data_ops
+```
+
+</CodeGroup>
+
+#### Suppression interval
+
+Don’t want to get multiple alerts if the same test keeps failing?
+You can now configure an `alert_suppression_interval`, this is a “snooze” period for alerts on the same issue.
+
+The accepted value is in hours, so 1 day snooze is `alert_suppression_interval: 24`.
+Elementary won't send new alerts on the same issue that are generated within suppression interval.
+
+Note: if you configure a suppression interval using this method, it will override the value in the global configuration.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      alert_suppression_interval: 24
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      alert_suppression_interval: 12
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "alert_suppression_interval": 24
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        alert_suppression_interval: 24
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        alert_suppression_interval: 48
+```
+
+</CodeGroup>
+
+#### Group alerts by table
+
+By default, Elementary sends a single alert to notify on each failure with extensive information for fast triage.
+
+Elementary also supports grouping alerts by table.
+In this case, a single Slack notification will be generated containing all issues associated with this table.
+The created notification will contain a union of the relevant owners, tags and subscribers.
+
+Due to their nature, grouped alerts will contain less information on each issue.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      slack_group_alerts_by: table
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      slack_group_alerts_by: table
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "slack_group_alerts_by": "table"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        slack_group_alerts_by: table
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        slack_group_alerts_by: table
+```
+
+</CodeGroup>
+
+#### Alert fields
+
+<Warning>**Currently this feature is supported only by test alerts!**</Warning>
+
+You can decide which fields to include in the alert, and create a format of alert that fits your use case and recipients.  
+By default, all the fields are included in the alert.
+
+Supported alert fields:
+
+- table: Displays the table name of the test
+- column: Displays the column name of the test
+- description: Displays the description of the test
+- owners: Displays the owners of the model on which the test is running
+- tags: Displays the dbt tags of the test/model
+- subscribers: Displays the subscribers of the test/model
+- result_message: Displays the returned message from the test result
+- test_parameters: Displays the parameters that were provided to the test
+- test_query: Displays the query of the test
+- test_results_sample: Displays a sample of the test results
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "alert_fields": "['description', 'owners', 'tags', 'subscribers']"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+</CodeGroup>
+
+## Alerts global configuration
+
+#### Enable/disable alerts
+
+You can choose to enable / disable alert types by adding a var to your `dbt_project.yml`.
+
+<Warning>
+  Vars will be deprecated soon! For OSS users, we recommend filtering the alerts
+  using [CLI selectors](/oss/guides/alerts-configuration#alerts-cli-flags)
+  instead.
+</Warning>
+
+Below are the available vars and their default config:
+
+```yml dbt_project.yml
+vars:
+  disable_model_alerts: false
+  disable_test_alerts: false
+  disable_warn_alerts: false
+  disable_skipped_model_alerts: true
+  disable_skipped_test_alerts: true
+```

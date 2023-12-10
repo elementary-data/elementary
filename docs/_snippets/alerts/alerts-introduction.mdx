@@ -1,0 +1,21 @@
+Elementary has a Slack integration to send alerts about:
+
+- Failures and/or of dbt tests
+- Failures and/or Elementary tests
+- Model runs failures
+- Source freshness issues
+
+You can enrich your alerts by adding properties to tests and models in your `.yml` files.
+The supported attributes are: owner, subscribers, description, tags.
+
+You can configure and customize your alerts by configuring:
+custom channel, suppression interval, alert fields (for test alerts only), alert grouping, alert filters.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1686642474/slack_alert_gshqdm.png"
+      alt="New Slack alert format"
+    />
+  </div>
+</Frame>

@@ -92,7 +92,18 @@ vars:
   disable_dbt_artifacts_autoupload: true
 ```
 
-If you disable the artifacts autoupload, we recommend your run `dbt run --select elementary.edr.dbt_artifacts` every time you deploy changes to your project.
+If you only want to disable dbt_columns but leave all other artifacts, configure the following:
+
+```yaml dbt_project.yml
+vars:
+  disable_dbt_columns_autoupload: true
+```
+
+<Warning>
+  If you disable the artifacts autoupload, we recommend your run `dbt run
+  --select elementary.edr.dbt_artifacts` every time you deploy changes to your
+  project.
+</Warning>
 
 #### Disable result models updates
 
@@ -104,3 +115,5 @@ vars:
   disable_tests_results: true
   disable_dbt_invocation_autoupload: "{{ target.name != 'prod' }}"
 ```
+
+<Tip> Please note you can also use the vars in your command line rather than in the dbt_project.yml file, by adding `--vars '{"disable_dbt_artifacts_autoupload": true}'` to your command line. </Tip>

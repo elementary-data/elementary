@@ -1,0 +1,92 @@
+---
+title: "JSON schema"
+---
+
+`elementary.json_schema`
+
+Allows validating that a string column matches a given JSON schema. The test expects a JSON schema as input,
+defined according to the [JSON schema standard](https://json-schema.org/), defined in YAML format (see an example below).
+
+This test along with the relevant JSON schema can be auto-generated (see details below).
+
+_Note_: This test relies on our [Python tests capability](/data-tests/python-tests), and is currently only supported for
+Snowflake and BigQuery data warehouses.
+
+### Auto-generate JSON schema tests
+
+Elementary provides the `generate_json_schema_test` macro in order to auto-generate the JSON schema for a given
+column using existing data.
+
+Example usage:
+
+```shell
+dbt run-operation elementary.generate_json_schema_test --args '{"node_name": "login_events", "column_name": "raw_event_data"}'
+```
+
+Will print:
+
+```shell
+Please add the following test to your model configuration:
+----------------------------------------------------------
+
+columns:
+  - name: raw_event_data
+    tests:
+      - elementary.json_schema:
+          type: object
+          properties:
+            event_id:
+              type: integer
+            event_name:
+              type: string
+            event_args:
+              type: array
+              items:
+                type: string
+          required:
+            - event_id
+            - event_name
+```
+
+_Note: The `generate_json_schema_test` macro relies on a 3rd-party python library called `genson`. If you are using
+BigQuery, you will need to pre-install this library in your Dataproc cluster (See [dbt's documentation on Python models](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/python-models#specific-data-platforms)
+for more details)_
+
+<RequestExample>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.json_schema: <json schema parameters>
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    columns:
+      - name: raw_event_data
+        tests:
+          - elementary.json_schema:
+              type: object
+              properties:
+                event_id:
+                  type: integer
+                event_name:
+                  type: string
+                event_args:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - event_id
+                - event_name
+```
+
+</RequestExample>

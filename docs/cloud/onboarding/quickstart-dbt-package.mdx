@@ -1,54 +1,11 @@
 ---
 title: "Install Elementary dbt package"
-sidebarTitle: "1. Install dbt package"
+sidebarTitle: "Install dbt package"
+icon: "square-1"
 ---
 
 <Snippet file="quickstart-package-install.mdx" />
 
-### 5. Run tests
-
-```shell Terminal
-dbt test
-```
-
-You can also run only some tests.
-Only tests you run after the installation will show up in the UI.
-
-After you ran your tests, we recommend that you ensure that the results were loaded to `elementary_test_results` table.
-
-<Snippet file="faq/question-change-elementary-schema.mdx" />
-<Accordion title="Important: Materialization config">
-
-For elementary to work, it needs to create some of the models as incremental tables.
-Make sure that there are no global materialization configurations that affect elementary, such as:
-
-```yml dbt_project.yml
-materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
-```
-
-Make sure to place the 'elementary' configuration under the models key, and other configs under your project name.
-
-Example:
-
-```yml dbt_project.yml
-models:
-  my_project:
-    materialized: "{{ 'table' if target.name == 'prod-cloud' else 'view' }}"
-
-  elementary:
-    +schema: "elementary"
-```
-
-**If you change materialization settings, make sure to run `dbt run -s elementary --full-refresh`.**
-
-</Accordion>
-
-### What happens now?
-
-Once the elementary dbt package has been installed and configured, your test results, run results and [dbt artifacts](/dbt/dbt-artifacts) will be loaded to elementary schema tables.
-
-If you see data in these models you completed the package deployment (Congrats! 🎉).
-
-### What's next?
+## What's next?
 
 [Signup to Elementary cloud](/cloud/onboarding/signup) and connect your data warehouse to Elementary Cloud to sync the Elementary schema.

@@ -10,17 +10,17 @@ _December 21, 2022: [v0.6.3 Python](https://github.com/elementary-data/elementar
 - **Slack alerts V2** 2️⃣
 
   - **Elementary now supports customizing alerts, so you could notify data producers and consumers** 🧑‍🔧
-    - Instead of sending detailed technical alerts, you can select fields. Learn more here [how to configure it](/quickstart/send-slack-alerts#customize-alerts-owners-test-descriptions-tags-subscribers-and-layout).
+    - Instead of sending detailed technical alerts, you can select fields. Learn more here [how to configure it](/oss/guides/send-slack-alerts#customize-alerts-owners-test-descriptions-tags-subscribers-and-layout).
   - Email owners will be translated to Slack handles in the alerts. Thanks [Josh Elston-Green](https://github.com/jelstongreen) for contributing.
   - Alerts also underwent **layout improvements** 🎨
 
 - **New data tests** 🩺
 
-  - [Advanced schema tests](/guides/add-schema-tests), **useful for source monitoring and enforcing data contracts:** ✅
+  - [Advanced schema tests](/data-tests/add-schema-tests), **useful for source monitoring and enforcing data contracts:** ✅
     - `schema_changes_from_baseline` - Define a schema in your `models/<properties.yml>` and ensure its validity.
     - `json_schema` - Validate the schema of JSON columns. 😱
     - To ease configuration and implementation - both tests include operations to **auto-generate the schema.**
-  - New and [improved table anomalies tests](/guides/add-elementary-tests), including `where_expression`: 📉
+  - New and [improved table anomalies tests](/data-tests/add-elementary-tests), including `where_expression`: 📉
     - `volume_anomalies` - Monitor your row count over time.
     - `freshness_anomalies` - Monitor the freshness of you data over time.
 

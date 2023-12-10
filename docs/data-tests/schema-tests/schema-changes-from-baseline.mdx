@@ -1,0 +1,126 @@
+---
+title: "Schema changes from baseline"
+---
+
+`elementary.schema_changes_from_baseline`
+
+Checks for schema changes against baseline columns defined in a source's or model's configuration.
+For this test to work, the configuration should contain columns and data types.
+
+The initial configuration needed for this test can be auto-generated (see details below).
+
+Supported parameters for the test:
+
+- `fail_on_added` - If set, the test will fail if there are columns in the table that do not exist in the baseline (default:
+  False - meaning added columns won't cause the test to fail).
+- `enforce_types` - If set, the test will raise an error if there are columns that are defined without a data type (default:
+  False - in this case the test will not fail, but instead will only verify that the column exists and not its type)
+
+**Notes**:
+
+1. Supported in Databricks with Unity Catalog only.
+2. Not supported in Athena.
+
+### Auto-generate baseline schema
+
+To make it easier to configure schema tests, Elementary provides dbt operations to auto generate tests configuration based on the existing schemas.
+
+In order for the schema changes from baseline test to work, a baseline needs to be generated from an initial state of
+the table and it should be added to the configuration of the source / model under "columns". The baseline consists
+of the name and data type for each column.
+
+In order to generate the baseline, Elementary provides the `generate_schema_baseline_test` macro. By default,
+running it will generate a schema_changes_from_baseline test for all sources, but it can be customized with
+the following arguments:
+
+- `name` - run on a specific source / model
+- `include_models` - whether or not to generate tests for models (default - false)
+- `include_sources` - whether or not to generate tests for sources (default - true)
+- `fail_on_added` - if set, the "fail_on_added" parameter will be added to the configuration of the tests with the supplied setting
+- `enforce_types` - if set, the "enforce_types" parameter will be added to the configuration of the tests with the supplied setting
+
+Examples:
+
+```shell
+# Generate a schema changes from baseline test for all sources
+dbt run-operation elementary.generate_schema_baseline_test
+
+# Generate a schema changes from baseline test for a specific model / source named "orders"
+dbt run-operation elementary.generate_schema_baseline_test --args '{"name": "orders"}'
+
+# Generate a schema changes from baseline test for all sources and all models
+dbt run-operation elementary.generate_schema_baseline_test --args '{"include_models": true}'
+
+# Generate a schema changes from baseline test with the "fail_on_added" and "enforce_types" parameters set to true
+dbt run-operation elementary.generate_schema_baseline_test --args '{"fail_on_added": true, "enforce_types": true}'
+```
+
+<RequestExample>
+
+```yml Sources
+version: 2
+
+sources:
+  - name: < source name >
+    database: < database name >
+    schema: < schema name >
+    tables:
+      - name: < table name >
+        columns:
+          - name: < column 1 >
+            data_type: < data type 1 >
+          - name: < column 2 >
+            data_type: < data type 2 >
+        tests:
+          - elementary.schema_changes_from_baseline
+```
+
+```yml Sources example
+version: 2
+
+sources:
+  - name: 'my_non_dbt_data'
+    database: 'raw_events'
+    schema: 'product'
+    tables:
+      - name: 'raw_product_login_events'
+        columns:
+          - name: event_name
+            data_type: text
+          - name: event_id
+            data_type: integer
+        tests:
+          - elementary.schema_changes_from_baseline
+              tags: ["elementary"]
+```
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column 1 >
+        data_type: < data type 1 >
+      - name: < column 2 >
+        data_type: < data type 1 >
+    tests:
+      - elementary.schema_changes_from_baseline
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    columns:
+      - name: event_name
+        data_type: text
+      - name: event_id
+        data_type: integer
+    tests:
+      - elementary.schema_changes_from_baseline:
+          tags: ["elementary"]
+```
+
+</RequestExample>

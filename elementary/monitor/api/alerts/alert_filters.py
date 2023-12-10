@@ -98,7 +98,7 @@ def _filter_alerts_by_owner(
 
     filtered_alerts = []
     for alert in alerts:
-        raw_owners = alert.owners
+        raw_owners = alert.unified_owners
         alert_owners = (
             try_load_json(raw_owners) if isinstance(raw_owners, str) else raw_owners
         )

@@ -1,0 +1,38 @@
+---
+title: "Schema changes"
+---
+
+`elementary.schema_changes`
+
+Executes schema changes monitor that alerts on deleted table, deleted or added columns, or change of data type of a column.
+Data Types note: Snowflake, Redshift and Postgres all has "synonym" data types, like `VARCHAR` and `TEXT` in Snowflake. These will be considered as equals by the tests. Types are converted internally to deal with this.
+
+**Notes**:
+
+1. Supported in Databricks with Unity Catalog only.
+2. Not supported in Athena.
+
+<RequestExample>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    tests:
+      - elementary.schema_changes
+```
+
+```yml Models example
+version: 2
+
+models:
+  - name: login_events
+    tests:
+      - elementary.schema_changes:
+          tags: ["elementary"]
+          config:
+            severity: warn
+```
+
+</RequestExample>

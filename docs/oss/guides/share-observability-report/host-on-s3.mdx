@@ -1,0 +1,54 @@
+---
+title: "Host the report on Amazon S3"
+sidebarTitle: "Host on S3"
+---
+
+<Info>
+
+**Prerequisites**
+
+- [AWS access keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html)
+- [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
+
+</Info>
+
+If you already have a [`~/.aws/credentials`](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html#cli-configure-files-where)
+file, you can run the command and provide only the profile name and the bucket's name:
+
+```shell
+edr send-report --aws-profile-name <AWS_PROFILE> --s3-bucket-name <BUCKET_NAME>
+```
+
+Alternatively, you can pass the access key ID and secret access key:
+
+```shell
+edr send-report --aws-access-key-id <ACCESS_KEY_ID> --aws-secret-access-key <SECRET_ACCESS_KEY> --s3-bucket-name <BUCKET_NAME>
+```
+
+You can control the location of the report in the bucket by providing `--bucket-file-path <REPORT_PATH>` (the report's file name should end with `.html`).
+
+### Hosting the report as a website
+
+You can host the report as the bucket's website so that you can browse to it with a constant URL
+like `https://<Elementary-Report-Bucket>.s3-website.<Region>.amazonaws.com`.
+In order to do that, you'll need to complete **steps 1-4** on
+the [configure a website on the bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html)
+guide.
+After you've completed it, pass `--update-bucket-website true` to `send-report` in order to update the main page of
+the bucket's website.
+
+### Configuration in file
+
+If you prefer to use `config.yml` file, you can add the following configuration instead of the CLI arguments:
+
+```yml
+aws:
+  profile_name: [AWS profile name]
+  s3_bucket_name: [S3 bucket name]
+
+update_bucket_website: [true | false]
+```
+
+### Send report summary to Slack
+
+In addition to hosting the report, you can send a [report summary notification to Slack](/oss/guides/share-observability-report/send-report-summary) every time the report is updated.

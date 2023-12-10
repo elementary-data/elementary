@@ -410,6 +410,7 @@ def report(
             disable_samples=disable_samples,
             filter=select,
         )
+        data_monitoring.validate_report_selector()
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.
         anonymous_tracking.track_cli_start(
@@ -449,6 +450,12 @@ def report(
     help="AWS profile name",
 )
 @click.option(
+    "--aws-region-name",
+    type=str,
+    default=None,
+    help="AWS region name",
+)
+@click.option(
     "--aws-access-key-id", type=str, default=None, help="The access key ID for AWS"
 )
 @click.option(
@@ -486,6 +493,12 @@ def report(
     type=str,
     default=None,
     help="The name of the GCS bucket to upload the report to.",
+)
+@click.option(
+    "--gcs-timeout-limit",
+    type=int,
+    default=None,
+    help="GCS requests timeout limit in seconds. If not provided the default is 60.",
 )
 @click.option(
     "--azure-connection-string",
@@ -569,6 +582,7 @@ def send_report(
     disable_passed_test_metrics,
     update_bucket_website,
     aws_profile_name,
+    aws_region_name,
     aws_access_key_id,
     aws_secret_access_key,
     s3_endpoint_url,
@@ -578,6 +592,7 @@ def send_report(
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
+    gcs_timeout_limit,
     exclude_elementary_models,
     disable_samples,
     project_name,
@@ -612,6 +627,7 @@ def send_report(
         slack_channel_name=slack_channel_name,
         update_bucket_website=update_bucket_website,
         aws_profile_name=aws_profile_name,
+        aws_region_name=aws_region_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         azure_connection_string=azure_connection_string,
@@ -621,6 +637,7 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        gcs_timeout_limit=gcs_timeout_limit,
         report_url=report_url,
         env=env,
     )

@@ -1,0 +1,30 @@
+---
+title: "dbt core & dbt cloud"
+---
+
+Elementary OSS integrates with dbt core (1.3.0 and above) and dbt cloud, as long as the data warehouse is supported.
+
+Both dbt core and cloud users need to [deploy the dbt package](/oss/quickstart/quickstart-cli-package) first in the monitored project.
+
+### dbt core
+
+After deploying the dbt package, use [this guide](/oss/quickstart/quickstart-cli) to install the CLI, and add an `elementary` profile.
+
+When you [deploy to production](/oss/deployment-and-configuration/elementary-in-production), you could orchestrate the CLI on the same system you use for running dbt core.
+
+### dbt cloud
+
+After deploying the dbt package, you will need to create a `profiles.yml` file on the machine you are using to run Elementary.
+This file contains the connection details for the CLI to access your DWH.
+
+Here are the detailed steps for using Elementary on dbt cloud:
+
+1. Deploy dbt package in dbt cloud.
+2. Use the command `dbt run-operation elementary.generate_elementary_cli_profile` on the dbt cloud interface to generate a profile.
+3. Copy the profile to a file you create on the machine where you would run the CLI: `~/.dbt/profiles.yml`
+4. Install the CLI and run edr from that machine.
+
+Use to create the profile, [this guide](/oss/quickstart/quickstart-cli) install the CLI, and run it.
+
+<Snippet file="faq/question-connection-profile.mdx" />
+<Snippet file="faq/question-profile-permissions.mdx" />
