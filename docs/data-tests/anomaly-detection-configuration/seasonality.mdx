@@ -65,4 +65,4 @@ vars:
 #### How it works?
 
 - The test will compare the value of a bucket to previous bucket with the same seasonality attribute, and not to the adjacent previous data points.
-- The `days_back` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `days_back` is by default multiplied by 7.
+- The `training_period` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `training_period` is by default multiplied by 7.
