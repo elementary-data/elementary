@@ -25,6 +25,7 @@ select
     COALESCE(ee.generated_at, de.generated_at) as generated_at,
     COALESCE(ee.metadata_hash, de.metadata_hash) as metadata_hash,
     COALESCE(ee.label, de.label) as label,
-    ee.raw_queries as raw_queries
+    COALESCE(ee.raw_queries, de.raw_queries) as raw_queries,
+    COALESCE(ee.depends_on_columns, de.depends_on_columns) as depends_on_columns
 from
     {{ ref('dbt_exposures') }} de full join {{ ref('elementary_cli', 'elementary_exposures') }} ee on ee.unique_id = de.unique_id
