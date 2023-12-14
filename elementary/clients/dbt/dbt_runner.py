@@ -229,6 +229,10 @@ class DbtRunner(BaseDbtRunner):
         success, _ = self._run_command(command_args=["debug"], quiet=quiet)
         return success
 
+    def retry(self, quiet: bool = False) -> bool:
+        success, _ = self._run_command(command_args=["retry"], quiet=quiet)
+        return success
+
     def ls(self, select: Optional[str] = None) -> list:
         command_args = ["-q", "ls"]
         if select:
