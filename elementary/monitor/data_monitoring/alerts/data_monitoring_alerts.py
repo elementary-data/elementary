@@ -19,7 +19,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.integrations import 
     Integrations,
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import ResourceType
+from elementary.monitor.data_monitoring.schema import ResourceType, SelectorFilterSchema
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -31,7 +31,7 @@ class DataMonitoringAlerts(DataMonitoring):
         self,
         config: Config,
         tracking: Optional[Tracking] = None,
-        filter: Optional[str] = None,
+        selector_filter: SelectorFilterSchema = SelectorFilterSchema(),
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
@@ -39,7 +39,11 @@ class DataMonitoringAlerts(DataMonitoring):
         override_config: bool = False,
     ):
         super().__init__(
-            config, tracking, force_update_dbt_package, disable_samples, filter
+            config,
+            tracking,
+            force_update_dbt_package,
+            disable_samples,
+            selector_filter,
         )
 
         self.global_suppression_interval = global_suppression_interval
@@ -67,7 +71,7 @@ class DataMonitoringAlerts(DataMonitoring):
         return self.alerts_api.get_new_alerts(
             days_back=days_back,
             disable_samples=self.disable_samples,
-            filter=self.filter.get_filter(),
+            filter=self.selector_filter,
         )
 
     def _format_alerts(
