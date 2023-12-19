@@ -21,7 +21,10 @@ def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking
     )
     dbt_runner_mock.ls.assert_called_once()
     assert data_monitoring_filter_with_user_dbt_runner.get_filter().node_names == []
-    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "mock:selector"
+    assert (
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
+        == "mock:selector"
+    )
 
     dbt_runner_mock.ls = mock.Mock(return_value=["node_name_1", "node_name_2"])
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
@@ -34,7 +37,10 @@ def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking
         "node_name_1",
         "node_name_2",
     ]
-    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "mock:selector"
+    assert (
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
+        == "mock:selector"
+    )
 
 
 def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
@@ -44,7 +50,10 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         selector="tag:mock_tag",
     )
     assert data_monitoring_filter_with_user_dbt_runner.get_filter().tag == "mock_tag"
-    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "tag:mock_tag"
+    assert (
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
+        == "tag:mock_tag"
+    )
 
     # owner selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
@@ -55,7 +64,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         data_monitoring_filter_with_user_dbt_runner.get_filter().owner == "mock_owner"
     )
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "config.meta.owner:mock_owner"
     )
 
@@ -68,7 +77,8 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         data_monitoring_filter_with_user_dbt_runner.get_filter().model == "mock_model"
     )
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector() == "model:mock_model"
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
+        == "model:mock_model"
     )
 
     # status selector
@@ -81,7 +91,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         Status.ERROR,
     ]
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "statuses:fail,error"
     )
 
@@ -94,7 +104,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         ResourceType.MODEL
     ]
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "resource_types:model"
     )
 
@@ -108,7 +118,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         == "mock_invocation_id"
     )
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "invocation_id:mock_invocation_id"
     )
 
@@ -122,7 +132,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         is not None
     )
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector()
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "invocation_time:2023-02-08 10:00:00"
     )
 
@@ -142,7 +152,8 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         data_monitoring_filter_with_user_dbt_runner.get_filter().last_invocation is True
     )
     assert (
-        data_monitoring_filter_with_user_dbt_runner.get_selector() == "last_invocation"
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
+        == "last_invocation"
     )
 
     # unsupported selector
@@ -160,7 +171,10 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     assert dbt_runner_get_filter.node_names is None
     assert dbt_runner_get_filter.resource_types is None
     assert dbt_runner_get_filter.statuses == []
-    assert data_monitoring_filter_with_user_dbt_runner.get_selector() == "blabla:blublu"
+    assert (
+        data_monitoring_filter_with_user_dbt_runner.get_filter().selector
+        == "blabla:blublu"
+    )
 
 
 @Parametrization.autodetect_parameters()
