@@ -1,4 +1,9 @@
 {% macro empty_elementary_exposures() %}
+    {{ return(adapter.dispatch('empty_elementary_exposures','elementary')()) }}
+{% endmacro %}
+
+
+{% macro default__empty_elementary_exposures() %}
     {% set columns = [('unique_id', 'string'),
                       ('name', 'string'),
                       ('maturity', 'string'),
@@ -14,6 +19,30 @@
                       ('package_name', 'string'),
                       ('original_path', 'long_string'),
                       ('path', 'string'),
+                      ('generated_at', 'string'),
+                      ('metadata_hash', 'string'),
+                      ('label', 'string'),
+                      ('raw_queries', 'long_string'),
+                     ] %}
+    {{ elementary.empty_table(columns) }}
+{% endmacro %}
+
+{% macro exasol__empty_elementary_exposures() %}
+    {% set columns = [('unique_id', 'string'),
+                      ('name', 'string'),
+                      ('maturity', 'string'),
+                      ('type', 'string'),
+                      ('owner_email', 'string'),
+                      ('owner_name', 'string'),
+                      ('url', 'long_string'),
+                      ('depends_on_macros', 'long_string'),
+                      ('depends_on_nodes', 'long_string'),
+                      ('description', 'long_string'),
+                      ('tags', 'long_string'),
+                      ('meta', 'long_string'),
+                      ('package_name', 'string'),
+                      ('original_path', 'long_string'),
+                      ('"PATH"', 'string'),
                       ('generated_at', 'string'),
                       ('metadata_hash', 'string'),
                       ('label', 'string'),
