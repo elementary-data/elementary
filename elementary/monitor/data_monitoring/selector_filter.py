@@ -151,31 +151,3 @@ class SelectorFilter:
         return all(
             [selector_type not in selector for selector_type in non_dbt_selectors]
         )
-
-    @staticmethod
-    def validate_report_selector(selector):
-        # If we start supporting multiple selectors we need to change this logic
-        if not selector:
-            return
-
-        valid_report_selectors = ["last_invocation", "invocation_id", "invocation_time"]
-        if all(
-            [selector_type not in selector for selector_type in valid_report_selectors]
-        ):
-            raise InvalidSelectorError("Selector is invalid for report: ", selector)
-
-    @staticmethod
-    def validate_alert_selector(selector):
-        # If we start supporting multiple selectors we need to change this logic
-        if not selector:
-            return
-
-        invalid_alert_selectors = [
-            "last_invocation",
-            "invocation_id",
-            "invocation_time",
-        ]
-        if any(
-            [selector_type in selector for selector_type in invalid_alert_selectors]
-        ):
-            raise InvalidSelectorError("Selector is invalid for alerts: ", selector)
