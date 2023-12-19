@@ -20,7 +20,6 @@ from elementary.monitor.data_monitoring.report.slack_report_summary_message_buil
     SlackReportSummaryMessageBuilder,
 )
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
@@ -139,7 +138,7 @@ class DataMonitoringReport(DataMonitoring):
         return report_data_dict
 
     def validate_report_selector(self):
-        SelectorFilter.validate_report_selector(self.selector_filter.selector)
+        self.selector_filter.validate_report_selector()
 
     def _add_report_tracking(
         self, report_data: ReportDataSchema, error: Optional[Exception] = None
