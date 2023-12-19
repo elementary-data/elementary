@@ -9,6 +9,7 @@ from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
+from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.monitor.debug import Debug
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
@@ -311,13 +312,14 @@ def monitor(
     anonymous_tracking.set_env("use_select", bool(select))
     try:
         config.validate_monitor()
+        selector_filter = SelectorFilter(config, anonymous_tracking, select)
         data_monitoring = DataMonitoringAlerts(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
             disable_samples=disable_samples,
-            filter=select,
+            selector_filter=selector_filter.get_filter(),
             global_suppression_interval=suppression_interval,
             override_config=override_dbt_project_config,
         )
@@ -403,12 +405,13 @@ def report(
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     try:
+        selector_filter = SelectorFilter(config, anonymous_tracking, select)
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
-            filter=select,
+            selector_filter=selector_filter.get_filter(),
         )
         data_monitoring.validate_report_selector()
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
@@ -652,12 +655,13 @@ def send_report(
             if bucket_file_path
             else slack_file_name
         )
+        selector_filter = SelectorFilter(config, anonymous_tracking, select)
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
-            filter=select,
+            selector_filter=selector_filter.get_filter(),
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.

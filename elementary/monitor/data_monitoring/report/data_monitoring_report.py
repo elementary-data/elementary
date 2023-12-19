@@ -19,6 +19,7 @@ from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
     SlackReportSummaryMessageBuilder,
 )
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
@@ -35,12 +36,16 @@ class DataMonitoringReport(DataMonitoring):
         self,
         config: Config,
         tracking: Tracking,
-        filter: Optional[str] = None,
+        selector_filter: SelectorFilterSchema = SelectorFilterSchema(),
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
     ):
         super().__init__(
-            config, tracking, force_update_dbt_package, disable_samples, filter
+            config,
+            tracking,
+            force_update_dbt_package,
+            disable_samples,
+            selector_filter,
         )
         self.report_api = ReportAPI(self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
@@ -119,7 +124,7 @@ class DataMonitoringReport(DataMonitoring):
             exclude_elementary_models=exclude_elementary_models,
             disable_samples=self.disable_samples,
             project_name=project_name or self.project_name,
-            filter=self.filter.get_filter(),
+            filter=self.selector_filter,
             env=self.config.env,
             warehouse_type=self.warehouse_info.type if self.warehouse_info else None,
         )
@@ -134,7 +139,7 @@ class DataMonitoringReport(DataMonitoring):
         return report_data_dict
 
     def validate_report_selector(self):
-        SelectorFilter.validate_report_selector(self.filter.selector)
+        SelectorFilter.validate_report_selector(self.selector_filter.selector)
 
     def _add_report_tracking(
         self, report_data: ReportDataSchema, error: Optional[Exception] = None
@@ -287,7 +292,7 @@ class DataMonitoringReport(DataMonitoring):
             disable_passed_test_metrics=disable_passed_test_metrics,
         )
         summary_test_results = tests_api.get_test_results_summary(
-            filter=self.filter.get_filter(),
+            filter=self.selector_filter,
         )
         if self.slack_client:
             send_succeeded = self.slack_client.send_message(
@@ -296,7 +301,7 @@ class DataMonitoringReport(DataMonitoring):
                     test_results=summary_test_results,
                     bucket_website_url=bucket_website_url,
                     include_description=include_description,
-                    filter=self.filter.get_filter(),
+                    filter=self.selector_filter,
                     days_back=days_back,
                 ),
             )

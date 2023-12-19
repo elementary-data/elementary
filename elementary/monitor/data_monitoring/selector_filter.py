@@ -2,6 +2,7 @@ import re
 from typing import Optional
 
 from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.config.config import Config
 from elementary.monitor.data_monitoring.schema import (
     ResourceType,
     SelectorFilterSchema,
@@ -21,12 +22,13 @@ class InvalidSelectorError(Exception):
 class SelectorFilter:
     def __init__(
         self,
+        config: Config,
         tracking: Optional[Tracking],
-        user_dbt_runner: Optional[DbtRunner] = None,
         selector: Optional[str] = None,
     ) -> None:
         self.tracking = tracking
         self.selector = selector
+        user_dbt_runner = self._create_user_dbt_runner(config)
         self.selector_fetcher = (
             SelectorFetcher(user_dbt_runner) if user_dbt_runner else None
         )
@@ -122,6 +124,17 @@ class SelectorFilter:
                     logger.error(f"Could not parse the given -s/--select: {selector}")
                     return SelectorFilterSchema(selector=selector, statuses=[])
         return data_monitoring_filter
+
+    def _create_user_dbt_runner(self, config: Config) -> Optional[DbtRunner]:
+        if config.project_dir:
+            return DbtRunner(
+                config.project_dir,
+                config.profiles_dir,
+                config.project_profile_target,
+                env_vars=config.env_vars,
+            )
+        else:
+            return None
 
     def get_filter(self) -> SelectorFilterSchema:
         return self.filter

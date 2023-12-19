@@ -6,8 +6,10 @@ from packaging import version
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
-from elementary.monitor.data_monitoring.schema import WarehouseInfo
-from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
+from elementary.monitor.data_monitoring.schema import (
+    SelectorFilterSchema,
+    WarehouseInfo,
+)
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import package
@@ -27,13 +29,12 @@ class DataMonitoring:
         tracking: Optional[Tracking] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
-        filter: Optional[str] = None,
+        selector_filter: SelectorFilterSchema = SelectorFilterSchema(),
     ):
         self.execution_properties: Dict[str, Any] = {}
         self.config = config
         self.tracking = tracking
         self.internal_dbt_runner = self._init_internal_dbt_runner()
-        self.user_dbt_runner = self._init_user_dbt_runner()
         self._download_dbt_package_if_needed(force_update_dbt_package)
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -57,12 +58,7 @@ class DataMonitoring:
         self.elementary_database_and_schema = self.get_elementary_database_and_schema()
         self.success = True
         self.disable_samples = disable_samples
-        self.raw_filter = filter
-        self.filter = SelectorFilter(
-            tracking=tracking,
-            user_dbt_runner=self.user_dbt_runner,
-            selector=self.raw_filter,
-        )
+        self.selector_filter = selector_filter
 
     def _init_internal_dbt_runner(self):
         internal_dbt_runner = DbtRunner(
@@ -72,18 +68,6 @@ class DataMonitoring:
             env_vars=self.config.env_vars,
         )
         return internal_dbt_runner
-
-    def _init_user_dbt_runner(self):
-        if self.config.project_dir:
-            user_dbt_runner = DbtRunner(
-                self.config.project_dir,
-                self.config.profiles_dir,
-                self.config.project_profile_target,
-                env_vars=self.config.env_vars,
-            )
-        else:
-            user_dbt_runner = None
-        return user_dbt_runner
 
     def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
         internal_dbt_package_up_to_date = dbt_project_utils.is_dbt_package_up_to_date()

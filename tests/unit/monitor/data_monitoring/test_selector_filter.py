@@ -1,4 +1,5 @@
-from unittest import mock
+from collections.abc import Generator
+from unittest.mock import MagicMock, patch
 
 import pytest
 from parametrization import Parametrization
@@ -9,30 +10,38 @@ from elementary.monitor.data_monitoring.selector_filter import (
     SelectorFilter,
 )
 from tests.mocks.anonymous_tracking_mock import MockAnonymousTracking
-from tests.mocks.dbt_runner_mock import MockDbtRunner
+from tests.mocks.config_mock import MockConfig
 
 
-def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking_mock):
-    dbt_runner_mock.ls = mock.Mock(return_value=[])
+def test_parse_selector_with_user_dbt_runner_no_models(
+    dbt_runner_no_models_mock, anonymous_tracking_mock
+):
+    config = MockConfig("mock_project_dir")
+
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
-        user_dbt_runner=dbt_runner_mock,
+        config=config,
         selector="mock:selector",
     )
-    dbt_runner_mock.ls.assert_called_once()
+
     assert data_monitoring_filter_with_user_dbt_runner.get_filter().node_names == []
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "mock:selector"
     )
 
-    dbt_runner_mock.ls = mock.Mock(return_value=["node_name_1", "node_name_2"])
+
+def test_parse_selector_with_user_dbt_runner_with_models(
+    dbt_runner_with_models_mock, anonymous_tracking_mock
+):
+    config = MockConfig("mock_project_dir")
+
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
         tracking=anonymous_tracking_mock,
-        user_dbt_runner=dbt_runner_mock,
+        config=config,
         selector="mock:selector",
     )
-    dbt_runner_mock.ls.assert_called_once()
+
     assert data_monitoring_filter_with_user_dbt_runner.get_filter().node_names == [
         "node_name_1",
         "node_name_2",
@@ -44,8 +53,11 @@ def test_parse_selector_with_user_dbt_runner(dbt_runner_mock, anonymous_tracking
 
 
 def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
+    config = MockConfig()
+
     # tag selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="tag:mock_tag",
     )
@@ -57,6 +69,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # owner selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="config.meta.owner:mock_owner",
     )
@@ -70,6 +83,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # model selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="model:mock_model",
     )
@@ -83,6 +97,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # status selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="statuses:fail,error",
     )
@@ -97,6 +112,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # resource type selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="resource_types:model",
     )
@@ -110,6 +126,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # invocation_id selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="invocation_id:mock_invocation_id",
     )
@@ -124,6 +141,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # invocation_time selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="invocation_time:2023-02-08 10:00:00",
     )
@@ -139,12 +157,14 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     # invalid_invocation_time selector
     with pytest.raises(ValueError):
         data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+            config=config,
             tracking=anonymous_tracking_mock,
             selector="invocation_time:2023-32-32",
         )
 
     # last_invocation selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="last_invocation",
     )
@@ -158,6 +178,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
     # unsupported selector
     data_monitoring_filter_with_user_dbt_runner = SelectorFilter(
+        config=config,
         tracking=anonymous_tracking_mock,
         selector="blabla:blublu",
     )
@@ -236,10 +257,19 @@ def test_validate_alerts_selector(selector, should_raise):
 
 
 @pytest.fixture
-def dbt_runner_mock() -> MockDbtRunner:
-    return MockDbtRunner()
-
-
-@pytest.fixture
 def anonymous_tracking_mock() -> MockAnonymousTracking:
     return MockAnonymousTracking()
+
+
+@pytest.fixture(scope="function")
+def dbt_runner_no_models_mock() -> Generator[MagicMock, None, None]:
+    with patch("elementary.clients.dbt.dbt_runner.DbtRunner.ls") as mock_ls:
+        mock_ls.return_value = []
+        yield mock_ls
+
+
+@pytest.fixture(scope="function")
+def dbt_runner_with_models_mock() -> Generator[MagicMock, None, None]:
+    with patch("elementary.clients.dbt.dbt_runner.DbtRunner.ls") as mock_ls:
+        mock_ls.return_value = ["node_name_1", "node_name_2"]
+        yield mock_ls

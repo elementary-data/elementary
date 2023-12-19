@@ -1,9 +1,8 @@
-from typing import Optional
-
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
+from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
@@ -11,7 +10,7 @@ from tests.mocks.dbt_runner_mock import MockDbtRunner
 class DataMonitoringAlertsMock(DataMonitoringAlerts):
     def __init__(
         self,
-        filter: Optional[str] = None,
+        selector_filter: SelectorFilterSchema = SelectorFilterSchema(),
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
@@ -23,7 +22,7 @@ class DataMonitoringAlertsMock(DataMonitoringAlerts):
         super().__init__(
             config,
             tracking,
-            filter,
+            selector_filter,
             force_update_dbt_package,
             disable_samples,
             send_test_message_on_success,
@@ -34,9 +33,6 @@ class DataMonitoringAlertsMock(DataMonitoringAlerts):
 
     def _init_internal_dbt_runner(self):
         return MockDbtRunner()
-
-    def _init_user_dbt_runner(self):
-        return None
 
     def _download_dbt_package_if_needed(self, *args, **kwargs):
         pass
