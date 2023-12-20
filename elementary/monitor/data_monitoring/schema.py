@@ -4,11 +4,14 @@ from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
-from elementary.monitor.data_monitoring.selector_filter import InvalidSelectorError
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
 logger = get_logger(__name__)
+
+
+class InvalidSelectorError(Exception):
+    pass
 
 
 class Status(Enum):

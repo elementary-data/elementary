@@ -15,10 +15,6 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class InvalidSelectorError(Exception):
-    pass
-
-
 class SelectorFilter:
     def __init__(
         self,
