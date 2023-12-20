@@ -278,7 +278,7 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
     error_after: Optional[str] = None
     warn_after: Optional[str] = None
     filter: Optional[str] = None
-    normalized_status: str
+    original_status: str
     path: str
     error: Optional[str] = None
     freshness_description: Optional[str] = None
@@ -296,7 +296,8 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
             id=self.id,
             source_name=self.source_name,
             identifier=self.identifier,
-            normalized_status=self.normalized_status,
+            status=self.status,
+            original_status=self.original_status,
             error_after=self.error_after,
             warn_after=self.warn_after,
             path=self.path,
@@ -315,7 +316,6 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
             owners=self.unified_owners,
             tags=self.tags,
             subscribers=self.subscribers,
-            status=self.status,
             model_meta=self.flatten_model_meta,
             suppression_interval=self.get_suppression_interval(
                 global_suppression_interval, override_config

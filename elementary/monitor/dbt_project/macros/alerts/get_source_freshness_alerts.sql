@@ -23,7 +23,7 @@
                 alerts_in_time_limit.snapshotted_at,
                 alerts_in_time_limit.detected_at,
                 alerts_in_time_limit.max_loaded_at_time_ago_in_s,
-                alerts_in_time_limit.status,
+                alerts_in_time_limit.status as original_status,
                 alerts_in_time_limit.normalized_status,
                 alerts_in_time_limit.error,
                 alerts_in_time_limit.unique_id,
@@ -78,6 +78,9 @@
         {% set warn_after = alert_dict.get('warn_after') %}
         {% set filter = alert_dict.get('filter') %}
 
+        {# we want to use the normalized status for all usages #}
+        {% set status = alert_dict.get('normalized_status') %}
+
         {% set pending_alert_dict = {'id': alert_dict.get('alert_id'),
                                  'source_freshness_execution_id': alert_dict.get('alert_id'),
                                  'model_unique_id': alert_dict.get('unique_id'),
@@ -93,8 +96,8 @@
                                  'error_after': error_after if error_after is not none else alert_dict.get('freshness_error_after'),
                                  'warn_after': warn_after if warn_after is not none else alert_dict.get('freshness_warn_after'),
                                  'filter': filter if filter is not none else alert_dict.get('freshness_filter'),
-                                 'status': alert_dict.get('status'),
-                                 'normalized_status': alert_dict.get('normalized_status'),
+                                 'status': status,
+                                 'original_status': alert_dict.get('original_status'),
                                  'owners': alert_dict.get('owner'),
                                  'path': alert_dict.get('path'),
                                  'error': alert_dict.get('error'),
