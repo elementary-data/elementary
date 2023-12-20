@@ -72,7 +72,7 @@ class SourceFreshnessesAPI(APIClient):
                 SourceFreshnessResultSchema(
                     metadata=metadata,
                     test_results=DbtSourceFreshnessResultSchema(
-                        status=source_freshness_results_db_row.normalized_status,
+                        status=source_freshness_results_db_row.status,
                         error_message=source_freshness_results_db_row.error,
                         max_loaded_at_time_ago_in_s=source_freshness_results_db_row.max_loaded_at_time_ago_in_s,
                         max_loaded_at=source_freshness_results_db_row.max_loaded_at,
@@ -107,7 +107,7 @@ class SourceFreshnessesAPI(APIClient):
                         source_freshness_result.unique_id
                     ],
                     test_results=DbtSourceFreshnessResultSchema(
-                        status=source_freshness_result.normalized_status,
+                        status=source_freshness_result.status,
                         error_message=source_freshness_result.error,
                         max_loaded_at_time_ago_in_s=source_freshness_result.max_loaded_at_time_ago_in_s,
                         max_loaded_at=source_freshness_result.max_loaded_at,
@@ -135,7 +135,7 @@ class SourceFreshnessesAPI(APIClient):
             ] = SourceFreshnessInvocationSchema(
                 id=invocation_id,
                 time_utc=source_freshness_results_db_row.generated_at,
-                status=source_freshness_results_db_row.normalized_status,
+                status=source_freshness_results_db_row.status,
             )
 
         source_freshness_invocations = dict()
@@ -181,7 +181,7 @@ class SourceFreshnessesAPI(APIClient):
             table_name=source_freshness_results_db_row.table_name,
             test_name=source_freshness_results_db_row.test_type,
             latest_run_time=detected_at.isoformat(),
-            latest_run_status=source_freshness_results_db_row.normalized_status,
+            latest_run_status=source_freshness_results_db_row.status,
             model_unique_id=source_freshness_results_db_row.unique_id,
             test_type=source_freshness_results_db_row.test_type,
             test_sub_type=source_freshness_results_db_row.test_sub_type,

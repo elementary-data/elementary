@@ -580,7 +580,7 @@ class SlackIntegration(BaseIntegration):
         subscribers = self.message_builder.prettify_and_dedup_list(
             alert.subscribers or []
         )
-        icon = self.message_builder.get_slack_status_icon(alert.normalized_status)
+        icon = self.message_builder.get_slack_status_icon(alert.status)
 
         title = [
             self.message_builder.create_header_block(
@@ -593,7 +593,7 @@ class SlackIntegration(BaseIntegration):
                     self.message_builder.create_context_block(
                         [
                             f"*Source:* {alert.source_name}.{alert.identifier}     |",
-                            f"*Status:* {alert.normalized_status}",
+                            f"*Status:* {alert.status}",
                         ],
                     ),
                     self.message_builder.create_context_block(
@@ -609,7 +609,7 @@ class SlackIntegration(BaseIntegration):
                 self.message_builder.create_context_block(
                     [
                         f"*Source:* {alert.source_name}.{alert.identifier}     |",
-                        f"*Status:* {alert.normalized_status}     |",
+                        f"*Status:* {alert.status}     |",
                         f"*{alert.detected_at_str}*",
                     ],
                 ),

@@ -19,7 +19,7 @@ class SourceFreshnessAlertModel(AlertModel):
         id: str,
         source_name: str,
         identifier: str,
-        normalized_status: str,
+        original_status: str,
         path: str,
         error: Optional[str],
         alert_class_id: str,
@@ -103,7 +103,7 @@ class SourceFreshnessAlertModel(AlertModel):
 
         self.source_name = source_name
         self.identifier = identifier
-        self.normalized_status = normalized_status
+        self.original_status = original_status
         self.error_after = error_after
         self.warn_after = warn_after
         self.filter = filter
@@ -128,7 +128,7 @@ class SourceFreshnessAlertModel(AlertModel):
             suppression_interval=self.suppression_interval,
             source_name=self.source_name,
             identifier=self.identifier,
-            normalized_status=self.normalized_status,
+            original_status=self.original_status,
             error_after=self.error_after,
             warn_after=self.warn_after,
             path=self.path,
@@ -146,13 +146,13 @@ class SourceFreshnessAlertModel(AlertModel):
 
     @property
     def error_message(self) -> str:
-        if self.status == "runtime error":
+        if self.original_status == "runtime error":
             return f"Failed to calculate the source freshness\n```{self.error}```"
         return self.result_description
 
     @property
     def summary(self) -> str:
-        if self.status == "runtime error":
+        if self.original_status == "runtime error":
             return f"Failed to calculate the source freshness of `{self.source_name}`"
         return f"Freshness exceeded the acceptable times on source `{self.source_name}`"
 
