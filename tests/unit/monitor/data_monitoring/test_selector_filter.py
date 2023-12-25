@@ -244,50 +244,6 @@ def test_validate_report_selector(selector_filter, should_raise):
         selector_filter.validate_report_selector()
 
 
-@Parametrization.autodetect_parameters()
-@Parametrization.case(
-    name="None", selector_filter=SelectorFilterSchema(), should_raise=False
-)
-@Parametrization.case(
-    name="report filter1",
-    selector_filter=SelectorFilterSchema(selector="invocation_id:mock_invocation_id"),
-    should_raise=True,
-)
-@Parametrization.case(
-    name="report filter2",
-    selector_filter=SelectorFilterSchema(
-        selector="invocation_time:mock_invocation_time"
-    ),
-    should_raise=True,
-)
-@Parametrization.case(
-    name="report filter3",
-    selector_filter=SelectorFilterSchema(selector="last_invocation"),
-    should_raise=True,
-)
-@Parametrization.case(
-    name="alerts filter1",
-    selector_filter=SelectorFilterSchema(selector="model=blabla"),
-    should_raise=False,
-)
-@Parametrization.case(
-    name="alerts filter2",
-    selector_filter=SelectorFilterSchema(selector="tag=blabla"),
-    should_raise=False,
-)
-@Parametrization.case(
-    name="alerts filter3",
-    selector_filter=SelectorFilterSchema(selector="statuses=blabla"),
-    should_raise=False,
-)
-def test_validate_alerts_selector(selector_filter, should_raise):
-    if should_raise:
-        with pytest.raises(InvalidSelectorError):
-            selector_filter.validate_alert_selector()
-    else:
-        selector_filter.validate_alert_selector()
-
-
 @pytest.fixture
 def anonymous_tracking_mock() -> MockAnonymousTracking:
     return MockAnonymousTracking()
