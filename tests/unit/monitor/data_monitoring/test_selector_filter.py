@@ -5,9 +5,9 @@ import pytest
 from parametrization import Parametrization
 
 from elementary.monitor.data_monitoring.schema import (
+    FiltersSchema,
     InvalidSelectorError,
     ResourceType,
-    SelectorFilterSchema,
     Status,
 )
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
@@ -63,7 +63,9 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="tag:mock_tag",
     )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().tag == "mock_tag"
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().tags[0].values == [
+        "mock_tag"
+    ]
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "tag:mock_tag"
@@ -75,9 +77,9 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="config.meta.owner:mock_owner",
     )
-    assert (
-        data_monitoring_filter_with_user_dbt_runner.get_filter().owner == "mock_owner"
-    )
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().owners[
+        0
+    ].values == ["mock_owner"]
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "config.meta.owner:mock_owner"
@@ -89,9 +91,9 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="model:mock_model",
     )
-    assert (
-        data_monitoring_filter_with_user_dbt_runner.get_filter().model == "mock_model"
-    )
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().models[
+        0
+    ].values == ["mock_model"]
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "model:mock_model"
@@ -103,9 +105,11 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="statuses:fail,error",
     )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().statuses == [
-        Status.FAIL,
-        Status.ERROR,
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().statuses[
+        0
+    ].values == [
+        Status.FAIL.value,
+        Status.ERROR.value,
     ]
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
@@ -118,9 +122,9 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         tracking=anonymous_tracking_mock,
         selector="resource_types:model",
     )
-    assert data_monitoring_filter_with_user_dbt_runner.get_filter().resource_types == [
-        ResourceType.MODEL
-    ]
+    assert data_monitoring_filter_with_user_dbt_runner.get_filter().resource_types[
+        0
+    ].values == [ResourceType.MODEL.value]
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "resource_types:model"
@@ -185,15 +189,15 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
         selector="blabla:blublu",
     )
     dbt_runner_get_filter = data_monitoring_filter_with_user_dbt_runner.get_filter()
-    assert dbt_runner_get_filter.tag is None
-    assert dbt_runner_get_filter.owner is None
-    assert dbt_runner_get_filter.model is None
     assert dbt_runner_get_filter.last_invocation is False
     assert dbt_runner_get_filter.invocation_id is None
     assert dbt_runner_get_filter.invocation_time is None
     assert dbt_runner_get_filter.node_names is None
-    assert dbt_runner_get_filter.resource_types is None
-    assert dbt_runner_get_filter.statuses == []
+    assert len(dbt_runner_get_filter.tags) == 0
+    assert len(dbt_runner_get_filter.owners) == 0
+    assert len(dbt_runner_get_filter.models) == 0
+    assert len(dbt_runner_get_filter.resource_types) == 0
+    assert len(dbt_runner_get_filter.statuses) == 0
     assert (
         data_monitoring_filter_with_user_dbt_runner.get_filter().selector
         == "blabla:blublu"
@@ -201,39 +205,35 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
 
 
 @Parametrization.autodetect_parameters()
-@Parametrization.case(
-    name="None", selector_filter=SelectorFilterSchema(), should_raise=False
-)
+@Parametrization.case(name="None", selector_filter=FiltersSchema(), should_raise=False)
 @Parametrization.case(
     name="report filter1",
-    selector_filter=SelectorFilterSchema(selector="invocation_id:mock_invocation_id"),
+    selector_filter=FiltersSchema(selector="invocation_id:mock_invocation_id"),
     should_raise=False,
 )
 @Parametrization.case(
     name="report filter2",
-    selector_filter=SelectorFilterSchema(
-        selector="invocation_time:mock_invocation_time"
-    ),
+    selector_filter=FiltersSchema(selector="invocation_time:mock_invocation_time"),
     should_raise=False,
 )
 @Parametrization.case(
     name="report filter3",
-    selector_filter=SelectorFilterSchema(selector="last_invocation"),
+    selector_filter=FiltersSchema(selector="last_invocation"),
     should_raise=False,
 )
 @Parametrization.case(
     name="alerts filter1",
-    selector_filter=SelectorFilterSchema(selector="model=blabla"),
+    selector_filter=FiltersSchema(selector="model=blabla"),
     should_raise=True,
 )
 @Parametrization.case(
     name="alerts filter2",
-    selector_filter=SelectorFilterSchema(selector="tag=blabla"),
+    selector_filter=FiltersSchema(selector="tag=blabla"),
     should_raise=True,
 )
 @Parametrization.case(
     name="alerts filter3",
-    selector_filter=SelectorFilterSchema(selector="statuses=blabla"),
+    selector_filter=FiltersSchema(selector="statuses=blabla"),
     should_raise=True,
 )
 def test_validate_report_selector(selector_filter, should_raise):
