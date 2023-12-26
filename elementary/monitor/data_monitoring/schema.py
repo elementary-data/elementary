@@ -144,37 +144,6 @@ class SelectorFilterSchema(BaseModel):
     resource_types: Optional[List[ResourceType]] = None
     node_names: Optional[List[str]] = None
 
-    @validator("invocation_time", pre=True)
-    def format_invocation_time(cls, invocation_time):
-        if invocation_time:
-            try:
-                invocation_datetime = convert_local_time_to_timezone(
-                    datetime.fromisoformat(invocation_time)
-                )
-                return invocation_datetime.strftime(DATETIME_FORMAT)
-            except ValueError as err:
-                logger.error(
-                    f"Failed to parse invocation time filter: {err}\nPlease use a valid ISO 8601 format"
-                )
-                raise
-        return None
-
-    def validate_report_selector(self):
-        # If we start supporting multiple selectors we need to change this logic
-        if not self.selector:
-            return
-
-        valid_report_selectors = ["last_invocation", "invocation_id", "invocation_time"]
-        if all(
-            [
-                selector_type not in self.selector
-                for selector_type in valid_report_selectors
-            ]
-        ):
-            raise InvalidSelectorError(
-                "Selector is invalid for report: ", self.selector
-            )
-
 
 class WarehouseInfo(BaseModel):
     id: str
