@@ -74,6 +74,7 @@
         elementary_test_results.failures,
         elementary_test_results.result_rows,
         dbt_tests.meta,
+        dbt_tests.tags as test_tags,
         dbt_artifacts.meta as model_meta,
         dbt_artifacts.tags as model_tags,
         dbt_artifacts.owner as model_owner,
