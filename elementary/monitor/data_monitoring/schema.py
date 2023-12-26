@@ -53,7 +53,7 @@ class ResourceTypeFilterSchema(FilterSchema):
 class FiltersSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
-    invocation_time: Optional[str] = Field(default=None)
+    invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
     node_names: Optional[List[str]] = None
 
