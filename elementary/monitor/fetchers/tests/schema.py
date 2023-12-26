@@ -25,6 +25,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_results_description: Optional[str]
     owners: Optional[List[str]]
     model_owner: Optional[List[str]]
+    # tags is a union of test_tags and model_tags that we get from the db.
     tags: List[str] = Field(default_factory=list)
     test_tags: List[str] = Field(default_factory=list)
     meta: dict
