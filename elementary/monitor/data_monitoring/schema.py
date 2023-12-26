@@ -34,7 +34,7 @@ class SupportedFilterTypes(Enum):
 
 class FilterSchema(BaseModel):
     # The relation between values is OR.
-    values: list[Any]
+    values: List[Any]
     type: SupportedFilterTypes = SupportedFilterTypes.IS
 
     class Config:
@@ -43,11 +43,11 @@ class FilterSchema(BaseModel):
 
 
 class StatusFilterSchema(FilterSchema):
-    values: list[Status]
+    values: List[Status]
 
 
 class ResourceTypeFilterSchema(FilterSchema):
-    values: list[ResourceType]
+    values: List[ResourceType]
 
 
 class FiltersSchema(BaseModel):
@@ -57,10 +57,10 @@ class FiltersSchema(BaseModel):
     last_invocation: Optional[bool] = False
     node_names: Optional[List[str]] = None
 
-    tags: list[FilterSchema] = Field(default_factory=list)
-    owners: list[FilterSchema] = Field(default_factory=list)
-    models: list[FilterSchema] = Field(default_factory=list)
-    statuses: list[StatusFilterSchema] = Field(
+    tags: List[FilterSchema] = Field(default_factory=list)
+    owners: List[FilterSchema] = Field(default_factory=list)
+    models: List[FilterSchema] = Field(default_factory=list)
+    statuses: List[StatusFilterSchema] = Field(
         default=[
             StatusFilterSchema(
                 type=SupportedFilterTypes.IS,
@@ -68,7 +68,7 @@ class FiltersSchema(BaseModel):
             )
         ]
     )
-    resource_types: list[ResourceTypeFilterSchema] = Field(default_factory=list)
+    resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time):
