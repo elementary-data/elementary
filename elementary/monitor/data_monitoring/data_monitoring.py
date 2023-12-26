@@ -6,10 +6,7 @@ from packaging import version
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
-from elementary.monitor.data_monitoring.schema import (
-    SelectorFilterSchema,
-    WarehouseInfo,
-)
+from elementary.monitor.data_monitoring.schema import FiltersSchema, WarehouseInfo
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import package
@@ -29,7 +26,7 @@ class DataMonitoring:
         tracking: Optional[Tracking] = None,
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
-        selector_filter: SelectorFilterSchema = SelectorFilterSchema(),
+        selector_filter: FiltersSchema = FiltersSchema(),
     ):
         self.execution_properties: Dict[str, Any] = {}
         self.config = config

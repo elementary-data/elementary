@@ -2,7 +2,7 @@ from elementary.config.config import Config
 from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
-from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.data_monitoring.schema import FiltersSchema
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
@@ -10,7 +10,7 @@ from tests.mocks.dbt_runner_mock import MockDbtRunner
 class DataMonitoringAlertsMock(DataMonitoringAlerts):
     def __init__(
         self,
-        selector_filter: SelectorFilterSchema = SelectorFilterSchema(),
+        selector_filter: FiltersSchema = FiltersSchema(),
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,

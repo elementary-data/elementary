@@ -1,8 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
@@ -28,22 +28,47 @@ class ResourceType(Enum):
     SOURCE_FRESHNESS = "source_freshness"
 
 
-class SelectorFilterSchema(BaseModel):
+class SupportedFilterTypes(Enum):
+    IS = "is"
+
+
+class FilterSchema(BaseModel):
+    # The relation between values is OR.
+    values: List[Any]
+    type: SupportedFilterTypes = SupportedFilterTypes.IS
+
+    class Config:
+        # Make sure that serializing Enum return values
+        use_enum_values = True
+
+
+class StatusFilterSchema(FilterSchema):
+    values: List[Status]
+
+
+class ResourceTypeFilterSchema(FilterSchema):
+    values: List[ResourceType]
+
+
+class FiltersSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
-    tag: Optional[str] = None
-    owner: Optional[str] = None
-    model: Optional[str] = None
-    statuses: Optional[List[Status]] = [
-        Status.FAIL,
-        Status.ERROR,
-        Status.RUNTIME_ERROR,
-        Status.WARN,
-    ]
-    resource_types: Optional[List[ResourceType]] = None
     node_names: Optional[List[str]] = None
+
+    tags: List[FilterSchema] = Field(default_factory=list)
+    owners: List[FilterSchema] = Field(default_factory=list)
+    models: List[FilterSchema] = Field(default_factory=list)
+    statuses: List[StatusFilterSchema] = Field(
+        default=[
+            StatusFilterSchema(
+                type=SupportedFilterTypes.IS,
+                values=[Status.FAIL, Status.ERROR, Status.RUNTIME_ERROR, Status.WARN],
+            )
+        ]
+    )
+    resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time):
@@ -76,25 +101,48 @@ class SelectorFilterSchema(BaseModel):
                 "Selector is invalid for report: ", self.selector
             )
 
-    def validate_alert_selector(self):
-        # If we start supporting multiple selectors we need to change this logic
-        if not self.selector:
-            return
+    def to_selector_filter_schema(self) -> "SelectorFilterSchema":
+        selector = self.selector if self.selector else None
+        invocation_id = self.invocation_id if self.invocation_id else None
+        invocation_time = self.invocation_time if self.invocation_time else None
+        last_invocation = self.last_invocation if self.last_invocation else False
+        node_names = self.node_names if self.node_names else None
+        tags = self.tags[0].values[0] if self.tags else None
+        owners = self.owners[0].values[0] if self.owners else None
+        models = self.models[0].values[0] if self.models else None
+        statuses = self.statuses[0].values if self.statuses else None
+        resource_types = self.resource_types[0].values if self.resource_types else None
 
-        invalid_alert_selectors = [
-            "last_invocation",
-            "invocation_id",
-            "invocation_time",
-        ]
-        if any(
-            [
-                selector_type in self.selector
-                for selector_type in invalid_alert_selectors
-            ]
-        ):
-            raise InvalidSelectorError(
-                "Selector is invalid for alerts: ", self.selector
-            )
+        return SelectorFilterSchema(
+            selector=selector,
+            invocation_id=invocation_id,
+            invocation_time=invocation_time,
+            last_invocation=last_invocation,
+            node_names=node_names,
+            tag=tags,
+            owner=owners,
+            model=models,
+            statuses=statuses,
+            resource_types=resource_types,
+        )
+
+
+class SelectorFilterSchema(BaseModel):
+    selector: Optional[str] = None
+    invocation_id: Optional[str] = None
+    invocation_time: Optional[str] = None
+    last_invocation: Optional[bool] = False
+    tag: Optional[str] = None
+    owner: Optional[str] = None
+    model: Optional[str] = None
+    statuses: Optional[List[Status]] = [
+        Status.FAIL,
+        Status.ERROR,
+        Status.RUNTIME_ERROR,
+        Status.WARN,
+    ]
+    resource_types: Optional[List[ResourceType]] = None
+    node_names: Optional[List[str]] = None
 
 
 class WarehouseInfo(BaseModel):

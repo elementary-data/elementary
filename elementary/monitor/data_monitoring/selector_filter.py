@@ -4,9 +4,12 @@ from typing import Optional
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.schema import (
+    FilterSchema,
+    FiltersSchema,
     ResourceType,
-    SelectorFilterSchema,
+    ResourceTypeFilterSchema,
     Status,
+    StatusFilterSchema,
 )
 from elementary.monitor.fetchers.selector.selector import SelectorFetcher
 from elementary.tracking.tracking_interface import Tracking
@@ -30,8 +33,8 @@ class SelectorFilter:
         )
         self.filter = self._parse_selector(self.selector)
 
-    def _parse_selector(self, selector: Optional[str] = None) -> SelectorFilterSchema:
-        data_monitoring_filter = SelectorFilterSchema()
+    def _parse_selector(self, selector: Optional[str] = None) -> FiltersSchema:
+        data_monitoring_filter = FiltersSchema()
         if selector:
             if self.selector_fetcher and self._can_use_fetcher(selector):
                 if self.tracking:
@@ -39,7 +42,7 @@ class SelectorFilter:
                 node_names = self.selector_fetcher.get_selector_results(
                     selector=selector
                 )
-                return SelectorFilterSchema(node_names=node_names, selector=selector)
+                return FiltersSchema(node_names=node_names, selector=selector)
             else:
                 invocation_id_regex = re.compile(r"invocation_id:(.*)")
                 invocation_time_regex = re.compile(r"invocation_time:(.*)")
@@ -62,40 +65,43 @@ class SelectorFilter:
                 if last_invocation_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "last_invocation")
-                    data_monitoring_filter = SelectorFilterSchema(
+                    data_monitoring_filter = FiltersSchema(
                         last_invocation=True, selector=selector
                     )
                 elif invocation_id_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "invocation_id")
-                    data_monitoring_filter = SelectorFilterSchema(
+                    data_monitoring_filter = FiltersSchema(
                         invocation_id=invocation_id_match.group(1),
                         selector=selector,
                     )
                 elif invocation_time_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "invocation_time")
-                    data_monitoring_filter = SelectorFilterSchema(
+                    data_monitoring_filter = FiltersSchema(
                         invocation_time=invocation_time_match.group(1),
                         selector=selector,
                     )
                 elif tag_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "tag")
-                    data_monitoring_filter = SelectorFilterSchema(
-                        tag=tag_match.group(1), selector=selector
+                    data_monitoring_filter = FiltersSchema(
+                        tags=[FilterSchema(values=[tag_match.group(1)])],
+                        selector=selector,
                     )
                 elif owner_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "owner")
-                    data_monitoring_filter = SelectorFilterSchema(
-                        owner=owner_match.group(1), selector=selector
+                    data_monitoring_filter = FiltersSchema(
+                        owners=[FilterSchema(values=[owner_match.group(1)])],
+                        selector=selector,
                     )
                 elif model_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "model")
-                    data_monitoring_filter = SelectorFilterSchema(
-                        model=model_match.group(1), selector=selector
+                    data_monitoring_filter = FiltersSchema(
+                        models=[FilterSchema(values=[model_match.group(1)])],
+                        selector=selector,
                     )
                 elif statuses_match:
                     if self.tracking:
@@ -103,8 +109,9 @@ class SelectorFilter:
                     statuses = [
                         Status(status) for status in statuses_match.group(1).split(",")
                     ]
-                    data_monitoring_filter = SelectorFilterSchema(
-                        statuses=statuses, selector=selector
+                    data_monitoring_filter = FiltersSchema(
+                        statuses=[StatusFilterSchema(values=statuses)],
+                        selector=selector,
                     )
                 elif resource_types_match:
                     if self.tracking:
@@ -113,12 +120,15 @@ class SelectorFilter:
                         ResourceType(resource_type)
                         for resource_type in resource_types_match.group(1).split(",")
                     ]
-                    data_monitoring_filter = SelectorFilterSchema(
-                        resource_types=resource_types, selector=selector
+                    data_monitoring_filter = FiltersSchema(
+                        resource_types=[
+                            ResourceTypeFilterSchema(values=resource_types)
+                        ],
+                        selector=selector,
                     )
                 else:
                     logger.error(f"Could not parse the given -s/--select: {selector}")
-                    return SelectorFilterSchema(selector=selector, statuses=[])
+                    return FiltersSchema(selector=selector, statuses=[])
         return data_monitoring_filter
 
     def _create_user_dbt_runner(self, config: Config) -> Optional[DbtRunner]:
@@ -132,7 +142,7 @@ class SelectorFilter:
         else:
             return None
 
-    def get_filter(self) -> SelectorFilterSchema:
+    def get_filter(self) -> FiltersSchema:
         return self.filter
 
     @staticmethod
