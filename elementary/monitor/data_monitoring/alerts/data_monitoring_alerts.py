@@ -67,7 +67,7 @@ class DataMonitoringAlerts(DataMonitoring):
         return self.alerts_api.get_new_alerts(
             days_back=days_back,
             disable_samples=self.disable_samples,
-            filter=self.selector_filter.to_selector_filter_schema(),
+            filter=self.selector_filter,
         )
 
     def _format_alerts(
