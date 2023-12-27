@@ -5,18 +5,18 @@
     {% endif %}
     {% set models_depends_on_nodes_query %}
         with dbt_models as (
-            select * from {{ ref('elementary', 'dbt_models') }}
+            select unique_id, depends_on_nodes from {{ ref('elementary', 'dbt_models') }}
             {% if exclude_elementary %}
               where package_name != 'elementary'
             {% endif %}
         ),
 
         dbt_sources as (
-            select * from {{ ref('elementary', 'dbt_sources') }}
+            select unique_id from {{ ref('elementary', 'dbt_sources') }}
         ),
 
         dbt_exposures as (
-            select * from {{ exposures_relation }}
+            select unique_id, depends_on_nodes from {{ exposures_relation }}
         )
 
         select
