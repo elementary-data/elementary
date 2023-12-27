@@ -8,6 +8,7 @@ from elementary.monitor.api.alerts.alert_filters import (
     filter_alerts,
 )
 from elementary.monitor.data_monitoring.schema import (
+    FiltersSchema,
     ResourceType,
     SelectorFilterSchema,
     Status,
@@ -273,7 +274,7 @@ def test_filter_alerts():
     test_alerts, model_alerts, _ = initial_alerts()
 
     # Test that empty filter returns all the alerts except for skipped.
-    filter = SelectorFilterSchema()
+    filter = FiltersSchema()
     filter_test_alerts = filter_alerts(test_alerts, filter)
     filter_model_alerts = filter_alerts(model_alerts, filter)
     assert len(filter_test_alerts) == len(test_alerts)
@@ -286,7 +287,7 @@ def test_filter_alerts():
     assert len(filter_model_alerts) == len(model_alerts) - 1  # 1 skipped model alert
 
     # Test that filter with unsupported selector returns no alert
-    filter = SelectorFilterSchema(last_invocation=True, selector="last_invocation")
+    filter = FiltersSchema(last_invocation=True, selector="last_invocation")
     filter_test_alerts = filter_alerts(test_alerts, filter)
     filter_model_alerts = filter_alerts(model_alerts, filter)
     assert len(filter_test_alerts) == 0

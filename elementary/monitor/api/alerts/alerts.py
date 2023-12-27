@@ -71,9 +71,7 @@ class AlertsAPI(APIClient):
         pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(
             days_back, disable_samples
         )
-        filtered_pending_test_alerts = filter_alerts(
-            pending_test_alerts, filter.to_selector_filter_schema()
-        )
+        filtered_pending_test_alerts = filter_alerts(pending_test_alerts, filter)
         last_alert_sent_times = self.alerts_fetcher.query_last_test_alert_times(
             days_back
         )
@@ -89,9 +87,7 @@ class AlertsAPI(APIClient):
         filter: FiltersSchema = FiltersSchema(),
     ) -> ModelAlertsSchema:
         pending_model_alerts = self.alerts_fetcher.query_pending_model_alerts(days_back)
-        filtered_pending_model_alerts = filter_alerts(
-            pending_model_alerts, filter.to_selector_filter_schema()
-        )
+        filtered_pending_model_alerts = filter_alerts(pending_model_alerts, filter)
         last_alert_sent_times = self.alerts_fetcher.query_last_model_alert_times(
             days_back
         )
@@ -110,7 +106,7 @@ class AlertsAPI(APIClient):
             self.alerts_fetcher.query_pending_source_freshness_alerts(days_back)
         )
         filtered_pending_source_freshness_alert = filter_alerts(
-            pending_source_freshness_alerts, filter.to_selector_filter_schema()
+            pending_source_freshness_alerts, filter
         )
         last_alert_sent_times = (
             self.alerts_fetcher.query_last_source_freshness_alert_times(days_back)

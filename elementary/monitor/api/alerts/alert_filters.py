@@ -1,6 +1,7 @@
 from typing import Callable, List, Union
 
 from elementary.monitor.data_monitoring.schema import (
+    FiltersSchema,
     ResourceType,
     SelectorFilterSchema,
     Status,
@@ -22,12 +23,13 @@ def filter_alerts(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    alerts_filter: SelectorFilterSchema = SelectorFilterSchema(),
+    filter: FiltersSchema = FiltersSchema(),
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
+    alerts_filter = filter.to_selector_filter_schema()
     # If the filter is on invocation stuff, it's not relevant to alerts and we return an empty list
     if (
         alerts_filter.invocation_id is not None
