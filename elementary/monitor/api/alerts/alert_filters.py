@@ -6,6 +6,7 @@ from elementary.monitor.data_monitoring.schema import (
     ResourceTypeFilterSchema,
     SelectorFilterSchema,
     Status,
+    StatusFilterSchema,
 )
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
@@ -48,8 +49,9 @@ def filter_alerts(
         filtered_alerts = _filter_alerts_by_model(filtered_alerts, filter)
     if filter.owner is not None:
         filtered_alerts = _filter_alerts_by_owner(filtered_alerts, filter)
-    if filter.statuses is not None:
-        filtered_alerts = _filter_alerts_by_status(filtered_alerts, filter)
+    filtered_alerts = _filter_alerts_by_statuses(
+        filtered_alerts, alerts_filter.statuses
+    )
     filtered_alerts = _filter_alerts_by_resource_types(
         filtered_alerts, alerts_filter.resource_types
     )
@@ -175,35 +177,39 @@ def _filter_alerts_by_node_names(
     return filtered_alerts  # type: ignore[return-value]
 
 
-def _filter_alerts_by_status(
+def _filter_alerts_by_statuses(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    status_filter: SelectorFilterSchema,
+    statuses_filter: list[StatusFilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if status_filter.statuses is None:
+    if len(statuses_filter) == 0:
         return alerts
 
-    statuses: List[Status] = status_filter.statuses
-    filter_func: Callable[
-        [
-            Union[
-                PendingTestAlertSchema,
-                PendingModelAlertSchema,
-                PendingSourceFreshnessAlertSchema,
-            ]
-        ],
-        bool,
-    ] = (
-        lambda alert: Status(alert.status) in statuses
-    )
-    return list(filter(filter_func, alerts))  # type: ignore[return-value]
+    filtered_alerts = alerts
+    for filter_item in statuses_filter:
+        statuses: List[Status] = filter_item.values
+        filter_func: Callable[
+            [
+                Union[
+                    PendingTestAlertSchema,
+                    PendingModelAlertSchema,
+                    PendingSourceFreshnessAlertSchema,
+                ]
+            ],
+            bool,
+        ] = (
+            lambda alert: alert.status in statuses
+        )
+        filtered_alerts = list(filter(filter_func, filtered_alerts))  # type: ignore
+
+    return filtered_alerts
 
 
 def _filter_alerts_by_resource_types(
@@ -224,8 +230,6 @@ def _filter_alerts_by_resource_types(
     filtered_alerts = alerts
     for filter_item in resource_types_filter:
         resource_types: List[ResourceType] = filter_item.values
-        print(f"resource_types: {resource_types}")
-
         filter_func: Callable[
             [
                 Union[

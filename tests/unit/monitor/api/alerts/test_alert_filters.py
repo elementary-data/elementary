@@ -3,7 +3,7 @@ from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_node_names,
     _filter_alerts_by_owner,
     _filter_alerts_by_resource_types,
-    _filter_alerts_by_status,
+    _filter_alerts_by_statuses,
     _filter_alerts_by_tag,
     filter_alerts,
 )
@@ -13,6 +13,7 @@ from elementary.monitor.data_monitoring.schema import (
     ResourceTypeFilterSchema,
     SelectorFilterSchema,
     Status,
+    StatusFilterSchema,
     SupportedFilterTypes,
 )
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
@@ -409,30 +410,45 @@ def test_filter_alerts_by_statuses():
         source_freshness_alerts,
     ) = initial_alerts()
 
-    filter = SelectorFilterSchema(statuses=[Status.WARN])
-    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
-    filter_source_freshness_alerts = _filter_alerts_by_status(
-        source_freshness_alerts, filter
+    filter = FiltersSchema(
+        statuses=[
+            StatusFilterSchema(values=[Status.WARN], type=SupportedFilterTypes.IS)
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_statuses(test_alerts, filter.statuses)
+    filter_model_alerts = _filter_alerts_by_statuses(model_alerts, filter.statuses)
+    filter_source_freshness_alerts = _filter_alerts_by_statuses(
+        source_freshness_alerts, filter.statuses
     )
     assert len(filter_test_alerts) == 1
     assert filter_test_alerts[0].id == "4"
     assert len(filter_model_alerts) == 0
     assert len(filter_source_freshness_alerts) == 1
 
-    filter = SelectorFilterSchema(statuses=[Status.ERROR, Status.SKIPPED])
-    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
+    filter = FiltersSchema(
+        statuses=[
+            StatusFilterSchema(
+                values=[Status.ERROR, Status.SKIPPED], type=SupportedFilterTypes.IS
+            )
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_statuses(test_alerts, filter.statuses)
+    filter_model_alerts = _filter_alerts_by_statuses(model_alerts, filter.statuses)
     assert len(filter_test_alerts) == 0
     assert len(filter_model_alerts) == 3
 
-    filter = SelectorFilterSchema(
-        statuses=[Status.FAIL, Status.WARN, Status.RUNTIME_ERROR]
+    filter = FiltersSchema(
+        statuses=[
+            StatusFilterSchema(
+                values=[Status.FAIL, Status.WARN, Status.RUNTIME_ERROR],
+                type=SupportedFilterTypes.IS,
+            )
+        ]
     )
-    filter_test_alerts = _filter_alerts_by_status(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_status(model_alerts, filter)
-    filter_source_freshness_alerts = _filter_alerts_by_status(
-        source_freshness_alerts, filter
+    filter_test_alerts = _filter_alerts_by_statuses(test_alerts, filter.statuses)
+    filter_model_alerts = _filter_alerts_by_statuses(model_alerts, filter.statuses)
+    filter_source_freshness_alerts = _filter_alerts_by_statuses(
+        source_freshness_alerts, filter.statuses
     )
     assert len(filter_test_alerts) == 4
     assert len(filter_model_alerts) == 0
