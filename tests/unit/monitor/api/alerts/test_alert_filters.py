@@ -2,7 +2,7 @@ from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_model,
     _filter_alerts_by_node_names,
     _filter_alerts_by_owner,
-    _filter_alerts_by_resource_type,
+    _filter_alerts_by_resource_types,
     _filter_alerts_by_status,
     _filter_alerts_by_tag,
     filter_alerts,
@@ -10,8 +10,10 @@ from elementary.monitor.api.alerts.alert_filters import (
 from elementary.monitor.data_monitoring.schema import (
     FiltersSchema,
     ResourceType,
+    ResourceTypeFilterSchema,
     SelectorFilterSchema,
     Status,
+    SupportedFilterTypes,
 )
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
@@ -441,10 +443,26 @@ def test_filter_alerts_by_resource_types():
     test_alerts, model_alerts, _ = initial_alerts()
     all_alerts = test_alerts + model_alerts
 
-    filter = SelectorFilterSchema(resource_types=[ResourceType.TEST])
-    filter_test_alerts = _filter_alerts_by_resource_type(all_alerts, filter)
+    filter = FiltersSchema(
+        resource_types=[
+            ResourceTypeFilterSchema(
+                values=[ResourceType.TEST], type=SupportedFilterTypes.IS
+            )
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_resource_types(
+        all_alerts, filter.resource_types
+    )
     assert filter_test_alerts == test_alerts
 
-    filter = SelectorFilterSchema(resource_types=[ResourceType.MODEL])
-    filter_test_alerts = _filter_alerts_by_resource_type(all_alerts, filter)
+    filter = FiltersSchema(
+        resource_types=[
+            ResourceTypeFilterSchema(
+                values=[ResourceType.MODEL], type=SupportedFilterTypes.IS
+            )
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_resource_types(
+        all_alerts, filter.resource_types
+    )
     assert filter_test_alerts == model_alerts
