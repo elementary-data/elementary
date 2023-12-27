@@ -377,7 +377,7 @@ def test_filter_alerts_by_model():
 def test_filter_alerts_by_node_names():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = SelectorFilterSchema(node_names=["test_3", "model_id_1"])
+    filter = FiltersSchema(node_names=["test_3", "model_id_1"])
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_node_names(model_alerts, filter)
     assert len(filter_test_alerts) == 1
@@ -386,14 +386,14 @@ def test_filter_alerts_by_node_names():
     assert filter_model_alerts[0].id == "1"
     assert filter_model_alerts[1].id == "2"
 
-    filter = SelectorFilterSchema(node_names=["model_id_2"])
+    filter = FiltersSchema(node_names=["model_id_2"])
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_node_names(model_alerts, filter)
     assert len(filter_test_alerts) == 0
     assert len(filter_model_alerts) == 1
     assert filter_model_alerts[0].id == "3"
 
-    filter = SelectorFilterSchema(node_names=["model_id_3"])
+    filter = FiltersSchema(node_names=["model_id_3"])
     filter_test_alerts = _filter_alerts_by_node_names(test_alerts, filter)
     filter_model_alerts = _filter_alerts_by_node_names(model_alerts, filter)
     assert len(filter_test_alerts) == 0
