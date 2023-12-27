@@ -23,13 +23,13 @@ def filter_alerts(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    filter: FiltersSchema = FiltersSchema(),
+    alerts_filter: FiltersSchema = FiltersSchema(),
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    alerts_filter = filter.to_selector_filter_schema()
+    filter = alerts_filter.to_selector_filter_schema()
     # If the filter is on invocation stuff, it's not relevant to alerts and we return an empty list
     if (
         alerts_filter.invocation_id is not None
@@ -41,18 +41,16 @@ def filter_alerts(
 
     # If the filter is empty, we want to return all of the alerts
     filtered_alerts = alerts
-    if alerts_filter.tag is not None:
-        filtered_alerts = _filter_alerts_by_tag(filtered_alerts, alerts_filter)
-    if alerts_filter.model is not None:
-        filtered_alerts = _filter_alerts_by_model(filtered_alerts, alerts_filter)
-    if alerts_filter.owner is not None:
-        filtered_alerts = _filter_alerts_by_owner(filtered_alerts, alerts_filter)
-    if alerts_filter.statuses is not None:
-        filtered_alerts = _filter_alerts_by_status(filtered_alerts, alerts_filter)
-    if alerts_filter.resource_types is not None:
-        filtered_alerts = _filter_alerts_by_resource_type(
-            filtered_alerts, alerts_filter
-        )
+    if filter.tag is not None:
+        filtered_alerts = _filter_alerts_by_tag(filtered_alerts, filter)
+    if filter.model is not None:
+        filtered_alerts = _filter_alerts_by_model(filtered_alerts, filter)
+    if filter.owner is not None:
+        filtered_alerts = _filter_alerts_by_owner(filtered_alerts, filter)
+    if filter.statuses is not None:
+        filtered_alerts = _filter_alerts_by_status(filtered_alerts, filter)
+    if filter.resource_types is not None:
+        filtered_alerts = _filter_alerts_by_resource_type(filtered_alerts, filter)
     if alerts_filter.node_names is not None:
         filtered_alerts = _filter_alerts_by_node_names(filtered_alerts, alerts_filter)
 
@@ -143,7 +141,7 @@ def _filter_alerts_by_node_names(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    node_name_filter: SelectorFilterSchema,
+    node_name_filter: FiltersSchema,
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
