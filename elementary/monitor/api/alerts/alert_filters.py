@@ -63,7 +63,7 @@ def _filter_alerts_by_tags(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    tags_filter: list[FilterSchema],
+    tags_filter: List[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
@@ -96,7 +96,7 @@ def _filter_alerts_by_owners(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    owner_filter: list[FilterSchema],
+    owner_filter: List[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
@@ -131,7 +131,7 @@ def _filter_alerts_by_models(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    model_filter: list[FilterSchema],
+    model_filter: List[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
@@ -202,7 +202,7 @@ def _filter_alerts_by_statuses(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    statuses_filter: list[StatusFilterSchema],
+    statuses_filter: List[StatusFilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
@@ -237,7 +237,7 @@ def _filter_alerts_by_resource_types(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    resource_types_filter: list[ResourceTypeFilterSchema],
+    resource_types_filter: List[ResourceTypeFilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
