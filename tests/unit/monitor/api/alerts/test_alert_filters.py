@@ -1,13 +1,14 @@
 from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_model,
     _filter_alerts_by_node_names,
-    _filter_alerts_by_owner,
+    _filter_alerts_by_owners,
     _filter_alerts_by_resource_types,
     _filter_alerts_by_statuses,
     _filter_alerts_by_tag,
     filter_alerts,
 )
 from elementary.monitor.data_monitoring.schema import (
+    FilterSchema,
     FiltersSchema,
     ResourceType,
     ResourceTypeFilterSchema,
@@ -328,12 +329,14 @@ def test_filter_alerts_by_tag():
     assert filter_model_alerts[0].id == "3"
 
 
-def test_filter_alerts_by_owner():
+def test_filter_alerts_by_owners():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = SelectorFilterSchema(owner="jeff")
-    filter_test_alerts = _filter_alerts_by_owner(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_owner(model_alerts, filter)
+    filter = FiltersSchema(
+        owners=[FilterSchema(values=["jeff"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_owners(test_alerts, filter.owners)
+    filter_model_alerts = _filter_alerts_by_owners(model_alerts, filter.owners)
     assert len(filter_test_alerts) == 3
     assert filter_test_alerts[0].id == "1"
     assert filter_test_alerts[1].id == "2"
@@ -342,9 +345,11 @@ def test_filter_alerts_by_owner():
     assert filter_model_alerts[0].id == "1"
     assert filter_model_alerts[1].id == "3"
 
-    filter = SelectorFilterSchema(owner="john")
-    filter_test_alerts = _filter_alerts_by_owner(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_owner(model_alerts, filter)
+    filter = FiltersSchema(
+        owners=[FilterSchema(values=["john"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_owners(test_alerts, filter.owners)
+    filter_model_alerts = _filter_alerts_by_owners(model_alerts, filter.owners)
     assert len(filter_test_alerts) == 3
     assert filter_test_alerts[0].id == "1"
     assert filter_test_alerts[1].id == "2"

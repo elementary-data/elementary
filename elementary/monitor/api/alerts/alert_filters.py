@@ -1,6 +1,7 @@
 from typing import Callable, List, Union
 
 from elementary.monitor.data_monitoring.schema import (
+    FilterSchema,
     FiltersSchema,
     ResourceType,
     ResourceTypeFilterSchema,
@@ -47,8 +48,7 @@ def filter_alerts(
         filtered_alerts = _filter_alerts_by_tag(filtered_alerts, filter)
     if filter.model is not None:
         filtered_alerts = _filter_alerts_by_model(filtered_alerts, filter)
-    if filter.owner is not None:
-        filtered_alerts = _filter_alerts_by_owner(filtered_alerts, filter)
+    filtered_alerts = _filter_alerts_by_owners(filtered_alerts, alerts_filter.owners)
     filtered_alerts = _filter_alerts_by_statuses(
         filtered_alerts, alerts_filter.statuses
     )
@@ -85,31 +85,39 @@ def _filter_alerts_by_tag(
     return filtered_alerts  # type: ignore[return-value]
 
 
-def _filter_alerts_by_owner(
+def _filter_alerts_by_owners(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    owner_filter: SelectorFilterSchema,
+    owner_filter: list[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if owner_filter.owner is None:
+    if len(owner_filter) == 0:
         return alerts
 
-    filtered_alerts = []
-    for alert in alerts:
-        raw_owners = alert.unified_owners
-        alert_owners = (
-            try_load_json(raw_owners) if isinstance(raw_owners, str) else raw_owners
-        )
+    filtered_alerts = alerts
+    for filter_item in owner_filter:
+        owners: List[str] = filter_item.values
 
-        if alert_owners and owner_filter.owner in alert_owners:
-            filtered_alerts.append(alert)
-    return filtered_alerts  # type: ignore[return-value]
+        inner_filtered_alerts = []
+        for alert in filtered_alerts:
+            raw_owners = alert.unified_owners
+            alert_owners = (
+                try_load_json(raw_owners) if isinstance(raw_owners, str) else raw_owners
+            )
+            for owner in owners:
+                if alert_owners and owner in alert_owners:
+                    inner_filtered_alerts.append(alert)
+                    break
+
+        filtered_alerts = inner_filtered_alerts  # type: ignore[assignment]
+
+    return filtered_alerts
 
 
 def _filter_alerts_by_model(
