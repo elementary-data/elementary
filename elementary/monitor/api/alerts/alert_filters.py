@@ -5,7 +5,6 @@ from elementary.monitor.data_monitoring.schema import (
     FiltersSchema,
     ResourceType,
     ResourceTypeFilterSchema,
-    SelectorFilterSchema,
     Status,
     StatusFilterSchema,
 )
@@ -32,7 +31,6 @@ def filter_alerts(
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    filter = alerts_filter.to_selector_filter_schema()
     # If the filter is on invocation stuff, it's not relevant to alerts and we return an empty list
     if (
         alerts_filter.invocation_id is not None
@@ -45,8 +43,7 @@ def filter_alerts(
     # If the filter is empty, we want to return all of the alerts
     filtered_alerts = alerts
     filtered_alerts = _filter_alerts_by_tags(filtered_alerts, alerts_filter.tags)
-    if filter.model is not None:
-        filtered_alerts = _filter_alerts_by_model(filtered_alerts, filter)
+    filtered_alerts = _filter_alerts_by_models(filtered_alerts, alerts_filter.models)
     filtered_alerts = _filter_alerts_by_owners(filtered_alerts, alerts_filter.owners)
     filtered_alerts = _filter_alerts_by_statuses(
         filtered_alerts, alerts_filter.statuses
@@ -128,31 +125,37 @@ def _filter_alerts_by_owners(
     return filtered_alerts
 
 
-def _filter_alerts_by_model(
+def _filter_alerts_by_models(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    model_filter: SelectorFilterSchema,
+    model_filter: list[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if model_filter.model is None:
+    if len(model_filter) == 0:
         return alerts
 
-    filtered_alerts: Union[
-        List[PendingTestAlertSchema],
-        List[PendingModelAlertSchema],
-        List[PendingSourceFreshnessAlertSchema],
-    ] = []  # type: ignore[assignment]
-    for alert in alerts:
-        alert_model_unique_id = alert.model_unique_id
-        if alert_model_unique_id and alert_model_unique_id.endswith(model_filter.model):
-            filtered_alerts.append(alert)  # type: ignore[arg-type]
-    return filtered_alerts  # type: ignore[return-value]
+    filtered_alerts = alerts
+    for filter_item in model_filter:
+        models: List[str] = filter_item.values
+
+        inner_filtered_alerts = []
+        for alert in filtered_alerts:
+            alert_model_unique_id = alert.model_unique_id
+            if alert_model_unique_id:
+                for model in models:
+                    if alert_model_unique_id.endswith(model):
+                        inner_filtered_alerts.append(alert)
+                        break
+
+        filtered_alerts = inner_filtered_alerts  # type: ignore[assignment]
+
+    return filtered_alerts
 
 
 def _filter_alerts_by_node_names(

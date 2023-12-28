@@ -1,5 +1,5 @@
 from elementary.monitor.api.alerts.alert_filters import (
-    _filter_alerts_by_model,
+    _filter_alerts_by_models,
     _filter_alerts_by_node_names,
     _filter_alerts_by_owners,
     _filter_alerts_by_resource_types,
@@ -12,7 +12,6 @@ from elementary.monitor.data_monitoring.schema import (
     FiltersSchema,
     ResourceType,
     ResourceTypeFilterSchema,
-    SelectorFilterSchema,
     Status,
     StatusFilterSchema,
     SupportedFilterTypes,
@@ -381,9 +380,11 @@ def test_filter_alerts_by_owners():
 def test_filter_alerts_by_model():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = SelectorFilterSchema(model="model_id_1")
-    filter_test_alerts = _filter_alerts_by_model(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_model(model_alerts, filter)
+    filter = FiltersSchema(
+        models=[FilterSchema(values=["model_id_1"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
+    filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
     assert len(filter_test_alerts) == 2
     assert filter_test_alerts[0].id == "1"
     assert filter_test_alerts[1].id == "2"
@@ -391,14 +392,46 @@ def test_filter_alerts_by_model():
     assert filter_model_alerts[0].id == "1"
     assert filter_model_alerts[1].id == "2"
 
-    filter = SelectorFilterSchema(model="model_id_2")
-    filter_test_alerts = _filter_alerts_by_model(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_model(model_alerts, filter)
+    filter = FiltersSchema(
+        models=[FilterSchema(values=["model_id_2"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
+    filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
     assert len(filter_test_alerts) == 2
     assert filter_test_alerts[0].id == "3"
     assert filter_test_alerts[1].id == "4"
     assert len(filter_model_alerts) == 1
     assert filter_model_alerts[0].id == "3"
+
+    filter = FiltersSchema(
+        models=[
+            FilterSchema(
+                values=["model_id_1", "model_id_2"], type=SupportedFilterTypes.IS
+            )
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
+    filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
+    assert len(filter_test_alerts) == 4
+    assert filter_test_alerts[0].id == "1"
+    assert filter_test_alerts[1].id == "2"
+    assert filter_test_alerts[2].id == "3"
+    assert filter_test_alerts[3].id == "4"
+    assert len(filter_model_alerts) == 3
+    assert filter_model_alerts[0].id == "1"
+    assert filter_model_alerts[1].id == "2"
+    assert filter_model_alerts[2].id == "3"
+
+    filter = FiltersSchema(
+        models=[
+            FilterSchema(values=["model_id_1"], type=SupportedFilterTypes.IS),
+            FilterSchema(values=["model_id_2"], type=SupportedFilterTypes.IS),
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
+    filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
+    assert len(filter_test_alerts) == 0
+    assert len(filter_model_alerts) == 0
 
 
 def test_filter_alerts_by_node_names():
