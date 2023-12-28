@@ -4,7 +4,7 @@ from elementary.monitor.api.alerts.alert_filters import (
     _filter_alerts_by_owners,
     _filter_alerts_by_resource_types,
     _filter_alerts_by_statuses,
-    _filter_alerts_by_tag,
+    _filter_alerts_by_tags,
     filter_alerts,
 )
 from elementary.monitor.data_monitoring.schema import (
@@ -298,21 +298,25 @@ def test_filter_alerts():
     assert len(filter_model_alerts) == 0
 
 
-def test_filter_alerts_by_tag():
+def test_filter_alerts_by_tags():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = SelectorFilterSchema(tag="one")
-    filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_tag(model_alerts, filter)
+    filter = FiltersSchema(
+        tags=[FilterSchema(values=["one"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
+    filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
     assert len(filter_test_alerts) == 2
     assert filter_test_alerts[0].id == "1"
     assert filter_test_alerts[1].id == "3"
     assert len(filter_model_alerts) == 1
     assert filter_model_alerts[0].id == "1"
 
-    filter = SelectorFilterSchema(tag="three")
-    filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_tag(model_alerts, filter)
+    filter = FiltersSchema(
+        tags=[FilterSchema(values=["three"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
+    filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
     assert len(filter_test_alerts) == 2
     assert filter_test_alerts[0].id == "2"
     assert filter_test_alerts[1].id == "4"
@@ -320,13 +324,28 @@ def test_filter_alerts_by_tag():
     assert filter_model_alerts[0].id == "2"
     assert filter_model_alerts[1].id == "3"
 
-    filter = SelectorFilterSchema(tag="four")
-    filter_test_alerts = _filter_alerts_by_tag(test_alerts, filter)
-    filter_model_alerts = _filter_alerts_by_tag(model_alerts, filter)
+    filter = FiltersSchema(
+        tags=[FilterSchema(values=["four"], type=SupportedFilterTypes.IS)]
+    )
+    filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
+    filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
     assert len(filter_test_alerts) == 1
     assert filter_test_alerts[0].id == "4"
     assert len(filter_model_alerts) == 1
     assert filter_model_alerts[0].id == "3"
+
+    filter = FiltersSchema(
+        tags=[
+            FilterSchema(values=["one"], type=SupportedFilterTypes.IS),
+            FilterSchema(values=["two"], type=SupportedFilterTypes.IS),
+        ]
+    )
+    filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
+    filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
+    assert len(filter_test_alerts) == 1
+    assert filter_test_alerts[0].id == "1"
+    assert len(filter_model_alerts) == 1
+    assert filter_model_alerts[0].id == "1"
 
 
 def test_filter_alerts_by_owners():

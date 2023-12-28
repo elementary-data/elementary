@@ -44,8 +44,7 @@ def filter_alerts(
 
     # If the filter is empty, we want to return all of the alerts
     filtered_alerts = alerts
-    if filter.tag is not None:
-        filtered_alerts = _filter_alerts_by_tag(filtered_alerts, filter)
+    filtered_alerts = _filter_alerts_by_tags(filtered_alerts, alerts_filter.tags)
     if filter.model is not None:
         filtered_alerts = _filter_alerts_by_model(filtered_alerts, filter)
     filtered_alerts = _filter_alerts_by_owners(filtered_alerts, alerts_filter.owners)
@@ -61,28 +60,37 @@ def filter_alerts(
     return filtered_alerts
 
 
-def _filter_alerts_by_tag(
+def _filter_alerts_by_tags(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    tag_filter: SelectorFilterSchema,
+    tags_filter: list[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if tag_filter.tag is None:
+    if len(tags_filter) == 0:
         return alerts
 
-    filtered_alerts = []
-    for alert in alerts:
-        alert_tags = alert.tags
+    filtered_alerts = alerts
+    for filter_item in tags_filter:
+        tags: List[str] = filter_item.values
 
-        if alert_tags and tag_filter.tag in alert_tags:
-            filtered_alerts.append(alert)
-    return filtered_alerts  # type: ignore[return-value]
+        inner_filtered_alerts = []
+        for alert in filtered_alerts:
+            alert_tags = alert.tags
+            if alert_tags:
+                for tag in tags:
+                    if tag in alert_tags:
+                        inner_filtered_alerts.append(alert)
+                        break
+
+        filtered_alerts = inner_filtered_alerts  # type: ignore[assignment]
+
+    return filtered_alerts
 
 
 def _filter_alerts_by_owners(
