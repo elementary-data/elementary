@@ -55,7 +55,7 @@ class FiltersSchema(BaseModel):
     invocation_id: Optional[str] = None
     invocation_time: Optional[str] = None
     last_invocation: Optional[bool] = False
-    node_names: Optional[List[str]] = None
+    node_names: List[str] = Field(default_factory=list)
 
     tags: List[FilterSchema] = Field(default_factory=list)
     owners: List[FilterSchema] = Field(default_factory=list)
