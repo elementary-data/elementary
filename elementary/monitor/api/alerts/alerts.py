@@ -13,7 +13,7 @@ from elementary.monitor.api.alerts.schema import (
     SourceFreshnessAlertsSchema,
     TestAlertsSchema,
 )
-from elementary.monitor.data_monitoring.schema import ResourceType, SelectorFilterSchema
+from elementary.monitor.data_monitoring.schema import FiltersSchema, ResourceType
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
@@ -49,7 +49,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        filter: FiltersSchema = FiltersSchema(),
     ) -> AlertsSchema:
         new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
         new_model_alerts = self.get_model_alerts(days_back, filter)
@@ -66,7 +66,7 @@ class AlertsAPI(APIClient):
         self,
         days_back: int,
         disable_samples: bool = False,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        filter: FiltersSchema = FiltersSchema(),
     ) -> TestAlertsSchema:
         pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(
             days_back, disable_samples
@@ -84,7 +84,7 @@ class AlertsAPI(APIClient):
     def get_model_alerts(
         self,
         days_back: int,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        filter: FiltersSchema = FiltersSchema(),
     ) -> ModelAlertsSchema:
         pending_model_alerts = self.alerts_fetcher.query_pending_model_alerts(days_back)
         filtered_pending_model_alerts = filter_alerts(pending_model_alerts, filter)
@@ -100,7 +100,7 @@ class AlertsAPI(APIClient):
     def get_source_freshness_alerts(
         self,
         days_back: int,
-        filter: SelectorFilterSchema = SelectorFilterSchema(),
+        filter: FiltersSchema = FiltersSchema(),
     ) -> SourceFreshnessAlertsSchema:
         pending_source_freshness_alerts = (
             self.alerts_fetcher.query_pending_source_freshness_alerts(days_back)

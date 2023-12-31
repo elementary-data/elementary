@@ -1,16 +1,18 @@
-from typing import Callable, List, Union
+import json
+from functools import reduce
+from typing import List, Union
 
 from elementary.monitor.data_monitoring.schema import (
-    ResourceType,
-    SelectorFilterSchema,
-    Status,
+    FilterSchema,
+    FiltersSchema,
+    ResourceTypeFilterSchema,
+    StatusFilterSchema,
 )
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
     PendingSourceFreshnessAlertSchema,
     PendingTestAlertSchema,
 )
-from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -22,7 +24,7 @@ def filter_alerts(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    alerts_filter: SelectorFilterSchema = SelectorFilterSchema(),
+    alerts_filter: FiltersSchema = FiltersSchema(),
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
@@ -39,100 +41,146 @@ def filter_alerts(
 
     # If the filter is empty, we want to return all of the alerts
     filtered_alerts = alerts
-    if alerts_filter.tag is not None:
-        filtered_alerts = _filter_alerts_by_tag(filtered_alerts, alerts_filter)
-    if alerts_filter.model is not None:
-        filtered_alerts = _filter_alerts_by_model(filtered_alerts, alerts_filter)
-    if alerts_filter.owner is not None:
-        filtered_alerts = _filter_alerts_by_owner(filtered_alerts, alerts_filter)
-    if alerts_filter.statuses is not None:
-        filtered_alerts = _filter_alerts_by_status(filtered_alerts, alerts_filter)
-    if alerts_filter.resource_types is not None:
-        filtered_alerts = _filter_alerts_by_resource_type(
-            filtered_alerts, alerts_filter
+    filtered_alerts = _filter_alerts_by_tags(filtered_alerts, alerts_filter.tags)
+    filtered_alerts = _filter_alerts_by_models(filtered_alerts, alerts_filter.models)
+    filtered_alerts = _filter_alerts_by_owners(filtered_alerts, alerts_filter.owners)
+    filtered_alerts = _filter_alerts_by_statuses(
+        filtered_alerts, alerts_filter.statuses
+    )
+    filtered_alerts = _filter_alerts_by_resource_types(
+        filtered_alerts, alerts_filter.resource_types
+    )
+    if alerts_filter.node_names:
+        filtered_alerts = _filter_alerts_by_node_names(
+            filtered_alerts, alerts_filter.node_names
         )
-    if alerts_filter.node_names is not None:
-        filtered_alerts = _filter_alerts_by_node_names(filtered_alerts, alerts_filter)
 
     return filtered_alerts
 
 
-def _filter_alerts_by_tag(
-    alerts: Union[
+def _find_common_alerts(
+    first_alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    tag_filter: SelectorFilterSchema,
+    second_alerts: Union[
+        List[PendingTestAlertSchema],
+        List[PendingModelAlertSchema],
+        List[PendingSourceFreshnessAlertSchema],
+    ],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if tag_filter.tag is None:
-        return alerts
+    first_hashable_alerts = [alert.json(sort_keys=True) for alert in first_alerts]
+    second_hashable_alerts = [alert.json(sort_keys=True) for alert in second_alerts]
+    common_hashable_alerts = [
+        json.loads(alert)
+        for alert in list(set(first_hashable_alerts) & set(second_hashable_alerts))
+    ]
+    common_alert_ids = [alert["id"] for alert in common_hashable_alerts]
 
-    filtered_alerts = []
-    for alert in alerts:
-        alert_tags = alert.tags
+    common_alerts = []
+    # To handle dedupping common alerts
+    alert_ids_already_handled = []
 
-        if alert_tags and tag_filter.tag in alert_tags:
-            filtered_alerts.append(alert)
-    return filtered_alerts  # type: ignore[return-value]
+    for alert in [*first_alerts, *second_alerts]:
+        if alert.id in common_alert_ids and alert.id not in alert_ids_already_handled:
+            common_alerts.append(alert)
+            alert_ids_already_handled.append(alert.id)
+    return common_alerts
 
 
-def _filter_alerts_by_owner(
+def _filter_alerts_by_tags(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    owner_filter: SelectorFilterSchema,
+    tags_filters: List[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if owner_filter.owner is None:
-        return alerts
+    if not tags_filters:
+        return [*alerts]
 
-    filtered_alerts = []
-    for alert in alerts:
-        raw_owners = alert.unified_owners
-        alert_owners = (
-            try_load_json(raw_owners) if isinstance(raw_owners, str) else raw_owners
-        )
+    grouped_filtered_alerts_by_tags = []
 
-        if alert_owners and owner_filter.owner in alert_owners:
-            filtered_alerts.append(alert)
-    return filtered_alerts  # type: ignore[return-value]
+    # OR filter for each tags_filter's values
+    for tags_filter in tags_filters:
+        filtered_alerts_by_tags = []
+        for alert in alerts:
+            if any(tag in (alert.tags or []) for tag in tags_filter.values):
+                filtered_alerts_by_tags.append(alert)
+        grouped_filtered_alerts_by_tags.append(filtered_alerts_by_tags)
+
+    # AND filter between all tags_filters
+    return reduce(_find_common_alerts, grouped_filtered_alerts_by_tags)  # type: ignore[return-value, arg-type]
 
 
-def _filter_alerts_by_model(
+def _filter_alerts_by_owners(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    model_filter: SelectorFilterSchema,
+    owners_filters: List[FilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if model_filter.model is None:
-        return alerts
+    if not owners_filters:
+        return [*alerts]
 
-    filtered_alerts: Union[
+    grouped_filtered_alerts_by_owners = []
+
+    # OR filter for each owners_filter's values
+    for owners_filter in owners_filters:
+        filtered_alerts_by_owners = []
+        for alert in alerts:
+            if any(owner in alert.unified_owners for owner in owners_filter.values):
+                filtered_alerts_by_owners.append(alert)
+        grouped_filtered_alerts_by_owners.append(filtered_alerts_by_owners)
+
+    # AND filter between all owners_filters
+    return reduce(_find_common_alerts, grouped_filtered_alerts_by_owners)  # type: ignore[return-value, arg-type]
+
+
+def _filter_alerts_by_models(
+    alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
-    ] = []  # type: ignore[assignment]
-    for alert in alerts:
-        alert_model_unique_id = alert.model_unique_id
-        if alert_model_unique_id and alert_model_unique_id.endswith(model_filter.model):
-            filtered_alerts.append(alert)  # type: ignore[arg-type]
-    return filtered_alerts  # type: ignore[return-value]
+    ],
+    models_filters: List[FilterSchema],
+) -> Union[
+    List[PendingTestAlertSchema],
+    List[PendingModelAlertSchema],
+    List[PendingSourceFreshnessAlertSchema],
+]:
+    if not models_filters:
+        return [*alerts]
+
+    grouped_filtered_alerts_by_models = []
+
+    # OR filter for each models_filter's values
+    for models_filter in models_filters:
+        filtered_alerts_by_models = []
+        for alert in alerts:
+            if any(
+                (alert.model_unique_id and alert.model_unique_id.endswith(model))
+                for model in models_filter.values
+            ):
+                filtered_alerts_by_models.append(alert)
+        grouped_filtered_alerts_by_models.append(filtered_alerts_by_models)
+
+    # AND filter between all models_filters
+    return reduce(_find_common_alerts, grouped_filtered_alerts_by_models)  # type: ignore[return-value, arg-type]
 
 
 def _filter_alerts_by_node_names(
@@ -141,14 +189,14 @@ def _filter_alerts_by_node_names(
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    node_name_filter: SelectorFilterSchema,
+    node_names_filters: List[str],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if node_name_filter.node_names is None:
-        return alerts
+    if not node_names_filters:
+        return [*alerts]
 
     filtered_alerts = []
     for alert in alerts:
@@ -164,7 +212,7 @@ def _filter_alerts_by_node_names(
             raise Exception(f"Unexpected alert type: {type(alert)}")
 
         if alert_node_name:
-            for node_name in node_name_filter.node_names:
+            for node_name in node_names_filters:
                 if alert_node_name.endswith(node_name) or node_name.endswith(
                     alert_node_name
                 ):
@@ -173,63 +221,64 @@ def _filter_alerts_by_node_names(
     return filtered_alerts  # type: ignore[return-value]
 
 
-def _filter_alerts_by_status(
+def _filter_alerts_by_statuses(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    status_filter: SelectorFilterSchema,
+    statuses_filters: List[StatusFilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if status_filter.statuses is None:
-        return alerts
+    if not statuses_filters:
+        return [*alerts]
 
-    statuses: List[Status] = status_filter.statuses
-    filter_func: Callable[
-        [
-            Union[
-                PendingTestAlertSchema,
-                PendingModelAlertSchema,
-                PendingSourceFreshnessAlertSchema,
-            ]
-        ],
-        bool,
-    ] = (
-        lambda alert: Status(alert.status) in statuses
-    )
-    return list(filter(filter_func, alerts))  # type: ignore[return-value]
+    grouped_filtered_alerts_by_statuses = []
+
+    # OR filter for each statuses_filter's values
+    for statuses_filter in statuses_filters:
+        filtered_alerts_by_statuses = []
+        for alert in alerts:
+            if any(status == alert.status for status in statuses_filter.values):
+                filtered_alerts_by_statuses.append(alert)
+        grouped_filtered_alerts_by_statuses.append(filtered_alerts_by_statuses)
+
+    # AND filter between all statuses_filters
+    return reduce(_find_common_alerts, grouped_filtered_alerts_by_statuses)  # type: ignore[return-value, arg-type]
 
 
-def _filter_alerts_by_resource_type(
+def _filter_alerts_by_resource_types(
     alerts: Union[
         List[PendingTestAlertSchema],
         List[PendingModelAlertSchema],
         List[PendingSourceFreshnessAlertSchema],
     ],
-    resource_type_filter: SelectorFilterSchema,
+    resource_types_filters: List[ResourceTypeFilterSchema],
 ) -> Union[
     List[PendingTestAlertSchema],
     List[PendingModelAlertSchema],
     List[PendingSourceFreshnessAlertSchema],
 ]:
-    if resource_type_filter.resource_types is None:
-        return alerts
+    if not resource_types_filters:
+        return [*alerts]
 
-    resource_types: List[ResourceType] = resource_type_filter.resource_types
-    filter_func: Callable[
-        [
-            Union[
-                PendingTestAlertSchema,
-                PendingModelAlertSchema,
-                PendingSourceFreshnessAlertSchema,
-            ]
-        ],
-        bool,
-    ] = (
-        lambda alert: alert.resource_type in resource_types
-    )
-    return list(filter(filter_func, alerts))  # type: ignore[return-value]
+    grouped_filtered_alerts_by_resource_types = []
+
+    # OR filter for each resource_types_filter's values
+    for resource_types_filter in resource_types_filters:
+        filtered_alerts_by_resource_types = []
+        for alert in alerts:
+            if any(
+                resource_type == alert.resource_type.value
+                for resource_type in resource_types_filter.values
+            ):
+                filtered_alerts_by_resource_types.append(alert)
+        grouped_filtered_alerts_by_resource_types.append(
+            filtered_alerts_by_resource_types
+        )
+
+    # AND filter between all resource_types_filters
+    return reduce(_find_common_alerts, grouped_filtered_alerts_by_resource_types)  # type: ignore[return-value, arg-type]

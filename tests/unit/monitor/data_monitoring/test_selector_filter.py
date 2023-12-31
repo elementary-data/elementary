@@ -192,7 +192,7 @@ def test_parse_selector_without_user_dbt_runner(anonymous_tracking_mock):
     assert dbt_runner_get_filter.last_invocation is False
     assert dbt_runner_get_filter.invocation_id is None
     assert dbt_runner_get_filter.invocation_time is None
-    assert dbt_runner_get_filter.node_names is None
+    assert len(dbt_runner_get_filter.node_names) == 0
     assert len(dbt_runner_get_filter.tags) == 0
     assert len(dbt_runner_get_filter.owners) == 0
     assert len(dbt_runner_get_filter.models) == 0
