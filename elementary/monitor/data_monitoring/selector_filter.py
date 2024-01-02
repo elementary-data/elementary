@@ -33,6 +33,7 @@ class SelectorFilter:
         )
         self.filter = self._parse_selector(self.selector)
 
+    # Once we will separate the filters to monitor and report filters, we will remove this method.
     def _parse_selector(self, selector: Optional[str] = None) -> FiltersSchema:
         data_monitoring_filter = FiltersSchema()
         if selector:

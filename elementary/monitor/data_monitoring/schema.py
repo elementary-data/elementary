@@ -1,6 +1,7 @@
+import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Pattern, Tuple
 
 from pydantic import BaseModel, Field, validator
 
@@ -50,6 +51,15 @@ class ResourceTypeFilterSchema(FilterSchema):
     values: List[ResourceType]
 
 
+def _get_default_statuses_filter() -> List[StatusFilterSchema]:
+    return [
+        StatusFilterSchema(
+            type=SupportedFilterTypes.IS,
+            values=[Status.FAIL, Status.ERROR, Status.RUNTIME_ERROR, Status.WARN],
+        )
+    ]
+
+
 class FiltersSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
@@ -60,14 +70,7 @@ class FiltersSchema(BaseModel):
     tags: List[FilterSchema] = Field(default_factory=list)
     owners: List[FilterSchema] = Field(default_factory=list)
     models: List[FilterSchema] = Field(default_factory=list)
-    statuses: List[StatusFilterSchema] = Field(
-        default=[
-            StatusFilterSchema(
-                type=SupportedFilterTypes.IS,
-                values=[Status.FAIL, Status.ERROR, Status.RUNTIME_ERROR, Status.WARN],
-            )
-        ]
-    )
+    statuses: List[StatusFilterSchema] = Field(default=_get_default_statuses_filter())
     resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
@@ -100,6 +103,83 @@ class FiltersSchema(BaseModel):
             raise InvalidSelectorError(
                 "Selector is invalid for report: ", self.selector
             )
+
+    @staticmethod
+    def from_cli_params(cli_filters: Tuple[str]) -> "FiltersSchema":
+        if not cli_filters:
+            return FiltersSchema()
+
+        tags = []
+        owners = []
+        models = []
+        statuses = []
+        resource_types = []
+
+        for filter in cli_filters:
+            tags_match = FiltersSchema._match_filter_regex(
+                filter_string=filter, regex=re.compile(r"tags:(.*)")
+            )
+            if tags_match:
+                tags.append(FilterSchema(values=tags_match))
+                continue
+
+            owners_match = FiltersSchema._match_filter_regex(
+                filter_string=filter, regex=re.compile(r"owners:(.*)")
+            )
+            if owners_match:
+                owners.append(FilterSchema(values=owners_match))
+                continue
+
+            models_match = FiltersSchema._match_filter_regex(
+                filter_string=filter, regex=re.compile(r"models:(.*)")
+            )
+            if models_match:
+                models.append(FilterSchema(values=models_match))
+                continue
+
+            statuses_match = FiltersSchema._match_filter_regex(
+                filter_string=filter, regex=re.compile(r"statuses:(.*)")
+            )
+            if statuses_match:
+                statuses.append(
+                    StatusFilterSchema(
+                        values=[Status(status) for status in statuses_match]
+                    )
+                )
+                continue
+
+            resource_types_match = FiltersSchema._match_filter_regex(
+                filter_string=filter, regex=re.compile(r"resource_types:(.*)")
+            )
+            if resource_types_match:
+                resource_types.append(
+                    ResourceTypeFilterSchema(
+                        values=[
+                            ResourceType(resource_type)
+                            for resource_type in resource_types_match
+                        ]
+                    )
+                )
+                continue
+
+            logger.warning(
+                f'Filter "{filter.split(":")[0]}" is not supported - Skipping this filter ("{filter}").'
+            )
+
+        return FiltersSchema(
+            tags=tags,
+            owners=owners,
+            models=models,
+            statuses=statuses if statuses else _get_default_statuses_filter(),
+            resource_types=resource_types,
+        )
+
+    @staticmethod
+    def _match_filter_regex(filter_string: str, regex: Pattern) -> List[str]:
+        match = regex.search(filter_string)
+        if match:
+            return match.group(1).split(",")
+        return []
 
     def to_selector_filter_schema(self) -> "SelectorFilterSchema":
         selector = self.selector if self.selector else None
