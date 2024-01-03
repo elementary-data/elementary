@@ -322,7 +322,7 @@ def monitor(
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     try:
-        # config.validate_monitor()
+        config.validate_monitor()
 
         filters = FiltersSchema()
         if bool(filter):
