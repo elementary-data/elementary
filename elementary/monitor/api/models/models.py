@@ -222,7 +222,11 @@ class ModelsAPI(APIClient):
             # For exposures, we want the path to be based on the path in the BI rather than
             # the file system path of the exposures yaml.
             # NOTE - if there is no path provided in the BI, the FQN will just be the exposure name.
-            split_artifact_path = ["exposures"] + fqn.split("/")
+            split_artifact_path = [
+                artifact.meta.get("platform", "exposures")
+                if artifact.meta
+                else "exposures"
+            ] + fqn.split("/")
         else:
             split_artifact_path = artifact.full_path.split(os.path.sep)
 
