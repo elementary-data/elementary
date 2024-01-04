@@ -144,7 +144,7 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "DEPRECATED! Please use --filter instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
             "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
         return func
@@ -253,7 +253,7 @@ def get_cli_properties() -> dict:
     help="The report URL for the alert attached links.",
 )
 @click.option(
-    "--filter",
+    "--filters",
     "-fl",
     type=str,
     default=None,
@@ -288,7 +288,7 @@ def monitor(
     suppression_interval,
     override_dbt_project_config,
     report_url,
-    filter,
+    filters,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -324,16 +324,18 @@ def monitor(
     try:
         config.validate_monitor()
 
-        filters = FiltersSchema()
-        if bool(filter):
-            filters = FiltersSchema.from_cli_params(filter)
+        alert_filters = FiltersSchema()
+        if bool(filters):
+            alert_filters = FiltersSchema.from_cli_params(filters)
         elif select is not None:
             click.secho(
                 '\n"--select" is deprecated and won\'t be supported in the near future.\n'
                 'Please use "-fl" or "--filter" for filtering the alerts.\n',
                 fg="bright_red",
             )
-            filters = SelectorFilter(config, anonymous_tracking, select).get_filter()
+            alert_filters = SelectorFilter(
+                config, anonymous_tracking, select
+            ).get_filter()
 
         data_monitoring = DataMonitoringAlerts(
             config=config,
@@ -341,7 +343,7 @@ def monitor(
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
             disable_samples=disable_samples,
-            selector_filter=filters,
+            selector_filter=alert_filters,
             global_suppression_interval=suppression_interval,
             override_config=override_dbt_project_config,
         )

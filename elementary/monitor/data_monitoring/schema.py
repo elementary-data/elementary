@@ -115,30 +115,30 @@ class FiltersSchema(BaseModel):
         statuses = []
         resource_types = []
 
-        for filter in cli_filters:
+        for cli_filter in cli_filters:
             tags_match = FiltersSchema._match_filter_regex(
-                filter_string=filter, regex=re.compile(r"tags:(.*)")
+                filter_string=cli_filter, regex=re.compile(r"tags:(.*)")
             )
             if tags_match:
                 tags.append(FilterSchema(values=tags_match))
                 continue
 
             owners_match = FiltersSchema._match_filter_regex(
-                filter_string=filter, regex=re.compile(r"owners:(.*)")
+                filter_string=cli_filter, regex=re.compile(r"owners:(.*)")
             )
             if owners_match:
                 owners.append(FilterSchema(values=owners_match))
                 continue
 
             models_match = FiltersSchema._match_filter_regex(
-                filter_string=filter, regex=re.compile(r"models:(.*)")
+                filter_string=cli_filter, regex=re.compile(r"models:(.*)")
             )
             if models_match:
                 models.append(FilterSchema(values=models_match))
                 continue
 
             statuses_match = FiltersSchema._match_filter_regex(
-                filter_string=filter, regex=re.compile(r"statuses:(.*)")
+                filter_string=cli_filter, regex=re.compile(r"statuses:(.*)")
             )
             if statuses_match:
                 statuses.append(
@@ -149,7 +149,7 @@ class FiltersSchema(BaseModel):
                 continue
 
             resource_types_match = FiltersSchema._match_filter_regex(
-                filter_string=filter, regex=re.compile(r"resource_types:(.*)")
+                filter_string=cli_filter, regex=re.compile(r"resource_types:(.*)")
             )
             if resource_types_match:
                 resource_types.append(
@@ -163,7 +163,7 @@ class FiltersSchema(BaseModel):
                 continue
 
             logger.warning(
-                f'Filter "{filter.split(":")[0]}" is not supported - Skipping this filter ("{filter}").'
+                f'Filter "{cli_filter.split(":")[0]}" is not supported - Skipping this filter ("{cli_filter}").'
             )
 
         return FiltersSchema(
