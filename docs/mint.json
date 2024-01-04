@@ -215,7 +215,8 @@
           "icon": "circle-play",
           "pages": [
             "cloud/onboarding/quickstart-dbt-package",
-            "cloud/onboarding/signup"
+            "cloud/onboarding/signup",
+            "cloud/manage-team"
           ]
         },
         "cloud/general/security-and-privacy"
