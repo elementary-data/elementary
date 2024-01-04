@@ -9,6 +9,7 @@ from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
+from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.monitor.debug import Debug
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
@@ -143,7 +144,7 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
             "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
         return func
@@ -251,6 +252,15 @@ def get_cli_properties() -> dict:
     default=None,
     help="The report URL for the alert attached links.",
 )
+@click.option(
+    "--filters",
+    "-fl",
+    type=str,
+    default=None,
+    multiple=True,
+    help="Filter the alerts by tags:<tags separated by commas> / owners:<owners separated by commas> / models:<models separated by commas> / "
+    "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -278,6 +288,7 @@ def monitor(
     suppression_interval,
     override_dbt_project_config,
     report_url,
+    filters,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -312,14 +323,27 @@ def monitor(
     anonymous_tracking.set_env("use_select", bool(select))
     try:
         config.validate_monitor()
-        selector_filter = SelectorFilter(config, anonymous_tracking, select)
+
+        alert_filters = FiltersSchema()
+        if bool(filters):
+            alert_filters = FiltersSchema.from_cli_params(filters)
+        elif select is not None:
+            click.secho(
+                '\n"--select" is deprecated and won\'t be supported in the near future.\n'
+                'Please use "-fl" or "--filter" for filtering the alerts.\n',
+                fg="bright_red",
+            )
+            alert_filters = SelectorFilter(
+                config, anonymous_tracking, select
+            ).get_filter()
+
         data_monitoring = DataMonitoringAlerts(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
             disable_samples=disable_samples,
-            selector_filter=selector_filter.get_filter(),
+            selector_filter=alert_filters,
             global_suppression_interval=suppression_interval,
             override_config=override_dbt_project_config,
         )
