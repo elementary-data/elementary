@@ -12,8 +12,8 @@ from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.utils.ordered_yaml import OrderedYaml
 
-
 MAX_SERIALISED_CHARACTER_LENGTH = 90_000
+
 
 class UploadSourceFreshnessOperation:
     def __init__(self, config: Config):
