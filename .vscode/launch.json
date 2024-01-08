@@ -10,7 +10,7 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "monitor",
+      "name": "Monitor",
       "type": "python",
       "request": "launch",
       "module": "elementary.cli.cli",
