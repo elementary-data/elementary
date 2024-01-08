@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Report",
+      "type": "python",
+      "request": "launch",
+      "module": "elementary.cli.cli",
+      "args": ["report"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "monitor",
+      "type": "python",
+      "request": "launch",
+      "module": "elementary.cli.cli",
+      "args": ["monitor"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
