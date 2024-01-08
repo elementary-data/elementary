@@ -127,7 +127,7 @@ class DataMonitoringReport(DataMonitoring):
         if error:
             logger.exception(
                 f"Could not generate the report - Error: {error}\nPlease reach out to our community for help with this issue.",
-                exc_info=(type(error), error, error.__traceback__),
+                exc_info=error,
             )
             self.success = False
 
