@@ -47,7 +47,7 @@ Just fix the issue yourself and [open a pull request](#submitting-changes).
 To get help fixing a specific issue, it's often best to comment on the issue
 itself. You're much more likely to get help if you provide details about what
 you've tried and where you've
-looked. [Slack](https://join.slack.com/t/elementary-community/shared_invite/zt-1b9vogqmq-y~IRhc2396CbHNBXLsrXcA) can also
+looked. [Slack](https://www.elementary-data.com/community) can also
 be a good place
 to ask for help.
 
