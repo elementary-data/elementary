@@ -35,4 +35,4 @@ select
     ee.depends_on_columns as depends_on_columns
 {% endif %}
 from
-    {{ dbt_exposures_relation }} de full join {{ ref('elementary_cli', 'elementary_exposures') }} ee on ee.unique_id = de.unique_id
+    {{ dbt_exposures_relation }} de full join {{ ref('elementary_cli', 'elementary_exposures') }} ee on ee.name = de.name
