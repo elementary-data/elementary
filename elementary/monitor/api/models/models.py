@@ -219,14 +219,7 @@ class ModelsAPI(APIClient):
             raise Exception("Artifact full path can't be null")
 
         if isinstance(artifact, ExposureSchema):
-            # For exposures, we want the path to be based on the path in the BI rather than
-            # the file system path of the exposures yaml.
-            # NOTE - if there is no path provided in the BI, the FQN will just be the exposure name.
-            split_artifact_path = [
-                artifact.meta.get("platform", "exposures")
-                if artifact.meta
-                else "exposures"
-            ] + fqn.split("/")
+            split_artifact_path = fqn.split("/")
         else:
             split_artifact_path = artifact.full_path.split(os.path.sep)
 
@@ -235,9 +228,9 @@ class ModelsAPI(APIClient):
                 if split_artifact_path[0] == "models":
                     split_artifact_path[0] = "sources"
 
-        # Add package name to model path
-        if artifact.package_name:
-            split_artifact_path.insert(0, artifact.package_name)
+        root_dir = cls._get_root_dir_path(artifact)
+        if root_dir:
+            split_artifact_path.insert(0, root_dir)
 
         return os.path.sep.join(split_artifact_path)
 
@@ -259,3 +252,15 @@ class ModelsAPI(APIClient):
         )
 
         return fqn.lower()
+
+    @classmethod
+    def _get_root_dir_path(cls, artifact: ArtifactSchemaType) -> Optional[str]:
+        if isinstance(artifact, ExposureSchema):
+            bi_platform = artifact.meta.get("platform") if artifact.meta else None
+            if bi_platform:
+                return bi_platform
+
+        if artifact.package_name:
+            return artifact.package_name
+
+        return None
