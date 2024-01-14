@@ -30,6 +30,7 @@ class DbtRunner(BaseDbtRunner):
         secret_vars: Optional[Dict[str, Any]] = None,
         allow_macros_without_package_prefix: bool = False,
         run_deps_if_needed: bool = True,
+        force_dbt_deps: bool = False,
     ) -> None:
         super().__init__(
             project_dir,
@@ -41,7 +42,9 @@ class DbtRunner(BaseDbtRunner):
         )
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
-        if run_deps_if_needed:
+        if force_dbt_deps:
+            self.deps()
+        elif run_deps_if_needed:
             self._run_deps_if_needed()
 
     def _run_command(

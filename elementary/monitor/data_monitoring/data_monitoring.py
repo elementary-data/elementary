@@ -55,6 +55,7 @@ class DataMonitoring:
         self.success = True
         self.disable_samples = disable_samples
         self.selector_filter = selector_filter
+        self.force_update_dbt_package = force_update_dbt_package
 
     def _init_internal_dbt_runner(self):
         internal_dbt_runner = DbtRunner(
@@ -63,6 +64,7 @@ class DataMonitoring:
             self.config.profile_target,
             env_vars=self.config.env_vars,
             run_deps_if_needed=self.config.run_dbt_deps_if_needed,
+            force_dbt_deps=self.force_update_dbt_package,
         )
         return internal_dbt_runner
 
