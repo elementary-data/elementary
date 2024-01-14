@@ -31,6 +31,7 @@ class DataMonitoring:
         self.execution_properties: Dict[str, Any] = {}
         self.config = config
         self.tracking = tracking
+        self.force_update_dbt_package = force_update_dbt_package
         self.internal_dbt_runner = self._init_internal_dbt_runner()
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
@@ -55,7 +56,6 @@ class DataMonitoring:
         self.success = True
         self.disable_samples = disable_samples
         self.selector_filter = selector_filter
-        self.force_update_dbt_package = force_update_dbt_package
 
     def _init_internal_dbt_runner(self):
         internal_dbt_runner = DbtRunner(
