@@ -26,7 +26,7 @@ def is_dbt_package_up_to_date(project_dir: str) -> bool:
 
 
 def _get_elementary_package_path(project_dir: str) -> Optional[str]:
-    package_path = os.path.join(project_dir, "dbt_project", _DBT_PACKAGE_NAME)
+    package_path = os.path.join(project_dir, "dbt_packages", _DBT_PACKAGE_NAME)
     if os.path.exists(package_path):
         return package_path
 
