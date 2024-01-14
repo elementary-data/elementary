@@ -492,6 +492,12 @@ def report(
     help="The secret access key for AWS",
 )
 @click.option(
+    "--aws-session-token",
+    type=str,
+    default=None,
+    help="The session token for AWS",
+)
+@click.option(
     "--s3-endpoint-url",
     type=str,
     default=None,
@@ -612,6 +618,7 @@ def send_report(
     aws_region_name,
     aws_access_key_id,
     aws_secret_access_key,
+    aws_session_token,
     s3_endpoint_url,
     s3_bucket_name,
     azure_connection_string,
@@ -657,6 +664,7 @@ def send_report(
         aws_region_name=aws_region_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
         azure_connection_string=azure_connection_string,
         azure_container_name=azure_container_name,
         s3_endpoint_url=s3_endpoint_url,
