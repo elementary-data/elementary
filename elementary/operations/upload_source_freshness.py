@@ -37,12 +37,10 @@ class UploadSourceFreshnessOperation:
 
     def upload_results(self, results: dict, metadata: dict):
         dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
+            dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,
         )
-        if not dbt_project_utils.is_dbt_package_up_to_date():
-            dbt_runner.deps()
 
         invocation_id = metadata.get("invocation_id")
         if not invocation_id:

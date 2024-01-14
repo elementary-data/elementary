@@ -32,7 +32,6 @@ class DataMonitoring:
         self.config = config
         self.tracking = tracking
         self.internal_dbt_runner = self._init_internal_dbt_runner()
-        self._download_dbt_package_if_needed(force_update_dbt_package)
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         dbt_pkg_version = latest_invocation.get("elementary_version")
@@ -59,29 +58,12 @@ class DataMonitoring:
 
     def _init_internal_dbt_runner(self):
         internal_dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
+            dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,
             env_vars=self.config.env_vars,
         )
         return internal_dbt_runner
-
-    def _download_dbt_package_if_needed(self, force_update_dbt_packages: bool):
-        internal_dbt_package_up_to_date = dbt_project_utils.is_dbt_package_up_to_date()
-        self.execution_properties[
-            "dbt_package_up_to_date"
-        ] = internal_dbt_package_up_to_date
-        self.execution_properties[
-            "force_update_dbt_packages"
-        ] = force_update_dbt_packages
-        if not internal_dbt_package_up_to_date or force_update_dbt_packages:
-            logger.info("Downloading edr internal dbt package")
-            package_downloaded = self.internal_dbt_runner.deps()
-            self.execution_properties["package_downloaded"] = package_downloaded
-            if not package_downloaded:
-                logger.error("Could not download internal dbt package")
-                self.success = False
-                return
 
     def properties(self):
         data_monitoring_properties = {

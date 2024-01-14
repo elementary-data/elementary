@@ -12,7 +12,7 @@ class Debug:
 
     def run(self) -> bool:
         dbt_runner = DbtRunner(
-            dbt_project_utils.PATH,
+            dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,
         )
