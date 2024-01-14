@@ -30,10 +30,6 @@ def _get_elementary_package_path(project_dir: str) -> Optional[str]:
     if os.path.exists(package_path):
         return package_path
 
-    legacy_package_path = os.path.join(project_dir, "dbt_modules", _DBT_PACKAGE_NAME)
-    if os.path.exists(legacy_package_path):
-        return legacy_package_path
-
     return None
 
 
