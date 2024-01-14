@@ -62,6 +62,7 @@ class DataMonitoring:
             self.config.profiles_dir,
             self.config.profile_target,
             env_vars=self.config.env_vars,
+            run_deps_if_needed=self.config.run_dbt_deps_if_needed,
         )
         return internal_dbt_runner
 

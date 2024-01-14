@@ -40,6 +40,7 @@ class UploadSourceFreshnessOperation:
             dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,
+            run_deps_if_needed=self.config.run_dbt_deps_if_needed,
         )
 
         invocation_id = metadata.get("invocation_id")
