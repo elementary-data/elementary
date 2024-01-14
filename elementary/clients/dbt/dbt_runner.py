@@ -303,15 +303,12 @@ class DbtRunner(BaseDbtRunner):
         if not required_package_names.issubset(installed_package_names):
             logger.info("Installing packages for edr internal dbt package...")
             should_run_deps = True
-        else:
-            # Check if Elementary's dbt package is up-to-date
+        elif not is_dbt_package_up_to_date(self.project_dir):
+            # Run deps also if Elementary's dbt package is not up-to-date
             # NOTE - we can't do this check for all packages, because the version in dbt_project.yaml is not enforced to be the same
             #        as the dbt hub version (but for our package we do ensure they are aligned)
-            if not is_dbt_package_up_to_date(self.project_dir):
-                logger.info(
-                    "edr internal dbt package is not up-to-date, updating it..."
-                )
-                should_run_deps = True
+            logger.info("edr internal dbt package is not up-to-date, updating it...")
+            should_run_deps = True
 
         if should_run_deps:
             self.deps()
