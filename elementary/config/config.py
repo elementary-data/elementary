@@ -53,6 +53,7 @@ class Config:
         aws_region_name: Optional[str] = None,
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
         s3_endpoint_url: Optional[str] = None,
         s3_bucket_name: Optional[str] = None,
         google_project_name: Optional[str] = None,
@@ -136,6 +137,7 @@ class Config:
         )
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
+        self.aws_session_token = aws_session_token
 
         google_config = config.get(self._GOOGLE, {})
         self.google_project_name = self._first_not_none(
