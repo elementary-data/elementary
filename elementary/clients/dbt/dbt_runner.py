@@ -293,6 +293,9 @@ class DbtRunner(BaseDbtRunner):
         ]
 
     def _run_deps_if_needed(self):
+        if not os.path.exists(self.project_dir):
+            return
+
         should_run_deps = False
 
         installed_package_names = set(self._get_installed_packages_names())
