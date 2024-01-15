@@ -1,8 +1,15 @@
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from elementary.utils.pydantic_shim import Field, validator
+
+from elementary.monitor.api.models.schema import NormalizedArtifactSchema
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
+
+
+class NormalizedTestSchema(NormalizedArtifactSchema):
+    unique_id: str
+    artifact_type: Literal["test"] = "test"
 
 
 class TestResultDBRowSchema(ExtendedBaseModel):

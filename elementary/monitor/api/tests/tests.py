@@ -18,7 +18,10 @@ from elementary.monitor.api.tests.schema import (
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from elementary.monitor.fetchers.tests.schema import (
+    NormalizedTestSchema,
+    TestResultDBRowSchema,
+)
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
@@ -122,6 +125,9 @@ class TestsAPI(APIClient):
         else:
             subscribers.append(model_subscribers)
         return subscribers
+
+    def get_singular_tests(self) -> List[NormalizedTestSchema]:
+        return self.tests_fetcher.get_singular_tests()
 
     def get_test_results(
         self,

@@ -15,6 +15,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedModelSchema,
     NormalizedSourceSchema,
 )
+from elementary.monitor.fetchers.tests.schema import NormalizedTestSchema
 
 FILES_GROUP_KEYWORD = "__files__"
 NO_TAGS_DEFAULT_TREE = "No tags"
@@ -22,7 +23,10 @@ NO_OWNERS_DEFAULT_TREE = "No owners"
 
 
 GROUPABLE_ARTIFACT = Union[
-    NormalizedModelSchema, NormalizedSourceSchema, NormalizedExposureSchema
+    NormalizedModelSchema,
+    NormalizedSourceSchema,
+    NormalizedExposureSchema,
+    NormalizedTestSchema,
 ]
 
 
