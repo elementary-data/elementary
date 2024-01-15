@@ -16,6 +16,7 @@ def test_get_test_results_totals(test_results_summary):
     assert totals.get("error") == 1
     assert totals.get("failed") == 3
     assert totals.get("warning") == 2
+    assert totals.get("skipped") == 1
 
 
 def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
@@ -25,6 +26,7 @@ def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
     attachments_as_string = json.dumps(
         message_builder.slack_message.get("attachments")[0].get("blocks")
     )
+
     assert ":small_red_triangle: *Failed tests*" in attachments_as_string
     assert ":warning: *Warning*" in attachments_as_string
     assert ":exclamation: *Error*" in attachments_as_string
@@ -96,7 +98,7 @@ def test_results_summary() -> List[TestResultSummarySchema]:
             subscribers=[],
             description="Another test",
             test_name="second_test",
-            status="warning",
+            status="warn",
             results_counter=None,
         ),
         TestResultSummarySchema(
@@ -186,7 +188,7 @@ def test_results_summary() -> List[TestResultSummarySchema]:
             subscribers=[],
             description="Not important",
             test_name="warn me",
-            status="warning",
+            status="warn",
             results_counter=7,
         )
     ]
@@ -220,10 +222,27 @@ def test_results_summary() -> List[TestResultSummarySchema]:
             results_counter=57,
         ),
     ]
+    skipped_test_results = [
+        TestResultSummarySchema(
+            test_unique_id="test_id_10",
+            elementary_unique_id="elementary_unique_id_10",
+            table_name="table_10",
+            test_type="dbt_test",
+            test_sub_type="generic",
+            owners=["egk"],
+            tags=[],
+            subscribers=[],
+            description=None,
+            test_name="Test me please",
+            status="skipped",
+            results_counter=42,
+        ),
+    ]
     return [
         *schema_changes_test_results,
         *passed_test_results,
         *warning_test_results,
         *error_test_results,
         *failed_test_results,
+        *skipped_test_results,
     ]
