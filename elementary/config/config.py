@@ -64,6 +64,7 @@ class Config:
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
         env: str = "dev",
+        run_dbt_deps_if_needed: Optional[bool] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -175,6 +176,9 @@ class Config:
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
+        self.run_dbt_deps_if_needed = self._first_not_none(
+            run_dbt_deps_if_needed, config.get("run_dbt_deps_if_needed"), True
+        )
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):

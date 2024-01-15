@@ -8,6 +8,7 @@ import yaml
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
+from elementary.monitor.dbt_project_utils import is_dbt_package_up_to_date
 from elementary.utils.env_vars import is_debug
 from elementary.utils.json_utils import try_load_json
 from elementary.utils.log import get_logger
@@ -28,6 +29,8 @@ class DbtRunner(BaseDbtRunner):
         vars: Optional[Dict[str, Any]] = None,
         secret_vars: Optional[Dict[str, Any]] = None,
         allow_macros_without_package_prefix: bool = False,
+        run_deps_if_needed: bool = True,
+        force_dbt_deps: bool = False,
     ) -> None:
         super().__init__(
             project_dir,
@@ -39,7 +42,10 @@ class DbtRunner(BaseDbtRunner):
         )
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
-        self._run_deps_if_needed()
+        if force_dbt_deps:
+            self.deps()
+        elif run_deps_if_needed:
+            self._run_deps_if_needed()
 
     def _run_command(
         self,
@@ -287,7 +293,22 @@ class DbtRunner(BaseDbtRunner):
         ]
 
     def _run_deps_if_needed(self):
+        if not os.path.exists(self.project_dir):
+            return
+
+        should_run_deps = False
+
         installed_package_names = set(self._get_installed_packages_names())
         required_package_names = set(self._get_required_packages_names())
         if not required_package_names.issubset(installed_package_names):
+            logger.info("Installing packages for edr internal dbt package...")
+            should_run_deps = True
+        elif not is_dbt_package_up_to_date(self.project_dir):
+            # Run deps also if Elementary's dbt package is not up-to-date
+            # NOTE - we can't do this check for all packages, because the version in dbt_project.yaml is not enforced to be the same
+            #        as the dbt hub version (but for our package we do ensure they are aligned)
+            logger.info("edr internal dbt package is not up-to-date, updating it...")
+            should_run_deps = True
+
+        if should_run_deps:
             self.deps()
