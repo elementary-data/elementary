@@ -52,7 +52,10 @@
         elementary_test_results.test_results_query,
         elementary_test_results.other,
         case
-            when dbt_tests.short_name is not null then dbt_tests.short_name
+            when elementary_test_results.test_name ilike concat(
+                coalesce(concat(dbt_tests.test_namespace, '_'), ''),
+                dbt_tests.short_name, '_', elementary_test_results.table_name, '%')
+            then dbt_tests.short_name
             else elementary_test_results.test_name
         end as test_name,
         elementary_test_results.test_params,
