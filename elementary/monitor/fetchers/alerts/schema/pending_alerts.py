@@ -52,6 +52,10 @@ class PendingAlertSchema(BaseModel):
         # Make sure that serializing Enum return values
         use_enum_values = True
 
+    @validator("data", pre=True, always=True)
+    def validate_data(cls, data: Optional[Union[str, Dict]]):
+        return try_load_json(data)
+
 
 class BasePendingAlertSchema(BaseModel):
     id: str
@@ -63,8 +67,6 @@ class BasePendingAlertSchema(BaseModel):
     tags: Optional[List[str]] = None
     owners: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
-    suppression_status: str
-    sent_at: Optional[datetime] = None
     status: str
 
     @property
