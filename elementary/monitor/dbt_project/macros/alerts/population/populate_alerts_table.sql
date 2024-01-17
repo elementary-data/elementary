@@ -16,9 +16,6 @@
             {% endif %}
         {% endfor %}
 
-        {% do elementary.edr_log(all_alerts) %}
-        {% do elementary.edr_log(backward_already_handled_alert_ids) %}
-        {% do elementary.edr_log(unhandled_alerts) %}
         {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts, should_commit=True) %}
     {% endif %}
     {% do return('') %}
