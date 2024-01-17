@@ -13,7 +13,7 @@ from elementary.monitor.api.alerts.schema import (
     SourceFreshnessAlertsSchema,
     TestAlertsSchema,
 )
-from elementary.monitor.data_monitoring.schema import FiltersSchema, ResourceType
+from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
     PendingModelAlertSchema,
@@ -48,10 +48,9 @@ class AlertsAPI(APIClient):
     def get_new_alerts(
         self,
         days_back: int,
-        disable_samples: bool = False,
         filter: FiltersSchema = FiltersSchema(),
     ) -> AlertsSchema:
-        new_test_alerts = self.get_test_alerts(days_back, disable_samples, filter)
+        new_test_alerts = self.get_test_alerts(days_back, filter)
         new_model_alerts = self.get_model_alerts(days_back, filter)
         new_source_freshness_alerts = self.get_source_freshness_alerts(
             days_back, filter
@@ -65,12 +64,9 @@ class AlertsAPI(APIClient):
     def get_test_alerts(
         self,
         days_back: int,
-        disable_samples: bool = False,
         filter: FiltersSchema = FiltersSchema(),
     ) -> TestAlertsSchema:
-        pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(
-            days_back, disable_samples
-        )
+        pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(days_back)
         filtered_pending_test_alerts = filter_alerts(pending_test_alerts, filter)
         last_alert_sent_times = self.alerts_fetcher.query_last_test_alert_times(
             days_back
@@ -126,18 +122,11 @@ class AlertsAPI(APIClient):
             List[PendingModelAlertSchema],
             List[PendingSourceFreshnessAlertSchema],
         ],
-        resource_type: ResourceType,
     ) -> None:
-        self.alerts_fetcher.skip_alerts(
-            alerts_to_skip=alerts_to_skip, resource_type=resource_type
-        )
+        self.alerts_fetcher.skip_alerts(alerts_to_skip=alerts_to_skip)
 
-    def update_sent_alerts(
-        self, alert_ids: List[str], resource_type: ResourceType
-    ) -> None:
-        self.alerts_fetcher.update_sent_alerts(
-            alert_ids=alert_ids, resource_type=resource_type
-        )
+    def update_sent_alerts(self, alert_ids: List[str]) -> None:
+        self.alerts_fetcher.update_sent_alerts(alert_ids=alert_ids)
 
     def _sort_alerts(
         self,

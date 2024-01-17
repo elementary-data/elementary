@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from alive_progress import alive_it
 
@@ -19,7 +19,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.integrations import 
     Integrations,
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import FiltersSchema, ResourceType
+from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -66,7 +66,6 @@ class DataMonitoringAlerts(DataMonitoring):
     def _fetch_data(self, days_back: int) -> AlertsSchema:
         return self.alerts_api.get_new_alerts(
             days_back=days_back,
-            disable_samples=self.disable_samples,
             filter=self.selector_filter,
         )
 
@@ -145,12 +144,6 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
 
-        sent_alert_ids_by_type: Dict[ResourceType, List[str]] = {
-            ResourceType.TEST: [],
-            ResourceType.MODEL: [],
-            ResourceType.SOURCE_FRESHNESS: [],
-        }
-
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
         for alert in alerts_with_progress_bar:
@@ -172,31 +165,19 @@ class DataMonitoringAlerts(DataMonitoring):
                     )
                 self.success = False
 
-        for sent_alert in sent_successfully_alerts:
-            if isinstance(sent_alert, TestAlertModel):
-                sent_alert_ids_by_type[ResourceType.TEST].append(sent_alert.id)
-            elif isinstance(sent_alert, ModelAlertModel):
-                sent_alert_ids_by_type[ResourceType.MODEL].append(sent_alert.id)
-            elif isinstance(sent_alert, SourceFreshnessAlertModel):
-                sent_alert_ids_by_type[ResourceType.SOURCE_FRESHNESS].append(
-                    sent_alert.id
-                )
-
         # Now update as sent:
-        for resource_type, alert_ids in sent_alert_ids_by_type.items():
-            self.sent_alert_count += len(alert_ids)
-            self.alerts_api.update_sent_alerts(alert_ids, resource_type)
+        self.sent_alert_count = len(sent_successfully_alerts)
+        self.alerts_api.update_sent_alerts(
+            [alert.id for alert in sent_successfully_alerts]
+        )
 
         # Now update sent alerts counter:
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
     def _skip_alerts(self, alerts: AlertsSchema):
-        self.alerts_api.skip_alerts(alerts.tests.skip, ResourceType.TEST)
-        self.alerts_api.skip_alerts(alerts.models.skip, ResourceType.MODEL)
-        self.alerts_api.skip_alerts(
-            alerts.source_freshnesses.skip,
-            ResourceType.SOURCE_FRESHNESS,
-        )
+        self.alerts_api.skip_alerts(alerts.tests.skip)
+        self.alerts_api.skip_alerts(alerts.models.skip)
+        self.alerts_api.skip_alerts(alerts.source_freshnesses.skip)
 
     def run_alerts(
         self,
@@ -206,7 +187,9 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> bool:
         logger.info("Running internal dbt run to aggregate alerts")
         success = self.internal_dbt_runner.run(
-            models="elementary_cli.alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
+            models="elementary_cli.alerts.alerts_v2",
+            full_refresh=dbt_full_refresh,
+            vars=dbt_vars,
         )
         self.execution_properties["alerts_run_success"] = success
         if not success:

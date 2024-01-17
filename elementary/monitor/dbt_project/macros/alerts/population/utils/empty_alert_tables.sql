@@ -52,18 +52,13 @@
 {% macro empty_alerts_v2() %}
     {{ elementary.empty_table([
 		('alert_id', 'long_string'),
+		('alert_class_id', 'long_string'),
 		('type', 'string'),
-		('database_name','string'),
-    	('schema_name','string'),
-		('model_unique_id','long_string'),
 		('detected_at','timestamp'),
     	('created_at','timestamp'),
-		('owners','string'),
-    	('tags','string'),
+    	('updated_at','timestamp'),
 		('status','string'),
-		{# data is a json that saved as long string to support all dwh types #}
-		('data', 'long_string')
-		('suppression_status', 'string'),
+		('data', 'long_string'),
 		('sent_at', 'string')
     ]) }}
 {% endmacro %}

@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
 
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
-from elementary.monitor.data_monitoring.schema import ResourceType
 from elementary.utils.dicts import flatten_dict_by_key, merge_dicts_attribute
 from elementary.utils.json_utils import (
     try_load_json,
@@ -22,6 +22,34 @@ SUBSCRIBERS_KEY = "subscribers"
 ALERT_FIELDS_KEY = "alert_fields"
 ALERT_SUPPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
+
+
+class AlertTypes(Enum):
+    TEST = "test"
+    MODEL = "model"
+    SOURCE_FRESHNESS = "source_freshness"
+
+
+class AlertStatus(Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    SKIPPED = "skipped"
+
+
+class PendingAlertSchema(BaseModel):
+    id: str
+    alert_class_id: str
+    type: AlertTypes
+    detected_at: datetime
+    created_at: datetime
+    updated_at: datetime
+    status: AlertStatus
+    data: Dict[str, Any]
+    sent_at: Optional[datetime] = None
+
+    class Config:
+        # Make sure that serializing Enum return values
+        use_enum_values = True
 
 
 class BasePendingAlertSchema(BaseModel):
@@ -138,7 +166,6 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
     severity: str
     test_meta: Optional[Dict] = None
     elementary_unique_id: str
-    resource_type: ResourceType = Field(ResourceType.TEST, const=True)
 
     @property
     def flatten_model_meta(self) -> Dict:
@@ -230,7 +257,6 @@ class PendingModelAlertSchema(BasePendingAlertSchema):
     materialization: str
     full_refresh: bool
     message: str
-    resource_type: ResourceType = Field(ResourceType.MODEL, const=True)
 
     def format_alert(
         self,
@@ -282,7 +308,6 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
     path: str
     error: Optional[str] = None
     freshness_description: Optional[str] = None
-    resource_type: ResourceType = Field(ResourceType.SOURCE_FRESHNESS, const=True)
 
     def format_alert(
         self,
