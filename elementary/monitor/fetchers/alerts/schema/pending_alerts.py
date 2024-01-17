@@ -2,11 +2,12 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.data_monitoring.schema import ResourceType
 from elementary.utils.dicts import flatten_dict_by_key, merge_dicts_attribute
 from elementary.utils.json_utils import (
     try_load_json,
@@ -166,6 +167,7 @@ class PendingTestAlertSchema(BasePendingAlertSchema):
     severity: str
     test_meta: Optional[Dict] = None
     elementary_unique_id: str
+    resource_type: ResourceType = Field(ResourceType.TEST, const=True)
 
     @property
     def flatten_model_meta(self) -> Dict:
@@ -257,6 +259,7 @@ class PendingModelAlertSchema(BasePendingAlertSchema):
     materialization: str
     full_refresh: bool
     message: str
+    resource_type: ResourceType = Field(ResourceType.MODEL, const=True)
 
     def format_alert(
         self,
@@ -308,6 +311,7 @@ class PendingSourceFreshnessAlertSchema(BasePendingAlertSchema):
     path: str
     error: Optional[str] = None
     freshness_description: Optional[str] = None
+    resource_type: ResourceType = Field(ResourceType.SOURCE_FRESHNESS, const=True)
 
     def format_alert(
         self,
