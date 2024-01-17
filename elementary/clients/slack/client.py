@@ -110,7 +110,7 @@ class SlackWebClient(SlackClient):
         file_path: str,
         message: Optional[SlackMessageSchema] = None,
     ) -> bool:
-        channel_id = self._get_channel_id(channel_name)
+        channel_id = self.get_channel_id(channel_name)
         try:
             self.client.files_upload_v2(
                 channel=channel_id,
@@ -166,7 +166,7 @@ class SlackWebClient(SlackClient):
         cursor = response.get("response_metadata", {}).get("next_cursor")
         return channels, cursor
 
-    def _get_channel_id(self, channel_name: str) -> Optional[str]:
+    def get_channel_id(self, channel_name: str) -> Optional[str]:
         cursor = None
         while True:
             channels, cursor = self._get_channels(cursor)
@@ -193,7 +193,7 @@ class SlackWebClient(SlackClient):
             logger.info(
                 f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
             )
-            channel_id = self._get_channel_id(channel_name)
+            channel_id = self.get_channel_id(channel_name)
             if not channel_id:
                 logger.info(
                     f'Elementary app could not find the channel "{channel_name}".'
