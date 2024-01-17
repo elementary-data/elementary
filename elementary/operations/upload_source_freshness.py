@@ -15,7 +15,7 @@ class UploadSourceFreshnessOperation:
     def __init__(self, config: Config):
         self.config = config
 
-    def run(self):
+    def run(self, rows_per_insert: int):
         if not self.config.project_dir:
             raise click.ClickException(
                 "Path to dbt project is missing. Please run the command with `--project-dir <DBT_PROJECT_DIR>`."
@@ -23,7 +23,7 @@ class UploadSourceFreshnessOperation:
         sources_file_contents = self.get_sources_file_contents()
         results = sources_file_contents["results"]
         metadata = sources_file_contents["metadata"]
-        self.upload_results(results, metadata)
+        self.upload_results(results, metadata, rows_per_insert)
         click.echo("Uploaded source freshness results successfully.")
 
     def get_sources_file_contents(self) -> dict:
@@ -35,7 +35,7 @@ class UploadSourceFreshnessOperation:
             )
         return json.loads(source_path.read_text())
 
-    def upload_results(self, results: dict, metadata: dict):
+    def upload_results(self, results: dict, metadata: dict, rows_per_insert: int):
         dbt_runner = DbtRunner(
             dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
@@ -57,7 +57,7 @@ class UploadSourceFreshnessOperation:
                 f"Source freshness for invocation id {invocation_id} were already uploaded."
             )
 
-        chunk_size = 100
+        chunk_size = rows_per_insert
         chunk_list = list(range(0, len(results), chunk_size))
         upload_with_progress_bar = alive_it(
             chunk_list, title="Uploading source freshness results"
