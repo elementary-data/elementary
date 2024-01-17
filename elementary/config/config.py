@@ -53,6 +53,7 @@ class Config:
         aws_region_name: Optional[str] = None,
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
         s3_endpoint_url: Optional[str] = None,
         s3_bucket_name: Optional[str] = None,
         google_project_name: Optional[str] = None,
@@ -63,6 +64,7 @@ class Config:
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
         env: str = "dev",
+        run_dbt_deps_if_needed: Optional[bool] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -136,6 +138,7 @@ class Config:
         )
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
+        self.aws_session_token = aws_session_token
 
         google_config = config.get(self._GOOGLE, {})
         self.google_project_name = self._first_not_none(
@@ -173,6 +176,9 @@ class Config:
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
+        self.run_dbt_deps_if_needed = self._first_not_none(
+            run_dbt_deps_if_needed, config.get("run_dbt_deps_if_needed"), True
+        )
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):

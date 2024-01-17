@@ -139,6 +139,7 @@ class SelectorFilter:
                 config.profiles_dir,
                 config.project_profile_target,
                 env_vars=config.env_vars,
+                run_deps_if_needed=config.run_dbt_deps_if_needed,
             )
         else:
             return None

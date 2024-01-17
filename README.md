@@ -188,6 +188,9 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/francoisforster"><img src="https://avatars.githubusercontent.com/u/1295590?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/LePeti"><img src="https://avatars.githubusercontent.com/u/19508797?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/belle-crisp"><img src="https://avatars.githubusercontent.com/u/126576963?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/jonboulle"><img src="https://avatars.githubusercontent.com/u/2601015?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/artem-garmash"><img src="https://avatars.githubusercontent.com/u/5680770?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/nicor88"><img src="https://avatars.githubusercontent.com/u/6278547?v=4" width="50" height="50" alt=""/></a>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
