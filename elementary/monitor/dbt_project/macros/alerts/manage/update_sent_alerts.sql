@@ -2,7 +2,7 @@
     {% if execute %}
         {% if alert_ids %}
             {% set update_sent_alerts_query %}
-                UPDATE {{ ref('elementary_cli', 'alerts_v2') }} set status = 'sent', sent_at = {{ elementary.edr_quote(sent_at) }}
+                UPDATE {{ ref('elementary_cli', 'alerts_v2') }} set status = 'sent', sent_at = {{ elementary.edr_quote(sent_at) }}, updated_at = {{ elementary.edr_current_timestamp() }}
                 WHERE alert_id IN {{ elementary.strings_list_to_tuple(alert_ids) }} and status = 'pending' and
                     {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ elementary_cli.get_alerts_time_limit() }}
             {% endset %}
