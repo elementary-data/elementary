@@ -16,7 +16,7 @@
             {% endif %}
         {% endfor %}
 
-        {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts, should_commit=True) %}
+        {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts) %}
     {% endif %}
     {% do return('') %}
 {% endmacro %}
