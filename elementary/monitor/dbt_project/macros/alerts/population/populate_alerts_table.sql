@@ -2,7 +2,7 @@
     {% if execute %}
         {% set alerts_v2_relation = elementary.get_elementary_relation('alerts_v2') %}
 
-        {% set test_alerts = elementary_cli.populate_test_alerts(disable_samples) %}
+        {% set test_alerts = elementary_cli.populate_test_alerts(disable_samples=disable_samples) %}
         {% set model_alerts = elementary_cli.populate_model_alerts() %}
         {% set source_freshness_alerts = elementary_cli.populate_source_freshness_alerts() %}
         
@@ -29,7 +29,7 @@
 
     {% set alert_ids = [] %}
 
-    {% if deprecated_alerts_relation %}
+    {% if load_relation(deprecated_alerts_relation) is not none %}
         {% set handled_alerts_query %}
             with alerts_ids as (
                 select alert_id

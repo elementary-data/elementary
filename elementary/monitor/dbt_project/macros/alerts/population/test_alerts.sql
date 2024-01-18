@@ -43,7 +43,7 @@
         %}
 
         {% set column_size = elementary.get_column_size() %}
-        {% if column_size and (tojson(test_alert_data) | length) > column_size %}
+        {% if column_size and ((tojson(test_alert_data) | length) > column_size) %}
             {% do test_alert_data.update({'test_rows_sample': none}) %}  
         {% endif %}
 
