@@ -1,7 +1,7 @@
 {% macro validate_alert_statuses_are_updated() %}
     {% set alerts_with_no_updated_status_query %}
         select alert_id
-        from from {{ ref('alerts_v2') }}
+        from {{ ref('elementary_cli', 'alerts_v2') }}
         where status not in ('sent', 'skipped')
     {% endset %}
     {% set alerts_agate = run_query(alerts_with_no_updated_status_query) %}
