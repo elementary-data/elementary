@@ -152,6 +152,7 @@
     left join tests on failed_tests.test_unique_id = tests.unique_id
     left join artifacts_meta on failed_tests.model_unique_id = artifacts_meta.unique_id
     where failed_tests.alert_id not in (
+        {# "this" is referring to "alerts_v2" - we are executing it using a post_hook over "alerts_v2" #}
         select alert_id from {{ this }}
     )
 {% endmacro %}

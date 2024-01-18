@@ -1,4 +1,4 @@
-{% macro populate_source_freshness_alerts(days_back=7) %}
+{% macro populate_source_freshness_alerts() %}
     {% set source_freshness_alerts = [] %}
     {% set raw_source_freshness_alerts_agate = run_query(elementary_cli.populate_source_freshness_alerts_query()) %}
     {% set raw_source_freshness_alerts = elementary.agate_to_dicts(raw_source_freshness_alerts_agate) %}
@@ -112,6 +112,7 @@
   select *
   from source_freshness_alerts
   where source_freshness_alerts.alert_id not in (
+    {# "this" is referring to "alerts_v2" - we are executing it using a post_hook over "alerts_v2" #}
     select alert_id from {{ this }}
   )
 {% endmacro %}

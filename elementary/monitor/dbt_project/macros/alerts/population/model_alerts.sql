@@ -1,4 +1,4 @@
-{% macro populate_model_alerts(days_back=7) %}
+{% macro populate_model_alerts() %}
     {% set model_alerts = [] %}
     {% set raw_model_alerts_agate = run_query(elementary_cli.populate_model_alerts_query()) %}
     {% set raw_model_alerts = elementary.agate_to_dicts(raw_model_alerts_agate) %}
@@ -141,6 +141,7 @@
     from all_alerts
     left join artifacts_meta on all_alerts.unique_id = artifacts_meta.unique_id
     where all_alerts.alert_id not in (
+        {# "this" is referring to "alerts_v2" - we are executing it using a post_hook over "alerts_v2" #}
         select alert_id from {{ this }}
     )
 {% endmacro %}
