@@ -1,9 +1,9 @@
-{% macro update_sent_alerts(alert_ids, sent_at, table_name) %}
+{% macro update_sent_alerts(alert_ids, sent_at) %}
     {% if execute %}
         {% if alert_ids %}
             {% set update_sent_alerts_query %}
-                UPDATE {{ ref(table_name) }} set suppression_status = 'sent', sent_at = {{ "'{}'".format(sent_at) }}, alert_sent = TRUE
-                WHERE alert_id IN {{ elementary.strings_list_to_tuple(alert_ids) }} and suppression_status = 'pending' and
+                UPDATE {{ ref('elementary_cli', 'alerts_v2') }} set status = 'sent', sent_at = {{ elementary.edr_quote(sent_at) }}, updated_at = {{ elementary.edr_current_timestamp() }}
+                WHERE alert_id IN {{ elementary.strings_list_to_tuple(alert_ids) }} and status = 'pending' and
                     {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ elementary_cli.get_alerts_time_limit() }}
             {% endset %}
             {% do elementary.run_query(update_sent_alerts_query) %}

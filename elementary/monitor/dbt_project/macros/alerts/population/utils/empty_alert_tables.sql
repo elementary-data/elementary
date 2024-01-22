@@ -47,3 +47,18 @@
 	  ('sent_at', 'string')
 	]) }}
 {% endmacro %}
+
+
+{% macro empty_alerts_v2() %}
+    {{ elementary.empty_table([
+		('alert_id', 'long_string'),
+		('alert_class_id', 'long_string'),
+		('type', 'string'),
+		('detected_at','timestamp'),
+    	('created_at','timestamp'),
+    	('updated_at','timestamp'),
+		('status','string'),
+		('data', 'long_string'),
+		('sent_at', 'string')
+    ]) }}
+{% endmacro %}

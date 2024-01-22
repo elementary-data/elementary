@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
@@ -24,6 +25,38 @@ ALERT_SUPPRESSION_INTERVAL_KEY = "alert_suppression_interval"
 GROUP_ALERTS_BY_KEY = "slack_group_alerts_by"
 
 
+class AlertTypes(Enum):
+    TEST = "test"
+    MODEL = "model"
+    SOURCE_FRESHNESS = "source_freshness"
+
+
+class AlertStatus(Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    SKIPPED = "skipped"
+
+
+class PendingAlertSchema(BaseModel):
+    id: str
+    alert_class_id: str
+    type: AlertTypes
+    detected_at: datetime
+    created_at: datetime
+    updated_at: datetime
+    status: AlertStatus
+    data: Dict[str, Any]
+    sent_at: Optional[datetime] = None
+
+    class Config:
+        # Make sure that serializing Enum return values
+        use_enum_values = True
+
+    @validator("data", pre=True, always=True)
+    def validate_data(cls, data: Optional[Union[str, Dict]]):
+        return try_load_json(data)
+
+
 class BasePendingAlertSchema(BaseModel):
     id: str
     alert_class_id: str
@@ -34,8 +67,6 @@ class BasePendingAlertSchema(BaseModel):
     tags: Optional[List[str]] = None
     owners: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
-    suppression_status: str
-    sent_at: Optional[datetime] = None
     status: str
 
     @property
