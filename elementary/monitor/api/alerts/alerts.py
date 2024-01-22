@@ -1,25 +1,13 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, Dict, List, Optional, Union
+from typing import DefaultDict, Dict, List, Optional
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.api.alerts.alert_filters import filter_alerts
-from elementary.monitor.api.alerts.schema import (
-    AlertsSchema,
-    ModelAlertsSchema,
-    SortedAlertsSchema,
-    SourceFreshnessAlertsSchema,
-    TestAlertsSchema,
-)
-from elementary.monitor.data_monitoring.schema import FiltersSchema
+from elementary.monitor.api.alerts.schema import SortedAlertsSchema
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
-from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
-    PendingModelAlertSchema,
-    PendingSourceFreshnessAlertSchema,
-    PendingTestAlertSchema,
-)
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -45,83 +33,17 @@ class AlertsAPI(APIClient):
         self.global_suppression_interval = global_suppression_interval
         self.override_meta_suppression_interval = override_meta_suppression_interval
 
-    def get_new_alerts(
-        self,
-        days_back: int,
-        filter: FiltersSchema = FiltersSchema(),
-    ) -> AlertsSchema:
-        new_test_alerts = self.get_test_alerts(days_back, filter)
-        new_model_alerts = self.get_model_alerts(days_back, filter)
-        new_source_freshness_alerts = self.get_source_freshness_alerts(
-            days_back, filter
+    def get_new_alerts(self, days_back: int) -> SortedAlertsSchema:
+        pending_alerts = self.alerts_fetcher.query_pending_alerts(days_back=days_back)
+        last_alert_sent_times = self.alerts_fetcher.query_last_alert_times(
+            days_back=days_back
         )
-        return AlertsSchema(
-            tests=new_test_alerts,
-            models=new_model_alerts,
-            source_freshnesses=new_source_freshness_alerts,
-        )
-
-    def get_test_alerts(
-        self,
-        days_back: int,
-        filter: FiltersSchema = FiltersSchema(),
-    ) -> TestAlertsSchema:
-        pending_test_alerts = self.alerts_fetcher.query_pending_test_alerts(days_back)
-        filtered_pending_test_alerts = filter_alerts(pending_test_alerts, filter)
-        last_alert_sent_times = self.alerts_fetcher.query_last_test_alert_times(
-            days_back
-        )
-        test_alerts = self._sort_alerts(
-            filtered_pending_test_alerts, last_alert_sent_times
-        )
-        # Mypy issues with Union types. We need to ignore the are-type
-        return TestAlertsSchema(send=test_alerts.send, skip=test_alerts.skip)  # type: ignore[arg-type]
-
-    def get_model_alerts(
-        self,
-        days_back: int,
-        filter: FiltersSchema = FiltersSchema(),
-    ) -> ModelAlertsSchema:
-        pending_model_alerts = self.alerts_fetcher.query_pending_model_alerts(days_back)
-        filtered_pending_model_alerts = filter_alerts(pending_model_alerts, filter)
-        last_alert_sent_times = self.alerts_fetcher.query_last_model_alert_times(
-            days_back
-        )
-        model_alerts = self._sort_alerts(
-            filtered_pending_model_alerts, last_alert_sent_times
-        )
-        # Mypy issues with Union types. We need to ignore the are-type
-        return ModelAlertsSchema(send=model_alerts.send, skip=model_alerts.skip)  # type: ignore[arg-type]
-
-    def get_source_freshness_alerts(
-        self,
-        days_back: int,
-        filter: FiltersSchema = FiltersSchema(),
-    ) -> SourceFreshnessAlertsSchema:
-        pending_source_freshness_alerts = (
-            self.alerts_fetcher.query_pending_source_freshness_alerts(days_back)
-        )
-        filtered_pending_source_freshness_alert = filter_alerts(
-            pending_source_freshness_alerts, filter
-        )
-        last_alert_sent_times = (
-            self.alerts_fetcher.query_last_source_freshness_alert_times(days_back)
-        )
-        source_freshness_alerts = self._sort_alerts(
-            filtered_pending_source_freshness_alert, last_alert_sent_times
-        )
-        # Mypy issues with Union types. We need to ignore the are-type
-        return SourceFreshnessAlertsSchema(
-            send=source_freshness_alerts.send, skip=source_freshness_alerts.skip  # type: ignore[arg-type]
-        )
+        sorted_alerts = self._sort_alerts(pending_alerts, last_alert_sent_times)
+        return sorted_alerts
 
     def skip_alerts(
         self,
-        alerts_to_skip: Union[
-            List[PendingTestAlertSchema],
-            List[PendingModelAlertSchema],
-            List[PendingSourceFreshnessAlertSchema],
-        ],
+        alerts_to_skip: List[PendingAlertSchema],
     ) -> None:
         self.alerts_fetcher.skip_alerts(alerts_to_skip=alerts_to_skip)
 
@@ -130,11 +52,7 @@ class AlertsAPI(APIClient):
 
     def _sort_alerts(
         self,
-        pending_alerts: Union[
-            List[PendingTestAlertSchema],
-            List[PendingModelAlertSchema],
-            List[PendingSourceFreshnessAlertSchema],
-        ],
+        pending_alerts: List[PendingAlertSchema],
         last_alert_sent_times: Dict[str, str],
     ) -> SortedAlertsSchema:
         suppressed_alerts = self._get_suppressed_alerts(
@@ -152,17 +70,11 @@ class AlertsAPI(APIClient):
                 alerts_to_skip.append(valid_alert)
             else:
                 alerts_to_send.append(valid_alert)
-
-        # Mypy issues with Union types. We need to ignore the are-type
-        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)  # type: ignore[arg-type]
+        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)
 
     def _get_suppressed_alerts(
         self,
-        alerts: Union[
-            List[PendingTestAlertSchema],
-            List[PendingModelAlertSchema],
-            List[PendingSourceFreshnessAlertSchema],
-        ],
+        alerts: List[PendingAlertSchema],
         last_alert_sent_times: Dict[str, str],
     ) -> List[str]:
         suppressed_alerts = []
@@ -174,7 +86,7 @@ class AlertsAPI(APIClient):
                 logger.debug("Alert without an id detected!")
                 continue
 
-            suppression_interval = alert.get_suppression_interval(
+            suppression_interval = alert.data.get_suppression_interval(
                 self.global_suppression_interval,
                 self.override_meta_suppression_interval,
             )
@@ -196,21 +108,11 @@ class AlertsAPI(APIClient):
 
     @staticmethod
     def _get_latest_alerts(
-        alerts: Union[
-            List[PendingTestAlertSchema],
-            List[PendingModelAlertSchema],
-            List[PendingSourceFreshnessAlertSchema],
-        ],
+        alerts: List[PendingAlertSchema],
     ) -> List[str]:
         alert_last_times: DefaultDict[
             str,
-            Optional[
-                Union[
-                    PendingModelAlertSchema,
-                    PendingSourceFreshnessAlertSchema,
-                    PendingTestAlertSchema,
-                ]
-            ],
+            Optional[PendingAlertSchema],
         ] = defaultdict(lambda: None)
         latest_alert_ids = []
         for alert in alerts:
