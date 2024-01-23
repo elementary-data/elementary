@@ -6,23 +6,19 @@ from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 
 
 def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
-    last_test_alert_sent_times = (
-        alerts_api_mock.alerts_fetcher.query_last_test_alert_times()
-    )
-    last_model_alert_sent_times = (
-        alerts_api_mock.alerts_fetcher.query_last_model_alert_times()
-    )
+    last_alert_sent_times = alerts_api_mock.alerts_fetcher.query_last_alert_times()
 
-    test_alerts = alerts_api_mock.alerts_fetcher.query_pending_test_alerts()
-    model_alerts = alerts_api_mock.alerts_fetcher.query_pending_model_alerts()
+    alerts = alerts_api_mock.alerts_fetcher.query_pending_alerts()
+    test_alerts = [alert for alert in alerts if alert.type == "test"]
+    model_alerts = [alert for alert in alerts if alert.type == "model"]
 
     suppressed_test_alerts = alerts_api_mock._get_suppressed_alerts(
         test_alerts,
-        last_test_alert_sent_times,
+        last_alert_sent_times,
     )
     suppressed_model_alerts = alerts_api_mock._get_suppressed_alerts(
         model_alerts,
-        last_model_alert_sent_times,
+        last_alert_sent_times,
     )
 
     assert json.dumps(suppressed_test_alerts, sort_keys=True) == json.dumps(
@@ -34,23 +30,19 @@ def test_get_suppressed_alerts(alerts_api_mock: MockAlertsAPI):
 
 
 def test_sort_alerts(alerts_api_mock: MockAlertsAPI):
-    last_test_alert_sent_times = (
-        alerts_api_mock.alerts_fetcher.query_last_test_alert_times()
-    )
-    last_model_alert_sent_times = (
-        alerts_api_mock.alerts_fetcher.query_last_model_alert_times()
-    )
+    last_alert_sent_times = alerts_api_mock.alerts_fetcher.query_last_alert_times()
 
-    test_alerts = alerts_api_mock.alerts_fetcher.query_pending_test_alerts()
-    model_alerts = alerts_api_mock.alerts_fetcher.query_pending_model_alerts()
+    alerts = alerts_api_mock.alerts_fetcher.query_pending_alerts()
+    test_alerts = [alert for alert in alerts if alert.type == "test"]
+    model_alerts = [alert for alert in alerts if alert.type == "model"]
 
     sorted_test_alerts = alerts_api_mock._sort_alerts(
         test_alerts,
-        last_test_alert_sent_times,
+        last_alert_sent_times,
     )
     sorted_model_alerts = alerts_api_mock._sort_alerts(
         model_alerts,
-        last_model_alert_sent_times,
+        last_alert_sent_times,
     )
 
     # alert_id_1 is suppressed and alert_id_5 is duplicated
@@ -76,8 +68,9 @@ def test_sort_alerts(alerts_api_mock: MockAlertsAPI):
 
 
 def test_get_latest_alerts(alerts_api_mock: MockAlertsAPI):
-    test_alerts = alerts_api_mock.alerts_fetcher.query_pending_test_alerts()
-    model_alerts = alerts_api_mock.alerts_fetcher.query_pending_model_alerts()
+    alerts = alerts_api_mock.alerts_fetcher.query_pending_alerts()
+    test_alerts = [alert for alert in alerts if alert.type == "test"]
+    model_alerts = [alert for alert in alerts if alert.type == "model"]
 
     latest_test_alerts = alerts_api_mock._get_latest_alerts(test_alerts)
     latest_model_alerts = alerts_api_mock._get_latest_alerts(model_alerts)

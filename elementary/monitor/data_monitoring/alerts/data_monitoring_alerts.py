@@ -10,8 +10,9 @@ from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts, Grou
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.alerts import AlertsAPI
-from elementary.monitor.api.alerts.schema import AlertsSchema
+from elementary.monitor.api.alerts.schema import SortedAlertsSchema
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
 )
@@ -20,6 +21,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.integrations import 
 )
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import FiltersSchema
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -63,15 +65,37 @@ class DataMonitoringAlerts(DataMonitoring):
             override_config_defaults=self.override_config_defaults,
         )
 
-    def _fetch_data(self, days_back: int) -> AlertsSchema:
+    def _populate_data(
+        self,
+        dbt_full_refresh: bool = False,
+        dbt_vars: Optional[dict] = None,
+    ) -> bool:
+        logger.info("Running internal dbt run to populate alerts")
+        success = self.internal_dbt_runner.run(
+            models="elementary_cli.alerts.alerts_v2",
+            full_refresh=dbt_full_refresh,
+            vars=dbt_vars,
+        )
+        self.execution_properties["alerts_populate_success"] = success
+        if not success:
+            logger.info("Could not populate alerts successfully")
+
+        return success
+
+    def _fetch_data(self, days_back: int) -> SortedAlertsSchema:
         return self.alerts_api.get_new_alerts(
             days_back=days_back,
-            filter=self.selector_filter,
+        )
+
+    def _filter_data(self, data: SortedAlertsSchema) -> SortedAlertsSchema:
+        return SortedAlertsSchema(
+            send=filter_alerts(alerts=data.send, alerts_filter=self.selector_filter),
+            skip=filter_alerts(alerts=data.skip, alerts_filter=self.selector_filter),
         )
 
     def _format_alerts(
         self,
-        alerts: AlertsSchema,
+        alerts: List[PendingAlertSchema],
     ) -> List[
         Union[
             TestAlertModel,
@@ -87,9 +111,11 @@ class DataMonitoringAlerts(DataMonitoring):
         default_alerts_group_by_strategy = GroupingType(
             self.config.slack_group_alerts_by
         )
-        for alert in alerts.all_alerts:
-            group_alerts_by = alert.group_alerts_by or default_alerts_group_by_strategy
-            formatted_alert = alert.format_alert(
+        for alert in alerts:
+            group_alerts_by = (
+                alert.data.group_alerts_by or default_alerts_group_by_strategy
+            )
+            formatted_alert = alert.data.format_alert(
                 timezone=self.config.timezone,
                 report_url=self.config.report_url,
                 elementary_database_and_schema=self.elementary_database_and_schema,
@@ -174,10 +200,8 @@ class DataMonitoringAlerts(DataMonitoring):
         # Now update sent alerts counter:
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
-    def _skip_alerts(self, alerts: AlertsSchema):
-        self.alerts_api.skip_alerts(alerts.tests.skip)
-        self.alerts_api.skip_alerts(alerts.models.skip)
-        self.alerts_api.skip_alerts(alerts.source_freshnesses.skip)
+    def _skip_alerts(self, alerts: List[PendingAlertSchema]):
+        self.alerts_api.skip_alerts(alerts)
 
     def run_alerts(
         self,
@@ -185,26 +209,33 @@ class DataMonitoringAlerts(DataMonitoring):
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
-        logger.info("Running internal dbt run to aggregate alerts")
-        success = self.internal_dbt_runner.run(
-            models="elementary_cli.alerts.alerts_v2",
-            full_refresh=dbt_full_refresh,
-            vars=dbt_vars,
+        # Populate data
+        popopulated_data_successfully = self._populate_data(
+            dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
         )
-        self.execution_properties["alerts_run_success"] = success
-        if not success:
-            logger.info("Could not aggregate alerts successfully")
+        if not popopulated_data_successfully:
             self.success = False
             self.execution_properties["success"] = self.success
             return self.success
 
+        # Fetch and filter data
         alerts = self._fetch_data(days_back)
-        self._skip_alerts(alerts)
-        formatted_alerts = self._format_alerts(alerts=alerts)
+        alerts = self._filter_data(alerts)
+        alerts_to_skip = alerts.skip
+        alerts_to_send = alerts.send
+
+        # Skip alerts
+        self._skip_alerts(alerts_to_skip)
+
+        # Format alerts
+        formatted_alerts = self._format_alerts(alerts=alerts_to_send)
+
+        # Send alerts
         self._send_alerts(formatted_alerts)
-        if self.send_test_message_on_success and alerts.count == 0:
+
+        if self.send_test_message_on_success and len(alerts_to_send) == 0:
             self._send_test_message()
-        self.execution_properties["alert_count"] = alerts.count
+        self.execution_properties["alert_count"] = len(alerts_to_send)
         self.execution_properties["elementary_test_count"] = len(
             [
                 alert
@@ -213,7 +244,7 @@ class DataMonitoringAlerts(DataMonitoring):
             ]
         )
         self.execution_properties["has_subscribers"] = any(
-            alert.subscribers for alert in alerts.all_alerts
+            alert.data.subscribers for alert in alerts_to_send
         )
         self.execution_properties["run_end"] = True
         self.execution_properties["success"] = self.success

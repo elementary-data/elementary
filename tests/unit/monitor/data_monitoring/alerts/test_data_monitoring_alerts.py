@@ -5,7 +5,7 @@ import pytest
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
-from elementary.monitor.api.alerts.schema import AlertsSchema
+from elementary.monitor.api.alerts.schema import SortedAlertsSchema
 from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )
@@ -23,7 +23,7 @@ def test_get_integration_client(data_monitoring_alerts_mock: DataMonitoringAlert
 def test_fetch_data(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     mock_alerts_api = MockAlertsAPI()
     alerts_data = data_monitoring_alerts_mock._fetch_data(days_back=1)
-    assert isinstance(alerts_data, AlertsSchema)
+    assert isinstance(alerts_data, SortedAlertsSchema)
     assert alerts_data.json(sort_keys=True) == mock_alerts_api.get_new_alerts(
         days_back=1
     ).json(sort_keys=True)
@@ -31,7 +31,7 @@ def test_fetch_data(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
 
 def test_format_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     alerts = data_monitoring_alerts_mock._fetch_data(days_back=1)
-    formatted_alerts = data_monitoring_alerts_mock._format_alerts(alerts)
+    formatted_alerts = data_monitoring_alerts_mock._format_alerts(alerts.send)
     test_alerts = [
         alert for alert in formatted_alerts if isinstance(alert, TestAlertModel)
     ]
@@ -55,7 +55,7 @@ def test_format_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
 
     # test format group by table
     data_monitoring_alerts_mock.config.slack_group_alerts_by = "table"
-    formatted_alerts = data_monitoring_alerts_mock._format_alerts(alerts)
+    formatted_alerts = data_monitoring_alerts_mock._format_alerts(alerts.send)
     sorted_formatted_alerts = sorted(
         formatted_alerts, key=lambda alert: alert.model_unique_id
     )

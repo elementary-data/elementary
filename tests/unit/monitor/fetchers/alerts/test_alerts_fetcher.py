@@ -44,15 +44,15 @@ def test_update_sent_alerts(
 @mock.patch("subprocess.run")
 def test_skip_alerts(mock_subprocess_run, alerts_fetcher_mock: MockAlertsFetcher):
     # Create 100 alerts
-    test_alerts = alerts_fetcher_mock.query_pending_test_alerts()
-    mock_alerts_ids_to_skip = test_alerts * 20
+    alerts = alerts_fetcher_mock.query_pending_alerts()
+    mock_alerts_ids_to_skip = alerts * 20
 
     alerts_fetcher_mock.skip_alerts(
         alerts_to_skip=mock_alerts_ids_to_skip,
     )
 
     # Test that alert ids were split into chunks
-    assert mock_subprocess_run.call_count == 2
+    assert mock_subprocess_run.call_count == 6
 
     calls_args = mock_subprocess_run.call_args_list
     for call_args in calls_args:

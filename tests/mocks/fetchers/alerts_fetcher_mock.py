@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
+from typing import List
 
 from elementary.config.config import Config
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
-    PendingModelAlertSchema,
-    PendingSourceFreshnessAlertSchema,
-    PendingTestAlertSchema,
+    AlertTypes,
+    PendingAlertSchema,
 )
 from elementary.utils.time import DATETIME_FORMAT
 from tests.mocks.dbt_runner_mock import MockDbtRunner
@@ -22,7 +22,7 @@ class MockAlertsFetcher(AlertsFetcher):
             mock_dbt_runner, config, elementary_database_and_schema="test.test"
         )
 
-    def query_pending_test_alerts(self, *args, **kwargs):
+    def query_pending_alerts(self, *args, **kwargs) -> List[PendingAlertSchema]:
         PENDDING_TEST_ALERTS_MOCK_DATA = [
             # Alert within suppression interval
             dict(
@@ -183,13 +183,6 @@ class MockAlertsFetcher(AlertsFetcher):
             ),
         ]
 
-        pending_test_alerts = [
-            PendingTestAlertSchema(**pending_alert)
-            for pending_alert in PENDDING_TEST_ALERTS_MOCK_DATA
-        ]
-        return pending_test_alerts
-
-    def query_pending_model_alerts(self, *args, **kwargs):
         PENDDING_MODEL_ALERTS_MOCK_DATA = [
             # Alert within suppression interval
             dict(
@@ -300,13 +293,6 @@ class MockAlertsFetcher(AlertsFetcher):
             ),
         ]
 
-        pending_model_alerts = [
-            PendingModelAlertSchema(**pending_alert)
-            for pending_alert in PENDDING_MODEL_ALERTS_MOCK_DATA
-        ]
-        return pending_model_alerts
-
-    def query_pending_source_freshness_alerts(self, *args, **kwargs):
         PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA = [
             # Alert within suppression interval
             dict(
@@ -447,13 +433,54 @@ class MockAlertsFetcher(AlertsFetcher):
             ),
         ]
 
+        pending_test_alerts = [
+            PendingAlertSchema(
+                id=pending_alert["id"],
+                alert_class_id=pending_alert["alert_class_id"],
+                type=AlertTypes.TEST,
+                detected_at=pending_alert["detected_at"],
+                created_at=pending_alert["detected_at"],
+                updated_at=pending_alert["detected_at"],
+                status="pending",
+                data=pending_alert,
+            )
+            for pending_alert in PENDDING_TEST_ALERTS_MOCK_DATA
+        ]
+
+        pending_model_alerts = [
+            PendingAlertSchema(
+                id=pending_alert["id"],
+                alert_class_id=pending_alert["alert_class_id"],
+                type=AlertTypes.MODEL,
+                detected_at=pending_alert["detected_at"],
+                created_at=pending_alert["detected_at"],
+                updated_at=pending_alert["detected_at"],
+                status="pending",
+                data=pending_alert,
+            )
+            for pending_alert in PENDDING_MODEL_ALERTS_MOCK_DATA
+        ]
+
         pending_source_freshness_alerts = [
-            PendingSourceFreshnessAlertSchema(**pending_alert)
+            PendingAlertSchema(
+                id=pending_alert["id"],
+                alert_class_id=pending_alert["alert_class_id"],
+                type=AlertTypes.SOURCE_FRESHNESS,
+                detected_at=pending_alert["detected_at"],
+                created_at=pending_alert["detected_at"],
+                updated_at=pending_alert["detected_at"],
+                status="pending",
+                data=pending_alert,
+            )
             for pending_alert in PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA
         ]
-        return pending_source_freshness_alerts
+        return [
+            *pending_test_alerts,
+            *pending_model_alerts,
+            *pending_source_freshness_alerts,
+        ]
 
-    def query_last_test_alert_times(self, *args, **kwargs):
+    def query_last_alert_times(self, *args, **kwargs):
         return {
             "test_id_1.column.generic": (
                 CURRENT_DATETIME_UTC - timedelta(hours=1.5)
@@ -464,30 +491,22 @@ class MockAlertsFetcher(AlertsFetcher):
             "test_id_4.column.generic": (
                 CURRENT_DATETIME_UTC - timedelta(hours=1.5)
             ).strftime(DATETIME_FORMAT),
+            "model_id_1": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
+            "model_id_2": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
+                DATETIME_FORMAT
+            ),
+            "model_id_4": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
+            "source_id_1": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
+            "source_id_2": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
+                DATETIME_FORMAT
+            ),
+            "source_id_4": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
+                DATETIME_FORMAT
+            ),
         }
-
-    def query_last_model_alert_times(self, *args, **kwargs):
-        return dict(
-            model_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-            model_id_2=(CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
-                DATETIME_FORMAT
-            ),
-            model_id_4=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-        )
-
-    def query_last_source_freshness_alert_times(self, *args, **kwargs):
-        return dict(
-            source_id_1=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-            source_id_2=(CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
-                DATETIME_FORMAT
-            ),
-            source_id_4=(CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-        )
