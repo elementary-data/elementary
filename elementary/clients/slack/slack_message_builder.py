@@ -189,6 +189,6 @@ class SlackMessageBuilder:
 
     def add_message_color(self, color: MessageColor):
         for block in self.blocks:
-            block["color"] = color
+            block["color"] = color.value
         for attachment in self.attachments:
-            attachment["color"] = color
+            attachment["color"] = color.value
