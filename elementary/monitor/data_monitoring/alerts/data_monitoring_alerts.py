@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import DefaultDict, Dict, List, Optional, Union
 
 from alive_progress import alive_it
 
@@ -12,13 +12,13 @@ from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAler
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.alerts import AlertsAPI
-from elementary.monitor.api.alerts.schema import SortedAlertsSchema
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.integrations import (
     Integrations,
 )
+from elementary.monitor.data_monitoring.alerts.schema import SortedAlertsSchema
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
 from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
@@ -50,8 +50,6 @@ class DataMonitoringAlerts(DataMonitoring):
             self.internal_dbt_runner,
             self.config,
             self.elementary_database_and_schema,
-            self.global_suppression_interval,
-            self.override_config,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
@@ -82,16 +80,87 @@ class DataMonitoringAlerts(DataMonitoring):
 
         return success
 
-    def _fetch_data(self, days_back: int) -> SortedAlertsSchema:
+    def _fetch_data(self, days_back: int) -> List[PendingAlertSchema]:
         return self.alerts_api.get_new_alerts(
             days_back=days_back,
         )
 
-    def _filter_data(self, data: SortedAlertsSchema) -> SortedAlertsSchema:
-        return SortedAlertsSchema(
-            send=filter_alerts(alerts=data.send, alerts_filter=self.selector_filter),
-            skip=filter_alerts(alerts=data.skip, alerts_filter=self.selector_filter),
+    def _filter_data(self, data: List[PendingAlertSchema]) -> List[PendingAlertSchema]:
+        return filter_alerts(data, alerts_filter=self.selector_filter)
+
+    def _fetch_last_sent_times(self, days_back: int) -> Dict[str, datetime]:
+        return self.alerts_api.get_alerts_last_sent_times(
+            days_back=days_back,
         )
+
+    def _sort_alerts(
+        self,
+        alerts: List[PendingAlertSchema],
+        alerts_last_sent_times: Dict[str, datetime],
+    ) -> SortedAlertsSchema:
+        suppressed_alerts = self._get_suppressed_alerts(alerts, alerts_last_sent_times)
+        latest_alert_ids = self._get_latest_alerts(alerts)
+        alerts_to_skip = []
+        alerts_to_send = []
+
+        for valid_alert in alerts:
+            if (
+                valid_alert.id in suppressed_alerts
+                or valid_alert.id not in latest_alert_ids
+            ):
+                alerts_to_skip.append(valid_alert)
+            else:
+                alerts_to_send.append(valid_alert)
+        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)
+
+    def _get_suppressed_alerts(
+        self,
+        alerts: List[PendingAlertSchema],
+        alerts_last_sent_times: Dict[str, datetime],
+    ) -> List[str]:
+        suppressed_alerts = []
+        current_time_utc = datetime.utcnow()
+        for alert in alerts:
+            alert_class_id = alert.alert_class_id
+            suppression_interval = alert.data.get_suppression_interval(
+                self.global_suppression_interval,
+                self.override_config,
+            )
+            last_sent_time = alerts_last_sent_times.get(alert_class_id)
+            is_alert_in_suppression = (
+                (current_time_utc - last_sent_time).total_seconds() / 3600
+                <= suppression_interval
+                if last_sent_time
+                else False
+            )
+            if is_alert_in_suppression:
+                suppressed_alerts.append(alert.id)
+
+        return suppressed_alerts
+
+    @staticmethod
+    def _get_latest_alerts(
+        alerts: List[PendingAlertSchema],
+    ) -> List[str]:
+        alert_last_times: DefaultDict[
+            str,
+            Optional[PendingAlertSchema],
+        ] = defaultdict(lambda: None)
+        latest_alert_ids = []
+        for alert in alerts:
+            alert_class_id = alert.alert_class_id
+            current_last_alert = alert_last_times[alert_class_id]
+            alert_detected_at = alert.detected_at
+            if (
+                not current_last_alert
+                or current_last_alert.detected_at < alert_detected_at
+            ):
+                alert_last_times[alert_class_id] = alert
+
+        for alert_last_time in alert_last_times.values():
+            if alert_last_time:
+                latest_alert_ids.append(alert_last_time.id)
+        return latest_alert_ids
 
     def _format_alerts(
         self,
@@ -221,8 +290,12 @@ class DataMonitoringAlerts(DataMonitoring):
         # Fetch and filter data
         alerts = self._fetch_data(days_back)
         alerts = self._filter_data(alerts)
-        alerts_to_skip = alerts.skip
-        alerts_to_send = alerts.send
+        alerts_last_sent_times = self._fetch_last_sent_times(days_back)
+        sorted_alerts = self._sort_alerts(
+            alerts=alerts, alerts_last_sent_times=alerts_last_sent_times
+        )
+        alerts_to_skip = sorted_alerts.skip
+        alerts_to_send = sorted_alerts.send
 
         # Skip alerts
         self._skip_alerts(alerts_to_skip)

@@ -1,11 +1,9 @@
-from collections import defaultdict
 from datetime import datetime
-from typing import DefaultDict, Dict, List, Optional
+from typing import Dict, List
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
 from elementary.config.config import Config
-from elementary.monitor.api.alerts.schema import SortedAlertsSchema
 from elementary.monitor.fetchers.alerts.alerts import AlertsFetcher
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
 from elementary.utils.log import get_logger
@@ -19,8 +17,6 @@ class AlertsAPI(APIClient):
         dbt_runner: DbtRunner,
         config: Config,
         elementary_database_and_schema: str,
-        global_suppression_interval: int,
-        override_meta_suppression_interval: bool = False,
     ):
         super().__init__(dbt_runner)
         self.config = config
@@ -30,16 +26,21 @@ class AlertsAPI(APIClient):
             config=self.config,
             elementary_database_and_schema=self.elementary_database_and_schema,
         )
-        self.global_suppression_interval = global_suppression_interval
-        self.override_meta_suppression_interval = override_meta_suppression_interval
 
-    def get_new_alerts(self, days_back: int) -> SortedAlertsSchema:
+    def get_new_alerts(self, days_back: int) -> List[PendingAlertSchema]:
         pending_alerts = self.alerts_fetcher.query_pending_alerts(days_back=days_back)
-        last_alert_sent_times = self.alerts_fetcher.query_last_alert_times(
+        return pending_alerts
+
+    def get_alerts_last_sent_times(self, days_back: int) -> Dict[str, datetime]:
+        alerts_last_sent_times = self.alerts_fetcher.query_last_alert_times(
             days_back=days_back
         )
-        sorted_alerts = self._sort_alerts(pending_alerts, last_alert_sent_times)
-        return sorted_alerts
+        last_sent_times = dict()
+        for alert_class_id, last_sent_time_as_string in alerts_last_sent_times.items():
+            last_sent_times.update(
+                {alert_class_id: datetime.fromisoformat(last_sent_time_as_string)}
+            )
+        return last_sent_times
 
     def skip_alerts(
         self,
@@ -49,88 +50,3 @@ class AlertsAPI(APIClient):
 
     def update_sent_alerts(self, alert_ids: List[str]) -> None:
         self.alerts_fetcher.update_sent_alerts(alert_ids=alert_ids)
-
-    def _sort_alerts(
-        self,
-        pending_alerts: List[PendingAlertSchema],
-        last_alert_sent_times: Dict[str, str],
-    ) -> SortedAlertsSchema:
-        suppressed_alerts = self._get_suppressed_alerts(
-            pending_alerts, last_alert_sent_times
-        )
-        latest_alert_ids = self._get_latest_alerts(pending_alerts)
-        alerts_to_skip = []
-        alerts_to_send = []
-
-        for valid_alert in pending_alerts:
-            if (
-                valid_alert.id in suppressed_alerts
-                or valid_alert.id not in latest_alert_ids
-            ):
-                alerts_to_skip.append(valid_alert)
-            else:
-                alerts_to_send.append(valid_alert)
-        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)
-
-    def _get_suppressed_alerts(
-        self,
-        alerts: List[PendingAlertSchema],
-        last_alert_sent_times: Dict[str, str],
-    ) -> List[str]:
-        suppressed_alerts = []
-        current_time_utc = datetime.utcnow()
-        for alert in alerts:
-            alert_class_id = alert.alert_class_id
-            if alert_class_id is None:
-                # Shouldn't happen, but logging in any case
-                logger.debug("Alert without an id detected!")
-                continue
-
-            suppression_interval = alert.data.get_suppression_interval(
-                self.global_suppression_interval,
-                self.override_meta_suppression_interval,
-            )
-            last_sent_time = (
-                datetime.fromisoformat(last_alert_sent_times[alert_class_id])
-                if last_alert_sent_times.get(alert_class_id)
-                else None
-            )
-            is_alert_in_suppression = (
-                (current_time_utc - last_sent_time).total_seconds() / 3600
-                <= suppression_interval
-                if last_sent_time
-                else False
-            )
-            if is_alert_in_suppression:
-                suppressed_alerts.append(alert.id)
-
-        return suppressed_alerts
-
-    @staticmethod
-    def _get_latest_alerts(
-        alerts: List[PendingAlertSchema],
-    ) -> List[str]:
-        alert_last_times: DefaultDict[
-            str,
-            Optional[PendingAlertSchema],
-        ] = defaultdict(lambda: None)
-        latest_alert_ids = []
-        for alert in alerts:
-            alert_class_id = alert.alert_class_id
-            if alert_class_id is None:
-                # Shouldn't happen, but logging in any case
-                logger.debug("Alert without an id detected!")
-                continue
-
-            current_last_alert = alert_last_times[alert_class_id]
-            alert_detected_at = alert.detected_at
-            if (
-                not current_last_alert
-                or current_last_alert.detected_at < alert_detected_at
-            ):
-                alert_last_times[alert_class_id] = alert
-
-        for alert_last_time in alert_last_times.values():
-            if alert_last_time:
-                latest_alert_ids.append(alert_last_time.id)
-        return latest_alert_ids

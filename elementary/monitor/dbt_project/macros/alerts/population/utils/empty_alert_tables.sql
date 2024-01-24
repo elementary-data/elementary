@@ -59,6 +59,6 @@
     	('updated_at','timestamp'),
 		('status','string'),
 		('data', 'long_string'),
-		('sent_at', 'string')
+		('sent_at', 'timestamp')
     ]) }}
 {% endmacro %}
