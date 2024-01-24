@@ -1,9 +1,15 @@
+from enum import Enum
 from typing import List, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.utils.json_utils import unpack_and_flatten_str_to_list
+
+
+class MessageColor(Enum):
+    RED = "#ff0000"
+    YELLOW = "#ffcc00"
 
 
 class SlackMessageBuilder:
@@ -16,6 +22,14 @@ class SlackMessageBuilder:
 
     def __init__(self) -> None:
         self.slack_message = self._initial_slack_message()
+
+    @property
+    def blocks(self) -> list:
+        return self.slack_message.get("blocks", [])
+
+    @property
+    def attachments(self) -> list:
+        return self.slack_message.get("attachments", [])
 
     @classmethod
     def _initial_slack_message(cls) -> dict:
@@ -172,3 +186,9 @@ class SlackMessageBuilder:
         if isinstance(str_list, str):
             str_list = unpack_and_flatten_str_to_list(str_list)
         return ", ".join(sorted(set(str_list)))
+
+    def add_message_color(self, color: MessageColor):
+        for block in self.blocks:
+            block["color"] = color
+        for attachment in self.attachments:
+            attachment["color"] = color

@@ -7,6 +7,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
 from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -51,12 +52,10 @@ DEFAULT_ALERT_FIELDS = [
     TEST_RESULTS_SAMPLE_FIELD,
 ]
 
-RED = "#ff0000"
-YELLOW = "#ffcc00"
-STATUS_DISPLAYS = {
-    "fail": {"color": RED, "display_name": "Failure"},
-    "warn": {"color": YELLOW, "display_name": "Warning"},
-    "error": {"color": RED, "display_name": "Error"},
+STATUS_DISPLAYS: Dict[str, Dict] = {
+    "fail": {"color": MessageColor.RED, "display_name": "Failure"},
+    "warn": {"color": MessageColor.YELLOW, "display_name": "Warning"},
+    "error": {"color": MessageColor.RED, "display_name": "Error"},
 }
 
 
@@ -104,7 +103,7 @@ class SlackIntegration(BaseIntegration):
     def _get_dbt_test_template(
         self, alert: TestAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        self.message_builder.add_color_to_slack_alert(self._get_color(alert.status))
+        self.message_builder.add_message_color(self._get_color(alert.status))
         title = [
             self.message_builder.create_header_block(
                 f"{self._get_display_name(alert.status)}: {alert.summary}"
@@ -261,7 +260,7 @@ class SlackIntegration(BaseIntegration):
     def _get_elementary_test_template(
         self, alert: TestAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        self.message_builder.add_color_to_slack_alert(self._get_color(alert.status))
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
         anomalous_value = (
             alert.other if alert.test_type == "anomaly_detection" else None
@@ -412,7 +411,7 @@ class SlackIntegration(BaseIntegration):
         tags = self.message_builder.prettify_and_dedup_list(alert.tags)
         owners = self.message_builder.prettify_and_dedup_list(alert.owners)
         subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
-        self.message_builder.add_color_to_slack_alert(self._get_color(alert.status))
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
         title = [
             self.message_builder.create_header_block(
@@ -512,7 +511,7 @@ class SlackIntegration(BaseIntegration):
         tags = self.message_builder.prettify_and_dedup_list(alert.tags)
         owners = self.message_builder.prettify_and_dedup_list(alert.owners)
         subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
-        self.message_builder.add_color_to_slack_alert(self._get_color(alert.status))
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
         title = [
             self.message_builder.create_header_block(
@@ -598,7 +597,7 @@ class SlackIntegration(BaseIntegration):
         subscribers = self.message_builder.prettify_and_dedup_list(
             alert.subscribers or []
         )
-        self.message_builder.add_color_to_slack_alert(self._get_color(alert.status))
+        self.message_builder.add_message_color(self._get_color(alert.status))
         title = [
             self.message_builder.create_header_block(
                 f"{self._get_display_name(alert.status)}: {alert.summary}"
@@ -736,7 +735,7 @@ class SlackIntegration(BaseIntegration):
     ):
         alerts = alert.alerts
 
-        self.message_builder.add_color_to_slack_alert(self._get_color(alert.status))
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
         title_blocks = [
             self.message_builder.create_header_block(
@@ -1010,7 +1009,7 @@ class SlackIntegration(BaseIntegration):
         return STATUS_DISPLAYS.get(alert_status, {}).get("display_name", alert_status)
 
     @staticmethod
-    def _get_color(alert_status: Optional[str]) -> str:
+    def _get_color(alert_status: Optional[str]) -> MessageColor:
         if alert_status is None:
-            return RED
-        return STATUS_DISPLAYS.get(alert_status, {}).get("color", RED)
+            return MessageColor.RED
+        return STATUS_DISPLAYS.get(alert_status, {}).get("color", MessageColor.RED)

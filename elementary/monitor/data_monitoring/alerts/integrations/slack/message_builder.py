@@ -78,12 +78,6 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
             ]
             self._add_blocks_as_attachments(configuration_blocks)
 
-    def add_color_to_slack_alert(self, color: str):
-        for block in self.slack_message.get("blocks", []):
-            block["color"] = color
-        for attachment in self.slack_message.get("attachments", []):
-            attachment["color"] = color
-
     @classmethod
     def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):
         """
