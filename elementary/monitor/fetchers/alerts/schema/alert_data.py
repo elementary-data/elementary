@@ -121,6 +121,8 @@ class BaseAlertDataSchema(BaseModel):
 
 
 class TestAlertDataSchema(BaseAlertDataSchema):
+    __test__ = False  # Mark for pytest - The class name starts with "Test" which throws warnings on pytest runs
+
     test_unique_id: str
     table_name: Optional[str] = None
     column_name: Optional[str] = None
