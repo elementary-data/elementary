@@ -262,12 +262,13 @@ class DataMonitoringAlerts(DataMonitoring):
 
         # Now update as sent:
         self.sent_alert_count = len(sent_successfully_alerts)
-        self.alerts_api.update_sent_alerts(
-            [alert.id for alert in sent_successfully_alerts]
-        )
+        self._update_sent_alerts([alert.id for alert in sent_successfully_alerts])
 
         # Now update sent alerts counter:
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
+
+    def _update_sent_alerts(self, alert_ids: List[str]):
+        self.alerts_api.update_sent_alerts(alert_ids=alert_ids)
 
     def _skip_alerts(self, alerts: List[PendingAlertSchema]):
         self.alerts_api.skip_alerts(alerts)
