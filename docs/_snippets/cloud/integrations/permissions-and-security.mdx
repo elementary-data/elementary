@@ -1,5 +1,9 @@
 #### Permissions and security
 
-Elementary cloud doesn't need permissions to your tables and schemas.
-It is recommended to create a read only user for the elementary schema only.
+Elementary cloud doesn't require read permissions to your tables and schemas, but only the following:
+
+- Read-only access to the elementary schema.
+- Metadata access to tables within your dbt databases (information schema and query history only - no read access required)
+
+It is recommended to create a user using the instructions specified above to avoid granting excess privileges.
 For more details, refer to [security and privacy](/cloud/general/security-and-privacy).
