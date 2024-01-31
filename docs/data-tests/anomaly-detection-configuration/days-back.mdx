@@ -1,0 +1,64 @@
+---
+title: "days_back"
+sidebarTitle: "days_back"
+---
+
+`days_back: [int]`
+
+The maximal timeframe for which the test will collect data.
+This timeframe includes the training period and detection period.
+
+- _Default: 14_
+- _Relevant tests: Anomaly detection tests with `timestamp_column`_
+
+<Frame caption="days_back change impact">
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1681301377/Anomaly%20detection%20tests/days_back_lpbr5p.png"
+    alt="days_back change impact"
+  />
+</Frame>
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    tests:
+      - elementary.volume_anomalies:
+          days_back: 30
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        days_back: 60
+```
+
+```yml dbt_project.yml
+vars:
+  days_back: 45
+```
+
+</RequestExample>
+
+#### How it works?
+
+The `days_back` param only works for tests that have `timestamp_column` configuration.
+
+It works differently according to the table materialization:
+
+- **Regular tables and views** - The values of the full `days_back` period is calculated on each run.
+- **Incremental models and sources** - The values of the full `days_back` period is calculated on the first test run, and on full refresh. The following test runs will only calculate the values of the `backfill_days` period.
+
+**Changes from default:**
+
+- **Full time buckets** - Elementary will increase the `days_back` automatically to insure full time buckets. For example if the `time_bucket` of the test is `period: week`, and 14 `days_back` result in Tuesday, the test will collect 2 more days back to complete a week (starting on Sunday).
+- **Seasonality training set** - If seasonality is configured, Elementary will increase the `days_back` automatically to ensure there are enough training set values to calculate an anomaly. For example if the `seasonality` of the test is `day_of_week`, `days_back` will be increased to ensure enough Sundays, Mondays, Tuesdays, etc. to calculate an anomaly for each.
+
+#### The impact of changing `days_back`
+
+If you **increase `days_back`** your test training set will be larger. This means a larger sample size for calculating the expected range, which should make the test less sensitive to outliers. This means less chance of false positive anomalies, but also less sensitivity so anomalies have a higher threshold.
+
+If you **decrease `days_back`** your test training set will be smaller. This means a smaller sample size for calculating the expected range, which might make the test more sensitive to outliers. This means more chance of false positive anomalies, but also more sensitivity as anomalies have a lower threshold.

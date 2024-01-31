@@ -3,7 +3,7 @@
 In order for a service user to work with Elementary cloud, it requires the following permissions:
 
 - Role "BigQuery Data Viewer" on your Elementary dataset.
-- Role "BigQuery Metadata Viewer" on the entire project and any external sources it is referencing.
+- Roles "BigQuery Metadata Viewer", "BigQuery Resource Viewer" on the entire project and any external sources it is referencing.
 
 To grant a role on a specific dataset, follow these steps:
 
@@ -27,7 +27,7 @@ To grant a role on a specific dataset, follow these steps:
 
 5. Fill out the form:
    - In the "New principals" textbox, write the **email address** of your user.
-   - In the "Select a role" dropdown menu, choose the desired role (BigQuery Data Viewer for your Elementary dataset, BigQuery Metadata Viewer for your dbt dataset).
+   - In the "Select a role" dropdown menu, choose the desired role (BigQuery Data Viewer for your Elementary dataset, BigQuery Metadata Viewer, BigQuery Resource Viewer for your dbt dataset).
    - Click "Save".
 
 <img

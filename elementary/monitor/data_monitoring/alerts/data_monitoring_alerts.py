@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import DefaultDict, Dict, List, Optional, Union
 
 from alive_progress import alive_it
 
@@ -10,16 +10,18 @@ from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts, Grou
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.alerts import AlertsAPI
-from elementary.monitor.api.alerts.schema import AlertsSchema
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.integrations import (
     Integrations,
 )
+from elementary.monitor.data_monitoring.alerts.schema import SortedAlertsSchema
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.schema import ResourceType
+from elementary.monitor.data_monitoring.schema import FiltersSchema
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -31,7 +33,7 @@ class DataMonitoringAlerts(DataMonitoring):
         self,
         config: Config,
         tracking: Optional[Tracking] = None,
-        filter: Optional[str] = None,
+        selector_filter: FiltersSchema = FiltersSchema(),
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
         send_test_message_on_success: bool = False,
@@ -39,7 +41,7 @@ class DataMonitoringAlerts(DataMonitoring):
         override_config: bool = False,
     ):
         super().__init__(
-            config, tracking, force_update_dbt_package, disable_samples, filter
+            config, tracking, force_update_dbt_package, disable_samples, selector_filter
         )
 
         self.global_suppression_interval = global_suppression_interval
@@ -48,13 +50,11 @@ class DataMonitoringAlerts(DataMonitoring):
             self.internal_dbt_runner,
             self.config,
             self.elementary_database_and_schema,
-            self.global_suppression_interval,
-            self.override_config,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
         self.override_config_defaults = override_config
-        self.alerts_integraion = self._get_integration_client()
+        self.alerts_integration = self._get_integration_client()
 
     def _get_integration_client(self) -> BaseIntegration:
         return Integrations.get_integration(
@@ -63,16 +63,108 @@ class DataMonitoringAlerts(DataMonitoring):
             override_config_defaults=self.override_config_defaults,
         )
 
-    def _fetch_data(self, days_back: int) -> AlertsSchema:
+    def _populate_data(
+        self,
+        dbt_full_refresh: bool = False,
+        dbt_vars: Optional[dict] = None,
+    ) -> bool:
+        logger.info("Running internal dbt run to populate alerts")
+        success = self.internal_dbt_runner.run(
+            models="elementary_cli.alerts.alerts_v2",
+            full_refresh=dbt_full_refresh,
+            vars=dbt_vars,
+        )
+        self.execution_properties["alerts_populate_success"] = success
+        if not success:
+            logger.info("Could not populate alerts successfully")
+
+        return success
+
+    def _fetch_data(self, days_back: int) -> List[PendingAlertSchema]:
         return self.alerts_api.get_new_alerts(
             days_back=days_back,
-            disable_samples=self.disable_samples,
-            filter=self.filter.get_filter(),
         )
+
+    def _filter_data(self, data: List[PendingAlertSchema]) -> List[PendingAlertSchema]:
+        return filter_alerts(data, alerts_filter=self.selector_filter)
+
+    def _fetch_last_sent_times(self, days_back: int) -> Dict[str, datetime]:
+        return self.alerts_api.get_alerts_last_sent_times(
+            days_back=days_back,
+        )
+
+    def _sort_alerts(
+        self,
+        alerts: List[PendingAlertSchema],
+        alerts_last_sent_times: Dict[str, datetime],
+    ) -> SortedAlertsSchema:
+        suppressed_alerts = self._get_suppressed_alerts(alerts, alerts_last_sent_times)
+        latest_alert_ids = self._get_latest_alerts(alerts)
+        alerts_to_skip = []
+        alerts_to_send = []
+
+        for valid_alert in alerts:
+            if (
+                valid_alert.id in suppressed_alerts
+                or valid_alert.id not in latest_alert_ids
+            ):
+                alerts_to_skip.append(valid_alert)
+            else:
+                alerts_to_send.append(valid_alert)
+        return SortedAlertsSchema(send=alerts_to_send, skip=alerts_to_skip)
+
+    def _get_suppressed_alerts(
+        self,
+        alerts: List[PendingAlertSchema],
+        alerts_last_sent_times: Dict[str, datetime],
+    ) -> List[str]:
+        suppressed_alerts = []
+        current_time_utc = datetime.utcnow()
+        for alert in alerts:
+            alert_class_id = alert.alert_class_id
+            suppression_interval = alert.data.get_suppression_interval(
+                self.global_suppression_interval,
+                self.override_config,
+            )
+            last_sent_time = alerts_last_sent_times.get(alert_class_id)
+            is_alert_in_suppression = (
+                (current_time_utc - last_sent_time).total_seconds() / 3600
+                <= suppression_interval
+                if last_sent_time
+                else False
+            )
+            if is_alert_in_suppression:
+                suppressed_alerts.append(alert.id)
+
+        return suppressed_alerts
+
+    @staticmethod
+    def _get_latest_alerts(
+        alerts: List[PendingAlertSchema],
+    ) -> List[str]:
+        alert_last_times: DefaultDict[
+            str,
+            Optional[PendingAlertSchema],
+        ] = defaultdict(lambda: None)
+        latest_alert_ids = []
+        for alert in alerts:
+            alert_class_id = alert.alert_class_id
+            current_last_alert = alert_last_times[alert_class_id]
+            alert_detected_at = alert.detected_at
+            if (
+                not current_last_alert
+                or current_last_alert.detected_at < alert_detected_at
+            ):
+                alert_last_times[alert_class_id] = alert
+
+        for alert_last_time in alert_last_times.values():
+            if alert_last_time:
+                latest_alert_ids.append(alert_last_time.id)
+        return latest_alert_ids
 
     def _format_alerts(
         self,
-        alerts: AlertsSchema,
+        alerts: List[PendingAlertSchema],
     ) -> List[
         Union[
             TestAlertModel,
@@ -88,9 +180,11 @@ class DataMonitoringAlerts(DataMonitoring):
         default_alerts_group_by_strategy = GroupingType(
             self.config.slack_group_alerts_by
         )
-        for alert in alerts.all_alerts:
-            group_alerts_by = alert.group_alerts_by or default_alerts_group_by_strategy
-            formatted_alert = alert.format_alert(
+        for alert in alerts:
+            group_alerts_by = (
+                alert.data.group_alerts_by or default_alerts_group_by_strategy
+            )
+            formatted_alert = alert.data.format_alert(
                 timezone=self.config.timezone,
                 report_url=self.config.report_url,
                 elementary_database_and_schema=self.elementary_database_and_schema,
@@ -126,7 +220,7 @@ class DataMonitoringAlerts(DataMonitoring):
         )
 
     def _send_test_message(self):
-        self.alerts_integraion.send_test_message(
+        self.alerts_integration.send_test_message(
             channel_name=self.config.slack_channel_name
         )
 
@@ -145,16 +239,10 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
 
-        sent_alert_ids_by_type: Dict[ResourceType, List[str]] = {
-            ResourceType.TEST: [],
-            ResourceType.MODEL: [],
-            ResourceType.SOURCE_FRESHNESS: [],
-        }
-
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
         for alert in alerts_with_progress_bar:
-            sent_successfully = self.alerts_integraion.send_alert(alert=alert)
+            sent_successfully = self.alerts_integration.send_alert(alert=alert)
             if sent_successfully:
                 if isinstance(alert, GroupedByTableAlerts):
                     sent_successfully_alerts.extend(alert.alerts)
@@ -172,31 +260,18 @@ class DataMonitoringAlerts(DataMonitoring):
                     )
                 self.success = False
 
-        for sent_alert in sent_successfully_alerts:
-            if isinstance(sent_alert, TestAlertModel):
-                sent_alert_ids_by_type[ResourceType.TEST].append(sent_alert.id)
-            elif isinstance(sent_alert, ModelAlertModel):
-                sent_alert_ids_by_type[ResourceType.MODEL].append(sent_alert.id)
-            elif isinstance(sent_alert, SourceFreshnessAlertModel):
-                sent_alert_ids_by_type[ResourceType.SOURCE_FRESHNESS].append(
-                    sent_alert.id
-                )
-
         # Now update as sent:
-        for resource_type, alert_ids in sent_alert_ids_by_type.items():
-            self.sent_alert_count += len(alert_ids)
-            self.alerts_api.update_sent_alerts(alert_ids, resource_type)
+        self.sent_alert_count = len(sent_successfully_alerts)
+        self._update_sent_alerts([alert.id for alert in sent_successfully_alerts])
 
         # Now update sent alerts counter:
         self.execution_properties["sent_alert_count"] = self.sent_alert_count
 
-    def _skip_alerts(self, alerts: AlertsSchema):
-        self.alerts_api.skip_alerts(alerts.tests.skip, ResourceType.TEST)
-        self.alerts_api.skip_alerts(alerts.models.skip, ResourceType.MODEL)
-        self.alerts_api.skip_alerts(
-            alerts.source_freshnesses.skip,
-            ResourceType.SOURCE_FRESHNESS,
-        )
+    def _update_sent_alerts(self, alert_ids: List[str]):
+        self.alerts_api.update_sent_alerts(alert_ids=alert_ids)
+
+    def _skip_alerts(self, alerts: List[PendingAlertSchema]):
+        self.alerts_api.skip_alerts(alerts)
 
     def run_alerts(
         self,
@@ -204,24 +279,37 @@ class DataMonitoringAlerts(DataMonitoring):
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
-        logger.info("Running internal dbt run to aggregate alerts")
-        success = self.internal_dbt_runner.run(
-            models="elementary_cli.alerts", full_refresh=dbt_full_refresh, vars=dbt_vars
+        # Populate data
+        popopulated_data_successfully = self._populate_data(
+            dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
         )
-        self.execution_properties["alerts_run_success"] = success
-        if not success:
-            logger.info("Could not aggregate alerts successfully")
+        if not popopulated_data_successfully:
             self.success = False
             self.execution_properties["success"] = self.success
             return self.success
 
+        # Fetch and filter data
         alerts = self._fetch_data(days_back)
-        self._skip_alerts(alerts)
-        formatted_alerts = self._format_alerts(alerts=alerts)
+        alerts = self._filter_data(alerts)
+        alerts_last_sent_times = self._fetch_last_sent_times(days_back)
+        sorted_alerts = self._sort_alerts(
+            alerts=alerts, alerts_last_sent_times=alerts_last_sent_times
+        )
+        alerts_to_skip = sorted_alerts.skip
+        alerts_to_send = sorted_alerts.send
+
+        # Skip alerts
+        self._skip_alerts(alerts_to_skip)
+
+        # Format alerts
+        formatted_alerts = self._format_alerts(alerts=alerts_to_send)
+
+        # Send alerts
         self._send_alerts(formatted_alerts)
-        if self.send_test_message_on_success and alerts.count == 0:
+
+        if self.send_test_message_on_success and len(alerts_to_send) == 0:
             self._send_test_message()
-        self.execution_properties["alert_count"] = alerts.count
+        self.execution_properties["alert_count"] = len(alerts_to_send)
         self.execution_properties["elementary_test_count"] = len(
             [
                 alert
@@ -230,7 +318,7 @@ class DataMonitoringAlerts(DataMonitoring):
             ]
         )
         self.execution_properties["has_subscribers"] = any(
-            alert.subscribers for alert in alerts.all_alerts
+            alert.data.subscribers for alert in alerts_to_send
         )
         self.execution_properties["run_end"] = True
         self.execution_properties["success"] = self.success
