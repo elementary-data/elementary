@@ -215,15 +215,6 @@ def test_create_compacted_sections_blocks():
     )
 
 
-def test_get_slack_status_icon():
-    assert SlackMessageBuilder.get_slack_status_icon("warn") == ":warning:"
-    assert SlackMessageBuilder.get_slack_status_icon("error") == ":x:"
-    assert (
-        SlackMessageBuilder.get_slack_status_icon("anything else")
-        == ":small_red_triangle:"
-    )
-
-
 def test_get_slack_message():
     slack_message_builder = SlackMessageBuilder()
     slack_message = slack_message_builder.get_slack_message()

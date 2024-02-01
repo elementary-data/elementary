@@ -5,6 +5,7 @@
     {% endif %}
     {% set label_column_exists = elementary.column_exists_in_relation(exposures_relation, 'label') %}
     {% set raw_queries_column_exists = elementary.column_exists_in_relation(exposures_relation, 'raw_queries') %}
+    {% set depends_on_columns_column_exists = elementary.column_exists_in_relation(exposures_relation, 'depends_on_columns') %}
     {%- if elementary.relation_exists(exposures_relation) -%}
         --{# TODO: should we group by #}
         {% set get_exposures_query %}
@@ -26,10 +27,16 @@
                   meta,
                   original_path as full_path,
                   {% if raw_queries_column_exists %}
-                    raw_queries
+                    raw_queries,
                   {% else %}
-                    NULL as raw_queries
+                    NULL as raw_queries,
                   {% endif %}
+                  {% if depends_on_columns_column_exists %}
+                    depends_on_columns
+                  {% else %}
+                    NULL as depends_on_columns
+                  {% endif %}
+
                 from {{ exposures_relation }}
               )
 
