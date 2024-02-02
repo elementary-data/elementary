@@ -389,8 +389,69 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
-        self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        if alert.suppression_interval:
+            title = "\n".join([title, f"*Snapshot:* {alert.alias}     |"])
+            title = "\n".join([title, f"Status: {alert.status}"])
+            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
+            title = "\n".join(
+                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
+            )
+        else:
+            title = "\n".join(
+                [
+                    title,
+                    f"*Snapshot:* {alert.alias}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}     |"])
+            title = "\n".join([title, f"{alert.detected_at_str}"])
+
+        model_runs_report_link = get_model_runs_link(
+            alert.report_url, alert.model_unique_id
+        )
+        if model_runs_report_link:
+            title = "\n".join(
+                [title, f"<{model_runs_report_link.url}|{model_runs_report_link.text}>"]
+            )
+
+        self.client.title(title)
+        # This is required by pymsteams..
+        self.client.text("**Elementary generated this message**")
+
+        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            tags = prettify_and_dedup_list(alert.tags or [])
+            section = cardsection()
+            section.activityTitle("*Tags*")
+            section.activityText(f'_{tags or "No tags"}_')
+            self.client.addSection(section)
+
+        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            owners = prettify_and_dedup_list(alert.owners or [])
+            section = cardsection()
+            section.activityTitle("*Owners*")
+            section.activityText(f'_{owners or "No owners"}_')
+            self.client.addSection(section)
+
+        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
+            section = cardsection()
+            section.activityTitle("*Subscribers*")
+            section.activityText(f'_{subscribers or "No subscribers"}_')
+            self.client.addSection(section)
+
+        if alert.message:
+            section = cardsection()
+            section.activityTitle("*Result message*")
+            section.activityText(f"```{alert.message.strip()}```")
+            self.client.addSection(section)
+
+        if alert.original_path:
+            section = cardsection()
+            section.activityTitle("*Path*")
+            section.activityText(f"`{alert.original_path}`")
+            self.client.addSection(section)
 
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
