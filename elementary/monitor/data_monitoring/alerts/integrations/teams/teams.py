@@ -13,6 +13,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.base_integration imp
     BaseIntegration,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    get_model_runs_link,
     get_test_runs_link,
 )
 from elementary.tracking.tracking_interface import Tracking
@@ -310,8 +311,82 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
-        self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        if alert.suppression_interval:
+            title = "\n".join([title, f"*Model:* {alert.alias}     |"])
+            title = "\n".join([title, f"Status: {alert.status}"])
+            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
+            title = "\n".join(
+                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
+            )
+        else:
+            title = "\n".join(
+                [
+                    title,
+                    f"*Model:* {alert.alias}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}     |"])
+            title = "\n".join([title, f"{alert.detected_at_str}"])
+
+        model_runs_report_link = get_model_runs_link(
+            alert.report_url, alert.model_unique_id
+        )
+        if model_runs_report_link:
+            title = "\n".join(
+                [title, f"<{model_runs_report_link.url}|{model_runs_report_link.text}>"]
+            )
+
+        self.client.title(title)
+        # This is required by pymsteams..
+        self.client.text("**Elementary generated this message**")
+
+        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            tags = prettify_and_dedup_list(alert.tags or [])
+            section = cardsection()
+            section.activityTitle("*Tags*")
+            section.activityText(f'_{tags or "No tags"}_')
+            self.client.addSection(section)
+
+        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            owners = prettify_and_dedup_list(alert.owners or [])
+            section = cardsection()
+            section.activityTitle("*Owners*")
+            section.activityText(f'_{owners or "No owners"}_')
+            self.client.addSection(section)
+
+        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
+            section = cardsection()
+            section.activityTitle("*Subscribers*")
+            section.activityText(f'_{subscribers or "No subscribers"}_')
+            self.client.addSection(section)
+
+        if (
+            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.message
+        ):
+            section = cardsection()
+            section.activityTitle("*Result message*")
+            section.activityText(f"```{alert.message.strip()}```")
+            self.client.addSection(section)
+
+        if alert.materialization:
+            section = cardsection()
+            section.activityTitle("*Materialization*")
+            section.activityText(f"`{str(alert.materialization)}`")
+            self.client.addSection(section)
+        if alert.full_refresh:
+            section = cardsection()
+            section.activityTitle("*Full refresh*")
+            section.activityText(f"`{alert.full_refresh}`")
+            self.client.addSection(section)
+        if alert.path:
+            section = cardsection()
+            section.activityTitle("*Path*")
+            section.activityText(f"`{alert.path}`")
+            self.client.addSection(section)
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
         self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
