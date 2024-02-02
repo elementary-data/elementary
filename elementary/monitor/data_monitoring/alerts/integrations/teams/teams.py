@@ -1,5 +1,6 @@
+import json
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pymsteams import cardsection
 
@@ -14,9 +15,13 @@ from elementary.monitor.data_monitoring.alerts.integrations.base_integration imp
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     get_model_runs_link,
+    get_model_test_runs_link,
     get_test_runs_link,
 )
 from elementary.tracking.tracking_interface import Tracking
+from elementary.utils.json_utils import (
+    list_of_lists_of_strings_to_comma_delimited_unique_strings,
+)
 from elementary.utils.log import get_logger
 from elementary.utils.strings import prettify_and_dedup_list
 
@@ -192,9 +197,6 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_elementary_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
-        self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
-
         anomalous_value = (
             alert.other if alert.test_type == "anomaly_detection" else None
         )
@@ -576,8 +578,95 @@ class TeamsIntegration(BaseIntegration):
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
-        self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
+        alerts = alert.alerts
+
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        if alert.model_errors:
+            title = "\n".join([title, f"Model errors: {len(alert.model_errors)}    |"])
+        if alert.test_failures:
+            title = "\n".join(
+                [title, f"Test failures: {len(alert.test_failures)}    |"]
+            )
+        if alert.test_warnings:
+            title = "\n".join(
+                [title, f"Test warnings: {len(alert.test_warnings)}    |"]
+            )
+        if alert.test_errors:
+            title = "\n".join([title, f"Test errors: {len(alert.test_errors)}"])
+
+        report_link = None
+        # No report link when there is only model error
+        if not alert.model_errors:
+            report_link = get_model_test_runs_link(
+                alert.report_url, alert.model_unique_id
+            )
+
+        if report_link:
+            title = "\n".join([title, f"<{report_link.url}|{report_link.text}>"])
+        self.client.title(title)
+        # This is required by pymsteams..
+        self.client.text("**Elementary generated this message**")
+
+        tags = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [alert.tags or [] for alert in alerts]
+        )
+        owners = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [alert.owners or [] for alert in alerts]
+        )
+        subscribers = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [alert.subscribers or [] for alert in alerts]
+        )
+
+        section = cardsection()
+        section.activityTitle("*Tags*")
+        section.activityText(f'_{tags if tags else "_No tags_"}_')
+        self.client.addSection(section)
+
+        section = cardsection()
+        section.activityTitle("*Owners*")
+        section.activityText(f'_{owners if owners else "_No owners_"}_')
+        self.client.addSection(section)
+
+        section = cardsection()
+        section.activityTitle("*Subscribers*")
+        section.activityText(f'_{subscribers if subscribers else "_No subscribers_"}_')
+        self.client.addSection(section)
+
+        if alert.model_errors:
+            section = cardsection()
+            section.activityTitle("*Model errors*")
+            section.activitySubtitle(
+                f"{self._get_model_error_block_header(alert.model_errors)}"
+            )
+            section.activityText(
+                f"{self._get_model_error_block_body(alert.model_errors)}"
+            )
+            self.client.addSection(section)
+
+        if alert.test_failures:
+            section = cardsection()
+            section.activityTitle("*Test failures*")
+            rows = [alert.concise_name for alert in alert.test_failures]
+            text = "\n".join([f"{row}" for row in rows])
+            section.activityText(text)
+            self.client.addSection(section)
+
+        if alert.test_warnings:
+            section = cardsection()
+            section.activityTitle("*Test warnings*")
+            rows = [alert.concise_name for alert in alert.test_warnings]
+            text = "\n".join([f"{row}" for row in rows])
+            section.activityText(text)
+            self.client.addSection(section)
+
+        if alert.test_errors:
+            section = cardsection()
+            section.activityTitle("*Test errors*")
+            rows = [alert.concise_name for alert in alert.test_errors]
+            text = "\n".join([f"{row}" for row in rows])
+            section.activityText(text)
+            self.client.addSection(section)
 
     def _get_fallback_template(
         self,
@@ -590,12 +679,17 @@ class TeamsIntegration(BaseIntegration):
         *args,
         **kwargs,
     ):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
+        self.client.title(f"Oops, we failed to format the alert ! -_-'")
+        self.client.text(
+            "Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue."
+        )
+        section = cardsection()
+        section.activityTitle("*Stack Trace*")
+        section.activityText(f"```{json.dumps(alert.data, indent=2)}```")
+        self.client.addSection(section)
 
     def _get_test_message_template(self, *args, **kwargs):
-        self.client.title(
-            f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        )
+        self.client.title("This is a test message generated by Elementary!")
         self.client.text(
             f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         )
@@ -632,6 +726,27 @@ class TeamsIntegration(BaseIntegration):
         if alert_status is None:
             return "Unknown"
         return STATUS_DISPLAYS.get(alert_status, {}).get("display_name", alert_status)
+
+    @staticmethod
+    def _get_model_error_block_header(
+        model_error_alerts: List[ModelAlertModel],
+    ) -> List:
+        if len(model_error_alerts) == 0:
+            return []
+        result = []
+        for model_error_alert in model_error_alerts:
+            if model_error_alert.message:
+                result.extend(["*Result message*"])
+        return result
+
+    @staticmethod
+    def _get_model_error_block_body(model_error_alerts: List[ModelAlertModel]) -> str:
+        if len(model_error_alerts) == 0:
+            return ""
+        for model_error_alert in model_error_alerts:
+            if model_error_alert.message:
+                return f"```{model_error_alert.message.strip()}```"
+        return ""
 
     def send_test_message(self, *args, **kwargs) -> bool:
         self._get_test_message_template()
