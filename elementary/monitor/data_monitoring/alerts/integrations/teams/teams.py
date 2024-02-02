@@ -87,34 +87,20 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         if alert.suppression_interval:
-            title = "\n".join(
-                [
-                    title,
-                    f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}"])
-            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
-            title = "\n".join(
-                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
-            )
+            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
+            title += f" | Status: {alert.status}"
+            title += f" | Time: {alert.detected_at_str}"
+            title += f" | Suppression interval: {alert.suppression_interval} hours"
         else:
-            title = "\n".join(
-                [
-                    title,
-                    f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}     |"])
-            title = "\n".join([title, f"{alert.detected_at_str}"])
+            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
+            title += f" | Status: {alert.status}"
+            title += f" | {alert.detected_at_str}"
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.elementary_unique_id
         )
         if test_runs_report_link:
-            title = "\n".join(
-                [title, f"<{test_runs_report_link.url}|{test_runs_report_link.text}>"]
-            )
+            title += f" | <{test_runs_report_link.url}|{test_runs_report_link.text}>"
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -208,34 +194,20 @@ class TeamsIntegration(BaseIntegration):
             title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         if alert.suppression_interval:
-            title = "\n".join(
-                [
-                    title,
-                    f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}"])
-            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
-            title = "\n".join(
-                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
-            )
+            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
+            title += f" | Status: {alert.status}"
+            title += f" | Time: {alert.detected_at_str}"
+            title += f" | Suppression interval: {alert.suppression_interval} hours"
         else:
-            title = "\n".join(
-                [
-                    title,
-                    f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}     |"])
-            title = "\n".join([title, f"{alert.detected_at_str}"])
+            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
+            title += f" | Status: {alert.status}"
+            title += f" | {alert.detected_at_str}"
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.elementary_unique_id
         )
         if test_runs_report_link:
-            title = "\n".join(
-                [title, f"<{test_runs_report_link.url}|{test_runs_report_link.text}>"]
-            )
+            title += f" | <{test_runs_report_link.url}|{test_runs_report_link.text}>"
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -316,29 +288,20 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         if alert.suppression_interval:
-            title = "\n".join([title, f"*Model:* {alert.alias}     |"])
-            title = "\n".join([title, f"Status: {alert.status}"])
-            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
-            title = "\n".join(
-                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
-            )
+            title += f" | Model: {alert.alias}"
+            title += f" | Status: {alert.status}"
+            title += f" | Time: {alert.detected_at_str}"
+            title += f" | Suppression interval: {alert.suppression_interval} hours"
         else:
-            title = "\n".join(
-                [
-                    title,
-                    f"*Model:* {alert.alias}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}     |"])
-            title = "\n".join([title, f"{alert.detected_at_str}"])
+            title += f" | Model: {alert.alias}"
+            title += f" | Status: {alert.status}"
+            title += f" | {alert.detected_at_str}"
 
         model_runs_report_link = get_model_runs_link(
             alert.report_url, alert.model_unique_id
         )
         if model_runs_report_link:
-            title = "\n".join(
-                [title, f"<{model_runs_report_link.url}|{model_runs_report_link.text}>"]
-            )
+            title += f" | <{model_runs_report_link.url}|{model_runs_report_link.text}>"
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -394,29 +357,20 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         if alert.suppression_interval:
-            title = "\n".join([title, f"*Snapshot:* {alert.alias}     |"])
-            title = "\n".join([title, f"Status: {alert.status}"])
-            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
-            title = "\n".join(
-                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
-            )
+            title += f" | Snapshot: {alert.alias}"
+            title += f" | Status: {alert.status}"
+            title += f" | Time: {alert.detected_at_str}"
+            title += f" | Suppression interval: {alert.suppression_interval} hours"
         else:
-            title = "\n".join(
-                [
-                    title,
-                    f"*Snapshot:* {alert.alias}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}     |"])
-            title = "\n".join([title, f"{alert.detected_at_str}"])
+            title += f" | Snapshot: {alert.alias}"
+            title += f" | Status: {alert.status}"
+            title += f" | {alert.detected_at_str}"
 
         model_runs_report_link = get_model_runs_link(
             alert.report_url, alert.model_unique_id
         )
         if model_runs_report_link:
-            title = "\n".join(
-                [title, f"<{model_runs_report_link.url}|{model_runs_report_link.text}>"]
-            )
+            title += f" | <{model_runs_report_link.url}|{model_runs_report_link.text}>"
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -461,31 +415,20 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         if alert.suppression_interval:
-            title = "\n".join(
-                [title, f"*Source:* {alert.source_name}.{alert.identifier}     |"]
-            )
-            title = "\n".join([title, f"Status: {alert.status}"])
-            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
-            title = "\n".join(
-                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
-            )
+            title += f" | Source: {alert.source_name}.{alert.identifier} "
+            title += f" | Status: {alert.status}"
+            title += f" | Time: {alert.detected_at_str}"
+            title += f" | Suppression interval: {alert.suppression_interval} hours"
         else:
-            title = "\n".join(
-                [
-                    title,
-                    f"*Source:* {alert.source_name}.{alert.identifier}     |",
-                ]
-            )
-            title = "\n".join([title, f"Status: {alert.status}     |"])
-            title = "\n".join([title, f"{alert.detected_at_str}"])
+            title += f" | Source: {alert.source_name}.{alert.identifier} "
+            title += f" | Status: {alert.status}"
+            title += f" | {alert.detected_at_str}"
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.source_freshness_execution_id
         )
         if test_runs_report_link:
-            title = "\n".join(
-                [title, f"<{test_runs_report_link.url}|{test_runs_report_link.text}>"]
-            )
+            title += f" | <{test_runs_report_link.url}|{test_runs_report_link.text}>"
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -583,17 +526,13 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         if alert.model_errors:
-            title = "\n".join([title, f"Model errors: {len(alert.model_errors)}    |"])
+            title += f" | Model errors: {len(alert.model_errors)}"
         if alert.test_failures:
-            title = "\n".join(
-                [title, f"Test failures: {len(alert.test_failures)}    |"]
-            )
+            title += f" | Test failures: {len(alert.test_failures)}"
         if alert.test_warnings:
-            title = "\n".join(
-                [title, f"Test warnings: {len(alert.test_warnings)}    |"]
-            )
+            title += f" | Test warnings: {len(alert.test_warnings)}"
         if alert.test_errors:
-            title = "\n".join([title, f"Test errors: {len(alert.test_errors)}"])
+            title += f" | Test errors: {len(alert.test_errors)}"
 
         report_link = None
         # No report link when there is only model error
@@ -718,7 +657,10 @@ class TeamsIntegration(BaseIntegration):
                 fallback_sent_successfully = self.client.send_message()
             except Exception:
                 fallback_sent_successfully = False
-            return fallback_sent_successfully
+            sent_successfully = fallback_sent_successfully
+        # Resetting the client so that it does not cache the message of other alerts
+        self.client = self._initial_client()
+
         return sent_successfully
 
     @staticmethod
