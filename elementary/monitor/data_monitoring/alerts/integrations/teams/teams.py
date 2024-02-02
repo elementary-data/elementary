@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from datetime import datetime
+from typing import Dict, Optional, Union
 
 from pymsteams import cardsection
 
@@ -193,6 +193,121 @@ class TeamsIntegration(BaseIntegration):
     def _get_elementary_test_template(self, alert: TestAlertModel, *args, **kwargs):
         self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
         self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
+
+        anomalous_value = (
+            alert.other if alert.test_type == "anomaly_detection" else None
+        )
+
+        title = ""
+        if alert.test_type == "schema_change":
+            title = f"{alert.summary}"
+        else:
+            title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        if alert.suppression_interval:
+            title = "\n".join(
+                [
+                    title,
+                    f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}"])
+            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
+            title = "\n".join(
+                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
+            )
+        else:
+            title = "\n".join(
+                [
+                    title,
+                    f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}     |"])
+            title = "\n".join([title, f"{alert.detected_at_str}"])
+
+        test_runs_report_link = get_test_runs_link(
+            alert.report_url, alert.elementary_unique_id
+        )
+        if test_runs_report_link:
+            title = "\n".join(
+                [title, f"<{test_runs_report_link.url}|{test_runs_report_link.text}>"]
+            )
+
+        self.client.title(title)
+        # This is required by pymsteams..
+        self.client.text("**Elementary generated this message**")
+
+        if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            section = cardsection()
+            section.activityTitle("*Table*")
+            section.activityText(f"_{alert.table_full_name}_")
+            self.client.addSection(section)
+
+        if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            section = cardsection()
+            section.activityTitle("*Column*")
+            section.activityText(f'_{alert.column_name or "No column"}_')
+            self.client.addSection(section)
+
+        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            tags = prettify_and_dedup_list(alert.tags or [])
+            section = cardsection()
+            section.activityTitle("*Tags*")
+            section.activityText(f'_{tags or "No tags"}_')
+            self.client.addSection(section)
+
+        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            owners = prettify_and_dedup_list(alert.owners or [])
+            section = cardsection()
+            section.activityTitle("*Owners*")
+            section.activityText(f'_{owners or "No owners"}_')
+            self.client.addSection(section)
+
+        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
+            section = cardsection()
+            section.activityTitle("*Subscribers*")
+            section.activityText(f'_{subscribers or "No subscribers"}_')
+            self.client.addSection(section)
+
+        if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            section = cardsection()
+            section.activityTitle("*Description*")
+            section.activityText(f'_{alert.test_description or "No description"}_')
+            self.client.addSection(section)
+
+        if (
+            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.error_message
+        ):
+            section = cardsection()
+            section.activityTitle("*Result message*")
+            section.activityText(f"```{alert.error_message.strip()}```")
+            self.client.addSection(section)
+
+        if (
+            TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and anomalous_value
+        ):
+            section = cardsection()
+            section.activityTitle("*Test results sample*")
+            message = ""
+            if alert.column_name:
+                message = f"*Column*: {alert.column_name}     |     *Anomalous Values*: {anomalous_value}"
+            else:
+                message = f"*Anomalous Values*: {anomalous_value}"
+            section.activityText(message)
+            self.client.addSection(section)
+
+        if (
+            TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.test_params
+        ):
+            section = cardsection()
+            section.activityTitle("*Test parameters*")
+            section.activityText(f"```{alert.test_params}```")
+            self.client.addSection(section)
 
     def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs):
         self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
