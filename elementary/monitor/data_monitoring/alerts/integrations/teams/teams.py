@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, Union
 
 from pymsteams import cardsection
@@ -456,8 +456,122 @@ class TeamsIntegration(BaseIntegration):
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
     ):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
-        self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        if alert.suppression_interval:
+            title = "\n".join(
+                [title, f"*Source:* {alert.source_name}.{alert.identifier}     |"]
+            )
+            title = "\n".join([title, f"Status: {alert.status}"])
+            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
+            title = "\n".join(
+                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
+            )
+        else:
+            title = "\n".join(
+                [
+                    title,
+                    f"*Source:* {alert.source_name}.{alert.identifier}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}     |"])
+            title = "\n".join([title, f"{alert.detected_at_str}"])
+
+        test_runs_report_link = get_test_runs_link(
+            alert.report_url, alert.source_freshness_execution_id
+        )
+        if test_runs_report_link:
+            title = "\n".join(
+                [title, f"<{test_runs_report_link.url}|{test_runs_report_link.text}>"]
+            )
+
+        self.client.title(title)
+        # This is required by pymsteams..
+        self.client.text("**Elementary generated this message**")
+
+        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            tags = prettify_and_dedup_list(alert.tags or [])
+            section = cardsection()
+            section.activityTitle("*Tags*")
+            section.activityText(f'_{tags or "No tags"}_')
+            self.client.addSection(section)
+
+        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            owners = prettify_and_dedup_list(alert.owners or [])
+            section = cardsection()
+            section.activityTitle("*Owners*")
+            section.activityText(f'_{owners or "No owners"}_')
+            self.client.addSection(section)
+
+        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
+            section = cardsection()
+            section.activityTitle("*Subscribers*")
+            section.activityText(f'_{subscribers or "No subscribers"}_')
+            self.client.addSection(section)
+
+        if alert.freshness_description:
+            section = cardsection()
+            section.activityTitle("*Description*")
+            section.activityText(f'_{alert.freshness_description or "No description"}_')
+            self.client.addSection(section)
+
+        if alert.status == "runtime error":
+            section = cardsection()
+            section.activityTitle("*Result message*")
+            section.activityText(
+                f"Failed to calculate the source freshness\n```{alert.error}```"
+            )
+            self.client.addSection(section)
+        else:
+            section = cardsection()
+            section.activityTitle("*Result message*")
+            section.activityText(f"```{alert.result_description}```")
+            self.client.addSection(section)
+
+        if alert.status != "runtime error":
+            section = cardsection()
+            section.activityTitle("*Time Elapsed*")
+            section.activityText(
+                f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}"
+            )
+            self.client.addSection(section)
+
+        if alert.status != "runtime error":
+            section = cardsection()
+            section.activityTitle("*Last Record At*")
+            section.activityText(f"{alert.max_loaded_at}")
+            self.client.addSection(section)
+
+        if alert.status != "runtime error":
+            section = cardsection()
+            section.activityTitle("*Sampled At*")
+            section.activityText(f"{alert.snapshotted_at_str}")
+            self.client.addSection(section)
+
+        if alert.error_after:
+            section = cardsection()
+            section.activityTitle("*Error after*")
+            section.activityText(f"`{alert.error_after}`")
+            self.client.addSection(section)
+
+        if alert.error_after:
+            section = cardsection()
+            section.activityTitle("*Warn after*")
+            section.activityText(f"`{alert.warn_after}`")
+            self.client.addSection(section)
+
+        if alert.error_after:
+            section = cardsection()
+            section.activityTitle("*Filter*")
+            section.activityText(f"`{alert.filter}`")
+            self.client.addSection(section)
+
+        if alert.path:
+            section = cardsection()
+            section.activityTitle("*Path*")
+            section.activityText(f"`{alert.path}`")
+            self.client.addSection(section)
 
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
