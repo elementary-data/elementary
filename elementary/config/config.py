@@ -16,6 +16,7 @@ class Config:
     _AWS = "aws"
     _GOOGLE = "google"
     _AZURE = "azure"
+    _TEAMS = "teams"
     _CONFIG_FILE_NAME = "config.yml"
 
     # Quoting env vars
@@ -63,6 +64,7 @@ class Config:
         azure_connection_string: Optional[str] = None,
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
+        teams_webhook: Optional[str] = None,
         env: str = "dev",
         run_dbt_deps_if_needed: Optional[bool] = None,
     ):
@@ -119,6 +121,12 @@ class Config:
             slack_group_alerts_by,
             slack_config.get("group_alerts_by"),
             GroupingType.BY_ALERT.value,
+        )
+
+        teams_config = config.get(self._TEAMS, {})
+        self.teams_webhook = self._first_not_none(
+            teams_webhook,
+            teams_config.get("teams_webhook"),
         )
 
         aws_config = config.get(self._AWS, {})
@@ -202,6 +210,10 @@ class Config:
         return self.slack_webhook or (self.slack_token and self.slack_channel_name)
 
     @property
+    def has_teams(self) -> bool:
+        return self.teams_webhook
+
+    @property
     def has_s3(self):
         return self.s3_bucket_name
 
@@ -225,9 +237,9 @@ class Config:
 
     def validate_monitor(self):
         self._validate_timezone()
-        if not self.has_slack:
+        if not self.has_slack and not self.has_teams:
             raise InvalidArgumentsError(
-                "Either a Slack token and a channel or a Slack webhook is required."
+                "Either a Slack token and a channel, a Slack webhook or a Microsoft Teams webhook is required."
             )
 
     def validate_send_report(self):
