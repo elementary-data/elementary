@@ -1,11 +1,8 @@
-import json
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
-from retry import retry
+from typing import Optional
 
-from pymsteams import connectorcard
-from ratelimit import limits, sleep_and_retry
-from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+from pymsteams import cardsection, connectorcard
+from retry import retry
 
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
@@ -35,7 +32,9 @@ class TeamsClient(ABC):
         if not config.has_teams:
             return None
         if config.teams_webhook:
-            return TeamsWebhookMessageBuilderClient(webhook=config.teams_webhook, tracking=tracking)
+            return TeamsWebhookMessageBuilderClient(
+                webhook=config.teams_webhook, tracking=tracking
+            )
         return None
 
     @abstractmethod
@@ -90,3 +89,6 @@ class TeamsWebhookMessageBuilderClient(TeamsWebhookClient):
 
     def text(self, text: str):
         self.client.text(text)
+
+    def addSection(self, section: cardsection):
+        self.client.addSection(section)

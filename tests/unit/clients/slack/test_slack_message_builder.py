@@ -5,6 +5,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
+from elementary.utils.strings import prettify_and_dedup_list
 
 
 def test_create_divider_block():
@@ -323,19 +324,12 @@ def test_create_button_action_block(text, url):
 
 
 def test_prettify_and_dedup_list():
-    message_builder = SlackMessageBuilder()
-    list_prettified = message_builder.prettify_and_dedup_list(
-        ["name1", "name2", "name2"]
-    )
+    list_prettified = prettify_and_dedup_list(["name1", "name2", "name2"])
     assert list_prettified == "name1, name2"
 
-    assert (
-        message_builder.prettify_and_dedup_list("name1, name2, name2") == "name1, name2"
-    )
+    assert prettify_and_dedup_list("name1, name2, name2") == "name1, name2"
 
-    string_of_list_prettified = message_builder.prettify_and_dedup_list(
-        '["name1", "name2", "name2"]'
-    )
+    string_of_list_prettified = prettify_and_dedup_list('["name1", "name2", "name2"]')
     assert string_of_list_prettified == "name1, name2"
 
 

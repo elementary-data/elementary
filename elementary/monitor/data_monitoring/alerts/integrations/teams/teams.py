@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
 
+from pymsteams import cardsection
+
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
 from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
@@ -10,8 +12,12 @@ from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
 )
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    get_test_runs_link,
+)
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
+from elementary.utils.strings import prettify_and_dedup_list
 
 logger = get_logger(__name__)
 
@@ -72,8 +78,117 @@ class TeamsIntegration(BaseIntegration):
         return teams_client
 
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
-        self.client.text(f"{self._get_display_name(alert.status)}: {alert.summary}")
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        if alert.suppression_interval:
+            title = "\n".join(
+                [
+                    title,
+                    f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}"])
+            title = "\n".join([title, f"Time: {alert.detected_at_str}     |"])
+            title = "\n".join(
+                [title, f"Suppression interval:* {alert.suppression_interval} hours"]
+            )
+        else:
+            title = "\n".join(
+                [
+                    title,
+                    f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                ]
+            )
+            title = "\n".join([title, f"Status: {alert.status}     |"])
+            title = "\n".join([title, f"{alert.detected_at_str}"])
+
+        test_runs_report_link = get_test_runs_link(
+            alert.report_url, alert.elementary_unique_id
+        )
+        if test_runs_report_link:
+            title = "\n".join(
+                [title, f"<{test_runs_report_link.url}|{test_runs_report_link.text}>"]
+            )
+
+        self.client.title(title)
+        # This is required by pymsteams..
+        self.client.text("**Elementary generated this message**")
+
+        if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            section = cardsection()
+            section.activityTitle("*Table*")
+            section.activityText(f"_{alert.table_full_name}_")
+            self.client.addSection(section)
+
+        if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            section = cardsection()
+            section.activityTitle("*Column*")
+            section.activityText(f'_{alert.column_name or "No column"}_')
+            self.client.addSection(section)
+
+        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            tags = prettify_and_dedup_list(alert.tags or [])
+            section = cardsection()
+            section.activityTitle("*Tags*")
+            section.activityText(f'_{tags or "No tags"}_')
+            self.client.addSection(section)
+
+        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            owners = prettify_and_dedup_list(alert.owners or [])
+            section = cardsection()
+            section.activityTitle("*Owners*")
+            section.activityText(f'_{owners or "No owners"}_')
+            self.client.addSection(section)
+
+        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
+            section = cardsection()
+            section.activityTitle("*Subscribers*")
+            section.activityText(f'_{subscribers or "No subscribers"}_')
+            self.client.addSection(section)
+
+        if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
+            section = cardsection()
+            section.activityTitle("*Description*")
+            section.activityText(f'_{alert.test_description or "No description"}_')
+            self.client.addSection(section)
+
+        if (
+            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.error_message
+        ):
+            section = cardsection()
+            section.activityTitle("*Result message*")
+            section.activityText(f"_{alert.error_message.strip()}_")
+            self.client.addSection(section)
+
+        if (
+            TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.test_rows_sample
+        ):
+            section = cardsection()
+            section.activityTitle("*Test results sample*")
+            section.activityText(f"```{alert.test_rows_sample}```")
+            self.client.addSection(section)
+
+        # This lacks logic to handle the case where the message is too long
+        if (
+            TEST_QUERY_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.test_results_query
+        ):
+            section = cardsection()
+            section.activityTitle("*Test query*")
+            section.activityText(f"{alert.test_results_query}")
+            self.client.addSection(section)
+
+        if (
+            TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.test_params
+        ):
+            section = cardsection()
+            section.activityTitle("*Test parameters*")
+            section.activityText(f"```{alert.test_params}```")
+            self.client.addSection(section)
 
     def _get_elementary_test_template(self, alert: TestAlertModel, *args, **kwargs):
         self.client.title(f"{self._get_display_name(alert.status)}: {alert.summary}")
