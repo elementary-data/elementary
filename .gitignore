@@ -93,8 +93,5 @@ venv/
 
 .DS_Store
 
-# vscode
-.vscode/
-
 # elementary outputs
 edr_target/

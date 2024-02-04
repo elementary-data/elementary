@@ -151,6 +151,11 @@ class SlackWebClient(SlackClient):
     def _get_channels(
         self, cursor: Optional[str] = None
     ) -> Tuple[List[dict], Optional[str]]:
+        return self.list_conversations(cursor=cursor)
+
+    def list_conversations(
+        self, cursor: Optional[str] = None
+    ) -> Tuple[List[dict], Optional[str]]:
         response = self.client.conversations_list(
             cursor=cursor,
             types="public_channel,private_channel",

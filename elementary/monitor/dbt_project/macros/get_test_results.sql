@@ -31,6 +31,7 @@
             owners,
             model_owner,
             tags,
+            test_tags,
             model_tags,
             meta,
             model_meta,

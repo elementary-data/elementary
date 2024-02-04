@@ -12,7 +12,7 @@ class SourceFreshnessResultDBRowSchema(ExtendedBaseModel):
     max_loaded_at: Optional[str] = None
     generated_at: str
     status: str
-    normalized_status: str
+    original_status: str
     error: Optional[str] = None
     invocation_id: str
     database_name: Optional[str] = None

@@ -7,6 +7,7 @@ from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
 from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -50,6 +51,12 @@ DEFAULT_ALERT_FIELDS = [
     TEST_QUERY_FIELD,
     TEST_RESULTS_SAMPLE_FIELD,
 ]
+
+STATUS_DISPLAYS: Dict[str, Dict] = {
+    "fail": {"color": MessageColor.RED, "display_name": "Failure"},
+    "warn": {"color": MessageColor.YELLOW, "display_name": "Warning"},
+    "error": {"color": MessageColor.RED, "display_name": "Error"},
+}
 
 
 class SlackIntegration(BaseIntegration):
@@ -96,9 +103,12 @@ class SlackIntegration(BaseIntegration):
     def _get_dbt_test_template(
         self, alert: TestAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        icon = self.message_builder.get_slack_status_icon(alert.status)
-
-        title = [self.message_builder.create_header_block(f"{icon} dbt test alert")]
+        self.message_builder.add_message_color(self._get_color(alert.status))
+        title = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -250,19 +260,18 @@ class SlackIntegration(BaseIntegration):
     def _get_elementary_test_template(
         self, alert: TestAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        icon = self.message_builder.get_slack_status_icon(alert.status)
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
-        anomalous_value = None
-        if alert.test_type == "schema_change":
-            alert_title = "Schema change detected"
-        elif alert.test_type == "anomaly_detection":
-            alert_title = "Data anomaly detected"
-            anomalous_value = alert.other or None
-        else:
-            raise ValueError("Invalid test type.", alert.test_type)
+        anomalous_value = (
+            alert.other if alert.test_type == "anomaly_detection" else None
+        )
 
         title = [
-            self.message_builder.create_header_block(f"{icon} {alert_title}"),
+            self.message_builder.create_header_block(
+                f"{alert.summary}"
+                if alert.test_type == "schema_change"
+                else f"{self._get_display_name(alert.status)}: {alert.summary}"
+            ),
         ]
         if alert.suppression_interval:
             title.extend(
@@ -402,9 +411,13 @@ class SlackIntegration(BaseIntegration):
         tags = self.message_builder.prettify_and_dedup_list(alert.tags)
         owners = self.message_builder.prettify_and_dedup_list(alert.owners)
         subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
-        icon = self.message_builder.get_slack_status_icon(alert.status)
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
-        title = [self.message_builder.create_header_block(f"{icon} dbt model alert")]
+        title = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -498,9 +511,13 @@ class SlackIntegration(BaseIntegration):
         tags = self.message_builder.prettify_and_dedup_list(alert.tags)
         owners = self.message_builder.prettify_and_dedup_list(alert.owners)
         subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
-        icon = self.message_builder.get_slack_status_icon(alert.status)
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
-        title = [self.message_builder.create_header_block(f"{icon} dbt snapshot alert")]
+        title = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -580,20 +597,20 @@ class SlackIntegration(BaseIntegration):
         subscribers = self.message_builder.prettify_and_dedup_list(
             alert.subscribers or []
         )
-        icon = self.message_builder.get_slack_status_icon(alert.normalized_status)
-
+        self.message_builder.add_message_color(self._get_color(alert.status))
         title = [
             self.message_builder.create_header_block(
-                f"{icon} dbt source freshness alert"
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
             )
         ]
+
         if alert.suppression_interval:
             title.extend(
                 [
                     self.message_builder.create_context_block(
                         [
                             f"*Source:* {alert.source_name}.{alert.identifier}     |",
-                            f"*Status:* {alert.normalized_status}",
+                            f"*Status:* {alert.status}",
                         ],
                     ),
                     self.message_builder.create_context_block(
@@ -609,7 +626,7 @@ class SlackIntegration(BaseIntegration):
                 self.message_builder.create_context_block(
                     [
                         f"*Source:* {alert.source_name}.{alert.identifier}     |",
-                        f"*Status:* {alert.normalized_status}     |",
+                        f"*Status:* {alert.status}     |",
                         f"*{alert.detected_at_str}*",
                     ],
                 ),
@@ -717,15 +734,14 @@ class SlackIntegration(BaseIntegration):
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ):
         alerts = alert.alerts
-        model = alert.model
 
-        title_blocks = []  # title, [banner], number of passed or failed,
-        title_blocks.append(
+        self.message_builder.add_message_color(self._get_color(alert.status))
+
+        title_blocks = [
             self.message_builder.create_header_block(
-                f":small_red_triangle: Table issues detected - {model}"
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
             )
-        )
-
+        ]
         # summary of number of failed, errors, etc.
         fields_summary: List[str] = []
         # summary of number of failed, errors, etc.
@@ -872,7 +888,7 @@ class SlackIntegration(BaseIntegration):
         return SlackMessageSchema(
             text=self.message_builder.get_limited_markdown_msg(
                 f":small_red_triangle: Oops, we failed to format the alert :confused:\n"
-                f"Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue.\n"
+                f"Please share this with the Elementary team via <https://www.elementary-data.com/community|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue.\n"
                 f"```{json.dumps(alert.data, indent=2)}```"
             )
         )
@@ -985,3 +1001,15 @@ class SlackIntegration(BaseIntegration):
                 )
             )
         return integration_params
+
+    @staticmethod
+    def _get_display_name(alert_status: Optional[str]) -> str:
+        if alert_status is None:
+            return "Unknown"
+        return STATUS_DISPLAYS.get(alert_status, {}).get("display_name", alert_status)
+
+    @staticmethod
+    def _get_color(alert_status: Optional[str]) -> MessageColor:
+        if alert_status is None:
+            return MessageColor.RED
+        return STATUS_DISPLAYS.get(alert_status, {}).get("color", MessageColor.RED)

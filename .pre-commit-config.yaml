@@ -19,7 +19,7 @@ repos:
     rev: "v3.0.0"
     hooks:
       - id: prettier
-        exclude: \.html$
+        exclude: \.html$|^docs/
 
   - repo: https://github.com/crate-ci/typos
     rev: v1.16.6

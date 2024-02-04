@@ -4,9 +4,12 @@ import networkx as nx
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-from elementary.monitor.api.lineage.schema import LineageNodeSchema, LineageSchema
+from elementary.monitor.api.lineage.schema import (
+    LineageNodeSchema,
+    LineageSchema,
+    NodeDependsOnNodesSchema,
+)
 from elementary.monitor.fetchers.lineage.lineage import LineageFetcher
-from elementary.monitor.fetchers.lineage.schema import NodeDependsOnNodesSchema
 
 
 class LineageAPI(APIClient):
@@ -38,6 +41,10 @@ class LineageAPI(APIClient):
         nodes_depends_on_nodes: List[NodeDependsOnNodesSchema],
     ) -> List[LineageNodeSchema]:
         return [
-            LineageNodeSchema(type=node.type, id=node.unique_id)
+            LineageNodeSchema(
+                id=node.unique_id,
+                type=node.type,
+                sub_type=node.sub_type,
+            )
             for node in nodes_depends_on_nodes
         ]

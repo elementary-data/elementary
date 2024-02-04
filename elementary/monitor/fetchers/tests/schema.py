@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import validator
+from pydantic import Field, validator
 
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
@@ -25,9 +25,12 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_results_description: Optional[str]
     owners: Optional[List[str]]
     model_owner: Optional[List[str]]
-    tags: Optional[List[str]]
+    # tags is a union of test_tags and model_tags that we get from the db.
+    tags: List[str] = Field(default_factory=list)
+    test_tags: List[str] = Field(default_factory=list)
     meta: dict
     model_meta: dict
+    model_tags: List[str] = Field(default_factory=list)
     test_results_query: Optional[str] = None
     other: Optional[str]
     test_name: str
@@ -66,6 +69,14 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     @validator("tags", pre=True)
     def load_tags(cls, tags):
         return cls._load_var_to_list(tags)
+
+    @validator("test_tags", pre=True)
+    def load_test_tags(cls, test_tags):
+        return cls._load_var_to_list(test_tags)
+
+    @validator("model_tags", pre=True)
+    def load_model_tags(cls, model_tags):
+        return cls._load_var_to_list(model_tags)
 
     @validator("owners", pre=True)
     def load_owners(cls, owners):

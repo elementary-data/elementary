@@ -157,9 +157,14 @@ class TestAlertModel(AlertModel):
 
     @property
     def summary(self) -> str:
+        if self.test_type == "schema_change":
+            return (
+                f"{self.test_sub_type_display_name} on "
+                f"{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}"
+            )
         return (
-            f"*{self.concise_name}* test failed on "
-            f"`{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}`"
+            f'"{self.concise_name}" test failed on '
+            f"{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}"
         )
 
     def get_report_link(self) -> Optional[ReportLinkData]:

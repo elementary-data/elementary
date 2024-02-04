@@ -3,9 +3,9 @@ from datetime import datetime
 
 import pytest
 
-from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
-    BasePendingAlertSchema,
-    PendingTestAlertSchema,
+from elementary.monitor.fetchers.alerts.schema.alert_data import (
+    BaseAlertDataSchema,
+    TestAlertDataSchema,
 )
 from elementary.utils.time import DATETIME_FORMAT
 
@@ -40,16 +40,16 @@ TEST_ALERT = dict(
 
 
 def test_flatten_meta():
-    flatten_meta = BasePendingAlertSchema._flatten_meta()
+    flatten_meta = BaseAlertDataSchema._flatten_meta()
     assert isinstance(flatten_meta, dict)
     assert len(flatten_meta) == 0
 
-    flatten_meta = BasePendingAlertSchema._flatten_meta(dict(a="a"))
+    flatten_meta = BaseAlertDataSchema._flatten_meta(dict(a="a"))
     assert json.dumps(flatten_meta, sort_keys=True) == json.dumps(
         dict(a="a"), sort_keys=True
     )
 
-    flatten_meta = BasePendingAlertSchema._flatten_meta(
+    flatten_meta = BaseAlertDataSchema._flatten_meta(
         dict(a="a", alerts_config=dict(a="b"))
     )
     assert json.dumps(flatten_meta, sort_keys=True) == json.dumps(
@@ -71,9 +71,9 @@ def test_flatten_meta():
 )
 def test_get_alert_meta_attrs(model_meta, test_meta, expected):
     alert = (
-        BasePendingAlertSchema(**{**BASE_ALERT, "model_meta": model_meta})
+        BaseAlertDataSchema(**{**BASE_ALERT, "model_meta": model_meta})
         if test_meta is None
-        else PendingTestAlertSchema(
+        else TestAlertDataSchema(
             **{**TEST_ALERT, "model_meta": model_meta, "test_meta": test_meta}
         )
     )
@@ -81,7 +81,7 @@ def test_get_alert_meta_attrs(model_meta, test_meta, expected):
 
 
 def test_get_suppression_interval():
-    base_alert = BasePendingAlertSchema(
+    base_alert = BaseAlertDataSchema(
         **{**BASE_ALERT, "model_meta": dict(alert_suppression_interval=1)}
     )
     assert (
@@ -93,7 +93,7 @@ def test_get_suppression_interval():
         == 2
     )
 
-    base_alert = BasePendingAlertSchema(**BASE_ALERT)
+    base_alert = BaseAlertDataSchema(**BASE_ALERT)
     assert (
         base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=False)
         == 2
@@ -105,17 +105,17 @@ def test_get_suppression_interval():
 
 
 def test_tags():
-    base_alert = BasePendingAlertSchema(**BASE_ALERT)
+    base_alert = BaseAlertDataSchema(**BASE_ALERT)
     assert base_alert.tags == []
 
-    base_alert = BasePendingAlertSchema(**{**BASE_ALERT, "tags": ["a", "b"]})
+    base_alert = BaseAlertDataSchema(**{**BASE_ALERT, "tags": ["a", "b"]})
     assert sorted(base_alert.tags) == sorted(["a", "b"])
 
-    base_alert = BasePendingAlertSchema(**{**BASE_ALERT, "tags": '["a", "b"]'})
+    base_alert = BaseAlertDataSchema(**{**BASE_ALERT, "tags": '["a", "b"]'})
     assert sorted(base_alert.tags) == sorted(["a", "b"])
 
-    base_alert = BasePendingAlertSchema(**{**BASE_ALERT, "tags": "a, b"})
+    base_alert = BaseAlertDataSchema(**{**BASE_ALERT, "tags": "a, b"})
     assert sorted(base_alert.tags) == sorted(["a", "b"])
 
-    base_alert = BasePendingAlertSchema(**{**BASE_ALERT, "tags": "a"})
+    base_alert = BaseAlertDataSchema(**{**BASE_ALERT, "tags": "a"})
     assert sorted(base_alert.tags) == sorted(["a"])
