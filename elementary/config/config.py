@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import google.auth
+import google.auth  # type: ignore[import]
 from dateutil import tz
-from google.auth.exceptions import DefaultCredentialsError
+from google.auth.exceptions import DefaultCredentialsError  # type: ignore[import]
 
 from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor.alerts.group_of_alerts import GroupingType
@@ -50,17 +50,21 @@ class Config:
         slack_group_alerts_by: Optional[str] = None,
         timezone: Optional[str] = None,
         aws_profile_name: Optional[str] = None,
+        aws_region_name: Optional[str] = None,
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
         s3_endpoint_url: Optional[str] = None,
         s3_bucket_name: Optional[str] = None,
         google_project_name: Optional[str] = None,
         google_service_account_path: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
+        gcs_timeout_limit: Optional[int] = None,
         azure_connection_string: Optional[str] = None,
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
         env: str = "dev",
+        run_dbt_deps_if_needed: Optional[bool] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -122,6 +126,10 @@ class Config:
             aws_profile_name,
             aws_config.get("profile_name"),
         )
+        self.aws_region_name = self._first_not_none(
+            aws_region_name,
+            aws_config.get("region_name"),
+        )
         self.s3_endpoint_url = self._first_not_none(
             s3_endpoint_url, aws_config.get("s3_endpoint_url")
         )
@@ -130,6 +138,7 @@ class Config:
         )
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
+        self.aws_session_token = aws_session_token
 
         google_config = config.get(self._GOOGLE, {})
         self.google_project_name = self._first_not_none(
@@ -143,6 +152,10 @@ class Config:
         self.gcs_bucket_name = self._first_not_none(
             gcs_bucket_name,
             google_config.get("gcs_bucket_name"),
+        )
+        self.gcs_timeout_limit = self._first_not_none(
+            gcs_timeout_limit,
+            google_config.get("gcs_timeout_limit"),
         )
 
         azure_config = config.get(self._AZURE, {})
@@ -163,6 +176,9 @@ class Config:
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
+        self.run_dbt_deps_if_needed = self._first_not_none(
+            run_dbt_deps_if_needed, config.get("run_dbt_deps_if_needed"), True
+        )
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):

@@ -6,4 +6,8 @@ MOCK_PROFILES_DIR = "profiles_dir"
 
 class MockDbtRunner(DbtRunner):
     def __init__(self) -> None:
-        super().__init__(project_dir=MOCK_PROJECT_DIR, profiles_dir=MOCK_PROFILES_DIR)
+        super().__init__(
+            project_dir=MOCK_PROJECT_DIR,
+            profiles_dir=MOCK_PROFILES_DIR,
+            run_deps_if_needed=False,
+        )

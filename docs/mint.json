@@ -169,11 +169,10 @@
             "data-tests/anomaly-detection-configuration/where-expression",
             "data-tests/anomaly-detection-configuration/anomaly-sensitivity",
             "data-tests/anomaly-detection-configuration/anomaly-direction",
-            "data-tests/anomaly-detection-configuration/days-back",
-            "data-tests/anomaly-detection-configuration/backfill-days",
+            "data-tests/anomaly-detection-configuration/training-period",
+            "data-tests/anomaly-detection-configuration/detection-period",
             "data-tests/anomaly-detection-configuration/time-bucket",
             "data-tests/anomaly-detection-configuration/seasonality",
-            "data-tests/anomaly-detection-configuration/min-training-set-size",
             "data-tests/anomaly-detection-configuration/column-anomalies",
             "data-tests/anomaly-detection-configuration/exclude_prefix",
             "data-tests/anomaly-detection-configuration/exclude_regexp",
@@ -216,7 +215,8 @@
           "icon": "circle-play",
           "pages": [
             "cloud/onboarding/quickstart-dbt-package",
-            "cloud/onboarding/signup"
+            "cloud/onboarding/signup",
+            "cloud/manage-team"
           ]
         },
         "cloud/general/security-and-privacy"
@@ -229,11 +229,13 @@
           "group": "Send Slack alerts",
           "pages": [
             "cloud/guides/enable-slack-alerts",
-            "cloud/guides/alerts-configuration"
+            "cloud/guides/alerts-configuration",
+            "cloud/guides/alert-rules"
           ]
         },
         "cloud/guides/sync-scheduling",
         "cloud/guides/collect-job-data",
+        "cloud/guides/collect-source-freshness",
         "cloud/guides/troubleshoot"
       ]
     },
@@ -290,7 +292,8 @@
             "oss/guides/share-observability-report/host-on-s3",
             "oss/guides/share-observability-report/host-on-gcs",
             "oss/guides/share-observability-report/host-on-azure",
-            "oss/guides/share-observability-report/send-report-summary"
+            "oss/guides/share-observability-report/send-report-summary",
+            "oss/guides/collect-dbt-source-freshness"
           ]
         },
         {

@@ -2,10 +2,10 @@ from os import path
 from typing import Optional, Tuple
 from urllib.parse import urljoin
 
-import google
-from google.auth.credentials import Credentials
-from google.cloud import storage  # type: ignore[attr-defined]
-from google.oauth2 import service_account
+import google  # type: ignore[import]
+from google.auth.credentials import Credentials  # type: ignore[import]
+from google.cloud import storage  # type: ignore[attr-defined, import]
+from google.oauth2 import service_account  # type: ignore[import]
 
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
@@ -15,6 +15,7 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 DEFAULT_BUCKET_WEBSITE_URL = "https://storage.googleapis.com"
+GCS_DEFAULT_TIMEOUT = 60
 
 
 class GCSClient:
@@ -42,7 +43,11 @@ class GCSClient:
         logger.info(f'Uploading to GCS bucket "{self.config.gcs_bucket_name}"')
         bucket = self.client.get_bucket(self.config.gcs_bucket_name)
         blob = bucket.blob(bucket_report_path)
-        blob.upload_from_filename(local_html_file_path, content_type="text/html")
+        blob.upload_from_filename(
+            local_html_file_path,
+            content_type="text/html",
+            timeout=self.config.gcs_timeout_limit or GCS_DEFAULT_TIMEOUT,
+        )
         logger.info("Uploaded report to GCS.")
         if self.config.update_bucket_website:
             bucket_report_folder_path = bucket_path.dirname(bucket_report_path)

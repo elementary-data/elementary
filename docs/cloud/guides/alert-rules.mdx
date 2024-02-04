@@ -1,0 +1,35 @@
+---
+title: "Alert rules"
+---
+
+Elementary cloud allows you to create rules that route your alerts.
+Each rule is a combination of a filter and a destination.
+
+The Slack channel you choose when connecting your Slack workspace is automatically added as a default alert rule, that sends all the alerts to that channel without any filtering.
+To modify, deactivate or add more rules, simply navigate to the "Alert routing rules" page in the left menu.
+
+<p>
+  <Frame>
+    <div className="dark:bg-white rounded-md p-4">
+      <img src="/pics/cloud/alert_rules.png" alt="Alert routing rules screen" />
+    </div>
+  </Frame>
+</p>
+
+<p>
+  <Frame>
+    <div className="dark:bg-white rounded-md p-4">
+      <img
+        src="/pics/cloud/alert_rules_drawer.png"
+        alt="Create a new alert rule or edit an existing one"
+      />
+    </div>
+  </Frame>
+</p>
+
+<Tip>
+  When the alerts are fetched, each alert is evaluated against all the rules,
+  until a rule matches. The alert is then routed to the destination of the
+  matching rule, and no further rules are evaluated. This is why the order of
+  the rules matters!
+</Tip>

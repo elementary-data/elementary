@@ -8,6 +8,7 @@
                       ('url', 'long_string'),
                       ('depends_on_macros', 'long_string'),
                       ('depends_on_nodes', 'long_string'),
+                      ('depends_on_columns', 'long_string'),
                       ('description', 'long_string'),
                       ('tags', 'long_string'),
                       ('meta', 'long_string'),
