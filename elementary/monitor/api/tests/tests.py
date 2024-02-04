@@ -352,6 +352,7 @@ class TestsAPI(APIClient):
             description=test_result_db_row.meta.get("description"),
             result=result,
             configuration=configuration,
+            test_tags=test_result_db_row.test_tags,
         )
 
     @staticmethod

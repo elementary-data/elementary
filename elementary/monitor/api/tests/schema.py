@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
@@ -62,6 +62,7 @@ class TestMetadataSchema(BaseModel):
     description: Optional[str] = None
     result: dict
     configuration: dict
+    test_tags: List[str] = Field(default_factory=list)
 
 
 class TestResultSchema(BaseModel):

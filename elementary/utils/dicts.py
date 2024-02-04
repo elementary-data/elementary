@@ -15,7 +15,9 @@ def merge_dicts_attribute(dicts: List[Dict], attribute_key: str) -> List:
     for dict_to_merge in dicts:
         dict_attribute = dict_to_merge.get(attribute_key, [])
         if isinstance(dict_attribute, list):
-            merged_attribute.extend(dict_attribute)
+            valid_items = [item for item in dict_attribute if item is not None]
+            merged_attribute.extend(valid_items)
         else:
-            merged_attribute.append(dict_attribute)
+            if dict_attribute is not None:
+                merged_attribute.append(dict_attribute)
     return merged_attribute
