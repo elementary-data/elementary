@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from pymsteams import cardsection, connectorcard
+from pymsteams import cardsection, connectorcard, potentialaction
 from retry import retry
 
 from elementary.config.config import Config
@@ -75,7 +75,6 @@ class TeamsWebhookClient(TeamsClient):
         return False
 
 
-
 class TeamsWebhookMessageBuilderClient(TeamsWebhookClient):
     def __init__(
         self,
@@ -93,3 +92,6 @@ class TeamsWebhookMessageBuilderClient(TeamsWebhookClient):
 
     def addSection(self, section: cardsection):
         self.client.addSection(section)
+
+    def addPotentialAction(self, action: potentialaction):
+        self.client.addPotentialAction(action)

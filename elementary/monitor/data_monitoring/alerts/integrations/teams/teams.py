@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union
 
-from pymsteams import cardsection
+from pymsteams import cardsection, potentialaction
 
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
@@ -83,24 +83,46 @@ class TeamsIntegration(BaseIntegration):
             raise Exception("Could not create a Teams client")
         return teams_client
 
-    def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-
+    def _get_alert_title(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
+        custom_title_part: Optional[str] = None,
+    ) -> str:
+        if alert.test_type == "schema_change":
+            title = f"{alert.summary}"
+        else:
+            title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+        title += f" | {custom_title_part}" if custom_title_part else ""
+        title += f" | Status: {alert.status}"
         if alert.suppression_interval:
-            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
-            title += f" | Status: {alert.status}"
             title += f" | Time: {alert.detected_at_str}"
             title += f" | Suppression interval: {alert.suppression_interval} hours"
         else:
-            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
-            title += f" | Status: {alert.status}"
             title += f" | {alert.detected_at_str}"
+
+        return title
+
+    def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
+        title = self._get_alert_title(
+            alert,
+            f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}",
+        )
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.elementary_unique_id
         )
         if test_runs_report_link:
-            title += f" | <{test_runs_report_link.url}|{test_runs_report_link.text}>"
+            action = potentialaction(test_runs_report_link.text)
+            action.addOpenURI(
+                test_runs_report_link.text,
+                [{"os": "default", "uri": test_runs_report_link.url}],
+            )
+            self.client.addPotentialAction(action)
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -187,27 +209,21 @@ class TeamsIntegration(BaseIntegration):
             alert.other if alert.test_type == "anomaly_detection" else None
         )
 
-        title = ""
-        if alert.test_type == "schema_change":
-            title = f"{alert.summary}"
-        else:
-            title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-
-        if alert.suppression_interval:
-            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
-            title += f" | Status: {alert.status}"
-            title += f" | Time: {alert.detected_at_str}"
-            title += f" | Suppression interval: {alert.suppression_interval} hours"
-        else:
-            title += f" | Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}"
-            title += f" | Status: {alert.status}"
-            title += f" | {alert.detected_at_str}"
+        title = self._get_alert_title(
+            alert,
+            f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}",
+        )
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.elementary_unique_id
         )
         if test_runs_report_link:
-            title += f" | <{test_runs_report_link.url}|{test_runs_report_link.text}>"
+            action = potentialaction(test_runs_report_link.text)
+            action.addOpenURI(
+                test_runs_report_link.text,
+                [{"os": "default", "uri": test_runs_report_link.url}],
+            )
+            self.client.addPotentialAction(action)
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -285,17 +301,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs):
-        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-
-        if alert.suppression_interval:
-            title += f" | Model: {alert.alias}"
-            title += f" | Status: {alert.status}"
-            title += f" | Time: {alert.detected_at_str}"
-            title += f" | Suppression interval: {alert.suppression_interval} hours"
-        else:
-            title += f" | Model: {alert.alias}"
-            title += f" | Status: {alert.status}"
-            title += f" | {alert.detected_at_str}"
+        title = self._get_alert_title(alert, f"Model: {alert.alias}")
 
         model_runs_report_link = get_model_runs_link(
             alert.report_url, alert.model_unique_id
@@ -354,23 +360,18 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
-        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-
-        if alert.suppression_interval:
-            title += f" | Snapshot: {alert.alias}"
-            title += f" | Status: {alert.status}"
-            title += f" | Time: {alert.detected_at_str}"
-            title += f" | Suppression interval: {alert.suppression_interval} hours"
-        else:
-            title += f" | Snapshot: {alert.alias}"
-            title += f" | Status: {alert.status}"
-            title += f" | {alert.detected_at_str}"
+        title = self._get_alert_title(alert, f"Test: Snapshot: {alert.alias}")
 
         model_runs_report_link = get_model_runs_link(
             alert.report_url, alert.model_unique_id
         )
         if model_runs_report_link:
-            title += f" | <{model_runs_report_link.url}|{model_runs_report_link.text}>"
+            action = potentialaction(model_runs_report_link.text)
+            action.addOpenURI(
+                model_runs_report_link.text,
+                [{"os": "default", "uri": model_runs_report_link.url}],
+            )
+            self.client.addPotentialAction(action)
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -412,23 +413,20 @@ class TeamsIntegration(BaseIntegration):
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
     ):
-        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-
-        if alert.suppression_interval:
-            title += f" | Source: {alert.source_name}.{alert.identifier} "
-            title += f" | Status: {alert.status}"
-            title += f" | Time: {alert.detected_at_str}"
-            title += f" | Suppression interval: {alert.suppression_interval} hours"
-        else:
-            title += f" | Source: {alert.source_name}.{alert.identifier} "
-            title += f" | Status: {alert.status}"
-            title += f" | {alert.detected_at_str}"
+        title = self._get_alert_title(
+            alert, f"Source: {alert.source_name}.{alert.identifier}"
+        )
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.source_freshness_execution_id
         )
         if test_runs_report_link:
-            title += f" | <{test_runs_report_link.url}|{test_runs_report_link.text}>"
+            action = potentialaction(test_runs_report_link.text)
+            action.addOpenURI(
+                test_runs_report_link.text,
+                [{"os": "default", "uri": test_runs_report_link.url}],
+            )
+            self.client.addPotentialAction(action)
 
         self.client.title(title)
         # This is required by pymsteams..
@@ -542,7 +540,12 @@ class TeamsIntegration(BaseIntegration):
             )
 
         if report_link:
-            title = "\n".join([title, f"<{report_link.url}|{report_link.text}>"])
+            action = potentialaction(report_link.text)
+            action.addOpenURI(
+                report_link.text, [{"os": "default", "uri": report_link.url}]
+            )
+            self.client.addPotentialAction(action)
+
         self.client.title(title)
         # This is required by pymsteams..
         self.client.text("**Elementary generated this message**")
