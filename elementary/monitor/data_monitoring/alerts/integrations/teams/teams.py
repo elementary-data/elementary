@@ -14,6 +14,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.base_integration imp
     BaseIntegration,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
     get_model_runs_link,
     get_model_test_runs_link,
     get_test_runs_link,
@@ -120,6 +121,14 @@ class TeamsIntegration(BaseIntegration):
 
         return subtitle
 
+    def _get_potential_action(self, reportlink: ReportLinkData):
+        action = potentialaction(reportlink.text)
+        action.addOpenURI(
+            reportlink.text,
+            [{"os": "default", "uri": reportlink.url}],
+        )
+        return action
+
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
         title = self._get_alert_title(alert)
         subtitle = self._get_alert_sub_title(alert)
@@ -128,11 +137,7 @@ class TeamsIntegration(BaseIntegration):
             alert.report_url, alert.elementary_unique_id
         )
         if test_runs_report_link:
-            action = potentialaction(test_runs_report_link.text)
-            action.addOpenURI(
-                test_runs_report_link.text,
-                [{"os": "default", "uri": test_runs_report_link.url}],
-            )
+            action = self._get_potential_action(test_runs_report_link)
             self.client.addPotentialAction(action)
 
         self.client.title(title)
@@ -225,11 +230,7 @@ class TeamsIntegration(BaseIntegration):
             alert.report_url, alert.elementary_unique_id
         )
         if test_runs_report_link:
-            action = potentialaction(test_runs_report_link.text)
-            action.addOpenURI(
-                test_runs_report_link.text,
-                [{"os": "default", "uri": test_runs_report_link.url}],
-            )
+            action = self._get_potential_action(test_runs_report_link)
             self.client.addPotentialAction(action)
 
         self.client.title(title)
@@ -314,7 +315,8 @@ class TeamsIntegration(BaseIntegration):
             alert.report_url, alert.model_unique_id
         )
         if model_runs_report_link:
-            title += f" | <{model_runs_report_link.url}|{model_runs_report_link.text}>"
+            action = self._get_potential_action(model_runs_report_link)
+            self.client.addPotentialAction(action)
 
         self.client.title(title)
         self.client.text(subtitle)
@@ -373,11 +375,7 @@ class TeamsIntegration(BaseIntegration):
             alert.report_url, alert.model_unique_id
         )
         if model_runs_report_link:
-            action = potentialaction(model_runs_report_link.text)
-            action.addOpenURI(
-                model_runs_report_link.text,
-                [{"os": "default", "uri": model_runs_report_link.url}],
-            )
+            action = self._get_potential_action(model_runs_report_link)
             self.client.addPotentialAction(action)
 
         self.client.title(title)
@@ -426,11 +424,7 @@ class TeamsIntegration(BaseIntegration):
             alert.report_url, alert.source_freshness_execution_id
         )
         if test_runs_report_link:
-            action = potentialaction(test_runs_report_link.text)
-            action.addOpenURI(
-                test_runs_report_link.text,
-                [{"os": "default", "uri": test_runs_report_link.url}],
-            )
+            action = self._get_potential_action(test_runs_report_link)
             self.client.addPotentialAction(action)
 
         self.client.title(title)
@@ -544,10 +538,7 @@ class TeamsIntegration(BaseIntegration):
             )
 
         if report_link:
-            action = potentialaction(report_link.text)
-            action.addOpenURI(
-                report_link.text, [{"os": "default", "uri": report_link.url}]
-            )
+            action = self._get_potential_action(report_link)
             self.client.addPotentialAction(action)
 
         self.client.title(title)
