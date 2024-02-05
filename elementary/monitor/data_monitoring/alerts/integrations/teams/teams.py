@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union
 
+import pandas as pd
 from pymsteams import cardsection, potentialaction
 
 from elementary.clients.teams.client import TeamsClient
@@ -197,7 +198,9 @@ class TeamsIntegration(BaseIntegration):
         ):
             section = cardsection()
             section.activityTitle("*Test results sample*")
-            section.activityText(f"```{alert.test_rows_sample}```")
+            df = pd.DataFrame(alert.test_rows_sample)
+            markdown_table_str = df.to_markdown(index=False)
+            section.activityText(markdown_table_str)
             self.client.addSection(section)
 
         # This lacks logic to handle the case where the message is too long
