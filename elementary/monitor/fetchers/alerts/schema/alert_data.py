@@ -128,7 +128,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
     column_name: Optional[str] = None
     test_type: str
     test_sub_type: str
-    test_results_description: str
+    test_results_description: Optional[str] = None
     test_results_query: Optional[str] = None
     test_rows_sample: Optional[List[Dict]] = None
     other: Optional[Dict] = None
