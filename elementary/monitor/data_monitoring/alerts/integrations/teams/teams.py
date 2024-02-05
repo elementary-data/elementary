@@ -91,27 +91,38 @@ class TeamsIntegration(BaseIntegration):
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
         ],
-        custom_title_part: Optional[str] = None,
-    ) -> str:
+    ):
         if alert.test_type == "schema_change":
             title = f"{alert.summary}"
         else:
             title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-        title += f" | {custom_title_part}" if custom_title_part else ""
-        title += f" | Status: {alert.status}"
-        if alert.suppression_interval:
-            title += f" | Time: {alert.detected_at_str}"
-            title += f" | Suppression interval: {alert.suppression_interval} hours"
-        else:
-            title += f" | {alert.detected_at_str}"
-
         return title
 
+    def _get_alert_sub_title(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
+    ) -> str:
+        subtitle = "**"
+        subtitle += f"Status: {alert.status}"
+        if alert.suppression_interval:
+            subtitle += f"   |   Time: {alert.detected_at_str}"
+            subtitle += (
+                f"   |   Suppression interval: {alert.suppression_interval} hours"
+            )
+        else:
+            subtitle += f"   |   {alert.detected_at_str}"
+        subtitle += "**"
+
+        return subtitle
+
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        title = self._get_alert_title(
-            alert,
-            f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}",
-        )
+        title = self._get_alert_title(alert)
+        subtitle = self._get_alert_sub_title(alert)
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.elementary_unique_id
@@ -125,8 +136,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addPotentialAction(action)
 
         self.client.title(title)
-        # This is required by pymsteams..
-        self.client.text("**Elementary generated this message**")
+        self.client.text(subtitle)
 
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
@@ -208,11 +218,8 @@ class TeamsIntegration(BaseIntegration):
         anomalous_value = (
             alert.other if alert.test_type == "anomaly_detection" else None
         )
-
-        title = self._get_alert_title(
-            alert,
-            f"Test: {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}",
-        )
+        title = self._get_alert_title(alert)
+        subtitle = self._get_alert_sub_title(alert)
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.elementary_unique_id
@@ -226,8 +233,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addPotentialAction(action)
 
         self.client.title(title)
-        # This is required by pymsteams..
-        self.client.text("**Elementary generated this message**")
+        self.client.text(subtitle)
 
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
@@ -301,7 +307,8 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs):
-        title = self._get_alert_title(alert, f"Model: {alert.alias}")
+        title = self._get_alert_title(alert)
+        subtitle = self._get_alert_sub_title(alert)
 
         model_runs_report_link = get_model_runs_link(
             alert.report_url, alert.model_unique_id
@@ -310,8 +317,7 @@ class TeamsIntegration(BaseIntegration):
             title += f" | <{model_runs_report_link.url}|{model_runs_report_link.text}>"
 
         self.client.title(title)
-        # This is required by pymsteams..
-        self.client.text("**Elementary generated this message**")
+        self.client.text(subtitle)
 
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
@@ -360,7 +366,8 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
-        title = self._get_alert_title(alert, f"Test: Snapshot: {alert.alias}")
+        title = self._get_alert_title(alert)
+        subtitle = self._get_alert_sub_title(alert)
 
         model_runs_report_link = get_model_runs_link(
             alert.report_url, alert.model_unique_id
@@ -374,8 +381,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addPotentialAction(action)
 
         self.client.title(title)
-        # This is required by pymsteams..
-        self.client.text("**Elementary generated this message**")
+        self.client.text(subtitle)
 
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
@@ -413,9 +419,8 @@ class TeamsIntegration(BaseIntegration):
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
     ):
-        title = self._get_alert_title(
-            alert, f"Source: {alert.source_name}.{alert.identifier}"
-        )
+        title = self._get_alert_title(alert)
+        subtitle = self._get_alert_sub_title(alert)
 
         test_runs_report_link = get_test_runs_link(
             alert.report_url, alert.source_freshness_execution_id
@@ -429,8 +434,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addPotentialAction(action)
 
         self.client.title(title)
-        # This is required by pymsteams..
-        self.client.text("**Elementary generated this message**")
+        self.client.text(subtitle)
 
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
@@ -520,17 +524,17 @@ class TeamsIntegration(BaseIntegration):
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ):
         alerts = alert.alerts
-
-        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+        title = self._get_alert_title(alert)
+        subtitle = ""
 
         if alert.model_errors:
-            title += f" | Model errors: {len(alert.model_errors)}"
+            subtitle += f" | Model errors: {len(alert.model_errors)}"
         if alert.test_failures:
-            title += f" | Test failures: {len(alert.test_failures)}"
+            subtitle += f" | Test failures: {len(alert.test_failures)}"
         if alert.test_warnings:
-            title += f" | Test warnings: {len(alert.test_warnings)}"
+            subtitle += f" | Test warnings: {len(alert.test_warnings)}"
         if alert.test_errors:
-            title += f" | Test errors: {len(alert.test_errors)}"
+            subtitle += f" | Test errors: {len(alert.test_errors)}"
 
         report_link = None
         # No report link when there is only model error
@@ -547,8 +551,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addPotentialAction(action)
 
         self.client.title(title)
-        # This is required by pymsteams..
-        self.client.text("**Elementary generated this message**")
+        self.client.text(subtitle)
 
         tags = list_of_lists_of_strings_to_comma_delimited_unique_strings(
             [alert.tags or [] for alert in alerts]
@@ -621,7 +624,7 @@ class TeamsIntegration(BaseIntegration):
         *args,
         **kwargs,
     ):
-        self.client.title(f"Oops, we failed to format the alert ! -_-'")
+        self.client.title("Oops, we failed to format the alert ! -_-'")
         self.client.text(
             "Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue."
         )
