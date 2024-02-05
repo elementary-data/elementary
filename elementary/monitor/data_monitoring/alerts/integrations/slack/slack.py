@@ -28,6 +28,10 @@ from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
     list_of_lists_of_strings_to_comma_delimited_unique_strings,
 )
+from elementary.utils.log import get_logger
+
+logger = get_logger(__name__)
+
 
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
@@ -954,7 +958,10 @@ class SlackIntegration(BaseIntegration):
             sent_successfully = self.client.send_message(
                 channel_name=channel_name, message=template
             )
-        except Exception:
+        except Exception as err:
+            logger.error(
+                f"Unable to send alert via Slack: {err}\nSending fallback template."
+            )
             sent_successfully = False
 
         if not sent_successfully:
@@ -963,7 +970,8 @@ class SlackIntegration(BaseIntegration):
                 fallback_sent_successfully = self.client.send_message(
                     channel_name=channel_name, message=fallback_template
                 )
-            except Exception:
+            except Exception as err:
+                logger.error(f"Unable to send alert fallback via Slack: {err}")
                 fallback_sent_successfully = False
             self.message_builder.reset_slack_message()
             return fallback_sent_successfully
