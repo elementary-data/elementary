@@ -84,21 +84,6 @@ class TeamsIntegration(BaseIntegration):
             raise Exception("Could not create a Teams client")
         return teams_client
 
-    def _get_alert_title(
-        self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-        ],
-    ):
-        if alert.test_type == "schema_change":
-            title = f"{alert.summary}"
-        else:
-            title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-        return title
-
     @staticmethod
     def _get_alert_sub_title(
         alert: Union[
@@ -131,7 +116,7 @@ class TeamsIntegration(BaseIntegration):
         return action
 
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        title = self._get_alert_title(alert)
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
         test_runs_report_link = get_test_runs_link(
@@ -226,7 +211,11 @@ class TeamsIntegration(BaseIntegration):
         anomalous_value = (
             alert.other if alert.test_type == "anomaly_detection" else None
         )
-        title = self._get_alert_title(alert)
+        if alert.test_type == "schema_change":
+            title = f"{alert.summary}"
+        else:
+            title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
         subtitle = self._get_alert_sub_title(alert)
 
         test_runs_report_link = get_test_runs_link(
@@ -311,7 +300,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs):
-        title = self._get_alert_title(alert)
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
         model_runs_report_link = get_model_runs_link(
@@ -371,7 +360,7 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
-        title = self._get_alert_title(alert)
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
         model_runs_report_link = get_model_runs_link(
@@ -420,7 +409,7 @@ class TeamsIntegration(BaseIntegration):
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
     ):
-        title = self._get_alert_title(alert)
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
         test_runs_report_link = get_test_runs_link(
@@ -521,13 +510,13 @@ class TeamsIntegration(BaseIntegration):
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ):
         alerts = alert.alerts
-        title = self._get_alert_title(alert)
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = ""
 
         if alert.model_errors:
             subtitle += f" | Model errors: {len(alert.model_errors)}"
         if alert.test_failures:
-            subtitle += f" | Test failures: {len(alert.test_failures)}"
+            subtitle += f" | &#1F53A; Test failures: {len(alert.test_failures)}"
         if alert.test_warnings:
             subtitle += f" | Test warnings: {len(alert.test_warnings)}"
         if alert.test_errors:
