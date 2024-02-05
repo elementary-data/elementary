@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from pymsteams import cardsection, connectorcard, potentialaction
+from pymsteams import cardsection, connectorcard, potentialaction  # type: ignore
 from retry import retry
 
 from elementary.config.config import Config
@@ -11,8 +11,6 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 OK_STATUS_CODE = 200
-ONE_MINUTE = 60
-ONE_SECOND = 1
 
 
 class TeamsClient(ABC):
@@ -21,9 +19,7 @@ class TeamsClient(ABC):
         tracking: Optional[Tracking] = None,
     ):
         self.client = self._initial_client()
-        self.webhook = None
         self.tracking = tracking
-        # self._initial_retry_handlers()
 
     @staticmethod
     def create_client(
@@ -48,12 +44,30 @@ class TeamsClient(ABC):
     def send_message(self, **kwargs):
         raise NotImplementedError
 
+    @abstractmethod
+    def title(self, title: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def text(self, text: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def addSection(self, section: cardsection):
+        raise NotImplementedError
+
+    @abstractmethod
+    def addPotentialAction(self, action: potentialaction):
+        raise NotImplementedError
+
 
 class TeamsWebhookClient(TeamsClient):
     def __init__(
         self,
+        webhook: str,
         tracking: Optional[Tracking] = None,
     ):
+        self.webhook = webhook
         super().__init__(tracking)
 
     def _initial_client(self):
@@ -81,8 +95,7 @@ class TeamsWebhookMessageBuilderClient(TeamsWebhookClient):
         webhook: str,
         tracking: Optional[Tracking] = None,
     ):
-        self.webhook = webhook
-        super().__init__(tracking)
+        super().__init__(webhook, tracking)
 
     def title(self, title: str):
         self.client.title(title)

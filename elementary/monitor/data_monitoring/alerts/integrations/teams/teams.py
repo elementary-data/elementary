@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
-from pymsteams import cardsection, potentialaction
+from pymsteams import cardsection, potentialaction  # type: ignore
 
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
@@ -90,7 +90,6 @@ class TeamsIntegration(BaseIntegration):
             TestAlertModel,
             ModelAlertModel,
             SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
         ],
     ) -> str:
         subtitle = "**"
@@ -700,3 +699,4 @@ class TeamsIntegration(BaseIntegration):
 
     def send_test_message(self, *args, **kwargs) -> bool:
         self._get_test_message_template()
+        return self.client.send_message()
