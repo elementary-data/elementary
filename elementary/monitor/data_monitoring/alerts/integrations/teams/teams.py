@@ -71,7 +71,6 @@ class TeamsIntegration(BaseIntegration):
         self.config = config
         self.tracking = tracking
         self.override_config_defaults = override_config_defaults
-        self.message_builder = None
         super().__init__()
 
         # Enforce typing
@@ -100,8 +99,8 @@ class TeamsIntegration(BaseIntegration):
             title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         return title
 
+    @staticmethod
     def _get_alert_sub_title(
-        self,
         alert: Union[
             TestAlertModel,
             ModelAlertModel,
@@ -122,7 +121,8 @@ class TeamsIntegration(BaseIntegration):
 
         return subtitle
 
-    def _get_potential_action(self, reportlink: ReportLinkData):
+    @staticmethod
+    def _get_potential_action(reportlink: ReportLinkData):
         action = potentialaction(reportlink.text)
         action.addOpenURI(
             reportlink.text,
