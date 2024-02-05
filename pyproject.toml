@@ -33,7 +33,7 @@ packaging = ">=20.9,<=23.1"
 azure-storage-blob = ">=12.11.0"
 pymsteams = ">=0.2.2,<1.0.0"
 retry = ">=0.9.2,<1.0.0"
-pandas = ">=2.2.0"
+pandas = ">=2.0.0"
 tabulate = ">= 0.9.0"
 
 dbt-snowflake = {version = ">=0.20,<2.0.0", optional = true}
