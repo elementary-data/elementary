@@ -229,7 +229,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
     original_path: str
     materialization: str
     full_refresh: bool
-    message: str
+    message: Optional[str] = None
     resource_type: ResourceType = Field(ResourceType.MODEL, const=True)
 
     def format_alert(
