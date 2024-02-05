@@ -514,13 +514,32 @@ class TeamsIntegration(BaseIntegration):
         subtitle = ""
 
         if alert.model_errors:
-            subtitle += f" | Model errors: {len(alert.model_errors)}"
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x1F635; Model errors: {len(alert.model_errors)}")
+                if subtitle
+                else f"&#x1F635; Model errors: {len(alert.model_errors)}"
+            )
         if alert.test_failures:
-            subtitle += f" | &#1F53A; Test failures: {len(alert.test_failures)}"
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x1F53A; Test failures: {len(alert.test_failures)}")
+                if subtitle
+                else f"&#x1F53A; Test failures: {len(alert.test_failures)}"
+            )
         if alert.test_warnings:
-            subtitle += f" | Test warnings: {len(alert.test_warnings)}"
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x26A0; Test warnings: {len(alert.test_warnings)}")
+                if subtitle
+                else f"&#x26A0; Test warnings: {len(alert.test_warnings)}"
+            )
         if alert.test_errors:
-            subtitle += f" | Test errors: {len(alert.test_errors)}"
+            subtitle = (
+                subtitle + (" | " + f"&#x2757; Test errors: {len(alert.test_errors)}")
+                if subtitle
+                else f"&#x2757; Test errors: {len(alert.test_errors)}"
+            )
 
         report_link = None
         # No report link when there is only model error
@@ -548,17 +567,17 @@ class TeamsIntegration(BaseIntegration):
 
         section = cardsection()
         section.activityTitle("*Tags*")
-        section.activityText(f'_{tags if tags else "_No tags_"}_')
+        section.activityText(f'_{tags if tags else "No tags"}_')
         self.client.addSection(section)
 
         section = cardsection()
         section.activityTitle("*Owners*")
-        section.activityText(f'_{owners if owners else "_No owners_"}_')
+        section.activityText(f'_{owners if owners else "No owners"}_')
         self.client.addSection(section)
 
         section = cardsection()
         section.activityTitle("*Subscribers*")
-        section.activityText(f'_{subscribers if subscribers else "_No subscribers_"}_')
+        section.activityText(f'_{subscribers if subscribers else "No subscribers"}_')
         self.client.addSection(section)
 
         if alert.model_errors:
@@ -576,7 +595,7 @@ class TeamsIntegration(BaseIntegration):
             section = cardsection()
             section.activityTitle("*Test failures*")
             rows = [alert.concise_name for alert in alert.test_failures]
-            text = "\n".join([f"{row}" for row in rows])
+            text = "\n".join([f"&#x1F53A; {row}" for row in rows])
             section.activityText(text)
             self.client.addSection(section)
 
@@ -584,7 +603,7 @@ class TeamsIntegration(BaseIntegration):
             section = cardsection()
             section.activityTitle("*Test warnings*")
             rows = [alert.concise_name for alert in alert.test_warnings]
-            text = "\n".join([f"{row}" for row in rows])
+            text = "\n".join([f"&#x26A0; {row}" for row in rows])
             section.activityText(text)
             self.client.addSection(section)
 
@@ -592,7 +611,7 @@ class TeamsIntegration(BaseIntegration):
             section = cardsection()
             section.activityTitle("*Test errors*")
             rows = [alert.concise_name for alert in alert.test_errors]
-            text = "\n".join([f"{row}" for row in rows])
+            text = "\n".join([f"&#x2757; {row}" for row in rows])
             section.activityText(text)
             self.client.addSection(section)
 
