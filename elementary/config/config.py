@@ -123,11 +123,17 @@ class Config:
             GroupingType.BY_ALERT.value,
         )
 
+        self.provided_slack_in_cli = slack_webhook is not None or (
+            slack_token is not None and slack_channel_name is not None
+        )
+
         teams_config = config.get(self._TEAMS, {})
         self.teams_webhook = self._first_not_none(
             teams_webhook,
             teams_config.get("teams_webhook"),
         )
+
+        self.provided_teams_in_cli = teams_webhook is not None
 
         aws_config = config.get(self._AWS, {})
         self.aws_profile_name = self._first_not_none(
@@ -207,11 +213,13 @@ class Config:
 
     @property
     def has_slack(self) -> bool:
-        return self.slack_webhook or (self.slack_token and self.slack_channel_name)
+        return (
+            self.slack_webhook or (self.slack_token and self.slack_channel_name)
+        ) and not self.provided_teams_in_cli
 
     @property
     def has_teams(self) -> bool:
-        return self.teams_webhook
+        return self.teams_webhook and not self.provided_slack_in_cli
 
     @property
     def has_s3(self):
@@ -240,6 +248,10 @@ class Config:
         if not self.has_slack and not self.has_teams:
             raise InvalidArgumentsError(
                 "Either a Slack token and a channel, a Slack webhook or a Microsoft Teams webhook is required."
+            )
+        if self.provided_teams_in_cli and self.provided_slack_in_cli:
+            raise InvalidArgumentsError(
+                "You provided both Slack and Teams integration on the command line. Please provide only one."
             )
 
     def validate_send_report(self):
