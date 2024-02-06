@@ -137,4 +137,25 @@ elementary:
       threads: [number of threads like 8]
 ```
 
+```yml Trino
+## Trino ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: trino
+      host: [hostname]
+      port: [port]
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+      method: [authentication method] # ldap, oauth etc.
+      user: [username]
+      # password: [optional, used with ldap authentication ]
+      # session_properties: [optional, sets Trino session properties used in the connection]
+```
+
 </CodeGroup>
