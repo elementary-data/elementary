@@ -627,7 +627,7 @@ class TeamsIntegration(BaseIntegration):
     ):
         self.client.title("Oops, we failed to format the alert ! -_-'")
         self.client.text(
-            "Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue."
+            "Please share this with the Elementary team via <https://elementary-data.com/community> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue."
         )
         section = cardsection()
         section.activityTitle("*Stack Trace*")
