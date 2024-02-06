@@ -29,10 +29,9 @@ from elementary.utils.json_utils import (
     list_of_lists_of_strings_to_comma_delimited_unique_strings,
 )
 from elementary.utils.log import get_logger
+from elementary.utils.strings import prettify_and_dedup_list
 
 logger = get_logger(__name__)
-
-from elementary.utils.strings import prettify_and_dedup_list
 
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
