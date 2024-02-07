@@ -16,10 +16,12 @@ OK_STATUS_CODE = 200
 class TeamsClient(ABC):
     def __init__(
         self,
+        webhook: str,
         tracking: Optional[Tracking] = None,
     ):
-        self.client = self._initial_client()
+        self.webhook = webhook
         self.tracking = tracking
+        self.client = self._initial_client()
 
     @staticmethod
     def create_client(
@@ -32,43 +34,6 @@ class TeamsClient(ABC):
                 webhook=config.teams_webhook, tracking=tracking
             )
         return None
-
-    @abstractmethod
-    def _initial_client(self):
-        raise NotImplementedError
-
-    def _initial_retry_handlers(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def send_message(self, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
-    def title(self, title: str):
-        raise NotImplementedError
-
-    @abstractmethod
-    def text(self, text: str):
-        raise NotImplementedError
-
-    @abstractmethod
-    def addSection(self, section: cardsection):
-        raise NotImplementedError
-
-    @abstractmethod
-    def addPotentialAction(self, action: potentialaction):
-        raise NotImplementedError
-
-
-class TeamsWebhookClient(TeamsClient):
-    def __init__(
-        self,
-        webhook: str,
-        tracking: Optional[Tracking] = None,
-    ):
-        self.webhook = webhook
-        super().__init__(tracking)
 
     def _initial_client(self):
         return connectorcard(self.webhook)
@@ -88,8 +53,24 @@ class TeamsWebhookClient(TeamsClient):
             )
         return False
 
+    @abstractmethod
+    def title(self, title: str):
+        raise NotImplementedError
 
-class TeamsWebhookMessageBuilderClient(TeamsWebhookClient):
+    @abstractmethod
+    def text(self, text: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def addSection(self, section: cardsection):
+        raise NotImplementedError
+
+    @abstractmethod
+    def addPotentialAction(self, action: potentialaction):
+        raise NotImplementedError
+
+
+class TeamsWebhookMessageBuilderClient(TeamsClient):
     def __init__(
         self,
         webhook: str,
