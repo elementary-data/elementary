@@ -114,32 +114,60 @@ class TeamsIntegration(BaseIntegration):
         )
         return action
 
-    def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
-        subtitle = self._get_alert_sub_title(alert)
+    def _add_report_link_if_applicable(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+        ],
+    ):
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.elementary_unique_id
-        )
-        if test_runs_report_link:
-            action = self._get_potential_action(test_runs_report_link)
+        if isinstance(alert, ModelAlertModel) or isinstance(
+            alert, SourceFreshnessAlertModel
+        ):
+            reportlink = get_model_runs_link(alert.report_url, alert.model_unique_id)
+        elif isinstance(alert, TestAlertModel):
+            reportlink = get_test_runs_link(
+                alert.report_url, alert.elementary_unique_id
+            )
+        elif isinstance(alert, GroupedByTableAlerts):
+            if not alert.model_errors:
+                reportlink = get_model_test_runs_link(
+                    alert.report_url, alert.model_unique_id
+                )
+            else:
+                reportlink = None
+        else:
+            reportlink = None
+
+        if reportlink:
+            action = self._get_potential_action(reportlink)
             self.client.addPotentialAction(action)
 
-        self.client.title(title)
-        self.client.text(subtitle)
-
+    def _add_table_field_section_if_applicable(self, alert: TestAlertModel):
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
             section.activityTitle("*Table*")
             section.activityText(f"_{alert.table_full_name}_")
             self.client.addSection(section)
 
+    def _add_column_field_section_if_applicable(self, alert: TestAlertModel):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
             section.activityTitle("*Column*")
             section.activityText(f'_{alert.column_name or "No column"}_')
             self.client.addSection(section)
 
+    def _add_tags_field_section_if_applicable(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+        ],
+    ):
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
             section = cardsection()
@@ -147,6 +175,14 @@ class TeamsIntegration(BaseIntegration):
             section.activityText(f'_{tags or "No tags"}_')
             self.client.addSection(section)
 
+    def _add_owners_field_section_if_applicable(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+        ],
+    ):
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             owners = prettify_and_dedup_list(alert.owners or [])
             section = cardsection()
@@ -154,6 +190,14 @@ class TeamsIntegration(BaseIntegration):
             section.activityText(f'_{owners or "No owners"}_')
             self.client.addSection(section)
 
+    def _add_subscribers_field_section_if_applicable(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+        ],
+    ):
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             subscribers = prettify_and_dedup_list(alert.subscribers or [])
             section = cardsection()
@@ -161,32 +205,35 @@ class TeamsIntegration(BaseIntegration):
             section.activityText(f'_{subscribers or "No subscribers"}_')
             self.client.addSection(section)
 
+    def _add_description_field_section_if_applicable(self, alert: TestAlertModel):
         if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
             section.activityTitle("*Description*")
             section.activityText(f'_{alert.test_description or "No description"}_')
             self.client.addSection(section)
 
-        if (
-            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.error_message
-        ):
+    def _add_result_message_field_section_if_applicable(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+        ],
+    ):
+        if RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
             section.activityTitle("*Result message*")
-            section.activityText(f"_{alert.error_message.strip()}_")
+            if isinstance(alert, ModelAlertModel):
+                if alert.message:
+                    message = alert.message.strip()
+            elif isinstance(alert, TestAlertModel):
+                if alert.error_message:
+                    message = alert.error_message.strip()
+            if not message:
+                message = "No result message"
+            section.activityText(f"_{message}_")
             self.client.addSection(section)
 
-        if (
-            TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.test_rows_sample
-        ):
-            section = cardsection()
-            section.activityTitle("*Test results sample*")
-            df = pd.DataFrame(alert.test_rows_sample)
-            markdown_table_str = df.to_markdown(index=False)
-            section.activityText(markdown_table_str)
-            self.client.addSection(section)
-
+    def _add_test_query_field_section_if_applicable(self, alert: TestAlertModel):
         # This lacks logic to handle the case where the message is too long
         if (
             TEST_QUERY_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
@@ -194,9 +241,10 @@ class TeamsIntegration(BaseIntegration):
         ):
             section = cardsection()
             section.activityTitle("*Test query*")
-            section.activityText(f"{alert.test_results_query}")
+            section.activityText(f"```{alert.test_results_query.strip()}")
             self.client.addSection(section)
 
+    def _add_test_params_field_section_if_applicable(self, alert: TestAlertModel):
         if (
             TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
             and alert.test_params
@@ -206,10 +254,47 @@ class TeamsIntegration(BaseIntegration):
             section.activityText(f"```{alert.test_params}```")
             self.client.addSection(section)
 
+    def _add_test_results_sample_field_section_if_applicable(
+        self, alert: TestAlertModel
+    ):
+        if TEST_RESULTS_SAMPLE_FIELD in (
+            alert.alert_fields or DEFAULT_ALERT_FIELDS
+        ) and (alert.test_rows_sample or alert.test_type == "anomaly_detection"):
+            section = cardsection()
+            section.activityTitle("*Test results sample*")
+            if alert.test_type == "anomaly_detection":
+                anomalous_value = alert.other
+                if alert.column_name:
+                    message = f"*Column*: {alert.column_name}     |     *Anomalous Values*: {anomalous_value}"
+                else:
+                    message = f"*Anomalous Values*: {anomalous_value}"
+            else:
+                df = pd.DataFrame(alert.test_rows_sample)
+                message = df.to_markdown(index=False)
+            section.activityText(message)
+            self.client.addSection(section)
+
+    def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+        subtitle = self._get_alert_sub_title(alert)
+
+        self._add_report_link_if_applicable(alert)
+
+        self.client.title(title)
+        self.client.text(subtitle)
+
+        self._add_table_field_section_if_applicable(alert)
+        self._add_column_field_section_if_applicable(alert)
+        self._add_tags_field_section_if_applicable(alert)
+        self._add_owners_field_section_if_applicable(alert)
+        self._add_subscribers_field_section_if_applicable(alert)
+        self._add_description_field_section_if_applicable(alert)
+        self._add_result_message_field_section_if_applicable(alert)
+        self._add_test_results_sample_field_section_if_applicable(alert)
+        self._add_test_query_field_section_if_applicable(alert)
+        self._add_test_params_field_section_if_applicable(alert)
+
     def _get_elementary_test_template(self, alert: TestAlertModel, *args, **kwargs):
-        anomalous_value = (
-            alert.other if alert.test_type == "anomaly_detection" else None
-        )
         if alert.test_type == "schema_change":
             title = f"{alert.summary}"
         else:
@@ -217,130 +302,33 @@ class TeamsIntegration(BaseIntegration):
 
         subtitle = self._get_alert_sub_title(alert)
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.elementary_unique_id
-        )
-        if test_runs_report_link:
-            action = self._get_potential_action(test_runs_report_link)
-            self.client.addPotentialAction(action)
+        self._add_report_link_if_applicable(alert)
 
         self.client.title(title)
         self.client.text(subtitle)
 
-        if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Table*")
-            section.activityText(f"_{alert.table_full_name}_")
-            self.client.addSection(section)
-
-        if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Column*")
-            section.activityText(f'_{alert.column_name or "No column"}_')
-            self.client.addSection(section)
-
-        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = prettify_and_dedup_list(alert.tags or [])
-            section = cardsection()
-            section.activityTitle("*Tags*")
-            section.activityText(f'_{tags or "No tags"}_')
-            self.client.addSection(section)
-
-        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = prettify_and_dedup_list(alert.owners or [])
-            section = cardsection()
-            section.activityTitle("*Owners*")
-            section.activityText(f'_{owners or "No owners"}_')
-            self.client.addSection(section)
-
-        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            section = cardsection()
-            section.activityTitle("*Subscribers*")
-            section.activityText(f'_{subscribers or "No subscribers"}_')
-            self.client.addSection(section)
-
-        if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Description*")
-            section.activityText(f'_{alert.test_description or "No description"}_')
-            self.client.addSection(section)
-
-        if (
-            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.error_message
-        ):
-            section = cardsection()
-            section.activityTitle("*Result message*")
-            section.activityText(f"```{alert.error_message.strip()}```")
-            self.client.addSection(section)
-
-        if (
-            TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and anomalous_value
-        ):
-            section = cardsection()
-            section.activityTitle("*Test results sample*")
-            message = ""
-            if alert.column_name:
-                message = f"*Column*: {alert.column_name}     |     *Anomalous Values*: {anomalous_value}"
-            else:
-                message = f"*Anomalous Values*: {anomalous_value}"
-            section.activityText(message)
-            self.client.addSection(section)
-
-        if (
-            TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.test_params
-        ):
-            section = cardsection()
-            section.activityTitle("*Test parameters*")
-            section.activityText(f"```{alert.test_params}```")
-            self.client.addSection(section)
+        self._add_table_field_section_if_applicable(alert)
+        self._add_column_field_section_if_applicable(alert)
+        self._add_tags_field_section_if_applicable(alert)
+        self._add_owners_field_section_if_applicable(alert)
+        self._add_subscribers_field_section_if_applicable(alert)
+        self._add_description_field_section_if_applicable(alert)
+        self._add_result_message_field_section_if_applicable(alert)
+        self._add_test_results_sample_field_section_if_applicable(alert)
+        self._add_test_params_field_section_if_applicable(alert)
 
     def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
-        model_runs_report_link = get_model_runs_link(
-            alert.report_url, alert.model_unique_id
-        )
-        if model_runs_report_link:
-            action = self._get_potential_action(model_runs_report_link)
-            self.client.addPotentialAction(action)
+        self._add_report_link_if_applicable(alert)
 
         self.client.title(title)
         self.client.text(subtitle)
-
-        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = prettify_and_dedup_list(alert.tags or [])
-            section = cardsection()
-            section.activityTitle("*Tags*")
-            section.activityText(f'_{tags or "No tags"}_')
-            self.client.addSection(section)
-
-        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = prettify_and_dedup_list(alert.owners or [])
-            section = cardsection()
-            section.activityTitle("*Owners*")
-            section.activityText(f'_{owners or "No owners"}_')
-            self.client.addSection(section)
-
-        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            section = cardsection()
-            section.activityTitle("*Subscribers*")
-            section.activityText(f'_{subscribers or "No subscribers"}_')
-            self.client.addSection(section)
-
-        if (
-            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.message
-        ):
-            section = cardsection()
-            section.activityTitle("*Result message*")
-            section.activityText(f"```{alert.message.strip()}```")
-            self.client.addSection(section)
+        self._add_tags_field_section_if_applicable(alert)
+        self._add_owners_field_section_if_applicable(alert)
+        self._add_subscribers_field_section_if_applicable(alert)
+        self._add_result_message_field_section_if_applicable(alert)
 
         if alert.materialization:
             section = cardsection()
@@ -362,42 +350,15 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
-        model_runs_report_link = get_model_runs_link(
-            alert.report_url, alert.model_unique_id
-        )
-        if model_runs_report_link:
-            action = self._get_potential_action(model_runs_report_link)
-            self.client.addPotentialAction(action)
+        self._add_report_link_if_applicable(alert)
 
         self.client.title(title)
         self.client.text(subtitle)
 
-        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = prettify_and_dedup_list(alert.tags or [])
-            section = cardsection()
-            section.activityTitle("*Tags*")
-            section.activityText(f'_{tags or "No tags"}_')
-            self.client.addSection(section)
-
-        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = prettify_and_dedup_list(alert.owners or [])
-            section = cardsection()
-            section.activityTitle("*Owners*")
-            section.activityText(f'_{owners or "No owners"}_')
-            self.client.addSection(section)
-
-        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            section = cardsection()
-            section.activityTitle("*Subscribers*")
-            section.activityText(f'_{subscribers or "No subscribers"}_')
-            self.client.addSection(section)
-
-        if alert.message:
-            section = cardsection()
-            section.activityTitle("*Result message*")
-            section.activityText(f"```{alert.message.strip()}```")
-            self.client.addSection(section)
+        self._add_tags_field_section_if_applicable(alert)
+        self._add_owners_field_section_if_applicable(alert)
+        self._add_subscribers_field_section_if_applicable(alert)
+        self._add_result_message_field_section_if_applicable(alert)
 
         if alert.original_path:
             section = cardsection()
@@ -411,36 +372,14 @@ class TeamsIntegration(BaseIntegration):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
         subtitle = self._get_alert_sub_title(alert)
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.source_freshness_execution_id
-        )
-        if test_runs_report_link:
-            action = self._get_potential_action(test_runs_report_link)
-            self.client.addPotentialAction(action)
+        self._add_report_link_if_applicable(alert)
 
         self.client.title(title)
         self.client.text(subtitle)
 
-        if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = prettify_and_dedup_list(alert.tags or [])
-            section = cardsection()
-            section.activityTitle("*Tags*")
-            section.activityText(f'_{tags or "No tags"}_')
-            self.client.addSection(section)
-
-        if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = prettify_and_dedup_list(alert.owners or [])
-            section = cardsection()
-            section.activityTitle("*Owners*")
-            section.activityText(f'_{owners or "No owners"}_')
-            self.client.addSection(section)
-
-        if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            section = cardsection()
-            section.activityTitle("*Subscribers*")
-            section.activityText(f'_{subscribers or "No subscribers"}_')
-            self.client.addSection(section)
+        self._add_tags_field_section_if_applicable(alert)
+        self._add_owners_field_section_if_applicable(alert)
+        self._add_subscribers_field_section_if_applicable(alert)
 
         if alert.freshness_description:
             section = cardsection()
@@ -540,16 +479,7 @@ class TeamsIntegration(BaseIntegration):
                 else f"&#x2757; Test errors: {len(alert.test_errors)}"
             )
 
-        report_link = None
-        # No report link when there is only model error
-        if not alert.model_errors:
-            report_link = get_model_test_runs_link(
-                alert.report_url, alert.model_unique_id
-            )
-
-        if report_link:
-            action = self._get_potential_action(report_link)
-            self.client.addPotentialAction(action)
+        self._add_report_link_if_applicable(alert)
 
         self.client.title(title)
         self.client.text(subtitle)
