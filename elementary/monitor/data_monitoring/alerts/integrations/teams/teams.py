@@ -16,9 +16,6 @@ from elementary.monitor.data_monitoring.alerts.integrations.base_integration imp
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
-    get_model_runs_link,
-    get_model_test_runs_link,
-    get_test_runs_link,
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
@@ -123,27 +120,9 @@ class TeamsIntegration(BaseIntegration):
             GroupedByTableAlerts,
         ],
     ):
-
-        if isinstance(alert, ModelAlertModel) or isinstance(
-            alert, SourceFreshnessAlertModel
-        ):
-            reportlink = get_model_runs_link(alert.report_url, alert.model_unique_id)
-        elif isinstance(alert, TestAlertModel):
-            reportlink = get_test_runs_link(
-                alert.report_url, alert.elementary_unique_id
-            )
-        elif isinstance(alert, GroupedByTableAlerts):
-            if not alert.model_errors:
-                reportlink = get_model_test_runs_link(
-                    alert.report_url, alert.model_unique_id
-                )
-            else:
-                reportlink = None
-        else:
-            reportlink = None
-
-        if reportlink:
-            action = self._get_potential_action(reportlink)
+        report_link = alert.get_report_link()
+        if report_link:
+            action = self._get_potential_action(report_link)
             self.client.addPotentialAction(action)
 
     def _add_table_field_section_if_applicable(self, alert: TestAlertModel):
@@ -219,6 +198,7 @@ class TeamsIntegration(BaseIntegration):
             ModelAlertModel,
         ],
     ):
+        message = None
         if RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             section = cardsection()
             section.activityTitle("*Result message*")
