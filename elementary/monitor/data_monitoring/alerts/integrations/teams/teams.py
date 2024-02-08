@@ -111,6 +111,13 @@ class TeamsIntegration(BaseIntegration):
         )
         return action
 
+    @staticmethod
+    def _get_section(title: str, text: str):
+        section = cardsection()
+        section.activityTitle(title)
+        section.activityText(text)
+        return section
+
     def _add_report_link_if_applicable(
         self,
         alert: Union[
@@ -127,17 +134,15 @@ class TeamsIntegration(BaseIntegration):
 
     def _add_table_field_section_if_applicable(self, alert: TestAlertModel):
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Table*")
-            section.activityText(f"_{alert.table_full_name}_")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Table*", f"_{alert.table_full_name}_")
+            )
 
     def _add_column_field_section_if_applicable(self, alert: TestAlertModel):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Column*")
-            section.activityText(f'_{alert.column_name or "No column"}_')
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Column*", f'_{alert.column_name or "No column"}_')
+            )
 
     def _add_tags_field_section_if_applicable(
         self,
@@ -149,10 +154,9 @@ class TeamsIntegration(BaseIntegration):
     ):
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
-            section = cardsection()
-            section.activityTitle("*Tags*")
-            section.activityText(f'_{tags or "No tags"}_')
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Tags*", f'_{tags or "No tags"}_')
+            )
 
     def _add_owners_field_section_if_applicable(
         self,
@@ -164,10 +168,9 @@ class TeamsIntegration(BaseIntegration):
     ):
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             owners = prettify_and_dedup_list(alert.owners or [])
-            section = cardsection()
-            section.activityTitle("*Owners*")
-            section.activityText(f'_{owners or "No owners"}_')
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Owners*", f'_{owners or "No owners"}_')
+            )
 
     def _add_subscribers_field_section_if_applicable(
         self,
@@ -179,17 +182,19 @@ class TeamsIntegration(BaseIntegration):
     ):
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            section = cardsection()
-            section.activityTitle("*Subscribers*")
-            section.activityText(f'_{subscribers or "No subscribers"}_')
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section(
+                    "*Subscribers*", f'_{subscribers or "No subscribers"}_'
+                )
+            )
 
     def _add_description_field_section_if_applicable(self, alert: TestAlertModel):
         if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Description*")
-            section.activityText(f'_{alert.test_description or "No description"}_')
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section(
+                    "*Description*", f'_{alert.test_description or "No description"}_'
+                )
+            )
 
     def _add_result_message_field_section_if_applicable(
         self,
@@ -200,8 +205,6 @@ class TeamsIntegration(BaseIntegration):
     ):
         message = None
         if RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            section = cardsection()
-            section.activityTitle("*Result message*")
             if isinstance(alert, ModelAlertModel):
                 if alert.message:
                     message = alert.message.strip()
@@ -210,8 +213,9 @@ class TeamsIntegration(BaseIntegration):
                     message = alert.error_message.strip()
             if not message:
                 message = "No result message"
-            section.activityText(f"_{message}_")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Result message*", f"__{message}__")
+            )
 
     def _add_test_query_field_section_if_applicable(self, alert: TestAlertModel):
         # This lacks logic to handle the case where the message is too long
@@ -219,20 +223,20 @@ class TeamsIntegration(BaseIntegration):
             TEST_QUERY_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
             and alert.test_results_query
         ):
-            section = cardsection()
-            section.activityTitle("*Test query*")
-            section.activityText(f"```{alert.test_results_query.strip()}")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section(
+                    "*Test query*", f"```{alert.test_results_query.strip()}"
+                )
+            )
 
     def _add_test_params_field_section_if_applicable(self, alert: TestAlertModel):
         if (
             TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
             and alert.test_params
         ):
-            section = cardsection()
-            section.activityTitle("*Test parameters*")
-            section.activityText(f"```{alert.test_params}```")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Test parameters*", f"```{alert.test_params}```")
+            )
 
     def _add_test_results_sample_field_section_if_applicable(
         self, alert: TestAlertModel
@@ -240,8 +244,6 @@ class TeamsIntegration(BaseIntegration):
         if TEST_RESULTS_SAMPLE_FIELD in (
             alert.alert_fields or DEFAULT_ALERT_FIELDS
         ) and (alert.test_rows_sample or alert.test_type == "anomaly_detection"):
-            section = cardsection()
-            section.activityTitle("*Test results sample*")
             if alert.test_type == "anomaly_detection":
                 anomalous_value = alert.other
                 if alert.column_name:
@@ -251,8 +253,9 @@ class TeamsIntegration(BaseIntegration):
             else:
                 df = pd.DataFrame(alert.test_rows_sample)
                 message = df.to_markdown(index=False)
-            section.activityText(message)
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Test results sample*", f"{message}")
+            )
 
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
@@ -311,20 +314,17 @@ class TeamsIntegration(BaseIntegration):
         self._add_result_message_field_section_if_applicable(alert)
 
         if alert.materialization:
-            section = cardsection()
-            section.activityTitle("*Materialization*")
-            section.activityText(f"`{str(alert.materialization)}`")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section(
+                    "*Materialization*", f"`{str(alert.materialization)}`"
+                )
+            )
         if alert.full_refresh:
-            section = cardsection()
-            section.activityTitle("*Full refresh*")
-            section.activityText(f"`{alert.full_refresh}`")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Full refresh*", f"`{alert.full_refresh}`")
+            )
         if alert.path:
-            section = cardsection()
-            section.activityTitle("*Path*")
-            section.activityText(f"`{alert.path}`")
-            self.client.addSection(section)
+            self.client.addSection(self._get_section("*Path*", f"`{alert.path}`"))
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
@@ -341,10 +341,9 @@ class TeamsIntegration(BaseIntegration):
         self._add_result_message_field_section_if_applicable(alert)
 
         if alert.original_path:
-            section = cardsection()
-            section.activityTitle("*Path*")
-            section.activityText(f"`{alert.original_path}`")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Path*", f"`{alert.original_path}`")
+            )
 
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
@@ -362,67 +361,60 @@ class TeamsIntegration(BaseIntegration):
         self._add_subscribers_field_section_if_applicable(alert)
 
         if alert.freshness_description:
-            section = cardsection()
-            section.activityTitle("*Description*")
-            section.activityText(f'_{alert.freshness_description or "No description"}_')
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section(
+                    "*Description*",
+                    f'_{alert.freshness_description or "No description"}_',
+                )
+            )
 
         if alert.status == "runtime error":
-            section = cardsection()
-            section.activityTitle("*Result message*")
-            section.activityText(
-                f"Failed to calculate the source freshness\n```{alert.error}```"
+            self.client.addSection(
+                self._get_section(
+                    "*Result message*",
+                    f"Failed to calculate the source freshness\n```{alert.error}```",
+                )
             )
-            self.client.addSection(section)
         else:
-            section = cardsection()
-            section.activityTitle("*Result message*")
-            section.activityText(f"```{alert.result_description}```")
-            self.client.addSection(section)
-
-        if alert.status != "runtime error":
-            section = cardsection()
-            section.activityTitle("*Time Elapsed*")
-            section.activityText(
-                f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}"
+            self.client.addSection(
+                self._get_section(
+                    "*Result message*", f"```{alert.result_description}```"
+                )
             )
-            self.client.addSection(section)
 
         if alert.status != "runtime error":
-            section = cardsection()
-            section.activityTitle("*Last Record At*")
-            section.activityText(f"{alert.max_loaded_at}")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section(
+                    "*Time Elapsed*",
+                    f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}",
+                )
+            )
 
         if alert.status != "runtime error":
-            section = cardsection()
-            section.activityTitle("*Sampled At*")
-            section.activityText(f"{alert.snapshotted_at_str}")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Last Record At*", f"{alert.max_loaded_at}")
+            )
+
+        if alert.status != "runtime error":
+            self.client.addSection(
+                self._get_section("*Sampled At*", f"{alert.snapshotted_at_str}")
+            )
 
         if alert.error_after:
-            section = cardsection()
-            section.activityTitle("*Error after*")
-            section.activityText(f"`{alert.error_after}`")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Error after*", f"`{alert.error_after}`")
+            )
 
         if alert.error_after:
-            section = cardsection()
-            section.activityTitle("*Warn after*")
-            section.activityText(f"`{alert.warn_after}`")
-            self.client.addSection(section)
+            self.client.addSection(
+                self._get_section("*Warn after*", f"`{alert.warn_after}`")
+            )
 
         if alert.error_after:
-            section = cardsection()
-            section.activityTitle("*Filter*")
-            section.activityText(f"`{alert.filter}`")
-            self.client.addSection(section)
+            self.client.addSection(self._get_section("*Filter*", f"`{alert.filter}`"))
 
         if alert.path:
-            section = cardsection()
-            section.activityTitle("*Path*")
-            section.activityText(f"`{alert.path}`")
-            self.client.addSection(section)
+            self.client.addSection(self._get_section("*Path*", f"`{alert.path}`"))
 
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
@@ -474,20 +466,17 @@ class TeamsIntegration(BaseIntegration):
             [alert.subscribers or [] for alert in alerts]
         )
 
-        section = cardsection()
-        section.activityTitle("*Tags*")
-        section.activityText(f'_{tags if tags else "No tags"}_')
-        self.client.addSection(section)
-
-        section = cardsection()
-        section.activityTitle("*Owners*")
-        section.activityText(f'_{owners if owners else "No owners"}_')
-        self.client.addSection(section)
-
-        section = cardsection()
-        section.activityTitle("*Subscribers*")
-        section.activityText(f'_{subscribers if subscribers else "No subscribers"}_')
-        self.client.addSection(section)
+        self.client.addSection(
+            self._get_section("*Tags*", f'_{tags if tags else "No tags"}_')
+        )
+        self.client.addSection(
+            self._get_section("*Owners*", f'_{owners if owners else "No owners"}_')
+        )
+        self.client.addSection(
+            self._get_section(
+                "*Subscribers*", f'_{subscribers if subscribers else "No subscribers"}_'
+            )
+        )
 
         if alert.model_errors:
             section = cardsection()
@@ -501,28 +490,19 @@ class TeamsIntegration(BaseIntegration):
             self.client.addSection(section)
 
         if alert.test_failures:
-            section = cardsection()
-            section.activityTitle("*Test failures*")
             rows = [alert.concise_name for alert in alert.test_failures]
             text = "\n".join([f"&#x1F53A; {row}" for row in rows])
-            section.activityText(text)
-            self.client.addSection(section)
+            self.client.addSection(self._get_section("*Test failures*", f"{text}"))
 
         if alert.test_warnings:
-            section = cardsection()
-            section.activityTitle("*Test warnings*")
             rows = [alert.concise_name for alert in alert.test_warnings]
             text = "\n".join([f"&#x26A0; {row}" for row in rows])
-            section.activityText(text)
-            self.client.addSection(section)
+            self.client.addSection(self._get_section("*Test warnings*", f"{text}"))
 
         if alert.test_errors:
-            section = cardsection()
-            section.activityTitle("*Test errors*")
             rows = [alert.concise_name for alert in alert.test_errors]
             text = "\n".join([f"&#x2757; {row}" for row in rows])
-            section.activityText(text)
-            self.client.addSection(section)
+            self.client.addSection(self._get_section("*Test errors*", f"{text}"))
 
     def _get_fallback_template(
         self,
