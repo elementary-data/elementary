@@ -30,9 +30,7 @@ class TeamsClient(ABC):
         if not config.has_teams:
             return None
         if config.teams_webhook:
-            return TeamsWebhookMessageBuilderClient(
-                webhook=config.teams_webhook, tracking=tracking
-            )
+            return TeamsWebhookClient(webhook=config.teams_webhook, tracking=tracking)
         return None
 
     @abstractmethod
@@ -60,7 +58,7 @@ class TeamsClient(ABC):
         raise NotImplementedError
 
 
-class TeamsWebhookMessageBuilderClient(TeamsClient):
+class TeamsWebhookClient(TeamsClient):
     def __init__(
         self,
         webhook: str,
