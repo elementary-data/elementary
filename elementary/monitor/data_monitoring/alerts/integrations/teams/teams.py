@@ -261,7 +261,7 @@ class TeamsIntegration(BaseIntegration):
         self._add_report_link_if_applicable(alert)
 
         self.client.title(title)
-        self.client.text(subtitle)
+        self.client.summary(subtitle)
 
         self._add_table_field_section_if_applicable(alert)
         self._add_column_field_section_if_applicable(alert)
@@ -562,7 +562,9 @@ class TeamsIntegration(BaseIntegration):
             self._get_alert_template(alert)
             sent_successfully = self.client.send_message()
         except Exception as e:
-            logger.error(e)
+            logger.error(
+                f"Unable to send alert via Teams: {e}\nSending fallback template."
+            )
             sent_successfully = False
 
         if not sent_successfully:
@@ -570,6 +572,7 @@ class TeamsIntegration(BaseIntegration):
                 self._get_fallback_template(alert)
                 fallback_sent_successfully = self.client.send_message()
             except Exception:
+                logger.error(f"Unable to send alert fallback via Teams: {e}")
                 fallback_sent_successfully = False
             sent_successfully = fallback_sent_successfully
         # Resetting the client so that it does not cache the message of other alerts
