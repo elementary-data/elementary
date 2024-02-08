@@ -214,7 +214,7 @@ class TeamsIntegration(BaseIntegration):
             if not message:
                 message = "No result message"
             self.client.addSection(
-                self._get_section("*Result message*", f"__{message}__")
+                self._get_section("*Result message*", f"_{message}_")
             )
 
     def _add_test_query_field_section_if_applicable(self, alert: TestAlertModel):
