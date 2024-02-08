@@ -35,23 +35,13 @@ class TeamsClient(ABC):
             )
         return None
 
+    @abstractmethod
     def _initial_client(self):
-        return connectorcard(self.webhook)
+        raise NotImplementedError
 
-    @retry(tries=3, delay=1, backoff=2, max_delay=5)
-    def send_message(self, **kwargs) -> bool:
-        self.client.send()
-        response = self.client.last_http_response
-
-        if response.status_code == OK_STATUS_CODE:
-            return True
-        else:
-            logger.error(
-                "Could not post message to teams via webhook - %s. Error: %s",
-                {self.webhook},
-                {response.body},
-            )
-        return False
+    @abstractmethod
+    def send_message(self, **kwargs):
+        raise NotImplementedError
 
     @abstractmethod
     def title(self, title: str):
@@ -77,6 +67,24 @@ class TeamsWebhookMessageBuilderClient(TeamsClient):
         tracking: Optional[Tracking] = None,
     ):
         super().__init__(webhook, tracking)
+
+    def _initial_client(self):
+        return connectorcard(self.webhook)
+
+    @retry(tries=3, delay=1, backoff=2, max_delay=5)
+    def send_message(self, **kwargs) -> bool:
+        self.client.send()
+        response = self.client.last_http_response
+
+        if response.status_code == OK_STATUS_CODE:
+            return True
+        else:
+            logger.error(
+                "Could not post message to teams via webhook - %s. Error: %s",
+                {self.webhook},
+                {response.body},
+            )
+        return False
 
     def title(self, title: str):
         self.client.title(title)
