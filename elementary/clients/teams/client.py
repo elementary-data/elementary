@@ -59,13 +59,6 @@ class TeamsClient(ABC):
 
 
 class TeamsWebhookClient(TeamsClient):
-    def __init__(
-        self,
-        webhook: str,
-        tracking: Optional[Tracking] = None,
-    ):
-        super().__init__(webhook, tracking)
-
     def _initial_client(self):
         return connectorcard(self.webhook)
 

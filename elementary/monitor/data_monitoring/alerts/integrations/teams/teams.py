@@ -14,6 +14,9 @@ from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
 )
+from elementary.monitor.data_monitoring.alerts.integrations.teams.message_builder import (
+    TeamsAlertMessageBuilder,
+)
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
 )
@@ -72,6 +75,7 @@ class TeamsIntegration(BaseIntegration):
 
         # Enforce typing
         self.client: TeamsClient
+        self.message_builder = TeamsAlertMessageBuilder(self.client)
 
     def _initial_client(self, *args, **kwargs) -> TeamsClient:
         teams_client = TeamsClient.create_client(
@@ -130,17 +134,17 @@ class TeamsIntegration(BaseIntegration):
         report_link = alert.get_report_link()
         if report_link:
             action = self._get_potential_action(report_link)
-            self.client.addPotentialAction(action)
+            self.message_builder.addPotentialAction(action)
 
     def _add_table_field_section_if_applicable(self, alert: TestAlertModel):
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Table*", f"_{alert.table_full_name}_")
             )
 
     def _add_column_field_section_if_applicable(self, alert: TestAlertModel):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Column*", f'_{alert.column_name or "No column"}_')
             )
 
@@ -154,7 +158,7 @@ class TeamsIntegration(BaseIntegration):
     ):
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Tags*", f'_{tags or "No tags"}_')
             )
 
@@ -168,7 +172,7 @@ class TeamsIntegration(BaseIntegration):
     ):
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             owners = prettify_and_dedup_list(alert.owners or [])
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Owners*", f'_{owners or "No owners"}_')
             )
 
@@ -182,7 +186,7 @@ class TeamsIntegration(BaseIntegration):
     ):
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Subscribers*", f'_{subscribers or "No subscribers"}_'
                 )
@@ -190,7 +194,7 @@ class TeamsIntegration(BaseIntegration):
 
     def _add_description_field_section_if_applicable(self, alert: TestAlertModel):
         if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Description*", f'_{alert.test_description or "No description"}_'
                 )
@@ -213,7 +217,7 @@ class TeamsIntegration(BaseIntegration):
                     message = alert.error_message.strip()
             if not message:
                 message = "No result message"
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Result message*", f"_{message}_")
             )
 
@@ -223,7 +227,7 @@ class TeamsIntegration(BaseIntegration):
             TEST_QUERY_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
             and alert.test_results_query
         ):
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Test query*", f"```{alert.test_results_query.strip()}"
                 )
@@ -234,7 +238,7 @@ class TeamsIntegration(BaseIntegration):
             TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
             and alert.test_params
         ):
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Test parameters*", f"```{alert.test_params}```")
             )
 
@@ -253,7 +257,7 @@ class TeamsIntegration(BaseIntegration):
             else:
                 df = pd.DataFrame(alert.test_rows_sample)
                 message = df.to_markdown(index=False)
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Test results sample*", f"{message}")
             )
 
@@ -263,8 +267,8 @@ class TeamsIntegration(BaseIntegration):
 
         self._add_report_link_if_applicable(alert)
 
-        self.client.title(title)
-        self.client.text(subtitle)
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
 
         self._add_table_field_section_if_applicable(alert)
         self._add_column_field_section_if_applicable(alert)
@@ -287,8 +291,8 @@ class TeamsIntegration(BaseIntegration):
 
         self._add_report_link_if_applicable(alert)
 
-        self.client.title(title)
-        self.client.text(subtitle)
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
 
         self._add_table_field_section_if_applicable(alert)
         self._add_column_field_section_if_applicable(alert)
@@ -306,25 +310,27 @@ class TeamsIntegration(BaseIntegration):
 
         self._add_report_link_if_applicable(alert)
 
-        self.client.title(title)
-        self.client.text(subtitle)
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
         self._add_tags_field_section_if_applicable(alert)
         self._add_owners_field_section_if_applicable(alert)
         self._add_subscribers_field_section_if_applicable(alert)
         self._add_result_message_field_section_if_applicable(alert)
 
         if alert.materialization:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Materialization*", f"`{str(alert.materialization)}`"
                 )
             )
         if alert.full_refresh:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Full refresh*", f"`{alert.full_refresh}`")
             )
         if alert.path:
-            self.client.addSection(self._get_section("*Path*", f"`{alert.path}`"))
+            self.message_builder.addSection(
+                self._get_section("*Path*", f"`{alert.path}`")
+            )
 
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
@@ -332,8 +338,8 @@ class TeamsIntegration(BaseIntegration):
 
         self._add_report_link_if_applicable(alert)
 
-        self.client.title(title)
-        self.client.text(subtitle)
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
 
         self._add_tags_field_section_if_applicable(alert)
         self._add_owners_field_section_if_applicable(alert)
@@ -341,7 +347,7 @@ class TeamsIntegration(BaseIntegration):
         self._add_result_message_field_section_if_applicable(alert)
 
         if alert.original_path:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Path*", f"`{alert.original_path}`")
             )
 
@@ -353,15 +359,15 @@ class TeamsIntegration(BaseIntegration):
 
         self._add_report_link_if_applicable(alert)
 
-        self.client.title(title)
-        self.client.text(subtitle)
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
 
         self._add_tags_field_section_if_applicable(alert)
         self._add_owners_field_section_if_applicable(alert)
         self._add_subscribers_field_section_if_applicable(alert)
 
         if alert.freshness_description:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Description*",
                     f'_{alert.freshness_description or "No description"}_',
@@ -369,21 +375,21 @@ class TeamsIntegration(BaseIntegration):
             )
 
         if alert.status == "runtime error":
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Result message*",
                     f"Failed to calculate the source freshness\n```{alert.error}```",
                 )
             )
         else:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Result message*", f"```{alert.result_description}```"
                 )
             )
 
         if alert.status != "runtime error":
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section(
                     "*Time Elapsed*",
                     f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}",
@@ -391,30 +397,34 @@ class TeamsIntegration(BaseIntegration):
             )
 
         if alert.status != "runtime error":
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Last Record At*", f"{alert.max_loaded_at}")
             )
 
         if alert.status != "runtime error":
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Sampled At*", f"{alert.snapshotted_at_str}")
             )
 
         if alert.error_after:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Error after*", f"`{alert.error_after}`")
             )
 
         if alert.error_after:
-            self.client.addSection(
+            self.message_builder.addSection(
                 self._get_section("*Warn after*", f"`{alert.warn_after}`")
             )
 
         if alert.error_after:
-            self.client.addSection(self._get_section("*Filter*", f"`{alert.filter}`"))
+            self.message_builder.addSection(
+                self._get_section("*Filter*", f"`{alert.filter}`")
+            )
 
         if alert.path:
-            self.client.addSection(self._get_section("*Path*", f"`{alert.path}`"))
+            self.message_builder.addSection(
+                self._get_section("*Path*", f"`{alert.path}`")
+            )
 
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
@@ -453,8 +463,8 @@ class TeamsIntegration(BaseIntegration):
 
         self._add_report_link_if_applicable(alert)
 
-        self.client.title(title)
-        self.client.text(subtitle)
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
 
         tags = list_of_lists_of_strings_to_comma_delimited_unique_strings(
             [alert.tags or [] for alert in alerts]
@@ -466,13 +476,13 @@ class TeamsIntegration(BaseIntegration):
             [alert.subscribers or [] for alert in alerts]
         )
 
-        self.client.addSection(
+        self.message_builder.addSection(
             self._get_section("*Tags*", f'_{tags if tags else "No tags"}_')
         )
-        self.client.addSection(
+        self.message_builder.addSection(
             self._get_section("*Owners*", f'_{owners if owners else "No owners"}_')
         )
-        self.client.addSection(
+        self.message_builder.addSection(
             self._get_section(
                 "*Subscribers*", f'_{subscribers if subscribers else "No subscribers"}_'
             )
@@ -487,22 +497,28 @@ class TeamsIntegration(BaseIntegration):
             section.activityText(
                 f"{self._get_model_error_block_body(alert.model_errors)}"
             )
-            self.client.addSection(section)
+            self.message_builder.addSection(section)
 
         if alert.test_failures:
             rows = [alert.concise_name for alert in alert.test_failures]
             text = "\n".join([f"&#x1F53A; {row}" for row in rows])
-            self.client.addSection(self._get_section("*Test failures*", f"{text}"))
+            self.message_builder.addSection(
+                self._get_section("*Test failures*", f"{text}")
+            )
 
         if alert.test_warnings:
             rows = [alert.concise_name for alert in alert.test_warnings]
             text = "\n".join([f"&#x26A0; {row}" for row in rows])
-            self.client.addSection(self._get_section("*Test warnings*", f"{text}"))
+            self.message_builder.addSection(
+                self._get_section("*Test warnings*", f"{text}")
+            )
 
         if alert.test_errors:
             rows = [alert.concise_name for alert in alert.test_errors]
             text = "\n".join([f"&#x2757; {row}" for row in rows])
-            self.client.addSection(self._get_section("*Test errors*", f"{text}"))
+            self.message_builder.addSection(
+                self._get_section("*Test errors*", f"{text}")
+            )
 
     def _get_fallback_template(
         self,
@@ -516,14 +532,14 @@ class TeamsIntegration(BaseIntegration):
         **kwargs,
     ):
         # Since the title can never be truncated and the text can be truncated by Teams, I think it is good to have a title + text in the fallback template
-        self.client.title(
+        self.message_builder.title(
             "Oops, we failed to format the alert ! -_-' Please share this with the Elementary team via <https://elementary-data.com/community> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue."
         )
-        self.client.text(f"```{json.dumps(alert.data, indent=2)}")
+        self.message_builder.text(f"```{json.dumps(alert.data, indent=2)}")
 
     def _get_test_message_template(self, *args, **kwargs):
-        self.client.title("This is a test message generated by Elementary!")
-        self.client.text(
+        self.message_builder.title("This is a test message generated by Elementary!")
+        self.message_builder.text(
             f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         )
 
@@ -557,6 +573,7 @@ class TeamsIntegration(BaseIntegration):
             sent_successfully = fallback_sent_successfully
         # Resetting the client so that it does not cache the message of other alerts
         self.client = self._initial_client()
+        self.message_builder = TeamsAlertMessageBuilder(self.client)
 
         return sent_successfully
 
