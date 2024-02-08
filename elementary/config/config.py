@@ -123,17 +123,11 @@ class Config:
             GroupingType.BY_ALERT.value,
         )
 
-        self.provided_slack_in_cli = slack_webhook is not None or (
-            slack_token is not None and slack_channel_name is not None
-        )
-
         teams_config = config.get(self._TEAMS, {})
         self.teams_webhook = self._first_not_none(
             teams_webhook,
             teams_config.get("teams_webhook"),
         )
-
-        self.provided_teams_in_cli = teams_webhook is not None
 
         aws_config = config.get(self._AWS, {})
         self.aws_profile_name = self._first_not_none(
@@ -213,13 +207,11 @@ class Config:
 
     @property
     def has_slack(self) -> bool:
-        return (
-            self.slack_webhook or (self.slack_token and self.slack_channel_name)
-        ) and not self.provided_teams_in_cli
+        return self.slack_webhook or (self.slack_token and self.slack_channel_name)
 
     @property
     def has_teams(self) -> bool:
-        return self.teams_webhook and not self.provided_slack_in_cli
+        return self.teams_webhook
 
     @property
     def has_s3(self):
@@ -244,14 +236,20 @@ class Config:
         return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
+        provided_integrations = list(
+            filter(
+                lambda provided_integration: provided_integration,
+                [self.has_slack, self.has_teams],
+            )
+        )
         self._validate_timezone()
-        if not self.has_slack and not self.has_teams:
+        if not provided_integrations:
             raise InvalidArgumentsError(
                 "Either a Slack token and a channel, a Slack webhook or a Microsoft Teams webhook is required."
             )
-        if self.provided_teams_in_cli and self.provided_slack_in_cli:
+        if len(provided_integrations) > 1:
             raise InvalidArgumentsError(
-                "You provided both Slack and Teams integration on the command line. Please provide only one."
+                "You provided both a Slack and Teams integration. Please provide only one so we know where to send the alerts."
             )
 
     def validate_send_report(self):
