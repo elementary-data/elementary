@@ -1,4 +1,5 @@
 pytest
+pytest-parametrization>=2022.2.1
 pre-commit
 mypy
 
