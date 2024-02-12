@@ -8,6 +8,9 @@ from elementary.monitor.data_monitoring.alerts.integrations.base_integration imp
 from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
     SlackIntegration,
 )
+from elementary.monitor.data_monitoring.alerts.integrations.teams.teams import (
+    TeamsIntegration,
+)
 from elementary.tracking.tracking_interface import Tracking
 
 
@@ -29,6 +32,12 @@ class Integrations:
     ) -> BaseIntegration:
         if config.has_slack:
             return SlackIntegration(
+                config=config,
+                tracking=tracking,
+                override_config_defaults=override_config_defaults,
+            )
+        elif config.has_teams:
+            return TeamsIntegration(
                 config=config,
                 tracking=tracking,
                 override_config_defaults=override_config_defaults,

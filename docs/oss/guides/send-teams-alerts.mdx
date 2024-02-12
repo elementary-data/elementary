@@ -1,0 +1,50 @@
+---
+title: "Setup Teams alerts"
+---
+
+<Snippet file="alerts/alerts-introduction.mdx" />
+
+## Setup Teams Integration
+
+<Info>
+
+**Before you start**
+
+Before you can start using the alerts, make sure to [install the dbt package](/oss/quickstart/quickstart-cli-package), [configure a profile and install the CLI](/oss/quickstart/quickstart-cli).
+This is **required for the alerts to work.**
+
+<br />
+</Info>
+
+<Snippet file="setup-teams-integration.mdx" />
+
+## Execute the CLI
+
+Make sure to run the following command after your dbt runs and tests:
+
+```
+edr monitor --teams-webhook <your_teams_webhook> --group-by [table | alert]
+```
+
+Or just `edr monitor` if you used `config.yml`.
+
+---
+
+## Alert on source freshness failures
+
+_Not supported in dbt cloud_
+
+To alert on source freshness, you will need to run `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
+
+- Note that `dbt source freshness` and `upload-source-freshness` needs to run from the same machine.
+- Note that `upload-source-freshness` requires passing `--project-dir` argument.
+
+## Continuous alerting
+
+In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after
+your dbt job ends to monitor the latest data updates).
+
+Read more about how to deploy [Elementary in production](/oss/deployment-and-configuration/elementary-in-production).
+If you need help or wish to consult on this, reach out to us
+on [Slack](https://elementary-data.com/community).
