@@ -16,7 +16,7 @@
             {% endif %}
         {% endfor %}
 
-        {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts) %}
+        {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts, on_query_exceed=populate_alerts_on_query_exceed) %}
     {% endif %}
     {% do return('') %}
 {% endmacro %}
@@ -56,4 +56,21 @@
     {% endif %}
 
     {% do return(alert_ids) %}
+{% endmacro %}
+
+
+{% macro populate_alerts_on_query_exceed(alert_row) %}
+    {% set row_max_size = elementary.get_config_var('query_max_size') %}
+
+    {# alert data contains data that could exceed the query size limit #}
+    {# We remove the problematic fields to insure the query is in the right size #}
+    {% set alert_data = alert_row['data'] %}
+    {% set alert_data_dict = fromjson(alert_data) %}
+    {% set risky_fields = ['test_rows_sample', 'test_results_query'] %}
+    {% for risky_field in risky_fields %}
+        {% if (tojson(alert_data_dict[risky_field]) | length) > (row_max_size / 3) %}
+            {% do alert_data_dict.update({risky_field: none}) %}            
+        {% endif %}
+    {% endfor %}
+    {% do alert_row.update({'data': tojson(alert_data_dict)}) %}
 {% endmacro %}
