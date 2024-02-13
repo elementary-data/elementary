@@ -42,11 +42,6 @@
         } 
         %}
 
-        {% set column_size = elementary.get_column_size() %}
-        {% if column_size and ((tojson(test_alert_data) | length) > column_size) %}
-            {% do test_alert_data.update({'test_rows_sample': none}) %}  
-        {% endif %}
-
         {% set test_alert = elementary_cli.generate_alert_object(
             raw_test_alert.alert_id,
             raw_test_alert.alert_class_id,

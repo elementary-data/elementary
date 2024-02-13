@@ -16,7 +16,7 @@
             {% endif %}
         {% endfor %}
 
-        {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts) %}
+        {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts, on_query_exceed=populate_alerts_on_query_exceed) %}
     {% endif %}
     {% do return('') %}
 {% endmacro %}
@@ -56,4 +56,15 @@
     {% endif %}
 
     {% do return(alert_ids) %}
+{% endmacro %}
+
+
+{% macro populate_alerts_on_query_exceed(alert_row) %}
+    {% set row_max_size = elementary.get_config_var('query_max_size') %}
+    {% set risky_columns = ['test_rows_sample', 'test_results_query'] %}
+    {% for risky_column in risky_columns %}
+        {% if (risky_column | length) > (row_max_query / 3) %}
+            {% do alert_row.update({risky_column: none}) %}            
+        {% endif %}
+    {% endfor %}
 {% endmacro %}
