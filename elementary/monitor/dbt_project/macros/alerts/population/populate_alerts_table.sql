@@ -63,7 +63,7 @@
     {% set row_max_size = elementary.get_config_var('query_max_size') %}
     {% set risky_columns = ['test_rows_sample', 'test_results_query'] %}
     {% for risky_column in risky_columns %}
-        {% if (risky_column | length) > (row_max_query / 3) %}
+        {% if (risky_column | length) > (row_max_size / 3) %}
             {% do alert_row.update({risky_column: none}) %}            
         {% endif %}
     {% endfor %}
