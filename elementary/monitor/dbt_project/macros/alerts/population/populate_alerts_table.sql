@@ -71,7 +71,10 @@
     {% set risky_fields = ['test_rows_sample', 'test_results_query'] %}
     {% for risky_field in risky_fields %}
         {% set field_length = tojson(alert_data_dict.get(risky_field, {})) | length %}
-        {% if (field_length > (row_max_size / 3)) or field_length > (column_max_size / 3) %}
+        {% set exceeding_row_size = field_length > (row_max_size / 3) %}
+        {# For some DWH there is no column size limitation #}
+        {% set exceeding_column_size = column_max_size and field_length > (column_max_size / 3) %}
+        {% if exceeding_row_size or exceeding_column_size %}
             {% do alert_data_dict.update({risky_field: none}) %}            
         {% endif %}
     {% endfor %}
