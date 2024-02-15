@@ -45,8 +45,8 @@ class ArtifactSchema(ExtendedBaseModel):
         return cls._load_var_to_list(owners)
 
     @validator("full_path", pre=True)
-    def format_full_path_sep(cls, full_path: str) -> str:
-        return posixpath.sep.join(full_path.split(os.path.sep))
+    def format_full_path_sep(cls, full_path: Optional[str]) -> str:
+        return posixpath.sep.join(full_path.split(os.path.sep)) if full_path else ""
 
     @validator("meta", pre=True)
     def load_meta(cls, meta):

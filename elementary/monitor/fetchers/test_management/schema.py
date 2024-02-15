@@ -43,6 +43,7 @@ class TestModel(BaseModel):
     meta: dict = Field(default_factory=dict)
     description: Optional[str]
     is_singular: bool
+    original_path: Optional[str]
     updated_at: str
     updated_by: Optional[str] = None
 
