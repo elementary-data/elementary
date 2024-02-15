@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Union
 
-from slack_sdk.models.blocks import SectionBlock
+from slack_sdk.models.blocks import HeaderBlock, SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.utils.json_utils import unpack_and_flatten_str_to_list
@@ -114,11 +114,16 @@ class SlackMessageBuilder:
 
     @staticmethod
     def create_header_block(msg: str) -> dict:
+        if len(msg) > HeaderBlock.text_max_length:
+            final_msg = msg[: HeaderBlock.text_max_length - 3] + "..."
+        else:
+            final_msg = msg
+
         return {
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": msg,
+                "text": final_msg,
             },
         }
 
