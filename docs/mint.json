@@ -89,6 +89,7 @@
       "group": "Features",
       "pages": [
         "features/data-tests",
+        "features/automated-monitors",
         "features/elementary-alerts",
         "features/data-observability-dashboard",
         {
@@ -101,7 +102,6 @@
             "features/column-level-lineage"
           ]
         },
-        "features/automated-monitors",
         "features/config-as-code",
         "features/catalog",
         "features/multi-env",
@@ -297,10 +297,12 @@
           ]
         },
         {
-          "group": "Send Slack alerts",
+          "group": "Send alerts",
           "pages": [
-            "oss/guides/send-slack-alerts",
-            "oss/guides/alerts-configuration"
+            "oss/guides/alerts/elementary-alerts",
+            "oss/guides/alerts/send-slack-alerts",
+            "oss/guides/alerts/send-teams-alerts",
+            "oss/guides/alerts/alerts-configuration"
           ]
         },
         "oss/guides/collect-job-data"
@@ -321,13 +323,16 @@
             "oss/deployment-and-configuration/github-actions",
             "oss/deployment-and-configuration/gitlab-ci"
           ]
-        },
-        "oss/deployment-and-configuration/slack"
+        }
       ]
     },
     {
       "group": "Integrations",
-      "pages": ["oss/integrations/dbt", "oss/integrations/slack"]
+      "pages": [
+        "oss/integrations/dbt",
+        "oss/deployment-and-configuration/slack",
+        "oss/deployment-and-configuration/teams"
+      ]
     }
   ],
   "footerSocials": {

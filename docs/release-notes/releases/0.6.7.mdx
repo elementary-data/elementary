@@ -9,12 +9,12 @@ _January 19, 2023: [v0.6.7 Python](https://github.com/elementary-data/elementary
 
 - **Postgres integration** 🆕
   - Elementary now supports Postgres! Thank you [Tasos Kouridis](https://github.com/kouridis) for this meaningful contribution!
-  - [Docs here](/integrations/postgres)
+  - [Docs here](oss/integrations/postgres)
 - **Freshness anomalies monitoring improvements** 🥬
   - We have split our freshness anomalies test into two different tests to better handle two common different use cases:
     - `freshness_anomalies` - monitors anomalies in the frequency of updates. Imagine a table that is being updated hourly and then all of a sudden this table wasn't updated for 4 hours. Here you would probably use the `updated_at`/`inserted_at` column as an input for this test.
     - `event_freshness_anomalies` - monitors that the underlying data is up to date. Imagine an events table that is being updated hourly correctly but the events themselves are coming with a delay of 2 days from your production databases. Here, you would probably use the `event_timestamp` column as an input for this test.
-  - [Docs here](guides/add-elementary-tests#table-model-source-tests)
+  - [Docs here](data-tests/anomaly-detection-tests/freshness-anomalies)
 
 ### 💫 More changes
 

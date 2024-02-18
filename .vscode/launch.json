@@ -2,20 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Report",
-      "type": "python",
+      "name": "edr",
+      "type": "debugpy",
       "request": "launch",
       "module": "elementary.cli.cli",
-      "args": ["report"],
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "Monitor",
-      "type": "python",
-      "request": "launch",
-      "module": "elementary.cli.cli",
-      "args": ["monitor"],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "args": "${command:pickArgs}"
     }
   ]
 }

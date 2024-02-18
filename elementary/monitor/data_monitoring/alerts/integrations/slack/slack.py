@@ -28,6 +28,10 @@ from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
     list_of_lists_of_strings_to_comma_delimited_unique_strings,
 )
+from elementary.utils.log import get_logger
+from elementary.utils.strings import prettify_and_dedup_list
+
+logger = get_logger(__name__)
 
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
@@ -160,15 +164,13 @@ class SlackIntegration(BaseIntegration):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             compacted_sections.append(f"*Column*\n{alert.column_name or '_No column_'}")
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = self.message_builder.prettify_and_dedup_list(alert.tags or [])
+            tags = prettify_and_dedup_list(alert.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = self.message_builder.prettify_and_dedup_list(alert.owners or [])
+            owners = prettify_and_dedup_list(alert.owners or [])
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = self.message_builder.prettify_and_dedup_list(
-                alert.subscribers or []
-            )
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers or "_No subscribers_"}'
             )
@@ -324,15 +326,13 @@ class SlackIntegration(BaseIntegration):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             compacted_sections.append(f"*Column*\n{alert.column_name or '_No column_'}")
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = self.message_builder.prettify_and_dedup_list(alert.tags or [])
+            tags = prettify_and_dedup_list(alert.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = self.message_builder.prettify_and_dedup_list(alert.owners or [])
+            owners = prettify_and_dedup_list(alert.owners or [])
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = self.message_builder.prettify_and_dedup_list(
-                alert.subscribers or []
-            )
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers or "_No subscribers_"}'
             )
@@ -408,9 +408,9 @@ class SlackIntegration(BaseIntegration):
     def _get_model_template(
         self, alert: ModelAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        tags = self.message_builder.prettify_and_dedup_list(alert.tags)
-        owners = self.message_builder.prettify_and_dedup_list(alert.owners)
-        subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
+        tags = prettify_and_dedup_list(alert.tags)
+        owners = prettify_and_dedup_list(alert.owners)
+        subscribers = prettify_and_dedup_list(alert.subscribers)
         self.message_builder.add_message_color(self._get_color(alert.status))
 
         title = [
@@ -508,9 +508,9 @@ class SlackIntegration(BaseIntegration):
     def _get_snapshot_template(
         self, alert: ModelAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        tags = self.message_builder.prettify_and_dedup_list(alert.tags)
-        owners = self.message_builder.prettify_and_dedup_list(alert.owners)
-        subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
+        tags = prettify_and_dedup_list(alert.tags)
+        owners = prettify_and_dedup_list(alert.owners)
+        subscribers = prettify_and_dedup_list(alert.subscribers)
         self.message_builder.add_message_color(self._get_color(alert.status))
 
         title = [
@@ -592,11 +592,9 @@ class SlackIntegration(BaseIntegration):
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
     ) -> SlackMessageSchema:
-        tags = self.message_builder.prettify_and_dedup_list(alert.tags or [])
-        owners = self.message_builder.prettify_and_dedup_list(alert.owners or [])
-        subscribers = self.message_builder.prettify_and_dedup_list(
-            alert.subscribers or []
-        )
+        tags = prettify_and_dedup_list(alert.tags or [])
+        owners = prettify_and_dedup_list(alert.owners or [])
+        subscribers = prettify_and_dedup_list(alert.subscribers or [])
         self.message_builder.add_message_color(self._get_color(alert.status))
         title = [
             self.message_builder.create_header_block(
@@ -954,7 +952,10 @@ class SlackIntegration(BaseIntegration):
             sent_successfully = self.client.send_message(
                 channel_name=channel_name, message=template
             )
-        except Exception:
+        except Exception as err:
+            logger.error(
+                f"Unable to send alert via Slack: {err}\nSending fallback template."
+            )
             sent_successfully = False
 
         if not sent_successfully:
@@ -963,7 +964,8 @@ class SlackIntegration(BaseIntegration):
                 fallback_sent_successfully = self.client.send_message(
                     channel_name=channel_name, message=fallback_template
                 )
-            except Exception:
+            except Exception as err:
+                logger.error(f"Unable to send alert fallback via Slack: {err}")
                 fallback_sent_successfully = False
             self.message_builder.reset_slack_message()
             return fallback_sent_successfully

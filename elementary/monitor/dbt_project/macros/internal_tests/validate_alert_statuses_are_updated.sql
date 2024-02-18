@@ -1,6 +1,6 @@
 {% macro validate_alert_statuses_are_updated() %}
     {% set alerts_with_no_updated_status_query %}
-        select alert_id
+        select alert_id, data
         from {{ ref('elementary_cli', 'alerts_v2') }}
         where status not in ('sent', 'skipped')
     {% endset %}
@@ -10,9 +10,10 @@
     {% set alerts_with_no_updated_status_without_singulars = [] %}
     {% for alert in alerts_with_no_updated_status %}
         {% set alert_data = fromjson(alert['data']) %}
-        {% if alert_data.get('test_sub_type', '') != 'singular' %}
+        -- By default we don't send skipped models. So we filter them out in this test.
+        {% if alert_data.get('test_sub_type', '') != 'singular' and alert_data.get('status', '') != 'skipped' %}
           {% do alerts_with_no_updated_status_without_singulars.append(alert) %}
-    {% endif %}
+        {% endif %}
     {% endfor %}
     {% if alerts_with_no_updated_status_without_singulars %}
         {% do exceptions.raise_compiler_error("Elementary couldn't update all of the alerts status") %}

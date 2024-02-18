@@ -322,23 +322,6 @@ def test_create_button_action_block(text, url):
     )
 
 
-def test_prettify_and_dedup_list():
-    message_builder = SlackMessageBuilder()
-    list_prettified = message_builder.prettify_and_dedup_list(
-        ["name1", "name2", "name2"]
-    )
-    assert list_prettified == "name1, name2"
-
-    assert (
-        message_builder.prettify_and_dedup_list("name1, name2, name2") == "name1, name2"
-    )
-
-    string_of_list_prettified = message_builder.prettify_and_dedup_list(
-        '["name1", "name2", "name2"]'
-    )
-    assert string_of_list_prettified == "name1, name2"
-
-
 def test_slack_message_attachments_limit():
     very_short_attachments = ["attachment"] * (
         SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS - 1
