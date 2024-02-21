@@ -29,7 +29,7 @@ class AzureClient:
         self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
     ) -> Tuple[bool, Optional[str]]:
         report_filename = (
-            bucket_path.basename(remote_bucket_file_path)
+            remote_bucket_file_path
             if remote_bucket_file_path
             else path.basename(local_html_file_path)
         )
