@@ -137,7 +137,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
     severity: str
     test_meta: Optional[Dict] = None
     elementary_unique_id: str
-    resource_type: ResourceType = Field(ResourceType.TEST, const=True)
+    resource_type: ResourceType = Field(ResourceType.TEST, const=True)  # type: ignore  # noqa
 
     @property
     def flatten_model_meta(self) -> Dict:
@@ -229,7 +229,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
     materialization: str
     full_refresh: bool
     message: Optional[str] = None
-    resource_type: ResourceType = Field(ResourceType.MODEL, const=True)
+    resource_type: ResourceType = Field(ResourceType.MODEL, const=True)  # type: ignore  # noqa
 
     def format_alert(
         self,
@@ -281,7 +281,7 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
     path: str
     error: Optional[str] = None
     freshness_description: Optional[str] = None
-    resource_type: ResourceType = Field(ResourceType.SOURCE_FRESHNESS, const=True)
+    resource_type: ResourceType = Field(ResourceType.SOURCE_FRESHNESS, const=True)  # type: ignore  # noqa
 
     def format_alert(
         self,
