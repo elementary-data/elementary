@@ -5,7 +5,6 @@ from azure.storage.blob import BlobServiceClient
 
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
-from elementary.utils import bucket_path
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
