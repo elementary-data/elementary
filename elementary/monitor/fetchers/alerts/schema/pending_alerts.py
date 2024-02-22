@@ -2,14 +2,13 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, root_validator
-
 from elementary.monitor.fetchers.alerts.schema.alert_data import (
     ModelAlertDataSchema,
     SourceFreshnessAlertDataSchema,
     TestAlertDataSchema,
 )
 from elementary.utils.json_utils import try_load_json
+from elementary.utils.pydantic_shim import BaseModel, root_validator
 
 ALERTS_CONFIG_KEY = "alerts_config"
 CHANNEL_KEY = "channel"

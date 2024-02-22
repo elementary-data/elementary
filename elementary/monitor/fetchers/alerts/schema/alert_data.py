@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
-
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -13,6 +11,7 @@ from elementary.utils.json_utils import (
     unpack_and_flatten_and_dedup_list_of_strings,
     unpack_and_flatten_str_to_list,
 )
+from elementary.utils.pydantic_shim import BaseModel, Field, validator
 
 ALERTS_CONFIG_KEY = "alerts_config"
 CHANNEL_KEY = "channel"
