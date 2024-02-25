@@ -52,6 +52,19 @@ class PendingAlertSchema(BaseModel):
         use_enum_values = True
 
     @root_validator(pre=True)
+    def validate_times(cls, values: dict) -> dict:
+        new_values = {**values}
+
+        current_datetime = datetime.utcnow()
+        if not values.get("detected_at"):
+            new_values["detected_at"] = current_datetime
+        if not values.get("created_at"):
+            new_values["created_at"] = current_datetime
+        if not values.get("updated_at"):
+            new_values["updated_at"] = current_datetime
+        return new_values
+
+    @root_validator(pre=True)
     def parse_data(cls, values: dict) -> dict:
         new_values = {**values}
 
