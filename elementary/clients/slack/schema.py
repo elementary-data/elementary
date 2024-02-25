@@ -1,8 +1,7 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
-
 from elementary.utils.log import get_logger
+from elementary.utils.pydantic_shim import BaseModel, validator
 
 logger = get_logger(__name__)
 

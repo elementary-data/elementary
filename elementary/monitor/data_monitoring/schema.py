@@ -3,9 +3,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, List, Optional, Pattern, Tuple
 
-from pydantic import BaseModel, Field, validator
-
 from elementary.utils.log import get_logger
+from elementary.utils.pydantic_shim import BaseModel, Field, validator
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
 logger = get_logger(__name__)

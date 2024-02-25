@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class GroupItemSchema(BaseModel):
