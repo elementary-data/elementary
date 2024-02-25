@@ -75,6 +75,7 @@
       results.max_loaded_at,
       results.snapshotted_at,
       {{ elementary.edr_cast_as_timestamp("results.generated_at") }} as detected_at,
+      {{ elementary.edr_current_timestamp() }} as created_at,
       results.max_loaded_at_time_ago_in_s,
       results.status as original_status,
       {{ elementary_cli.normalized_source_freshness_status()}},

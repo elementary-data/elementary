@@ -2,14 +2,13 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, root_validator
-
 from elementary.monitor.fetchers.alerts.schema.alert_data import (
     ModelAlertDataSchema,
     SourceFreshnessAlertDataSchema,
     TestAlertDataSchema,
 )
 from elementary.utils.json_utils import try_load_json
+from elementary.utils.pydantic_shim import BaseModel, root_validator
 
 ALERTS_CONFIG_KEY = "alerts_config"
 CHANNEL_KEY = "channel"
@@ -50,6 +49,19 @@ class PendingAlertSchema(BaseModel):
         smart_union = True
         # Make sure that serializing Enum return values
         use_enum_values = True
+
+    @root_validator(pre=True)
+    def validate_times(cls, values: dict) -> dict:
+        new_values = {**values}
+
+        current_datetime = datetime.utcnow()
+        if not values.get("detected_at"):
+            new_values["detected_at"] = current_datetime
+        if not values.get("created_at"):
+            new_values["created_at"] = current_datetime
+        if not values.get("updated_at"):
+            new_values["updated_at"] = current_datetime
+        return new_values
 
     @root_validator(pre=True)
     def parse_data(cls, values: dict) -> dict:
