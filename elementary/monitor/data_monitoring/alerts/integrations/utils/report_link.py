@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 TEST_RUNS_LINK_TEXT = "View test runs"
 MODEL_RUNS_LINK_TEXT = "View model runs"

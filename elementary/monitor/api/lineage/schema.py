@@ -1,9 +1,9 @@
 import re
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import networkx as nx
-from pydantic import BaseModel, validator
-from pydantic.typing import Literal
+
+from elementary.utils.pydantic_shim import BaseModel, validator
 
 NodeUniqueIdType = str
 NodeType = Literal["model", "source", "exposure"]

@@ -24,6 +24,7 @@ from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
+from elementary.utils.time import convert_time_to_timezone
 
 logger = get_logger(__name__)
 
@@ -119,7 +120,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts_last_sent_times: Dict[str, datetime],
     ) -> List[str]:
         suppressed_alerts = []
-        current_time_utc = datetime.utcnow()
+        current_time_utc = convert_time_to_timezone(datetime.utcnow())
         for alert in alerts:
             alert_class_id = alert.alert_class_id
             suppression_interval = alert.data.get_suppression_interval(
@@ -128,7 +129,10 @@ class DataMonitoringAlerts(DataMonitoring):
             )
             last_sent_time = alerts_last_sent_times.get(alert_class_id)
             is_alert_in_suppression = (
-                (current_time_utc - last_sent_time).total_seconds() / 3600
+                (
+                    current_time_utc - convert_time_to_timezone(last_sent_time)
+                ).total_seconds()
+                / 3600
                 <= suppression_interval
                 if last_sent_time
                 else False
