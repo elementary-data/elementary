@@ -29,6 +29,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_type: str
     test_sub_type: str
     test_results_description: Optional[str]
+    original_path: str
     owners: Optional[List[str]]
     model_owner: Optional[List[str]]
     # tags is a union of test_tags and model_tags that we get from the db.

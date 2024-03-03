@@ -7,10 +7,6 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-_QUICKSTART_CLI_ERR_MSG = (
-    "Please refer for guidance - https://docs.elementary-data.com/quickstart-cli"
-)
-
 
 class Error(Exception):
     """Base class for exceptions in this module."""

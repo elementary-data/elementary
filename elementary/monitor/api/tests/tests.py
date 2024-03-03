@@ -345,6 +345,7 @@ class TestsAPI(APIClient):
             column_name=test_result_db_row.column_name,
             test_name=test_result_db_row.test_name,
             test_display_name=test_display_name,
+            original_path=test_result_db_row.original_path,
             latest_run_time=detected_at.isoformat(),
             latest_run_time_utc=detected_at_utc.isoformat(),
             latest_run_status=test_result_db_row.status,

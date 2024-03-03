@@ -28,6 +28,7 @@
             test_type,
             test_sub_type,
             test_results_description,
+            original_path,
             owners,
             model_owner,
             tags,
