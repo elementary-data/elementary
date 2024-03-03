@@ -3,7 +3,10 @@ from typing import List, Optional
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
-from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from elementary.monitor.fetchers.tests.schema import (
+    NormalizedTestSchema,
+    TestResultDBRowSchema,
+)
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -32,5 +35,23 @@ class TestsFetcher(FetcherClient):
         )
         test_results = [
             TestResultDBRowSchema(**test_result) for test_result in test_results
+        ]
+        return test_results
+
+    def get_singular_tests(self) -> List[NormalizedTestSchema]:
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="elementary_cli.get_singular_tests"
+        )
+        test_results = (
+            json.loads(run_operation_response[0]) if run_operation_response else []
+        )
+        test_results = [
+            NormalizedTestSchema(
+                unique_id=test_result["unique_id"],
+                model_name=test_result["name"],
+                normalized_full_path=f"{test_result['package_name']}/{test_result['original_path']}",
+                tags=test_result["tags"],
+            )
+            for test_result in test_results
         ]
         return test_results
