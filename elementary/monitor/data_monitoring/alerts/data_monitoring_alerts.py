@@ -194,6 +194,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 elementary_database_and_schema=self.elementary_database_and_schema,
                 global_suppression_interval=self.global_suppression_interval,
                 override_config=self.override_config,
+                disable_samples=self.disable_samples,
             )
             try:
                 grouping_type = GroupingType(group_alerts_by)
