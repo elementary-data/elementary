@@ -83,17 +83,17 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 ### Elementary Cloud
 
-  1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
+1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
 
-  2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
+2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
 
-  3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
+3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
 
 ### Elementary Community
 
-  1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
+1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
 
-  2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
+2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
 ## Community & Support
 
