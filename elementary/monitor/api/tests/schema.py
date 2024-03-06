@@ -48,6 +48,7 @@ class TestMetadataSchema(BaseModel):
     column_name: Optional[str] = None
     test_name: str
     test_display_name: str
+    original_path: str
     latest_run_time: str
     latest_run_time_utc: str
     latest_run_status: str

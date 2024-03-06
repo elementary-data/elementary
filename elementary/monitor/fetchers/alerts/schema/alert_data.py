@@ -105,6 +105,8 @@ class BaseAlertDataSchema(BaseModel):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        *args,
+        **kwargs
     ):
         raise NotImplementedError
 
@@ -183,6 +185,9 @@ class TestAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        disable_samples: bool = False,
+        *args,
+        **kwargs
     ) -> TestAlertModel:
         return TestAlertModel(
             id=self.id,
@@ -199,7 +204,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
             test_description=self.description,
             other=self.other,
             test_params=self.test_params,
-            test_rows_sample=self.test_rows_sample,
+            test_rows_sample=self.test_rows_sample if not disable_samples else None,
             column_name=self.column_name,
             alert_class_id=self.alert_class_id,
             model_unique_id=self.model_unique_id,
@@ -238,6 +243,8 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        *args,
+        **kwargs
     ) -> ModelAlertModel:
         return ModelAlertModel(
             id=self.id,
@@ -290,6 +297,8 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        *args,
+        **kwargs
     ) -> SourceFreshnessAlertModel:
         return SourceFreshnessAlertModel(
             id=self.id,

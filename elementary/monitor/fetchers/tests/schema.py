@@ -1,8 +1,14 @@
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
+from elementary.monitor.api.models.schema import NormalizedArtifactSchema
 from elementary.utils.pydantic_shim import Field, validator
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
+
+
+class NormalizedTestSchema(NormalizedArtifactSchema):
+    unique_id: str
+    artifact_type: Literal["test"] = "test"
 
 
 class TestResultDBRowSchema(ExtendedBaseModel):
@@ -22,6 +28,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_type: str
     test_sub_type: str
     test_results_description: Optional[str]
+    original_path: str
     owners: Optional[List[str]]
     model_owner: Optional[List[str]]
     # tags is a union of test_tags and model_tags that we get from the db.
