@@ -19,7 +19,7 @@ elementary.cli.upgrade.recommend_version_upgrade()
 logger = get_logger(__name__)
 
 
-def get_log_path(ctx):
+def get_log_path(ctx) -> str:
     target_path = Config.DEFAULT_TARGET_PATH
     try:
         ctx_args = ctx.args
@@ -74,7 +74,7 @@ class ElementaryCLI(click.MultiCommand):
     version=package.get_package_version(),
     message="Elementary version %(version)s.",
 )
-def cli():
+def cli() -> None:
     pass
 
 

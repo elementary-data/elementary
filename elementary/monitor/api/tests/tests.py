@@ -218,7 +218,7 @@ class TestsAPI(APIClient):
         for elementary_unique_id, invocations in grouped_invocations.items():
             totals = self._get_test_invocations_totals(invocations)
             test_invocations[elementary_unique_id] = InvocationsSchema(
-                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2) if invocations else 0,
+                fail_rate=(round((totals.errors + totals.failures) / len(invocations), 2) if invocations else 0),
                 totals=totals,
                 invocations=invocations,
                 description=self._get_invocations_description(totals),

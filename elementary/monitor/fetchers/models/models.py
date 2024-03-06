@@ -53,7 +53,7 @@ class ModelsFetcher(FetcherClient):
         exposures = [
             {
                 **exposure,
-                "raw_queries": json.loads(exposure["raw_queries"]) if exposure.get("raw_queries") else None,
+                "raw_queries": (json.loads(exposure["raw_queries"]) if exposure.get("raw_queries") else None),
             }
             for exposure in exposures
         ]

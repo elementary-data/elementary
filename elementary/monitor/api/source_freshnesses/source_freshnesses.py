@@ -128,7 +128,7 @@ class SourceFreshnessesAPI(APIClient):
                 totals.add_total(run.status)
 
             source_freshness_invocations[unique_id] = SourceFreshnessInvocationsSchema(
-                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2) if invocations else 0,
+                fail_rate=(round((totals.errors + totals.failures) / len(invocations), 2) if invocations else 0),
                 totals=totals,
                 invocations=list(invocations.values()),
                 description=f"There were {totals.failures or 'no'} failures, {totals.errors or 'no'} errors and {totals.warnings or 'no'} warnings on the last {len(invocations)} source freshness runs.",

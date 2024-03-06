@@ -9,7 +9,7 @@ pydantic_version = version("pydantic")
 pydantic_major = pydantic_version.split(".")[0]
 
 if pydantic_major == "1":
-    from pydantic import (  # type: ignore  # noqa
+    from pydantic import (  # noqa
         BaseModel,
         Extra,
         Field,
@@ -18,7 +18,7 @@ if pydantic_major == "1":
         validator,
     )
 elif pydantic_major == "2":
-    from pydantic.v1 import (  # type: ignore  # noqa
+    from pydantic.v1 import (  # noqa
         BaseModel,
         Extra,
         Field,

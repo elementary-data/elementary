@@ -103,7 +103,7 @@ class TeamsIntegration(BaseIntegration):
         return subtitle
 
     @staticmethod
-    def _get_potential_action(reportlink: ReportLinkData):
+    def _get_potential_action(reportlink: ReportLinkData) -> potentialaction:
         action = potentialaction(reportlink.text)
         action.addOpenURI(
             reportlink.text,
@@ -112,7 +112,7 @@ class TeamsIntegration(BaseIntegration):
         return action
 
     @staticmethod
-    def _get_section(title: str, text: str):
+    def _get_section(title: str, text: str) -> cardsection:
         section = cardsection()
         section.activityTitle(title)
         section.activityText(text)
