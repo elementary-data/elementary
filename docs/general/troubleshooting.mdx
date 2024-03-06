@@ -168,8 +168,25 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 
 </Accordion>
 
-<Accordion title="My problem is not listed here">
+<Accordion title="I want to disable elementary models and / or tests temporarily">
   
+If you want to prevent elementary tests from running the simplest way is to exclude the tag that marks all of them in your dbt command:
+
+```shell
+dbt test --exclude tag:elementary-tests
+```
+
+If you add the following to your dbt_project.yml, elementary models will not run and elementary tests will be executed but will do nothing and always pass.
+```shell
+models:
+  elementary:
+    enabled: false
+```
+
+</Accordion>
+
+<Accordion title="My problem is not listed here">
+
 If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
 
 </Accordion>

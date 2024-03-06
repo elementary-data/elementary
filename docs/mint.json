@@ -89,6 +89,7 @@
       "group": "Features",
       "pages": [
         "features/data-tests",
+        "features/automated-monitors",
         "features/elementary-alerts",
         "features/data-observability-dashboard",
         {
@@ -101,7 +102,6 @@
             "features/column-level-lineage"
           ]
         },
-        "features/automated-monitors",
         "features/config-as-code",
         "features/catalog",
         "features/multi-env",
