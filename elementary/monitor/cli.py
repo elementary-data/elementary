@@ -603,6 +603,14 @@ def report(
     default=None,
     help="Include additional information at the test results summary message.\nCurrently only --include descriptions is supported.",
 )
+
+@click.option(
+    "--notification-title",
+    type=str,
+    default=None,
+    help="The title of the notification message.",
+)
+
 @click.pass_context
 def send_report(
     ctx,
@@ -615,6 +623,7 @@ def send_report(
     slack_token,
     slack_channel_name,
     slack_file_name,
+    notification_title,
     profile_target,
     project_profile_target,
     executions_limit,
@@ -668,6 +677,7 @@ def send_report(
         dbt_quoting=dbt_quoting,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
+        notification_title = notification_title,
         update_bucket_website=update_bucket_website,
         aws_profile_name=aws_profile_name,
         aws_region_name=aws_region_name,

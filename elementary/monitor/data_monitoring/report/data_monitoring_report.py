@@ -118,7 +118,7 @@ class DataMonitoringReport(DataMonitoring):
             disable_passed_test_metrics=disable_passed_test_metrics,
             exclude_elementary_models=exclude_elementary_models,
             disable_samples=self.disable_samples,
-            project_name=project_name or self.project_name,
+            project_name=project_name or self.config.google_project_name,
             filter=self.selector_filter.to_selector_filter_schema(),
             env=self.config.env,
             warehouse_type=self.warehouse_info.type if self.warehouse_info else None,
@@ -295,6 +295,8 @@ class DataMonitoringReport(DataMonitoring):
                 channel_name=self.config.slack_channel_name,
                 message=SlackReportSummaryMessageBuilder().get_slack_message(
                     test_results=summary_test_results,
+                    notification_title=self.config.notification_title,
+                    google_monitoring_title= self.config.google_monitoring_title,
                     bucket_website_url=bucket_website_url,
                     include_description=include_description,
                     filter=self.selector_filter.to_selector_filter_schema(),

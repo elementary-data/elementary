@@ -15,12 +15,14 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     def get_slack_message(
         self,
         test_results: List[TestResultSummarySchema],
+        notification_title: str,
+        google_monitoring_title: str,
         days_back: int,
         bucket_website_url: Optional[str] = None,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         include_description: bool = False,
     ) -> SlackMessageSchema:
-        self.add_title_to_slack_alert()
+        self.add_title_to_slack_alert(notification_title = notification_title,google_monitoring_title = google_monitoring_title)
         self.add_preview_to_slack_alert(
             test_results,
             days_back=days_back,
@@ -34,9 +36,11 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         )
         return super().get_slack_message()
 
-    def add_title_to_slack_alert(self):
+    def add_title_to_slack_alert(self, notification_title: str, google_monitoring_title: str):
+        notification_header = "Monitoring summary" if notification_title == None and google_monitoring_title == None else "Monitoring summary of Project: " + next((el for el in [notification_title, google_monitoring_title] if el is not None), "No Title supplied")
+        #notification_header = "Monitoring summary" if notification_title == None else "Monitoring summary of Project: " + notification_title
         title_blocks = [
-            self.create_header_block(":mag: Monitoring summary"),
+            self.create_header_block(f":mag: {notification_header} "),
             self.create_divider_block(),
         ]
         self._add_always_displayed_blocks(title_blocks)

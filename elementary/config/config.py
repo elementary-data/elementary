@@ -17,6 +17,7 @@ class Config:
     _GOOGLE = "google"
     _AZURE = "azure"
     _TEAMS = "teams"
+    _NOTIFICATIONS = "notifications"
     _CONFIG_FILE_NAME = "config.yml"
 
     # Quoting env vars
@@ -49,6 +50,7 @@ class Config:
         slack_token: Optional[str] = None,
         slack_channel_name: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
+        notification_title: Optional[str] = None,
         timezone: Optional[str] = None,
         aws_profile_name: Optional[str] = None,
         aws_region_name: Optional[str] = None,
@@ -58,6 +60,7 @@ class Config:
         s3_endpoint_url: Optional[str] = None,
         s3_bucket_name: Optional[str] = None,
         google_project_name: Optional[str] = None,
+        google_monitoring_title: Optional[str] = None,
         google_service_account_path: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
         gcs_timeout_limit: Optional[int] = None,
@@ -123,6 +126,13 @@ class Config:
             GroupingType.BY_ALERT.value,
         )
 
+        notification_config = config.get(self._NOTIFICATIONS, {})
+
+        self.notification_title = self._first_not_none(
+            notification_title,
+            notification_config.get("notification_title"),
+        )
+
         teams_config = config.get(self._TEAMS, {})
         self.teams_webhook = self._first_not_none(
             teams_webhook,
@@ -152,6 +162,10 @@ class Config:
         self.google_project_name = self._first_not_none(
             google_project_name,
             google_config.get("project_name"),
+        )
+        self.google_monitoring_title = self._first_not_none(
+            google_monitoring_title,
+            google_config.get("monitoring_title"),
         )
         self.google_service_account_path = self._first_not_none(
             google_service_account_path,
