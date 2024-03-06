@@ -151,7 +151,7 @@ class DataMonitoringReport(DataMonitoring):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=(self.warehouse_info.id if self.warehouse_info else None),
+                anonymous_warehouse_id=self.warehouse_info.id if self.warehouse_info else None,
             )
 
     def send_report(

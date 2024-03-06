@@ -84,7 +84,7 @@ class SlackWebClient(SlackClient):
                 channel=channel_name,
                 text=message.text,
                 blocks=json.dumps(message.blocks) if message.blocks else None,
-                attachments=(json.dumps(message.attachments) if message.attachments else None),
+                attachments=json.dumps(message.attachments) if message.attachments else None,
             )
             return True
         except SlackApiError as err:
