@@ -42,21 +42,23 @@ Available as self-hosted or Cloud service with premium features.
 
 ## Features
 
-<img src="static/happy_fire.ico" width="16"/> **Anomaly detection tests** - Collect data quality metrics and detect anomalies, executed and configured as native dbt tests.
+<img src="static/happy_fire.ico" width="16"/> **Anomaly detection tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
 
-<img src="static/happy_fire.ico" width="16"/> **Automated monitors** - Out-of-the-box automated monitors in Elementary cloud to detect freshness, volume and schema issues.
+<img src="static/happy_fire.ico" width="16"/> **Automated monitors** - Out-of-the-box cloud monitors to detect freshness, volume and schema issues.
 
-<img src="static/happy_fire.ico" width="16"/> **End-to-End Data Lineage** - Data lineage enriched with the latest test results, for impact and root cause analysis of data issues. The Cloud product includes **Column Level Lineage** and **BI integrations**.
+<img src="static/happy_fire.ico" width="16"/> **End-to-End Data Lineage** - Enriched with the latest test results, for impact and root cause analysis of data issues. Elementary Cloud offers **Column Level Lineage** and **BI integrations**.
 
-<img src="static/happy_fire.ico" width="16"/> **Data quality dashboard** - Single interface for all your data monitoring and tests, Elementary, dbt, packages and custom.
+<img src="static/happy_fire.ico" width="16"/> **Data quality dashboard** - Single interface for all your data monitoring and test results.
 
-<img src="static/happy_fire.ico" width="16"/> **dbt observability** - Monitor models and jobs run results and performance over time.
+<img src="static/happy_fire.ico" width="16"/> **Models performance** - Monitor models and jobs run results and performance over time.
 
 <img src="static/happy_fire.ico" width="16"/> **Configuration-as-code** - Elementary configuration is managed in your dbt code.
 
-<img src="static/happy_fire.ico" width="16"/> **Alerts** - Send detailed alerts to Slack or Microsoft Teams, including multiple channels and tagging of owners and subscribers. Cloud supports additional alert destinations.
+<img src="static/happy_fire.ico" width="16"/> **Alerts** - Actionable alerts including custom channels and tagging of owners.
 
-<img src="static/happy_fire.ico" width="16"/> **Data catalog** - Explore your datasets information - descriptions, columns, columns descriptions, latest update time, and datasets health.
+<img src="static/happy_fire.ico" width="16"/> **Data catalog** - Explore your datasets information - descriptions, columns, datasets health, etc.
+
+<img src="static/happy_fire.ico" width="16"/> **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
 
 ##
 
@@ -81,17 +83,17 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 ### Elementary Cloud
 
-    1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
+1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
 
-    2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
+2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
 
-    3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
+3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
 
 ### Elementary Community
 
-    1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
+1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
 
-    2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
+2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
 ## Community & Support
 
