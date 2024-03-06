@@ -22,26 +22,23 @@
 
 ## What is Elementary?
 
-Elementary is a dbt-native data observability solution for data and analytics engineers. 
-Set up in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause. 
+Elementary is a dbt-native data observability solution for data and analytics engineers.
+Set up in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause.
 Available as self-hosted or Cloud service with premium features.
-
 
 #### Table of Contents
 
 - [Features](#features)
 - [Self-hosted vs. Cloud service](#self-hosted-vs-cloud-service)
 - [Get Started](#get-started)
-- [Community &  Support](#community--support)
+- [Community & Support](#community--support)
 - [Contribution](#contributions)
-
 
 <kbd align="center">
         <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
 </kbd>
 
 <br>
-
 
 ## Features
 
@@ -67,13 +64,12 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
 Join [Slack](https://www.elementary-data.com/community) to learn more about Elementary.
 
-
 ## Self-hosted vs. Cloud service
 
 ### Elementary Cloud
 
-Ideal for teams monitoring mission-critical data pipelines, requiring guaranteed uptime and reliability, short-time-to-value, advanced features, collaboration, and professional support. 
-The solution is secure by design, and requires no access to your data from cloud.  
+Ideal for teams monitoring mission-critical data pipelines, requiring guaranteed uptime and reliability, short-time-to-value, advanced features, collaboration, and professional support.
+The solution is secure by design, and requires no access to your data from cloud.
 
 To learn more, [book a demo](https://cal.com/maayansa/elementary-intro-github) or see our [pricing page](https://www.elementary-data.com/pricing).
 
@@ -81,10 +77,9 @@ To learn more, [book a demo](https://cal.com/maayansa/elementary-intro-github) o
 
 Elementary Community is an open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report. It is best for data and analytics engineers that require basic observability capabilities or for evaluating features without vendor approval. Our community can provide great support on [Slack](https://www.elementary-data.com/community) if needed.
 
-
 ## Get Started
 
-### Elementary Cloud 
+### Elementary Cloud
 
 1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
 
@@ -92,21 +87,18 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
 
-
 ### Elementary Community
 
 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
 
 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
-
 ## Community & Support
 
 For additional information and help, you can use one of these channels:
 
-- [Slack community](https://www.elementary-data.com/community) \(Release announcments, community support, discussions, etc.\)
+- [Slack community](https://www.elementary-data.com/community) \(Release announcements, community support, discussions, etc.\)
 - [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
-
 
 ## **Contributions**
 
