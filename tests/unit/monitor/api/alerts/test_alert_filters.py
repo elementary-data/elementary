@@ -380,9 +380,7 @@ def test_find_common_alerts():
 def test_filter_alerts_by_tags():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = FiltersSchema(
-        tags=[FilterSchema(values=["one"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(tags=[FilterSchema(values=["one"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
     filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
     assert len(filter_test_alerts) == 2
@@ -391,9 +389,7 @@ def test_filter_alerts_by_tags():
     assert len(filter_model_alerts) == 1
     assert filter_model_alerts[0].id == "1"
 
-    filter = FiltersSchema(
-        tags=[FilterSchema(values=["three"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(tags=[FilterSchema(values=["three"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
     filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
     assert len(filter_test_alerts) == 2
@@ -403,9 +399,7 @@ def test_filter_alerts_by_tags():
     assert filter_model_alerts[0].id == "2"
     assert filter_model_alerts[1].id == "3"
 
-    filter = FiltersSchema(
-        tags=[FilterSchema(values=["four"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(tags=[FilterSchema(values=["four"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_tags(test_alerts, filter.tags)
     filter_model_alerts = _filter_alerts_by_tags(model_alerts, filter.tags)
     assert len(filter_test_alerts) == 1
@@ -453,9 +447,7 @@ def test_filter_alerts_by_tags():
 def test_filter_alerts_by_owners():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = FiltersSchema(
-        owners=[FilterSchema(values=["jeff"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(owners=[FilterSchema(values=["jeff"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_owners(test_alerts, filter.owners)
     filter_model_alerts = _filter_alerts_by_owners(model_alerts, filter.owners)
     assert len(filter_test_alerts) == 3
@@ -466,9 +458,7 @@ def test_filter_alerts_by_owners():
     assert filter_model_alerts[0].id == "1"
     assert filter_model_alerts[1].id == "3"
 
-    filter = FiltersSchema(
-        owners=[FilterSchema(values=["john"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(owners=[FilterSchema(values=["john"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_owners(test_alerts, filter.owners)
     filter_model_alerts = _filter_alerts_by_owners(model_alerts, filter.owners)
     assert len(filter_test_alerts) == 3
@@ -483,9 +473,7 @@ def test_filter_alerts_by_owners():
 def test_filter_alerts_by_model():
     test_alerts, model_alerts, _ = initial_alerts()
 
-    filter = FiltersSchema(
-        models=[FilterSchema(values=["model_id_1"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(models=[FilterSchema(values=["model_id_1"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
     filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
     assert len(filter_test_alerts) == 2
@@ -495,9 +483,7 @@ def test_filter_alerts_by_model():
     assert filter_model_alerts[0].id == "1"
     assert filter_model_alerts[1].id == "2"
 
-    filter = FiltersSchema(
-        models=[FilterSchema(values=["model_id_2"], type=SupportedFilterTypes.IS)]
-    )
+    filter = FiltersSchema(models=[FilterSchema(values=["model_id_2"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
     filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
     assert len(filter_test_alerts) == 2
@@ -506,13 +492,7 @@ def test_filter_alerts_by_model():
     assert len(filter_model_alerts) == 1
     assert filter_model_alerts[0].id == "3"
 
-    filter = FiltersSchema(
-        models=[
-            FilterSchema(
-                values=["model_id_1", "model_id_2"], type=SupportedFilterTypes.IS
-            )
-        ]
-    )
+    filter = FiltersSchema(models=[FilterSchema(values=["model_id_1", "model_id_2"], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_models(test_alerts, filter.models)
     filter_model_alerts = _filter_alerts_by_models(model_alerts, filter.models)
     assert len(filter_test_alerts) == 4
@@ -570,27 +550,17 @@ def test_filter_alerts_by_statuses():
         source_freshness_alerts,
     ) = initial_alerts()
 
-    filter = FiltersSchema(
-        statuses=[
-            StatusFilterSchema(values=[Status.WARN], type=SupportedFilterTypes.IS)
-        ]
-    )
+    filter = FiltersSchema(statuses=[StatusFilterSchema(values=[Status.WARN], type=SupportedFilterTypes.IS)])
     filter_test_alerts = _filter_alerts_by_statuses(test_alerts, filter.statuses)
     filter_model_alerts = _filter_alerts_by_statuses(model_alerts, filter.statuses)
-    filter_source_freshness_alerts = _filter_alerts_by_statuses(
-        source_freshness_alerts, filter.statuses
-    )
+    filter_source_freshness_alerts = _filter_alerts_by_statuses(source_freshness_alerts, filter.statuses)
     assert len(filter_test_alerts) == 1
     assert filter_test_alerts[0].id == "4"
     assert len(filter_model_alerts) == 0
     assert len(filter_source_freshness_alerts) == 1
 
     filter = FiltersSchema(
-        statuses=[
-            StatusFilterSchema(
-                values=[Status.ERROR, Status.SKIPPED], type=SupportedFilterTypes.IS
-            )
-        ]
+        statuses=[StatusFilterSchema(values=[Status.ERROR, Status.SKIPPED], type=SupportedFilterTypes.IS)]
     )
     filter_test_alerts = _filter_alerts_by_statuses(test_alerts, filter.statuses)
     filter_model_alerts = _filter_alerts_by_statuses(model_alerts, filter.statuses)
@@ -607,9 +577,7 @@ def test_filter_alerts_by_statuses():
     )
     filter_test_alerts = _filter_alerts_by_statuses(test_alerts, filter.statuses)
     filter_model_alerts = _filter_alerts_by_statuses(model_alerts, filter.statuses)
-    filter_source_freshness_alerts = _filter_alerts_by_statuses(
-        source_freshness_alerts, filter.statuses
-    )
+    filter_source_freshness_alerts = _filter_alerts_by_statuses(source_freshness_alerts, filter.statuses)
     assert len(filter_test_alerts) == 4
     assert len(filter_model_alerts) == 0
     assert len(filter_source_freshness_alerts) == 2
@@ -620,27 +588,15 @@ def test_filter_alerts_by_resource_types():
     all_alerts = test_alerts + model_alerts
 
     filter = FiltersSchema(
-        resource_types=[
-            ResourceTypeFilterSchema(
-                values=[ResourceType.TEST], type=SupportedFilterTypes.IS
-            )
-        ]
+        resource_types=[ResourceTypeFilterSchema(values=[ResourceType.TEST], type=SupportedFilterTypes.IS)]
     )
-    filter_test_alerts = _filter_alerts_by_resource_types(
-        all_alerts, filter.resource_types
-    )
+    filter_test_alerts = _filter_alerts_by_resource_types(all_alerts, filter.resource_types)
     assert filter_test_alerts == test_alerts
 
     filter = FiltersSchema(
-        resource_types=[
-            ResourceTypeFilterSchema(
-                values=[ResourceType.MODEL], type=SupportedFilterTypes.IS
-            )
-        ]
+        resource_types=[ResourceTypeFilterSchema(values=[ResourceType.MODEL], type=SupportedFilterTypes.IS)]
     )
-    filter_test_alerts = _filter_alerts_by_resource_types(
-        all_alerts, filter.resource_types
-    )
+    filter_test_alerts = _filter_alerts_by_resource_types(all_alerts, filter.resource_types)
     assert filter_test_alerts == model_alerts
 
 

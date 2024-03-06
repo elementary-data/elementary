@@ -51,9 +51,7 @@ class NodeDependsOnNodesSchema(BaseModel):
     @validator("depends_on_nodes", pre=True, always=True)
     def set_depends_on_nodes(cls, depends_on_nodes):
         formatted_depends_on = depends_on_nodes or []
-        formatted_depends_on = [
-            cls._format_node_id(node_id) for node_id in formatted_depends_on
-        ]
+        formatted_depends_on = [cls._format_node_id(node_id) for node_id in formatted_depends_on]
         return [node_id for node_id in formatted_depends_on if node_id]
 
     @classmethod

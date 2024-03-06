@@ -70,9 +70,7 @@ class TestAlertModel(AlertModel):
         self.table_name = table_name
         self.test_type = test_type
         self.test_sub_type = test_sub_type
-        self.test_results_description = (
-            test_results_description and test_results_description.capitalize()
-        )
+        self.test_results_description = test_results_description and test_results_description.capitalize()
         self.test_results_query = test_results_query and test_results_query.strip()
         self.test_short_name = test_short_name
         self.other = other or dict()
@@ -89,11 +87,7 @@ class TestAlertModel(AlertModel):
 
     @property
     def table_full_name(self) -> str:
-        table_full_name_parts = [
-            name
-            for name in [self.database_name, self.schema_name, self.table_name]
-            if name
-        ]
+        table_full_name_parts = [name for name in [self.database_name, self.schema_name, self.table_name] if name]
         return ".".join(table_full_name_parts).lower()
 
     @property

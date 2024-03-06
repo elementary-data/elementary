@@ -31,33 +31,21 @@ def _get_run_history_report_link(
         url = f"{formatted_report_url}/report/{path.value}/{unique_id}/"
         report_link = ReportLinkData(
             url=url,
-            text=TEST_RUNS_LINK_TEXT
-            if path == ReportPath.TEST_RUNS
-            else MODEL_RUNS_LINK_TEXT,
+            text=(TEST_RUNS_LINK_TEXT if path == ReportPath.TEST_RUNS else MODEL_RUNS_LINK_TEXT),
         )
 
     return report_link
 
 
-def get_test_runs_link(
-    report_url: Optional[str], elementary_unique_id: Optional[str]
-) -> Optional[ReportLinkData]:
-    return _get_run_history_report_link(
-        report_url, ReportPath.TEST_RUNS, elementary_unique_id
-    )
+def get_test_runs_link(report_url: Optional[str], elementary_unique_id: Optional[str]) -> Optional[ReportLinkData]:
+    return _get_run_history_report_link(report_url, ReportPath.TEST_RUNS, elementary_unique_id)
 
 
-def get_model_runs_link(
-    report_url: Optional[str], model_unique_id: Optional[str]
-) -> Optional[ReportLinkData]:
-    return _get_run_history_report_link(
-        report_url, ReportPath.MODEL_RUNS, model_unique_id
-    )
+def get_model_runs_link(report_url: Optional[str], model_unique_id: Optional[str]) -> Optional[ReportLinkData]:
+    return _get_run_history_report_link(report_url, ReportPath.MODEL_RUNS, model_unique_id)
 
 
-def get_model_test_runs_link(
-    report_url: Optional[str], model_unique_id: Optional[str]
-) -> Optional[ReportLinkData]:
+def get_model_test_runs_link(report_url: Optional[str], model_unique_id: Optional[str]) -> Optional[ReportLinkData]:
     report_link = None
 
     if model_unique_id and report_url:

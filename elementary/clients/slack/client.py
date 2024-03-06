@@ -30,9 +30,7 @@ class SlackClient(ABC):
         self.email_to_user_id_cache: Dict[str, str] = {}
 
     @staticmethod
-    def create_client(
-        config: Config, tracking: Optional[Tracking] = None
-    ) -> Optional["SlackClient"]:
+    def create_client(config: Config, tracking: Optional[Tracking] = None) -> Optional["SlackClient"]:
         if not config.has_slack:
             return None
         if config.slack_token:
@@ -54,9 +52,7 @@ class SlackClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def send_file(
-        self, channel_name: str, file_path: str, message: SlackMessageSchema
-    ) -> bool:
+    def send_file(self, channel_name: str, file_path: str, message: SlackMessageSchema) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -82,17 +78,13 @@ class SlackWebClient(SlackClient):
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
-    def send_message(
-        self, channel_name: str, message: SlackMessageSchema, **kwargs
-    ) -> bool:
+    def send_message(self, channel_name: str, message: SlackMessageSchema, **kwargs) -> bool:
         try:
             self.client.chat_postMessage(
                 channel=channel_name,
                 text=message.text,
                 blocks=json.dumps(message.blocks) if message.blocks else None,
-                attachments=json.dumps(message.attachments)
-                if message.attachments
-                else None,
+                attachments=(json.dumps(message.attachments) if message.attachments else None),
             )
             return True
         except SlackApiError as err:
@@ -148,14 +140,10 @@ class SlackWebClient(SlackClient):
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
-    def _get_channels(
-        self, cursor: Optional[str] = None
-    ) -> Tuple[List[dict], Optional[str]]:
+    def _get_channels(self, cursor: Optional[str] = None) -> Tuple[List[dict], Optional[str]]:
         return self.list_conversations(cursor=cursor)
 
-    def list_conversations(
-        self, cursor: Optional[str] = None
-    ) -> Tuple[List[dict], Optional[str]]:
+    def list_conversations(self, cursor: Optional[str] = None) -> Tuple[List[dict], Optional[str]]:
         response = self.client.conversations_list(
             cursor=cursor,
             types="public_channel,private_channel",
@@ -190,14 +178,10 @@ class SlackWebClient(SlackClient):
     def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
         err_type = err.response.data["error"]
         if err_type == "not_in_channel":
-            logger.info(
-                f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
-            )
+            logger.info(f'Elementary app is not in the channel "{channel_name}". Attempting to join.')
             channel_id = self._get_channel_id(channel_name)
             if not channel_id:
-                logger.info(
-                    f'Elementary app could not find the channel "{channel_name}".'
-                )
+                logger.info(f'Elementary app could not find the channel "{channel_name}".')
                 return False
             return self._join_channel(channel_id=channel_id)
         elif err_type == "channel_not_found":
@@ -205,9 +189,7 @@ class SlackWebClient(SlackClient):
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
             )
             return False
-        logger.error(
-            f"Failed to send a message to channel - {channel_name}. Error: {err}"
-        )
+        logger.error(f"Failed to send a message to channel - {channel_name}. Error: {err}")
         return False
 
 
@@ -221,23 +203,17 @@ class SlackWebhookClient(SlackClient):
         super().__init__(tracking)
 
     def _initial_client(self):
-        return WebhookClient(
-            url=self.webhook, default_headers={"Content-type": "application/json"}
-        )
+        return WebhookClient(url=self.webhook, default_headers={"Content-type": "application/json"})
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
-        response = self.client.send(
-            text=message.text, blocks=message.blocks, attachments=message.attachments
-        )
+        response = self.client.send(text=message.text, blocks=message.blocks, attachments=message.attachments)
         if response.status_code == OK_STATUS_CODE:
             return True
 
         else:
-            logger.error(
-                f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}"
-            )
+            logger.error(f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}")
             return False
 
     def send_file(self, **kwargs):

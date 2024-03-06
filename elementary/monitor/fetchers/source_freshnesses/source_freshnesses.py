@@ -27,9 +27,7 @@ class SourceFreshnessesFetcher(FetcherClient):
                 invocations_per_test=invocations_per_test,
             ),
         )
-        source_freshness_results = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
+        source_freshness_results = json.loads(run_operation_response[0]) if run_operation_response else []
         source_freshness_results = [
             SourceFreshnessResultDBRowSchema(**source_freshness_result)
             for source_freshness_result in source_freshness_results

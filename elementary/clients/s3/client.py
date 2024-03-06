@@ -25,9 +25,7 @@ class S3Client:
         self.tracking = tracking
 
     @classmethod
-    def create_client(
-        cls, config: Config, tracking: Optional[Tracking] = None
-    ) -> Optional["S3Client"]:
+    def create_client(cls, config: Config, tracking: Optional[Tracking] = None) -> Optional["S3Client"]:
         return cls(config, tracking=tracking) if config.has_s3 else None
 
     def send_report(
@@ -67,9 +65,7 @@ class S3Client:
                 try:
                     bucket_name = self.config.s3_bucket_name
                     bucket_location = self._get_bucket_region(bucket_name)
-                    aws_s3_website_url = self._get_aws_s3_website_url_from_location(
-                        bucket_location
-                    )
+                    aws_s3_website_url = self._get_aws_s3_website_url_from_location(bucket_location)
                     bucket_website_url = f"http://{bucket_name}.{aws_s3_website_url}"
 
                 except Exception as ex:
@@ -78,9 +74,7 @@ class S3Client:
         return bucket_website_url
 
     def _get_bucket_region(self, bucket_name: str) -> str:
-        region = self.client.get_bucket_location(Bucket=bucket_name)[
-            "LocationConstraint"
-        ]
+        region = self.client.get_bucket_location(Bucket=bucket_name)["LocationConstraint"]
         if region is None:
             # Specifically for us-east-1, the LocationConstraint is always None
             region = "us-east-1"
@@ -120,6 +114,4 @@ class S3Client:
             "us-gov-east-1": "s3-website.us-gov-east-1.amazonaws.com",
             "us-gov-west-1": "s3-website-us-gov-west-1.amazonaws.com",
         }
-        return location_to_website_url_map.get(
-            location, f"s3-website.{location}.amazonaws.com"
-        )
+        return location_to_website_url_map.get(location, f"s3-website.{location}.amazonaws.com")

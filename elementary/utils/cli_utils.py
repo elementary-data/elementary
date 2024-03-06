@@ -9,9 +9,7 @@ class RequiredIf(click.Option):
             raise ClickException("'required_if' parameter is required")
 
         kwargs["help"] = (
-            kwargs.get("help", "")
-            + " NOTE: This argument must be configured together with %s."
-            % self.required_if
+            kwargs.get("help", "") + " NOTE: This argument must be configured together with %s." % self.required_if
         ).strip()
         super(RequiredIf, self).__init__(*args, **kwargs)
 
@@ -20,10 +18,7 @@ class RequiredIf(click.Option):
         other_present = self.required_if in opts
 
         if we_are_present and not other_present:
-            raise click.UsageError(
-                "Illegal usage: `%s` must be configured with `%s`"
-                % (self.name, self.required_if)
-            )
+            raise click.UsageError("Illegal usage: `%s` must be configured with `%s`" % (self.name, self.required_if))
         else:
             self.prompt = None
 

@@ -13,32 +13,22 @@ logger = get_logger(__name__)
 class AzureClient:
     def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
-        self.blob_service_client = BlobServiceClient.from_connection_string(
-            self.config.azure_connection_string
-        )
+        self.blob_service_client = BlobServiceClient.from_connection_string(self.config.azure_connection_string)
         self.tracking = tracking
 
     @classmethod
-    def create_client(
-        cls, config: Config, tracking: Optional[Tracking] = None
-    ) -> Optional["AzureClient"]:
+    def create_client(cls, config: Config, tracking: Optional[Tracking] = None) -> Optional["AzureClient"]:
         return cls(config, tracking=tracking) if config.has_blob else None
 
     def send_report(
         self, local_html_file_path: str, remote_bucket_file_path: Optional[str] = None
     ) -> Tuple[bool, Optional[str]]:
-        report_filename = (
-            remote_bucket_file_path
-            if remote_bucket_file_path
-            else path.basename(local_html_file_path)
-        )
+        report_filename = remote_bucket_file_path if remote_bucket_file_path else path.basename(local_html_file_path)
         blob_handle = self.blob_service_client.get_blob_client(
             container=self.config.azure_container_name, blob=report_filename
         )
         bucket_website_url = None
-        logger.info(
-            f'Uploading to Azure container "{self.config.azure_container_name}"'
-        )
+        logger.info(f'Uploading to Azure container "{self.config.azure_container_name}"')
         with open(local_html_file_path, "rb") as data:
             blob_handle.upload_blob(data, content_type="text/html", overwrite=True)
         logger.info("Uploaded report to Azure blob storage.")

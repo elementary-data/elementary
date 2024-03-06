@@ -29,9 +29,7 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         result: Optional[SlackBlocksType] = None,
         configuration: Optional[SlackBlocksType] = None,
     ) -> SlackMessageSchema:
-        return self._create_slack_alert(
-            title=title, preview=preview, result=result, configuration=configuration
-        )
+        return self._create_slack_alert(title=title, preview=preview, result=result, configuration=configuration)
 
     def _create_slack_alert(
         self,
@@ -50,9 +48,7 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
             title = [*title_blocks, self.create_divider_block()]
             self._add_always_displayed_blocks(title)
 
-    def add_preview_to_slack_alert(
-        self, preview_blocks: Optional[SlackBlocksType] = None
-    ):
+    def add_preview_to_slack_alert(self, preview_blocks: Optional[SlackBlocksType] = None):
         if preview_blocks:
             validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
             self._add_blocks_as_attachments(validated_preview_blocks)
@@ -89,9 +85,7 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         :param preview_blocks:
         :return:
         """
-        if (
-            not preview_blocks
-        ):  # this condition captures case of Null and also of a list with length 0
+        if not preview_blocks:  # this condition captures case of Null and also of a list with length 0
             return
 
         preview_blocks_count = len(preview_blocks)
@@ -103,9 +97,7 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
             return preview_blocks
 
         padded_preview_blocks = [*preview_blocks]
-        padding_length = (
-            SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
-        )
+        padding_length = SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
         padding = [cls.create_empty_section_block() for i in range(padding_length)]
         padded_preview_blocks.extend(padding)
         return padded_preview_blocks

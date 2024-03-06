@@ -19,7 +19,7 @@ elementary.cli.upgrade.recommend_version_upgrade()
 logger = get_logger(__name__)
 
 
-def get_log_path(ctx):
+def get_log_path(ctx) -> str:
     target_path = Config.DEFAULT_TARGET_PATH
     try:
         ctx_args = ctx.args
@@ -60,8 +60,7 @@ class ElementaryCLI(click.MultiCommand):
         files_target_path = get_log_path(ctx)
         set_root_logger_handlers("elementary", files_target_path)
         click.echo(
-            "Any feedback and suggestions are welcomed! join our community here - "
-            "https://bit.ly/slack-elementary\n"
+            "Any feedback and suggestions are welcomed! join our community here - " "https://bit.ly/slack-elementary\n"
         )
         logger.info(f"Running with edr={package.get_package_version()}")
         return super().invoke(ctx)
@@ -75,7 +74,7 @@ class ElementaryCLI(click.MultiCommand):
     version=package.get_package_version(),
     message="Elementary version %(version)s.",
 )
-def cli():
+def cli() -> None:
     pass
 
 

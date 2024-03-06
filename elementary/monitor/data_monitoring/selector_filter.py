@@ -28,9 +28,7 @@ class SelectorFilter:
         self.tracking = tracking
         self.selector = selector
         user_dbt_runner = self._create_user_dbt_runner(config)
-        self.selector_fetcher = (
-            SelectorFetcher(user_dbt_runner) if user_dbt_runner else None
-        )
+        self.selector_fetcher = SelectorFetcher(user_dbt_runner) if user_dbt_runner else None
         self.filter = self._parse_selector(self.selector)
 
     # Once we will separate the filters to monitor and report filters, we will remove this method.
@@ -40,9 +38,7 @@ class SelectorFilter:
             if self.selector_fetcher and self._can_use_fetcher(selector):
                 if self.tracking:
                     self.tracking.set_env("select_method", "dbt selector")
-                node_names = self.selector_fetcher.get_selector_results(
-                    selector=selector
-                )
+                node_names = self.selector_fetcher.get_selector_results(selector=selector)
                 return FiltersSchema(node_names=node_names, selector=selector)
             else:
                 invocation_id_regex = re.compile(r"invocation_id:(.*)")
@@ -66,9 +62,7 @@ class SelectorFilter:
                 if last_invocation_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "last_invocation")
-                    data_monitoring_filter = FiltersSchema(
-                        last_invocation=True, selector=selector
-                    )
+                    data_monitoring_filter = FiltersSchema(last_invocation=True, selector=selector)
                 elif invocation_id_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "invocation_id")
@@ -107,9 +101,7 @@ class SelectorFilter:
                 elif statuses_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "statuses")
-                    statuses = [
-                        Status(status) for status in statuses_match.group(1).split(",")
-                    ]
+                    statuses = [Status(status) for status in statuses_match.group(1).split(",")]
                     data_monitoring_filter = FiltersSchema(
                         statuses=[StatusFilterSchema(values=statuses)],
                         selector=selector,
@@ -118,13 +110,10 @@ class SelectorFilter:
                     if self.tracking:
                         self.tracking.set_env("select_method", "resource_types")
                     resource_types = [
-                        ResourceType(resource_type)
-                        for resource_type in resource_types_match.group(1).split(",")
+                        ResourceType(resource_type) for resource_type in resource_types_match.group(1).split(",")
                     ]
                     data_monitoring_filter = FiltersSchema(
-                        resource_types=[
-                            ResourceTypeFilterSchema(values=resource_types)
-                        ],
+                        resource_types=[ResourceTypeFilterSchema(values=resource_types)],
                         selector=selector,
                     )
                 else:
@@ -156,6 +145,4 @@ class SelectorFilter:
             "statuses",
             "resource_types",
         ]
-        return all(
-            [selector_type not in selector for selector_type in non_dbt_selectors]
-        )
+        return all([selector_type not in selector for selector_type in non_dbt_selectors])

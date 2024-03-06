@@ -76,14 +76,10 @@ class FiltersSchema(BaseModel):
     def format_invocation_time(cls, invocation_time):
         if invocation_time:
             try:
-                invocation_datetime = convert_local_time_to_timezone(
-                    datetime.fromisoformat(invocation_time)
-                )
+                invocation_datetime = convert_local_time_to_timezone(datetime.fromisoformat(invocation_time))
                 return invocation_datetime.strftime(DATETIME_FORMAT)
             except ValueError as err:
-                logger.error(
-                    f"Failed to parse invocation time filter: {err}\nPlease use a valid ISO 8601 format"
-                )
+                logger.error(f"Failed to parse invocation time filter: {err}\nPlease use a valid ISO 8601 format")
                 raise
         return None
 
@@ -93,15 +89,8 @@ class FiltersSchema(BaseModel):
             return
 
         valid_report_selectors = ["last_invocation", "invocation_id", "invocation_time"]
-        if all(
-            [
-                selector_type not in self.selector
-                for selector_type in valid_report_selectors
-            ]
-        ):
-            raise InvalidSelectorError(
-                "Selector is invalid for report: ", self.selector
-            )
+        if all([selector_type not in self.selector for selector_type in valid_report_selectors]):
+            raise InvalidSelectorError("Selector is invalid for report: ", self.selector)
 
     @staticmethod
     def from_cli_params(cli_filters: Tuple[str]) -> "FiltersSchema":
@@ -115,23 +104,17 @@ class FiltersSchema(BaseModel):
         resource_types = []
 
         for cli_filter in cli_filters:
-            tags_match = FiltersSchema._match_filter_regex(
-                filter_string=cli_filter, regex=re.compile(r"tags:(.*)")
-            )
+            tags_match = FiltersSchema._match_filter_regex(filter_string=cli_filter, regex=re.compile(r"tags:(.*)"))
             if tags_match:
                 tags.append(FilterSchema(values=tags_match))
                 continue
 
-            owners_match = FiltersSchema._match_filter_regex(
-                filter_string=cli_filter, regex=re.compile(r"owners:(.*)")
-            )
+            owners_match = FiltersSchema._match_filter_regex(filter_string=cli_filter, regex=re.compile(r"owners:(.*)"))
             if owners_match:
                 owners.append(FilterSchema(values=owners_match))
                 continue
 
-            models_match = FiltersSchema._match_filter_regex(
-                filter_string=cli_filter, regex=re.compile(r"models:(.*)")
-            )
+            models_match = FiltersSchema._match_filter_regex(filter_string=cli_filter, regex=re.compile(r"models:(.*)"))
             if models_match:
                 models.append(FilterSchema(values=models_match))
                 continue
@@ -140,11 +123,7 @@ class FiltersSchema(BaseModel):
                 filter_string=cli_filter, regex=re.compile(r"statuses:(.*)")
             )
             if statuses_match:
-                statuses.append(
-                    StatusFilterSchema(
-                        values=[Status(status) for status in statuses_match]
-                    )
-                )
+                statuses.append(StatusFilterSchema(values=[Status(status) for status in statuses_match]))
                 continue
 
             resource_types_match = FiltersSchema._match_filter_regex(
@@ -153,10 +132,7 @@ class FiltersSchema(BaseModel):
             if resource_types_match:
                 resource_types.append(
                     ResourceTypeFilterSchema(
-                        values=[
-                            ResourceType(resource_type)
-                            for resource_type in resource_types_match
-                        ]
+                        values=[ResourceType(resource_type) for resource_type in resource_types_match]
                     )
                 )
                 continue

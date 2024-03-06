@@ -85,9 +85,7 @@ class GroupsAPI(APIClient):
                 group[NO_TAGS_DEFAULT_TREE].append(self._get_group_item(artifact))
         return dict(group)
 
-    def get_owners_group(
-        self, artifacts: List[GROUPABLE_ARTIFACT]
-    ) -> OwnersGroupSchema:
+    def get_owners_group(self, artifacts: List[GROUPABLE_ARTIFACT]) -> OwnersGroupSchema:
         group = defaultdict(list)
         for artifact in artifacts:
             unique_id = artifact.unique_id
@@ -103,6 +101,4 @@ class GroupsAPI(APIClient):
 
     @staticmethod
     def _get_group_item(artifact: GROUPABLE_ARTIFACT) -> GroupItemSchema:
-        return GroupItemSchema(
-            node_id=artifact.unique_id, resource_type=artifact.artifact_type
-        )
+        return GroupItemSchema(node_id=artifact.unique_id, resource_type=artifact.artifact_type)

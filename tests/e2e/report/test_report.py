@@ -22,27 +22,19 @@ def test_group():
     assert {
         "node_id": "model.elementary_integration_tests.error_model",
         "resource_type": "model",
-    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
-        "__files__"
-    ]
+    } in report_data[
+        "groups"
+    ]["dbt"]["elementary_integration_tests"]["models"]["__files__"]
     assert {
         "node_id": "model.elementary_integration_tests.nested",
         "resource_type": "model",
-    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["models"][
-        "nested"
-    ][
-        "models"
-    ][
-        "tree"
-    ][
-        "__files__"
-    ]
+    } in report_data["groups"][
+        "dbt"
+    ]["elementary_integration_tests"]["models"]["nested"]["models"]["tree"]["__files__"]
     assert {
         "node_id": "source.elementary_integration_tests.training.any_type_column_anomalies_training",
         "resource_type": "source",
-    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["sources"][
-        "__files__"
-    ]
+    } in report_data["groups"]["dbt"]["elementary_integration_tests"]["sources"]["__files__"]
     assert {
         "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
         "resource_type": "model",
@@ -79,9 +71,7 @@ def test_test_runs_are_sorted():
         for test in tests:
             runs = test.get("test_runs")
             invocations = runs.get("invocations")
-            invocation_times = [
-                invocation.get("time_utc") for invocation in invocations
-            ]
+            invocation_times = [invocation.get("time_utc") for invocation in invocations]
             sorted_invocation_times = [*invocation_times]
             sorted_invocation_times.sort()
             assert invocation_times == sorted_invocation_times
@@ -518,30 +508,15 @@ def assert_test_counter(
                 if column and test_metadata.get("column_name")
                 else True
             )
-            match_test_sub_type = (
-                test_metadata.get("test_sub_type") == test_sub_type
-                if test_sub_type
-                else True
-            )
-            match_status = (
-                test_metadata.get("latest_run_status") == status if status else True
-            )
+            match_test_sub_type = test_metadata.get("test_sub_type") == test_sub_type if test_sub_type else True
+            match_status = test_metadata.get("latest_run_status") == status if status else True
             match_name = test_metadata.get("test_name") == name if name else True
-            if (
-                match_test_type
-                and match_table
-                and match_column
-                and match_test_sub_type
-                and match_status
-                and match_name
-            ):
+            if match_test_type and match_table and match_column and match_test_sub_type and match_status and match_name:
                 tests_found += 1
     assert tests_found == expected_amount
 
 
-def assert_test_sub_types_occurre_only_once(
-    report_data, test_type, test_sub_types, table=None, column=None, name=None
-):
+def assert_test_sub_types_occurre_only_once(report_data, test_type, test_sub_types, table=None, column=None, name=None):
     for sub_type in test_sub_types:
         assert_test_counter(
             report_data=report_data,
@@ -559,9 +534,7 @@ def assert_totals(data_totals: Totals, fixture_totals: Totals):
         assert_totals_entry(data_totals[total_key], fixture_totals[total_key])
 
 
-def assert_totals_entry(
-    data_total_entries: TotalsEntry, fixture_total_entries: TotalsEntry
-):
+def assert_totals_entry(data_total_entries: TotalsEntry, fixture_total_entries: TotalsEntry):
     for key in data_total_entries:
         assert data_total_entries[key] * fixture_total_entries[key] >= 0
 

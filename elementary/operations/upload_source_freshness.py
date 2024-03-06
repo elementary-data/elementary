@@ -53,15 +53,11 @@ class UploadSourceFreshnessOperation:
             quiet=True,
         )
         if not response:
-            raise click.ClickException(
-                f"Source freshness for invocation id {invocation_id} were already uploaded."
-            )
+            raise click.ClickException(f"Source freshness for invocation id {invocation_id} were already uploaded.")
 
         chunk_size = rows_per_insert
         chunk_list = list(range(0, len(results), chunk_size))
-        upload_with_progress_bar = alive_it(
-            chunk_list, title="Uploading source freshness results"
-        )
+        upload_with_progress_bar = alive_it(chunk_list, title="Uploading source freshness results")
         for chunk in upload_with_progress_bar:
             results_segment = results[chunk : chunk + chunk_size]
 

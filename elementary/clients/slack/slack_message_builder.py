@@ -142,9 +142,7 @@ class SlackMessageBuilder:
         }
 
     @staticmethod
-    def create_section_with_button(
-        section_text: str, button_text: str, url: str
-    ) -> dict:
+    def create_section_with_button(section_text: str, button_text: str, url: str) -> dict:
         return {
             "type": "section",
             "text": {"type": "mrkdwn", "text": section_text},

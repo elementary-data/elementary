@@ -101,9 +101,7 @@ class DbtRunner(BaseDbtRunner):
         output = None
         if capture_output:
             output = result.stdout.decode("utf-8")
-            logger.debug(
-                f"Result bytes size for command '{log_command}' is {len(result.stdout)}"
-            )
+            logger.debug(f"Result bytes size for command '{log_command}' is {len(result.stdout)}")
             if log_output or is_debug():
                 for log in parse_dbt_output(output):
                     logger.info(log.msg)
@@ -113,9 +111,7 @@ class DbtRunner(BaseDbtRunner):
         return True, output
 
     def deps(self, quiet: bool = False, capture_output: bool = True) -> bool:
-        success, _ = self._run_command(
-            command_args=["deps"], quiet=quiet, capture_output=capture_output
-        )
+        success, _ = self._run_command(command_args=["deps"], quiet=quiet, capture_output=capture_output)
         return success
 
     def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
@@ -151,9 +147,7 @@ class DbtRunner(BaseDbtRunner):
         macro_to_run_args = macro_args if macro_args else dict()
         if should_log:
             macro_to_run = "elementary.log_macro_results"
-            macro_to_run_args = dict(
-                macro_name=macro_name, macro_args=macro_args if macro_args else dict()
-            )
+            macro_to_run_args = dict(macro_name=macro_name, macro_args=macro_args if macro_args else dict())
         command_args = ["run-operation", macro_to_run]
         json_args = json.dumps(macro_to_run_args, ensure_ascii=False)
         command_args.extend(["--args", json_args])
@@ -165,9 +159,7 @@ class DbtRunner(BaseDbtRunner):
             log_output=log_output,
         )
         if log_errors and not success:
-            logger.error(
-                f'Failed to run macro: "{macro_name}"\nRun output: {command_output}'
-            )
+            logger.error(f'Failed to run macro: "{macro_name}"\nRun output: {command_output}')
         run_operation_results = []
         if capture_output and command_output is not None:
             for log in parse_dbt_output(command_output):
@@ -175,9 +167,7 @@ class DbtRunner(BaseDbtRunner):
                     logger.error(log.msg)
                     continue
                 if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
-                    run_operation_results.append(
-                        log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
-                    )
+                    run_operation_results.append(log.msg[len(self.ELEMENTARY_LOG_PREFIX) :])
         return run_operation_results
 
     def run(
@@ -243,19 +233,11 @@ class DbtRunner(BaseDbtRunner):
             success, command_output_string = self._run_command(
                 command_args=command_args, capture_output=True, log_format="text"
             )
-            command_outputs = (
-                command_output_string.splitlines() if command_output_string else []
-            )
+            command_outputs = command_output_string.splitlines() if command_output_string else []
             # ls command didn't match nodes.
             # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.
-            if (
-                len(command_outputs) == 2
-                and try_load_json(command_outputs[0])
-                and try_load_json(command_outputs[1])
-            ):
-                logger.warning(
-                    f"The selection criterion '{select}' does not match any nodes"
-                )
+            if len(command_outputs) == 2 and try_load_json(command_outputs[0]) and try_load_json(command_outputs[1]):
+                logger.warning(f"The selection criterion '{select}' does not match any nodes")
                 return []
             # When nodes are matched, ls command returns strings of the node names.
             else:
@@ -267,15 +249,9 @@ class DbtRunner(BaseDbtRunner):
         self._run_command(command_args=["source", "freshness"])
 
     def _get_installed_packages_names(self):
-        packages_dir = os.path.join(
-            self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
-        )
+        packages_dir = os.path.join(self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages"))
         try:
-            return [
-                name
-                for name in os.listdir(packages_dir)
-                if os.path.isdir(os.path.join(packages_dir, name))
-            ]
+            return [name for name in os.listdir(packages_dir) if os.path.isdir(os.path.join(packages_dir, name))]
         except FileNotFoundError:
             return []
 

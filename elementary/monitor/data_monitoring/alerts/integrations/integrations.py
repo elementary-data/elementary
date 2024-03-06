@@ -18,9 +18,7 @@ class UnsupportedAlertIntegrationError(Error):
     """Exception raised while executing edr monitor without a supported integration"""
 
     def __init__(self) -> None:
-        super().__init__(
-            "Failed to run edr monitor - no supported integration was provided"
-        )
+        super().__init__("Failed to run edr monitor - no supported integration was provided")
 
 
 class Integrations:

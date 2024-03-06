@@ -10,9 +10,7 @@ def test_empty_from_cli_params():
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
 
@@ -24,9 +22,7 @@ def test_tags_key_from_cli_params():
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
     cli_filter = ("tags:tag1,tag2",)
@@ -36,9 +32,7 @@ def test_tags_key_from_cli_params():
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
     cli_filter = ("tags:tag1", "tags:tag2")
@@ -49,9 +43,7 @@ def test_tags_key_from_cli_params():
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
 
@@ -63,9 +55,7 @@ def test_owners_key_from_cli_params():
     assert filter_schema.owners[0].values == ["freddy"]
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
     cli_filter = ("owners:freddy,dredd",)
@@ -75,9 +65,7 @@ def test_owners_key_from_cli_params():
     assert sorted(filter_schema.owners[0].values) == sorted(["freddy", "dredd"])
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
     cli_filter = ("owners:freddy", "owners:dredd")
@@ -88,9 +76,7 @@ def test_owners_key_from_cli_params():
     assert filter_schema.owners[1].values == ["dredd"]
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
 
@@ -102,9 +88,7 @@ def test_models_key_from_cli_params():
     assert filter_schema.models[0].values == ["freddy"]
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
     cli_filter = ("models:freddy,dredd",)
@@ -114,9 +98,7 @@ def test_models_key_from_cli_params():
     assert sorted(filter_schema.models[0].values) == sorted(["freddy", "dredd"])
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
     cli_filter = ("models:freddy", "models:dredd")
@@ -127,9 +109,7 @@ def test_models_key_from_cli_params():
     assert filter_schema.models[1].values == ["dredd"]
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
 
@@ -194,9 +174,7 @@ def test_resource_types_key_from_cli_params():
     assert len(filter_schema.models) == 0
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 1
     assert filter_schema.resource_types[0].values == ["test"]
 
@@ -206,9 +184,7 @@ def test_resource_types_key_from_cli_params():
     assert len(filter_schema.models) == 0
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 1
     assert sorted(filter_schema.resource_types[0].values) == sorted(["test", "model"])
 
@@ -218,9 +194,7 @@ def test_resource_types_key_from_cli_params():
     assert len(filter_schema.models) == 0
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 2
     assert filter_schema.resource_types[0].values == ["test"]
     assert filter_schema.resource_types[1].values == ["model"]
@@ -233,9 +207,7 @@ def test_unsupported_key_from_cli_params():
     assert len(filter_schema.owners) == 0
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0
 
 
@@ -248,7 +220,5 @@ def test_multiple_keys_from_cli_params():
     assert sorted(filter_schema.owners[0].values) == sorted(["freddy", "dredd"])
     assert len(filter_schema.models) == 0
     assert len(filter_schema.statuses) == 1
-    assert sorted(filter_schema.statuses[0].values) == sorted(
-        ["fail", "error", "runtime error", "warn"]
-    )
+    assert sorted(filter_schema.statuses[0].values) == sorted(["fail", "error", "runtime error", "warn"])
     assert len(filter_schema.resource_types) == 0

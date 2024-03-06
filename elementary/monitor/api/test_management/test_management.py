@@ -37,8 +37,5 @@ class TestManagementAPI(APIClient):
 
     def get_project_users(self) -> UsersModel:
         project_user_names = self.test_management_fetcher.get_all_project_users()
-        project_users = [
-            UserModel(name=project_user, origin="project")
-            for project_user in project_user_names
-        ]
+        project_users = [UserModel(name=project_user, origin="project") for project_user in project_user_names]
         return UsersModel(users=project_users)

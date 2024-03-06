@@ -9,7 +9,7 @@ pydantic_version = version("pydantic")
 pydantic_major = pydantic_version.split(".")[0]
 
 if pydantic_major == "1":
-    from pydantic import (  # type: ignore  # noqa
+    from pydantic import (  # noqa
         BaseModel,
         Extra,
         Field,
@@ -18,7 +18,7 @@ if pydantic_major == "1":
         validator,
     )
 elif pydantic_major == "2":
-    from pydantic.v1 import (  # type: ignore  # noqa
+    from pydantic.v1 import (  # noqa
         BaseModel,
         Extra,
         Field,
@@ -27,6 +27,4 @@ elif pydantic_major == "2":
         validator,
     )
 else:
-    raise RuntimeError(
-        f"Currently only pydantic 1 and 2 are supported, found pydantic {pydantic_version}"
-    )
+    raise RuntimeError(f"Currently only pydantic 1 and 2 are supported, found pydantic {pydantic_version}")

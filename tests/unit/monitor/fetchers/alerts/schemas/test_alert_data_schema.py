@@ -35,7 +35,7 @@ TEST_ALERT = dict(
     test_short_name="test",
     severity="warning",
     test_meta=dict(),
-    elementary_unique_id="e_id_1"
+    elementary_unique_id="e_id_1",
 )
 
 
@@ -45,16 +45,10 @@ def test_flatten_meta():
     assert len(flatten_meta) == 0
 
     flatten_meta = BaseAlertDataSchema._flatten_meta(dict(a="a"))
-    assert json.dumps(flatten_meta, sort_keys=True) == json.dumps(
-        dict(a="a"), sort_keys=True
-    )
+    assert json.dumps(flatten_meta, sort_keys=True) == json.dumps(dict(a="a"), sort_keys=True)
 
-    flatten_meta = BaseAlertDataSchema._flatten_meta(
-        dict(a="a", alerts_config=dict(a="b"))
-    )
-    assert json.dumps(flatten_meta, sort_keys=True) == json.dumps(
-        dict(a="b"), sort_keys=True
-    )
+    flatten_meta = BaseAlertDataSchema._flatten_meta(dict(a="a", alerts_config=dict(a="b")))
+    assert json.dumps(flatten_meta, sort_keys=True) == json.dumps(dict(a="b"), sort_keys=True)
 
 
 @pytest.mark.parametrize(
@@ -73,35 +67,19 @@ def test_get_alert_meta_attrs(model_meta, test_meta, expected):
     alert = (
         BaseAlertDataSchema(**{**BASE_ALERT, "model_meta": model_meta})
         if test_meta is None
-        else TestAlertDataSchema(
-            **{**TEST_ALERT, "model_meta": model_meta, "test_meta": test_meta}
-        )
+        else TestAlertDataSchema(**{**TEST_ALERT, "model_meta": model_meta, "test_meta": test_meta})
     )
     assert sorted(alert._get_alert_meta_attrs("attr")) == sorted(expected)
 
 
 def test_get_suppression_interval():
-    base_alert = BaseAlertDataSchema(
-        **{**BASE_ALERT, "model_meta": dict(alert_suppression_interval=1)}
-    )
-    assert (
-        base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=False)
-        == 1
-    )
-    assert (
-        base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=True)
-        == 2
-    )
+    base_alert = BaseAlertDataSchema(**{**BASE_ALERT, "model_meta": dict(alert_suppression_interval=1)})
+    assert base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=False) == 1
+    assert base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=True) == 2
 
     base_alert = BaseAlertDataSchema(**BASE_ALERT)
-    assert (
-        base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=False)
-        == 2
-    )
-    assert (
-        base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=True)
-        == 2
-    )
+    assert base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=False) == 2
+    assert base_alert.get_suppression_interval(interval_from_cli=2, override_by_cli=True) == 2
 
 
 def test_tags():

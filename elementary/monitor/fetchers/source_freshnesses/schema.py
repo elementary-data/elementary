@@ -42,19 +42,11 @@ class SourceFreshnessResultDBRowSchema(ExtendedBaseModel):
 
     @validator("max_loaded_at", pre=True)
     def format_max_loaded_at(cls, max_loaded_at):
-        return (
-            convert_partial_iso_format_to_full_iso_format(max_loaded_at)
-            if max_loaded_at
-            else None
-        )
+        return convert_partial_iso_format_to_full_iso_format(max_loaded_at) if max_loaded_at else None
 
     @validator("snapshotted_at", pre=True)
     def format_snapshotted_at(cls, snapshotted_at):
-        return (
-            convert_partial_iso_format_to_full_iso_format(snapshotted_at)
-            if snapshotted_at
-            else None
-        )
+        return convert_partial_iso_format_to_full_iso_format(snapshotted_at) if snapshotted_at else None
 
     @validator("meta", pre=True)
     def load_meta(cls, meta):

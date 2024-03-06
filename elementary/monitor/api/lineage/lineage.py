@@ -19,16 +19,12 @@ class LineageAPI(APIClient):
 
     def get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
         lineage_graph = nx.DiGraph()
-        nodes_depends_on_nodes = self.lineage_fetcher.get_nodes_depends_on_nodes(
-            exclude_elementary_models
-        )
+        nodes_depends_on_nodes = self.lineage_fetcher.get_nodes_depends_on_nodes(exclude_elementary_models)
         for node_depends_on_nodes in nodes_depends_on_nodes:
             lineage_graph.add_edges_from(
                 [
                     (node_depends_on_nodes.unique_id, depends_on_node)
-                    for depends_on_node in (
-                        node_depends_on_nodes.depends_on_nodes or []
-                    )
+                    for depends_on_node in (node_depends_on_nodes.depends_on_nodes or [])
                 ]
             )
         return LineageSchema(

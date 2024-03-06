@@ -23,9 +23,7 @@ def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
     # Within attachments limitation
     message_builder = SlackReportSummaryMessageBuilder()
     message_builder.add_details_to_slack_alert(test_results_summary)
-    attachments_as_string = json.dumps(
-        message_builder.slack_message.get("attachments")[0].get("blocks")
-    )
+    attachments_as_string = json.dumps(message_builder.slack_message.get("attachments")[0].get("blocks"))
 
     assert ":small_red_triangle: *Failed tests*" in attachments_as_string
     assert ":warning: *Warning*" in attachments_as_string
@@ -33,24 +31,16 @@ def test_add_details_to_slack_alert_attachments_limit(test_results_summary):
 
     message_builder = SlackReportSummaryMessageBuilder()
     message_builder.add_details_to_slack_alert((test_results_summary * 5)[0:39])
-    attachments_as_string = json.dumps(
-        message_builder.slack_message.get("attachments")[0].get("blocks")
-    )
+    attachments_as_string = json.dumps(message_builder.slack_message.get("attachments")[0].get("blocks"))
     assert ":small_red_triangle: *Failed tests*" in attachments_as_string
     assert ":warning: *Warning*" in attachments_as_string
     assert ":exclamation: *Error*" in attachments_as_string
 
     # Over attachments limitation
     message_builder = SlackReportSummaryMessageBuilder()
-    nonsuccessful_parts_of_fixture = [
-        x for x in test_results_summary if x.status != "pass"
-    ]
-    message_builder.add_details_to_slack_alert(
-        (nonsuccessful_parts_of_fixture * 50)[0:40]
-    )
-    attachments_as_string = json.dumps(
-        message_builder.slack_message.get("attachments")[0].get("blocks")
-    )
+    nonsuccessful_parts_of_fixture = [x for x in test_results_summary if x.status != "pass"]
+    message_builder.add_details_to_slack_alert((nonsuccessful_parts_of_fixture * 50)[0:40])
+    attachments_as_string = json.dumps(message_builder.slack_message.get("attachments")[0].get("blocks"))
     assert "The amount of results exceeded Slack" in attachments_as_string
 
 
@@ -61,9 +51,7 @@ def test_passed_tests_filtered_out_of_details_view(
     message_builder = SlackReportSummaryMessageBuilder()
     passed_tests_from_fixture = [x for x in test_results_summary if x.status == "pass"]
     message_builder.add_details_to_slack_alert(passed_tests_from_fixture)
-    attachments_as_string = json.dumps(
-        message_builder.slack_message.get("attachments")[0].get("blocks")
-    )
+    attachments_as_string = json.dumps(message_builder.slack_message.get("attachments")[0].get("blocks"))
     assert "Warning" not in attachments_as_string
     assert "*table_3* | first_test" not in attachments_as_string
 

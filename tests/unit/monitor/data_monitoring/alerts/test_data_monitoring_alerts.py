@@ -30,109 +30,57 @@ def test_fetch_data(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     mock_alerts_api = MockAlertsAPI()
     alerts_data = data_monitoring_alerts_mock._fetch_data(days_back=1)
     assert all(isinstance(alert_data, PendingAlertSchema) for alert_data in alerts_data)
-    assert json.dumps(
-        [data.json(sort_keys=True) for data in alerts_data], sort_keys=True
-    ) == json.dumps(
-        [
-            data.json(sort_keys=True)
-            for data in mock_alerts_api.get_new_alerts(days_back=1)
-        ],
+    assert json.dumps([data.json(sort_keys=True) for data in alerts_data], sort_keys=True) == json.dumps(
+        [data.json(sort_keys=True) for data in mock_alerts_api.get_new_alerts(days_back=1)],
         sort_keys=True,
     )
 
 
 def test_fetch_last_sent_times(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     mock_alerts_api = MockAlertsAPI()
-    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(
-        days_back=1
-    )
-    assert all(
-        isinstance(sent_at, datetime) for sent_at in alerts_last_sent_times.values()
-    )
-    assert sorted(
+    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(days_back=1)
+    assert all(isinstance(sent_at, datetime) for sent_at in alerts_last_sent_times.values())
+    assert sorted([f"{id}{sent_at.isoformat()}" for (id, sent_at) in alerts_last_sent_times.items()]) == sorted(
         [
             f"{id}{sent_at.isoformat()}"
-            for (id, sent_at) in alerts_last_sent_times.items()
-        ]
-    ) == sorted(
-        [
-            f"{id}{sent_at.isoformat()}"
-            for (id, sent_at) in mock_alerts_api.get_alerts_last_sent_times(
-                days_back=1
-            ).items()
+            for (id, sent_at) in mock_alerts_api.get_alerts_last_sent_times(days_back=1).items()
         ]
     )
 
 
 def test_sort_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     alerts = data_monitoring_alerts_mock._fetch_data(days_back=1)
-    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(
-        days_back=1
-    )
-    sorted_alerts = data_monitoring_alerts_mock._sort_alerts(
-        alerts, alerts_last_sent_times
-    )
+    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(days_back=1)
+    sorted_alerts = data_monitoring_alerts_mock._sort_alerts(alerts, alerts_last_sent_times)
 
-    assert sorted(
-        [
-            alert.id
-            for alert in sorted_alerts.send
-            if isinstance(alert.data, TestAlertDataSchema)
-        ]
-    ) == [
+    assert sorted([alert.id for alert in sorted_alerts.send if isinstance(alert.data, TestAlertDataSchema)]) == [
+        "alert_id_2",
+        "alert_id_3",
+        "alert_id_4",
+    ]
+    assert sorted([alert.id for alert in sorted_alerts.send if isinstance(alert.data, ModelAlertDataSchema)]) == [
         "alert_id_2",
         "alert_id_3",
         "alert_id_4",
     ]
     assert sorted(
-        [
-            alert.id
-            for alert in sorted_alerts.send
-            if isinstance(alert.data, ModelAlertDataSchema)
-        ]
-    ) == [
-        "alert_id_2",
-        "alert_id_3",
-        "alert_id_4",
-    ]
-    assert sorted(
-        [
-            alert.id
-            for alert in sorted_alerts.send
-            if isinstance(alert.data, SourceFreshnessAlertDataSchema)
-        ]
+        [alert.id for alert in sorted_alerts.send if isinstance(alert.data, SourceFreshnessAlertDataSchema)]
     ) == [
         "alert_id_2",
         "alert_id_3",
         "alert_id_4",
     ]
 
-    assert sorted(
-        [
-            alert.id
-            for alert in sorted_alerts.skip
-            if isinstance(alert.data, TestAlertDataSchema)
-        ]
-    ) == [
+    assert sorted([alert.id for alert in sorted_alerts.skip if isinstance(alert.data, TestAlertDataSchema)]) == [
+        "alert_id_1",
+        "alert_id_5",
+    ]
+    assert sorted([alert.id for alert in sorted_alerts.skip if isinstance(alert.data, ModelAlertDataSchema)]) == [
         "alert_id_1",
         "alert_id_5",
     ]
     assert sorted(
-        [
-            alert.id
-            for alert in sorted_alerts.skip
-            if isinstance(alert.data, ModelAlertDataSchema)
-        ]
-    ) == [
-        "alert_id_1",
-        "alert_id_5",
-    ]
-    assert sorted(
-        [
-            alert.id
-            for alert in sorted_alerts.skip
-            if isinstance(alert.data, SourceFreshnessAlertDataSchema)
-        ]
+        [alert.id for alert in sorted_alerts.skip if isinstance(alert.data, SourceFreshnessAlertDataSchema)]
     ) == [
         "alert_id_1",
         "alert_id_5",
@@ -141,9 +89,7 @@ def test_sort_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
 
 def test_get_suppressed_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     alerts = data_monitoring_alerts_mock._fetch_data(days_back=1)
-    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(
-        days_back=1
-    )
+    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(days_back=1)
     test_alerts = [alert for alert in alerts if alert.type == "test"]
     model_alerts = [alert for alert in alerts if alert.type == "model"]
 
@@ -156,12 +102,8 @@ def test_get_suppressed_alerts(data_monitoring_alerts_mock: DataMonitoringAlerts
         alerts_last_sent_times,
     )
 
-    assert json.dumps(suppressed_test_alerts, sort_keys=True) == json.dumps(
-        ["alert_id_1"], sort_keys=True
-    )
-    assert json.dumps(suppressed_model_alerts, sort_keys=True) == json.dumps(
-        ["alert_id_1"], sort_keys=True
-    )
+    assert json.dumps(suppressed_test_alerts, sort_keys=True) == json.dumps(["alert_id_1"], sort_keys=True)
+    assert json.dumps(suppressed_model_alerts, sort_keys=True) == json.dumps(["alert_id_1"], sort_keys=True)
 
 
 def test_get_latest_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
@@ -184,40 +126,26 @@ def test_get_latest_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock
 
 def test_format_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     alerts = data_monitoring_alerts_mock._fetch_data(days_back=1)
-    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(
-        days_back=1
-    )
-    sorted_alerts = data_monitoring_alerts_mock._sort_alerts(
-        alerts, alerts_last_sent_times
-    )
+    alerts_last_sent_times = data_monitoring_alerts_mock._fetch_last_sent_times(days_back=1)
+    sorted_alerts = data_monitoring_alerts_mock._sort_alerts(alerts, alerts_last_sent_times)
     formatted_alerts = data_monitoring_alerts_mock._format_alerts(sorted_alerts.send)
-    test_alerts = [
-        alert for alert in formatted_alerts if isinstance(alert, TestAlertModel)
-    ]
-    model_alerts = [
-        alert for alert in formatted_alerts if isinstance(alert, ModelAlertModel)
-    ]
-    source_freshness_alerts = [
-        alert
-        for alert in formatted_alerts
-        if isinstance(alert, SourceFreshnessAlertModel)
-    ]
-    assert json.dumps(
-        [alert.id for alert in test_alerts], sort_keys=True
-    ) == json.dumps(["alert_id_2", "alert_id_3", "alert_id_4"])
-    assert json.dumps(
-        [alert.id for alert in model_alerts], sort_keys=True
-    ) == json.dumps(["alert_id_2", "alert_id_3", "alert_id_4"])
-    assert json.dumps(
-        [alert.id for alert in source_freshness_alerts], sort_keys=True
-    ) == json.dumps(["alert_id_2", "alert_id_3", "alert_id_4"])
+    test_alerts = [alert for alert in formatted_alerts if isinstance(alert, TestAlertModel)]
+    model_alerts = [alert for alert in formatted_alerts if isinstance(alert, ModelAlertModel)]
+    source_freshness_alerts = [alert for alert in formatted_alerts if isinstance(alert, SourceFreshnessAlertModel)]
+    assert json.dumps([alert.id for alert in test_alerts], sort_keys=True) == json.dumps(
+        ["alert_id_2", "alert_id_3", "alert_id_4"]
+    )
+    assert json.dumps([alert.id for alert in model_alerts], sort_keys=True) == json.dumps(
+        ["alert_id_2", "alert_id_3", "alert_id_4"]
+    )
+    assert json.dumps([alert.id for alert in source_freshness_alerts], sort_keys=True) == json.dumps(
+        ["alert_id_2", "alert_id_3", "alert_id_4"]
+    )
 
     # test format group by table
     data_monitoring_alerts_mock.config.slack_group_alerts_by = "table"
     formatted_alerts = data_monitoring_alerts_mock._format_alerts(sorted_alerts.send)
-    sorted_formatted_alerts = sorted(
-        formatted_alerts, key=lambda alert: alert.model_unique_id
-    )
+    sorted_formatted_alerts = sorted(formatted_alerts, key=lambda alert: alert.model_unique_id)
     grouped_by_table_ids = [alert.model_unique_id for alert in sorted_formatted_alerts]
     assert grouped_by_table_ids == [
         "model_id_1",

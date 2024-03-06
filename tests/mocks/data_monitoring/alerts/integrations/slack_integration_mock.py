@@ -15,7 +15,7 @@ class SlackIntegrationMock(SlackIntegration):
         slack_channel_name: Optional[str] = None,
         slack_webhook: Optional[str] = None,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         config = Config(
             slack_token=slack_token,
@@ -24,9 +24,5 @@ class SlackIntegrationMock(SlackIntegration):
         )
         config.is_slack_workflow = is_slack_workflow
         super().__init__(
-            config=config,
-            tracking=None,
-            override_config_defaults=override_config_defaults,
-            *args,
-            **kwargs
+            config=config, tracking=None, override_config_defaults=override_config_defaults, *args, **kwargs
         )

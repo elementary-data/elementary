@@ -28,9 +28,7 @@ class ModelsFetcher(FetcherClient):
                 "exclude_elementary": exclude_elementary_models,
             },
         )
-        model_run_dicts = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
+        model_run_dicts = json.loads(run_operation_response[0]) if run_operation_response else []
         model_runs = [ModelRunSchema(**model_run) for model_run in model_run_dicts]
         return model_runs
 
@@ -44,28 +42,18 @@ class ModelsFetcher(FetcherClient):
         return models
 
     def get_sources(self) -> List[SourceSchema]:
-        run_operation_response = self.dbt_runner.run_operation(
-            macro_name="elementary_cli.get_sources"
-        )
-        sources = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
+        run_operation_response = self.dbt_runner.run_operation(macro_name="elementary_cli.get_sources")
+        sources = json.loads(run_operation_response[0]) if run_operation_response else []
         sources = [SourceSchema(**source) for source in sources]
         return sources
 
     def get_exposures(self) -> List[ExposureSchema]:
-        run_operation_response = self.dbt_runner.run_operation(
-            macro_name="elementary_cli.get_exposures"
-        )
-        exposures = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
+        run_operation_response = self.dbt_runner.run_operation(macro_name="elementary_cli.get_exposures")
+        exposures = json.loads(run_operation_response[0]) if run_operation_response else []
         exposures = [
             {
                 **exposure,
-                "raw_queries": json.loads(exposure["raw_queries"])
-                if exposure.get("raw_queries")
-                else None,
+                "raw_queries": (json.loads(exposure["raw_queries"]) if exposure.get("raw_queries") else None),
             }
             for exposure in exposures
         ]
@@ -73,11 +61,7 @@ class ModelsFetcher(FetcherClient):
         return exposures
 
     def get_test_coverages(self) -> List[ModelTestCoverage]:
-        run_operation_response = self.dbt_runner.run_operation(
-            macro_name="elementary_cli.get_dbt_models_test_coverage"
-        )
-        coverages = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
+        run_operation_response = self.dbt_runner.run_operation(macro_name="elementary_cli.get_dbt_models_test_coverage")
+        coverages = json.loads(run_operation_response[0]) if run_operation_response else []
         coverages = [ModelTestCoverage(**coverage) for coverage in coverages]
         return coverages

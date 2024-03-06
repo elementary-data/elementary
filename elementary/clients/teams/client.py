@@ -24,9 +24,7 @@ class TeamsClient(ABC):
         self.client = self._initial_client()
 
     @staticmethod
-    def create_client(
-        config: Config, tracking: Optional[Tracking] = None
-    ) -> Optional["TeamsClient"]:
+    def create_client(config: Config, tracking: Optional[Tracking] = None) -> Optional["TeamsClient"]:
         if not config.has_teams:
             return None
         if config.teams_webhook:

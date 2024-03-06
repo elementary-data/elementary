@@ -10,20 +10,11 @@ def test_get_test_metadata_from_test_result_db_row(
     elementary_test_result_db_row = test_result_db_rows[0]
     dbt_test_result_db_row = test_result_db_rows[-1]
 
-    elementary_test_metadata = (
-        tests_api_mock._get_test_metadata_from_test_result_db_row(
-            elementary_test_result_db_row
-        )
-    )
-    dbt_test_metadata = tests_api_mock._get_test_metadata_from_test_result_db_row(
-        dbt_test_result_db_row
-    )
+    elementary_test_metadata = tests_api_mock._get_test_metadata_from_test_result_db_row(elementary_test_result_db_row)
+    dbt_test_metadata = tests_api_mock._get_test_metadata_from_test_result_db_row(dbt_test_result_db_row)
 
     # Test elementary test configuration generated correctly
-    assert (
-        elementary_test_metadata.configuration.get("test_name")
-        == elementary_test_result_db_row.test_name
-    )
+    assert elementary_test_metadata.configuration.get("test_name") == elementary_test_result_db_row.test_name
     assert elementary_test_metadata.configuration.get(
         "timestamp_column"
     ) == elementary_test_result_db_row.test_params.get("timestamp_column")
@@ -33,14 +24,8 @@ def test_get_test_metadata_from_test_result_db_row(
     ) == elementary_test_result_db_row.test_params.get("sensitivity")
 
     # Test dbt test configuration generated correctly
-    assert (
-        dbt_test_metadata.configuration.get("test_name")
-        == dbt_test_result_db_row.test_name
-    )
-    assert (
-        dbt_test_metadata.configuration.get("test_params")
-        == dbt_test_result_db_row.test_params
-    )
+    assert dbt_test_metadata.configuration.get("test_name") == dbt_test_result_db_row.test_name
+    assert dbt_test_metadata.configuration.get("test_params") == dbt_test_result_db_row.test_params
 
 
 @pytest.fixture

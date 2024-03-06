@@ -35,16 +35,10 @@ def filter_alerts(
     filtered_alerts = _filter_alerts_by_tags(filtered_alerts, alerts_filter.tags)
     filtered_alerts = _filter_alerts_by_models(filtered_alerts, alerts_filter.models)
     filtered_alerts = _filter_alerts_by_owners(filtered_alerts, alerts_filter.owners)
-    filtered_alerts = _filter_alerts_by_statuses(
-        filtered_alerts, alerts_filter.statuses
-    )
-    filtered_alerts = _filter_alerts_by_resource_types(
-        filtered_alerts, alerts_filter.resource_types
-    )
+    filtered_alerts = _filter_alerts_by_statuses(filtered_alerts, alerts_filter.statuses)
+    filtered_alerts = _filter_alerts_by_resource_types(filtered_alerts, alerts_filter.resource_types)
     if alerts_filter.node_names:
-        filtered_alerts = _filter_alerts_by_node_names(
-            filtered_alerts, alerts_filter.node_names
-        )
+        filtered_alerts = _filter_alerts_by_node_names(filtered_alerts, alerts_filter.node_names)
 
     return filtered_alerts
 
@@ -56,8 +50,7 @@ def _find_common_alerts(
     first_hashable_alerts = [alert.json(sort_keys=True) for alert in first_alerts]
     second_hashable_alerts = [alert.json(sort_keys=True) for alert in second_alerts]
     common_hashable_alerts = [
-        json.loads(alert)
-        for alert in list(set(first_hashable_alerts) & set(second_hashable_alerts))
+        json.loads(alert) for alert in list(set(first_hashable_alerts) & set(second_hashable_alerts))
     ]
     common_alert_ids = [alert["id"] for alert in common_hashable_alerts]
 
@@ -106,9 +99,7 @@ def _filter_alerts_by_owners(
     for owners_filter in owners_filters:
         filtered_alerts_by_owners = []
         for alert in alerts:
-            if any(
-                owner in alert.data.unified_owners for owner in owners_filter.values
-            ):
+            if any(owner in alert.data.unified_owners for owner in owners_filter.values):
                 filtered_alerts_by_owners.append(alert)
         grouped_filtered_alerts_by_owners.append(filtered_alerts_by_owners)
 
@@ -130,10 +121,7 @@ def _filter_alerts_by_models(
         filtered_alerts_by_models = []
         for alert in alerts:
             if any(
-                (
-                    alert.data.model_unique_id
-                    and alert.data.model_unique_id.endswith(model)
-                )
+                (alert.data.model_unique_id and alert.data.model_unique_id.endswith(model))
                 for model in models_filter.values
             ):
                 filtered_alerts_by_models.append(alert)
@@ -156,9 +144,7 @@ def _filter_alerts_by_node_names(
         alert_type = AlertTypes(alert.type)
         if alert_type is AlertTypes.TEST:
             alert_node_name = alert.data.test_name  # type: ignore[union-attr]
-        elif (
-            alert_type is AlertTypes.MODEL or alert_type is AlertTypes.SOURCE_FRESHNESS
-        ):
+        elif alert_type is AlertTypes.MODEL or alert_type is AlertTypes.SOURCE_FRESHNESS:
             alert_node_name = alert.data.model_unique_id
         else:
             # Shouldn't happen
@@ -166,9 +152,7 @@ def _filter_alerts_by_node_names(
 
         if alert_node_name:
             for node_name in node_names_filters:
-                if alert_node_name.endswith(node_name) or node_name.endswith(
-                    alert_node_name
-                ):
+                if alert_node_name.endswith(node_name) or node_name.endswith(alert_node_name):
                     filtered_alerts.append(alert)
                     break
     return filtered_alerts  # type: ignore[return-value]
@@ -208,14 +192,9 @@ def _filter_alerts_by_resource_types(
     for resource_types_filter in resource_types_filters:
         filtered_alerts_by_resource_types = []
         for alert in alerts:
-            if any(
-                resource_type == alert.data.resource_type.value
-                for resource_type in resource_types_filter.values
-            ):
+            if any(resource_type == alert.data.resource_type.value for resource_type in resource_types_filter.values):
                 filtered_alerts_by_resource_types.append(alert)
-        grouped_filtered_alerts_by_resource_types.append(
-            filtered_alerts_by_resource_types
-        )
+        grouped_filtered_alerts_by_resource_types.append(filtered_alerts_by_resource_types)
 
     # AND filter between all resource_types_filters
     return reduce(_find_common_alerts, grouped_filtered_alerts_by_resource_types)
