@@ -28,8 +28,8 @@ def get_total_test_results(
 
 def get_total_test_runs(
     tests_runs: Dict[str, List[Union[TestRunSchema, SourceFreshnessRunSchema]]]
-) -> Dict[Optional[str], TotalsSchema]:
-    totals: Dict[Optional[str], TotalsSchema] = defaultdict(TotalsSchema)
+) -> Dict[str, TotalsSchema]:
+    totals: Dict[str, TotalsSchema] = defaultdict(TotalsSchema)
     for key, test_runs in tests_runs.items():
         for test_run in test_runs:
             # It's possible test_runs will be None if we didn't find any invocations associated
