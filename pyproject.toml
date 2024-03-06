@@ -13,7 +13,7 @@ documentation = "https://docs.elementary-data.com"
 packages = [{include = "elementary"}]
 
 [tool.poetry.dependencies]
-python = ">=3.6.2"
+python = ">=3.8,<4"
 click = ">=7.0,<8.1.4"
 pyfiglet = "<1.0.0"
 dbt-core = ">=0.20,<2.0.0"
