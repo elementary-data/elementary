@@ -43,9 +43,7 @@ class DbtCommandError(Error):
     ):
         msg = "Failed to run dbt command."
         if logs and not err_msg:
-            err_msg = "\n".join(
-                [log.msg for log in logs if log.msg and log.level == "error"]
-            )
+            err_msg = "\n".join([log.msg for log in logs if log.msg and log.level == "error"])
         if err_msg:
             msg = f"{msg}\n{err_msg}"
         super().__init__(msg)
@@ -89,9 +87,7 @@ class DbtCommandError(Error):
 
                 if "--args" in command_args:
                     args_index = command_args.index("--args")
-                    detailed_command_args["macro_args"] = json.loads(
-                        command_args[args_index + 1]
-                    )
+                    detailed_command_args["macro_args"] = json.loads(command_args[args_index + 1])
 
             return detailed_command_args
         except Exception as ex:
@@ -112,9 +108,7 @@ class DbtLsCommandError(Error):
     def __init__(self, selector: Optional[str] = None):
         self.selector = selector
         self.selector_method = self.extract_selector_method(self.selector)
-        super().__init__(
-            f"Failed to run dbt ls - '{self.selector_method}' is not a valid selector method!"
-        )
+        super().__init__(f"Failed to run dbt ls - '{self.selector_method}' is not a valid selector method!")
 
     @property
     def anonymous_tracking_context(self):

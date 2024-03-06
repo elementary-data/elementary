@@ -2,16 +2,14 @@ import shutil
 import sys
 from pathlib import Path
 
-from elementary.monitor.dbt_project_utils import _DBT_PACKAGE_NAME, _PACKAGES_PATH
+from elementary.monitor.dbt_project_utils import _DBT_PACKAGE_NAME, CLI_DBT_PROJECT_PATH
 
-ELE_DBT_PKG_PATH = Path(_PACKAGES_PATH) / _DBT_PACKAGE_NAME
+ELE_DBT_PKG_PATH = Path(CLI_DBT_PROJECT_PATH) / _DBT_PACKAGE_NAME
 
 
 def main():
     if len(sys.argv) != 2:
-        raise ValueError(
-            "Please provide the path to the local elementary dbt package as an argument."
-        )
+        raise ValueError("Please provide the path to the local elementary dbt package as an argument.")
     local_dbt_pkg_path = Path(sys.argv[1]).resolve()
     if ELE_DBT_PKG_PATH.is_symlink():
         ELE_DBT_PKG_PATH.unlink()

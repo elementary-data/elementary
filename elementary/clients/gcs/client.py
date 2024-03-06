@@ -25,9 +25,7 @@ class GCSClient:
         self.tracking = tracking
 
     @classmethod
-    def create_client(
-        cls, config: Config, tracking: Optional[Tracking] = None
-    ) -> Optional["GCSClient"]:
+    def create_client(cls, config: Config, tracking: Optional[Tracking] = None) -> Optional["GCSClient"]:
         return cls(config, tracking=tracking) if config.has_gcs else None
 
     def send_report(
@@ -68,22 +66,14 @@ class GCSClient:
             logger.info("Updated GCS bucket's website.")
         return True, bucket_website_url
 
-    def get_bucket_website_url(
-        self, bucket_name: str, destination_bucket: Optional[str] = None
-    ) -> Optional[str]:
+    def get_bucket_website_url(self, bucket_name: str, destination_bucket: Optional[str] = None) -> Optional[str]:
         bucket_website_url = None
         if self.config.update_bucket_website:
             if self.config.report_url:
                 bucket_website_url = self.config.report_url
             else:
-                full_bucket_path = (
-                    f"{destination_bucket}/{bucket_name}"
-                    if destination_bucket
-                    else bucket_name
-                )
-                bucket_website_url = urljoin(
-                    DEFAULT_BUCKET_WEBSITE_URL, full_bucket_path
-                )
+                full_bucket_path = f"{destination_bucket}/{bucket_name}" if destination_bucket else bucket_name
+                bucket_website_url = urljoin(DEFAULT_BUCKET_WEBSITE_URL, full_bucket_path)
         return bucket_website_url
 
     def get_client(self, config: Config):
@@ -95,8 +85,6 @@ class GCSClient:
     @staticmethod
     def get_credentials(config: Config) -> Credentials:
         if config.google_service_account_path:
-            return service_account.Credentials.from_service_account_file(
-                config.google_service_account_path
-            )
+            return service_account.Credentials.from_service_account_file(config.google_service_account_path)
         credentials, _ = google.auth.default()
         return credentials

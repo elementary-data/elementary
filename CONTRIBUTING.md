@@ -24,8 +24,7 @@ source venv/bin/activate
 #### (3) Install requirements
 
 ```
-pip install -r dev-requirements.txt
-pip install -e .
+poetry install
 ```
 
 You're done. Running `edr` will now run the code in your local repository.
@@ -85,7 +84,7 @@ In order to run them, please follow these steps:
 
 ```bash
 # Run in the root directory of the repository
-pip install -r dev-requirements.txt
+poetry install
 ```
 
 2. Run the tests:

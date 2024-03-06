@@ -30,9 +30,7 @@ class BaseTracking(ABC):
         self._props[key] = value
 
     @abstractmethod
-    def register_group(
-        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ):
+    def register_group(self, group_type: str, group_identifier: str, group_props: Optional[dict] = None):
         raise NotImplementedError
 
     @abstractmethod
@@ -63,8 +61,6 @@ class Tracking(BaseTracking):
             groups=self.groups,
         )
 
-    def register_group(
-        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
-    ):
+    def register_group(self, group_type: str, group_identifier: str, group_props: Optional[dict] = None):
         posthog.group_identify(group_type, group_identifier, group_props)
         self.groups[group_type] = group_identifier

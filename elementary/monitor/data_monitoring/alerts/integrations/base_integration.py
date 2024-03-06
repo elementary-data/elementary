@@ -24,7 +24,7 @@ class BaseIntegration(ABC):
             GroupedByTableAlerts,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ):
         if isinstance(alert, TestAlertModel):
             if alert.is_elementary_test:
@@ -58,15 +58,11 @@ class BaseIntegration(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_source_freshness_template(
-        self, alert: SourceFreshnessAlertModel, *args, **kwargs
-    ):
+    def _get_source_freshness_template(self, alert: SourceFreshnessAlertModel, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_group_by_table_template(
-        self, alert: GroupedByTableAlerts, *args, **kwargs
-    ):
+    def _get_group_by_table_template(self, alert: GroupedByTableAlerts, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -79,7 +75,7 @@ class BaseIntegration(ABC):
             GroupedByTableAlerts,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ):
         raise NotImplementedError
 
@@ -93,7 +89,7 @@ class BaseIntegration(ABC):
             GroupedByTableAlerts,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ) -> bool:
         raise NotImplementedError
 

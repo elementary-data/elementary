@@ -87,9 +87,7 @@ class BaseAlertDataSchema(BaseModel):
         return flatten_dict_by_key(meta, ALERTS_CONFIG_KEY) if meta else dict()
 
     def _get_alert_meta_attrs(self, meta_key: str) -> List[str]:
-        attrs: List[str] = merge_dicts_attribute(
-            dicts=[self.flatten_model_meta], attribute_key=meta_key
-        )
+        attrs: List[str] = merge_dicts_attribute(dicts=[self.flatten_model_meta], attribute_key=meta_key)
         return unpack_and_flatten_and_dedup_list_of_strings(attrs)
 
     @staticmethod
@@ -106,7 +104,7 @@ class BaseAlertDataSchema(BaseModel):
         global_suppression_interval: int = 0,
         override_config: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ):
         raise NotImplementedError
 
@@ -187,7 +185,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
         override_config: bool = False,
         disable_samples: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ) -> TestAlertModel:
         return TestAlertModel(
             id=self.id,
@@ -217,9 +215,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
             status=self.status,
             model_meta=self.flatten_model_meta,
             test_meta=self.flatten_test_meta,
-            suppression_interval=self.get_suppression_interval(
-                global_suppression_interval, override_config
-            ),
+            suppression_interval=self.get_suppression_interval(global_suppression_interval, override_config),
             timezone=timezone,
             report_url=report_url,
             alert_fields=self.alert_fields,
@@ -244,7 +240,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
         global_suppression_interval: int = 0,
         override_config: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ) -> ModelAlertModel:
         return ModelAlertModel(
             id=self.id,
@@ -264,9 +260,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
             subscribers=self.subscribers,
             status=self.status,
             model_meta=self.flatten_model_meta,
-            suppression_interval=self.get_suppression_interval(
-                global_suppression_interval, override_config
-            ),
+            suppression_interval=self.get_suppression_interval(global_suppression_interval, override_config),
             timezone=timezone,
             report_url=report_url,
             alert_fields=self.alert_fields,
@@ -298,7 +292,7 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
         global_suppression_interval: int = 0,
         override_config: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ) -> SourceFreshnessAlertModel:
         return SourceFreshnessAlertModel(
             id=self.id,
@@ -325,9 +319,7 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
             tags=self.tags,
             subscribers=self.subscribers,
             model_meta=self.flatten_model_meta,
-            suppression_interval=self.get_suppression_interval(
-                global_suppression_interval, override_config
-            ),
+            suppression_interval=self.get_suppression_interval(global_suppression_interval, override_config),
             timezone=timezone,
             report_url=report_url,
             alert_fields=self.alert_fields,

@@ -41,9 +41,7 @@ class DataMonitoringAlerts(DataMonitoring):
         global_suppression_interval: int = 0,
         override_config: bool = False,
     ):
-        super().__init__(
-            config, tracking, force_update_dbt_package, disable_samples, selector_filter
-        )
+        super().__init__(config, tracking, force_update_dbt_package, disable_samples, selector_filter)
 
         self.global_suppression_interval = global_suppression_interval
         self.override_config = override_config
@@ -105,10 +103,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts_to_send = []
 
         for valid_alert in alerts:
-            if (
-                valid_alert.id in suppressed_alerts
-                or valid_alert.id not in latest_alert_ids
-            ):
+            if valid_alert.id in suppressed_alerts or valid_alert.id not in latest_alert_ids:
                 alerts_to_skip.append(valid_alert)
             else:
                 alerts_to_send.append(valid_alert)
@@ -129,10 +124,7 @@ class DataMonitoringAlerts(DataMonitoring):
             )
             last_sent_time = alerts_last_sent_times.get(alert_class_id)
             is_alert_in_suppression = (
-                (
-                    current_time_utc - convert_time_to_timezone(last_sent_time)
-                ).total_seconds()
-                / 3600
+                (current_time_utc - convert_time_to_timezone(last_sent_time)).total_seconds() / 3600
                 <= suppression_interval
                 if last_sent_time
                 else False
@@ -155,10 +147,7 @@ class DataMonitoringAlerts(DataMonitoring):
             alert_class_id = alert.alert_class_id
             current_last_alert = alert_last_times[alert_class_id]
             alert_detected_at = alert.detected_at
-            if (
-                not current_last_alert
-                or current_last_alert.detected_at < alert_detected_at
-            ):
+            if not current_last_alert or current_last_alert.detected_at < alert_detected_at:
                 alert_last_times[alert_class_id] = alert
 
         for alert_last_time in alert_last_times.values():
@@ -181,13 +170,9 @@ class DataMonitoringAlerts(DataMonitoring):
         grouped_by_table_alerts = []
         model_ids_to_alerts_map = defaultdict(lambda: [])
 
-        default_alerts_group_by_strategy = GroupingType(
-            self.config.slack_group_alerts_by
-        )
+        default_alerts_group_by_strategy = GroupingType(self.config.slack_group_alerts_by)
         for alert in alerts:
-            group_alerts_by = (
-                alert.data.group_alerts_by or default_alerts_group_by_strategy
-            )
+            group_alerts_by = alert.data.group_alerts_by or default_alerts_group_by_strategy
             formatted_alert = alert.data.format_alert(
                 timezone=self.config.timezone,
                 report_url=self.config.report_url,
@@ -199,9 +184,7 @@ class DataMonitoringAlerts(DataMonitoring):
             try:
                 grouping_type = GroupingType(group_alerts_by)
                 if grouping_type == GroupingType.BY_TABLE:
-                    model_ids_to_alerts_map[formatted_alert.model_unique_id].append(
-                        formatted_alert
-                    )
+                    model_ids_to_alerts_map[formatted_alert.model_unique_id].append(formatted_alert)
                 else:
                     formatted_alerts.append(formatted_alert)
             except ValueError:
@@ -213,9 +196,7 @@ class DataMonitoringAlerts(DataMonitoring):
         for alerts_by_model in model_ids_to_alerts_map.values():
             grouped_by_table_alerts.append(GroupedByTableAlerts(alerts=alerts_by_model))
 
-        self.execution_properties["had_group_by_table"] = (
-            len(grouped_by_table_alerts) > 0
-        )
+        self.execution_properties["had_group_by_table"] = len(grouped_by_table_alerts) > 0
         self.execution_properties["had_group_by_alert"] = len(formatted_alerts) > 0
 
         all_alerts = formatted_alerts + grouped_by_table_alerts
@@ -225,9 +206,7 @@ class DataMonitoringAlerts(DataMonitoring):
         )
 
     def _send_test_message(self):
-        self.alerts_integration.send_test_message(
-            channel_name=self.config.slack_channel_name
-        )
+        self.alerts_integration.send_test_message(channel_name=self.config.slack_channel_name)
 
     def _send_alerts(
         self,
@@ -260,9 +239,7 @@ class DataMonitoringAlerts(DataMonitoring):
                             f"Could not send the alert - {grouped_alert.id}. Full alert: {json.dumps(grouped_alert.data)}"
                         )
                 else:
-                    logger.error(
-                        f"Could not send the alert - {alert.id}. Full alert: {json.dumps(alert.data)}"
-                    )
+                    logger.error(f"Could not send the alert - {alert.id}. Full alert: {json.dumps(alert.data)}")
                 self.success = False
 
         # Now update as sent:
@@ -285,9 +262,7 @@ class DataMonitoringAlerts(DataMonitoring):
         dbt_vars: Optional[dict] = None,
     ) -> bool:
         # Populate data
-        popopulated_data_successfully = self._populate_data(
-            dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
-        )
+        popopulated_data_successfully = self._populate_data(dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars)
         if not popopulated_data_successfully:
             self.success = False
             self.execution_properties["success"] = self.success
@@ -297,9 +272,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts = self._fetch_data(days_back)
         alerts = self._filter_data(alerts)
         alerts_last_sent_times = self._fetch_last_sent_times(days_back)
-        sorted_alerts = self._sort_alerts(
-            alerts=alerts, alerts_last_sent_times=alerts_last_sent_times
-        )
+        sorted_alerts = self._sort_alerts(alerts=alerts, alerts_last_sent_times=alerts_last_sent_times)
         alerts_to_skip = sorted_alerts.skip
         alerts_to_send = sorted_alerts.send
 
@@ -316,15 +289,9 @@ class DataMonitoringAlerts(DataMonitoring):
             self._send_test_message()
         self.execution_properties["alert_count"] = len(alerts_to_send)
         self.execution_properties["elementary_test_count"] = len(
-            [
-                alert
-                for alert in formatted_alerts
-                if isinstance(alert, TestAlertModel) and alert.is_elementary_test
-            ]
+            [alert for alert in formatted_alerts if isinstance(alert, TestAlertModel) and alert.is_elementary_test]
         )
-        self.execution_properties["has_subscribers"] = any(
-            alert.data.subscribers for alert in alerts_to_send
-        )
+        self.execution_properties["has_subscribers"] = any(alert.data.subscribers for alert in alerts_to_send)
         self.execution_properties["run_end"] = True
         self.execution_properties["success"] = self.success
         return self.success

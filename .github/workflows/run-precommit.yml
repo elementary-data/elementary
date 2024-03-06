@@ -13,14 +13,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: "3.8"
+          python-version: "3.9"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
 
       # mainly needed so mypy will have the dependencies it needs
       - name: Install elementary
-        run: pip install -e .
-
-      - name: Install dev requirements
-        run: pip install -r dev-requirements.txt
+        run: poetry install
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files --show-diff-on-failure

@@ -82,9 +82,7 @@ class SlackIntegration(BaseIntegration):
         self.client: SlackClient
 
     def _initial_client(self, *args, **kwargs) -> SlackClient:
-        slack_client = SlackClient.create_client(
-            config=self.config, tracking=self.tracking
-        )
+        slack_client = SlackClient.create_client(config=self.config, tracking=self.tracking)
         if not slack_client:
             raise Exception("Could not initial Slack client")
         return slack_client
@@ -104,15 +102,9 @@ class SlackIntegration(BaseIntegration):
             return SlackMessageSchema(text=json.dumps(alert.data, sort_keys=True))
         return super()._get_alert_template(alert, *args, **kwargs)
 
-    def _get_dbt_test_template(
-        self, alert: TestAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
+    def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs) -> SlackMessageSchema:
         self.message_builder.add_message_color(self._get_color(alert.status))
-        title = [
-            self.message_builder.create_header_block(
-                f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
-        ]
+        title = [self.message_builder.create_header_block(f"{self._get_display_name(alert.status)}: {alert.summary}")]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -141,9 +133,7 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.elementary_unique_id
-        )
+        test_runs_report_link = get_test_runs_link(alert.report_url, alert.elementary_unique_id)
         if test_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -154,11 +144,7 @@ class SlackIntegration(BaseIntegration):
 
         preview = []
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            preview.append(
-                self.message_builder.create_text_section_block(
-                    f"*Table*\n{alert.table_full_name}"
-                )
-            )
+            preview.append(self.message_builder.create_text_section_block(f"*Table*\n{alert.table_full_name}"))
 
         compacted_sections = []
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
@@ -171,66 +157,39 @@ class SlackIntegration(BaseIntegration):
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            compacted_sections.append(
-                f'*Subscribers*\n{subscribers or "_No subscribers_"}'
-            )
+            compacted_sections.append(f'*Subscribers*\n{subscribers or "_No subscribers_"}')
         if compacted_sections:
-            preview.extend(
-                self.message_builder.create_compacted_sections_blocks(
-                    compacted_sections
-                )
-            )
+            preview.extend(self.message_builder.create_compacted_sections_blocks(compacted_sections))
 
         if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             if alert.test_description:
                 preview.extend(
                     [
                         self.message_builder.create_text_section_block("*Description*"),
-                        self.message_builder.create_context_block(
-                            [alert.test_description]
-                        ),
+                        self.message_builder.create_context_block([alert.test_description]),
                     ]
                 )
             else:
-                preview.append(
-                    self.message_builder.create_text_section_block(
-                        "*Description*\n_No description_"
-                    )
-                )
+                preview.append(self.message_builder.create_text_section_block("*Description*\n_No description_"))
 
         result = []
-        if (
-            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.error_message
-        ):
+        if RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and alert.error_message:
             result.extend(
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.error_message.strip()}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.error_message.strip()}```"),
                 ]
             )
 
-        if (
-            TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.test_rows_sample
-        ):
+        if TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and alert.test_rows_sample:
             result.extend(
                 [
-                    self.message_builder.create_context_block(
-                        ["*Test results sample*"]
-                    ),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.test_rows_sample}```"
-                    ),
+                    self.message_builder.create_context_block(["*Test results sample*"]),
+                    self.message_builder.create_text_section_block(f"```{alert.test_rows_sample}```"),
                 ]
             )
 
-        if (
-            TEST_QUERY_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.test_results_query
-        ):
+        if TEST_QUERY_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and alert.test_results_query:
             result.append(self.message_builder.create_context_block(["*Test query*"]))
 
             msg = f"```{alert.test_results_query}```"
@@ -242,16 +201,11 @@ class SlackIntegration(BaseIntegration):
             result.append(self.message_builder.create_text_section_block(msg))
 
         configuration = []
-        if (
-            TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.test_params
-        ):
+        if TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and alert.test_params:
             configuration.extend(
                 [
                     self.message_builder.create_context_block(["*Test parameters*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.test_params}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.test_params}```"),
                 ]
             )
 
@@ -259,14 +213,10 @@ class SlackIntegration(BaseIntegration):
             title=title, preview=preview, result=result, configuration=configuration
         )
 
-    def _get_elementary_test_template(
-        self, alert: TestAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
+    def _get_elementary_test_template(self, alert: TestAlertModel, *args, **kwargs) -> SlackMessageSchema:
         self.message_builder.add_message_color(self._get_color(alert.status))
 
-        anomalous_value = (
-            alert.other if alert.test_type == "anomaly_detection" else None
-        )
+        anomalous_value = alert.other if alert.test_type == "anomaly_detection" else None
 
         title = [
             self.message_builder.create_header_block(
@@ -303,9 +253,7 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.elementary_unique_id
-        )
+        test_runs_report_link = get_test_runs_link(alert.report_url, alert.elementary_unique_id)
         if test_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -316,11 +264,7 @@ class SlackIntegration(BaseIntegration):
 
         preview = []
         if TABLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            preview.append(
-                self.message_builder.create_text_section_block(
-                    f"*Table*\n{alert.table_full_name}"
-                )
-            )
+            preview.append(self.message_builder.create_text_section_block(f"*Table*\n{alert.table_full_name}"))
 
         compacted_sections = []
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
@@ -333,54 +277,32 @@ class SlackIntegration(BaseIntegration):
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             subscribers = prettify_and_dedup_list(alert.subscribers or [])
-            compacted_sections.append(
-                f'*Subscribers*\n{subscribers or "_No subscribers_"}'
-            )
+            compacted_sections.append(f'*Subscribers*\n{subscribers or "_No subscribers_"}')
         if compacted_sections:
-            preview.extend(
-                self.message_builder.create_compacted_sections_blocks(
-                    compacted_sections
-                )
-            )
+            preview.extend(self.message_builder.create_compacted_sections_blocks(compacted_sections))
 
         if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             if alert.test_description:
                 preview.extend(
                     [
                         self.message_builder.create_text_section_block("*Description*"),
-                        self.message_builder.create_context_block(
-                            [alert.test_description]
-                        ),
+                        self.message_builder.create_context_block([alert.test_description]),
                     ]
                 )
             else:
-                preview.append(
-                    self.message_builder.create_text_section_block(
-                        "*Description*\n_No description_"
-                    )
-                )
+                preview.append(self.message_builder.create_text_section_block("*Description*\n_No description_"))
 
         result = []
-        if (
-            RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.error_message
-        ):
+        if RESULT_MESSAGE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and alert.error_message:
             result.extend(
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.error_message.strip()}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.error_message.strip()}```"),
                 ]
             )
 
-        if (
-            TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and anomalous_value
-        ):
-            result.append(
-                self.message_builder.create_context_block(["*Test results sample*"])
-            )
+        if TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and anomalous_value:
+            result.append(self.message_builder.create_context_block(["*Test results sample*"]))
             messages = []
             if alert.column_name:
                 messages.append(f"*Column*: {alert.column_name}     |")
@@ -388,16 +310,11 @@ class SlackIntegration(BaseIntegration):
             result.append(self.message_builder.create_context_block(messages))
 
         configuration = []
-        if (
-            TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
-            and alert.test_params
-        ):
+        if TEST_PARAMS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS) and alert.test_params:
             configuration.extend(
                 [
                     self.message_builder.create_context_block(["*Test parameters*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.test_params}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.test_params}```"),
                 ]
             )
 
@@ -405,19 +322,13 @@ class SlackIntegration(BaseIntegration):
             title=title, preview=preview, result=result, configuration=configuration
         )
 
-    def _get_model_template(
-        self, alert: ModelAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
+    def _get_model_template(self, alert: ModelAlertModel, *args, **kwargs) -> SlackMessageSchema:
         tags = prettify_and_dedup_list(alert.tags)
         owners = prettify_and_dedup_list(alert.owners)
         subscribers = prettify_and_dedup_list(alert.subscribers)
         self.message_builder.add_message_color(self._get_color(alert.status))
 
-        title = [
-            self.message_builder.create_header_block(
-                f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
-        ]
+        title = [self.message_builder.create_header_block(f"{self._get_display_name(alert.status)}: {alert.summary}")]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -446,9 +357,7 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        model_runs_report_link = get_model_runs_link(
-            alert.report_url, alert.model_unique_id
-        )
+        model_runs_report_link = get_model_runs_link(alert.report_url, alert.model_unique_id)
         if model_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -470,54 +379,32 @@ class SlackIntegration(BaseIntegration):
             result.extend(
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.message.strip()}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.message.strip()}```"),
                 ]
             )
 
         configuration = []
         if alert.materialization:
-            configuration.append(
-                self.message_builder.create_context_block(["*Materialization*"])
-            )
-            configuration.append(
-                self.message_builder.create_text_section_block(
-                    f"`{str(alert.materialization)}`"
-                )
-            )
+            configuration.append(self.message_builder.create_context_block(["*Materialization*"]))
+            configuration.append(self.message_builder.create_text_section_block(f"`{str(alert.materialization)}`"))
         if alert.full_refresh:
-            configuration.append(
-                self.message_builder.create_context_block(["*Full refresh*"])
-            )
-            configuration.append(
-                self.message_builder.create_text_section_block(
-                    f"`{alert.full_refresh}`"
-                )
-            )
+            configuration.append(self.message_builder.create_context_block(["*Full refresh*"]))
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.full_refresh}`"))
         if alert.path:
             configuration.append(self.message_builder.create_context_block(["*Path*"]))
-            configuration.append(
-                self.message_builder.create_text_section_block(f"`{alert.path}`")
-            )
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.path}`"))
 
         return self.message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
 
-    def _get_snapshot_template(
-        self, alert: ModelAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
+    def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs) -> SlackMessageSchema:
         tags = prettify_and_dedup_list(alert.tags)
         owners = prettify_and_dedup_list(alert.owners)
         subscribers = prettify_and_dedup_list(alert.subscribers)
         self.message_builder.add_message_color(self._get_color(alert.status))
 
-        title = [
-            self.message_builder.create_header_block(
-                f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
-        ]
+        title = [self.message_builder.create_header_block(f"{self._get_display_name(alert.status)}: {alert.summary}")]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -546,9 +433,7 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        model_runs_report_link = get_model_runs_link(
-            alert.report_url, alert.model_unique_id
-        )
+        model_runs_report_link = get_model_runs_link(alert.report_url, alert.model_unique_id)
         if model_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -570,37 +455,25 @@ class SlackIntegration(BaseIntegration):
             result.extend(
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.message.strip()}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.message.strip()}```"),
                 ]
             )
 
         configuration = []
         if alert.original_path:
             configuration.append(self.message_builder.create_context_block(["*Path*"]))
-            configuration.append(
-                self.message_builder.create_text_section_block(
-                    f"`{alert.original_path}`"
-                )
-            )
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.original_path}`"))
 
         return self.message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
 
-    def _get_source_freshness_template(
-        self, alert: SourceFreshnessAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
+    def _get_source_freshness_template(self, alert: SourceFreshnessAlertModel, *args, **kwargs) -> SlackMessageSchema:
         tags = prettify_and_dedup_list(alert.tags or [])
         owners = prettify_and_dedup_list(alert.owners or [])
         subscribers = prettify_and_dedup_list(alert.subscribers or [])
         self.message_builder.add_message_color(self._get_color(alert.status))
-        title = [
-            self.message_builder.create_header_block(
-                f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
-        ]
+        title = [self.message_builder.create_header_block(f"{self._get_display_name(alert.status)}: {alert.summary}")]
 
         if alert.suppression_interval:
             title.extend(
@@ -630,9 +503,7 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.source_freshness_execution_id
-        )
+        test_runs_report_link = get_test_runs_link(alert.report_url, alert.source_freshness_execution_id)
         if test_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -653,17 +524,11 @@ class SlackIntegration(BaseIntegration):
             preview.extend(
                 [
                     self.message_builder.create_text_section_block("*Description*"),
-                    self.message_builder.create_context_block(
-                        [alert.freshness_description]
-                    ),
+                    self.message_builder.create_context_block([alert.freshness_description]),
                 ]
             )
         else:
-            preview.append(
-                self.message_builder.create_text_section_block(
-                    "*Description*\n_No description_"
-                )
-            )
+            preview.append(self.message_builder.create_text_section_block("*Description*\n_No description_"))
 
         result = []
         if alert.status == "runtime error":
@@ -671,8 +536,7 @@ class SlackIntegration(BaseIntegration):
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
                     self.message_builder.create_text_section_block(
-                        f"Failed to calculate the source freshness\n"
-                        f"```{alert.error}```"
+                        f"Failed to calculate the source freshness\n" f"```{alert.error}```"
                     ),
                 ]
             )
@@ -680,9 +544,7 @@ class SlackIntegration(BaseIntegration):
             result.extend(
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
-                    self.message_builder.create_text_section_block(
-                        f"```{alert.result_description}```"
-                    ),
+                    self.message_builder.create_text_section_block(f"```{alert.result_description}```"),
                 ]
             )
             result.extend(
@@ -698,47 +560,29 @@ class SlackIntegration(BaseIntegration):
         configuration = []
 
         if alert.error_after:
-            configuration.append(
-                self.message_builder.create_context_block(["*Error after*"])
-            )
-            configuration.append(
-                self.message_builder.create_text_section_block(f"`{alert.error_after}`")
-            )
+            configuration.append(self.message_builder.create_context_block(["*Error after*"]))
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.error_after}`"))
         if alert.warn_after:
-            configuration.append(
-                self.message_builder.create_context_block(["*Warn after*"])
-            )
-            configuration.append(
-                self.message_builder.create_text_section_block(f"`{alert.warn_after}`")
-            )
+            configuration.append(self.message_builder.create_context_block(["*Warn after*"]))
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.warn_after}`"))
         if alert.filter:
-            configuration.append(
-                self.message_builder.create_context_block(["*Filter*"])
-            )
-            configuration.append(
-                self.message_builder.create_text_section_block(f"`{alert.filter}`")
-            )
+            configuration.append(self.message_builder.create_context_block(["*Filter*"]))
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.filter}`"))
         if alert.path:
             configuration.append(self.message_builder.create_context_block(["*Path*"]))
-            configuration.append(
-                self.message_builder.create_text_section_block(f"`{alert.path}`")
-            )
+            configuration.append(self.message_builder.create_text_section_block(f"`{alert.path}`"))
 
         return self.message_builder.get_slack_message(
             title=title, preview=preview, result=result, configuration=configuration
         )
 
-    def _get_group_by_table_template(
-        self, alert: GroupedByTableAlerts, *args, **kwargs
-    ):
+    def _get_group_by_table_template(self, alert: GroupedByTableAlerts, *args, **kwargs):
         alerts = alert.alerts
 
         self.message_builder.add_message_color(self._get_color(alert.status))
 
         title_blocks = [
-            self.message_builder.create_header_block(
-                f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
+            self.message_builder.create_header_block(f"{self._get_display_name(alert.status)}: {alert.summary}")
         ]
         # summary of number of failed, errors, etc.
         fields_summary: List[str] = []
@@ -746,25 +590,17 @@ class SlackIntegration(BaseIntegration):
         if alert.model_errors:
             fields_summary.append(f":X: Model errors: {len(alert.model_errors)}    |")
         if alert.test_failures:
-            fields_summary.append(
-                f":small_red_triangle: Test failures: {len(alert.test_failures)}    |"
-            )
+            fields_summary.append(f":small_red_triangle: Test failures: {len(alert.test_failures)}    |")
         if alert.test_warnings:
-            fields_summary.append(
-                f":warning: Test warnings: {len(alert.test_warnings)}    |"
-            )
+            fields_summary.append(f":warning: Test warnings: {len(alert.test_warnings)}    |")
         if alert.test_errors:
-            fields_summary.append(
-                f":exclamation: Test errors: {len(alert.test_errors)}"
-            )
+            fields_summary.append(f":exclamation: Test errors: {len(alert.test_errors)}")
         title_blocks.append(self.message_builder.create_context_block(fields_summary))
 
         report_link = None
         # No report link when there is only model error
         if not alert.model_errors:
-            report_link = get_model_test_runs_link(
-                alert.report_url, alert.model_unique_id
-            )
+            report_link = get_model_test_runs_link(alert.report_url, alert.model_unique_id)
 
         if report_link:
             report_link_block = self.message_builder.create_context_block(
@@ -783,21 +619,15 @@ class SlackIntegration(BaseIntegration):
             [alert.tags or [] for alert in alerts],
             prefix=self.message_builder._HASHTAG,
         )
-        owners = list_of_lists_of_strings_to_comma_delimited_unique_strings(
-            [alert.owners or [] for alert in alerts]
-        )
+        owners = list_of_lists_of_strings_to_comma_delimited_unique_strings([alert.owners or [] for alert in alerts])
         subscribers = list_of_lists_of_strings_to_comma_delimited_unique_strings(
             [alert.subscribers or [] for alert in alerts]
         )
         preview_blocks.append(
-            self.message_builder.create_text_section_block(
-                f"*Tags*: {tags if tags else '_No tags_'}"
-            )
+            self.message_builder.create_text_section_block(f"*Tags*: {tags if tags else '_No tags_'}")
         )
         preview_blocks.append(
-            self.message_builder.create_text_section_block(
-                f"*Owners*: {owners if owners else '_No owners_'}"
-            )
+            self.message_builder.create_text_section_block(f"*Owners*: {owners if owners else '_No owners_'}")
         )
         preview_blocks.append(
             self.message_builder.create_text_section_block(
@@ -809,9 +639,7 @@ class SlackIntegration(BaseIntegration):
         details_blocks = []
         # Model errors
         if alert.model_errors:
-            details_blocks.append(
-                self.message_builder.create_text_section_block("*Model errors*")
-            )
+            details_blocks.append(self.message_builder.create_text_section_block("*Model errors*"))
             details_blocks.append(self.message_builder.create_divider_block())
             block_header = self.message_builder.create_context_block(
                 self._get_model_error_block_header(alert.model_errors)
@@ -823,27 +651,21 @@ class SlackIntegration(BaseIntegration):
 
         # Test failures
         if alert.test_failures:
-            details_blocks.append(
-                self.message_builder.create_text_section_block("*Test failures*")
-            )
+            details_blocks.append(self.message_builder.create_text_section_block("*Test failures*"))
             rows = [alert.concise_name for alert in alert.test_failures]
             text = "\n".join([f":small_red_triangle: {row}" for row in rows])
             details_blocks.append(self.message_builder.create_text_section_block(text))
 
         # Test warnings
         if alert.test_warnings:
-            details_blocks.append(
-                self.message_builder.create_text_section_block("*Test warnings*")
-            )
+            details_blocks.append(self.message_builder.create_text_section_block("*Test warnings*"))
             rows = [alert.concise_name for alert in alert.test_warnings]
             text = "\n".join([f":warning: {row}" for row in rows])
             details_blocks.append(self.message_builder.create_text_section_block(text))
 
         # Test errors
         if alert.test_errors:
-            details_blocks.append(
-                self.message_builder.create_text_section_block("*Test errors*")
-            )
+            details_blocks.append(self.message_builder.create_text_section_block("*Test errors*"))
             rows = [alert.concise_name for alert in alert.test_errors]
             text = "\n".join([f":exclamation: {row}" for row in rows])
             details_blocks.append(self.message_builder.create_text_section_block(text))
@@ -909,10 +731,7 @@ class SlackIntegration(BaseIntegration):
         if emails is None:
             return []
 
-        return [
-            _get_user_id(email) if _regex_match_owner_email(email) else email
-            for email in emails
-        ]
+        return [_get_user_id(email) if _regex_match_owner_email(email) else email for email in emails]
 
     def _fix_owners_and_subscribers(
         self,
@@ -926,9 +745,7 @@ class SlackIntegration(BaseIntegration):
         if isinstance(alert, GroupedByTableAlerts):
             for grouped_alert in alert.alerts:
                 grouped_alert.owners = self._parse_emails_to_ids(grouped_alert.owners)
-                grouped_alert.subscribers = self._parse_emails_to_ids(
-                    grouped_alert.subscribers
-                )
+                grouped_alert.subscribers = self._parse_emails_to_ids(grouped_alert.subscribers)
         else:
             alert.owners = self._parse_emails_to_ids(alert.owners)
             alert.subscribers = self._parse_emails_to_ids(alert.subscribers)
@@ -949,13 +766,9 @@ class SlackIntegration(BaseIntegration):
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)
-            sent_successfully = self.client.send_message(
-                channel_name=channel_name, message=template
-            )
+            sent_successfully = self.client.send_message(channel_name=channel_name, message=template)
         except Exception as err:
-            logger.error(
-                f"Unable to send alert via Slack: {err}\nSending fallback template."
-            )
+            logger.error(f"Unable to send alert via Slack: {err}\nSending fallback template.")
             sent_successfully = False
 
         if not sent_successfully:
@@ -995,10 +808,7 @@ class SlackIntegration(BaseIntegration):
                     channel=(
                         self.config.slack_channel_name
                         if self.override_config_defaults
-                        else (
-                            alert.unified_meta.get("channel")
-                            or self.config.slack_channel_name
-                        )
+                        else (alert.unified_meta.get("channel") or self.config.slack_channel_name)
                     )
                 )
             )

@@ -32,14 +32,10 @@ class AlertsAPI(APIClient):
         return pending_alerts
 
     def get_alerts_last_sent_times(self, days_back: int) -> Dict[str, datetime]:
-        alerts_last_sent_times = self.alerts_fetcher.query_last_alert_times(
-            days_back=days_back
-        )
+        alerts_last_sent_times = self.alerts_fetcher.query_last_alert_times(days_back=days_back)
         last_sent_times = dict()
         for alert_class_id, last_sent_time_as_string in alerts_last_sent_times.items():
-            last_sent_times.update(
-                {alert_class_id: datetime.fromisoformat(last_sent_time_as_string)}
-            )
+            last_sent_times.update({alert_class_id: datetime.fromisoformat(last_sent_time_as_string)})
         return last_sent_times
 
     def skip_alerts(

@@ -21,9 +21,7 @@ class InvocationsAPI(APIClient):
         else:
             raise NotImplementedError
 
-    def get_invocation_by_time(
-        self, type: str, invocation_max_time: str
-    ) -> DbtInvocationSchema:
+    def get_invocation_by_time(self, type: str, invocation_max_time: str) -> DbtInvocationSchema:
         if type == "test":
             return self.invocations_fetcher.get_test_last_invocation(
                 macro_args=dict(invocation_max_time=invocation_max_time)
@@ -31,30 +29,20 @@ class InvocationsAPI(APIClient):
         else:
             raise NotImplementedError
 
-    def get_invocation_by_id(
-        self, type: str, invocation_id: str
-    ) -> DbtInvocationSchema:
+    def get_invocation_by_id(self, type: str, invocation_id: str) -> DbtInvocationSchema:
         if type == "test":
-            return self.invocations_fetcher.get_test_last_invocation(
-                macro_args=dict(invocation_id=invocation_id)
-            )
+            return self.invocations_fetcher.get_test_last_invocation(macro_args=dict(invocation_id=invocation_id))
         else:
             raise NotImplementedError
 
-    def get_test_invocation_from_filter(
-        self, selector_filter: SelectorFilterSchema
-    ) -> DbtInvocationSchema:
+    def get_test_invocation_from_filter(self, selector_filter: SelectorFilterSchema) -> DbtInvocationSchema:
         # If none of the following filter options exists, the invocation is empty and there is no filter.
         invocation = DbtInvocationSchema()
 
         if selector_filter.invocation_id:
-            invocation = self.get_invocation_by_id(
-                type="test", invocation_id=selector_filter.invocation_id
-            )
+            invocation = self.get_invocation_by_id(type="test", invocation_id=selector_filter.invocation_id)
         elif selector_filter.invocation_time:
-            invocation = self.get_invocation_by_time(
-                type="test", invocation_max_time=selector_filter.invocation_time
-            )
+            invocation = self.get_invocation_by_time(type="test", invocation_max_time=selector_filter.invocation_time)
         elif selector_filter.last_invocation:
             invocation = self.get_last_invocation(type="test")
 

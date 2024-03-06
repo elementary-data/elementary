@@ -40,9 +40,7 @@ class AnonymousTracking(Tracking):
             logger.debug("Unable to initialize anonymous tracking.", exc_info=True)
 
     def _get_anonymous_user_id(self):
-        user_id_path = Path().joinpath(
-            self._config.config_dir, self._ANONYMOUS_USER_ID_FILE
-        )
+        user_id_path = Path().joinpath(self._config.config_dir, self._ANONYMOUS_USER_ID_FILE)
         try:
             return user_id_path.read_text()
         except OSError:
@@ -54,9 +52,7 @@ class AnonymousTracking(Tracking):
             pass
         return user_id
 
-    def _send_anonymous_event(
-        self, name: str, properties: Optional[dict] = None
-    ) -> None:
+    def _send_anonymous_event(self, name: str, properties: Optional[dict] = None) -> None:
         try:
             if self._do_not_track or self.anonymous_user_id is None:
                 return
@@ -121,9 +117,7 @@ class AnonymousCommandLineTracking(AnonymousTracking):
             props["internal_exceptions_count"] = self.internal_exceptions_count
         self._send_anonymous_event("cli-end", properties=props)
 
-    def track_cli_exception(
-        self, module_name: str, exc: Exception, command: Optional[str] = None
-    ) -> None:
+    def track_cli_exception(self, module_name: str, exc: Exception, command: Optional[str] = None) -> None:
         props = {
             "module_name": module_name,
             "command": command,

@@ -25,14 +25,10 @@ class BaseIntegrationMock(BaseIntegration):
     def _get_snapshot_template(self, alert: ModelAlertModel, *args, **kwargs):
         return "snapshot"
 
-    def _get_source_freshness_template(
-        self, alert: SourceFreshnessAlertModel, *args, **kwargs
-    ):
+    def _get_source_freshness_template(self, alert: SourceFreshnessAlertModel, *args, **kwargs):
         return "source_freshness"
 
-    def _get_group_by_table_template(
-        self, alert: GroupedByTableAlerts, *args, **kwargs
-    ):
+    def _get_group_by_table_template(self, alert: GroupedByTableAlerts, *args, **kwargs):
         return "grouped_by_table"
 
     def _get_fallback_template(
@@ -44,7 +40,7 @@ class BaseIntegrationMock(BaseIntegration):
             GroupedByTableAlerts,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ):
         return "fall_back"
 
@@ -57,7 +53,7 @@ class BaseIntegrationMock(BaseIntegration):
             GroupedByTableAlerts,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ) -> bool:
         return True
 

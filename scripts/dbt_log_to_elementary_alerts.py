@@ -22,9 +22,7 @@ def get_json_logs(log_lines: List[str]):
 def get_elementary_alerts(elementary_json_logs: List[dict]):
     elementary_alerts = []
     for json_log in elementary_json_logs:
-        elementary_alerts.extend(
-            json.loads("".join(json_log["data"]["msg"].split(ALERT_PREFIX, 1)[1:]))
-        )
+        elementary_alerts.extend(json.loads("".join(json_log["data"]["msg"].split(ALERT_PREFIX, 1)[1:])))
     return elementary_alerts
 
 

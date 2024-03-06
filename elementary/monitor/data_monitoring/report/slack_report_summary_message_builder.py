@@ -53,9 +53,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             selector_text = f"model: {filter.model}"
         elif filter.owner:
             selector_text = f"owner: {filter.owner}"
-        days_back_text = (
-            f"timeframe: {days_back} day{'s' if days_back > 1 else ''} back"
-        )
+        days_back_text = f"timeframe: {days_back} day{'s' if days_back > 1 else ''} back"
 
         return f"_This summary was generated with the following filters - {days_back_text}{f', {selector_text}' if selector_text else ''}_"
 
@@ -73,9 +71,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
 
         if bucket_website_url:
             preview_blocks.append(
-                self.create_text_section_block(
-                    f"<{bucket_website_url}|View full report> :arrow_upper_right:"
-                )
+                self.create_text_section_block(f"<{bucket_website_url}|View full report> :arrow_upper_right:")
             )
 
         totals = self._get_test_results_totals(test_results)
@@ -109,29 +105,19 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         skipped_tests_details = []
         for test in test_results:
             if test.status == "error":
-                error_tests_details.extend(
-                    self._get_test_result_details_block(test, include_description)
-                )
+                error_tests_details.extend(self._get_test_result_details_block(test, include_description))
             elif test.status == "fail":
-                failed_tests_details.extend(
-                    self._get_test_result_details_block(test, include_description)
-                )
+                failed_tests_details.extend(self._get_test_result_details_block(test, include_description))
             elif test.status == "warn":
-                warning_tests_details.extend(
-                    self._get_test_result_details_block(test, include_description)
-                )
+                warning_tests_details.extend(self._get_test_result_details_block(test, include_description))
             elif test.status == "skipped":
-                skipped_tests_details.extend(
-                    self._get_test_result_details_block(test, include_description)
-                )
+                skipped_tests_details.extend(self._get_test_result_details_block(test, include_description))
             else:  # test status is "pass" i.e. success
                 pass
 
         details_blocks = []
         if failed_tests_details:
-            details_blocks.append(
-                self.create_text_section_block(":small_red_triangle: *Failed tests*")
-            )
+            details_blocks.append(self.create_text_section_block(":small_red_triangle: *Failed tests*"))
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(failed_tests_details)
 
@@ -141,16 +127,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             details_blocks.extend(warning_tests_details)
 
         if error_tests_details:
-            details_blocks.append(
-                self.create_text_section_block(":exclamation: *Error*")
-            )
+            details_blocks.append(self.create_text_section_block(":exclamation: *Error*"))
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(error_tests_details)
 
         if skipped_tests_details:
-            details_blocks.append(
-                self.create_text_section_block(":fast_forward: *Skipped*")
-            )
+            details_blocks.append(self.create_text_section_block(":fast_forward: *Skipped*"))
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(skipped_tests_details)
 
@@ -163,9 +145,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             self._MAX_AMOUNT_OF_ATTACHMENTS - self._MAX_ALERT_PREVIEW_BLOCKS
         ):
             too_many_test_results_message = f"_The amount of results exceeded Slack’s limitation. Please {f'<{bucket_website_url}|visit the report>' if bucket_website_url else 'check out the attached report'} to see result’s details{'._' if bucket_website_url else '_ :point_down:'}"
-            self._add_blocks_as_attachments(
-                [self.create_text_section_block(too_many_test_results_message)]
-            )
+            self._add_blocks_as_attachments([self.create_text_section_block(too_many_test_results_message)])
 
     def _get_test_result_details_block(
         self, test_result: TestResultSummarySchema, include_description: bool = False
@@ -183,9 +163,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
         ]
         if include_description and test_result.description:
-            details_blocks.append(
-                self.create_context_block([f"_Description:_ {test_result.description}"])
-            )
+            details_blocks.append(self.create_context_block([f"_Description:_ {test_result.description}"]))
         return details_blocks
 
     @staticmethod

@@ -142,10 +142,12 @@ def common_options(cmd: str):
             "--select",
             type=str,
             default=None,
-            help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
-            if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
-            "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
+            help=(
+                "Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
+                if cmd in (Command.REPORT, Command.SEND_REPORT)
+                else "DEPRECATED! Please use --filters instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+                "statuses:<warn/fail/error/skipped> / resource_types:<model/test>."
+            ),
         )(func)
         return func
 
@@ -342,9 +344,7 @@ def monitor(
                 'Please use "-fl" or "--filter" for filtering the alerts.\n',
                 fg="bright_red",
             )
-            alert_filters = SelectorFilter(
-                config, anonymous_tracking, select
-            ).get_filter()
+            alert_filters = SelectorFilter(config, anonymous_tracking, select).get_filter()
 
         data_monitoring = DataMonitoringAlerts(
             config=config,
@@ -358,15 +358,9 @@ def monitor(
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking
         # properties. This is a tech-debt that should be fixed in the future.
-        anonymous_tracking.track_cli_start(
-            Command.MONITOR, get_cli_properties(), ctx.command.name
-        )
-        success = data_monitoring.run_alerts(
-            days_back, full_refresh_dbt_package, dbt_vars=vars
-        )
-        anonymous_tracking.track_cli_end(
-            Command.MONITOR, data_monitoring.properties(), ctx.command.name
-        )
+        anonymous_tracking.track_cli_start(Command.MONITOR, get_cli_properties(), ctx.command.name)
+        success = data_monitoring.run_alerts(days_back, full_refresh_dbt_package, dbt_vars=vars)
+        anonymous_tracking.track_cli_end(Command.MONITOR, data_monitoring.properties(), ctx.command.name)
         if not success:
             sys.exit(1)
     except Exception as exc:
@@ -449,9 +443,7 @@ def report(
         data_monitoring.validate_report_selector()
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.
-        anonymous_tracking.track_cli_start(
-            Command.REPORT, get_cli_properties(), ctx.command.name
-        )
+        anonymous_tracking.track_cli_start(Command.REPORT, get_cli_properties(), ctx.command.name)
         generated_report_successfully, _ = data_monitoring.generate_report(
             days_back=days_back,
             test_runs_amount=executions_limit,
@@ -461,9 +453,7 @@ def report(
             should_open_browser=open_browser,
             project_name=project_name,
         )
-        anonymous_tracking.track_cli_end(
-            Command.REPORT, data_monitoring.properties(), ctx.command.name
-        )
+        anonymous_tracking.track_cli_end(Command.REPORT, data_monitoring.properties(), ctx.command.name)
         if not generated_report_successfully:
             sys.exit(1)
     except Exception as exc:
@@ -491,9 +481,7 @@ def report(
     default=None,
     help="AWS region name",
 )
-@click.option(
-    "--aws-access-key-id", type=str, default=None, help="The access key ID for AWS"
-)
+@click.option("--aws-access-key-id", type=str, default=None, help="The access key ID for AWS")
 @click.option(
     "--aws-secret-access-key",
     type=str,
@@ -691,11 +679,7 @@ def send_report(
         config.validate_send_report()
         # bucket-file-path determines the path of the report in the bucket.
         # If this path contains folders we extract the report file name to first save the report locally
-        local_file_path = (
-            bucket_path.basename(bucket_file_path)
-            if bucket_file_path
-            else slack_file_name
-        )
+        local_file_path = bucket_path.basename(bucket_file_path) if bucket_file_path else slack_file_name
         selector_filter = SelectorFilter(config, anonymous_tracking, select)
         data_monitoring = DataMonitoringReport(
             config=config,
@@ -706,9 +690,7 @@ def send_report(
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.
-        anonymous_tracking.track_cli_start(
-            Command.SEND_REPORT, get_cli_properties(), ctx.command.name
-        )
+        anonymous_tracking.track_cli_start(Command.SEND_REPORT, get_cli_properties(), ctx.command.name)
         sent_report_successfully = data_monitoring.send_report(
             days_back=days_back,
             test_runs_amount=executions_limit,
@@ -722,17 +704,13 @@ def send_report(
             include_description=(include == "description"),
         )
 
-        anonymous_tracking.track_cli_end(
-            Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name
-        )
+        anonymous_tracking.track_cli_end(Command.SEND_REPORT, data_monitoring.properties(), ctx.command.name)
 
         if not sent_report_successfully:
             sys.exit(1)
 
     except Exception as exc:
-        anonymous_tracking.track_cli_exception(
-            Command.SEND_REPORT, exc, ctx.command.name
-        )
+        anonymous_tracking.track_cli_exception(Command.SEND_REPORT, exc, ctx.command.name)
         raise
 
 

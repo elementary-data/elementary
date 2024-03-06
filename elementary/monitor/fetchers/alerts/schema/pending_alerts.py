@@ -40,9 +40,7 @@ class PendingAlertSchema(BaseModel):
     created_at: datetime
     updated_at: datetime
     status: AlertStatus
-    data: Union[
-        TestAlertDataSchema, ModelAlertDataSchema, SourceFreshnessAlertDataSchema
-    ]
+    data: Union[TestAlertDataSchema, ModelAlertDataSchema, SourceFreshnessAlertDataSchema]
     sent_at: Optional[datetime] = None
 
     class Config:

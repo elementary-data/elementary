@@ -144,9 +144,7 @@ PENDDING_TEST_ALERTS_MOCK_DATA = [
         alert_class_id="test_id_3.column.row_count",
         test_unique_id="test_id_3",
         model_unique_id="model_id_2",
-        detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(
-            DATETIME_FORMAT
-        ),
+        detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(DATETIME_FORMAT),
         database_name="test_db",
         schema_name="test_schema",
         table_name="table",
@@ -267,9 +265,7 @@ PENDDING_MODEL_ALERTS_MOCK_DATA = [
         path="",
         original_path="",
         materialization="table",
-        detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(
-            DATETIME_FORMAT
-        ),
+        detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(DATETIME_FORMAT),
         database_name="test_db",
         schema_name="test_schema",
         full_refresh=False,
@@ -398,9 +394,7 @@ PENDDING_SOURCE_FRESHNESS_ALERTS_MOCK_DATA = [
         source_freshness_execution_id="alert_id_5",
         alert_class_id="source_id_3",
         model_unique_id="source_id_3",
-        detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(
-            DATETIME_FORMAT
-        ),
+        detected_at=(CURRENT_DATETIME_UTC - timedelta(hours=1)).strftime(DATETIME_FORMAT),
         snapshotted_at="2022-10-11 10:00:00",
         max_loaded_at="2022-10-11 10:00:00",
         max_loaded_at_time_ago_in_s=123123,
@@ -428,9 +422,7 @@ class MockAlertsFetcher(AlertsFetcher):
     def __init__(self):
         mock_dbt_runner = MockDbtRunner()
         config = Config()
-        super().__init__(
-            mock_dbt_runner, config, elementary_database_and_schema="test.test"
-        )
+        super().__init__(mock_dbt_runner, config, elementary_database_and_schema="test.test")
 
     def query_pending_alerts(self, *args, **kwargs) -> List[PendingAlertSchema]:
         pending_test_alerts = [
@@ -482,31 +474,13 @@ class MockAlertsFetcher(AlertsFetcher):
 
     def query_last_alert_times(self, *args, **kwargs):
         return {
-            "test_id_1.column.generic": (
-                CURRENT_DATETIME_UTC - timedelta(hours=1.5)
-            ).strftime(DATETIME_FORMAT),
-            "test_id_2.column.row_count": (
-                CURRENT_DATETIME_UTC - timedelta(minutes=1)
-            ).strftime(DATETIME_FORMAT),
-            "test_id_4.column.generic": (
-                CURRENT_DATETIME_UTC - timedelta(hours=1.5)
-            ).strftime(DATETIME_FORMAT),
-            "model_id_1": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-            "model_id_2": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
-                DATETIME_FORMAT
-            ),
-            "model_id_4": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-            "source_id_1": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
-            "source_id_2": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(
-                DATETIME_FORMAT
-            ),
-            "source_id_4": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(
-                DATETIME_FORMAT
-            ),
+            "test_id_1.column.generic": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(DATETIME_FORMAT),
+            "test_id_2.column.row_count": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(DATETIME_FORMAT),
+            "test_id_4.column.generic": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(DATETIME_FORMAT),
+            "model_id_1": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(DATETIME_FORMAT),
+            "model_id_2": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(DATETIME_FORMAT),
+            "model_id_4": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(DATETIME_FORMAT),
+            "source_id_1": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(DATETIME_FORMAT),
+            "source_id_2": (CURRENT_DATETIME_UTC - timedelta(minutes=1)).strftime(DATETIME_FORMAT),
+            "source_id_4": (CURRENT_DATETIME_UTC - timedelta(hours=1.5)).strftime(DATETIME_FORMAT),
         }

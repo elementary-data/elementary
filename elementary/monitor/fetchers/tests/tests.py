@@ -30,21 +30,13 @@ class TestsFetcher(FetcherClient):
                 disable_passed_test_metrics=disable_passed_test_metrics,
             ),
         )
-        test_results = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
-        test_results = [
-            TestResultDBRowSchema(**test_result) for test_result in test_results
-        ]
+        test_results = json.loads(run_operation_response[0]) if run_operation_response else []
+        test_results = [TestResultDBRowSchema(**test_result) for test_result in test_results]
         return test_results
 
     def get_singular_tests(self) -> List[NormalizedTestSchema]:
-        run_operation_response = self.dbt_runner.run_operation(
-            macro_name="elementary_cli.get_singular_tests"
-        )
-        test_results = (
-            json.loads(run_operation_response[0]) if run_operation_response else []
-        )
+        run_operation_response = self.dbt_runner.run_operation(macro_name="elementary_cli.get_singular_tests")
+        test_results = json.loads(run_operation_response[0]) if run_operation_response else []
         test_results = [
             NormalizedTestSchema(
                 unique_id=test_result["unique_id"],

@@ -9,9 +9,7 @@ logger = get_logger(__name__)
 
 
 class InvocationsFetcher(FetcherClient):
-    def get_test_last_invocation(
-        self, macro_args: Optional[dict] = None
-    ) -> DbtInvocationSchema:
+    def get_test_last_invocation(self, macro_args: Optional[dict] = None) -> DbtInvocationSchema:
         invocation_response = self.dbt_runner.run_operation(
             macro_name="elementary_cli.get_test_last_invocation", macro_args=macro_args
         )
@@ -26,23 +24,15 @@ class InvocationsFetcher(FetcherClient):
         invocations_response = self.dbt_runner.run_operation(
             macro_name="elementary_cli.get_models_latest_invocations_data"
         )
-        invocation_results = (
-            json.loads(invocations_response[0]) if invocations_response else []
-        )
-        invocation_results = [
-            DbtInvocationSchema(**invocation_result)
-            for invocation_result in invocation_results
-        ]
+        invocation_results = json.loads(invocations_response[0]) if invocations_response else []
+        invocation_results = [DbtInvocationSchema(**invocation_result) for invocation_result in invocation_results]
         return invocation_results
 
     def get_models_latest_invocation(self) -> Dict[str, str]:
-        response = self.dbt_runner.run_operation(
-            macro_name="elementary_cli.get_models_latest_invocation"
-        )
+        response = self.dbt_runner.run_operation(macro_name="elementary_cli.get_models_latest_invocation")
         models_latest_invocation_results = json.loads(response[0]) if response else []
 
         models_latest_invocation_map = {
-            result["unique_id"]: result["invocation_id"]
-            for result in models_latest_invocation_results
+            result["unique_id"]: result["invocation_id"] for result in models_latest_invocation_results
         }
         return models_latest_invocation_map

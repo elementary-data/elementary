@@ -78,16 +78,11 @@ class TestsAPI(APIClient):
             filtered_test_results_db_rows = [
                 test_result
                 for test_result in filtered_test_results_db_rows
-                if (
-                    test_result.model_unique_id
-                    and test_result.model_unique_id.endswith(filter.model)
-                )
+                if (test_result.model_unique_id and test_result.model_unique_id.endswith(filter.model))
             ]
 
         filtered_test_results_db_rows = [
-            test_result
-            for test_result in filtered_test_results_db_rows
-            if test_result.invocations_rank_index == 1
+            test_result for test_result in filtered_test_results_db_rows if test_result.invocations_rank_index == 1
         ]
         return [
             TestResultSummarySchema(
@@ -99,9 +94,7 @@ class TestsAPI(APIClient):
                 test_sub_type=test_result.test_sub_type,
                 owners=test_result.model_owner,
                 tags=test_result.tags,
-                subscribers=self._get_test_subscribers(
-                    test_meta=test_result.meta, model_meta=test_result.model_meta
-                ),
+                subscribers=self._get_test_subscribers(test_meta=test_result.meta, model_meta=test_result.model_meta),
                 description=test_result.meta.get("description"),
                 test_name=test_result.test_name,
                 status=test_result.status,
@@ -144,16 +137,12 @@ class TestsAPI(APIClient):
             ]
 
         filtered_test_results_db_rows = [
-            test_result
-            for test_result in filtered_test_results_db_rows
-            if test_result.invocations_rank_index == 1
+            test_result for test_result in filtered_test_results_db_rows if test_result.invocations_rank_index == 1
         ]
 
         tests_results: DefaultDict[str, List[TestResultSchema]] = defaultdict(list)
         for test_result_db_row in filtered_test_results_db_rows:
-            metadata = self._get_test_metadata_from_test_result_db_row(
-                test_result_db_row
-            )
+            metadata = self._get_test_metadata_from_test_result_db_row(test_result_db_row)
             inner_test_results = self._get_test_result_from_test_result_db_row(
                 test_result_db_row, disable_samples=disable_samples
             )
@@ -175,20 +164,14 @@ class TestsAPI(APIClient):
     def get_test_runs(self) -> Dict[str, List[TestRunSchema]]:
         tests_invocations = self._get_invocations(self.test_results_db_rows)
         latest_test_results = [
-            test_result
-            for test_result in self.test_results_db_rows
-            if test_result.invocations_rank_index == 1
+            test_result for test_result in self.test_results_db_rows if test_result.invocations_rank_index == 1
         ]
 
         test_runs = defaultdict(list)
         for test_result_db_row in latest_test_results:
-            test_invocations = tests_invocations.get(
-                test_result_db_row.elementary_unique_id
-            )
+            test_invocations = tests_invocations.get(test_result_db_row.elementary_unique_id)
             test_run = TestRunSchema(
-                metadata=self._get_test_metadata_from_test_result_db_row(
-                    test_result_db_row
-                ),
+                metadata=self._get_test_metadata_from_test_result_db_row(test_result_db_row),
                 test_runs=test_invocations,
             )
             if test_result_db_row.model_unique_id:
@@ -197,18 +180,13 @@ class TestsAPI(APIClient):
                 test_runs[test_result_db_row.test_unique_id].append(test_run)
         return test_runs
 
-    def _get_invocations(
-        self, test_result_db_rows: List[TestResultDBRowSchema]
-    ) -> Dict[str, InvocationsSchema]:
+    def _get_invocations(self, test_result_db_rows: List[TestResultDBRowSchema]) -> Dict[str, InvocationsSchema]:
         grouped_invocations = defaultdict(list)
         grouped_invocation_ids: DefaultDict[str, List[str]] = defaultdict(list)
         for test_result_db_row in test_result_db_rows:
             try:
                 elementary_unique_id = test_result_db_row.elementary_unique_id
-                invocation_id = (
-                    test_result_db_row.invocation_id
-                    or test_result_db_row.test_execution_id
-                )
+                invocation_id = test_result_db_row.invocation_id or test_result_db_row.test_execution_id
 
                 if invocation_id is None:
                     # Shouldn't happen, mainly a sanity
@@ -226,8 +204,7 @@ class TestsAPI(APIClient):
                             time_utc=test_result_db_row.detected_at,
                             status=test_result_db_row.status,
                             affected_rows=self._parse_affected_row(
-                                results_description=test_result_db_row.test_results_description
-                                or ""
+                                results_description=test_result_db_row.test_results_description or ""
                             ),
                         )
                     )
@@ -241,9 +218,7 @@ class TestsAPI(APIClient):
         for elementary_unique_id, invocations in grouped_invocations.items():
             totals = self._get_test_invocations_totals(invocations)
             test_invocations[elementary_unique_id] = InvocationsSchema(
-                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2)
-                if invocations
-                else 0,
+                fail_rate=(round((totals.errors + totals.failures) / len(invocations), 2) if invocations else 0),
                 totals=totals,
                 invocations=invocations,
                 description=self._get_invocations_description(totals),
@@ -277,9 +252,7 @@ class TestsAPI(APIClient):
         affected_rows_pattern = re.compile(r"^Got\s\d+\sresult")
         number_pattern = re.compile(r"\d+")
         try:
-            matches_affected_rows_string = re.findall(
-                affected_rows_pattern, results_description
-            )[0]
+            matches_affected_rows_string = re.findall(affected_rows_pattern, results_description)[0]
             affected_rows = re.findall(number_pattern, matches_affected_rows_string)[0]
             return int(affected_rows)
         except Exception:
@@ -290,13 +263,9 @@ class TestsAPI(APIClient):
         test_result_db_row: TestResultDBRowSchema,
     ) -> TestMetadataSchema:
         test_display_name = (
-            test_result_db_row.test_name.replace("_", " ").title()
-            if test_result_db_row.test_name
-            else ""
+            test_result_db_row.test_name.replace("_", " ").title() if test_result_db_row.test_name else ""
         )
-        detected_at_datetime = convert_utc_iso_format_to_datetime(
-            test_result_db_row.detected_at
-        )
+        detected_at_datetime = convert_utc_iso_format_to_datetime(test_result_db_row.detected_at)
         detected_at_utc = detected_at_datetime
         detected_at = detected_at_datetime.astimezone(tz.tzlocal())
         table_full_name_parts = [
@@ -310,11 +279,7 @@ class TestsAPI(APIClient):
         ]
         table_full_name = ".".join(table_full_name_parts).lower()
         test_params = test_result_db_row.test_params
-        test_query = (
-            test_result_db_row.test_results_query.strip()
-            if test_result_db_row.test_results_query
-            else None
-        )
+        test_query = test_result_db_row.test_results_query.strip() if test_result_db_row.test_results_query else None
 
         result = dict(
             result_description=test_result_db_row.test_results_description,
@@ -335,8 +300,7 @@ class TestsAPI(APIClient):
                 test_name=test_result_db_row.test_name,
                 timestamp_column=test_params.get("timestamp_column"),
                 testing_timeframe=f"{time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
-                anomaly_threshold=test_params.get("sensitivity")
-                or test_params.get("anomaly_sensitivity"),
+                anomaly_threshold=test_params.get("sensitivity") or test_params.get("anomaly_sensitivity"),
             )
 
         return TestMetadataSchema(
@@ -384,14 +348,9 @@ class TestsAPI(APIClient):
                 failed_rows_count=TestsAPI._get_failed_rows_count(test_result_db_row),
             )
         else:
-            test_sub_type_display_name = test_result_db_row.test_sub_type.replace(
-                "_", " "
-            ).title()
+            test_sub_type_display_name = test_result_db_row.test_sub_type.replace("_", " ").title()
             if test_result_db_row.test_type == "anomaly_detection":
-                if (
-                    isinstance(sample_data, list)
-                    and test_result_db_row.test_sub_type != "dimension"
-                ):
+                if isinstance(sample_data, list) and test_result_db_row.test_sub_type != "dimension":
                     sample_data.sort(key=lambda metric: metric.get("end_time"))
                 test_results = ElementaryTestResultSchema(
                     display_name=test_sub_type_display_name,
@@ -406,9 +365,7 @@ class TestsAPI(APIClient):
             else:
                 # Unexpected test type - might have been introduced in a new package version.
                 # So we have no choice but to log a warning and ignore it.
-                logger.warning(
-                    f"Unexpected elementary test type: {test_result_db_row.test_type}"
-                )
+                logger.warning(f"Unexpected elementary test type: {test_result_db_row.test_type}")
                 test_results = None
 
         return test_results
@@ -416,13 +373,8 @@ class TestsAPI(APIClient):
     @staticmethod
     def _get_failed_rows_count(test_result_db_row: TestResultDBRowSchema) -> int:
         failed_rows_count = -1
-        if (
-            test_result_db_row.status != "pass"
-            and test_result_db_row.test_results_description
-        ):
-            found_rows_number_match = re.search(
-                r"\d+", test_result_db_row.test_results_description
-            )
+        if test_result_db_row.status != "pass" and test_result_db_row.test_results_description:
+            found_rows_number_match = re.search(r"\d+", test_result_db_row.test_results_description)
             if found_rows_number_match:
                 found_rows_number = found_rows_number_match.group()
                 failed_rows_count = int(found_rows_number)

@@ -39,18 +39,12 @@ class DataMonitoringReport(DataMonitoring):
         force_update_dbt_package: bool = False,
         disable_samples: bool = False,
     ):
-        super().__init__(
-            config, tracking, force_update_dbt_package, disable_samples, selector_filter
-        )
+        super().__init__(config, tracking, force_update_dbt_package, disable_samples, selector_filter)
         self.report_api = ReportAPI(self.internal_dbt_runner)
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-        self.azure_client = AzureClient.create_client(
-            self.config, tracking=self.tracking
-        )
-        self.slack_client = SlackClient.create_client(
-            self.config, tracking=self.tracking
-        )
+        self.azure_client = AzureClient.create_client(self.config, tracking=self.tracking)
+        self.slack_client = SlackClient.create_client(self.config, tracking=self.tracking)
 
     def generate_report(
         self,
@@ -137,9 +131,7 @@ class DataMonitoringReport(DataMonitoring):
     def validate_report_selector(self):
         self.selector_filter.validate_report_selector()
 
-    def _add_report_tracking(
-        self, report_data: ReportDataSchema, error: Optional[Exception] = None
-    ):
+    def _add_report_tracking(self, report_data: ReportDataSchema, error: Optional[Exception] = None):
         if error:
             if self.tracking:
                 self.tracking.record_internal_exception(error)
@@ -151,23 +143,15 @@ class DataMonitoringReport(DataMonitoring):
                 test_metadatas.append(test.get("metadata"))
 
         self.execution_properties["elementary_test_count"] = len(
-            [
-                test_metadata
-                for test_metadata in test_metadatas
-                if test_metadata.get("test_type") != "dbt_test"
-            ]
+            [test_metadata for test_metadata in test_metadatas if test_metadata.get("test_type") != "dbt_test"]
         )
         self.execution_properties["test_result_count"] = len(test_metadatas)
 
-        if self.config.anonymous_tracking_enabled and isinstance(
-            self.tracking, AnonymousTracking
-        ):
+        if self.config.anonymous_tracking_enabled and isinstance(self.tracking, AnonymousTracking):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.warehouse_info.id
-                if self.warehouse_info
-                else None,
+                anonymous_warehouse_id=(self.warehouse_info.id if self.warehouse_info else None),
             )
 
     def send_report(
@@ -210,9 +194,7 @@ class DataMonitoringReport(DataMonitoring):
 
         should_send_report_over_slack = True
         # If we upload the report to a bucket, we don't want to share it via Slack.
-        if (
-            upload_succeeded and bucket_website_url is not None
-        ) or disable_html_attachment:
+        if (upload_succeeded and bucket_website_url is not None) or disable_html_attachment:
             should_send_report_over_slack = False
 
         # If a Slack client is provided, we want to send a results summary and attachment of the report if needed.
@@ -233,9 +215,7 @@ class DataMonitoringReport(DataMonitoring):
 
     def send_report_attachment(self, local_html_path: str) -> bool:
         if self.slack_client:
-            send_succeeded = self.slack_client.send_report(
-                self.config.slack_channel_name, local_html_path
-            )
+            send_succeeded = self.slack_client.send_report(self.config.slack_channel_name, local_html_path)
             self.execution_properties["sent_to_slack_successfully"] = send_succeeded
             if not send_succeeded:
                 self.success = False
@@ -243,9 +223,7 @@ class DataMonitoringReport(DataMonitoring):
         self.execution_properties["success"] = self.success
         return self.success
 
-    def upload_report(
-        self, local_html_path: str, remote_file_path: Optional[str] = None
-    ) -> Tuple[bool, Optional[str]]:
+    def upload_report(self, local_html_path: str, remote_file_path: Optional[str] = None) -> Tuple[bool, Optional[str]]:
         if self.gcs_client:
             send_succeeded, bucket_website_url = self.gcs_client.send_report(
                 local_html_path, remote_bucket_file_path=remote_file_path
@@ -304,9 +282,7 @@ class DataMonitoringReport(DataMonitoring):
         else:
             send_succeeded = False
 
-        self.execution_properties[
-            "sent_test_results_summary_successfully"
-        ] = send_succeeded
+        self.execution_properties["sent_test_results_summary_successfully"] = send_succeeded
         self.success = send_succeeded
 
         if send_succeeded:

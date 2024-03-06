@@ -67,9 +67,7 @@ def test_validate_preview_blocks():
     )
 
     # 5 blocks
-    validated_preview_blocks = message_builder._validate_preview_blocks(
-        [block, block, block, block, block]
-    )
+    validated_preview_blocks = message_builder._validate_preview_blocks([block, block, block, block, block])
     assert len(validated_preview_blocks) == 5
     assert json.dumps(validated_preview_blocks, sort_keys=True) == json.dumps(
         [
@@ -84,9 +82,7 @@ def test_validate_preview_blocks():
 
     # over 5 blocks
     with pytest.raises(PreviewIsTooLongError):
-        message_builder._validate_preview_blocks(
-            [block, block, block, block, block, block]
-        )
+        message_builder._validate_preview_blocks([block, block, block, block, block, block])
 
 
 def test_add_preview_to_slack_alert():
@@ -199,9 +195,7 @@ def test_add_details_to_slack_alert():
 
     # All details
     message_builder = SlackAlertMessageBuilder()
-    message_builder.add_details_to_slack_alert(
-        configuration=[block, block], result=[block, block]
-    )
+    message_builder.add_details_to_slack_alert(configuration=[block, block], result=[block, block])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],

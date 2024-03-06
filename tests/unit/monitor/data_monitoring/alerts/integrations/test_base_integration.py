@@ -8,39 +8,13 @@ from tests.mocks.data_monitoring.alerts.integrations.base_integration_mock impor
 )
 
 
-def test_get_alert_template(
-    base_integration_mock: BaseIntegrationMock, alerts_data_mock: AlertsDataMock
-):
-    assert (
-        base_integration_mock._get_alert_template(alert=alerts_data_mock.dbt_test)
-        == "dbt_test"
-    )
-    assert (
-        base_integration_mock._get_alert_template(
-            alert=alerts_data_mock.elementary_test
-        )
-        == "elementary_test"
-    )
-    assert (
-        base_integration_mock._get_alert_template(alert=alerts_data_mock.model)
-        == "model"
-    )
-    assert (
-        base_integration_mock._get_alert_template(alert=alerts_data_mock.snapshot)
-        == "snapshot"
-    )
-    assert (
-        base_integration_mock._get_alert_template(
-            alert=alerts_data_mock.source_freshness
-        )
-        == "source_freshness"
-    )
-    assert (
-        base_integration_mock._get_alert_template(
-            alert=alerts_data_mock.grouped_by_table
-        )
-        == "grouped_by_table"
-    )
+def test_get_alert_template(base_integration_mock: BaseIntegrationMock, alerts_data_mock: AlertsDataMock):
+    assert base_integration_mock._get_alert_template(alert=alerts_data_mock.dbt_test) == "dbt_test"
+    assert base_integration_mock._get_alert_template(alert=alerts_data_mock.elementary_test) == "elementary_test"
+    assert base_integration_mock._get_alert_template(alert=alerts_data_mock.model) == "model"
+    assert base_integration_mock._get_alert_template(alert=alerts_data_mock.snapshot) == "snapshot"
+    assert base_integration_mock._get_alert_template(alert=alerts_data_mock.source_freshness) == "source_freshness"
+    assert base_integration_mock._get_alert_template(alert=alerts_data_mock.grouped_by_table) == "grouped_by_table"
 
 
 @pytest.fixture

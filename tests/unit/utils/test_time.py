@@ -10,16 +10,12 @@ from elementary.utils.time import (
 
 
 def test_datetime_strftime_without_timezone():
-    str_datetime = datetime_strftime(
-        datetime(2010, 1, 1, 1, 1, 1, 1), include_timezone=False
-    )
+    str_datetime = datetime_strftime(datetime(2010, 1, 1, 1, 1, 1, 1), include_timezone=False)
     assert str_datetime == "2010-01-01 01:01:01"
 
 
 def test_datetime_strftime_with_timezone():
-    str_datetime = datetime_strftime(
-        datetime(2010, 1, 1, 1, 1, 1, 1, tzinfo=tz.tzutc()), include_timezone=True
-    )
+    str_datetime = datetime_strftime(datetime(2010, 1, 1, 1, 1, 1, 1, tzinfo=tz.tzutc()), include_timezone=True)
     assert str_datetime == "2010-01-01 01:01:01 UTC"
 
 

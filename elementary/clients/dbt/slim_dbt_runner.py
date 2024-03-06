@@ -48,9 +48,7 @@ def default_project_dir() -> Path:
 def default_profiles_dir() -> Path:
     if "DBT_PROFILES_DIR" in os.environ:
         return Path(os.environ["DBT_PROFILES_DIR"]).resolve()
-    return (
-        Path.cwd() if (Path.cwd() / "profiles.yml").exists() else Path.home() / ".dbt"
-    )
+    return Path.cwd() if (Path.cwd() / "profiles.yml").exists() else Path.home() / ".dbt"
 
 
 DEFAULT_PROFILES_DIR = str(default_profiles_dir())
@@ -106,9 +104,7 @@ class SlimDbtRunner(BaseDbtRunner):
         target: Optional[str] = None,
         vars: Optional[dict] = None,
     ):
-        self._load_config_args(
-            project_dir=project_dir, profiles_dir=profiles_dir, target=target, vars=vars
-        )
+        self._load_config_args(project_dir=project_dir, profiles_dir=profiles_dir, target=target, vars=vars)
         self._load_config()
         self._load_adapter()
         self._load_manifest()
@@ -142,9 +138,7 @@ class SlimDbtRunner(BaseDbtRunner):
 
         register_adapter(self.config)
         self.adapter_name = self.config.credentials.type
-        self.adapter = cast(
-            BaseAdapter, get_adapter_class_by_name(self.adapter_name)(self.config)
-        )
+        self.adapter = cast(BaseAdapter, get_adapter_class_by_name(self.adapter_name)(self.config))
 
         self.connections_manager = cast(BaseConnectionManager, self.adapter.connections)
         self.connections_manager.set_connection_name()

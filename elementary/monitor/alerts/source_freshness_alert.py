@@ -66,17 +66,13 @@ class SourceFreshnessAlertModel(AlertModel):
             elementary_database_and_schema,
         )
         self.snapshotted_at_str = (
-            convert_datetime_utc_str_to_timezone_str(
-                snapshotted_at.isoformat(), self.timezone
-            )
+            convert_datetime_utc_str_to_timezone_str(snapshotted_at.isoformat(), self.timezone)
             if snapshotted_at
             else None
         )
 
         self.max_loaded_at = (
-            convert_datetime_utc_str_to_timezone_str(
-                max_loaded_at.isoformat(), self.timezone
-            )
+            convert_datetime_utc_str_to_timezone_str(max_loaded_at.isoformat(), self.timezone)
             if max_loaded_at
             else None
         )
@@ -84,16 +80,12 @@ class SourceFreshnessAlertModel(AlertModel):
         self.max_loaded_at_time_ago_in_s = max_loaded_at_time_ago_in_s
 
         formatted_max_loaded_at = (
-            convert_datetime_utc_str_to_timezone_str(
-                max_loaded_at.isoformat(), self.timezone, include_timezone=True
-            )
+            convert_datetime_utc_str_to_timezone_str(max_loaded_at.isoformat(), self.timezone, include_timezone=True)
             if max_loaded_at
             else None
         )
         formatted_detected_at = (
-            datetime_strftime(self.detected_at, include_timezone=True)
-            if self.detected_at
-            else "N/A"
+            datetime_strftime(self.detected_at, include_timezone=True) if self.detected_at else "N/A"
         )
         self.result_description = (
             error

@@ -9,16 +9,12 @@ from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 
 def test_create_divider_block():
     divider_block = SlackMessageBuilder.create_divider_block()
-    assert json.dumps(divider_block, sort_keys=True) == json.dumps(
-        {"type": "divider"}, sort_keys=True
-    )
+    assert json.dumps(divider_block, sort_keys=True) == json.dumps({"type": "divider"}, sort_keys=True)
 
 
 def test_create_fields_section_block():
     section_messages = ["first section"]
-    fields_section_block = SlackMessageBuilder.create_fields_section_block(
-        section_messages
-    )
+    fields_section_block = SlackMessageBuilder.create_fields_section_block(section_messages)
     assert json.dumps(fields_section_block, sort_keys=True) == json.dumps(
         {
             "type": "section",
@@ -33,9 +29,7 @@ def test_create_fields_section_block():
     )
 
     section_messages = ["first section", "second section"]
-    fields_section_block = SlackMessageBuilder.create_fields_section_block(
-        section_messages
-    )
+    fields_section_block = SlackMessageBuilder.create_fields_section_block(section_messages)
     assert json.dumps(fields_section_block, sort_keys=True) == json.dumps(
         {
             "type": "section",
@@ -151,18 +145,14 @@ def test_create_header_block(message):
 def test_create_compacted_sections_blocks():
     # no sections
     section_messages = []
-    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
-        section_messages
-    )
+    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(section_messages)
     assert json.dumps(compacted_section, sort_keys=True) == json.dumps(
         [{"type": "section", "fields": []}], sort_keys=True
     )
 
     # even sections
     section_messages = ["One", "Two", "Three", "Four"]
-    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
-        section_messages
-    )
+    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(section_messages)
     assert json.dumps(compacted_section, sort_keys=True) == json.dumps(
         [
             {
@@ -185,9 +175,7 @@ def test_create_compacted_sections_blocks():
 
     # odd sections
     section_messages = ["One", "Two", "Three", "Four", "Five"]
-    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(
-        section_messages
-    )
+    compacted_section = SlackMessageBuilder.create_compacted_sections_blocks(section_messages)
     assert json.dumps(compacted_section, sort_keys=True) == json.dumps(
         [
             {
@@ -285,9 +273,7 @@ def test_get_limited_markdown_msg():
     short_message = "short message"
     long_message = short_message * 3000
 
-    markdown_short_message = slack_message_builder.get_limited_markdown_msg(
-        short_message
-    )
+    markdown_short_message = slack_message_builder.get_limited_markdown_msg(short_message)
     markdown_long_message = slack_message_builder.get_limited_markdown_msg(long_message)
     assert markdown_short_message == short_message
     assert len(markdown_long_message) == SectionBlock.text_max_length
@@ -303,9 +289,7 @@ def test_get_limited_markdown_msg():
     ],
 )
 def test_create_button_action_block(text, url):
-    button_action_block = SlackMessageBuilder.create_button_action_block(
-        text=text, url=url
-    )
+    button_action_block = SlackMessageBuilder.create_button_action_block(text=text, url=url)
     assert json.dumps(button_action_block, sort_keys=True) == json.dumps(
         {
             "type": "actions",
@@ -323,21 +307,11 @@ def test_create_button_action_block(text, url):
 
 
 def test_slack_message_attachments_limit():
-    very_short_attachments = ["attachment"] * (
-        SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS - 1
-    )
+    very_short_attachments = ["attachment"] * (SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS - 1)
     short_attachments = ["attachment"] * SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS
-    long_attachments = ["attachment"] * (
-        SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS + 1
-    )
+    long_attachments = ["attachment"] * (SlackMessageBuilder._MAX_AMOUNT_OF_ATTACHMENTS + 1)
 
-    assert (
-        SlackMessageSchema(attachments=very_short_attachments).attachments
-        == very_short_attachments
-    )
-    assert (
-        SlackMessageSchema(attachments=short_attachments).attachments
-        == short_attachments
-    )
+    assert SlackMessageSchema(attachments=very_short_attachments).attachments == very_short_attachments
+    assert SlackMessageSchema(attachments=short_attachments).attachments == short_attachments
     assert SlackMessageSchema(attachments=long_attachments).attachments is None
     assert SlackMessageSchema(attachments=[]).attachments == []

@@ -58,9 +58,12 @@ jobs:
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-snowflake${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Install Elementary
         run: |
-          pip install -r dev-requirements.txt
+          poetry install --only dev
           pip install ".[snowflake]"
 
       - name: Install dbt package

@@ -40,14 +40,10 @@ class AlertModel:
         if detected_at is not None:
             try:
                 self.detected_at_utc = detected_at
-                self.detected_at = detected_at.astimezone(
-                    tz.gettz(timezone) if timezone else tz.tzlocal()
-                )
+                self.detected_at = detected_at.astimezone(tz.gettz(timezone) if timezone else tz.tzlocal())
             except Exception:
                 logger.error('Failed to parse "detected_at" field.')
-        self.detected_at_str = (
-            self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else "N/A"
-        )
+        self.detected_at_str = self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else "N/A"
         self.database_name = database_name
         self.schema_name = schema_name
         self.owners: List[str] = owners or []

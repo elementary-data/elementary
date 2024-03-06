@@ -1,28 +1,30 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 24.2.0
     hooks:
       - id: black
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         args: ["--profile", "black"]
 
   - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    rev: 7.0.0
     hooks:
       - id: flake8
+        additional_dependencies:
+          - "Flake8-pyproject~=1.1"
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: "v3.0.0"
+    rev: "v4.0.0-alpha.8"
     hooks:
       - id: prettier
         exclude: \.html$|^docs/
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.16.6
+    rev: v1.19.0
     hooks:
       - id: typos
         exclude: index\.html$|elementary_output\.json$
@@ -36,10 +38,24 @@ repos:
         require_serial: true
         pass_filenames: false
 
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
     hooks:
       - id: mypy
-        name: mypy
-        entry: mypy --no-error-summary
-        language: system
-        files: ^elementary/.*\.py$
+        args:
+          # FIXME: uncomment the following line to enable mypy
+          #          - --strict
+          - --ignore-missing-imports
+          - --install-types
+          - --allow-subclassing-any
+          - --allow-untyped-decorators
+          # FIXME: remove following 2 lines and fix corresponding code ASAP
+          - --allow-untyped-defs
+          - --allow-untyped-call
+        additional_dependencies:
+          - types-PyYAML
+          - types-python-dateutil
+          - types-requests
+          - types-retry
+          - types-setuptools
+        exclude: ^tests/

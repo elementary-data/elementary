@@ -36,9 +36,7 @@ class DataMonitoring:
         latest_invocation = self.get_latest_invocation()
         self.project_name = latest_invocation.get("project_name")
         dbt_pkg_version = latest_invocation.get("elementary_version")
-        self.warehouse_info = self._get_warehouse_info(
-            hash_id=isinstance(tracking, AnonymousTracking)
-        )
+        self.warehouse_info = self._get_warehouse_info(hash_id=isinstance(tracking, AnonymousTracking))
         if tracking:
             if self.warehouse_info:
                 tracking.register_group(
@@ -69,9 +67,7 @@ class DataMonitoring:
         return internal_dbt_runner
 
     def properties(self):
-        data_monitoring_properties = {
-            "data_monitoring_properties": self.execution_properties
-        }
+        data_monitoring_properties = {"data_monitoring_properties": self.execution_properties}
         return data_monitoring_properties
 
     def get_elementary_database_and_schema(self):
@@ -109,8 +105,7 @@ class DataMonitoring:
         dbt_pkg_ver = cast(version.Version, version.parse(dbt_pkg_ver_str))
         py_pkg_ver = cast(version.Version, version.parse(py_pkg_ver_str))
         if dbt_pkg_ver.major > py_pkg_ver.major or (
-            dbt_pkg_ver.major == py_pkg_ver.major
-            and dbt_pkg_ver.minor > py_pkg_ver.minor
+            dbt_pkg_ver.major == py_pkg_ver.major and dbt_pkg_ver.minor > py_pkg_ver.minor
         ):
             logger.warning(
                 f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
@@ -120,8 +115,7 @@ class DataMonitoring:
             return
 
         if dbt_pkg_ver.major < py_pkg_ver.major or (
-            dbt_pkg_ver.major == py_pkg_ver.major
-            and dbt_pkg_ver.minor < py_pkg_ver.minor
+            dbt_pkg_ver.major == py_pkg_ver.major and dbt_pkg_ver.minor < py_pkg_ver.minor
         ):
             logger.warning(
                 f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
@@ -130,16 +124,12 @@ class DataMonitoring:
             )
             return
 
-        logger.info(
-            f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible."
-        )
+        logger.info(f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible.")
 
     def _get_warehouse_info(self, hash_id: bool = False) -> Optional[WarehouseInfo]:
         try:
             warehouse_type, warehouse_unique_id = json.loads(
-                self.internal_dbt_runner.run_operation(
-                    "elementary_cli.get_adapter_type_and_unique_id", quiet=True
-                )[0]
+                self.internal_dbt_runner.run_operation("elementary_cli.get_adapter_type_and_unique_id", quiet=True)[0]
             )
             return WarehouseInfo(
                 id=warehouse_unique_id if not hash_id else hash(warehouse_unique_id),

@@ -138,12 +138,8 @@ class Config:
             aws_region_name,
             aws_config.get("region_name"),
         )
-        self.s3_endpoint_url = self._first_not_none(
-            s3_endpoint_url, aws_config.get("s3_endpoint_url")
-        )
-        self.s3_bucket_name = self._first_not_none(
-            s3_bucket_name, aws_config.get("s3_bucket_name")
-        )
+        self.s3_endpoint_url = self._first_not_none(s3_endpoint_url, aws_config.get("s3_endpoint_url"))
+        self.s3_bucket_name = self._first_not_none(s3_bucket_name, aws_config.get("s3_bucket_name"))
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.aws_session_token = aws_session_token
@@ -198,12 +194,7 @@ class Config:
 
     @property
     def has_send_report_platform(self):
-        return (
-            (self.slack_token and self.slack_channel_name)
-            or self.has_s3
-            or self.has_gcs
-            or self.has_blob
-        )
+        return (self.slack_token and self.slack_channel_name) or self.has_s3 or self.has_gcs or self.has_blob
 
     @property
     def has_slack(self) -> bool:
@@ -254,9 +245,7 @@ class Config:
 
     def validate_send_report(self):
         if not self.has_send_report_platform:
-            raise InvalidArgumentsError(
-                "You must provide a platform to upload the report to (Slack token / S3 / GCS)."
-            )
+            raise InvalidArgumentsError("You must provide a platform to upload the report to (Slack token / S3 / GCS).")
 
     def _validate_timezone(self):
         if self.timezone and not tz.gettz(self.timezone):
@@ -278,14 +267,10 @@ class Config:
 
         dbt_quoting_keys = {part.strip() for part in dbt_quoting.split(",")}
         if not dbt_quoting_keys.issubset(cls._QUOTING_VALID_KEYS):
-            raise InvalidArgumentsError(
-                "Invalid quoting specification: %s" % dbt_quoting
-            )
+            raise InvalidArgumentsError("Invalid quoting specification: %s" % dbt_quoting)
 
         env_vars = {env_var: "False" for env_var in cls._QUOTING_ENV_VARS}
-        env_vars.update(
-            {cls._QUOTING_KEY_MAPPING[key]: "True" for key in dbt_quoting_keys}
-        )
+        env_vars.update({cls._QUOTING_KEY_MAPPING[key]: "True" for key in dbt_quoting_keys})
 
         return env_vars
 

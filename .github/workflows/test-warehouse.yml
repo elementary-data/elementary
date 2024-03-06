@@ -118,9 +118,12 @@ jobs:
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Install Elementary
         run: |
-          pip install -r dev-requirements.txt
+          poetry install --only dev
           pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
 
       - name: Write dbt profiles

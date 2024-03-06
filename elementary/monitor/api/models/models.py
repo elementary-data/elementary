@@ -60,20 +60,14 @@ class ModelsAPI(APIClient):
             ]
             # The median should be based only on successful model runs.
             successful_execution_times = [
-                model_run.execution_time
-                for model_run in model_runs
-                if model_run.status.lower() == "success"
+                model_run.execution_time for model_run in model_runs if model_run.status.lower() == "success"
             ]
             median_execution_time = (
-                statistics.median(successful_execution_times)
-                if len(successful_execution_times)
-                else 0
+                statistics.median(successful_execution_times) if len(successful_execution_times) else 0
             )
             last_model_run = sorted(model_runs, key=lambda run: run.generated_at)[-1]
             execution_time_change_rate = (
-                (last_model_run.execution_time / median_execution_time - 1) * 100
-                if median_execution_time != 0
-                else 0
+                (last_model_run.execution_time / median_execution_time - 1) * 100 if median_execution_time != 0 else 0
             )
             aggregated_models_runs.append(
                 ModelRunsSchema(
@@ -99,9 +93,7 @@ class ModelsAPI(APIClient):
                 failures=0,
                 passed=aggregated_model_run.totals.success,
             )
-        return ModelRunsWithTotalsSchema(
-            runs=aggregated_models_runs, totals=model_runs_totals
-        )
+        return ModelRunsWithTotalsSchema(runs=aggregated_models_runs, totals=model_runs_totals)
 
     @staticmethod
     def _get_model_runs_totals(
@@ -111,12 +103,8 @@ class ModelsAPI(APIClient):
         success_runs = len([run for run in runs if run.status == "success"])
         return TotalsModelRunsSchema(errors=error_runs, success=success_runs)
 
-    def get_models(
-        self, exclude_elementary_models: bool = False
-    ) -> Dict[str, NormalizedModelSchema]:
-        models_results = self.models_fetcher.get_models(
-            exclude_elementary_models=exclude_elementary_models
-        )
+    def get_models(self, exclude_elementary_models: bool = False) -> Dict[str, NormalizedModelSchema]:
+        models_results = self.models_fetcher.get_models(exclude_elementary_models=exclude_elementary_models)
         models = dict()
         if models_results:
             for model_result in models_results:
@@ -176,21 +164,15 @@ class ModelsAPI(APIClient):
         return coverages
 
     @overload
-    def _normalize_dbt_artifact_dict(
-        self, artifact: ModelSchema
-    ) -> NormalizedModelSchema:
+    def _normalize_dbt_artifact_dict(self, artifact: ModelSchema) -> NormalizedModelSchema:  # fmt: off
         ...
 
     @overload
-    def _normalize_dbt_artifact_dict(
-        self, artifact: ExposureSchema
-    ) -> NormalizedExposureSchema:
+    def _normalize_dbt_artifact_dict(self, artifact: ExposureSchema) -> NormalizedExposureSchema:  # fmt: off
         ...
 
     @overload
-    def _normalize_dbt_artifact_dict(
-        self, artifact: SourceSchema
-    ) -> NormalizedSourceSchema:
+    def _normalize_dbt_artifact_dict(self, artifact: SourceSchema) -> NormalizedSourceSchema:  # fmt: off
         ...
 
     def _normalize_dbt_artifact_dict(
@@ -207,9 +189,7 @@ class ModelsAPI(APIClient):
 
         fqn = self._fqn(artifact)
         normalized_artifact["fqn"] = fqn
-        normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(
-            artifact, fqn
-        )
+        normalized_artifact["normalized_full_path"] = self._normalize_artifact_path(artifact, fqn)
 
         return schema_to_normalized_schema_map[type(artifact)](**normalized_artifact)
 
