@@ -67,14 +67,14 @@ class ReportAPI(APIClient):
             models = models_api.get_models(exclude_elementary_models)
             sources = models_api.get_sources()
             exposures = models_api.get_exposures()
-            tests = tests_api.get_singular_tests()
+            singular_tests = tests_api.get_singular_tests()
 
             groups = groups_api.get_groups(
                 artifacts=[
                     *models.values(),
                     *sources.values(),
                     *exposures.values(),
-                    *tests,
+                    *singular_tests,
                 ]
             )
 
