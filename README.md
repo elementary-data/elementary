@@ -44,7 +44,7 @@ Available as self-hosted or Cloud service with premium features.
 
 <img src="static/happy_fire.ico" width="16"/> **Anomaly detection tests** - Collect data quality metrics and detect anomalies, executed and configured as native dbt tests.
 
-<img src="static/happy_fire.ico" width="16"/> **Automated monitors** - Out-of-the-box automated monitors in the cloud product to detect freshness, volume and schema issues.
+<img src="static/happy_fire.ico" width="16"/> **Automated monitors** - Out-of-the-box automated monitors in Elementary cloud to detect freshness, volume and schema issues.
 
 <img src="static/happy_fire.ico" width="16"/> **End-to-End Data Lineage** - Data lineage enriched with the latest test results, for impact and root cause analysis of data issues. The Cloud product includes **Column Level Lineage** and **BI integrations**.
 
@@ -64,7 +64,7 @@ Our full documentation is [available here](https://docs.elementary-data.com/).
 
 Join [Slack](https://www.elementary-data.com/community) to learn more about Elementary.
 
-## Self-hosted vs. Cloud service
+## Self-hosted vs. Cloud
 
 ### Elementary Cloud
 
@@ -81,17 +81,17 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 ### Elementary Cloud
 
-1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
+    1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
 
-2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
+    2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
 
-3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
+    3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
 
 ### Elementary Community
 
-1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
+    1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
 
-2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
+    2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
 ## Community & Support
 
