@@ -5,9 +5,6 @@
 <h2 align="center">
  dbt native data observability for analytics & data engineers
 </h2>
-<h4 align="center">
-Monitor your data quality, operation and performance directly from your dbt project.
-</h4>
 
 <p align="center">
 <a href="https://www.elementary-data.com/community"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
@@ -25,7 +22,19 @@ Monitor your data quality, operation and performance directly from your dbt proj
 
 ## What is Elementary?
 
-Elementary is a dbt-native data observability solution for data and analytics engineers. Set up in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause. Available as self-hosted or Cloud service with premium features.
+Elementary is a dbt-native data observability solution for data and analytics engineers. 
+Set up in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause. 
+Available as self-hosted or Cloud service with premium features.
+
+
+#### Table of Contents
+
+- [Features](#features)
+- [Self-hosted vs. Cloud service](#self-hosted-vs-cloud-service)
+- [Get Started](#get-started)
+- [Community &  Support](#community--support)
+- [Contribution](#contributions)
+
 
 <kbd align="center">
         <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
@@ -33,78 +42,70 @@ Elementary is a dbt-native data observability solution for data and analytics en
 
 <br>
 
-## Table of Contents
-
-- [Features](#features)
-- [Self-hosted vs. Cloud service](#self-hosted-vs-cloud-service)  
-- [Get Started](#get-started)
-- [Community &  Support](#community--support)
-- [Contribution](#contributions)
 
 ## Features
 
-<img src="static/happy_fire.ico" width="16"/> **Elementary Data Tests** - For detection of data quality issues, configured and executed like native tests in your dbt project.
+<img src="static/happy_fire.ico" width="16"/> **Anomaly detection tests** - Collect data quality metrics and detect anomalies, executed and configured as native dbt tests.
 
-<img src="static/happy_fire.ico" width="16"/> **Anomaly detection dbt tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
+<img src="static/happy_fire.ico" width="16"/> **Automated monitors** - Out-of-the-box automated monitors in the cloud product to detect freshness, volume and schema issues.
 
-<img src="static/happy_fire.ico" width="16"/> **Automated monitors** - Out-of-the-box automated monitors to detect freshness, volume and schema issues.
+<img src="static/happy_fire.ico" width="16"/> **End-to-End Data Lineage** - Data lineage enriched with the latest test results, for impact and root cause analysis of data issues. The Cloud product includes **Column Level Lineage** and **BI integrations**.
 
-<img src="static/happy_fire.ico" width="16"/> **Cofiguration-as-code** - All Elementary configuration is managed in your dbt code.
+<img src="static/happy_fire.ico" width="16"/> **Data quality dashboard** - Single interface for all your data monitoring and tests, Elementary, dbt, packages and custom.
 
-<img src="static/happy_fire.ico" width="16"/> **End-to-End Data Lineage** - Data lineage graph enriched with the latest test results, to enable easy impact and root cause analysis of data issues. The Cloud product includes Column Level Lineage and BI integrations.
+<img src="static/happy_fire.ico" width="16"/> **dbt observability** - Monitor models and jobs run results and performance over time.
+
+<img src="static/happy_fire.ico" width="16"/> **Configuration-as-code** - Elementary configuration is managed in your dbt code.
+
+<img src="static/happy_fire.ico" width="16"/> **Alerts** - Send detailed alerts to Slack or Microsoft Teams, including multiple channels and tagging of owners and subscribers. Cloud supports additional alert destinations.
 
 <img src="static/happy_fire.ico" width="16"/> **Data catalog** - Explore your datasets information - descriptions, columns, columns descriptions, latest update time, and datasets health.
 
-<img src="static/happy_fire.ico" width="16"/> **Alerts** - Send alerts to Slack or Microsoft Teams, including custom channels and tagging of owners and subscribers.
+##
+
+Our full documentation is [available here](https://docs.elementary-data.com/).
+
+Join [Slack](https://www.elementary-data.com/community) to learn more about Elementary.
 
 
 ## Self-hosted vs. Cloud service
 
-**Cloud Service**
+### Elementary Cloud
 
-Our managed cloud service is ideal for teams monitoring mission-critical data pipelines, requiring guaranteed uptime and reliability, short-time-to-value, advanced features, collaboration, and professional support.
+Ideal for teams monitoring mission-critical data pipelines, requiring guaranteed uptime and reliability, short-time-to-value, advanced features, collaboration, and professional support. 
+The solution is secure by design, and requires no access to your data from cloud.  
 
-To learn more, [book a demo](https://cal.com/maayansa/30min?user=maayansa) or see our [pricing page](https://elementary-data.webflow.io/pricing).
+To learn more, [book a demo](https://cal.com/maayansa/elementary-intro-github) or see our [pricing page](https://www.elementary-data.com/pricing).
 
-**Self-hosted**
+### Self-hosted
 
-Elementary Community is an open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report. It is best for data and analytics engineers that require basic observability capabilities or for evaluating features without vendor approval. Our community can provide great support if needed.
-
-Check out our [docs](https://docs.elementary-data.com/oss/oss-introduction) for more info.
+Elementary Community is an open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report. It is best for data and analytics engineers that require basic observability capabilities or for evaluating features without vendor approval. Our community can provide great support on [Slack](https://www.elementary-data.com/community) if needed.
 
 
 ## Get Started
 
-**Get started with Elementary Cloud Service**
+### Elementary Cloud 
 
-Step 1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
+1 - [Create an account](https://elementary-data.frontegg.com/oauth/account/sign-up)
 
-Step 2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
+2 - [Install Elementary dbt package](https://docs.elementary-data.com/cloud/onboarding/quickstart-dbt-package)
 
-Step 3 - [Set up Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
+3 - [Connect Elementary Cloud](https://docs.elementary-data.com/cloud/onboarding/signup)
 
-#
-**Get started with Elementary Community**
 
-Step 1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
+### Elementary Community
 
-Step 2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
+1 - [Install Elementary dbt package](https://docs.elementary-data.com/quickstart)
 
-##
-
-Join [Slack](https://www.elementary-data.com/community) to learn more about Elementary.
-
-Our full documentation is [available here](https://docs.elementary-data.com/).
-
+2 - [Install Elementary CLI](https://docs.elementary-data.com/quickstart-cli)
 
 
 ## Community & Support
 
 For additional information and help, you can use one of these channels:
 
-- [Slack](https://www.elementary-data.com/community) \(Live chat with the team, support, discussions, etc.\)
+- [Slack community](https://www.elementary-data.com/community) \(Release announcments, community support, discussions, etc.\)
 - [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
-- [Twitter](https://twitter.com/ElementaryData) \(Updates on new releases and stuff)
 
 
 ## **Contributions**
