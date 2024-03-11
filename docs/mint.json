@@ -42,25 +42,21 @@
     }
   ],
   "topbarCtaButton": {
-    "name": "Try Elementary Cloud",
+    "name": "Get Started Now",
     "url": "https://app.elementary-data.com/"
   },
   "topbarLinks": [
-    {
-      "name": "Github",
-      "url": "https://github.com/elementary-data/elementary"
-    }
   ],
   "anchors": [
     {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://elementary-data.com/community"
+      "name": "Book a Demo",
+      "icon": "calendar-check",
+      "url": "https://cal.com/maayansa/elementary-intro-docs"
     },
     {
-      "name": "Demo",
-      "icon": "circle-play",
-      "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
+      "name": "Join Slack",
+      "icon": "slack",
+      "url": "https://elementary-data.com/community"
     }
   ],
   "navigation": [
