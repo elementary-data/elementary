@@ -1,18 +1,9 @@
 ---
 title: "Welcome to Elementary"
 sidebarTitle: "Introduction"
-description: "dbt native data observability, built for data and analytics engineers"
+description: "dbt-native data observability platform built for data and analytics engineers."
 icon: "fire"
 ---
-
-With Elementary you can monitor your data pipelines in minutes, in your dbt project.
-
-Gain immediate visibility to your jobs, models runs and test results.
-Detect data issues with freshness, volume, anomaly detection and schema tests.
-Explore all your test results and data health in a single interface and understand impact and root cause with rich lineage.
-Distribute actionable alerts to different channels and owners, and be on top of your data health.
-
-Start by deploying the dbt package, and then setup Elementary Cloud **or** Elementary OSS.
 
 <div className="dark:#4A165C rounded-md p-0">
   <img
@@ -21,32 +12,59 @@ Start by deploying the dbt package, and then setup Elementary Cloud **or** Eleme
   />
 </div>
 
-## Elementary Products
 
-<Snippet file="products-cards.mdx" />
-
-## Quick start
+Elementary has two product offerings:
 
 <Snippet file="quickstart/quickstart-cards.mdx" />
 
-## How it works?
+See also the [detailed comparison](/overview/cloud-vs-oss) between Elementary and Elementary Community.
 
-In your dbt project, you install the [Elementary dbt package](/guides/modules-overview/dbt-package).
-The package will collect metadata and run results to a dedicated Elementary schema.
-You can use elementary tests in your dbt project, configured just like native dbt tests.
+## Get started with Elementary
 
-[Elementary Cloud](/cloud/introduction) or [Elementary CLI](/oss/oss-introduction) will connect to your data warehouse, read from the Elementary schema, and present the results in the UI / alerts.
+<Snippet file="cloud/quickstart-steps.mdx" />
 
-## Community & Support
+### Elementary Community
 
-For additional information and help, you can use one of these channels:
+Or - Start with [Elementary Community](/oss/quickstart/quickstart-cli-package), open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report.
 
-- [Slack](https://elementary-data.com/community) (live chat with the team, support, consult with us, etc.)
-- [GitHub issues](https://github.com/elementary-data/elementary-lineage/issues) (bug reports, feature requests, contributions)
-- [Twitter](https://twitter.com/ElementaryData) (updates on new releases and stuff)
 
-## Contributing to Elementary
+## Why choose Elementary?
 
-Thank you 🧡 Whether it’s a bug fix, new feature, or documentation changes - we greatly appreciate contributions!
+<AccordionGroup>
+  <Accordion title="Built for data developers" icon="code" iconType="solid">
+    Elementary configuration is managed in your dbt code. 
+    Elementary Cloud syncs configuration changes from the UI back to the dbt project code repository.
 
-Check out the [contributions guide](/general/contributions).
+    You won't need to duplicate configuration - all your existing tests, owners, tags, and descriptions are leveraged.
+
+  </Accordion>
+
+  <Accordion title="Secure by design" icon="lock" iconType="solid">
+    Elementary Cloud can't access your data.
+
+    The dbt package creates a schema for logs, results and metadata, and Elementary only requires access to the Elementary schema.
+
+    [Read about Security and Privacy >>>](/cloud/general/security-and-privacy)
+
+  </Accordion>
+
+  <Accordion title="dbt native" icon="cube">
+    Elementary dbt package automatically collects results and artifacts from your dbt project. All of your Elementary configuration is managed in your dbt code.
+
+    By combining the package and Elementary Cloud, you get full dbt observability. All your tests and results in one dashboard and interface.
+
+  </Accordion>
+
+</AccordionGroup>
+
+
+## Want to know more?
+
+<Card
+title="Book a call with our team"
+href="https://cal.com/maayansa/elementary-intro-docs"
+></Card>
+<Card
+title="Reach out to us on slack"
+href="https://elementary-data.com/community"
+></Card>
