@@ -94,7 +94,8 @@
         "features/config-as-code",
         "features/catalog",
         "features/multi-env",
-        "features/ci"
+        "features/ci",
+        "features/integrations"
       ]
     },
     {
