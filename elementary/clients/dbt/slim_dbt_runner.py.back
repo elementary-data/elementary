@@ -21,9 +21,7 @@ from dbt.version import __version__ as dbt_version_string
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel, validator
-from dbt.cli.main import dbtRunner, dbtRunnerResult
-from dbt.events.base_types import EventMsg
-from google.protobuf.json_format import MessageToDict
+from time import perf_counter as pc
 
 logger = get_logger(__name__)
 
@@ -192,27 +190,6 @@ class SlimDbtRunner(BaseDbtRunner):
         if self.connections_manager:
             self.connections_manager.cleanup_all()
 
-    def _run_command_with_dbt_python_api(self, dbt_command):
-        dbt_logs = []
-        # if self.dbt_version.major >= 1 and self.dbt_version.minor >= 5:
-        #     logger.info(f"DBT VERSION IS OK!!!!  {self.dbt_version}")
-        # else:
-        #     logger.error(f"DBT VERSION IS NOT OK!!!! {self.dbt_version}")
-
-        def collect_dbt_command_logs(event: EventMsg):
-            if event.info.name == 'JinjaLogInfo':
-                dict_event = MessageToDict(event)
-                dbt_logs.append(json.dumps(dict_event))
-
-        # initialize
-        dbt = dbtRunner(callbacks=[collect_dbt_command_logs])
-        # run the command
-        res: dbtRunnerResult = dbt.invoke(dbt_command)
-        result = '\n'.join(dbt_logs)
-        logger.info(f"DBT COMMAND RESULT: {res}")
-        return '\n'.join(dbt_logs)
-
-
     def run_operation(
         self,
         macro_name: str,
@@ -233,29 +210,26 @@ class SlimDbtRunner(BaseDbtRunner):
             )
 
         macro_args = macro_args or {}
-
+        t0 = pc()
         all_vars = self._get_all_vars(vars)
-        # self._load_runner(
-        #     project_dir=self.project_dir,
-        #     profiles_dir=self.profiles_dir,
-        #     target=self.target,
-        #     vars=all_vars,
-        # )
+        t1 = pc()
+        self._load_runner(
+            project_dir=self.project_dir,
+            profiles_dir=self.profiles_dir,
+            target=self.target,
+            vars=all_vars,
+        )
+        t2 = pc()
+        logger.info(f"TIME TO RUN ALL VARS: {t1-t0}")
+        logger.info(f"TIME TO RUN LOAD RUNNER OPERATION: {t2-t1}")
         log_command = [
             "dbt",
             "run-operation",
             macro_name,
             "--args",
             json.dumps(macro_args, ensure_ascii=False),
-            "--project-dir",
-            "/opt/elementary_internal/packages/py_common/elementary_internal/dbt/dbt_project",
-            "--profiles-dir",
-            "/opt/elementary_internal/packages/py_common/elementary_internal/dbt",
-            "--target",
-            "postgres",
         ]
         if all_vars:
-            logger.info(f"ALL VARS: {all_vars}")
             log_command.extend(
                 [
                     "--vars",
@@ -265,15 +239,78 @@ class SlimDbtRunner(BaseDbtRunner):
         log_msg = f"Running {' '.join(log_command)}"
         if not quiet:
             logger.info(log_msg)
-        else:
-            logger.debug(log_msg)
-
+        # else:
+        #     logger.debug(log_msg)
         run_operation_results = []
-        # macro_output = self._execute_macro(macro_name, **macro_args)
-        macro_output = self._run_command_with_dbt_python_api(dbt_command=log_command[1:])
+        t3 = pc()
+        macro_output = self._execute_macro(macro_name, **macro_args)
         if capture_output:
             run_operation_results = [json.dumps(macro_output)]
+        t4 = pc()
+        logger.info(f"TIME TO RUN MACRO: {t4-t3}")
         return run_operation_results
+
+    def run_multiple_operations(
+            self,
+            macro_name: str,
+            capture_output: bool = True,
+            macro_args_list: Optional[dict] = None,
+            log_errors: bool = True,
+            vars: Optional[dict] = None,
+            quiet: bool = False,
+            **kwargs,
+    ) -> list:
+        if self.profiles_dir is None:
+            raise Exception("profiles_dir must be passed to SlimDbtRunner")
+
+        if "." not in macro_name and not self.allow_macros_without_package_prefix:
+            raise ValueError(
+                f"Macro name '{macro_name}' is missing package prefix. "
+                f"Please use the following format: <package_name>.<macro_name>"
+            )
+        run_operation_results_list = []
+        for macro_args in macro_args_list:
+            macro_args = macro_args
+            t0 = pc()
+            all_vars = self._get_all_vars(vars)
+            t1 = pc()
+            self._load_runner(
+                project_dir=self.project_dir,
+                profiles_dir=self.profiles_dir,
+                target=self.target,
+                vars=all_vars,
+            )
+            t2 = pc()
+            logger.info(f"TIME TO RUN ALL VARS: {t1-t0}")
+            logger.info(f"TIME TO RUN LOAD RUNNER OPERATION: {t2-t1}")
+            log_command = [
+                "dbt",
+                "run-operation",
+                macro_name,
+                "--args",
+                json.dumps(macro_args, ensure_ascii=False),
+            ]
+            if all_vars:
+                log_command.extend(
+                    [
+                        "--vars",
+                        json.dumps(self._get_secret_masked_vars(all_vars)),
+                    ]
+                )
+            log_msg = f"Running {' '.join(log_command)}"
+            if not quiet:
+                logger.info(log_msg)
+            # else:
+            #     logger.debug(log_msg)
+            run_operation_results = []
+            t3 = pc()
+            macro_output = self._execute_macro(macro_name, **macro_args)
+            if capture_output:
+                run_operation_results = [json.dumps(macro_output)]
+            t4 = pc()
+            logger.info(f"TIME TO RUN MACRO: {t4-t3}")
+            run_operation_results_list.append(run_operation_results)
+        return run_operation_results_list
 
     def deps(self, *args, **kwargs):
         raise NotImplementedError

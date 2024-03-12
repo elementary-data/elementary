@@ -248,6 +248,7 @@ class DataMonitoringAlerts(DataMonitoring):
         sent_successfully_alerts = []
         for alert in alerts_with_progress_bar:
             sent_successfully = self.alerts_integration.send_alert(alert=alert)
+            logger.info("NOA SENT!")
             if sent_successfully:
                 if isinstance(alert, GroupedByTableAlerts):
                     sent_successfully_alerts.extend(alert.alerts)
