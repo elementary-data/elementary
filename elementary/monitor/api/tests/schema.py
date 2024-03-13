@@ -63,6 +63,7 @@ class TestMetadataSchema(BaseModel):
     result: dict
     configuration: dict
     test_tags: List[str] = Field(default_factory=list)
+    normalized_full_path: Optional[str] = None
 
 
 class TestResultSchema(BaseModel):
