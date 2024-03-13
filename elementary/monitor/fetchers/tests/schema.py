@@ -48,6 +48,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     invocations_rank_index: int
     sample_data: Optional[Union[dict, List]] = None
     failures: Optional[int] = None
+    package_name: Optional[str] = None
 
     class Config:
         smart_union = True
