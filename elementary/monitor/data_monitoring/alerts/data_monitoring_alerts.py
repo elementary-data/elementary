@@ -40,6 +40,7 @@ class DataMonitoringAlerts(DataMonitoring):
         send_test_message_on_success: bool = False,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        populate_data: bool = True,
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, selector_filter
@@ -47,6 +48,7 @@ class DataMonitoringAlerts(DataMonitoring):
 
         self.global_suppression_interval = global_suppression_interval
         self.override_config = override_config
+        self.should_populate_data = populate_data
         self.alerts_api = AlertsAPI(
             self.internal_dbt_runner,
             self.config,
@@ -285,13 +287,14 @@ class DataMonitoringAlerts(DataMonitoring):
         dbt_vars: Optional[dict] = None,
     ) -> bool:
         # Populate data
-        popopulated_data_successfully = self._populate_data(
-            dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
-        )
-        if not popopulated_data_successfully:
-            self.success = False
-            self.execution_properties["success"] = self.success
-            return self.success
+        if self.should_populate_data:
+            popopulated_data_successfully = self._populate_data(
+                dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
+            )
+            if not popopulated_data_successfully:
+                self.success = False
+                self.execution_properties["success"] = self.success
+                return self.success
 
         # Fetch and filter data
         alerts = self._fetch_data(days_back)
