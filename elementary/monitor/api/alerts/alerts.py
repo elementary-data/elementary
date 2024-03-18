@@ -16,15 +16,12 @@ class AlertsAPI(APIClient):
         self,
         dbt_runner: DbtRunner,
         config: Config,
-        elementary_database_and_schema: str,
     ):
         super().__init__(dbt_runner)
         self.config = config
-        self.elementary_database_and_schema = elementary_database_and_schema
         self.alerts_fetcher = AlertsFetcher(
             dbt_runner=self.dbt_runner,
             config=self.config,
-            elementary_database_and_schema=self.elementary_database_and_schema,
         )
 
     def get_new_alerts(self, days_back: int) -> List[PendingAlertSchema]:
