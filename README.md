@@ -201,6 +201,11 @@ Check out the [contributions guide](https://docs.elementary-data.com/general/con
 <a href="https://github.com/suelai"><img src="https://avatars.githubusercontent.com/u/24508576?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/aibazhang"><img src="https://avatars.githubusercontent.com/u/29817697?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/samirS97"><img src="https://avatars.githubusercontent.com/u/51163297?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/svdimchenko"><img src="https://avatars.githubusercontent.com/u/39801237?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/ronisaban2024"><img src="https://avatars.githubusercontent.com/u/162031979?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/dongchris"><img src="https://avatars.githubusercontent.com/u/86695140?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/sanromeo"><img src="https://avatars.githubusercontent.com/u/44975602?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/AvivZikelDY"><img src="https://avatars.githubusercontent.com/u/111749106?v=4" width="50" height="50" alt=""/></a>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
