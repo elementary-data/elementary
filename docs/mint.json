@@ -125,6 +125,24 @@
       ]
     },
     {
+      "group": "Integrations",
+      "pages": [
+        "cloud/integrations/elementary-integrations",
+        {
+          "group": "Data warehouses",
+          "pages": [
+            "cloud/integrations/dwh/snowflake",
+            "cloud/integrations/dwh/bigquery",
+            "cloud/integrations/dwh/redshift",
+            "cloud/integrations/dwh/databricks",
+            "cloud/integrations/dwh/postgres",
+            "cloud/integrations/dwh/athena",
+            "cloud/integrations/dwh/clickhouse"
+          ]
+        }
+      ]
+    },
+    {
       "group": "BI tools integration",
       "pages": [
         "cloud/integrations/bi/connect-bi-tool",
