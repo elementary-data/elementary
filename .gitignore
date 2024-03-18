@@ -27,6 +27,7 @@ var/
 *.mypy_cache/
 logs/
 .venv
+poetry.lock
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
