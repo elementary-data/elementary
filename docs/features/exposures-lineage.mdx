@@ -39,21 +39,31 @@ exposures:
           data_type: "numeric"
 ```
 
-</Accordion>
-
 ### Automated BI lineage
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
 
-Elementary Cloud integrated with BI tools to automatically extend the lineage up to the dashboard level.
+Elementary will automatically and continuously extend column-level-lineage the lineage to the dashboard level of your data visualization tool.
 
-**Supported BI tools:**
+</Accordion>
+
+<video
+autoplay
+muted
+loop
+playsinline
+className="w-full aspect-video"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1710790204/colum-level-lineage-to-bi-better_c00lz0.mp4"
+></video>
+
+### Supported BI tools:
 
 <Snippet file="cloud/integrations/cards-groups/bi-cards.mdx" />
 
-### Why are exposures useful?
+### Why is lineage to exposures useful?
 
 - **Incidents impact analysis**: You could explore which exposures are impacted by each data issue.
 - **Exposure health**: By selecting an exposure and filtering on upstream nodes, you could see the status of all it’s upstream datasets.
+- **Prioritize data issues**: Prioritize the triage and resolution of issues that are impacting your critical downstream assets.
 - **Change impact**: Analyze which exposures will be impacted by a planned change.
-- **Unused datasets**: Detect datasets that no exposure consumes, that might be removed to save costs.
+- **Unused datasets**: Detect datasets that no exposure consumes, that could be removed to save costs.

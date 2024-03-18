@@ -1,17 +1,28 @@
 ---
-title: "Automated lineage to BI"
-sidebarTitle: "BI integration"
+title: "Automated lineage to Data Visualization layer"
+sidebarTitle: "Automated BI lineage"
 ---
 
-After you connect your BI tool, Elementary will automatically and continuously extend column-level-lineage the lineage to the dashboard level.
+Elementary will automatically and continuously extend column-level-lineage the lineage to the dashboard level of your data visualization tool.
 This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
 
 ### Why is end-to-end data lineage useful?
 
-- **Impact analysis** - You could explore which exposures are impacted by each data issue.
-- **Exposure health** - By selecting an exposure and filtering on upstream nodes, you could see the status of all it's upstream models.
-- **dbt docs enrichment** - As the exposures are created in code, they will be made available in your dbt docs lineage as well.
-- **dbt cloud change impact** - If you develop in dbt cloud, you could visualize in your IDE the downstream exposures Elementary generates, and understand the impact of changes.
+- **Incidents impact analysis**: You could explore which exposures are impacted by each data issue.
+- **Exposure health**: By selecting an exposure and filtering on upstream nodes, you could see the status of all it’s upstream datasets.
+- **Prioritize data issues**: Prioritize the triage and resolution of issues that are impacting your critical downstream assets.
+- **Change impact**: Analyze which exposures will be impacted by a planned change.
+- **Unused datasets**: Detect datasets that no exposure consumes, that could be removed to save costs.
+
+
+<video
+autoplay
+muted
+loop
+playsinline
+className="w-full aspect-video"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1710790204/colum-level-lineage-to-bi-better_c00lz0.mp4"
+></video>
 
 ### Supported BI tools
 
@@ -22,3 +33,7 @@ This will provide you end-to-end data lineage to understand your downstream depe
 
 Elementary can open PRs to your dbt project, to update your exposures yml files.
 This means the lineage to the dashboards will also be visible in dbt docs and dbt cloud. 
+
+Why is it useful? 
+- **dbt docs enrichment** - As the exposures are created in code, they will be made available in your dbt docs lineage as well.
+- **dbt cloud change impact** - If you develop in dbt cloud, you could visualize in your IDE the downstream exposures Elementary generates, and understand the impact of changes.
