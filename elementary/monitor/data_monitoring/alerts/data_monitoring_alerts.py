@@ -67,14 +67,18 @@ class DataMonitoringAlerts(DataMonitoring):
 
     def _populate_data(
         self,
+        days_back: Optional[int] = None,
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
         logger.info("Running internal dbt run to populate alerts")
+        vars = dbt_vars or dict()
+        if days_back:
+            vars.update(days_back=days_back)
         success = self.internal_dbt_runner.run(
             models="elementary_cli.alerts.alerts_v2",
             full_refresh=dbt_full_refresh,
-            vars=dbt_vars,
+            vars=vars,
         )
         self.execution_properties["alerts_populate_success"] = success
         if not success:
@@ -288,7 +292,9 @@ class DataMonitoringAlerts(DataMonitoring):
         # Populate data
         if self.should_populate_data:
             popopulated_data_successfully = self._populate_data(
-                dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
+                days_back=days_back,
+                dbt_full_refresh=dbt_full_refresh,
+                dbt_vars=dbt_vars,
             )
             if not popopulated_data_successfully:
                 self.success = False
