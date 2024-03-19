@@ -1,13 +1,13 @@
-{% macro populate_alerts_table(disable_samples=false) %}
+{% macro populate_alerts_table(days_back=1, disable_samples=false) %}
     {% if execute %}
         {% set alerts_v2_relation = elementary.get_elementary_relation('alerts_v2') %}
 
-        {% set test_alerts = elementary_cli.populate_test_alerts(disable_samples=disable_samples) %}
-        {% set model_alerts = elementary_cli.populate_model_alerts() %}
-        {% set source_freshness_alerts = elementary_cli.populate_source_freshness_alerts() %}
+        {% set test_alerts = elementary_cli.populate_test_alerts(days_back=days_back, disable_samples=disable_samples) %}
+        {% set model_alerts = elementary_cli.populate_model_alerts(days_back=days_back) %}
+        {% set source_freshness_alerts = elementary_cli.populate_source_freshness_alerts(days_back=days_back) %}
         
         {% set all_alerts = test_alerts + model_alerts + source_freshness_alerts %}
-        {% set backward_already_handled_alert_ids = backward_already_handled_alerts() %}
+        {% set backward_already_handled_alert_ids = backward_already_handled_alerts(days_back=days_back) %}
 
         {% set unhandled_alerts = [] %}
         {% for alert in all_alerts %}
@@ -23,7 +23,7 @@
 {% endmacro %}
 
 
-{% macro backward_already_handled_alerts() %}
+{% macro backward_already_handled_alerts(days_back=1) %}
     {% set deprecated_alerts_relation = ref('elementary_cli', 'alerts') %}
     {% set deprecated_alerts_models_relation = ref('elementary_cli', 'alerts_models') %}
     {% set deprecated_alerts_source_freshness_relation = ref('elementary_cli', 'alerts_source_freshness') %}
@@ -36,14 +36,17 @@
                 select alert_id
                 from {{ deprecated_alerts_relation }}
                 where suppression_status != 'pending'
+                and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
                 union all 
                 select alert_id
                 from {{ deprecated_alerts_models_relation }}
                 where suppression_status != 'pending'
+                and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
                 union all 
                 select alert_id
                 from {{ deprecated_alerts_source_freshness_relation }}
                 where suppression_status != 'pending'
+                and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
             )
 
             select *

@@ -6,7 +6,7 @@
     on_schema_change = 'sync_all_columns',
     table_type=elementary.get_default_table_type(),
     incremental_strategy=elementary.get_default_incremental_strategy(),
-    post_hook = "{{ elementary_cli.populate_alerts_table() }}"
+    post_hook = "{{ elementary_cli.populate_alerts_table(days_back=var('days_back', 1)) }}"
   )
 }}
 

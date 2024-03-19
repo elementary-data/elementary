@@ -1,6 +1,6 @@
-{% macro populate_source_freshness_alerts() %}
+{% macro populate_source_freshness_alerts(days_back=1) %}
     {% set source_freshness_alerts = [] %}
-    {% set raw_source_freshness_alerts_agate = run_query(elementary_cli.populate_source_freshness_alerts_query()) %}
+    {% set raw_source_freshness_alerts_agate = run_query(elementary_cli.populate_source_freshness_alerts_query(days_back)) %}
     {% set raw_source_freshness_alerts = elementary.agate_to_dicts(raw_source_freshness_alerts_agate) %}
     {% for raw_source_freshness_alert in raw_source_freshness_alerts %}
         {% set error_after = raw_source_freshness_alert.get('error_after') %}
@@ -50,7 +50,7 @@
 {% endmacro %}
 
 
-{% macro populate_source_freshness_alerts_query() %}
+{% macro populate_source_freshness_alerts_query(days_back=1) %}
   {% set source_freshness_results_relation = ref('elementary', 'dbt_source_freshness_results') %}
   {% set error_after_column_exists = elementary.column_exists_in_relation(source_freshness_results_relation, 'error_after') %}
 
@@ -108,6 +108,7 @@
     join dbt_sources as sources
     on results.unique_id = sources.unique_id
     where lower(status) != 'pass'
+    and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('results.generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
   )
 
   select *

@@ -1,6 +1,6 @@
-{% macro populate_model_alerts() %}
+{% macro populate_model_alerts(days_back=1) %}
     {% set model_alerts = [] %}
-    {% set raw_model_alerts_agate = run_query(elementary_cli.populate_model_alerts_query()) %}
+    {% set raw_model_alerts_agate = run_query(elementary_cli.populate_model_alerts_query(days_back)) %}
     {% set raw_model_alerts = elementary.agate_to_dicts(raw_model_alerts_agate) %}
     {% for raw_model_alert in raw_model_alerts %}
         {% set status = elementary.insensitive_get_dict_value(raw_model_alert, 'status') | lower %}
@@ -38,7 +38,7 @@
 {% endmacro %}
 
 
-{% macro populate_model_alerts_query() %}
+{% macro populate_model_alerts_query(days_back=1) %}
     with models as (
         select * from {{ ref('elementary', 'dbt_models') }}
     ),
@@ -89,6 +89,7 @@
             alias 
         from model_run_results
         where lower(status) != 'success'
+        and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
         union all
         select 
             model_execution_id,
@@ -117,6 +118,7 @@
             alias
         from snapshot_run_results
         where lower(status) != 'success' 
+        and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
     )
 
     select 
