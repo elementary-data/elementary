@@ -108,7 +108,7 @@
     join dbt_sources as sources
     on results.unique_id = sources.unique_id
     where lower(status) != 'pass'
-    and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('results.generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
+    and {{ elementary.edr_cast_as_timestamp('results.generated_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
   )
 
   select *

@@ -89,7 +89,7 @@
             alias 
         from model_run_results
         where lower(status) != 'success'
-        and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
+        and {{ elementary.edr_cast_as_timestamp('generated_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
         union all
         select 
             model_execution_id,
@@ -118,7 +118,7 @@
             alias
         from snapshot_run_results
         where lower(status) != 'success' 
-        and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
+        and {{ elementary.edr_cast_as_timestamp('generated_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 
     select 

@@ -106,7 +106,7 @@
             result_rows
         from elementary_test_results
         where lower(status) != 'pass'
-        and {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
+        and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 
     select distinct
