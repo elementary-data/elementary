@@ -16,8 +16,6 @@
                 {% do unhandled_alerts.append(alert) %}
             {% endif %}
         {% endfor %}
-        {% do elementary.edr_log(alerts_v2_relation) %}
-        {% do elementary.edr_log(unhandled_alerts) %}
         {% do elementary.insert_rows(alerts_v2_relation, unhandled_alerts, on_query_exceed=elementary_cli.handle_exceeding_limit_alert_data) %}
     {% endif %}
     {% do return('') %}
