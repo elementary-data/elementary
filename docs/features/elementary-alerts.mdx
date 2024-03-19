@@ -3,31 +3,12 @@ title: "Alerts"
 icon: "bell-exclamation"
 ---
 
-<Tip>
-  More alerts integrations are coming soon, reach out to us for details!
-</Tip>
-
 <Snippet file="alerts/alerts-introduction.mdx" />
 
-## Alerts setup
+## Alerts destinations
 
-<CardGroup cols={2}>
-  <Card title="Activate alerts in Cloud" icon="cloud" iconType="solid" href="/cloud/guides/enable-slack-alerts">
-    Signup to cloud, and activate the Slack integration.
-  </Card>
-  <Card title="Setup alerts in OSS" icon="square-terminal" iconType="solid" href="/oss/guides/alerts/elementary-alerts">
-    Install the CLI tool, and configure a profile. Use the `edr monitor` command to send alerts.
-    If you want continuous alerting, you will need to orchestrate the CLI.
-  </Card>
-</CardGroup>
+<Snippet file="cloud/integrations/cards-groups/alerts-destination-cards.mdx" />
 
 ## Alerts configuration
 
-<CardGroup cols={2}>
-  <Card title="Alerts rules in Cloud" icon="cloud" iconType="solid" href="/cloud/guides/alert-rules">
-    Use Alert Rules to distribute your alerts to the right channels.
-  </Card>
-  <Card title="Alerts configuration in code" icon="square-terminal" iconType="solid" href="/cloud/guides/alerts-configuration">
-    Alert content and properties configuration as code in your project YML files.
-  </Card>
-</CardGroup>
+<Snippet file="alerts/alerts-configuration.mdx" />

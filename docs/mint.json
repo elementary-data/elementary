@@ -114,8 +114,8 @@
           "group": "Send Slack alerts",
           "pages": [
             "cloud/guides/enable-slack-alerts",
-            "cloud/guides/alerts-configuration",
-            "cloud/guides/alert-rules"
+            "cloud/guides/alert-rules",
+            "cloud/guides/alerts-configuration"
           ]
         },
         "cloud/guides/sync-scheduling",
@@ -125,30 +125,72 @@
       ]
     },
     {
-      "group": "BI tools integration",
+      "group": "Integrations",
       "pages": [
-        "cloud/integrations/bi/connect-bi-tool",
-        "cloud/integrations/bi/looker",
-        "cloud/integrations/bi/tableau"
-      ]
-    },
-    {
-      "group": "Code repository integration",
-      "pages": [
-        "cloud/integrations/code-repo/connect-code-repo",
-        "cloud/integrations/code-repo/github",
-        "cloud/integrations/code-repo/gitlab"
-      ]
-    },
-    {
-      "group": "Data warehouses",
-      "pages": [
-        "cloud/integrations/dwh/snowflake",
-        "cloud/integrations/dwh/bigquery",
-        "cloud/integrations/dwh/redshift",
-        "cloud/integrations/dwh/databricks",
-        "cloud/integrations/dwh/postgres",
-        "cloud/integrations/dwh/athena"
+        "cloud/integrations/elementary-integrations",
+        {
+          "group": "Data warehouses",
+          "pages": [
+            "cloud/integrations/dwh/snowflake",
+            "cloud/integrations/dwh/bigquery",
+            "cloud/integrations/dwh/redshift",
+            "cloud/integrations/dwh/databricks",
+            "cloud/integrations/dwh/postgres",
+            "cloud/integrations/dwh/athena",
+            "cloud/integrations/dwh/clickhouse"
+          ]
+        },
+        {
+          "group": "Transformation & Orchestration",
+          "pages": [
+            "cloud/integrations/transformation-and-orchestration/dbt-core",
+            "cloud/integrations/transformation-and-orchestration/dbt-cloud",
+            "cloud/integrations/transformation-and-orchestration/airflow",
+            "cloud/integrations/transformation-and-orchestration/orchestration-tools"
+          ]
+        },
+        {
+          "group": "Data visualization",
+          "pages": [
+            "cloud/integrations/bi/connect-bi-tool",
+            "cloud/integrations/bi/looker",
+            "cloud/integrations/bi/tableau",
+            "cloud/integrations/bi/metabase",
+            "cloud/integrations/bi/power-bi",
+            "cloud/integrations/bi/sigma",
+            "cloud/integrations/bi/thoughtspot",
+            "cloud/integrations/bi/mode",
+            "cloud/integrations/bi/hex",
+            "cloud/integrations/bi/explo"
+          ]
+        },
+        {
+          "group": "Reverse ETL",
+          "pages": [
+            "cloud/integrations/reverse-etl/census",
+            "cloud/integrations/reverse-etl/hightouch"
+          ]
+        },
+        {
+          "group": "Code repositories",
+          "pages": [
+            "cloud/integrations/code-repo/connect-code-repo",
+            "cloud/integrations/code-repo/github",
+            "cloud/integrations/code-repo/gitlab"
+          ]
+        },
+        {
+          "group": "Communication & collaboration",
+          "pages": [
+            "cloud/integrations/alerts/slack",
+            "cloud/integrations/alerts/ms-teams",
+            "cloud/integrations/alerts/pagerduty",
+            "cloud/integrations/alerts/opsgenie",
+            "cloud/integrations/alerts/jira",
+            "cloud/integrations/alerts/linear",
+            "cloud/integrations/alerts/webhooks"
+          ]
+        }
       ]
     },
     {
