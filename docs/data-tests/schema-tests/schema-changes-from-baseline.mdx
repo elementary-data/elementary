@@ -53,7 +53,20 @@ dbt run-operation elementary.generate_schema_baseline_test --args '{"include_mod
 
 # Generate a schema changes from baseline test with the "fail_on_added" and "enforce_types" parameters set to true
 dbt run-operation elementary.generate_schema_baseline_test --args '{"fail_on_added": true, "enforce_types": true}'
+
+# Output:
+#> Generating schema changes from baseline test for ...:
+#>
+#> sources:
+#>   - name: <name>
+#>     columns:
+#>       ...
+#>     tests:
+#>       - elementary.schema_changes_from_baseline:
+#>           ...
 ```
+
+This command will output the generated configuration for the schema changes from baseline test, which can be copied and pasted into the relevant `yml` file.
 
 <RequestExample>
 
