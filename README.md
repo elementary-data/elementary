@@ -29,7 +29,7 @@ Available as self-hosted or Cloud service with premium features.
 #### Table of Contents
 
 - [Features](#features)
-- [Self-hosted vs. Cloud service](#self-hosted-vs-cloud-service)
+- [Self-hosted vs. Cloud service](#self-hosted-vs-cloud)
 - [Get Started](#get-started)
 - [Community & Support](#community--support)
 - [Contribution](#contributions)
