@@ -11,6 +11,5 @@ class MockAlertsAPI(AlertsAPI):
         super().__init__(
             mock_dbt_runner,
             config,
-            elementary_database_and_schema="test.test",
         )
         self.alerts_fetcher = MockAlertsFetcher()

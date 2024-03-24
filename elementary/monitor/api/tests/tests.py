@@ -363,6 +363,7 @@ class TestsAPI(APIClient):
             result=result,
             configuration=configuration,
             test_tags=test_result_db_row.test_tags,
+            normalized_full_path=test_result_db_row.normalized_full_path,
         )
 
     @staticmethod

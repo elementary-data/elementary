@@ -75,6 +75,7 @@
         elementary_test_results.result_rows,
         dbt_tests.original_path,
         dbt_tests.meta,
+        dbt_tests.package_name,
         dbt_tests.tags as test_tags,
         dbt_artifacts.meta as model_meta,
         dbt_artifacts.tags as model_tags,

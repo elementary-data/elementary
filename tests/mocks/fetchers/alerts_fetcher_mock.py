@@ -428,9 +428,7 @@ class MockAlertsFetcher(AlertsFetcher):
     def __init__(self):
         mock_dbt_runner = MockDbtRunner()
         config = Config()
-        super().__init__(
-            mock_dbt_runner, config, elementary_database_and_schema="test.test"
-        )
+        super().__init__(mock_dbt_runner, config)
 
     def query_pending_alerts(self, *args, **kwargs) -> List[PendingAlertSchema]:
         pending_test_alerts = [
