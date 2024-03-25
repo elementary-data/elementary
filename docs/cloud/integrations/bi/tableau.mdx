@@ -2,21 +2,20 @@
 title: "Tableau"
 ---
 
-In order to allow Elementary to continuously generate [dbt exposures](https://docs.getdbt.com/docs/build/exposures) from Tableau you will need to setup the following integrations:
+After you connect Tableau, Elementary will automatically and continuously extend the lineage to the dashboard level.
+This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
 
-1. Connect Tableau - Elementary will continuously connect to Tableau to extract metadata.
-2. Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo) - Elementary will open a pull request to add exposures to your dbt project.
-
-## Connect Tableau
 
 In order for Elementary to extract your metadata from Tableau you must meet all of the Tableau Metadata GraphQL requirements (most are set by default):
 
-- Tableau Cloud/Server 2019.3 or later.
+- Tableau Cloud / Server 2019.3 or later.
 - Tableau REST API must not be disabled.
 - The Metadata API must be enabled.
 - The Metadata API must be accessed via an access token.
 
-### Creating a Personal Access Token
+## Tableau Cloud
+
+### Creating Personal Access Token
 
 Create a Personal Access Token in Tableau. For details on how to create a user token please refer to the **[Tableau guide](https://help.tableau.com/current/pro/desktop/en-us/useracct.htm#create-a-personal-access-token)**.
 
@@ -41,8 +40,7 @@ Choose the Tableau BI connection and provide the following details to validate a
   />
 </Frame>
 
-## Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo)
 
-To allow Elementary to open pull requests to add exposures to your dbt project, follow the relevant guide according to your code repository provider:
+## Tableau Server
 
-<Snippet file="cloud/integrations/cards-groups/code-repo-cards.mdx" />
+Elementary supports Tableau Server, reach out to our team for details. 

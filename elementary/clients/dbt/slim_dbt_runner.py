@@ -17,10 +17,10 @@ from dbt.flags import set_from_args
 from dbt.parser.manifest import Manifest, ManifestLoader
 from dbt.tracking import disable_tracking
 from dbt.version import __version__ as dbt_version_string
-from pydantic import BaseModel, validator
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.utils.log import get_logger
+from elementary.utils.pydantic_shim import BaseModel, validator
 
 logger = get_logger(__name__)
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class ReportDataEnvSchema(BaseModel):

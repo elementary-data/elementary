@@ -27,7 +27,7 @@
             freshness.unique_id,
             freshness.max_loaded_at,
             freshness.generated_at,
-            freshness.status,
+            freshness.status as original_status,
             freshness.normalized_status,
             {# backwards compatibility - these fields were added together #}
             {% if error_after_column_exists %}
@@ -72,13 +72,16 @@
         {% set warn_after = source_freshness_result_dict.get('warn_after') %}
         {% set filter = source_freshness_result_dict.get('filter') %}
 
+        {# we want to use the normalized status for all usages #}
+        {% set status = source_freshness_result_dict.get('normalized_status') %}
+
         {% set result_dict = {'source_freshness_execution_id': source_freshness_result_dict.get('source_freshness_execution_id'),
                                  'unique_id': source_freshness_result_dict.get('unique_id'),
                                  'max_loaded_at': source_freshness_result_dict.get('max_loaded_at'),
                                  'generated_at': source_freshness_result_dict.get('generated_at'),
                                  'execute_started_at': source_freshness_result_dict.get('execute_started_at'),
-                                 'status': source_freshness_result_dict.get('status'),
-                                 'normalized_status': source_freshness_result_dict.get('normalized_status'),
+                                 'status': status,
+                                 'original_status': source_freshness_result_dict.get('original_status'),
                                  'error': source_freshness_result_dict.get('error'),
                                  'invocation_id': source_freshness_result_dict.get('invocation_id'),
                                  'database_name': source_freshness_result_dict.get('database_name'),

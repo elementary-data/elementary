@@ -85,7 +85,8 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
                     f":white_check_mark: Passed: {totals.get('passed', 0)}",
                     f":small_red_triangle: Failed: {totals.get('failed', 0)}",
                     f":exclamation: Errors: {totals.get('error', 0)}",
-                    f":Warning: Warning: {totals.get('warning', 0)}",
+                    f":warning: Warning: {totals.get('warning', 0)}",
+                    f":fast_forward: Skipped: {totals.get('skipped', 0)}",
                 ]
             )
         )
@@ -105,6 +106,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         error_tests_details = []
         failed_tests_details = []
         warning_tests_details = []
+        skipped_tests_details = []
         for test in test_results:
             if test.status == "error":
                 error_tests_details.extend(
@@ -114,8 +116,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
                 failed_tests_details.extend(
                     self._get_test_result_details_block(test, include_description)
                 )
-            elif test.status == "warning":
+            elif test.status == "warn":
                 warning_tests_details.extend(
+                    self._get_test_result_details_block(test, include_description)
+                )
+            elif test.status == "skipped":
+                skipped_tests_details.extend(
                     self._get_test_result_details_block(test, include_description)
                 )
             else:  # test status is "pass" i.e. success
@@ -140,6 +146,13 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             )
             details_blocks.append(self.create_divider_block())
             details_blocks.extend(error_tests_details)
+
+        if skipped_tests_details:
+            details_blocks.append(
+                self.create_text_section_block(":fast_forward: *Skipped*")
+            )
+            details_blocks.append(self.create_divider_block())
+            details_blocks.extend(skipped_tests_details)
 
         amount_of_details_blocks = len(details_blocks)
         if details_blocks and amount_of_details_blocks <= (
@@ -179,7 +192,7 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
     def _get_test_results_totals(
         test_results: List[TestResultSummarySchema],
     ) -> Dict[str, int]:
-        totals = dict(passed=0, failed=0, error=0, warning=0)
+        totals = dict(passed=0, failed=0, error=0, warning=0, skipped=0)
         for test in test_results:
             if test.status == "pass":
                 totals["passed"] += 1
@@ -187,6 +200,8 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
                 totals["error"] += 1
             elif test.status == "fail":
                 totals["failed"] += 1
-            else:
+            elif test.status == "warn":
                 totals["warning"] += 1
+            elif test.status == "skipped":
+                totals["skipped"] += 1
         return totals

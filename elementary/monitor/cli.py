@@ -9,6 +9,8 @@ from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
 from elementary.monitor.data_monitoring.report.data_monitoring_report import (
     DataMonitoringReport,
 )
+from elementary.monitor.data_monitoring.schema import FiltersSchema
+from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
 from elementary.monitor.debug import Debug
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
@@ -142,7 +144,7 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
             "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
         return func
@@ -250,6 +252,22 @@ def get_cli_properties() -> dict:
     default=None,
     help="The report URL for the alert attached links.",
 )
+@click.option(
+    "--filters",
+    "-fl",
+    type=str,
+    default=None,
+    multiple=True,
+    help="Filter the alerts by tags:<tags separated by commas> / owners:<owners separated by commas> / models:<models separated by commas> / "
+    "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
+)
+@click.option(
+    "--teams-webhook",
+    "-tw",
+    type=str,
+    default=None,
+    help="A Microsoft Teams webhook URL for sending alerts to a specific channel in Teams.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -277,6 +295,8 @@ def monitor(
     suppression_interval,
     override_dbt_project_config,
     report_url,
+    filters,
+    teams_webhook,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -306,18 +326,33 @@ def monitor(
         env=env,
         slack_group_alerts_by=group_by,
         report_url=report_url,
+        teams_webhook=teams_webhook,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     try:
         config.validate_monitor()
+
+        alert_filters = FiltersSchema()
+        if bool(filters):
+            alert_filters = FiltersSchema.from_cli_params(filters)
+        elif select is not None:
+            click.secho(
+                '\n"--select" is deprecated and won\'t be supported in the near future.\n'
+                'Please use "-fl" or "--filter" for filtering the alerts.\n',
+                fg="bright_red",
+            )
+            alert_filters = SelectorFilter(
+                config, anonymous_tracking, select
+            ).get_filter()
+
         data_monitoring = DataMonitoringAlerts(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             send_test_message_on_success=test,
             disable_samples=disable_samples,
-            filter=select,
+            selector_filter=alert_filters,
             global_suppression_interval=suppression_interval,
             override_config=override_dbt_project_config,
         )
@@ -403,12 +438,13 @@ def report(
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
     try:
+        selector_filter = SelectorFilter(config, anonymous_tracking, select)
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
-            filter=select,
+            selector_filter=selector_filter.get_filter(),
         )
         data_monitoring.validate_report_selector()
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
@@ -463,6 +499,12 @@ def report(
     type=str,
     default=None,
     help="The secret access key for AWS",
+)
+@click.option(
+    "--aws-session-token",
+    type=str,
+    default=None,
+    help="The session token for AWS",
 )
 @click.option(
     "--s3-endpoint-url",
@@ -585,6 +627,7 @@ def send_report(
     aws_region_name,
     aws_access_key_id,
     aws_secret_access_key,
+    aws_session_token,
     s3_endpoint_url,
     s3_bucket_name,
     azure_connection_string,
@@ -630,6 +673,7 @@ def send_report(
         aws_region_name=aws_region_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
         azure_connection_string=azure_connection_string,
         azure_container_name=azure_container_name,
         s3_endpoint_url=s3_endpoint_url,
@@ -652,12 +696,13 @@ def send_report(
             if bucket_file_path
             else slack_file_name
         )
+        selector_filter = SelectorFilter(config, anonymous_tracking, select)
         data_monitoring = DataMonitoringReport(
             config=config,
             tracking=anonymous_tracking,
             force_update_dbt_package=update_dbt_package,
             disable_samples=disable_samples,
-            filter=select,
+            selector_filter=selector_filter.get_filter(),
         )
         # The call to track_cli_start must be after the constructor of DataMonitoringAlerts as it enriches the tracking properties.
         # This is a tech-debt that should be fixed in the future.

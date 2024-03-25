@@ -1,9 +1,14 @@
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
-from pydantic import validator
-
+from elementary.monitor.api.models.schema import NormalizedArtifactSchema
+from elementary.utils.pydantic_shim import Field, validator
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
+
+
+class NormalizedTestSchema(NormalizedArtifactSchema):
+    unique_id: str
+    artifact_type: Literal["test"] = "test"
 
 
 class TestResultDBRowSchema(ExtendedBaseModel):
@@ -23,11 +28,15 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     test_type: str
     test_sub_type: str
     test_results_description: Optional[str]
+    original_path: str
     owners: Optional[List[str]]
     model_owner: Optional[List[str]]
-    tags: Optional[List[str]]
+    # tags is a union of test_tags and model_tags that we get from the db.
+    tags: List[str] = Field(default_factory=list)
+    test_tags: List[str] = Field(default_factory=list)
     meta: dict
     model_meta: dict
+    model_tags: List[str] = Field(default_factory=list)
     test_results_query: Optional[str] = None
     other: Optional[str]
     test_name: str
@@ -39,6 +48,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     invocations_rank_index: int
     sample_data: Optional[Union[dict, List]] = None
     failures: Optional[int] = None
+    package_name: Optional[str] = None
 
     class Config:
         smart_union = True
@@ -67,6 +77,14 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     def load_tags(cls, tags):
         return cls._load_var_to_list(tags)
 
+    @validator("test_tags", pre=True)
+    def load_test_tags(cls, test_tags):
+        return cls._load_var_to_list(test_tags)
+
+    @validator("model_tags", pre=True)
+    def load_model_tags(cls, model_tags):
+        return cls._load_var_to_list(model_tags)
+
     @validator("owners", pre=True)
     def load_owners(cls, owners):
         return cls._load_var_to_list(owners)
@@ -80,3 +98,9 @@ class TestResultDBRowSchema(ExtendedBaseModel):
         test_type = values.get("test_type")
         # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None
+
+    @property
+    def normalized_full_path(self) -> str:
+        if self.package_name:
+            return f"{self.package_name}/{self.original_path}"
+        return self.original_path

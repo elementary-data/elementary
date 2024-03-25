@@ -1,9 +1,8 @@
 import json
 from typing import Union
 
-from pydantic import BaseModel
-
 from elementary.utils.json_utils import try_load_json
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class ExtendedBaseModel(BaseModel):

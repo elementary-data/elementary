@@ -1,6 +1,6 @@
 ---
-title: "Slack Alerts"
-icon: "slack"
+title: "Alerts"
+icon: "bell-exclamation"
 ---
 
 <Tip>
@@ -9,20 +9,25 @@ icon: "slack"
 
 <Snippet file="alerts/alerts-introduction.mdx" />
 
-## Elementary alerts setup
+## Alerts setup
 
-<AccordionGroup>
-  <Accordion title="Elementary Cloud" icon="cloud" iconType="solid">
-    Signup to cloud, and activate the [Slack integration](/cloud/guides/enable-slack-alerts).
+<CardGroup cols={2}>
+  <Card title="Activate alerts in Cloud" icon="cloud" iconType="solid" href="/cloud/guides/enable-slack-alerts">
+    Signup to cloud, and activate the Slack integration.
+  </Card>
+  <Card title="Setup alerts in OSS" icon="square-terminal" iconType="solid" href="/oss/guides/alerts/elementary-alerts">
+    Install the CLI tool, and configure a profile. Use the `edr monitor` command to send alerts.
+    If you want continuous alerting, you will need to orchestrate the CLI.
+  </Card>
+</CardGroup>
 
-    All [alerts configuration](/cloud/guides/alerts-configuration) is as code in your project YML files.
+## Alerts configuration
 
-  </Accordion>
-  <Accordion title="Elementary OSS" icon="square-terminal" iconType="solid">
-    Install the CLI tool, and configure a profile. Use the `edr monitor` command to [send Slack alerts](/oss/quickstart/quickstart-cli).
-    If you want continuous alerting, you will need to orchestrate the CLI and [deploy it to production](/oss/deployment-and-configuration/elementary-in-production).
-
-    All [alerts configuration](/oss/guides/alerts-configuration) is as code in your project YML files.
-
-  </Accordion>
-</AccordionGroup>
+<CardGroup cols={2}>
+  <Card title="Alerts rules in Cloud" icon="cloud" iconType="solid" href="/cloud/guides/alert-rules">
+    Use Alert Rules to distribute your alerts to the right channels.
+  </Card>
+  <Card title="Alerts configuration in code" icon="square-terminal" iconType="solid" href="/cloud/guides/alerts-configuration">
+    Alert content and properties configuration as code in your project YML files.
+  </Card>
+</CardGroup>

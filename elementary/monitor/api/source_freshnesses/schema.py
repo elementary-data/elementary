@@ -1,8 +1,7 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
-
 from elementary.monitor.api.totals_schema import TotalsSchema
+from elementary.utils.pydantic_shim import BaseModel, Field, validator
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 
@@ -29,6 +28,7 @@ class SourceFreshnessMetadataSchema(BaseModel):
     description: Optional[str] = None
     configuration: dict
     elementary_unique_id: str
+    test_tags: List[str] = Field(default_factory=list)
 
 
 class SourceFreshnessResultSchema(BaseModel):

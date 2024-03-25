@@ -1,8 +1,38 @@
 ---
-title: Automated Monitors
+title: Automated freshness, volume and schema monitoring
+sidebarTitle: "Automated Monitors"
 icon: "wand-magic-sparkles"
 ---
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
 
-Under construction 🚧
+Elementary offers out-of-the-box automated monitors to detect freshness, volume and schema issues. 
+This provides broad coverage and a basic level of observability, without any configuration effort.
+
+Additionally, these monitors will not increase compute costs as they leverage only warehouse metadata (information schema, query history). 
+ 
+The monitors are trained on historical metadata, and adjust based on updates frequency, seasonality and trends.
+
+<Info>As views are stateless, automated volume and freshness monitors only apply on tables.</Info>
+
+<Frame>
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1707906008/automated_monitors_kt5doc.png"
+    alt="Elementary Automated Monitors"
+  />
+</Frame>
+
+## Supported automated monitors
+
+### Volume
+
+Monitors how much data was added / removed / updated to the table with each update.
+The monitor alerts you if there is an unexpected drop or spike in rows.
+
+### Freshness
+
+Monitors how frequently a table is updated, and alerts you if there is an unexpected delay. 
+
+### Schema changes
+
+_Coming soon_

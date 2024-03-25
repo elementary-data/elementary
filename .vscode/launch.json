@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "edr",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "elementary.cli.cli",
+      "console": "integratedTerminal",
+      "args": "${command:pickArgs}"
+    }
+  ]
+}

@@ -16,6 +16,7 @@ class Config:
     _AWS = "aws"
     _GOOGLE = "google"
     _AZURE = "azure"
+    _TEAMS = "teams"
     _CONFIG_FILE_NAME = "config.yml"
 
     # Quoting env vars
@@ -53,6 +54,7 @@ class Config:
         aws_region_name: Optional[str] = None,
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
         s3_endpoint_url: Optional[str] = None,
         s3_bucket_name: Optional[str] = None,
         google_project_name: Optional[str] = None,
@@ -62,7 +64,9 @@ class Config:
         azure_connection_string: Optional[str] = None,
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
+        teams_webhook: Optional[str] = None,
         env: str = "dev",
+        run_dbt_deps_if_needed: Optional[bool] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -119,6 +123,12 @@ class Config:
             GroupingType.BY_ALERT.value,
         )
 
+        teams_config = config.get(self._TEAMS, {})
+        self.teams_webhook = self._first_not_none(
+            teams_webhook,
+            teams_config.get("teams_webhook"),
+        )
+
         aws_config = config.get(self._AWS, {})
         self.aws_profile_name = self._first_not_none(
             aws_profile_name,
@@ -136,6 +146,7 @@ class Config:
         )
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
+        self.aws_session_token = aws_session_token
 
         google_config = config.get(self._GOOGLE, {})
         self.google_project_name = self._first_not_none(
@@ -173,6 +184,9 @@ class Config:
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
+        self.run_dbt_deps_if_needed = self._first_not_none(
+            run_dbt_deps_if_needed, config.get("run_dbt_deps_if_needed"), True
+        )
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
@@ -194,6 +208,10 @@ class Config:
     @property
     def has_slack(self) -> bool:
         return self.slack_webhook or (self.slack_token and self.slack_channel_name)
+
+    @property
+    def has_teams(self) -> bool:
+        return self.teams_webhook
 
     @property
     def has_s3(self):
@@ -218,10 +236,20 @@ class Config:
         return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
+        provided_integrations = list(
+            filter(
+                lambda provided_integration: provided_integration,
+                [self.has_slack, self.has_teams],
+            )
+        )
         self._validate_timezone()
-        if not self.has_slack:
+        if not provided_integrations:
             raise InvalidArgumentsError(
-                "Either a Slack token and a channel or a Slack webhook is required."
+                "Either a Slack token and a channel, a Slack webhook or a Microsoft Teams webhook is required."
+            )
+        if len(provided_integrations) > 1:
+            raise InvalidArgumentsError(
+                "You provided both a Slack and Teams integration. Please provide only one so we know where to send the alerts."
             )
 
     def validate_send_report(self):

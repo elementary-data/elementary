@@ -2,12 +2,8 @@
 title: "Looker"
 ---
 
-In order to allow Elementary to continuously generate [dbt exposures](https://docs.getdbt.com/docs/build/exposures) from Looker you will need to setup the following integrations:
-
-1. Connect Looker - Elementary will continuously connect to Looker to extract metadata.
-2. Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo) - Elementary will open a pull request to add exposures to your dbt project.
-
-## Connect Looker
+After you connect Looker, Elementary will automatically and continuously extend the column-level-lineage to the dashboard level.
+This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
 
 ### Create permission set and role
 
@@ -23,6 +19,7 @@ To follow the [least privilege](https://en.wikipedia.org/wiki/Principle_of_least
         - `see_user_dashboards`
         - `see_sql`
         - `see_lookml`
+          - `develop`
 
 - **Create a role**
 
@@ -67,9 +64,3 @@ Choose the Looker BI connection and provide the following details to validate an
     alt="Connect Looker to Elementary environment"
   />
 </Frame>
-
-## Connect dbt project [code repository](/cloud/integrations/code-repo/connect-code-repo)
-
-To allow Elementary to open pull requests to add exposures to your dbt project, follow the relevant guide according to your code repository provider:
-
-<Snippet file="cloud/integrations/cards-groups/code-repo-cards.mdx" />

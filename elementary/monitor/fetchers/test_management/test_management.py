@@ -156,6 +156,7 @@ class TestManagementFetcher(FetcherClient):
                     meta=meta,
                     description=description,
                     is_singular=test_result["is_singular"],
+                    original_path=test_result["original_path"],
                     updated_at=test_result["generated_at"],
                 )
             )

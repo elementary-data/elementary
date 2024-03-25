@@ -22,9 +22,9 @@ class TestAlertModel(AlertModel):
         severity: str,
         test_type: str,
         test_sub_type: str,
-        test_results_description: str,
         test_short_name: str,
         alert_class_id: str,
+        test_results_description: Optional[str] = None,
         test_results_query: Optional[str] = None,
         table_name: Optional[str] = None,
         model_unique_id: Optional[str] = None,
@@ -70,7 +70,9 @@ class TestAlertModel(AlertModel):
         self.table_name = table_name
         self.test_type = test_type
         self.test_sub_type = test_sub_type
-        self.test_results_description = test_results_description.capitalize()
+        self.test_results_description = (
+            test_results_description and test_results_description.capitalize()
+        )
         self.test_results_query = test_results_query and test_results_query.strip()
         self.test_short_name = test_short_name
         self.other = other or dict()
@@ -157,9 +159,14 @@ class TestAlertModel(AlertModel):
 
     @property
     def summary(self) -> str:
+        if self.test_type == "schema_change":
+            return (
+                f"{self.test_sub_type_display_name} on "
+                f"{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}"
+            )
         return (
-            f"*{self.concise_name}* test failed on "
-            f"`{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}`"
+            f'"{self.concise_name}" test failed on '
+            f"{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}"
         )
 
     def get_report_link(self) -> Optional[ReportLinkData]:
