@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from pymsteams import cardsection, connectorcard, potentialaction  # type: ignore
-from retry import retry
+from ratelimit import limits, sleep_and_retry
 
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
@@ -11,6 +11,7 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 OK_STATUS_CODE = 200
+ONE_SECOND = 1
 
 
 class TeamsClient(ABC):
@@ -62,7 +63,8 @@ class TeamsWebhookClient(TeamsClient):
     def _initial_client(self):
         return connectorcard(self.webhook)
 
-    @retry(tries=3, delay=1, backoff=2, max_delay=5)
+    @sleep_and_retry
+    @limits(calls=1, period=ONE_SECOND)
     def send_message(self, **kwargs) -> bool:
         self.client.send()
         response = self.client.last_http_response
