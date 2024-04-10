@@ -14,6 +14,6 @@
     {{ return(target.project) }}
 {% endmacro %}
 
-{% macro trino__get_adapter_unique_id() %}
-    {{ exceptions.raise_compiler_error("Force failure and thus set warehouse_type=null since Trino is not currently supported within the report index.html") }}
+{% macro athena__get_adapter_unique_id() %}
+    {{ return(target.s3_staging_dir) }}
 {% endmacro %}
