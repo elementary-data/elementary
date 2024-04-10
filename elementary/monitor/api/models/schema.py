@@ -2,14 +2,13 @@ import os
 import posixpath
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
-
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.schema import (
     ExposureSchema,
     ModelSchema,
     SourceSchema,
 )
+from elementary.utils.pydantic_shim import BaseModel, Field, validator
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
@@ -21,7 +20,7 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     # Currently, it's model_name to match the CLI UI.
     model_name: str
     normalized_full_path: str
-    fqn: str
+    fqn: Optional[str] = None
 
     @validator("tags", pre=True)
     def load_tags(cls, tags):
@@ -38,17 +37,17 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
-    artifact_type: str = Field("model", const=True)
+    artifact_type: str = Field("model", const=True)  # type: ignore  # noqa
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
-    artifact_type: str = Field("source", const=True)
+    artifact_type: str = Field("source", const=True)  # type: ignore  # noqa
 
 
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedExposureSchema(NormalizedArtifactSchema, ExposureSchema):
-    artifact_type: str = Field("exposure", const=True)
+    artifact_type: str = Field("exposure", const=True)  # type: ignore  # noqa
 
 
 class ModelCoverageSchema(BaseModel):

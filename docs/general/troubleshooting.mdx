@@ -153,13 +153,13 @@ python3 -m pip install elementary-data[<adapter>]
 
 </Accordion>
 
-<Accordion title="I changed `days back` but the results are the same">
+<Accordion title="I changed the training period but the results are the same">
 
-Elementary tests have a var named `days_back`.
-If you change it after executing elementary tests, you will need to run a full refresh to the metrics collected. This will make the next tests collect data for the new `days_back` timeframe.
+Elementary tests have a var named `training_period`.
+If you change it after executing elementary tests, you will need to run a full refresh to the metrics collected. This will make the next tests collect data for the new `training_period` timeframe.
 The steps are:
 
-1. Change var `days_back` in your `dbt_project.yml`.
+1. Change var `training_period` in your `dbt_project.yml`.
 2. Full refresh of the model 'data_monitoring_metrics' by running ` dbt run --select data_monitoring_metrics --full-refresh`.
 3. Running the elementary tests again.
 
@@ -168,8 +168,25 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 
 </Accordion>
 
-<Accordion title="My problem is not listed here">
+<Accordion title="I want to disable elementary models and / or tests temporarily">
   
+If you want to prevent elementary tests from running the simplest way is to exclude the tag that marks all of them in your dbt command:
+
+```shell
+dbt test --exclude tag:elementary-tests
+```
+
+If you add the following to your dbt_project.yml, elementary models will not run and elementary tests will be executed but will do nothing and always pass.
+```shell
+models:
+  elementary:
+    enabled: false
+```
+
+</Accordion>
+
+<Accordion title="My problem is not listed here">
+
 If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
 
 </Accordion>

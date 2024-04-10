@@ -18,7 +18,10 @@ from elementary.monitor.api.tests.schema import (
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
-from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from elementary.monitor.fetchers.tests.schema import (
+    NormalizedTestSchema,
+    TestResultDBRowSchema,
+)
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from elementary.utils.log import get_logger
 from elementary.utils.time import convert_utc_iso_format_to_datetime
@@ -123,11 +126,14 @@ class TestsAPI(APIClient):
             subscribers.append(model_subscribers)
         return subscribers
 
+    def get_singular_tests(self) -> List[NormalizedTestSchema]:
+        return self.tests_fetcher.get_singular_tests()
+
     def get_test_results(
         self,
         invocation_id: Optional[str],
         disable_samples: bool = False,
-    ) -> Dict[Optional[str], List[TestResultSchema]]:
+    ) -> Dict[str, List[TestResultSchema]]:
         filtered_test_results_db_rows = self.test_results_db_rows
 
         if invocation_id:
@@ -143,9 +149,7 @@ class TestsAPI(APIClient):
             if test_result.invocations_rank_index == 1
         ]
 
-        tests_results: DefaultDict[Optional[str], List[TestResultSchema]] = defaultdict(
-            list
-        )
+        tests_results: DefaultDict[str, List[TestResultSchema]] = defaultdict(list)
         for test_result_db_row in filtered_test_results_db_rows:
             metadata = self._get_test_metadata_from_test_result_db_row(
                 test_result_db_row
@@ -157,16 +161,18 @@ class TestsAPI(APIClient):
             if inner_test_results is None:
                 continue
 
-            tests_results[test_result_db_row.model_unique_id].append(
-                TestResultSchema(
-                    metadata=metadata,
-                    test_results=inner_test_results,
-                )
+            test_result = TestResultSchema(
+                metadata=metadata,
+                test_results=inner_test_results,
             )
+            if test_result_db_row.model_unique_id:
+                tests_results[test_result_db_row.model_unique_id].append(test_result)
+            if test_result_db_row.test_sub_type == "singular":
+                tests_results[test_result_db_row.test_unique_id].append(test_result)
 
         return tests_results
 
-    def get_test_runs(self) -> Dict[Optional[str], List[TestRunSchema]]:
+    def get_test_runs(self) -> Dict[str, List[TestRunSchema]]:
         tests_invocations = self._get_invocations(self.test_results_db_rows)
         latest_test_results = [
             test_result
@@ -185,7 +191,10 @@ class TestsAPI(APIClient):
                 ),
                 test_runs=test_invocations,
             )
-            test_runs[test_result_db_row.model_unique_id].append(test_run)
+            if test_result_db_row.model_unique_id:
+                test_runs[test_result_db_row.model_unique_id].append(test_run)
+            if test_result_db_row.test_sub_type == "singular":
+                test_runs[test_result_db_row.test_unique_id].append(test_run)
         return test_runs
 
     def _get_invocations(
@@ -339,6 +348,7 @@ class TestsAPI(APIClient):
             column_name=test_result_db_row.column_name,
             test_name=test_result_db_row.test_name,
             test_display_name=test_display_name,
+            original_path=test_result_db_row.original_path,
             latest_run_time=detected_at.isoformat(),
             latest_run_time_utc=detected_at_utc.isoformat(),
             latest_run_status=test_result_db_row.status,
@@ -353,6 +363,7 @@ class TestsAPI(APIClient):
             result=result,
             configuration=configuration,
             test_tags=test_result_db_row.test_tags,
+            normalized_full_path=test_result_db_row.normalized_full_path,
         )
 
     @staticmethod

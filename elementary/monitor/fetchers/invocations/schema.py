@@ -1,8 +1,7 @@
 from typing import Optional
 
-from pydantic import BaseModel, validator
-
 from elementary.utils.json_utils import try_load_json
+from elementary.utils.pydantic_shim import BaseModel, validator
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
 

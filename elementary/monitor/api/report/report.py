@@ -67,9 +67,15 @@ class ReportAPI(APIClient):
             models = models_api.get_models(exclude_elementary_models)
             sources = models_api.get_sources()
             exposures = models_api.get_exposures()
+            singular_tests = tests_api.get_singular_tests()
 
             groups = groups_api.get_groups(
-                artifacts=[*models.values(), *sources.values(), *exposures.values()]
+                artifacts=[
+                    *models.values(),
+                    *sources.values(),
+                    *exposures.values(),
+                    *singular_tests,
+                ]
             )
 
             models_runs = models_api.get_models_runs(
@@ -134,9 +140,11 @@ class ReportAPI(APIClient):
 
             invocations_job_identification = defaultdict(list)
             for invocation in invocations:
-                key = invocation.job_name or invocation.job_id
-                if key is not None:
-                    invocations_job_identification[key].append(invocation.invocation_id)
+                invocation_key = invocation.job_name or invocation.job_id
+                if invocation_key is not None:
+                    invocations_job_identification[invocation_key].append(
+                        invocation.invocation_id
+                    )
 
             report_data = ReportDataSchema(
                 creation_time=get_now_utc_iso_format(),
@@ -187,33 +195,27 @@ class ReportAPI(APIClient):
     def _serialize_test_results(
         self,
         test_results: Dict[
-            Optional[str], List[Union[TestResultSchema, SourceFreshnessResultSchema]]
+            str, List[Union[TestResultSchema, SourceFreshnessResultSchema]]
         ],
-    ) -> Dict[Optional[str], List[dict]]:
+    ) -> Dict[str, List[dict]]:
         serializable_test_results = defaultdict(list)
-        for model_unique_id, test_result in test_results.items():
-            serializable_test_results[model_unique_id].extend(
+        for key, test_result in test_results.items():
+            serializable_test_results[key].extend(
                 [result.dict() for result in test_result]
             )
         return serializable_test_results
 
     def _serialize_test_runs(
         self,
-        test_runs: Dict[
-            Optional[str], List[Union[TestRunSchema, SourceFreshnessRunSchema]]
-        ],
-    ) -> Dict[Optional[str], List[dict]]:
+        test_runs: Dict[str, List[Union[TestRunSchema, SourceFreshnessRunSchema]]],
+    ) -> Dict[str, List[dict]]:
         serializable_test_runs = defaultdict(list)
-        for model_unique_id, test_run in test_runs.items():
-            serializable_test_runs[model_unique_id].extend(
-                [run.dict() for run in test_run]
-            )
+        for key, test_run in test_runs.items():
+            serializable_test_runs[key].extend([run.dict() for run in test_run])
         return serializable_test_runs
 
-    def _serialize_totals(
-        self, totals: Dict[Optional[str], TotalsSchema]
-    ) -> Dict[Optional[str], dict]:
+    def _serialize_totals(self, totals: Dict[str, TotalsSchema]) -> Dict[str, dict]:
         serialized_totals = dict()
-        for model_unique_id, total in totals.items():
-            serialized_totals[model_unique_id] = total.dict()
+        for key, total in totals.items():
+            serialized_totals[key] = total.dict()
         return serialized_totals

@@ -3,6 +3,9 @@ from typing import Dict, List, Optional
 
 from dateutil import tz
 
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
+)
 from elementary.utils.log import get_logger
 from elementary.utils.time import DATETIME_FORMAT
 
@@ -70,3 +73,10 @@ class AlertModel:
     @property
     def concise_name(self):
         return "Alert"
+
+    @property
+    def summary(self) -> str:
+        raise NotImplementedError
+
+    def get_report_link(self) -> Optional[ReportLinkData]:
+        raise NotImplementedError

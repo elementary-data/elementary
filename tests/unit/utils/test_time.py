@@ -2,7 +2,11 @@ from datetime import datetime
 
 from dateutil import tz
 
-from elementary.utils.time import datetime_strftime, get_formatted_timedelta
+from elementary.utils.time import (
+    convert_time_to_timezone,
+    datetime_strftime,
+    get_formatted_timedelta,
+)
 
 
 def test_datetime_strftime_without_timezone():
@@ -37,3 +41,29 @@ def test_get_formatted_timedelta_minutes_delta():
 def test_get_formatted_timedelta_seconds_delta():
     formatted_timedelta = get_formatted_timedelta(12)
     assert formatted_timedelta == "12 seconds"
+
+
+def test_convert_time_to_timezone():
+    # test time with no timezone is handled by default as utc
+    date = datetime(2010, 1, 1, 1, 1, 1, 1)
+    date_with_timezone = convert_time_to_timezone(date)
+    assert date.tzname() is None
+    assert date_with_timezone.tzname() == "UTC"
+
+    # test default timezone to convert to is utc by default
+    date = datetime.fromisoformat("2010-01-01T01:01:01+01:00")
+    date_with_timezone = convert_time_to_timezone(date)
+    assert date.tzname() == "UTC+01:00"
+    assert date_with_timezone.tzname() == "UTC"
+    assert date.hour == 1
+    assert date_with_timezone.hour == 0
+    assert (date - date_with_timezone).total_seconds() == 0
+
+    date = datetime.fromisoformat("2010-01-01T01:01:01+01:00")
+    utc_plus_2_timezone = "Etc/GMT-2"
+    date_with_timezone = convert_time_to_timezone(date, utc_plus_2_timezone)
+    assert date.tzname() == "UTC+01:00"
+    assert date_with_timezone.tzname() == "+02"
+    assert date.hour == 1
+    assert date_with_timezone.hour == 2
+    assert (date - date_with_timezone).total_seconds() == 0
