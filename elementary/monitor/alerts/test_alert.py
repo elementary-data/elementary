@@ -152,22 +152,28 @@ class TestAlertModel(AlertModel):
 
     @property
     def concise_name(self) -> str:
-        if self.is_elementary_test:
+        if self.test_sub_type_display_name.lower() not in (
+            "generic",
+            "dimension",
+            "singular",
+        ):
             return f"{self.test_short_name or self.test_name} - {self.test_sub_type_display_name}"
         else:
             return f"{self.test_short_name or self.test_name}"
 
     @property
+    def asset_name(self) -> str:
+        return (
+            self.table_full_name + "." + self.column_name
+            if self.column_name
+            else self.table_full_name
+        )
+
+    @property
     def summary(self) -> str:
         if self.test_type == "schema_change":
-            return (
-                f"{self.test_sub_type_display_name} on "
-                f"{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}"
-            )
-        return (
-            f'"{self.concise_name}" test failed on '
-            f"{self.table_full_name + '.' + self.column_name if self.column_name else self.table_full_name}"
-        )
+            return f"{self.test_sub_type_display_name} on {self.asset_name}"
+        return f'"{self.concise_name}" test failed on {self.asset_name}'
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         return get_test_runs_link(self.report_url, self.elementary_unique_id)
