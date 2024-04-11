@@ -134,20 +134,6 @@ class SlackMessageBuilder:
         }
 
     @staticmethod
-    def create_button_action_block(text: str, url: str) -> dict:
-        return {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": text, "emoji": True},
-                    "value": text,
-                    "url": url,
-                }
-            ],
-        }
-
-    @staticmethod
     def create_section_with_button(
         section_text: str, button_text: str, url: str
     ) -> dict:
@@ -183,6 +169,10 @@ class SlackMessageBuilder:
         attachment = {"type": "section", "fields": section_fields}
         attachments.append(attachment)
         return attachments
+
+    @staticmethod
+    def create_actions_block(actions: List[dict]) -> dict:
+        return {"type": "actions", "elements": actions}
 
     @staticmethod
     def create_user_select(
@@ -235,6 +225,20 @@ class SlackMessageBuilder:
         if action_id:
             static_select_element.update({"action_id": action_id})
         return static_select_element
+
+    @staticmethod
+    def create_button(text: str, url: str) -> dict:
+        return {
+            "type": "button",
+            "text": {"type": "plain_text", "text": text, "emoji": True},
+            "value": text,
+            "url": url,
+        }
+
+    @staticmethod
+    def create_button_action_block(text: str, url: str) -> dict:
+        actions = [SlackMessageBuilder.create_button(text=text, url=url)]
+        return SlackMessageBuilder.create_actions_block(actions=actions)
 
     def get_slack_message(self, *args, **kwargs) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
