@@ -1,10 +1,16 @@
 from enum import Enum
-from typing import List, Union
+from typing import List, Optional, Union
 
+from pydantic import BaseModel
 from slack_sdk.models.blocks import HeaderBlock, SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.utils.json_utils import unpack_and_flatten_str_to_list
+
+
+class OptionSchema(BaseModel):
+    value: str
+    display_name: str
 
 
 class MessageColor(Enum):
@@ -177,6 +183,58 @@ class SlackMessageBuilder:
         attachment = {"type": "section", "fields": section_fields}
         attachments.append(attachment)
         return attachments
+
+    @staticmethod
+    def create_user_select(
+        place_holder: Optional[str] = None,
+        initial_user: Optional[str] = None,
+        action_id: Optional[str] = None,
+    ) -> dict:
+        user_select_element = {
+            "type": "users_select",
+            "placeholder": {
+                "type": "plain_text",
+                "text": place_holder or "Select a user",
+                "emoji": True,
+            },
+        }
+        if initial_user:
+            user_select_element.update({"initial_user": initial_user})
+        if action_id:
+            user_select_element.update({"action_id": action_id})
+        return user_select_element
+
+    @staticmethod
+    def create_option_item(value: str, display_name: str) -> dict:
+        return {
+            "text": {"type": "plain_text", "text": display_name, "emoji": True},
+            "value": value,
+        }
+
+    @staticmethod
+    def create_static_select(
+        place_holder: str,
+        select_options: List[OptionSchema],
+        action_id: Optional[str] = None,
+    ) -> dict:
+        options = [
+            SlackMessageBuilder.create_option_item(
+                value=option.value, display_name=option.display_name
+            )
+            for option in select_options
+        ]
+        static_select_element = {
+            "type": "static_select",
+            "placeholder": {
+                "type": "plain_text",
+                "text": place_holder,
+                "emoji": True,
+            },
+            "options": options,
+        }
+        if action_id:
+            static_select_element.update({"action_id": action_id})
+        return static_select_element
 
     def get_slack_message(self, *args, **kwargs) -> SlackMessageSchema:
         return SlackMessageSchema(**self.slack_message)
