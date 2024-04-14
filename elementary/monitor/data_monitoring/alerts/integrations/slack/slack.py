@@ -781,6 +781,7 @@ class SlackIntegration(BaseIntegration):
             fields_summary.append(
                 f":exclamation: Test errors: {len(alert.test_errors)}"
             )
+        title_blocks.append(self.message_builder.create_context_block(fields_summary))
 
         report_link = None
         # No report link when there is only model error
