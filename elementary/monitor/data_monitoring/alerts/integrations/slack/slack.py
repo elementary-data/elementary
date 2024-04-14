@@ -797,8 +797,6 @@ class SlackIntegration(BaseIntegration):
             )
             title_blocks.append(report_link_block)
 
-        self.message_builder.add_title_to_slack_alert(title_blocks=title_blocks)
-
         # attention required : tags, owners, subscribers
         preview_blocks = []
 
