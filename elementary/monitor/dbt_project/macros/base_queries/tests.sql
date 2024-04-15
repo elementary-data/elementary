@@ -42,6 +42,7 @@
             dbt_tests.model_owners as model_owners,
             dbt_tests.model_tags as model_tags,
             dbt_tests.tags as tags,
+            dbt_tests.original_path as original_path,
             dbt_tests.generated_at as generated_at,
             dbt_tests.meta as meta,
             case 

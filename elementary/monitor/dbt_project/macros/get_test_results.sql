@@ -28,6 +28,8 @@
             test_type,
             test_sub_type,
             test_results_description,
+            original_path,
+            package_name,
             owners,
             model_owner,
             tags,

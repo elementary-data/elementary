@@ -6,7 +6,8 @@ from typing import Any, Dict, List, Optional, Union
 from slack_sdk.models.blocks import SectionBlock
 
 from elementary.clients.slack.client import SlackClient, SlackWebClient
-from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
+from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
 from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -17,6 +18,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.base_integration imp
 )
 from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builder import (
     SlackAlertMessageBuilder,
+    SlackAlertMessageSchema,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     get_model_runs_link,
@@ -27,6 +29,10 @@ from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
     list_of_lists_of_strings_to_comma_delimited_unique_strings,
 )
+from elementary.utils.log import get_logger
+from elementary.utils.strings import prettify_and_dedup_list
+
+logger = get_logger(__name__)
 
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
@@ -50,6 +56,12 @@ DEFAULT_ALERT_FIELDS = [
     TEST_QUERY_FIELD,
     TEST_RESULTS_SAMPLE_FIELD,
 ]
+
+STATUS_DISPLAYS: Dict[str, Dict] = {
+    "fail": {"color": MessageColor.RED, "display_name": "Failure"},
+    "warn": {"color": MessageColor.YELLOW, "display_name": "Warning"},
+    "error": {"color": MessageColor.RED, "display_name": "Error"},
+}
 
 
 class SlackIntegration(BaseIntegration):
@@ -91,20 +103,26 @@ class SlackIntegration(BaseIntegration):
     ) -> SlackMessageSchema:
         if self.config.is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(alert.data, sort_keys=True))
-        return super()._get_alert_template(alert, *args, **kwargs)
+        alert_schema: SlackAlertMessageSchema = super()._get_alert_template(
+            alert, *args, **kwargs
+        )
+        return self.message_builder.get_slack_message(alert_schema=alert_schema)
 
     def _get_dbt_test_template(
         self, alert: TestAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
-        icon = self.message_builder.get_slack_status_icon(alert.status)
-
-        title = [self.message_builder.create_header_block(f"{icon} dbt test alert")]
+    ) -> SlackAlertMessageSchema:
+        self.message_builder.add_message_color(self._get_color(alert.status))
+        title = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
         if alert.suppression_interval:
             title.extend(
                 [
                     self.message_builder.create_context_block(
                         [
-                            f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                            f"*Test:* {alert.concise_name}     |",
                             f"*Status:* {alert.status}",
                         ],
                     ),
@@ -120,7 +138,7 @@ class SlackIntegration(BaseIntegration):
             title.append(
                 self.message_builder.create_context_block(
                     [
-                        f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                        f"*Test:* {alert.concise_name}     |",
                         f"*Status:* {alert.status}     |",
                         f"*{alert.detected_at_str}*",
                     ],
@@ -150,15 +168,13 @@ class SlackIntegration(BaseIntegration):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             compacted_sections.append(f"*Column*\n{alert.column_name or '_No column_'}")
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = self.message_builder.prettify_and_dedup_list(alert.tags or [])
+            tags = prettify_and_dedup_list(alert.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = self.message_builder.prettify_and_dedup_list(alert.owners or [])
+            owners = prettify_and_dedup_list(alert.owners or [])
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = self.message_builder.prettify_and_dedup_list(
-                alert.subscribers or []
-            )
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers or "_No subscribers_"}'
             )
@@ -243,33 +259,36 @@ class SlackIntegration(BaseIntegration):
                 ]
             )
 
-        return self.message_builder.get_slack_message(
-            title=title, preview=preview, result=result, configuration=configuration
+        return SlackAlertMessageSchema(
+            title=title,
+            preview=preview,
+            details=self._create_single_alert_details_blocks(
+                result=result, configuration=configuration
+            ),
         )
 
     def _get_elementary_test_template(
         self, alert: TestAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
-        icon = self.message_builder.get_slack_status_icon(alert.status)
+    ) -> SlackAlertMessageSchema:
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
-        anomalous_value = None
-        if alert.test_type == "schema_change":
-            alert_title = "Schema change detected"
-        elif alert.test_type == "anomaly_detection":
-            alert_title = "Data anomaly detected"
-            anomalous_value = alert.other or None
-        else:
-            raise ValueError("Invalid test type.", alert.test_type)
+        anomalous_value = (
+            alert.other if alert.test_type == "anomaly_detection" else None
+        )
 
         title = [
-            self.message_builder.create_header_block(f"{icon} {alert_title}"),
+            self.message_builder.create_header_block(
+                f"{alert.summary}"
+                if alert.test_type == "schema_change"
+                else f"{self._get_display_name(alert.status)}: {alert.summary}"
+            ),
         ]
         if alert.suppression_interval:
             title.extend(
                 [
                     self.message_builder.create_context_block(
                         [
-                            f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                            f"*Test:* {alert.concise_name}     |",
                             f"*Status:* {alert.status}",
                         ],
                     ),
@@ -285,7 +304,7 @@ class SlackIntegration(BaseIntegration):
             title.append(
                 self.message_builder.create_context_block(
                     [
-                        f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                        f"*Test:* {alert.concise_name}     |",
                         f"*Status:* {alert.status}     |",
                         f"*{alert.detected_at_str}*",
                     ],
@@ -315,15 +334,13 @@ class SlackIntegration(BaseIntegration):
         if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             compacted_sections.append(f"*Column*\n{alert.column_name or '_No column_'}")
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            tags = self.message_builder.prettify_and_dedup_list(alert.tags or [])
+            tags = prettify_and_dedup_list(alert.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
         if OWNERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            owners = self.message_builder.prettify_and_dedup_list(alert.owners or [])
+            owners = prettify_and_dedup_list(alert.owners or [])
             compacted_sections.append(f"*Owners*\n{owners or '_No owners_'}")
         if SUBSCRIBERS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            subscribers = self.message_builder.prettify_and_dedup_list(
-                alert.subscribers or []
-            )
+            subscribers = prettify_and_dedup_list(alert.subscribers or [])
             compacted_sections.append(
                 f'*Subscribers*\n{subscribers or "_No subscribers_"}'
             )
@@ -392,19 +409,27 @@ class SlackIntegration(BaseIntegration):
                 ]
             )
 
-        return self.message_builder.get_slack_message(
-            title=title, preview=preview, result=result, configuration=configuration
+        return SlackAlertMessageSchema(
+            title=title,
+            preview=preview,
+            details=self._create_single_alert_details_blocks(
+                result=result, configuration=configuration
+            ),
         )
 
     def _get_model_template(
         self, alert: ModelAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
-        tags = self.message_builder.prettify_and_dedup_list(alert.tags)
-        owners = self.message_builder.prettify_and_dedup_list(alert.owners)
-        subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
-        icon = self.message_builder.get_slack_status_icon(alert.status)
+    ) -> SlackAlertMessageSchema:
+        tags = prettify_and_dedup_list(alert.tags)
+        owners = prettify_and_dedup_list(alert.owners)
+        subscribers = prettify_and_dedup_list(alert.subscribers)
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
-        title = [self.message_builder.create_header_block(f"{icon} dbt model alert")]
+        title = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -488,19 +513,27 @@ class SlackIntegration(BaseIntegration):
                 self.message_builder.create_text_section_block(f"`{alert.path}`")
             )
 
-        return self.message_builder.get_slack_message(
-            title=title, preview=preview, result=result, configuration=configuration
+        return SlackAlertMessageSchema(
+            title=title,
+            preview=preview,
+            details=self._create_single_alert_details_blocks(
+                result=result, configuration=configuration
+            ),
         )
 
     def _get_snapshot_template(
         self, alert: ModelAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
-        tags = self.message_builder.prettify_and_dedup_list(alert.tags)
-        owners = self.message_builder.prettify_and_dedup_list(alert.owners)
-        subscribers = self.message_builder.prettify_and_dedup_list(alert.subscribers)
-        icon = self.message_builder.get_slack_status_icon(alert.status)
+    ) -> SlackAlertMessageSchema:
+        tags = prettify_and_dedup_list(alert.tags)
+        owners = prettify_and_dedup_list(alert.owners)
+        subscribers = prettify_and_dedup_list(alert.subscribers)
+        self.message_builder.add_message_color(self._get_color(alert.status))
 
-        title = [self.message_builder.create_header_block(f"{icon} dbt snapshot alert")]
+        title = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
         if alert.suppression_interval:
             title.extend(
                 [
@@ -568,25 +601,27 @@ class SlackIntegration(BaseIntegration):
                 )
             )
 
-        return self.message_builder.get_slack_message(
-            title=title, preview=preview, result=result, configuration=configuration
+        return SlackAlertMessageSchema(
+            title=title,
+            preview=preview,
+            details=self._create_single_alert_details_blocks(
+                result=result, configuration=configuration
+            ),
         )
 
     def _get_source_freshness_template(
         self, alert: SourceFreshnessAlertModel, *args, **kwargs
-    ) -> SlackMessageSchema:
-        tags = self.message_builder.prettify_and_dedup_list(alert.tags or [])
-        owners = self.message_builder.prettify_and_dedup_list(alert.owners or [])
-        subscribers = self.message_builder.prettify_and_dedup_list(
-            alert.subscribers or []
-        )
-        icon = self.message_builder.get_slack_status_icon(alert.status)
-
+    ) -> SlackAlertMessageSchema:
+        tags = prettify_and_dedup_list(alert.tags or [])
+        owners = prettify_and_dedup_list(alert.owners or [])
+        subscribers = prettify_and_dedup_list(alert.subscribers or [])
+        self.message_builder.add_message_color(self._get_color(alert.status))
         title = [
             self.message_builder.create_header_block(
-                f"{icon} dbt source freshness alert"
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
             )
         ]
+
         if alert.suppression_interval:
             title.extend(
                 [
@@ -709,23 +744,26 @@ class SlackIntegration(BaseIntegration):
                 self.message_builder.create_text_section_block(f"`{alert.path}`")
             )
 
-        return self.message_builder.get_slack_message(
-            title=title, preview=preview, result=result, configuration=configuration
+        return SlackAlertMessageSchema(
+            title=title,
+            preview=preview,
+            details=self._create_single_alert_details_blocks(
+                result=result, configuration=configuration
+            ),
         )
 
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
-    ):
+    ) -> SlackAlertMessageSchema:
         alerts = alert.alerts
-        model = alert.model
 
-        title_blocks = []  # title, [banner], number of passed or failed,
-        title_blocks.append(
+        self.message_builder.add_message_color(self._get_color(alert.status))
+
+        title_blocks = [
             self.message_builder.create_header_block(
-                f":small_red_triangle: Table issues detected - {model}"
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
             )
-        )
-
+        ]
         # summary of number of failed, errors, etc.
         fields_summary: List[str] = []
         # summary of number of failed, errors, etc.
@@ -760,8 +798,6 @@ class SlackIntegration(BaseIntegration):
             )
             title_blocks.append(report_link_block)
 
-        self.message_builder.add_title_to_slack_alert(title_blocks=title_blocks)
-
         # attention required : tags, owners, subscribers
         preview_blocks = []
 
@@ -790,7 +826,6 @@ class SlackIntegration(BaseIntegration):
                 f"*Subscribers*: {subscribers if subscribers else '_No subscribers_'}"
             )
         )
-        self.message_builder.add_preview_to_slack_alert(preview_blocks=preview_blocks)
 
         details_blocks = []
         # Model errors
@@ -834,8 +869,9 @@ class SlackIntegration(BaseIntegration):
             text = "\n".join([f":exclamation: {row}" for row in rows])
             details_blocks.append(self.message_builder.create_text_section_block(text))
 
-        self.message_builder._add_blocks_as_attachments(details_blocks)
-        return self.message_builder.get_slack_message()
+        return SlackAlertMessageSchema(
+            title=title_blocks, preview=preview_blocks, details=details_blocks
+        )
 
     @staticmethod
     def _get_model_error_block_header(
@@ -872,7 +908,7 @@ class SlackIntegration(BaseIntegration):
         return SlackMessageSchema(
             text=self.message_builder.get_limited_markdown_msg(
                 f":small_red_triangle: Oops, we failed to format the alert :confused:\n"
-                f"Please share this with the Elementary team via <https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue.\n"
+                f"Please share this with the Elementary team via <https://www.elementary-data.com/community|Slack> or a <https://github.com/elementary-data/elementary/issues/new|GitHub> issue.\n"
                 f"```{json.dumps(alert.data, indent=2)}```"
             )
         )
@@ -938,7 +974,10 @@ class SlackIntegration(BaseIntegration):
             sent_successfully = self.client.send_message(
                 channel_name=channel_name, message=template
             )
-        except Exception:
+        except Exception as err:
+            logger.error(
+                f"Unable to send alert via Slack: {err}\nSending fallback template."
+            )
             sent_successfully = False
 
         if not sent_successfully:
@@ -947,7 +986,8 @@ class SlackIntegration(BaseIntegration):
                 fallback_sent_successfully = self.client.send_message(
                     channel_name=channel_name, message=fallback_template
                 )
-            except Exception:
+            except Exception as err:
+                logger.error(f"Unable to send alert fallback via Slack: {err}")
                 fallback_sent_successfully = False
             self.message_builder.reset_slack_message()
             return fallback_sent_successfully
@@ -985,3 +1025,39 @@ class SlackIntegration(BaseIntegration):
                 )
             )
         return integration_params
+
+    def _create_single_alert_details_blocks(
+        self, result: SlackBlocksType, configuration: SlackBlocksType
+    ) -> SlackBlocksType:
+        details_blocks = []
+        if result:
+            details_blocks.extend(
+                [
+                    self.message_builder.create_text_section_block(":mag: *Result*"),
+                    self.message_builder.create_divider_block(),
+                    *result,
+                ]
+            )
+        if configuration:
+            details_blocks.extend(
+                [
+                    self.message_builder.create_text_section_block(
+                        ":hammer_and_wrench: *Configuration*"
+                    ),
+                    self.message_builder.create_divider_block(),
+                    *configuration,
+                ]
+            )
+        return details_blocks
+
+    @staticmethod
+    def _get_display_name(alert_status: Optional[str]) -> str:
+        if alert_status is None:
+            return "Unknown"
+        return STATUS_DISPLAYS.get(alert_status, {}).get("display_name", alert_status)
+
+    @staticmethod
+    def _get_color(alert_status: Optional[str]) -> MessageColor:
+        if alert_status is None:
+            return MessageColor.RED
+        return STATUS_DISPLAYS.get(alert_status, {}).get("color", MessageColor.RED)

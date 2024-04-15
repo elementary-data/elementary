@@ -215,15 +215,6 @@ def test_create_compacted_sections_blocks():
     )
 
 
-def test_get_slack_status_icon():
-    assert SlackMessageBuilder.get_slack_status_icon("warn") == ":warning:"
-    assert SlackMessageBuilder.get_slack_status_icon("error") == ":x:"
-    assert (
-        SlackMessageBuilder.get_slack_status_icon("anything else")
-        == ":small_red_triangle:"
-    )
-
-
 def test_get_slack_message():
     slack_message_builder = SlackMessageBuilder()
     slack_message = slack_message_builder.get_slack_message()
@@ -329,23 +320,6 @@ def test_create_button_action_block(text, url):
         },
         sort_keys=True,
     )
-
-
-def test_prettify_and_dedup_list():
-    message_builder = SlackMessageBuilder()
-    list_prettified = message_builder.prettify_and_dedup_list(
-        ["name1", "name2", "name2"]
-    )
-    assert list_prettified == "name1, name2"
-
-    assert (
-        message_builder.prettify_and_dedup_list("name1, name2, name2") == "name1, name2"
-    )
-
-    string_of_list_prettified = message_builder.prettify_and_dedup_list(
-        '["name1", "name2", "name2"]'
-    )
-    assert string_of_list_prettified == "name1, name2"
 
 
 def test_slack_message_attachments_limit():

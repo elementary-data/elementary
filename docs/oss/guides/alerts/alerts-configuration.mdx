@@ -1,0 +1,89 @@
+---
+title: "Alerts Configuration and Customization"
+sidebarTitle: "Alerts configuration"
+---
+
+<Snippet file="guides/alerts-code-configuration.mdx" />
+
+## Alerts CLI flags
+
+#### Filter alerts
+
+Elementary supports filtering the alerts by tag, owner, model, status or resource type.
+
+Using filters, you can send alerts to the relevant people and teams by running `edr` multiple times with different filters on each run.
+
+<Warning>
+alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
+</Warning>
+
+<CodeGroup>
+
+```shell tags filter
+edr monitor --filters tags:critical
+edr monitor --filters tags:finance,marketing
+```
+
+```shell owners filter
+edr monitor --filters owners:@jeff
+edr monitor --filters owners:@jessy,@jeff
+```
+
+```shell models filter
+edr monitor --filters models:customers
+edr monitor --filters models:orders,customers,signups
+```
+
+```shell statuses filter
+edr monitor --filters statuses:warn,fail
+edr monitor --filters statuses:error
+edr monitor --filters statuses:skipped
+```
+
+```shell resource_types filter
+edr monitor --filters resource_types:model
+edr monitor --filters resource_types:test
+edr monitor --filters resource_types:test,source_freshness
+```
+
+</CodeGroup>
+
+The `--filters` flag can be used multiple times to apply multiple filters. The filters are combined using the logical AND operator.
+The comma `,` is used to separate multiple values for the same filter, creating a logical OR.
+
+<CodeGroup>
+
+```shell multiple filters
+edr monitor --filters resource_types:model --filters tags:finance,marketing
+```
+
+</CodeGroup>
+
+
+
+#### Group alerts by table
+
+By default, Elementary sends a single alert to notify on each failure with extensive information for fast triage.
+
+Elementary also supports grouping alerts by table.
+In this case, a single Slack notification will be generated containing all issues associated with this table.
+The created notification will contain a union of the relevant owners, tags and subscribers.
+
+Due to their nature, grouped alerts will contain less information on each issue.
+
+```shell
+edr monitor --group-by table
+```
+
+#### Suppression interval flag
+
+Don’t want to get multiple alerts if the same test keeps failing?
+You can now configure an alert_suppression_interval, this is a “snooze” period for alerts on the same issue.
+Elementary won’t send new alerts on the same issue that are generated within suppression interval.
+
+The flag configuration is the suppression interval duration in hours, and the default is 0 hours (no alert suppression).
+If configured otherwise in the dbt project config block or meta, the CLI value will be ignored (unless `--override-dbt-project-config` is used).
+
+```shell
+edr monitor --suppression-interval 24
+```

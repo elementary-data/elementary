@@ -29,9 +29,10 @@ If undefined, default is null for both spike and drop.
 models:
   - name: this_is_a_model
     tests:
-      ignore_small_changes:
-        spike_failure_percent_threshold: 2
-        drop_failure_percent_threshold: 50
+      - elementary.volume_anomalies:
+          ignore_small_changes:
+            spike_failure_percent_threshold: 2
+            drop_failure_percent_threshold: 50
 ```
 
 ```yml model

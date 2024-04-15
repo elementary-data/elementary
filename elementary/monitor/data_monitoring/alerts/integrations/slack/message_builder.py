@@ -1,5 +1,7 @@
 from typing import Optional
 
+from pydantic import BaseModel
+
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
 
@@ -18,31 +20,23 @@ class PreviewIsTooLongError(Exception):
         return f"{len(self.preview_blocks)} provided -> {self.message}"
 
 
+class SlackAlertMessageSchema(BaseModel):
+    title: Optional[SlackBlocksType] = None
+    preview: Optional[SlackBlocksType] = None
+    details: Optional[SlackBlocksType] = None
+
+
 class SlackAlertMessageBuilder(SlackMessageBuilder):
     def __init__(self) -> None:
         super().__init__()
 
     def get_slack_message(
         self,
-        title: Optional[SlackBlocksType] = None,
-        preview: Optional[SlackBlocksType] = None,
-        result: Optional[SlackBlocksType] = None,
-        configuration: Optional[SlackBlocksType] = None,
+        alert_schema: SlackAlertMessageSchema,
     ) -> SlackMessageSchema:
-        return self._create_slack_alert(
-            title=title, preview=preview, result=result, configuration=configuration
-        )
-
-    def _create_slack_alert(
-        self,
-        title: Optional[SlackBlocksType] = None,
-        preview: Optional[SlackBlocksType] = None,
-        result: Optional[SlackBlocksType] = None,
-        configuration: Optional[SlackBlocksType] = None,
-    ) -> SlackMessageSchema:
-        self.add_title_to_slack_alert(title)
-        self.add_preview_to_slack_alert(preview)
-        self.add_details_to_slack_alert(result, configuration)
+        self.add_title_to_slack_alert(alert_schema.title)
+        self.add_preview_to_slack_alert(alert_schema.preview)
+        self.add_details_to_slack_alert(alert_schema.details)
         return super().get_slack_message()
 
     def add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
@@ -59,24 +53,10 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
 
     def add_details_to_slack_alert(
         self,
-        result: Optional[SlackBlocksType] = None,
-        configuration: Optional[SlackBlocksType] = None,
+        detail_blocks: Optional[SlackBlocksType] = None,
     ):
-        if result:
-            result_blocks = [
-                self.create_text_section_block(":mag: *Result*"),
-                self.create_divider_block(),
-                *result,
-            ]
-            self._add_blocks_as_attachments(result_blocks)
-
-        if configuration:
-            configuration_blocks = [
-                self.create_text_section_block(":hammer_and_wrench: *Configuration*"),
-                self.create_divider_block(),
-                *configuration,
-            ]
-            self._add_blocks_as_attachments(configuration_blocks)
+        if detail_blocks:
+            self._add_blocks_as_attachments(detail_blocks)
 
     @classmethod
     def _validate_preview_blocks(cls, preview_blocks: Optional[SlackBlocksType] = None):

@@ -38,6 +38,18 @@ def convert_local_time_to_timezone(
     return local_time_with_timezone.astimezone(to_zone)
 
 
+def convert_time_to_timezone(
+    time: datetime, timezone: Optional[str] = None
+) -> datetime:
+    # Converting a datetime to timezone
+    # If "time" has no timezone, the default is set to utc.
+    # If not "timezone" has provided, the default is set to utc.
+    time_timezone = tz.gettz(time.tzname()) if time.tzname() else tz.tzutc()
+    to_timezone = tz.gettz(timezone) if timezone else tz.tzutc()
+    time_with_timezone = time.replace(tzinfo=time_timezone)
+    return time_with_timezone.astimezone(to_timezone)
+
+
 def get_now_utc_str(format: str = DATETIME_FORMAT) -> str:
     return datetime.utcnow().strftime(format)
 
