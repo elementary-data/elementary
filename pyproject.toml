@@ -43,6 +43,7 @@ dbt-postgres = {version = ">=0.20,<2.0.0", optional = true}
 dbt-databricks = {version = ">=0.20,<2.0.0", optional = true}
 dbt-spark = {version = ">=0.20,<2.0.0", optional = true}
 dbt-athena-community = {version = ">=1.6.3,<2.0.0", optional = true}
+dbt-trino = {version = ">=1.5.0,<2.0.0", optional = true}
 
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
@@ -52,6 +53,7 @@ postgres = ["dbt-postgres"]
 databricks = ["dbt-databricks"]
 spark = ["dbt-spark"]
 athena = ["dbt-athena-community"]
+trino = ["dbt-trino"]
 all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark"]
 
 [build-system]
