@@ -162,18 +162,16 @@ class TestAlertModel(AlertModel):
             return f"{self.test_short_name or self.test_name}"
 
     @property
-    def asset_name(self) -> str:
-        return (
+    def summary(self) -> str:
+        asset_name = (
             self.table_full_name + "." + self.column_name
             if self.column_name
             else self.table_full_name
         )
 
-    @property
-    def summary(self) -> str:
         if self.test_type == "schema_change":
-            return f"{self.test_sub_type_display_name} on {self.asset_name}"
-        return f'"{self.concise_name}" test failed on {self.asset_name}'
+            return f"{self.test_sub_type_display_name} on {asset_name}"
+        return f'"{self.concise_name}" test failed on {asset_name}'
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         return get_test_runs_link(self.report_url, self.elementary_unique_id)
