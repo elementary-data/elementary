@@ -122,7 +122,7 @@ class SlackIntegration(BaseIntegration):
                 [
                     self.message_builder.create_context_block(
                         [
-                            f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                            f"*Test:* {alert.concise_name}     |",
                             f"*Status:* {alert.status}",
                         ],
                     ),
@@ -138,7 +138,7 @@ class SlackIntegration(BaseIntegration):
             title.append(
                 self.message_builder.create_context_block(
                     [
-                        f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                        f"*Test:* {alert.concise_name}     |",
                         f"*Status:* {alert.status}     |",
                         f"*{alert.detected_at_str}*",
                     ],
@@ -288,7 +288,7 @@ class SlackIntegration(BaseIntegration):
                 [
                     self.message_builder.create_context_block(
                         [
-                            f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                            f"*Test:* {alert.concise_name}     |",
                             f"*Status:* {alert.status}",
                         ],
                     ),
@@ -304,7 +304,7 @@ class SlackIntegration(BaseIntegration):
             title.append(
                 self.message_builder.create_context_block(
                     [
-                        f"*Test:* {alert.test_short_name or alert.test_name} - {alert.test_sub_type_display_name}     |",
+                        f"*Test:* {alert.concise_name}     |",
                         f"*Status:* {alert.status}     |",
                         f"*{alert.detected_at_str}*",
                     ],

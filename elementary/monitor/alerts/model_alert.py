@@ -94,7 +94,7 @@ class ModelAlertModel(AlertModel):
         return f"dbt {dbt_type} alert - {self.alias}"
 
     @property
-    def summary(self):
+    def summary(self) -> str:
         return f'dbt failed to build {self.materialization} "{self.alias}"'
 
     def get_report_link(self) -> Optional[ReportLinkData]:
