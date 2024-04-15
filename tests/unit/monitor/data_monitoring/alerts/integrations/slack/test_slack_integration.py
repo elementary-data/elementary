@@ -2,6 +2,10 @@ import json
 from typing import Optional
 from unittest import mock
 
+from elementary.clients.slack.schema import SlackMessageSchema
+from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builder import (
+    SlackAlertMessageSchema,
+)
 from tests.mocks.data_monitoring.alerts.integrations.alerts_data_mock import (
     DBT_TEST_ALERT_MOCK,
     AlertsDataMock,
@@ -24,8 +28,21 @@ def test_get_alert_template_workflow_param():
     integration = get_slack_integration_mock(
         slack_token="mock", slack_channel_name="mock"
     )
-    integration._get_dbt_test_template = mock.Mock(return_value="dbt_test")
-    assert integration._get_alert_template(alert=alerts_data.dbt_test) == "dbt_test"
+    integration._get_dbt_test_template = mock.Mock(
+        return_value=SlackAlertMessageSchema(
+            title=[integration.message_builder.create_header_block("Header!")]
+        )
+    )
+    assert integration._get_alert_template(
+        alert=alerts_data.dbt_test
+    ) == SlackMessageSchema(
+        text=None,
+        attachments=[{"blocks": []}],
+        blocks=[
+            {"type": "header", "text": {"type": "plain_text", "text": "Header!"}},
+            {"type": "divider"},
+        ],
+    )
 
 
 def test_get_integration_params_different_slack_clients_logic():
