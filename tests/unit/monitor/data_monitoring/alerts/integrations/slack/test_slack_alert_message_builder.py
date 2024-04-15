@@ -134,7 +134,7 @@ def test_add_preview_to_slack_alert():
 def test_add_details_to_slack_alert():
     block = SlackAlertMessageBuilder.create_divider_block()
 
-    # No result and configuration blocks
+    # No details
     message_builder = SlackAlertMessageBuilder()
     message_builder.add_details_to_slack_alert()
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
@@ -145,87 +145,26 @@ def test_add_details_to_slack_alert():
         sort_keys=True,
     )
 
-    # Only result blocks
+    # Empty details
     message_builder = SlackAlertMessageBuilder()
-    message_builder.add_details_to_slack_alert(result=[block, block])
+    message_builder.add_details_to_slack_alert([])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
-            "attachments": [
-                {
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": ":mag: *Result*",
-                            },
-                        },
-                        {"type": "divider"},
-                        block,
-                        block,
-                    ]
-                }
-            ],
+            "attachments": [{"blocks": []}],
         },
         sort_keys=True,
     )
 
-    # Only configuration blocks
+    # With details
     message_builder = SlackAlertMessageBuilder()
-    message_builder.add_details_to_slack_alert(configuration=[block, block])
+    message_builder.add_details_to_slack_alert([block, block])
     assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
         {
             "blocks": [],
             "attachments": [
                 {
                     "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": ":hammer_and_wrench: *Configuration*",
-                            },
-                        },
-                        {"type": "divider"},
-                        block,
-                        block,
-                    ]
-                }
-            ],
-        },
-        sort_keys=True,
-    )
-
-    # All details
-    message_builder = SlackAlertMessageBuilder()
-    message_builder.add_details_to_slack_alert(
-        configuration=[block, block], result=[block, block]
-    )
-    assert json.dumps(message_builder.slack_message, sort_keys=True) == json.dumps(
-        {
-            "blocks": [],
-            "attachments": [
-                {
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": ":mag: *Result*",
-                            },
-                        },
-                        {"type": "divider"},
-                        block,
-                        block,
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": ":hammer_and_wrench: *Configuration*",
-                            },
-                        },
-                        {"type": "divider"},
                         block,
                         block,
                     ]
