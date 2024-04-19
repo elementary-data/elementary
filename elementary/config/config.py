@@ -67,6 +67,7 @@ class Config:
         teams_webhook: Optional[str] = None,
         env: str = "dev",
         run_dbt_deps_if_needed: Optional[bool] = None,
+        project_name: Optional[str] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -74,6 +75,7 @@ class Config:
         self.profile_target = profile_target
         self.project_profile_target = project_profile_target
         self.env = env
+        self.project_name = project_name
 
         # Additional env vars supplied to dbt invocations
         self.env_vars = dict()
