@@ -99,8 +99,8 @@
                     {% endfor %}
                     {# Adding the rest of the static headers (metrics headers) #}
                     {% do headers.extend([
-                        {'id': 'anomalous_value_' ~ metric_name, 'display_name': metric_name, 'type': 'int'},
-                        {'id': 'anomalous_value_average_' ~ metric_name, 'display_name': metric_name, 'type': 'int'}
+                        {'id': 'anomalous_value_' ~ metric_name, 'display_name': ' '.join(metric_name.split('_')), 'type': 'int'},
+                        {'id': 'anomalous_value_average_' ~ metric_name, 'display_name': 'average ' ~ ' '.join(metric_name.split('_')), 'type': 'int'}
                     ]) %}
                     {% set test_rows_sample = {
                         'headers': headers,
