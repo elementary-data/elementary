@@ -114,6 +114,5 @@
         {# Adding sample data to test results #}
         {% do test.update({"sample_data": test_rows_sample}) %}
     {%- endfor -%}
-    {{ log(tests, info=True) }}
     {% do return(tests) %}
 {%- endmacro -%}
