@@ -79,23 +79,25 @@
                     {% set anomalous_rows = [] %}
                     {% set headers = [{'id': 'anomalous_value_timestamp', 'display_name': 'timestamp', 'type': 'date'}] %}
                     {% for row in test_rows_sample %}
-                        {% set anomalous_row = {
+                        {% if row['is_anomalous'] %}
+                          {% set anomalous_row = {
                             'anomalous_value_timestamp': row['end_time'],
                             'anomalous_value_' ~ metric_name: row['value'],
                             'anomalous_value_average_' ~ metric_name: row['average'] | round(1)
-                        } %}
-                        {% set dimensions = row['dimension'].split('; ') %}
-                        {% set diemsions_values = row['dimension_value'].split('; ') %}
-                        {% for index in range(dimensions | length) %}
-                            {% do anomalous_row.update({dimensions[index]: diemsions_values[index]}) %}
-                        {% endfor %}
-                        {% if loop.last %}
-                            {# Adding dimensions to the headers #}
-                            {% for index in range(dimensions | length) %}
-                                {% do headers.append({'id': dimensions[index], 'display_name': dimensions[index], 'type': 'str'},) %}
-                            {% endfor %}
+                          } %}
+                          {% set dimensions = row['dimension'].split('; ') %}
+                          {% set diemsions_values = row['dimension_value'].split('; ') %}
+                          {% for index in range(dimensions | length) %}
+                              {% do anomalous_row.update({dimensions[index]: diemsions_values[index]}) %}
+                          {% endfor %}
+                          {% if loop.last %}
+                              {# Adding dimensions to the headers #}
+                              {% for index in range(dimensions | length) %}
+                                  {% do headers.append({'id': dimensions[index], 'display_name': dimensions[index], 'type': 'str'},) %}
+                              {% endfor %}
+                          {% endif %}
+                          {% do anomalous_rows.append(anomalous_row) %}
                         {% endif %}
-                        {% do anomalous_rows.append(anomalous_row) %}
                     {% endfor %}
                     {# Adding the rest of the static headers (metrics headers) #}
                     {% do headers.extend([
