@@ -73,6 +73,7 @@
         elementary_test_results.test_alias,
         elementary_test_results.failures,
         elementary_test_results.result_rows,
+        elementary_test_results.execution_time,
         dbt_tests.original_path,
         dbt_tests.meta,
         dbt_tests.package_name,

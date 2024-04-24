@@ -26,6 +26,7 @@ class InvocationSchema(BaseModel):
     time_utc: str
     id: str
     status: str
+    execution_time: Optional[float] = None
 
     @validator("time_utc", pre=True)
     def format_time_utc(cls, time_utc):
