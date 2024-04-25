@@ -66,7 +66,7 @@ class ReportAPI(APIClient):
 
             models = models_api.get_models(exclude_elementary_models)
             sources = models_api.get_sources()
-            exposures = models_api.get_exposures()
+            exposures = models_api.get_exposures(include_no_upstream_tables=False)
             singular_tests = tests_api.get_singular_tests()
 
             groups = groups_api.get_groups(
@@ -113,7 +113,14 @@ class ReportAPI(APIClient):
 
             test_runs_totals = get_total_test_runs(union_test_runs)
 
-            lineage = lineage_api.get_lineage(exclude_elementary_models)
+            lineage_node_ids = [
+                *[source.unique_id for source in sources.values() if source.unique_id],
+                *[model.unique_id for model in models.values() if model.unique_id],
+                *[exp.unique_id for exp in exposures.values() if exp.unique_id],
+            ]
+            lineage = lineage_api.get_lineage(
+                lineage_node_ids, exclude_elementary_models
+            )
             filters = filters_api.get_filters(
                 test_results_totals, test_runs_totals, models, sources, models_runs.runs
             )

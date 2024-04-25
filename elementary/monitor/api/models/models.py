@@ -145,9 +145,12 @@ class ModelsAPI(APIClient):
                 sources[source_unique_id] = normalized_source
         return sources
 
-    def get_exposures(self) -> Dict[str, NormalizedExposureSchema]:
+    def get_exposures(
+        self,
+        include_no_upstream_tables: bool = True,
+    ) -> Dict[str, NormalizedExposureSchema]:
         exposures_results = self.models_fetcher.get_exposures()
-        exposures = dict()
+        exposures: Dict[str, NormalizedExposureSchema] = dict()
         if exposures_results:
             for exposure_result in exposures_results:
                 normalized_exposure = self._normalize_dbt_artifact_dict(exposure_result)
@@ -158,7 +161,15 @@ class ModelsAPI(APIClient):
                     continue
 
                 exposures[exposure_unique_id] = normalized_exposure
-        return exposures
+
+        if include_no_upstream_tables:
+            return exposures
+
+        return {
+            exp_id: exp
+            for exp_id, exp in exposures.items()
+            if self._has_upstream_non_exposure(exp, exposures)
+        }
 
     def get_test_coverages(self) -> Dict[str, ModelCoverageSchema]:
         coverage_results = self.models_fetcher.get_test_coverages()
@@ -174,6 +185,17 @@ class ModelsAPI(APIClient):
                     column_tests=coverage_result.column_tests,
                 )
         return coverages
+
+    def _has_upstream_non_exposure(
+        self,
+        exposure: NormalizedExposureSchema,
+        exposures: Dict[str, NormalizedExposureSchema],
+    ) -> bool:
+        return any(
+            dep not in exposures
+            or self._has_upstream_non_exposure(exposures[dep], exposures)
+            for dep in exposure.depends_on_nodes or []
+        )
 
     @overload
     def _normalize_dbt_artifact_dict(

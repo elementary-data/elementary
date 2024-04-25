@@ -31,6 +31,7 @@
                   {% else %}
                     NULL as raw_queries,
                   {% endif %}
+                  depends_on_nodes,
                   {% if depends_on_columns_column_exists %}
                     depends_on_columns
                   {% else %}
