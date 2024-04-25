@@ -147,7 +147,7 @@ class ModelsAPI(APIClient):
 
     def get_exposures(
         self,
-        include_no_upstream_tables: bool = True,
+        upstream_node_ids: Optional[List[str]] = None,
     ) -> Dict[str, NormalizedExposureSchema]:
         exposures_results = self.models_fetcher.get_exposures()
         exposures: Dict[str, NormalizedExposureSchema] = dict()
@@ -162,13 +162,13 @@ class ModelsAPI(APIClient):
 
                 exposures[exposure_unique_id] = normalized_exposure
 
-        if include_no_upstream_tables:
+        if not upstream_node_ids:
             return exposures
 
         return {
             exp_id: exp
             for exp_id, exp in exposures.items()
-            if self._has_upstream_non_exposure(exp, exposures)
+            if self._exposure_has_upstream_node(exp, exposures, upstream_node_ids)
         }
 
     def get_test_coverages(self) -> Dict[str, ModelCoverageSchema]:
@@ -186,14 +186,20 @@ class ModelsAPI(APIClient):
                 )
         return coverages
 
-    def _has_upstream_non_exposure(
+    def _exposure_has_upstream_node(
         self,
         exposure: NormalizedExposureSchema,
         exposures: Dict[str, NormalizedExposureSchema],
+        upstream_node_ids: List[str],
     ) -> bool:
         return any(
-            dep not in exposures
-            or self._has_upstream_non_exposure(exposures[dep], exposures)
+            dep in upstream_node_ids
+            or (
+                dep in exposures
+                and self._exposure_has_upstream_node(
+                    exposures[dep], exposures, upstream_node_ids
+                )
+            )
             for dep in exposure.depends_on_nodes or []
         )
 
