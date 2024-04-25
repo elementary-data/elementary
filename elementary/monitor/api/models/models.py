@@ -2,7 +2,7 @@ import json
 import os
 import statistics
 from collections import defaultdict
-from typing import Dict, List, Optional, Union, overload
+from typing import Dict, List, Optional, Set, Union, overload
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -191,16 +191,26 @@ class ModelsAPI(APIClient):
         exposure: NormalizedExposureSchema,
         exposures: Dict[str, NormalizedExposureSchema],
         upstream_node_ids: List[str],
+        visited: Optional[Set[str]] = None,
     ) -> bool:
-        return any(
-            dep in upstream_node_ids
-            or (
-                dep in exposures
-                and self._exposure_has_upstream_node(
-                    exposures[dep], exposures, upstream_node_ids
+        if not visited:
+            visited = set()
+
+        return exposure.depends_on_nodes is not None and all(
+            dep not in visited
+            and (
+                dep in upstream_node_ids
+                or (
+                    dep in exposures
+                    and self._exposure_has_upstream_node(
+                        exposures[dep],
+                        exposures,
+                        upstream_node_ids,
+                        visited.union({dep}),
+                    )
                 )
             )
-            for dep in exposure.depends_on_nodes or []
+            for dep in exposure.depends_on_nodes
         )
 
     @overload
