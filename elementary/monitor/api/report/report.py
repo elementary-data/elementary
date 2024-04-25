@@ -64,9 +64,13 @@ class ReportAPI(APIClient):
             filters_api = FiltersAPI(dbt_runner=self.dbt_runner)
             invocations_api = InvocationsAPI(dbt_runner=self.dbt_runner)
 
+            lineage_node_ids: List[str] = []
             models = models_api.get_models(exclude_elementary_models)
+            lineage_node_ids.extend(models.keys())
             sources = models_api.get_sources()
-            exposures = models_api.get_exposures()
+            lineage_node_ids.extend(sources.keys())
+            exposures = models_api.get_exposures(upstream_node_ids=lineage_node_ids)
+            lineage_node_ids.extend(exposures.keys())
             singular_tests = tests_api.get_singular_tests()
 
             groups = groups_api.get_groups(
@@ -113,7 +117,9 @@ class ReportAPI(APIClient):
 
             test_runs_totals = get_total_test_runs(union_test_runs)
 
-            lineage = lineage_api.get_lineage(exclude_elementary_models)
+            lineage = lineage_api.get_lineage(
+                lineage_node_ids, exclude_elementary_models
+            )
             filters = filters_api.get_filters(
                 test_results_totals, test_runs_totals, models, sources, models_runs.runs
             )
