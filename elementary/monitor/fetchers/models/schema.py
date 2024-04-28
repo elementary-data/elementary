@@ -85,9 +85,13 @@ class ExposureSchema(ArtifactSchema):
     url: Optional[str] = None
     type: Optional[str] = None
     maturity: Optional[str] = None
-    depends_on: Optional[List[str]] = None
+    depends_on_nodes: Optional[List[str]] = None
     owner: Optional[OwnerSchema] = None
     raw_queries: Optional[List[str]] = None
+
+    @validator("depends_on_nodes", pre=True)
+    def load_depends_on_nodes(cls, depends_on_nodes):
+        return cls._load_var_to_list(depends_on_nodes)
 
 
 class ModelTestCoverage(ExtendedBaseModel):
