@@ -193,10 +193,13 @@ class ModelsAPI(APIClient):
         upstream_node_ids: List[str],
         visited: Optional[Set[str]] = None,
     ) -> bool:
+        if not exposure.depends_on_nodes:
+            return False
+
         if not visited:
             visited = set()
 
-        return exposure.depends_on_nodes is not None and all(
+        return all(
             dep not in visited
             and (
                 dep in upstream_node_ids
