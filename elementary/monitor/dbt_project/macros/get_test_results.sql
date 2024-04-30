@@ -71,10 +71,10 @@
                 {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
-                {% if test.test_sub_type == 'dimension' or test_params.dimensions | length > 0 %}
+                {% if test.test_sub_type == 'dimension' or test_params.dimensions %}
                     {% if test.test_sub_type == 'dimension' %}
                       {% set metric_name = 'row_count' %}
-                    {% elif test_params.dimensions | length > 0 %}
+                    {% elif test_params.dimensions %}
                       {% set metric_name = test.test_sub_type %}
                     {% endif %}
                     {% set anomalous_rows = [] %}
