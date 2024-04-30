@@ -2,7 +2,7 @@ import json
 import os
 import statistics
 from collections import defaultdict
-from typing import Dict, List, Optional, Union, overload
+from typing import Dict, List, Optional, Set, Union, overload
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -145,9 +145,12 @@ class ModelsAPI(APIClient):
                 sources[source_unique_id] = normalized_source
         return sources
 
-    def get_exposures(self) -> Dict[str, NormalizedExposureSchema]:
+    def get_exposures(
+        self,
+        upstream_node_ids: Optional[List[str]] = None,
+    ) -> Dict[str, NormalizedExposureSchema]:
         exposures_results = self.models_fetcher.get_exposures()
-        exposures = dict()
+        exposures: Dict[str, NormalizedExposureSchema] = dict()
         if exposures_results:
             for exposure_result in exposures_results:
                 normalized_exposure = self._normalize_dbt_artifact_dict(exposure_result)
@@ -158,7 +161,15 @@ class ModelsAPI(APIClient):
                     continue
 
                 exposures[exposure_unique_id] = normalized_exposure
-        return exposures
+
+        if not upstream_node_ids:
+            return exposures
+
+        return {
+            exp_id: exp
+            for exp_id, exp in exposures.items()
+            if self._exposure_has_upstream_node(exp, exposures, upstream_node_ids)
+        }
 
     def get_test_coverages(self) -> Dict[str, ModelCoverageSchema]:
         coverage_results = self.models_fetcher.get_test_coverages()
@@ -174,6 +185,36 @@ class ModelsAPI(APIClient):
                     column_tests=coverage_result.column_tests,
                 )
         return coverages
+
+    def _exposure_has_upstream_node(
+        self,
+        exposure: NormalizedExposureSchema,
+        exposures: Dict[str, NormalizedExposureSchema],
+        upstream_node_ids: List[str],
+        visited: Optional[Set[str]] = None,
+    ) -> bool:
+        if not exposure.depends_on_nodes:
+            return False
+
+        if not visited:
+            visited = set()
+
+        return all(
+            dep not in visited
+            and (
+                dep in upstream_node_ids
+                or (
+                    dep in exposures
+                    and self._exposure_has_upstream_node(
+                        exposures[dep],
+                        exposures,
+                        upstream_node_ids,
+                        visited.union({dep}),
+                    )
+                )
+            )
+            for dep in exposure.depends_on_nodes
+        )
 
     @overload
     def _normalize_dbt_artifact_dict(

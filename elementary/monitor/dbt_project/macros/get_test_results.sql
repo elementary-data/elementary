@@ -43,6 +43,7 @@
             test_params,
             severity,
             status,
+            execution_time,
             days_diff,
             invocations_rank_index,
             failures,

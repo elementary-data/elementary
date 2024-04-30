@@ -49,6 +49,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     sample_data: Optional[Union[dict, List]] = None
     failures: Optional[int] = None
     package_name: Optional[str] = None
+    execution_time: Optional[float] = None
 
     class Config:
         smart_union = True

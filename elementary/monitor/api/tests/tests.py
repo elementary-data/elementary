@@ -225,6 +225,7 @@ class TestsAPI(APIClient):
                             id=invocation_id,
                             time_utc=test_result_db_row.detected_at,
                             status=test_result_db_row.status,
+                            execution_time=test_result_db_row.execution_time,
                             affected_rows=self._parse_affected_row(
                                 results_description=test_result_db_row.test_results_description
                                 or ""
