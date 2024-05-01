@@ -78,6 +78,8 @@ class TestResultSchema(BaseModel):
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
     test_runs: Optional[InvocationsSchema]
+    median_exec_time: Optional[float]
+    last_exec_time: Optional[float]
 
 
 class TestResultSummarySchema(BaseModel):
