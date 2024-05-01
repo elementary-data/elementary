@@ -26,6 +26,7 @@ class InvocationSchema(BaseModel):
     time_utc: str
     id: str
     status: str
+    execution_time: Optional[float] = None
 
     @validator("time_utc", pre=True)
     def format_time_utc(cls, time_utc):
@@ -77,6 +78,8 @@ class TestResultSchema(BaseModel):
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
     test_runs: Optional[InvocationsSchema]
+    median_exec_time: Optional[float]
+    last_exec_time: Optional[float]
 
 
 class TestResultSummarySchema(BaseModel):

@@ -1,4 +1,5 @@
 import re
+import statistics
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Union, cast
 
@@ -185,11 +186,24 @@ class TestsAPI(APIClient):
             test_invocations = tests_invocations.get(
                 test_result_db_row.elementary_unique_id
             )
+            invocations = test_invocations.invocations if test_invocations else []
+            # The median should be based only on non errored test runs.
+            execution_times = [
+                invocation.execution_time
+                for invocation in invocations
+                if invocation.status.lower() != "error"
+                and invocation.execution_time is not None
+            ]
+            median_execution_time = (
+                statistics.median(execution_times) if len(execution_times) else 0
+            )
             test_run = TestRunSchema(
                 metadata=self._get_test_metadata_from_test_result_db_row(
                     test_result_db_row
                 ),
                 test_runs=test_invocations,
+                median_exec_time=median_execution_time,
+                last_exec_time=test_result_db_row.execution_time,
             )
             if test_result_db_row.model_unique_id:
                 test_runs[test_result_db_row.model_unique_id].append(test_run)
@@ -225,6 +239,7 @@ class TestsAPI(APIClient):
                             id=invocation_id,
                             time_utc=test_result_db_row.detected_at,
                             status=test_result_db_row.status,
+                            execution_time=test_result_db_row.execution_time,
                             affected_rows=self._parse_affected_row(
                                 results_description=test_result_db_row.test_results_description
                                 or ""
