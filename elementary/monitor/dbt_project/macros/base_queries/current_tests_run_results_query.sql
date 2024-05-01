@@ -93,5 +93,5 @@
     join dbt_tests on elementary_test_results.test_unique_id = dbt_tests.unique_id
     left join first_time_test_occurred first_occurred on elementary_test_results.test_unique_id = first_occurred.test_unique_id
     left join dbt_artifacts on elementary_test_results.model_unique_id = dbt_artifacts.unique_id
-    left join dbt_run_results on elementary_test_results.id = dbt_run_results.model_execution_id
+    left join dbt_run_results on elementary_test_results.test_execution_id = dbt_run_results.model_execution_id
 {% endmacro %}
