@@ -114,7 +114,7 @@ jobs:
 
       - name: Install dbt
         run: >
-          pip install
+          pip install --pre
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
