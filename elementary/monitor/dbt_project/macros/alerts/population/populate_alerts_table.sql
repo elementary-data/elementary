@@ -35,17 +35,17 @@
                 select alert_id
                 from {{ deprecated_alerts_relation }}
                 where suppression_status != 'pending'
-                and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
+                and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
                 union all 
                 select alert_id
                 from {{ deprecated_alerts_models_relation }}
                 where suppression_status != 'pending'
-                and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
+                and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
                 union all 
                 select alert_id
                 from {{ deprecated_alerts_source_freshness_relation }}
                 where suppression_status != 'pending'
-                and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_dateadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
+                and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
             )
 
             select *
