@@ -88,32 +88,3 @@
     {% set resources_meta_agate = run_query(resources_meta_query) %}
     {% do return(elementary.agate_to_dicts(resources_meta_agate)) %}
 {% endmacro %}
-
-
-{% macro get_resources_columns() %}
-    {% set columns_relation = ref('elementary', 'information_schema_columns') %}
-    {% if not elementary.relation_exists(columns_relation) %}
-        {% set columns_relation = ref('elementary', 'dbt_columns') %}
-    {% endif %}
-
-    {% set resources_columns_query %}
-        select
-            full_table_name,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            data_type
-        from {{ columns_relation }}
-    {% endset %}
-    {% set columns_agate = run_query(resources_columns_query) %}
-    {% set columns = elementary.agate_to_dicts(columns_agate) %}
-    {% set resources_columns_map = {} %}
-    {% for column in columns %}
-        {% set resource = column.get('full_table_name') %}
-        {% set resource_columns = resources_columns_map.get(resource, []) %}
-        {% do resource_columns.append({'column': column.get('column_name'), 'type': column.get('data_type')}) %}
-        {% do resources_columns_map.update({resource: resource_columns}) %} 
-    {% endfor %}
-    {% do return(resources_columns_map) %}
-{% endmacro %}
