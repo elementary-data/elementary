@@ -1,8 +1,8 @@
-{% macro populate_test_alerts(days_back=7, disable_samples=false) %}
+{% macro populate_test_alerts(days_back=1, disable_samples=false) %}
     {% set test_result_rows_agate = not disable_samples and elementary_cli.get_result_rows_agate(days_back) %}
 
     {% set test_alerts = [] %}
-    {% set raw_test_alerts_agate = run_query(elementary_cli.populate_test_alerts_query()) %}
+    {% set raw_test_alerts_agate = run_query(elementary_cli.populate_test_alerts_query(days_back)) %}
     {% set raw_test_alerts = elementary.agate_to_dicts(raw_test_alerts_agate) %}
     {% for raw_test_alert in raw_test_alerts %}
         {% set test_type = raw_test_alert.alert_type %}
@@ -56,7 +56,7 @@
 {% endmacro %}
 
 
-{% macro populate_test_alerts_query() %}
+{% macro populate_test_alerts_query(days_back=1) %}
     with elementary_test_results as (
         select * from {{ ref('elementary_test_results') }}
     ),
@@ -106,6 +106,7 @@
             result_rows
         from elementary_test_results
         where lower(status) != 'pass'
+        and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 
     select distinct

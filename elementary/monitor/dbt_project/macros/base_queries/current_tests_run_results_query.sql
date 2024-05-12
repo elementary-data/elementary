@@ -6,6 +6,13 @@
         {% endif %}
     ),
 
+    dbt_run_results as (
+        select * from {{ ref('elementary', 'dbt_run_results') }}
+        {% if days_back %}
+            where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('execute_completed_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
+        {% endif %}
+    ),
+
     dbt_tests as (
         select * from {{ ref('elementary', 'dbt_tests') }}
     ),
@@ -73,14 +80,18 @@
         elementary_test_results.test_alias,
         elementary_test_results.failures,
         elementary_test_results.result_rows,
+        dbt_tests.original_path,
         dbt_tests.meta,
+        dbt_tests.package_name,
         dbt_tests.tags as test_tags,
         dbt_artifacts.meta as model_meta,
         dbt_artifacts.tags as model_tags,
         dbt_artifacts.owner as model_owner,
-        first_occurred.first_time_occurred as test_created_at
+        first_occurred.first_time_occurred as test_created_at,
+        dbt_run_results.execution_time as execution_time
     from elementary_test_results
     join dbt_tests on elementary_test_results.test_unique_id = dbt_tests.unique_id
     left join first_time_test_occurred first_occurred on elementary_test_results.test_unique_id = first_occurred.test_unique_id
     left join dbt_artifacts on elementary_test_results.model_unique_id = dbt_artifacts.unique_id
+    left join dbt_run_results on elementary_test_results.test_execution_id = dbt_run_results.model_execution_id
 {% endmacro %}

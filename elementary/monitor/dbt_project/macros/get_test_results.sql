@@ -28,6 +28,8 @@
             test_type,
             test_sub_type,
             test_results_description,
+            original_path,
+            package_name,
             owners,
             model_owner,
             tags,
@@ -41,6 +43,7 @@
             test_params,
             severity,
             status,
+            execution_time,
             days_diff,
             invocations_rank_index,
             failures,
@@ -57,6 +60,7 @@
         {% set test_rows_sample = none %}
         {% if test.invocations_rank_index == 1 %}
             {% set test_type = test.test_type %}
+            {% set test_params = fromjson(test.test_params) %}
             {% set status = test.status | lower %}
 
             {% set elementary_tests_allowlist_status = ['fail', 'warn']  %}
@@ -67,14 +71,19 @@
                 {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
-                {% if test.test_sub_type == 'dimension' %}
+                {% if test.test_sub_type == 'dimension' or test_params.dimensions %}
+                    {% if test.test_sub_type == 'dimension' %}
+                      {% set metric_name = 'row_count' %}
+                    {% elif test_params.dimensions %}
+                      {% set metric_name = test.test_sub_type %}
+                    {% endif %}
                     {% set anomalous_rows = [] %}
                     {% set headers = [{'id': 'anomalous_value_timestamp', 'display_name': 'timestamp', 'type': 'date'}] %}
                     {% for row in test_rows_sample %}
                         {% set anomalous_row = {
-                            'anomalous_value_timestamp': row['end_time'],
-                            'anomalous_value_row_count': row['value'],
-                            'anomalous_value_average_row_count': row['average'] | round(1)
+                        'anomalous_value_timestamp': row['end_time'],
+                        'anomalous_value_' ~ metric_name: row['value'],
+                        'anomalous_value_average_' ~ metric_name: row['average'] | round(1)
                         } %}
                         {% set dimensions = row['dimension'].split('; ') %}
                         {% set diemsions_values = row['dimension_value'].split('; ') %}
@@ -87,12 +96,14 @@
                                 {% do headers.append({'id': dimensions[index], 'display_name': dimensions[index], 'type': 'str'},) %}
                             {% endfor %}
                         {% endif %}
-                        {% do anomalous_rows.append(anomalous_row) %}
+                        {% if row['is_anomalous'] %}
+                          {% do anomalous_rows.append(anomalous_row) %}
+                        {% endif %}
                     {% endfor %}
                     {# Adding the rest of the static headers (metrics headers) #}
                     {% do headers.extend([
-                        {'id': 'anomalous_value_row_count', 'display_name': 'row count', 'type': 'int'},
-                        {'id': 'anomalous_value_average_row_count', 'display_name': 'average row count', 'type': 'int'}
+                        {'id': 'anomalous_value_' ~ metric_name, 'display_name': ' '.join(metric_name.split('_')), 'type': 'int'},
+                        {'id': 'anomalous_value_average_' ~ metric_name, 'display_name': 'average ' ~ ' '.join(metric_name.split('_')), 'type': 'int'}
                     ]) %}
                     {% set test_rows_sample = {
                         'headers': headers,

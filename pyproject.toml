@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elementary-data"
-version = "0.14.1"
+version = "0.15.1"
 description = "Data monitoring and lineage"
 authors = ["Elementary"]
 keywords = ["data", "lineage", "data lineage", "data warehouse", "DWH", "observability", "data monitoring", "data observability", "Snowflake", "BigQuery", "Redshift", "data reliability", "analytics engineering"]
@@ -13,7 +13,7 @@ documentation = "https://docs.elementary-data.com"
 packages = [{include = "elementary"}]
 
 [tool.poetry.dependencies]
-python = ">=3.6.2"
+python = ">=3.8,<4"
 click = ">=7.0,<8.1.4"
 pyfiglet = "<1.0.0"
 dbt-core = ">=0.20,<2.0.0"
@@ -33,7 +33,6 @@ networkx = ">=2.3,<3"
 packaging = ">=20.9,<=23.1"
 azure-storage-blob = ">=12.11.0"
 pymsteams = ">=0.2.2,<1.0.0"
-retry = ">=0.9.2,<1.0.0"
 pandas = ">=2.0.0"
 tabulate = ">= 0.9.0"
 
@@ -44,6 +43,7 @@ dbt-postgres = {version = ">=0.20,<2.0.0", optional = true}
 dbt-databricks = {version = ">=0.20,<2.0.0", optional = true}
 dbt-spark = {version = ">=0.20,<2.0.0", optional = true}
 dbt-athena-community = {version = ">=1.6.3,<2.0.0", optional = true}
+dbt-trino = {version = ">=1.5.0,<2.0.0", optional = true}
 
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
@@ -53,6 +53,7 @@ postgres = ["dbt-postgres"]
 databricks = ["dbt-databricks"]
 spark = ["dbt-spark"]
 athena = ["dbt-athena-community"]
+trino = ["dbt-trino"]
 all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark"]
 
 [build-system]

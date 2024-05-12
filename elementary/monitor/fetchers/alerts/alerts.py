@@ -19,11 +19,9 @@ class AlertsFetcher(FetcherClient):
         self,
         dbt_runner: BaseDbtRunner,
         config: Config,
-        elementary_database_and_schema: str,
     ):
         super().__init__(dbt_runner)
         self.config = config
-        self.elementary_database_and_schema = elementary_database_and_schema
 
     def skip_alerts(
         self,

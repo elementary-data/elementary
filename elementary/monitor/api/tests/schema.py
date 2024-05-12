@@ -26,6 +26,7 @@ class InvocationSchema(BaseModel):
     time_utc: str
     id: str
     status: str
+    execution_time: Optional[float] = None
 
     @validator("time_utc", pre=True)
     def format_time_utc(cls, time_utc):
@@ -48,6 +49,7 @@ class TestMetadataSchema(BaseModel):
     column_name: Optional[str] = None
     test_name: str
     test_display_name: str
+    original_path: Optional[str] = None
     latest_run_time: str
     latest_run_time_utc: str
     latest_run_status: str
@@ -62,6 +64,7 @@ class TestMetadataSchema(BaseModel):
     result: dict
     configuration: dict
     test_tags: List[str] = Field(default_factory=list)
+    normalized_full_path: Optional[str] = None
 
 
 class TestResultSchema(BaseModel):
@@ -75,6 +78,8 @@ class TestResultSchema(BaseModel):
 class TestRunSchema(BaseModel):
     metadata: TestMetadataSchema
     test_runs: Optional[InvocationsSchema]
+    median_exec_time: Optional[float]
+    last_exec_time: Optional[float]
 
 
 class TestResultSummarySchema(BaseModel):

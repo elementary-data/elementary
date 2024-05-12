@@ -40,6 +40,7 @@ class DataMonitoringAlerts(DataMonitoring):
         send_test_message_on_success: bool = False,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        populate_data: bool = True,
     ):
         super().__init__(
             config, tracking, force_update_dbt_package, disable_samples, selector_filter
@@ -47,10 +48,10 @@ class DataMonitoringAlerts(DataMonitoring):
 
         self.global_suppression_interval = global_suppression_interval
         self.override_config = override_config
+        self.should_populate_data = populate_data
         self.alerts_api = AlertsAPI(
             self.internal_dbt_runner,
             self.config,
-            self.elementary_database_and_schema,
         )
         self.sent_alert_count = 0
         self.send_test_message_on_success = send_test_message_on_success
@@ -66,14 +67,18 @@ class DataMonitoringAlerts(DataMonitoring):
 
     def _populate_data(
         self,
+        days_back: Optional[int] = None,
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
         logger.info("Running internal dbt run to populate alerts")
+        vars = dbt_vars or dict()
+        if days_back:
+            vars.update(days_back=days_back)
         success = self.internal_dbt_runner.run(
             models="elementary_cli.alerts.alerts_v2",
             full_refresh=dbt_full_refresh,
-            vars=dbt_vars,
+            vars=vars,
         )
         self.execution_properties["alerts_populate_success"] = success
         if not success:
@@ -194,6 +199,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 elementary_database_and_schema=self.elementary_database_and_schema,
                 global_suppression_interval=self.global_suppression_interval,
                 override_config=self.override_config,
+                disable_samples=self.disable_samples,
             )
             try:
                 grouping_type = GroupingType(group_alerts_by)
@@ -284,13 +290,16 @@ class DataMonitoringAlerts(DataMonitoring):
         dbt_vars: Optional[dict] = None,
     ) -> bool:
         # Populate data
-        popopulated_data_successfully = self._populate_data(
-            dbt_full_refresh=dbt_full_refresh, dbt_vars=dbt_vars
-        )
-        if not popopulated_data_successfully:
-            self.success = False
-            self.execution_properties["success"] = self.success
-            return self.success
+        if self.should_populate_data:
+            popopulated_data_successfully = self._populate_data(
+                days_back=days_back,
+                dbt_full_refresh=dbt_full_refresh,
+                dbt_vars=dbt_vars,
+            )
+            if not popopulated_data_successfully:
+                self.success = False
+                self.execution_properties["success"] = self.success
+                return self.success
 
         # Fetch and filter data
         alerts = self._fetch_data(days_back)
