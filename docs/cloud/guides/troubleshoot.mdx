@@ -39,3 +39,14 @@ For more information on the permissions required by each data warehouse:
 [Databricks](/cloud/integrations/dwh/databricks#permissions-and-security)
 
 [Postgres](/cloud/integrations/dwh/postgres#permissions-and-security)
+
+
+### How do I set-up the table name of my Singular test?
+
+Singular tests are sql queries that can reference more than one table, but are often intended to test a logic that is related to one table in particular.
+In order to have that table name appear in the UI in the test results, test execution and more screens, you may set it up by adding the following to the config block of your singular test file:
+```
+{{ config(
+    override_primary_test_model_id="model_name"
+) }}
+```
