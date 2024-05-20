@@ -1,0 +1,34 @@
+---
+title: "exclude_final_results"
+sidebarTitle: "exclude_final_results"
+---
+
+`exclude_final_results: [SQL where expression on fields value / average]`
+
+Failures in dimension anomaly tests consist of outliers in row counts across all dimensions during the training period.
+Some dimensions may contribute metrics that are considered insignificant compared to others, and you may prefer not to receive alerts for them.
+With this parameter, you can disregard such failures.
+
+1. `value` - Outlier row count of a dimension during the detection period.
+2. `average` - The average rows count of a dimension during the training period.
+
+- _Supported values: valid SQL where expression on the columns value / average_
+- _Relevant tests: Dimension anomalies _
+
+<RequestExample>
+
+```yml test
+models:
+  - name: model_name
+    config:
+      elementary:
+        timestamp_column: updated_at
+    tests:
+      - elementary.dimension_anomalies:
+          dimensions:
+            - device_os
+            - device_browser
+          exclude_final_results: 'value > 1000 or average > 10'
+```
+
+</RequestExample>
