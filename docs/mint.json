@@ -241,7 +241,7 @@
             "data-tests/anomaly-detection-configuration/fail_on_zero",
             "data-tests/anomaly-detection-configuration/detection-delay",
             "data-tests/anomaly-detection-configuration/anomaly-exclude-metrics",
-            "data-tests/anomaly-detection-configuration/exclude_final_results"
+            "data-tests/anomaly-detection-configuration/exclude-final-results"
           ]
         },
         "data-tests/anomaly-detection-tests/volume-anomalies",
