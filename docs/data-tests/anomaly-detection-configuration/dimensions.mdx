@@ -5,15 +5,18 @@ sidebarTitle: "dimensions"
 
 `dimensions: [list of SQL expressions]`
 
-Configuration for the tests `dimension_anomalies`, `column_anomalies` and `all_columns_anomalies`.
-The test counts rows grouped by given column / columns / valid select sql expression.
+The test will group the results by a given column / columns / valid select sql expression.
 Under `dimensions` you can configure the group by expression.
 
-This test monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
-It is best to configure it on low-cardinality fields.
+Using this param segments the tested data per dimension, and each dimension is monitored seperataly.
+
+For example - 
+A `column_anomalies` test monitoring for `null_rate` with `dimensions` configured will monitor the 
+`null_rate` of values in the column, grouped by dimension, and will fail if in a specific dimension there is an anomaly in `null_rate`.
+It is best to configure low-cardinality fields as `dimensions`.
 
 - _Default: None_
-- _Relevant tests: `dimension_anomalies`_
+- _Relevant tests: `dimension_anomalies`, `column_anomalies`, `all_columns_anomalies`_
 - _Configuration level: test_
 
 <RequestExample>
