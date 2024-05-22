@@ -24,9 +24,7 @@
 
 Elementary is a dbt-native data observability solution for data and analytics engineers.
 Set up in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause.
-Elementary has two offerings: an open-source package and managed platform. 
-
-
+Elementary has two offerings: an open-source package and managed platform.
 
 <kbd align="center">
         <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
@@ -34,8 +32,7 @@ Elementary has two offerings: an open-source package and managed platform.
 
 <br>
 
-
-## Open-source Package vs. Cloud Platform 
+## Open-source Package vs. Cloud Platform
 
 ### Elementary Cloud Platform
 
@@ -48,7 +45,7 @@ The solution is secure by design, and requires no access to your data from cloud
 
 Elementary Community is an open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report. It is best for data and analytics engineers that require basic observability capabilities.
 
-[Get started with the Open-source Package](https://docs.elementary-data.com/oss/oss-introduction) 
+[Get started with the Open-source Package](https://docs.elementary-data.com/oss/oss-introduction)
 
 ## Features
 
@@ -69,7 +66,6 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 **Data catalog** - Explore your datasets information - descriptions, columns, datasets health, etc.
 
 **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
-
 
 ## Support
 
