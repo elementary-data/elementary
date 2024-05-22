@@ -37,10 +37,10 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         return super().get_slack_message()
 
     def add_title_to_slack_alert(self, env: str, project_name: Optional[str] = None):
-        _project_name = f"for the {project_name} " if project_name else ""
+        context = f"- {project_name} ({env})" if project_name else f"({env})"
         title_blocks = [
             self.create_header_block(
-                f":mag: Monitoring summary {_project_name}({env})"
+                f":mag: Monitoring summary {context}"
             ),
             self.create_divider_block(),
         ]
