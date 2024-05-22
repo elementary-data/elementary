@@ -1,18 +1,15 @@
 Elementary can send alerts about:
 
-- Failures and/or of dbt tests
-- Failures and/or Elementary tests
+- Failures and/or warnings of dbt tests
+- Failures and/or warnings Elementary tests
 - Model runs failures
-- Source freshness issues
-
-The alerts can be sent to Slack or Microsoft Teams, and we are working on adding more channels.
-Please [reach out to us](https://elementary-data.com/community) if you have a specific destination in mind.
+- Source freshness failures
 
 You can enrich your alerts by adding properties to tests and models in your `.yml` files.
 The supported attributes are: owner, subscribers, description, tags.
 
 You can configure and customize your alerts by configuring:
-custom channel, suppression interval, alert fields (for test alerts only), alert grouping, alert filters.
+Custom channel, suppression interval, alert filters, etc.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">

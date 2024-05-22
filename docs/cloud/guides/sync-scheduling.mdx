@@ -27,7 +27,11 @@ In the _Schedule Settings_, you're provided with a webhook URL. Next, you will n
 Heading to dbt Cloud, you can [create a webhook subscription](https://docs.getdbt.com/docs/deploy/webhooks#create-a-webhook-subscription) that would trigger a sync after your jobs are done. 
 
 - Make sure the webhook is triggered on `Run completed` events
-- Select the jobs of the relevant environment. 
+- Select **only** the main jobs of the relevant environment.
+
+<Warning>Make sure to select only the main jobs of the relevant environment. Selecting all jobs will trigger a sync for each job, which may result in unnecessary updates and therefore increased cost on the data warehouse.</Warning>
+
+<img src="/pics/cloud/dbt_cloud_webhook_setup.png" />
 
 After completing the guide, you'll be provided with the secret token that you'll need to fill in the form on Elementary Cloud. Press _Save_ and you're done!
 
