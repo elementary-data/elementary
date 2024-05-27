@@ -175,6 +175,10 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/dongchris"><img src="https://avatars.githubusercontent.com/u/86695140?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/sanromeo"><img src="https://avatars.githubusercontent.com/u/44975602?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/AvivZikelDY"><img src="https://avatars.githubusercontent.com/u/111749106?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/hamzamazhar"><img src="https://avatars.githubusercontent.com/u/7986579?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/MiConnell"><img src="https://avatars.githubusercontent.com/u/14168559?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/syou6162"><img src="https://avatars.githubusercontent.com/u/18356?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Tomme"><img src="https://avatars.githubusercontent.com/u/932895?v=4" width="50" height="50" alt=""/></a>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
