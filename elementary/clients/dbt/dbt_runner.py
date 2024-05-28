@@ -90,6 +90,7 @@ class DbtRunner(BaseDbtRunner):
                 check=self.raise_on_failure,
                 capture_output=(capture_output or quiet),
                 env=self._get_command_env(),
+                cwd=self.project_dir,
             )
         except subprocess.CalledProcessError as err:
             logs = list(parse_dbt_output(err.output.decode())) if err.output else []
@@ -233,6 +234,10 @@ class DbtRunner(BaseDbtRunner):
 
     def debug(self, quiet: bool = False) -> bool:
         success, _ = self._run_command(command_args=["debug"], quiet=quiet)
+        return success
+
+    def retry(self, quiet: bool = False) -> bool:
+        success, _ = self._run_command(command_args=["retry"], quiet=quiet)
         return success
 
     def ls(self, select: Optional[str] = None) -> list:

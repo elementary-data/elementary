@@ -7,7 +7,9 @@ config(
 }}
 
 {% set dbt_exposures_relation = ref('dbt_exposures') %}
-{% set depends_on_columns_column_exists = elementary.column_exists_in_relation(dbt_exposures_relation, 'depends_on_columns') %}
+{% set elementary_exposures_relation = ref('elementary_cli', 'elementary_exposures') %}
+{% set depends_on_columns_column_exists_on_dbt_exposures = elementary.column_exists_in_relation(dbt_exposures_relation, 'depends_on_columns') %}
+{% set depends_on_columns_column_exists_on_elementary_exposures = elementary.column_exists_in_relation(elementary_exposures_relation, 'depends_on_columns') %}
 
 select
     COALESCE(ee.unique_id, de.unique_id) as unique_id,
@@ -29,10 +31,14 @@ select
     COALESCE(ee.metadata_hash, de.metadata_hash) as metadata_hash,
     COALESCE(ee.label, de.label) as label,
     COALESCE(ee.raw_queries, de.raw_queries) as raw_queries,
-{% if depends_on_columns_column_exists %}
+{% if depends_on_columns_column_exists_on_dbt_exposures and depends_on_columns_column_exists_on_elementary_exposures %}
     COALESCE(ee.depends_on_columns, de.depends_on_columns) as depends_on_columns
-{% else %}
+{% elif depends_on_columns_column_exists_on_elementary_exposures %}
     ee.depends_on_columns as depends_on_columns
+{% elif depends_on_columns_column_exists_on_dbt_exposures %}
+    de.depends_on_columns as depends_on_columns
+{% else %}
+    null as depends_on_columns
 {% endif %}
 from
-    {{ dbt_exposures_relation }} de full join {{ ref('elementary_cli', 'elementary_exposures') }} ee on ee.name = de.name
+    {{ dbt_exposures_relation }} de full join {{ elementary_exposures_relation }} ee on ee.name = de.name

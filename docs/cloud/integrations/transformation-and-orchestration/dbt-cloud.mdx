@@ -1,0 +1,17 @@
+---
+title: "dbt cloud"
+---
+
+Elementary integrates with dbt cloud for the supported data warehouses.
+
+Users need to [deploy the dbt package](/cloud/onboarding/quickstart-dbt-package) in the monitored project, and it will collect results and artifacts in run time using on-run-end hooks.
+Results are saved to a dedicated schema, and Elementary syncs the results through the DWH connection.
+
+## Jobs information
+
+Elementary automatically collects jobs data from dbt cloud, including `job run url` and `job id`. These are presented in the lineage node info tab. 
+To collect additional jobs info such as `job name`, check out [this guide](/cloud/guides/collect-job-data).
+
+## Syncs schedule
+
+For near-real-time results, it is recommended to change the sync configuration from the default hourly syncs to [webhook triggered syncs](/cloud/guides/sync-scheduling).

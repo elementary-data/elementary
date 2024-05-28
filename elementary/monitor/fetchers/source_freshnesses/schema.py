@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pydantic import validator
-
+from elementary.utils.pydantic_shim import validator
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 

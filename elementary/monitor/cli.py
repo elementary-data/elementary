@@ -261,6 +261,13 @@ def get_cli_properties() -> dict:
     help="Filter the alerts by tags:<tags separated by commas> / owners:<owners separated by commas> / models:<models separated by commas> / "
     "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
 )
+@click.option(
+    "--teams-webhook",
+    "-tw",
+    type=str,
+    default=None,
+    help="A Microsoft Teams webhook URL for sending alerts to a specific channel in Teams.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -289,6 +296,7 @@ def monitor(
     override_dbt_project_config,
     report_url,
     filters,
+    teams_webhook,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -318,6 +326,7 @@ def monitor(
         env=env,
         slack_group_alerts_by=group_by,
         report_url=report_url,
+        teams_webhook=teams_webhook,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
@@ -675,6 +684,7 @@ def send_report(
         gcs_timeout_limit=gcs_timeout_limit,
         report_url=report_url,
         env=env,
+        project_name=project_name,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))

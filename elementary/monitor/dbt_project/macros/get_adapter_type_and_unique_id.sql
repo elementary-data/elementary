@@ -13,3 +13,7 @@
 {% macro bigquery__get_adapter_unique_id() %}
     {{ return(target.project) }}
 {% endmacro %}
+
+{% macro athena__get_adapter_unique_id() %}
+    {{ return(target.s3_staging_dir) }}
+{% endmacro %}

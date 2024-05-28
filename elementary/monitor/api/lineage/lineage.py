@@ -17,11 +17,19 @@ class LineageAPI(APIClient):
         super().__init__(dbt_runner)
         self.lineage_fetcher = LineageFetcher(dbt_runner=self.dbt_runner)
 
-    def get_lineage(self, exclude_elementary_models: bool = False) -> LineageSchema:
+    def get_lineage(
+        self,
+        lineage_node_ids: List[str],
+        exclude_elementary_models: bool = False,
+    ) -> LineageSchema:
         lineage_graph = nx.DiGraph()
-        nodes_depends_on_nodes = self.lineage_fetcher.get_nodes_depends_on_nodes(
-            exclude_elementary_models
-        )
+        nodes_depends_on_nodes = [
+            node
+            for node in self.lineage_fetcher.get_nodes_depends_on_nodes(
+                exclude_elementary_models
+            )
+            if node.unique_id in lineage_node_ids
+        ]
         for node_depends_on_nodes in nodes_depends_on_nodes:
             lineage_graph.add_edges_from(
                 [

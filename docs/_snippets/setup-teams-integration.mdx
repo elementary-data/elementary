@@ -1,0 +1,108 @@
+First create a Microsoft Teams team:
+
+<Accordion title="Create a new Team">
+
+## Create a new Team
+
+Go to the Microsoft Teams desktop app and create a new team.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707202577/ghoizqzywicyipr7nbrm.png"
+  alt="Microsoft Teams team"
+/>
+
+Create a team from from a template and use the `From Scratch` template.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707202897/dhftnz4zc0jsuay6eh2c.png"
+  alt="Microsoft Teams template"
+/>
+
+Choose `Public` as the kind of a team.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203017/s2buhk5yncmortzlvge5.png"
+  alt="Microsoft Teams public team"
+/>
+
+Call it `Elementary` (or whatever you prefer) and connect it to the workspace of your choice.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203137/jw2wgscz9cruarapmzpj.png"
+  alt="Microsoft Teams Elementary team"
+/>
+
+</Accordion>
+
+Now it is time to setup the webhook for this channel.
+
+<Accordion title="Create Teams Webhook">
+
+## Create a webhook
+
+Go to a channel in your Team and choose `Manage channel`
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
+  alt="Teams manage channel"
+/>
+
+Choose `Edit` connectors.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
+  alt="Teams edit connectors"
+/>
+
+Search for `Incoming webhook` and choose `Add`.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
+  alt="Teams add incoming webhook"
+/>
+
+Choose `Add` again and add name your webhook `ElementaryWebhook` (or whatever you prefer). And `Create` the webhook.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204465/mcncjpvsnptd0gcsbb21.png"
+  alt="Teams create webhook"
+/>
+
+Copy the URL of the webhook.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204718/gkt2uhz2qaow1lm1frnp.png"
+  alt="Teams copy URL webhook"
+/>
+
+</Accordion>
+
+Lastly, pass the webhook to the CLI as a param or in the `config.yml` file:
+
+<Accordion title="Teams config as CLI params">
+
+## Webhook:
+
+Use the webhook URL when you execute edr monitor using the option `-tw, --teams-webhook`:
+
+```shell
+edr monitor --teams-webhook <your_teams_webhook_url>
+```
+
+</Accordion>
+
+<Accordion title="Teams config as in config.yml">
+
+The CLI reads the Teams integration from a file, copy it into a file called config.yml.
+Create it here: `HOME_DIR/.edr/config.yml`
+
+Here is the format in the yml itself:
+
+## Webhook:
+
+```yml config.yml
+teams:
+  teams_webhook: <your_teams_webhook_url>
+```
+
+</Accordion>

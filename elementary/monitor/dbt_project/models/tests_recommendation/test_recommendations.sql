@@ -65,7 +65,7 @@ with
             lower(schema_name) as schema_name,
             lower(table_name) as table_name,
             json_agg(json_build_object('name', lower(column_name), 'data_type', lower(data_type))) as columns
-        from {{ ref("elementary", "information_schema_columns") }}
+        from {{ elementary.get_elementary_relation('information_schema_columns') }}
         group by 1, 2, 3
     ),
 

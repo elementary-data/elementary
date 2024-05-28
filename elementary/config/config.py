@@ -16,6 +16,7 @@ class Config:
     _AWS = "aws"
     _GOOGLE = "google"
     _AZURE = "azure"
+    _TEAMS = "teams"
     _CONFIG_FILE_NAME = "config.yml"
 
     # Quoting env vars
@@ -63,8 +64,10 @@ class Config:
         azure_connection_string: Optional[str] = None,
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
+        teams_webhook: Optional[str] = None,
         env: str = "dev",
         run_dbt_deps_if_needed: Optional[bool] = None,
+        project_name: Optional[str] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -72,6 +75,7 @@ class Config:
         self.profile_target = profile_target
         self.project_profile_target = project_profile_target
         self.env = env
+        self.project_name = project_name
 
         # Additional env vars supplied to dbt invocations
         self.env_vars = dict()
@@ -119,6 +123,12 @@ class Config:
             slack_group_alerts_by,
             slack_config.get("group_alerts_by"),
             GroupingType.BY_ALERT.value,
+        )
+
+        teams_config = config.get(self._TEAMS, {})
+        self.teams_webhook = self._first_not_none(
+            teams_webhook,
+            teams_config.get("teams_webhook"),
         )
 
         aws_config = config.get(self._AWS, {})
@@ -202,6 +212,10 @@ class Config:
         return self.slack_webhook or (self.slack_token and self.slack_channel_name)
 
     @property
+    def has_teams(self) -> bool:
+        return self.teams_webhook
+
+    @property
     def has_s3(self):
         return self.s3_bucket_name
 
@@ -224,10 +238,20 @@ class Config:
         return self.gcs_bucket_name and self.has_gcloud
 
     def validate_monitor(self):
+        provided_integrations = list(
+            filter(
+                lambda provided_integration: provided_integration,
+                [self.has_slack, self.has_teams],
+            )
+        )
         self._validate_timezone()
-        if not self.has_slack:
+        if not provided_integrations:
             raise InvalidArgumentsError(
-                "Either a Slack token and a channel or a Slack webhook is required."
+                "Either a Slack token and a channel, a Slack webhook or a Microsoft Teams webhook is required."
+            )
+        if len(provided_integrations) > 1:
+            raise InvalidArgumentsError(
+                "You provided both a Slack and Teams integration. Please provide only one so we know where to send the alerts."
             )
 
     def validate_send_report(self):

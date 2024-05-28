@@ -51,14 +51,14 @@ class SourceFreshnessesAPI(APIClient):
 
     def get_source_freshness_results(
         self,
-    ) -> Dict[Optional[str], List[SourceFreshnessResultSchema]]:
+    ) -> Dict[str, List[SourceFreshnessResultSchema]]:
         filtered_source_freshness_results_db_rows = [
             test_result
             for test_result in self.source_freshness_results_db_rows
             if test_result.invocations_rank_index == 1
         ]
         tests_results: DefaultDict[
-            Optional[str], List[SourceFreshnessResultSchema]
+            str, List[SourceFreshnessResultSchema]
         ] = defaultdict(list)
 
         for (

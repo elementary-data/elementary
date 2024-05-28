@@ -19,9 +19,9 @@ class ModelAlertModel(AlertModel):
         path: str,
         original_path: str,
         materialization: str,
-        message: str,
         full_refresh: bool,
         alert_class_id: str,
+        message: Optional[str] = None,
         model_unique_id: Optional[str] = None,
         detected_at: Optional[datetime] = None,
         database_name: Optional[str] = None,
@@ -94,8 +94,8 @@ class ModelAlertModel(AlertModel):
         return f"dbt {dbt_type} alert - {self.alias}"
 
     @property
-    def summary(self):
-        return f"dbt failed to build {self.materialization} {self.alias}"
+    def summary(self) -> str:
+        return f'dbt failed to build {self.materialization} "{self.alias}"'
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         return get_model_runs_link(self.report_url, self.model_unique_id)

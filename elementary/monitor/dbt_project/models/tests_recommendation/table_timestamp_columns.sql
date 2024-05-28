@@ -41,7 +41,7 @@ with
             lower(schema_name) as schema_name,
             lower(table_name) as table_name,
             lower(column_name) as column_name
-        from {{ ref("elementary", "information_schema_columns") }}
+        from {{ elementary.get_elementary_relation('information_schema_columns') }}
     ),
 
     -- Inferring the timestamp column based on their names and assigning a confidence score.

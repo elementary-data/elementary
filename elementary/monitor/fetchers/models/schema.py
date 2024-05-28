@@ -2,8 +2,7 @@ import os
 import posixpath
 from typing import Any, Dict, List, Optional, TypeVar
 
-from pydantic import Field, validator
-
+from elementary.utils.pydantic_shim import Field, validator
 from elementary.utils.schema import ExtendedBaseModel
 from elementary.utils.time import convert_partial_iso_format_to_full_iso_format
 
@@ -45,8 +44,8 @@ class ArtifactSchema(ExtendedBaseModel):
         return cls._load_var_to_list(owners)
 
     @validator("full_path", pre=True)
-    def format_full_path_sep(cls, full_path: str) -> str:
-        return posixpath.sep.join(full_path.split(os.path.sep))
+    def format_full_path_sep(cls, full_path: Optional[str]) -> str:
+        return posixpath.sep.join(full_path.split(os.path.sep)) if full_path else ""
 
     @validator("meta", pre=True)
     def load_meta(cls, meta):
@@ -86,9 +85,13 @@ class ExposureSchema(ArtifactSchema):
     url: Optional[str] = None
     type: Optional[str] = None
     maturity: Optional[str] = None
-    depends_on: Optional[List[str]] = None
+    depends_on_nodes: Optional[List[str]] = None
     owner: Optional[OwnerSchema] = None
     raw_queries: Optional[List[str]] = None
+
+    @validator("depends_on_nodes", pre=True)
+    def load_depends_on_nodes(cls, depends_on_nodes):
+        return cls._load_var_to_list(depends_on_nodes)
 
 
 class ModelTestCoverage(ExtendedBaseModel):

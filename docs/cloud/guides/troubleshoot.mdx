@@ -2,12 +2,31 @@
 title: "Troubleshooting"
 ---
 
+### I connected my data warehouse but I don't see any test results
+
+If you already connected your data warehouse to Elementary but don't see anything in Elementary UI, there could be several reasons.
+Try following these steps to troubleshoot:
+
+
+**1. Validate elementary dbt package is deployed, working, and using the latest version**
+
+- Refer to the [dbt package installation guide](/quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
+
+**2. Check if the table `elementary_test_results` exists and has data**
+- If the table does not exist - refer to the [dbt package installation guide](/quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- If the table exists but has no data - Did you execute `dbt test` since deploying the package and creating the models?
+- If you have, make sure the table was created as an incremental table (not a regular table or view).
+- If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full-refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
+
+**4. Still no data in the table? Reach out to the elementary team by starting an intercom chat from Elementary UI.**
+
+
 ### Column information cannot be retrieved
 
 This error can happen because of a few reasons:
 
 1. check that your elementary dbt package version is 0.12.0 or higher
-2. check that the user you are using to connect to your database has permissions to access the information schema
+2. check that the user you are using to connect to your database has permission to access the information schema of all the schemas built or used by your dbt project
 
 For more information on the permissions required by each data warehouse:
 

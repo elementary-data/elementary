@@ -33,46 +33,35 @@
       "url": "data-tests"
     },
     {
-      "name": "Elementary Cloud",
-      "url": "cloud"
-    },
-    {
       "name": "Elementary OSS",
       "url": "oss"
     }
   ],
   "topbarCtaButton": {
-    "name": "Try Elementary Cloud",
+    "name": "Get Started Now",
     "url": "https://app.elementary-data.com/"
   },
   "topbarLinks": [
-    {
-      "name": "Github",
-      "url": "https://github.com/elementary-data/elementary"
-    }
   ],
   "anchors": [
     {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://elementary-data.com/community"
+      "name": "Book a Demo",
+      "icon": "calendar-check",
+      "url": "https://cal.com/maayansa/elementary-intro-docs"
     },
     {
-      "name": "Demo",
-      "icon": "circle-play",
-      "url": "https://storage.googleapis.com/elementary_static/elementary_demo.html"
+      "name": "Join Slack",
+      "icon": "slack",
+      "url": "https://elementary-data.com/community"
     }
   ],
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "key-features", "quickstart"]
-    },
-    {
-      "group": "Overview",
       "pages": [
-        "overview/elementary-cloud",
-        "overview/elementary-oss",
+        "introduction",
+        "quickstart",
+        "cloud/general/security-and-privacy",
         {
           "group": "dbt package",
           "icon": "cube",
@@ -89,6 +78,7 @@
       "group": "Features",
       "pages": [
         "features/data-tests",
+        "features/automated-monitors",
         "features/elementary-alerts",
         "features/data-observability-dashboard",
         {
@@ -101,47 +91,115 @@
             "features/column-level-lineage"
           ]
         },
-        "features/automated-monitors",
         "features/config-as-code",
         "features/catalog",
         "features/multi-env",
-        "features/ci"
+        "features/ci",
+        "features/integrations"
       ]
     },
     {
-      "group": "Community & Support",
+      "group": "Guides",
       "pages": [
-        "general/troubleshooting",
-        "general/faq",
-        "general/contributions",
-        "general/community-and-support"
-      ]
-    },
-    {
-      "group": "Release Notes",
-      "pages": [
-        "release-notes/upgrading-elementary",
         {
-          "group": "Releases",
+          "group": "Setup Elementary",
           "pages": [
-            "release-notes/releases/0.11.2",
-            "release-notes/releases/0.10.0",
-            "release-notes/releases/0.9.1",
-            "release-notes/releases/0.8.2",
-            "release-notes/releases/0.8.0",
-            "release-notes/releases/0.7.10",
-            "release-notes/releases/0.7.7",
-            "release-notes/releases/0.7.6",
-            "release-notes/releases/0.7.5",
-            "release-notes/releases/0.7.2",
-            "release-notes/releases/0.6.10",
-            "release-notes/releases/0.6.7",
-            "release-notes/releases/0.6.5",
-            "release-notes/releases/0.6.3",
-            "release-notes/releases/0.6.1",
-            "release-notes/releases/0.5.4"
+            "cloud/onboarding/signup",
+            "cloud/onboarding/quickstart-dbt-package",
+            "cloud/onboarding/connect-data-warehouse",
+            "cloud/manage-team"
+          ]
+        },
+        {
+          "group": "Send Slack alerts",
+          "pages": [
+            "cloud/guides/enable-slack-alerts",
+            "cloud/guides/alert-rules",
+            "cloud/guides/alerts-configuration"
+          ]
+        },
+        "cloud/guides/sync-scheduling",
+        "cloud/guides/collect-job-data",
+        "cloud/guides/collect-source-freshness",
+        "cloud/guides/troubleshoot"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "cloud/integrations/elementary-integrations",
+        {
+          "group": "Data warehouses",
+          "pages": [
+            "cloud/integrations/dwh/snowflake",
+            "cloud/integrations/dwh/bigquery",
+            "cloud/integrations/dwh/redshift",
+            "cloud/integrations/dwh/databricks",
+            "cloud/integrations/dwh/postgres",
+            "cloud/integrations/dwh/athena",
+            "cloud/integrations/dwh/trino",
+            "cloud/integrations/dwh/clickhouse"
+          ]
+        },
+        {
+          "group": "Transformation & Orchestration",
+          "pages": [
+            "cloud/integrations/transformation-and-orchestration/dbt-core",
+            "cloud/integrations/transformation-and-orchestration/dbt-cloud",
+            "cloud/integrations/transformation-and-orchestration/airflow",
+            "cloud/integrations/transformation-and-orchestration/orchestration-tools"
+          ]
+        },
+        {
+          "group": "Data visualization",
+          "pages": [
+            "cloud/integrations/bi/connect-bi-tool",
+            "cloud/integrations/bi/looker",
+            "cloud/integrations/bi/tableau",
+            "cloud/integrations/bi/metabase",
+            "cloud/integrations/bi/power-bi",
+            "cloud/integrations/bi/sigma",
+            "cloud/integrations/bi/thoughtspot",
+            "cloud/integrations/bi/mode",
+            "cloud/integrations/bi/hex",
+            "cloud/integrations/bi/explo"
+          ]
+        },
+        {
+          "group": "Reverse ETL",
+          "pages": [
+            "cloud/integrations/reverse-etl/census",
+            "cloud/integrations/reverse-etl/hightouch"
+          ]
+        },
+        {
+          "group": "Code repositories",
+          "pages": [
+            "cloud/integrations/code-repo/connect-code-repo",
+            "cloud/integrations/code-repo/github",
+            "cloud/integrations/code-repo/gitlab"
+          ]
+        },
+        {
+          "group": "Communication & collaboration",
+          "pages": [
+            "cloud/integrations/alerts/slack",
+            "cloud/integrations/alerts/ms-teams",
+            "cloud/integrations/alerts/pagerduty",
+            "cloud/integrations/alerts/opsgenie",
+            "cloud/integrations/alerts/jira",
+            "cloud/integrations/alerts/linear",
+            "cloud/integrations/alerts/webhooks"
           ]
         }
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "overview/cloud-vs-oss",
+        "resources/pricing",
+        "resources/community"
       ]
     },
     {
@@ -169,11 +227,10 @@
             "data-tests/anomaly-detection-configuration/where-expression",
             "data-tests/anomaly-detection-configuration/anomaly-sensitivity",
             "data-tests/anomaly-detection-configuration/anomaly-direction",
-            "data-tests/anomaly-detection-configuration/days-back",
-            "data-tests/anomaly-detection-configuration/backfill-days",
+            "data-tests/anomaly-detection-configuration/training-period",
+            "data-tests/anomaly-detection-configuration/detection-period",
             "data-tests/anomaly-detection-configuration/time-bucket",
             "data-tests/anomaly-detection-configuration/seasonality",
-            "data-tests/anomaly-detection-configuration/min-training-set-size",
             "data-tests/anomaly-detection-configuration/column-anomalies",
             "data-tests/anomaly-detection-configuration/exclude_prefix",
             "data-tests/anomaly-detection-configuration/exclude_regexp",
@@ -182,7 +239,8 @@
             "data-tests/anomaly-detection-configuration/update_timestamp_column",
             "data-tests/anomaly-detection-configuration/ignore_small_changes",
             "data-tests/anomaly-detection-configuration/fail_on_zero",
-            "data-tests/anomaly-detection-configuration/detection-delay"
+            "data-tests/anomaly-detection-configuration/detection-delay",
+            "data-tests/anomaly-detection-configuration/anomaly-exclude-metrics"
           ]
         },
         "data-tests/anomaly-detection-tests/volume-anomalies",
@@ -205,64 +263,6 @@
     {
       "group": "Other Tests",
       "pages": ["data-tests/python-tests"]
-    },
-    {
-      "group": "Elementary Cloud",
-      "pages": [
-        "cloud/introduction",
-        {
-          "group": "Quickstart",
-          "icon": "circle-play",
-          "pages": [
-            "cloud/onboarding/quickstart-dbt-package",
-            "cloud/onboarding/signup"
-          ]
-        },
-        "cloud/general/security-and-privacy"
-      ]
-    },
-    {
-      "group": "Guides",
-      "pages": [
-        {
-          "group": "Send Slack alerts",
-          "pages": [
-            "cloud/guides/enable-slack-alerts",
-            "cloud/guides/alerts-configuration",
-            "cloud/guides/alert-rules"
-          ]
-        },
-        "cloud/guides/sync-scheduling",
-        "cloud/guides/collect-job-data",
-        "cloud/guides/troubleshoot"
-      ]
-    },
-    {
-      "group": "BI tools integration",
-      "pages": [
-        "cloud/integrations/bi/connect-bi-tool",
-        "cloud/integrations/bi/looker",
-        "cloud/integrations/bi/tableau"
-      ]
-    },
-    {
-      "group": "Code repository integration",
-      "pages": [
-        "cloud/integrations/code-repo/connect-code-repo",
-        "cloud/integrations/code-repo/github",
-        "cloud/integrations/code-repo/gitlab"
-      ]
-    },
-    {
-      "group": "Data warehouses",
-      "pages": [
-        "cloud/integrations/dwh/snowflake",
-        "cloud/integrations/dwh/bigquery",
-        "cloud/integrations/dwh/redshift",
-        "cloud/integrations/dwh/databricks",
-        "cloud/integrations/dwh/postgres",
-        "cloud/integrations/dwh/athena"
-      ]
     },
     {
       "group": "Elementary OSS",
@@ -290,14 +290,17 @@
             "oss/guides/share-observability-report/host-on-s3",
             "oss/guides/share-observability-report/host-on-gcs",
             "oss/guides/share-observability-report/host-on-azure",
-            "oss/guides/share-observability-report/send-report-summary"
+            "oss/guides/share-observability-report/send-report-summary",
+            "oss/guides/collect-dbt-source-freshness"
           ]
         },
         {
-          "group": "Send Slack alerts",
+          "group": "Send alerts",
           "pages": [
-            "oss/guides/send-slack-alerts",
-            "oss/guides/alerts-configuration"
+            "oss/guides/alerts/elementary-alerts",
+            "oss/guides/alerts/send-slack-alerts",
+            "oss/guides/alerts/send-teams-alerts",
+            "oss/guides/alerts/alerts-configuration"
           ]
         },
         "oss/guides/collect-job-data"
@@ -318,13 +321,52 @@
             "oss/deployment-and-configuration/github-actions",
             "oss/deployment-and-configuration/gitlab-ci"
           ]
-        },
-        "oss/deployment-and-configuration/slack"
+        }
       ]
     },
     {
       "group": "Integrations",
-      "pages": ["oss/integrations/dbt", "oss/integrations/slack"]
+      "pages": [
+        "oss/integrations/dbt",
+        "oss/deployment-and-configuration/slack",
+        "oss/deployment-and-configuration/teams"
+      ]
+    },
+    {
+      "group": "Community & Support",
+      "pages": [
+        "oss/general/troubleshooting",
+        "oss/general/faq",
+        "oss/general/contributions",
+        "oss/general/community-and-support"
+      ]
+    },
+    {
+      "group": "Release Notes",
+      "pages": [
+        "oss/release-notes/upgrading-elementary",
+        {
+          "group": "Releases",
+          "pages": [
+            "oss/release-notes/releases/0.11.2",
+            "oss/release-notes/releases/0.10.0",
+            "oss/release-notes/releases/0.9.1",
+            "oss/release-notes/releases/0.8.2",
+            "oss/release-notes/releases/0.8.0",
+            "oss/release-notes/releases/0.7.10",
+            "oss/release-notes/releases/0.7.7",
+            "oss/release-notes/releases/0.7.6",
+            "oss/release-notes/releases/0.7.5",
+            "oss/release-notes/releases/0.7.2",
+            "oss/release-notes/releases/0.6.10",
+            "oss/release-notes/releases/0.6.7",
+            "oss/release-notes/releases/0.6.5",
+            "oss/release-notes/releases/0.6.3",
+            "oss/release-notes/releases/0.6.1",
+            "oss/release-notes/releases/0.5.4"
+          ]
+        }
+      ]
     }
   ],
   "footerSocials": {
