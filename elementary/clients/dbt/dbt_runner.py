@@ -90,6 +90,7 @@ class DbtRunner(BaseDbtRunner):
                 check=self.raise_on_failure,
                 capture_output=(capture_output or quiet),
                 env=self._get_command_env(),
+                cwd=self.project_dir,
             )
         except subprocess.CalledProcessError as err:
             logs = list(parse_dbt_output(err.output.decode())) if err.output else []

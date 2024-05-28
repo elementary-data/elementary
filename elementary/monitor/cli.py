@@ -684,6 +684,7 @@ def send_report(
         gcs_timeout_limit=gcs_timeout_limit,
         report_url=report_url,
         env=env,
+        project_name=project_name,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
