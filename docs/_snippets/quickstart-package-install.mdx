@@ -39,7 +39,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
     ```yml packages.yml
     packages:
       - package: elementary-data/elementary
-        version: 0.15.1
+        version: 0.15.2
         ## Docs: https://docs.elementary-data.com
     ```
   </Step>
@@ -75,6 +75,18 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
         **If you change materialization settings, make sure to run `dbt run -s elementary --full-refresh`.**
         
     </Accordion>
+    <Accordion title="Important: Allowing Elementary to override dbt's default materializations (relevant from dbt 1.8)">
+        <Snippet file="dbt-18-materializations-common.mdx" />
+
+        In order for these features to work, it is required to add the following flag to your `dbt_project.yml` file:
+        ```yml dbt_project.yml
+        flags:
+          require_explicit_package_overrides_for_builtin_materializations: false
+        ```
+
+        Please note that after setting this flag you may see a deprecation warning from dbt.
+        This is a temporary measure and we are working with the dbt team on a [longer term solution](https://github.com/dbt-labs/dbt-core/issues/10090).
+    </Accordion>
     
     ```yml dbt_project.yml
     models:
@@ -84,6 +96,10 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
         +schema: "elementary"
         ## To disable elementary for dev, uncomment this:
         # enabled: "{{ target.name in ['prod','analytics'] }}"
+    
+    # Required from dbt 1.8 and above for certain Elementary features (please see more details above)
+    flags:
+      require_explicit_package_overrides_for_builtin_materializations: false
     ```
   </Step>
   <Step title="Import the package and build Elementary models">
