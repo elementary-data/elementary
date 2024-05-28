@@ -16,11 +16,13 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         self,
         test_results: List[TestResultSummarySchema],
         days_back: int,
+        env: str,
         bucket_website_url: Optional[str] = None,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         include_description: bool = False,
+        project_name: Optional[str] = None,
     ) -> SlackMessageSchema:
-        self.add_title_to_slack_alert()
+        self.add_title_to_slack_alert(env, project_name)
         self.add_preview_to_slack_alert(
             test_results,
             days_back=days_back,
@@ -34,9 +36,10 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
         )
         return super().get_slack_message()
 
-    def add_title_to_slack_alert(self):
+    def add_title_to_slack_alert(self, env: str, project_name: Optional[str] = None):
+        context = f"- {project_name} ({env})" if project_name else f"({env})"
         title_blocks = [
-            self.create_header_block(":mag: Monitoring summary"),
+            self.create_header_block(f":mag: Monitoring summary {context}"),
             self.create_divider_block(),
         ]
         self._add_always_displayed_blocks(title_blocks)
