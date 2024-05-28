@@ -1,0 +1,4 @@
+Starting from dbt 1.8 and above, 3rd party dbt packages cannot override dbt materializations without an explicit configuration from users.
+Elementary utilizes this dbt mechanism to add reporting functionality to non-Elementary tests (such as native dbt tests and expectations):
+* Collection of the total number of failed rows.
+* Collection of failed row samples.
