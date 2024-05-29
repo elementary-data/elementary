@@ -2,7 +2,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 import dbt.adapters.factory
 from dbt.adapters.base import BaseAdapter, BaseConnectionManager
@@ -11,8 +11,13 @@ from packaging import version
 # IMPORTANT: This must be kept before the rest of the dbt imports
 dbt.adapters.factory.get_adapter = lambda config: config.adapter  # type: ignore[attr-defined]
 
-from dbt.adapters.factory import get_adapter_class_by_name, register_adapter
+from dbt.adapters.factory import (
+    AdapterRequiredConfig,
+    get_adapter_class_by_name,
+    register_adapter,
+)
 from dbt.config import RuntimeConfig
+from dbt.context.providers import generate_runtime_macro_context
 from dbt.flags import set_from_args
 from dbt.parser.manifest import Manifest, ManifestLoader
 from dbt.tracking import disable_tracking
@@ -36,6 +41,32 @@ if dbt_version >= version.parse("1.5.0"):
 else:
     DEFAULT_VARS = "{}"
 
+if TYPE_CHECKING:
+
+    def register_adapter_compat(config: AdapterRequiredConfig):
+        pass
+
+    def get_mp_context():
+        pass
+
+else:
+    if dbt_version >= version.parse("1.8.0"):
+        from dbt.mp_context import get_mp_context
+
+        def register_adapter_compat(config: AdapterRequiredConfig):
+            register_adapter(config, get_mp_context())
+
+    else:
+
+        def register_adapter_compat(config: AdapterRequiredConfig):
+            register_adapter(config)
+
+
+if dbt_version >= version.parse("1.8.0"):
+    from dbt_common.context import set_invocation_context
+
+    set_invocation_context({})
+
 
 def default_project_dir() -> Path:
     if "DBT_PROJECT_DIR" in os.environ:
@@ -58,6 +89,8 @@ DEFAULT_PROJECT_DIR = str(default_project_dir())
 
 
 class ConfigArgs(BaseModel):
+    REQUIRE_RESOURCE_NAMES_WITHOUT_SPACES = False
+
     project_dir: str = DEFAULT_PROJECT_DIR
     profiles_dir: str = DEFAULT_PROFILES_DIR
     profile: Optional[str] = None
@@ -140,11 +173,18 @@ class SlimDbtRunner(BaseDbtRunner):
         if not self.config:
             raise Exception("Config not loaded")
 
-        register_adapter(self.config)
+        if dbt_version >= version.parse("1.8.0"):
+            adapter_args = [self.config, get_mp_context()]
+        else:
+            adapter_args = [self.config]
+
+        register_adapter_compat(self.config)
         self.adapter_name = self.config.credentials.type
         self.adapter = cast(
-            BaseAdapter, get_adapter_class_by_name(self.adapter_name)(self.config)
+            BaseAdapter, get_adapter_class_by_name(self.adapter_name)(*adapter_args)  # type: ignore
         )
+        if dbt_version >= version.parse("1.8.0"):
+            self.adapter.set_macro_context_generator(generate_runtime_macro_context)  # type: ignore
 
         self.connections_manager = cast(BaseConnectionManager, self.adapter.connections)
         self.connections_manager.set_connection_name()
@@ -158,9 +198,9 @@ class SlimDbtRunner(BaseDbtRunner):
             raise Exception("Adapter not loaded")
 
         self.project_parser = ManifestLoader(
-            self.config,
-            self.config.load_dependencies(),
-            self.connections_manager.set_query_header,
+            root_project=self.config,
+            all_projects=self.config.load_dependencies(),
+            macro_hook=self.connections_manager.set_query_header,  # type: ignore
         )
         self.manifest = self.project_parser.load()
         if self.manifest is None:
@@ -178,11 +218,16 @@ class SlimDbtRunner(BaseDbtRunner):
             package_name = None
             actual_macro_name = macro_name
 
+        if dbt_version < version.parse("1.8.0"):
+            additional_exec_macro_kwargs = {"manifest": self.manifest}
+        else:
+            additional_exec_macro_kwargs = {"macro_resolver": self.manifest}
+
         return self.adapter.execute_macro(
             macro_name=actual_macro_name,
             project=package_name,
             kwargs=kwargs,
-            manifest=self.manifest,
+            **additional_exec_macro_kwargs,  # type: ignore
         )
 
     def close_connection(self):

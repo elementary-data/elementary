@@ -95,9 +95,9 @@ def common_options(cmd: str):
         )(func)
         func = click.option(
             "--env",
-            type=click.Choice(["dev", "prod"]),
+            type=str,
             default="dev",
-            help="This flag indicates if you are running Elementary in prod or dev environment and will be reflected accordingly in the report.",
+            help="This flag indicates which environment you are running Elementary in (e.g. dev or prod) and will be reflected accordingly in the report.",
         )(func)
         func = click.option(
             "--config-dir",
@@ -684,6 +684,7 @@ def send_report(
         gcs_timeout_limit=gcs_timeout_limit,
         report_url=report_url,
         env=env,
+        project_name=project_name,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))

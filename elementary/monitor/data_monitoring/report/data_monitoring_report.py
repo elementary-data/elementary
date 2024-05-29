@@ -299,6 +299,8 @@ class DataMonitoringReport(DataMonitoring):
                     include_description=include_description,
                     filter=self.selector_filter.to_selector_filter_schema(),
                     days_back=days_back,
+                    env=self.config.env,
+                    project_name=self.config.project_name,
                 ),
             )
         else:

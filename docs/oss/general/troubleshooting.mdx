@@ -11,10 +11,10 @@ If you get an empty report, there are several steps to understand what went wron
 
 - **Check that dbt package version is the latest**
 
-- Refer to the [dbt package installation guide](/quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- Refer to the [dbt package installation guide](/oss/quickstart/quickstart-cli-package#step-by-step-install-elementary-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
 
 - **Check if the table `elementary_test_results` exists and has data**
-- If the table does not exist - refer to the [dbt package installation guide](/quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- If the table does not exist - refer to the [dbt package installation guide](/oss/quickstart/quickstart-cli-package#step-by-step-install-elementary-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
 - If the table exists but has no data - Did you execute `dbt test` since deploying the package and creating the models?
 - If yes, make sure the table was created as an incremental table (not a regular table or view).
 - If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full-refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
@@ -151,6 +151,17 @@ python3 -m pip install elementary-data
 python3 -m pip install elementary-data[<adapter>]
 ```
 
+</Accordion>
+
+<Accordion title="WARNING - Installed package 'elementary' is overriding the built-in materialization 'XXX'">
+  <Snippet file="dbt-18-materializations-common.mdx" />
+
+  The warning above may appear in one of the following two cases: 
+  * If you are using the most recent version of dbt 1.6 or 1.7 - this warning will appear by default, since it indicates the aforementioned behavior change in dbt 1.8.
+  * If you are using dbt 1.8 and above, this warning will NOT appear by default, however it will start appearing once you set the flag `require_explicit_package_overrides_for_builtin_materializations` to `false` 
+  as required in the [dbt package installation guide](/oss/quickstart/quickstart-cli-package#step-by-step-install-elementary-dbt-package).
+
+  In either case, please ignore it for now. This is a temporary measure and we are working with the dbt team on a [longer term solution](https://github.com/dbt-labs/dbt-core/issues/10090).
 </Accordion>
 
 <Accordion title="I changed the training period but the results are the same">
