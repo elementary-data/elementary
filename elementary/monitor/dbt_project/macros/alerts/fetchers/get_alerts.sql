@@ -1,10 +1,15 @@
-{% macro get_pending_alerts(days_back, type=none) %}
+{% macro get_pending_alerts(days_back, type=none, hours_back=none) %}
     -- depends_on: {{ ref('alerts_v2') }}
+    {% if hours_back %}
+        {% set alerts_time_limit = elementary_cli.get_alerts_time_limit_hour(hours_back) %}
+    {% else %}
+        {% set alerts_time_limit = elementary_cli.get_alerts_time_limit(days_back) %}
+    {% endif %}
     {% set select_pending_alerts_query %}
         with alerts_in_time_limit as (
             select *
             from {{ ref('elementary_cli', 'alerts_v2') }}
-            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ elementary_cli.get_alerts_time_limit(days_back) }}
+            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ alerts_time_limit }}
             {% if type %}
                 and lower(type) = {{ elementary.edr_quote(type | lower) }}
             {% endif %}
@@ -30,8 +35,13 @@
 {% endmacro %}
 
 
-{% macro get_last_alert_sent_times(days_back, type=none) %}
+{% macro get_last_alert_sent_times(days_back, type=none, hours_back=none) %}
     -- depends_on: {{ ref('alerts_v2') }}
+    {% if hours_back %}
+        {% set alerts_time_limit = elementary_cli.get_alerts_time_limit_hour(hours_back) %}
+    {% else %}
+        {% set alerts_time_limit = elementary_cli.get_alerts_time_limit(days_back) %}
+    {% endif %}
     {% set select_last_alert_sent_times_query %}
         with alerts_in_time_limit as (
             select
@@ -39,7 +49,7 @@
                 status,
                 sent_at
             from {{ ref('alerts_v2') }}
-            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ elementary_cli.get_alerts_time_limit(days_back) }}
+            where {{ elementary.edr_cast_as_timestamp('detected_at') }} >= {{ alerts_time_limit }}
             {% if type %}
                 and lower(type) = {{ elementary.edr_quote(type | lower) }}
             {% endif %}

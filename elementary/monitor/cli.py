@@ -93,6 +93,14 @@ def common_options(cmd: str):
             default=1 if cmd == Command.MONITOR else 7,
             help="Set a limit to how far back should edr collect data.",
         )(func)
+        if cmd in (Command.MONITOR):
+            func = click.option(
+                "--hours-back",
+                "-h",
+                type=int,
+                default=None,
+                help="Optionally set an hourly limit to how far back should edr collect data. If provided, it overrides --days-back.",
+            )(func)
         func = click.option(
             "--env",
             type=str,
@@ -166,6 +174,7 @@ def get_cli_properties() -> dict:
     full_refresh_dbt_package = params.get("full_refresh_dbt_package")
     select = params.get("select")
     days_back = params.get("days_back")
+    hours_back = params.get("hours_back")
     timezone = params.get("timezone")
     group_by = params.get("group_by")
     suppression_interval = params.get("suppression_interval")
@@ -177,6 +186,7 @@ def get_cli_properties() -> dict:
         "full_refresh_dbt_package": full_refresh_dbt_package,
         "select": select,
         "days_back": days_back,
+        "hours_back": hours_back,
         "timezone": timezone,
         "group_by": group_by,
         "suppression_interval": suppression_interval,
@@ -272,6 +282,7 @@ def get_cli_properties() -> dict:
 def monitor(
     ctx,
     days_back,
+    hours_back,
     slack_webhook,
     deprecated_slack_webhook,
     slack_token,
@@ -362,7 +373,7 @@ def monitor(
             Command.MONITOR, get_cli_properties(), ctx.command.name
         )
         success = data_monitoring.run_alerts(
-            days_back, full_refresh_dbt_package, dbt_vars=vars
+            days_back, hours_back, full_refresh_dbt_package, dbt_vars=vars
         )
         anonymous_tracking.track_cli_end(
             Command.MONITOR, data_monitoring.properties(), ctx.command.name

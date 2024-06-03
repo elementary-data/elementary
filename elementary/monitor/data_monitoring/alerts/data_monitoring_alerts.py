@@ -68,6 +68,7 @@ class DataMonitoringAlerts(DataMonitoring):
     def _populate_data(
         self,
         days_back: Optional[int] = None,
+        hours_back: Optional[int] = None,
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
@@ -75,6 +76,8 @@ class DataMonitoringAlerts(DataMonitoring):
         vars = dbt_vars or dict()
         if days_back:
             vars.update(days_back=days_back)
+        if hours_back:
+            vars.update(hours_back=hours_back)
         success = self.internal_dbt_runner.run(
             models="elementary_cli.alerts.alerts_v2",
             full_refresh=dbt_full_refresh,
@@ -86,17 +89,17 @@ class DataMonitoringAlerts(DataMonitoring):
 
         return success
 
-    def _fetch_data(self, days_back: int) -> List[PendingAlertSchema]:
+    def _fetch_data(self, days_back: int, hours_back: Optional[int] = None) -> List[PendingAlertSchema]:
         return self.alerts_api.get_new_alerts(
-            days_back=days_back,
+            days_back=days_back, hours_back=hours_back,
         )
 
     def _filter_data(self, data: List[PendingAlertSchema]) -> List[PendingAlertSchema]:
         return filter_alerts(data, alerts_filter=self.selector_filter)
 
-    def _fetch_last_sent_times(self, days_back: int) -> Dict[str, datetime]:
+    def _fetch_last_sent_times(self, days_back: int, hours_back: Optional[int] = None) -> Dict[str, datetime]:
         return self.alerts_api.get_alerts_last_sent_times(
-            days_back=days_back,
+            days_back=days_back, hours_back=hours_back,
         )
 
     def _sort_alerts(
@@ -286,6 +289,7 @@ class DataMonitoringAlerts(DataMonitoring):
     def run_alerts(
         self,
         days_back: int,
+        hours_back: int,
         dbt_full_refresh: bool = False,
         dbt_vars: Optional[dict] = None,
     ) -> bool:
@@ -293,6 +297,7 @@ class DataMonitoringAlerts(DataMonitoring):
         if self.should_populate_data:
             popopulated_data_successfully = self._populate_data(
                 days_back=days_back,
+                hours_back=hours_back,
                 dbt_full_refresh=dbt_full_refresh,
                 dbt_vars=dbt_vars,
             )
@@ -302,9 +307,9 @@ class DataMonitoringAlerts(DataMonitoring):
                 return self.success
 
         # Fetch and filter data
-        alerts = self._fetch_data(days_back)
+        alerts = self._fetch_data(days_back=days_back, hours_back=hours_back)
         alerts = self._filter_data(alerts)
-        alerts_last_sent_times = self._fetch_last_sent_times(days_back)
+        alerts_last_sent_times = self._fetch_last_sent_times(days_back=days_back, hours_back=hours_back)
         sorted_alerts = self._sort_alerts(
             alerts=alerts, alerts_last_sent_times=alerts_last_sent_times
         )

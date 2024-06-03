@@ -38,11 +38,11 @@ class AlertsFetcher(FetcherClient):
             )
 
     def query_pending_alerts(
-        self, days_back: int, type: Optional[AlertTypes] = None
+        self, days_back: int, type: Optional[AlertTypes] = None, hours_back: Optional[int] = None
     ) -> List[PendingAlertSchema]:
         pending_alerts_results = self.dbt_runner.run_operation(
             macro_name="elementary_cli.get_pending_alerts",
-            macro_args={"days_back": days_back, "type": type.value if type else None},
+            macro_args={"days_back": days_back, "type": type.value if type else None, "hours_back": hours_back},
         )
         return [
             PendingAlertSchema(**result)
@@ -50,11 +50,11 @@ class AlertsFetcher(FetcherClient):
         ]
 
     def query_last_alert_times(
-        self, days_back: int, type: Optional[AlertTypes] = None
+        self, days_back: int, type: Optional[AlertTypes] = None, hours_back: Optional[int] = None
     ) -> Dict[str, str]:
         response = self.dbt_runner.run_operation(
             macro_name="elementary_cli.get_last_alert_sent_times",
-            macro_args={"days_back": days_back, "type": type.value if type else None},
+            macro_args={"days_back": days_back, "type": type.value if type else None, "hours_back": hours_back},
         )
         return json.loads(response[0])
 
