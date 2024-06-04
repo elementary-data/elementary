@@ -1,6 +1,6 @@
 packages:
   - package: dbt-labs/dbt_utils
-    version: [">=0.8.0", "<0.9.0"]
+    version: [">=1.0.0", "<2.0.0"]
   - package: elementary-data/elementary
     version: 0.15.1
 
