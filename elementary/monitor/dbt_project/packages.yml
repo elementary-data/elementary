@@ -1,8 +1,8 @@
 packages:
   - package: dbt-labs/dbt_utils
     version: [">=0.8.0", "<2.0.0"]
-  # - package: elementary-data/elementary
-  #   version: 0.15.1
+  - package: elementary-data/elementary
+    version: 0.15.1
 
   #  NOTE - for unreleased CLI versions we often need to update the package version to a commit hash (please leave this
   #  commented, so it will be easy to access)
