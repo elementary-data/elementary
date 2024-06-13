@@ -29,6 +29,12 @@ logger = get_logger(__name__)
 
 
 class ModelsAPI(APIClient):
+    _ARTIFACT_TYPE_DIR_MAP = {
+        SourceSchema: "sources",
+        ModelSchema: "models",
+        ExposureSchema: "exposures",
+    }
+
     def __init__(self, dbt_runner: BaseDbtRunner):
         super().__init__(dbt_runner)
         self.models_fetcher = ModelsFetcher(dbt_runner=self.dbt_runner)
@@ -259,19 +265,20 @@ class ModelsAPI(APIClient):
         if artifact.full_path is None:
             raise Exception("Artifact full path can't be null")
 
-        if isinstance(artifact, ExposureSchema):
-            split_artifact_path = fqn.split("/")
+        if (
+            isinstance(artifact, ExposureSchema)
+            and artifact.meta
+            and artifact.meta.get("platform")
+        ):
+            split_artifact_path = [artifact.meta["platform"], *fqn.split("/")]
         else:
-            split_artifact_path = artifact.full_path.split(os.path.sep)
-
-            # If source, change models directory into sources
-            if isinstance(artifact, SourceSchema):
-                if split_artifact_path[0] == "models":
-                    split_artifact_path[0] = "sources"
-
-        root_dir = cls._get_root_dir_path(artifact)
-        if root_dir:
-            split_artifact_path.insert(0, root_dir)
+            artifact_dir_name = cls._ARTIFACT_TYPE_DIR_MAP[type(artifact)]
+            split_artifact_path = [
+                artifact.package_name,
+                artifact_dir_name,
+                # Remove dbt's 'models-path' directory.
+                *artifact.full_path.split(os.path.sep)[1:],
+            ]
 
         return os.path.sep.join(split_artifact_path)
 
@@ -293,15 +300,3 @@ class ModelsAPI(APIClient):
         )
 
         return fqn.lower()
-
-    @classmethod
-    def _get_root_dir_path(cls, artifact: ArtifactSchemaType) -> Optional[str]:
-        if isinstance(artifact, ExposureSchema):
-            bi_platform = artifact.meta.get("platform") if artifact.meta else None
-            if bi_platform:
-                return bi_platform
-
-        if artifact.package_name:
-            return artifact.package_name
-
-        return None
