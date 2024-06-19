@@ -75,6 +75,14 @@
       ]
     },
     {
+      "group": "Cloud Platform",
+      "pages": [
+        "cloud/introduction",
+        "cloud/features",
+        "cloud/general/security-and-privacy",
+      ]
+    },
+    {
       "group": "Features",
       "pages": [
         "features/data-tests",
