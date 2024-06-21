@@ -1,0 +1,42 @@
+name: Create Pylon Issue
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  create_pylon_issue:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Create Pylon Issue for GitHub Issue
+      if: github.event_name == 'issues'
+      run: |
+        curl -X POST "https://api.usepylon.com/v1/issues" \
+        -H "Authorization: Bearer ${{ secrets.PYLON_API_KEY }}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "title": "${{ github.event.issue.title }}",
+          "description": "${{ github.event.issue.body }}",
+          "repository": "${{ github.repository }}",
+          "type": "GitHub Issue",
+          "url": "${{ github.event.issue.html_url }}"
+        }'
+
+    - name: Create Pylon Issue for Pull Request
+      if: github.event_name == 'pull_request'
+      run: |
+        curl -X POST "https://api.usepylon.com/v1/issues" \
+        -H "Authorization: Bearer ${{ secrets.PYLON_API_KEY }}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "title": "${{ github.event.pull_request.title }}",
+          "description": "${{ github.event.pull_request.body }}",
+          "repository": "${{ github.repository }}",
+          "type": "Pull Request",
+          "url": "${{ github.event.pull_request.html_url }}"
+        }'
