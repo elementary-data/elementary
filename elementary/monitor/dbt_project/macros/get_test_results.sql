@@ -53,10 +53,16 @@
         order by elementary_unique_id, invocations_rank_index desc
     {%- endset -%}
 
+    {% set test_results = [] %}
     {% set test_results_agate = elementary.run_query(select_test_results) %}
     {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
     {%- for test in tests -%}
+        {% set test_meta = fromjson(test.meta) %}
+        {% if not test_meta.get("elementary", {}).get("include", true) %}
+            {% continue %}
+        {% endif %}
+
         {% set test_rows_sample = none %}
         {% if test.invocations_rank_index == 1 %}
             {% set test_type = test.test_type %}
@@ -114,6 +120,8 @@
         {% endif %}
         {# Adding sample data to test results #}
         {% do test.update({"sample_data": test_rows_sample}) %}
+        {% do test_results.append(test) %}
     {%- endfor -%}
-    {% do return(tests) %}
+
+    {% do return(test_results) %}
 {%- endmacro -%}
