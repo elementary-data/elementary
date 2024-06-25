@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.dbt_runner import DbtRunner
@@ -24,13 +24,13 @@ class AlertsAPI(APIClient):
             config=self.config,
         )
 
-    def get_new_alerts(self, days_back: int) -> List[PendingAlertSchema]:
-        pending_alerts = self.alerts_fetcher.query_pending_alerts(days_back=days_back)
+    def get_new_alerts(self, days_back: int, hours_back: Optional[int] = None) -> List[PendingAlertSchema]:
+        pending_alerts = self.alerts_fetcher.query_pending_alerts(days_back=days_back, hours_back=hours_back)
         return pending_alerts
 
-    def get_alerts_last_sent_times(self, days_back: int) -> Dict[str, datetime]:
+    def get_alerts_last_sent_times(self, days_back: int, hours_back: Optional[int] = None) -> Dict[str, datetime]:
         alerts_last_sent_times = self.alerts_fetcher.query_last_alert_times(
-            days_back=days_back
+            days_back=days_back, hours_back=hours_back
         )
         last_sent_times = dict()
         for alert_class_id, last_sent_time_as_string in alerts_last_sent_times.items():
