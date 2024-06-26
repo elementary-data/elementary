@@ -61,7 +61,6 @@
       "pages": [
         "introduction",
         "quickstart",
-        "cloud/general/security-and-privacy",
         {
           "group": "dbt package",
           "icon": "cube",
@@ -79,7 +78,52 @@
       "pages": [
         "cloud/introduction",
         "cloud/features",
+        "cloud/integrations",
         "cloud/general/security-and-privacy"
+      ]
+    },
+    {
+      "group": "Anomaly Detection Monitors",
+      "pages": [
+        "features/automated-monitors"
+      ]
+    },
+    {
+      "group": "Data Tests",
+      "pages": [
+        "features/automated-monitors"
+      ]
+    },
+    {
+      "group": "Performance Monitoring",
+      "pages": [
+        "features/automated-monitors"
+      ]
+    },
+    {
+      "group": "Data Lineage",
+      "pages": [
+        "features/data-lineage/lineage",
+        "features/data-lineage/column-level-lineage",
+        "features/data-lineage/exposures-lineage"
+      ]
+    },
+    {
+      "group": "Alerts and Incidents",
+      "pages": [
+        "features/automated-monitors"
+      ]
+    },
+    {
+      "group": "Data Governance",
+      "pages": [
+        "features/automated-monitors"
+      ]
+    },
+    {
+      "group": "Collaboration and Communication",
+      "pages": [
+        "features/automated-monitors"
       ]
     },
     {
@@ -89,16 +133,6 @@
         "features/automated-monitors",
         "features/elementary-alerts",
         "features/data-observability-dashboard",
-        {
-          "group": "End-to-End Lineage",
-          "icon": "arrow-progress",
-          "iconType": "solid",
-          "pages": [
-            "features/lineage",
-            "features/exposures-lineage",
-            "features/column-level-lineage"
-          ]
-        },
         "features/config-as-code",
         "features/catalog",
         "features/multi-env",
@@ -272,7 +306,9 @@
     },
     {
       "group": "Other Tests",
-      "pages": ["data-tests/python-tests"]
+      "pages": [
+        "data-tests/python-tests"
+      ]
     },
     {
       "group": "Elementary OSS",
@@ -318,7 +354,10 @@
     },
     {
       "group": "Configuration & usage",
-      "pages": ["oss/cli-install", "oss/cli-commands"]
+      "pages": [
+        "oss/cli-install",
+        "oss/cli-commands"
+      ]
     },
     {
       "group": "Deployment",
@@ -379,7 +418,22 @@
       ]
     }
   ],
-  "footerSocials": {
+  "redirects": [
+    {
+      "source": "features/lineage",
+      "destination": "features/data-lineage/lineage"
+    },
+    {
+      "source": "features/exposures-lineage",
+      "destination": "features/data-lineage/exposures-lineage"
+    },
+    {
+      "source": "features/column-level-lineage",
+      "destination": "features/data-lineage/column-level-lineage"
+    }
+  ],
+  "footerSocials":
+    {
     "website": "https://www.elementary-data.com",
     "slack": "https://elementary-data.com/community"
   },
