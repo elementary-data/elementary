@@ -85,7 +85,17 @@
     {
       "group": "Anomaly Detection Monitors",
       "pages": [
-        "features/automated-monitors"
+        "features/anomaly-detection/monitors-overview",
+        "features/anomaly-detection/automated-monitors",
+        "features/anomaly-detection/opt-in-monitors",
+        {
+        "group": "Configuration and Feedback",
+        "pages": [
+          "features/anomaly-detection/monitors-configuration",
+          "features/anomaly-detection/monitors-feedback",
+          "features/anomaly-detection/disable-or-mute-monitors"
+        ]
+        }
       ]
     },
     {
@@ -430,6 +440,10 @@
     {
       "source": "features/column-level-lineage",
       "destination": "features/data-lineage/column-level-lineage"
+    },
+    {
+      "source": "features/automated-monitors",
+      "destination": "features/anomaly-detection/automated-monitors"
     }
   ],
   "footerSocials":
