@@ -101,7 +101,10 @@
     {
       "group": "Data Tests",
       "pages": [
-        "features/automated-monitors"
+        "features/data-tests/data-tests-overview",
+        "features/data-tests/custom-sql-tests",
+        "features/data-tests/dbt-tests",
+        "features/data-tests/schema-validation-test"
       ]
     },
     {
@@ -430,20 +433,24 @@
   ],
   "redirects": [
     {
-      "source": "features/lineage",
-      "destination": "features/data-lineage/lineage"
+      "source": "/features/lineage",
+      "destination": "/features/data-lineage/lineage"
     },
     {
-      "source": "features/exposures-lineage",
-      "destination": "features/data-lineage/exposures-lineage"
+      "source": "/features/exposures-lineage",
+      "destination": "/features/data-lineage/exposures-lineage"
     },
     {
-      "source": "features/column-level-lineage",
-      "destination": "features/data-lineage/column-level-lineage"
+      "source": "/features/column-level-lineage",
+      "destination": "/features/data-lineage/column-level-lineage"
     },
     {
-      "source": "features/automated-monitors",
-      "destination": "features/anomaly-detection/automated-monitors"
+      "source": "/features/automated-monitors",
+      "destination": "/features/anomaly-detection/automated-monitors"
+    },
+    {
+      "source": "/features/data-tests",
+      "destination": "/features/data-tests/dbt-tests"
     }
   ],
   "footerSocials":
