@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: test_data
+    schema: "{{ target.schema + var('schema_name_suffix', '') }}"
+    tables:
+      - name: metrics_seed1
+      - name: metrics_seed2
+      - name: metrics_seed3

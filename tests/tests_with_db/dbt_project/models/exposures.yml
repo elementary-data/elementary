@@ -1,0 +1,42 @@
+version: 2
+
+exposures:
+  - name: customers
+    label: CustomersFTW
+    type: dashboard
+    maturity: high
+    url: https://bi.tool/dashboards/1
+    description: >
+      Did someone say "exponential growth"?
+
+    depends_on:
+      - ref('customers')
+
+    owner:
+      name: Callum McData
+      email: data@jaffleshop.com
+    meta:
+      referenced_columns:
+        - column_name: id
+          data_type: numeric
+          node: ref('customers')
+
+  - name: orders
+    label: Returned Orders
+    type: dashboard
+    maturity: high
+    url: https://bi.tool/dashboards/2
+    description: >
+      Did someone say "exponential growth"?
+
+    depends_on:
+      - ref('orders')
+
+    owner:
+      name: Callum McData
+      email: data@jaffleshop.com
+    meta:
+      referenced_columns:
+        - column_name: "order_id"
+          data_type: "string"
+        - column_name: "ZOMG"

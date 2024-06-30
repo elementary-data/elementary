@@ -97,3 +97,4 @@ venv/
 
 # elementary outputs
 edr_target/
+tests/tests_with_db/dbt_project/dbt_packages/
