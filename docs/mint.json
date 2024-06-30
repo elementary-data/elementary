@@ -86,7 +86,15 @@
       "group": "Anomaly Detection Monitors",
       "pages": [
         "features/anomaly-detection/monitors-overview",
-        "features/anomaly-detection/automated-monitors",
+        {
+          "group": "Automated monitors",
+          "pages": [
+            "features/anomaly-detection/automated-monitors",
+            "features/anomaly-detection/automated-freshness",
+            "features/anomaly-detection/automated-volume"
+          ]
+        },
+
         "features/anomaly-detection/opt-in-monitors",
         {
         "group": "Configuration and Feedback",
@@ -108,12 +116,6 @@
       ]
     },
     {
-      "group": "Performance Monitoring",
-      "pages": [
-        "features/automated-monitors"
-      ]
-    },
-    {
       "group": "Data Lineage",
       "pages": [
         "features/data-lineage/lineage",
@@ -125,6 +127,12 @@
       "group": "Alerts and Incidents",
       "pages": [
         "features/automated-monitors"
+      ]
+    },
+    {
+      "group": "Performance & Cost",
+      "pages": [
+        "features/performance-monitoring/performance-monitoring"
       ]
     },
     {

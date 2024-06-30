@@ -1,6 +1,6 @@
 ---
 title: Automated Freshness & Volume Monitors
-sidebarTitle: "Automated Monitors"
+sidebarTitle: "Introduction"
 ---
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
@@ -9,8 +9,7 @@ sidebarTitle: "Automated Monitors"
 
 ### How it works?
 
-The monitors collect metadata, and the [anomaly detection model](cloud/features/anomaly-detection/monitors-overview#how-monitors-work?) adjusts based on updates frequency, seasonality and trends.
-Further information on the detection models can be found here. 
+The monitors collect metadata, and the [anomaly detection model](cloud/features/anomaly-detection/monitors-overview#how-anomaly-detection-works?) adjusts based on updates frequency, seasonality and trends. 
 
 As soon as you connect Elementary Cloud Platform to your data warehouse, a backfill process will begin to collect historical metadata. 
 Within an average of a few hours, your automated monitors will be operational.
@@ -21,15 +20,7 @@ You can fine tune the [configuration](cloud/features/anomaly-detection/monitors-
 
 ## Automated Monitors
 
-### Volume Monitor
-
-Monitors how many rows were added or removed to a table on each update,
-and fails if there is an unexpected drop or spike in rows.
-
-### Freshness Monitor
-
-Monitors updates to tables and how frequently a table is updated,
-and fails if there is an unexpected delay.
+<Snippet file="cloud/features/anomaly-detection/automated-monitors-cards.mdx" />
 
 ## Alerts on Failures
 
