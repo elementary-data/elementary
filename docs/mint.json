@@ -78,7 +78,7 @@
       "pages": [
         "cloud/introduction",
         "cloud/features",
-        "cloud/integrations",
+        "features/integrations",
         "cloud/general/security-and-privacy"
       ]
     },
@@ -94,7 +94,6 @@
             "features/anomaly-detection/automated-volume"
           ]
         },
-
         "features/anomaly-detection/opt-in-monitors",
         {
         "group": "Configuration and Feedback",
@@ -126,7 +125,17 @@
     {
       "group": "Alerts and Incidents",
       "pages": [
-        "features/automated-monitors"
+        "features/alerts-and-incidents/alerts-and-incidents-overview",
+        {
+          "group": "Setup & configure alerts",
+          "pages": [
+            "features/alerts-and-incidents/effective-alerts-setup",
+            "features/alerts-and-incidents/alert-rules",
+            "features/alerts-and-incidents/owners-and-subscribers",
+            "features/alerts-and-incidents/alert-configuration"
+          ]
+        },
+        "features/alerts-and-incidents/incident-management"
       ]
     },
     {
@@ -138,27 +147,24 @@
     {
       "group": "Data Governance",
       "pages": [
-        "features/automated-monitors"
+        "features/data-governance/overview-and-best-practices",
+        "features/data-governance/define-ownership",
+        "features/data-governance/leverage-tags"
       ]
     },
     {
       "group": "Collaboration and Communication",
       "pages": [
-        "features/automated-monitors"
+        "features/collaboration-and-communication/data-observability-dashboard",
+        "features/collaboration-and-communication/catalog"
       ]
     },
     {
-      "group": "Features",
+      "group": "Additional features",
       "pages": [
-        "features/data-tests",
-        "features/automated-monitors",
-        "features/elementary-alerts",
-        "features/data-observability-dashboard",
         "features/config-as-code",
-        "features/catalog",
         "features/multi-env",
-        "features/ci",
-        "features/integrations"
+        "features/ci"
       ]
     },
     {
@@ -439,6 +445,22 @@
       ]
     }
   ],
+  "footerSocials":
+    {
+    "website": "https://www.elementary-data.com",
+    "slack": "https://elementary-data.com/community"
+  },
+  "analytics": {
+    "ga4": {
+      "measurementId": "G-4DQN8YR4NH"
+    },
+    "posthog": {
+      "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
+    },
+    "gtm": {
+      "tagId": "GTM-TKR4HS3Q"
+    }
+  },
   "redirects": [
     {
       "source": "/features/lineage",
@@ -459,22 +481,22 @@
     {
       "source": "/features/data-tests",
       "destination": "/features/data-tests/dbt-tests"
-    }
-  ],
-  "footerSocials":
+    },
     {
-    "website": "https://www.elementary-data.com",
-    "slack": "https://elementary-data.com/community"
-  },
-  "analytics": {
-    "ga4": {
-      "measurementId": "G-4DQN8YR4NH"
+      "source": "/features/elementary-alerts",
+      "destination": "/features/alerts-and-incidents/alerts-and-incidents-overview"
     },
-    "posthog": {
-      "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
+    {
+      "source": "/cloud/guides/alert-rules",
+      "destination": "/features/alerts-and-incidents/alert-rules"
     },
-    "gtm": {
-      "tagId": "GTM-TKR4HS3Q"
+    {
+      "source": "/features/catalog",
+      "destination": "/features/collaboration-and-communication/catalog"
+    },
+    {
+      "source": "/features/data-observability-dashboard",
+      "destination": "/features/collaboration-and-communication/data-observability-dashboard"
     }
-  }
+  ]
 }
