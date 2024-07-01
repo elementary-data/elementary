@@ -2,100 +2,58 @@
 title: "Slack"
 ---
 
-## What you can send alerts about
+Elementary's Slack integration enables sending Slack alerts when data issues happen.
 
-- Model run failures
-- Failures and/or warnings of dbt tests (including Elementary dbt package)
-- Failures and/or warnings Elementary Cloud test tests
-    - Automated volume tests
-    - Automated freshness tests
-- dbt source freshness failures
-
-## Enriching alerts
-
-You can enrich your alerts by adding properties to tests and models in your **`.yml`** files. The supported attributes are:
-
-- owner
-- tags
-- subscribers
-- description
-
+The alerts include rich context, and you can change the incident status and asssigne from the alert itself.
+You can also create [alert rules](/features/alerts-and-incidents/alert-rules) to distribute alerts to different channels and destinations.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740543/Slack_alert_screenshot_kbun9o.png"
       alt="Slack alert screenshot"
+      width="500"
     />
   </div>
 </Frame>
 
 ## Enabling Slack alerts
 
-Go to the `Envronments` page using the sidebar:
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719735768/opsgenie_connect_environment_fcdafd.png"
-      alt="Environments menu"
-    />
-  </div>
-</Frame>
-
-Select an environment and click connect on the Connect messaging app card, and select the Slack option:
+1. Go to the `Environments` page on the sidebar.
+2. Select an environment and click connect on the `Connect messaging app` card (first card), and select `Slack`.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739151/connect_messaging_app_v64m69.png"
       alt="Connect messaging app"
+      width="500"
     />
   </div>
 </Frame>
 
-Select Slack:
+4. Authorize the Elementary app for your workspace. This step may require a workspace admin approval.
 
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740543/Select_Slack_ghh4fo.png"
-      alt="Select Slack"
-    />
-  </div>
-</Frame>
+5. Select a default channel for alerts, and set the suppression interval.
 
-Select a default channel for alerts, and set the suppression interval:
+<Note>
+The default channel you select will automatically add a default [alert rule](/features/alerts-and-incidents/alert-rules)
+to sends all failures to this channel. Alerts on warnings are not sent by default. To modify and add tules, navigate to `Alert Rules` page.
+</Note>
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740639/Select_slack_channel_lcnhy3.png"
       alt="Select Slack channel and alert suppression"
+      width="400"
     />
   </div>
 </Frame>
 
-## Configuring Slack Alert rules
 
-Elementary Cloud allows you to create rules that route your alerts. Each rule is a combination of a filter and a destination.
+## Alerts to private channels
 
-The `Slack` channel you choose when connecting your `Slack` workspace is automatically added as a default alert rule, that sends all the alerts to that channel without any filtering. To modify, deactivate or add more rules, simply navigate to the “Alert routing rules” page in the left menu.
+If the channel you want to send alerts to is private (🔒), it will not appear in the channels dropdown on the onboarding or the alert rules screen. 
 
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740544/Create_alert_rules_in_Slack_m6h6y3.png"
-      alt="Configure slack alert rule"
-    />
-  </div>
-</Frame>
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740543/Slack_alert_rules_zdv2zc.png"
-      alt="Slack alert rules"
-    />
-  </div>
-</Frame>
+You will need to invite the Elementary bot to the private channel by typing `@Elementary` in the channel and clicking to invite the bot in, and then it will apear in the UI.

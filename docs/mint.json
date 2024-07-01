@@ -109,8 +109,8 @@
       "group": "Data Tests",
       "pages": [
         "features/data-tests/data-tests-overview",
-        "features/data-tests/custom-sql-tests",
         "features/data-tests/dbt-tests",
+        "features/data-tests/custom-sql-tests",
         "features/data-tests/schema-validation-test"
       ]
     },
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "group": "Collaboration and Communication",
+      "group": "Collaboration & Communication",
       "pages": [
         "features/collaboration-and-communication/data-observability-dashboard",
         "features/collaboration-and-communication/catalog"
@@ -250,7 +250,7 @@
           ]
         },
         {
-          "group": "Communication & collaboration",
+          "group": "Alerts & Incidents",
           "pages": [
             "cloud/integrations/alerts/slack",
             "cloud/integrations/alerts/ms-teams",

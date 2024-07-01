@@ -2,23 +2,9 @@
 title: "Microsoft Teams"
 ---
 
-## What you can send alerts about
+Elementary's Microsoft Teams integration enables sending alerts when data issues happen.
 
-- Model run failures
-- Failures and/or warnings of dbt tests (including Elementary dbt package)
-- Failures and/or warnings Elementary Cloud test tests
-    - Automated volume tests
-    - Automated freshness tests
-- dbt source freshness failures
-
-## Enriching alerts
-
-You can enrich your alerts by adding properties to tests and models in your **`.yml`** files. The supported attributes are:
-
-- owner
-- tags
-- subscribers
-- description
+The alerts include rich context, and you can create [alert rules](/features/alerts-and-incidents/alert-rules) to distribute alerts to different channels and destinations.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
@@ -31,121 +17,111 @@ You can enrich your alerts by adding properties to tests and models in your **`.
 
 ## Enabling Microsoft Teams alerts
 
-Go to the Envronments page using the sidebar:
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739150/Connect_environment_cbfhfi.png"
-      alt="Click environment on the sidebar"
-    />
-  </div>
-</Frame>
-
-Select an environment and click connect on the Connect messaging app card, and select the Microsoft Teams option:
+1. Go to the `Environments` page on the sidebar.
+2. Select an environment and click connect on the `Connect messaging app` card (first card), and select `Microsoft Teams`.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739151/connect_messaging_app_v64m69.png"
       alt="Connect messaging app"
+      width="500"
     />
   </div>
 </Frame>
 
-Select Microsoft Teams:
+3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook.
+
+<Accordion title="How to create a Microsoft Teams webhook?">
+  1. Go to a channel in your Team and choose `Manage channel`
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739414/Select_ms_teams_wfvqow.png"
-      alt="Select Microsoft Teams"
+        src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
+        alt="Teams manage channel"
+        width="400"
     />
   </div>
 </Frame>
 
-Create webooks:
 
-## Create a webhook
+2. Click on `Edit` connectors.
 
-Go to a channel in your Team and choose `Manage channel`
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+        src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
+        alt="Teams edit connectors"
+        width="500"
+    />
+  </div>
+</Frame>
 
-<img
-src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
-alt="Teams manage channel"
-/>
+3. Search for `Incoming webhook` and choose `Add`.
 
-Choose `Edit` connectors.
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+    src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
+    alt="Teams add incoming webhook"
+    width="400"
+    />
+  </div>
+</Frame>
 
-<img
-src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
-alt="Teams edit connectors"
-/>
+4. Choose `Add` again and add a name to your webhook, then click on `Create`.
 
-Search for `Incoming webhook` and choose `Add`.
-
-<img
-src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
-alt="Teams add incoming webhook"
-/>
-
-Choose `Add` again and add name your webhook `ElementaryWebhook` (or whatever you prefer). And `Create` the webhook.
-
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
 <img
 src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204465/mcncjpvsnptd0gcsbb21.png"
 alt="Teams create webhook"
+width="400"
 />
+  </div>
+</Frame>
 
-Copy the URL of the webhook.
+5. Copy the URL of the webhook.
 
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
 <img
 src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204718/gkt2uhz2qaow1lm1frnp.png"
 alt="Teams copy URL webhook"
+width="400"
 />
+  </div>
+</Frame>
 
 
-Provide your Microsoft Teams webhooks, and give each one an indicative name:
+</Accordion>
+
+4. Configure your Microsoft Teams webhooks, and give each one a name indicating it's connected channel:
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739712/Select_channel_MS_teams_hu08sc.png"
       alt="Provide webhooks"
+      width="800"
     />
   </div>
 </Frame>
 
-Select a default channel for alerts, and set the suppression interval:
+5. Select a default channel for alerts, and set the suppression interval.
+
+<Note>
+The default channel you select will automatically add a default [alert rule](/features/alerts-and-incidents/alert-rules)
+to sends all failures to this channel. Alerts on warnings are not sent by default. To modify and add tules, navigate to `Alert Rules` page.
+</Note>
+
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739673/Select_channel_and_alert_suppression_jttahx.png"
       alt="Select channel and suppression interval"
-    />
-  </div>
-</Frame>
-
-## Configuring Microsoft Teams alert rules
-
-Elementary Cloud allows you to create rules that route your alerts. Each rule is a combination of a filter and a destination.
-
-The `Microsoft Teams` webhook you choose when connecting your `Microsoft Teams` integration is automatically added as a default alert rule, that sends all the alerts to that webhook without any filtering. To modify, deactivate or add more rules, simply navigate to the “Alert routing rules” page in the left menu.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739150/Create_alert_rule_MS_teams_tjctbu.png"
-      alt="Create alert rule microsoft teams"
-    />
-  </div>
-</Frame>
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-4">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739150/MS_teams_alert_rules_j6gy2g.png"
-      alt="Microsoft Teams alert rules"
     />
   </div>
 </Frame>
