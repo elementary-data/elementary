@@ -1,0 +1,40 @@
+---
+title: End-to-End Data Lineage
+sidebarTitle: Lineage overview
+---
+
+Elementary offers automated [Column Level Lineage](/features/column-level-lineage) functionality, enriched with the latest test and monitors results.
+It is built with usability and performance in mind. 
+The column-level lineage is built from the metadata of your data warehouse, and integrations with [BI tools]((/features/exposures-lineage#automated-bi-lineage)) such as Looker and Tableau.
+
+Elementary updates your lineage view frequently, ensuring it is always current.
+This up-to-date lineage data is essential for supporting several critical workflows, including:
+
+- **Effective Data Issue Debugging**: Identify and trace data issues back to their sources.
+- **Incidents impact analysis**: You could explore which downstream assets are impacted by each data issue.
+- **Prioritize data issues**: Prioritize the triage and resolution of issues that are impacting your critical downstream assets.
+- **Public assets health**: By selecting an exposure and filtering on upstream nodes, you could see the status of all it’s upstream data sets.
+- **Change impact**: Analyze which exposures will be impacted by a planned change.
+- **Unused datasets**: Detect datasets that are not consumed downstrean, and could be removed to reduce costs.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1710790204/colum-level-lineage-to-bi-better_c00lz0.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Lineage"
+></iframe>
+
+## Node info and test results
+
+To see additional information in the lineage view, use the `...` menu right to the column:
+
+- **Test results**: Access the table latest test results in the lineage view.
+- **Node info**: See details such as description, owner and tags. If collected, it will include the latest job info.
+
+
+## Job info in lineage
+
+You can [configure Elementary to collect jobs information](/cloud/guides/collect-job-data) to present in the lineage _Node info_ tab. Job names can also be used to filter the lineage graph.

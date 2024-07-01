@@ -1,6 +1,6 @@
 ---
-title: Lineage to Downstream Dashboards
-sidebarTitle: BI Integrations
+title: Lineage to Downstream Dashboards and Tools
+sidebarTitle: Lineage to BI
 ---
 
 Some of your data is used downstream in dashboards, applications, data science pipelines, reverse ETLs, etc.
@@ -8,10 +8,10 @@ These downstream data consumers are called _exposures_.
 
 Elementary lineage graph presents downstream exposures of two origins:
 
-1. Elementary Cloud Automated BI integrations
+1. Elementary Automated BI integrations
 2. Exposures configured in your dbt project. Read about [how to configure exposures](https://docs.getdbt.com/docs/build/exposures) in code.
 
-<Accordion title="Supported exposures YML fields">
+<Accordion title="Supported `exposures.yml` fields">
 
 ```yaml
 exposures:
@@ -41,29 +41,24 @@ exposures:
 
 </Accordion>
 
-### Automated BI lineage
+### Automated lineage to BI
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
 
 Elementary will automatically and continuously extend the column-level-lineage to the dashboard level of your data visualization tool.
 
-<video
-autoplay
-muted
-loop
-playsinline
-className="w-full aspect-video"
+If your BI tool has it's own modeling layers (e.g. data sources in Tableu, Explores in Looker), these will also be included in the graph and column lineage. 
+
+<iframe
+width="700"
+height="400"
 src="https://res.cloudinary.com/diuctyblm/video/upload/v1710790204/colum-level-lineage-to-bi-better_c00lz0.mp4"
-></video>
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Lineage"
+></iframe>
 
 ### Supported BI tools:
 
 <Snippet file="cloud/integrations/cards-groups/bi-cards.mdx" />
-
-### Why is lineage to exposures useful?
-
-- **Incidents impact analysis**: You could explore which exposures are impacted by each data issue.
-- **Exposure health**: By selecting an exposure and filtering on upstream nodes, you could see the status of all it’s upstream datasets.
-- **Prioritize data issues**: Prioritize the triage and resolution of issues that are impacting your critical downstream assets.
-- **Change impact**: Analyze which exposures will be impacted by a planned change.
-- **Unused datasets**: Detect datasets that no exposure consumes, that could be removed to save costs.
