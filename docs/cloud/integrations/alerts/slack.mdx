@@ -2,13 +2,100 @@
 title: "Slack"
 ---
 
-<Snippet file="alerts/alerts-introduction.mdx" />
+## What you can send alerts about
 
-## Enable Slack alerts
+- Model run failures
+- Failures and/or warnings of dbt tests (including Elementary dbt package)
+- Failures and/or warnings Elementary Cloud test tests
+    - Automated volume tests
+    - Automated freshness tests
+- dbt source freshness failures
 
-On the environments page, select an environment and click `connect` on the **Connect Slack** card. 
-After connecting your workspace, you will need to select a default channel for alerts.
+## Enriching alerts
 
-## Alerts configuration
+You can enrich your alerts by adding properties to tests and models in your **`.yml`** files. The supported attributes are: 
 
-<Snippet file="alerts/alerts-configuration.mdx" />
+- owner
+- tags
+- subscribers
+- description
+
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740543/Slack_alert_screenshot_kbun9o.png"
+      alt="Slack alert screenshot"
+    />
+  </div>
+</Frame>
+
+## Enabling Slack alerts
+
+Go to the `Envronments` page using the sidebar:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719735768/opsgenie_connect_environment_fcdafd.png"
+      alt="Environments menu"
+    />
+  </div>
+</Frame>
+
+Select an environment and click connect on the Connect messaging app card, and select the Slack option:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739151/connect_messaging_app_v64m69.png"
+      alt="Connect messaging app"
+    />
+  </div>
+</Frame>
+
+Select Slack:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740543/Select_Slack_ghh4fo.png"
+      alt="Select Slack"
+    />
+  </div>
+</Frame>
+
+Select a default channel for alerts, and set the suppression interval:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740639/Select_slack_channel_lcnhy3.png"
+      alt="Select Slack channel and alert supression"
+    />
+  </div>
+</Frame>
+
+## Configuring Slack Alert rules:
+
+Elementary Cloud allows you to create rules that route your alerts. Each rule is a combination of a filter and a destination.
+
+The `Slack` channel you choose when connecting your `Slack` workspace is automatically added as a default alert rule, that sends all the alerts to that channel without any filtering. To modify, deactivate or add more rules, simply navigate to the “Alert routing rules” page in the left menu.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740544/Create_alert_rules_in_Slack_m6h6y3.png"
+      alt="Configure slack alert rule"
+    />
+  </div>
+</Frame>
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719740543/Slack_alert_rules_zdv2zc.png"
+      alt="Slack alert rules"
+    />
+  </div>
+</Frame>

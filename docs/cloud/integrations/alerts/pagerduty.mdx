@@ -1,6 +1,89 @@
 ---
-title: "PagerDuty (Beta)"
+title: "PagerDuty"
 ---
 
-Routing alerts to PagerDuty is supported as a beta integration. 
-Reach out to us to enable it for your instance!
+## What you can send alerts about
+
+- Model run failures
+- Failures and/or warnings of dbt tests (including Elementary dbt package)
+- Failures and/or warnings Elementary Cloud test tests
+    - Automated volume tests
+    - Automated freshness tests
+- dbt source freshness failures
+
+## Enriching alerts
+
+You can enrich your alerts by adding properties to tests and models in your **`.yml`** files. The supported attributes are: 
+
+- owner
+- tags
+
+Those enrichments are used for filtering alerts only.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556084/pagerduty_alert_screenshot_fuxuhf.png"
+      alt="PagerDuty Alerts"
+    />
+  </div>
+</Frame>
+
+## Enabling PagerDuty alerts
+
+Go to the `Envronments` page using the sidebar:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556083/set_up_pagerduty_screenshot_flbrdl.png"
+      alt="Environemnts"
+    />
+  </div>
+</Frame>
+
+Select an environment and click connect on the Connect incident management tool card:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556084/pagerduty_connect_environment_nyfv6z.png"
+      alt="Connect incident management tool"
+    />
+  </div>
+</Frame>
+
+Select PagerDuty:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556083/connect_incident_management_tool_y4gnut.png"
+      alt="Select PagerDuty"
+    />
+  </div>
+</Frame>
+
+## Configuring PagerDuty alert rules
+
+Elementary Cloud allows you to create rules that route your alerts. Each rule is a combination of a filter and a destination.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556084/create_alert_pagerduty_wuymnn.png"
+      alt="Create PagerDuty alert rules in Elementary"
+    />
+  </div>
+</Frame>
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556084/alert_rules_pagerduty_qjfn4b.png"
+      alt="Active PagerDuty alert rule in Elementary"
+    />
+  </div>
+</Frame>
+
+
