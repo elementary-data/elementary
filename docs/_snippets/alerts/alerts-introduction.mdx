@@ -5,17 +5,165 @@ Elementary can send alerts about:
 - Model runs failures
 - Source freshness failures
 
-You can enrich your alerts by adding properties to tests and models in your `.yml` files.
-The supported attributes are: owner, subscribers, description, tags.
+### Alert details
 
-You can configure and customize your alerts by configuring:
-Custom channel, suppression interval, alert filters, etc.
+You can enrich your alerts by adding properties to tests and models in your **`.yml`** files. The supported attributes are: Time, status, owners, tags, subscribers, result, test description, sample of faulty rows, test query and test configuration. 
+
+You can customize the content of the alert to contain more / less detail based on the recipient.
+
+
+### Set alert subscribers
+
+Alert subscribers are configured in code. 
+
+If you want additional users besides the owner to be tagged on an alert, add them as subscribers.
+
+- You can configure a single subscriber or a list (**`["@jessica.jones", "@joe.joseph"]`**).
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      subscribers: "@jessica.jones"
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      subscribers: ["@jessica.jones", "@joe.joseph"]
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "subscribers": "@jessica.jones"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        subscribers: "@jessica.jones"
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        subscribers: "@jessica.jones"
+```
+
+</CodeGroup>
+
+## Create Alert Rules
+
+Elementary allows you to configure alert rules based on different conditions. You can configure test categories, destinations, filters and suppression. 
+
+**Why are alert rules important?** 
+
+Data is propagated and distributed, leading to numerous recipients needing notifications when issues arise. For example, many data teams split their data products across business domains, ensuring that only people within a specific domain receive alerts about data issues in their domain's datasets.
+
+To achieve this, you can create distinct alert rules for each domain based on tags. For instance, you can send all data issues related to marketing tables to the marketing-data-ops channel by using the marketing tag.
+
+Given that data teams monitor numerous tables with numerous tests, it's crucial to use these rules to filter alerts that truly matter and ensure they reach the relevant owners who can effectively handle them.
+
+### Select Test Categories
+
+Test categories lets you configure which types of tests you want to be alerted on: 
+
+1. Automated tests 
+    - Auto volume
+    - Auto freshness 
+    - Auto schema (coming soon)
+2. Tests as code - tests that are configured in your dbt project (Elementary package, dbt tests, custom tests and generic tests) 
+3. Or both
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
     <img
-      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1707742279/od5lminwcmktkjfh0lao.png"
-      alt="Slack alert format"
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1716358058/Alerts/Select%20test%20categories.png"
+      alt="Slack test categories"
+    />
+  </div>
+</Frame>
+
+### Select Destination and Channel
+
+Select the destination and relevant channels where you want your alerts to be sent.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1716360820/Alerts/Select%20alert%20destination%20and%20channel.png"
+      alt="Slack test categories"
+    />
+  </div>
+</Frame>
+
+
+
+The Slack channel you choose when connecting your Slack workspace is automatically added as a default alert rule, that sends all the alerts to that channel without any filtering. To modify, deactivate or add more rules, simply navigate to the “Alert routing rules” page in the left menu.
+
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1716358059/Alerts/modify%20channels.png"
+      alt="Modify alert rules"
+    />
+  </div>
+</Frame>
+
+### Set Filters
+
+You can filter alerts based on the following properties:
+
+- Model
+- Owner
+- Resource type
+- Status
+- Tag
+
+
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1716358058/Alerts/select%20alert%20filters.png"
+      alt="Set filters"
+    />
+  </div>
+</Frame>
+
+### Set Alert Suppression
+
+You can configure the suppression interval for the alert rule.
+Elementary won't send alerts for the same issue again within the suppression interval (set in hours).
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1716358058/Alerts/set%20alert%20suppression.png"
+      alt="Modify alert supression"
+    />
+  </div>
+</Frame>
+
+### When receiving alerts you can:
+
+- Select an assignee to handle the alert
+- Set a status
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1716358059/Alerts/Select%20assignee%20and%20set%20status.png"
+      alt="Select assignee and set alert status"
     />
   </div>
 </Frame>
