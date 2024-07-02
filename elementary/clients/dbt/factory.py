@@ -18,7 +18,7 @@ else:
     RUNNER_CLASS = SubprocessDbtRunner
 
 
-def get_dbt_runner(
+def create_dbt_runner(
     project_dir: str,
     profiles_dir: Optional[str] = None,
     target: Optional[str] = None,

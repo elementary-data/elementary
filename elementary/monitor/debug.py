@@ -1,6 +1,6 @@
 import click
 
-from elementary.clients.dbt.factory import get_dbt_runner
+from elementary.clients.dbt.factory import create_dbt_runner
 from elementary.config.config import Config
 from elementary.exceptions.exceptions import DbtCommandError
 from elementary.monitor import dbt_project_utils
@@ -11,7 +11,7 @@ class Debug:
         self.config = config
 
     def run(self) -> bool:
-        dbt_runner = get_dbt_runner(
+        dbt_runner = create_dbt_runner(
             dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,

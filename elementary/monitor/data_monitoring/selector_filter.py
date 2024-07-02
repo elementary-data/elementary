@@ -2,7 +2,7 @@ import re
 from typing import Optional
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-from elementary.clients.dbt.factory import get_dbt_runner
+from elementary.clients.dbt.factory import create_dbt_runner
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.schema import (
     FilterSchema,
@@ -135,7 +135,7 @@ class SelectorFilter:
 
     def _create_user_dbt_runner(self, config: Config) -> Optional[BaseDbtRunner]:
         if config.project_dir:
-            return get_dbt_runner(
+            return create_dbt_runner(
                 config.project_dir,
                 config.profiles_dir,
                 config.project_profile_target,
