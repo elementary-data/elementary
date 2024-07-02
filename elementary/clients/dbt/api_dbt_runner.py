@@ -1,5 +1,4 @@
 import json
-import os
 from dataclasses import dataclass
 from typing import Optional, cast
 
@@ -11,6 +10,7 @@ from elementary.clients.dbt.command_line_dbt_runner import (
     DbtCommandResult,
 )
 from elementary.exceptions.exceptions import DbtCommandError
+from elementary.utils.env_vars_context import env_vars_context
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -44,8 +44,9 @@ class APIDbtRunner(CommandLineDbtRunner):
             if event.info.name == "JinjaLogInfo":
                 dbt_logs.append(event_dump)
 
-        dbt = dbtRunner(callbacks=[collect_dbt_command_logs])
-        res: dbtRunnerResult = dbt.invoke(dbt_command_args)
+        with env_vars_context(self.env_vars):
+            dbt = dbtRunner(callbacks=[collect_dbt_command_logs])
+            res: dbtRunnerResult = dbt.invoke(dbt_command_args)
         output = "\n".join(dbt_logs) or None
         if self.raise_on_failure and not res.success:
             raise DbtCommandError(base_command_args=dbt_command_args, err_msg=output)
@@ -57,9 +58,3 @@ class APIDbtRunner(CommandLineDbtRunner):
     ) -> list[str]:
         ls_result = cast(APIDbtCommandResult, result).result_obj.result
         return cast(list[str], ls_result)
-
-    def _get_command_env(self):
-        env = os.environ.copy()
-        if self.env_vars is not None:
-            env.update(self.env_vars)
-        return env
