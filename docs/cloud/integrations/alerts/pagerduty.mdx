@@ -7,7 +7,7 @@ Elementary's PagerDuty integration enables sending alerts when data issues happe
 It is recommended to create [alert rules](/features/alerts-and-incidents/alert-rules) to filter and select the alerts that will create incidents in PagerDuty.
 
 <Frame>
-  <div className="dark:bg-white rounded-md p-4">
+  <div className="dark:bg-white rounded-md p-1">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556084/pagerduty_alert_screenshot_fuxuhf.png"
       alt="PagerDuty Alerts"
@@ -22,7 +22,7 @@ It is recommended to create [alert rules](/features/alerts-and-incidents/alert-r
 2. Select an environment and click connect on the `Connect incident management tool` card (second card), and select `PagerDuty`.
 
 <Frame>
-  <div className="dark:bg-white rounded-md p-4">
+  <div className="dark:bg-white rounded-md p-1">
     <img
       src="https://res.cloudinary.com/diuctyblm/image/upload/v1719556084/pagerduty_connect_environment_nyfv6z.png"
       alt="Connect incident management tool"
@@ -31,4 +31,15 @@ It is recommended to create [alert rules](/features/alerts-and-incidents/alert-r
   </div>
 </Frame>
 
-3. `PagerDuty` will now be available as a destination on the [`alert rules`](/features/alerts-and-incidents/alert-rules) page. You can add rules to create PagerDuty incidents out of alerts who match your rule.
+3. Authorize the Elementary for your account. **This step may require admin approval.**
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719912214/pd-approve_tpjf8u.png"
+      alt="PagerDuty approval"
+    />
+  </div>
+</Frame> 
+
+4. `PagerDuty` will now be available as a destination on the [`alert rules`](/features/alerts-and-incidents/alert-rules) page. You can add rules to create PagerDuty incidents out of alerts who match your rule.
