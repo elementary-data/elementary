@@ -135,6 +135,7 @@
             "features/alerts-and-incidents/alert-configuration"
           ]
         },
+        "features/alerts-and-incidents/incidents",
         "features/alerts-and-incidents/incident-management"
       ]
     },
