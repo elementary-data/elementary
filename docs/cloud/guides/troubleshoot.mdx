@@ -4,7 +4,7 @@ title: "Troubleshooting"
 
 ### I connected my data warehouse but I don't see any test results
 
-If you already connected your data warehouse to Elementary but don't see anything in Elementary UI, there could be several reasons.
+If you already connected your data warehouse to Elementary but are not seeing anything in the Elementary UI, there could be several reasons.
 Try following these steps to troubleshoot:
 
 
@@ -18,15 +18,15 @@ Try following these steps to troubleshoot:
 - If you have, make sure the table was created as an incremental table (not a regular table or view).
 - If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full-refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
 
-**4. Still no data in the table? Reach out to the elementary team by starting an intercom chat from Elementary UI.**
+**4. Still no data in the table? Reach out to the Elementary team by starting an intercom chat from the Elementary UI.**
 
 
 ### Column information cannot be retrieved
 
 This error can happen because of a few reasons:
 
-1. check that your elementary dbt package version is 0.12.0 or higher
-2. check that the user you are using to connect to your database has permission to access the information schema of all the schemas built or used by your dbt project
+1. Check that your elementary dbt package version is 0.12.0 or higher.
+2. Check that the user you are using to connect to your database has permission to access the information schema of all the schemas built or used by your dbt project.
 
 For more information on the permissions required by each data warehouse:
 
@@ -39,3 +39,14 @@ For more information on the permissions required by each data warehouse:
 [Databricks](/cloud/integrations/dwh/databricks#permissions-and-security)
 
 [Postgres](/cloud/integrations/dwh/postgres#permissions-and-security)
+
+
+### How do I set up the table name of my Singular test?
+
+Singular tests are sql queries that can reference more than one table, but are often intended to test a logic that is related to one table in particular.
+In order to have that table name appear in the UI in the test results, test execution and more screens, you can set it up by adding the following to the config block of your singular test file:
+```
+{{ config(
+    override_primary_test_model_id="model_name"
+) }}
+```

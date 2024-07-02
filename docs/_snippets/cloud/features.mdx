@@ -1,0 +1,81 @@
+
+### Detection & Coverage
+
+Elementary integrates powerful anomaly detection and dbt tests into a unified detection strategy.
+Effective detection of data issues requires a comprehensive approach,
+including both pipeline and data monitoring, validation tests,
+anomaly detection for unexpected behavior, and a single interface to manage it all at scale.
+
+<CardGroup cols={2}>
+  <Card title="Anomaly Detection" href="/features/anomaly-detection/monitors-overview">
+    ML-powered monitors automatically detect data quality issues.
+    Out-of-the-box for volume and freshness, and opt-in for data quality metrics.
+  </Card>
+  <Card title="Data Tests" href="/features/anomaly-detection/data-tests-overview">
+    Validate data and track the results of dbt tests, dbt packages tests (dbt-utils, dbt-expectations, elementary) and custom SQL tests.  
+  </Card>
+  <Card title="Schema Validation" href="/features/data-tests/schema-validation-test">
+    Validate there are no breaking changes in tables schema, JSON schema, and downstream exposures such as dashboards.  
+  </Card>
+  <Card title="Runs & Performance" href="/features/performance-monitoring/performance-monitoring">
+    Track failures and runs of jobs, models, and tests overtime.
+    Pipeline failures and performance issues can cause data incidents, and create unneceserry costs.
+  </Card>
+  <Card title="Code & UI Configuration">
+    Configure Elementary in code, or via the UI for non-technical users or for adding tests in bulk.
+    The platform opens PRs to your repo, saving hours of tedious YAML edits.
+  </Card>
+  <Card title="Test Recommendations">
+    Coming soon!
+  </Card>
+</CardGroup>
+
+### Triage & Response
+
+Detecting issues is just the first step to achieve data reliability.
+Elementary offers tools to create an effective response plan, for faster recovery.
+This includes investigating the root cause and impact of issues, communicating issues to the relevant people, assigning owners to fix issues, keeping track of open incidents and more.
+
+<CardGroup cols={2}>
+  <Card title="Data Lineage" href="/features/data-lineage/lineage">
+    Column-level lineage that spans through sources, models and BI tools, enriched with monitoring results. Enables granular root cause and impact analysis. 
+  </Card>
+  <Card title="Ownership" href="/features/data-governance/define-ownership">
+    Define clear ownership of data assets and enable owners to be informed and accountable for the health and status of their data.   
+  </Card>
+  <Card title="Actionable Alerts" href="/features/alerts-and-incidents/alerts-and-incidents-overview">
+    Distribute highly configurable alerts to different channels and integrations. 
+    Automatically tag owners, and enable setting status and assigns at the alert level.  
+  </Card>
+  <Card title="Automated Grouping" href="/features/alerts-and-incidents/incidents">
+    Different failures related to the same issue are grouped automatically to a single incident.
+    This accelerates triage and response, and reduces alerts fautigue.  
+  </Card>
+  <Card title="Incident Management" href="/features/alerts-and-incidents/incident-management">
+    Manage all open incidents in a single interface, with a clear view of status and assignees.
+    Track historical incidents and high-level incidents metrics. 
+  </Card>
+</CardGroup>
+
+### Collaboration & Communication
+
+The data team doesn’t live in a silo - you have many stakeholders.
+The only way to improve data trust is by bringing in more team members, users and stakeholders to the data health process.
+Elementary fosters collaboration by allowing you to easily share and communicate the status of issues,
+the overall health of the data platform and progress made to improve it with the broader organization.
+
+<CardGroup cols={2}>
+  <Card title="Data Health Dashboard" href="/features/collaboration-and-communication/data-observability-dashboard">
+    Up to date dashboard with current status and trends of data issues. 
+    Share the dashboard with others, enable them to slice results and stay informed.
+  </Card>
+  <Card title="Assets Tags" href="/features/data-governance/leverage-tags">
+    Enable effective collaboration and communication by grouping related data assets and tests by business domains, data products, priority, etc.   
+  </Card>
+  <Card title="Data Catalog" href="/features/collaboration-and-communication/catalog">
+    Search and explore your datasets information - descriptions, columns, column descriptions, compiled code, datasets health and more.
+  </Card>
+  <Card title="Data Health Score">
+    Coming soon!
+  </Card>
+</CardGroup>

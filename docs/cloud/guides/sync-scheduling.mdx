@@ -1,10 +1,10 @@
 ---
-title: "Environment syncs schedule"
+title: "Environment Syncs Schedule"
 ---
 
 ## Synchronizing the Elementary schema
 
-The data on your Elementary cloud environments is updated by syncing the local Elementary schema from the data warehouse.
+The data on your Elementary Cloud environments is updated by syncing the local Elementary schema from the data warehouse.
 
 There are 2 available scheduling options:
 
@@ -24,9 +24,9 @@ In the _Schedule Settings_, you're provided with a webhook URL. Next, you will n
 
 <img src="/pics/cloud/sync-webhook-dbt-cloud.png" />
 
-Heading to dbt Cloud, you can [create a webhook subscription](https://docs.getdbt.com/docs/deploy/webhooks#create-a-webhook-subscription) that would trigger a sync after your jobs are done. 
+Heading to dbt Cloud, you can [create a webhook subscription](https://docs.getdbt.com/docs/deploy/webhooks#create-a-webhook-subscription) that will trigger a sync after your jobs are done. 
 
-- Make sure the webhook is triggered on `Run completed` events
+- Make sure the webhook is triggered on `Run completed` events.
 - Select **only** the main jobs of the relevant environment.
 
 <Warning>Make sure to select only the main jobs of the relevant environment. Selecting all jobs will trigger a sync for each job, which may result in unnecessary updates and therefore increased cost on the data warehouse.</Warning>
