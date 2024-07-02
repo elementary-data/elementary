@@ -6,9 +6,9 @@ sidebarTitle: Lineage to BI
 Some of your data is used downstream in dashboards, applications, data science pipelines, reverse ETLs, etc.
 These downstream data consumers are called _exposures_.
 
-Elementary lineage graph presents downstream exposures of two origins:
+The Elementary lineage graph presents downstream exposures of two origins:
 
-1. Elementary Automated BI integrations
+1. Elementary automated BI integrations
 2. Exposures configured in your dbt project. Read about [how to configure exposures](https://docs.getdbt.com/docs/build/exposures) in code.
 
 <Accordion title="Supported `exposures.yml` fields">
@@ -41,13 +41,13 @@ exposures:
 
 </Accordion>
 
-### Automated lineage to BI
+### Automated lineage to the BI
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
 
-Elementary will automatically and continuously extend the column-level-lineage to the dashboard level of your data visualization tool.
+Elementary will automatically and continuously extend the column-level lineage to the dashboard level of your data visualization tool.
 
-If your BI tool has it's own modeling layers (e.g. data sources in Tableu, Explores in Looker), these will also be included in the graph and column lineage. 
+If your BI tool has its own modeling layers (e.g. data sources in Tableu, Explores in Looker), these will also be included in the graph and column lineage. 
 
 <iframe
 width="700"

@@ -15,7 +15,7 @@ The goal is to provide context that is useful to triage and resolve data issues,
 - The ID of a specific run execution: `job_run_id`
 - Job run results URL: `job_run_url`
 
-## How Elementary collects jobs metadata?
+## How Elementary collects jobs metadata
 
 #### Environment variables
 
@@ -31,7 +31,7 @@ To configure `env_var` for your orchestrator, refer to your orchestrator's docs.
 
 Elementary also supports passing job metadata as dbt vars. If `env_var` and `var` exist, the `var` will be prioritized.
 
-To pass job data to elementary using `var`, use the `--vars` flag in your invocations:
+To pass job data to Elementary using `var`, use the `--vars` flag in your invocations:
 
 ```shell
 dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_load"}'
@@ -57,7 +57,7 @@ The following default environment variables are supported out of the box:
 | Github actions | orchestrator<br/>job_run_id: `GITHUB_RUN_ID`<br/>job_url: generated from `GITHUB_SERVER_URL`, `GITHUB_REPOSITORY`, `GITHUB_RUN_ID`                                                                                                                               |
 | Airflow        | orchestrator                                                                                                                                                                                                                                                     |
 
-## What if I use dbt cloud + orchestrator?
+## What if I use dbt Cloud + orchestrator?
 
 By default, Elementary will collect the dbt cloud jobs info.
 If you wish to override that, change your dbt cloud invocations to pass the orchestrator job info using `--vars`:
