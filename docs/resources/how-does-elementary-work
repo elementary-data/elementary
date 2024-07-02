@@ -1,0 +1,28 @@
+---
+title: "How does Elementary work"
+sidebarTitle: "Elementary Could Platform"
+---
+## Cloud platform architecture 
+The Elementary open-source package creates a schema that collects the test results and the models from your dbt projects. The platform is part of your package and it runs in your dbt pipeline and it writes to its own data set in the data warehouse and then the platform syncs that data set to the cloud. It also integrates directly with your data warehouse so it has access to the information schema, the query history and the metadata.
+
+We also integrate with your dbt code repository - so we understand how it’s built including tags, owners, which tables are part of your dbt project and what tables are not, and we see daily usage by connecting to your BI.
+
+<Frame>
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1718797457/elementary_cloud_architecture_mff2io.png "
+    alt="Elementary Cloud Platform Architecture"
+  />
+</Frame>
+
+
+## How it works?
+1. You install the Elementary dbt package in your dbt project and configure it to write to it's own schema, the Elementary schema.
+2. The package writes test results, run results, logs and metadata to the Elementary schema.
+3. The cloud service only requires `read access` to the Elementary schema, not to schemas where your sensitive data is stored.
+4. The cloud service connects to sync the Elementary schema using an **encrypted connection** and a **static IP address** that you will need to add to your allowlist.
+
+
+##
+
+
+[Read about Security and Privacy](/cloud/general/security-and-privacy)

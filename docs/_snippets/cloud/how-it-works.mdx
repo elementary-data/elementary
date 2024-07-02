@@ -1,0 +1,12 @@
+1. You install the Elementary dbt package in your dbt project and configure it to write to it's own schema, the Elementary schema.
+2. The package writes test results, run results, logs and metadata to the Elementary schema.
+3. The cloud service only requires `read access` to the Elementary schema, not to schemas where your sensitive data is stored.
+4. The cloud service connects to sync the Elementary schema using an **encrypted connection** and a **static IP address** that you will need to add to your allowlist.
+
+<Frame>
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1719157574/Cloud_platform_architecture_dogyrm.png"
+    alt="Elementary cloud security"
+    width="700"
+  />
+</Frame>

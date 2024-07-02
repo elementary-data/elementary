@@ -1,6 +1,128 @@
 ---
-title: "MS Teams (Beta)"
+title: "Microsoft Teams"
 ---
 
-Routing alerts to MS Teams is supported as a beta integration.
-Reach out to us to enable it for your instance!
+Elementary's Microsoft Teams integration enables sending alerts when data issues happen.
+
+The alerts include rich context, and you can create [alert rules](/features/alerts-and-incidents/alert-rules) to distribute alerts to different channels and destinations.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739150/MS_teams_alert_screenshot_lakytr.png"
+      alt="MS teams alert screenshot"
+    />
+  </div>
+</Frame>
+
+## Enabling Microsoft Teams alerts
+
+1. Go to the `Environments` page on the sidebar.
+2. Select an environment and click connect on the `Connect messaging app` card (first card), and select `Microsoft Teams`.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739151/connect_messaging_app_v64m69.png"
+      alt="Connect messaging app"
+      width="500"
+    />
+  </div>
+</Frame>
+
+3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook.
+
+<Accordion title="How to create a Microsoft Teams webhook?">
+  1. Go to a channel in your Team and choose `Manage channel`
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+        src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
+        alt="Teams manage channel"
+        width="400"
+    />
+  </div>
+</Frame>
+
+
+2. Click on `Edit` connectors.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+        src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
+        alt="Teams edit connectors"
+        width="500"
+    />
+  </div>
+</Frame>
+
+3. Search for `Incoming webhook` and choose `Add`.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+    src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
+    alt="Teams add incoming webhook"
+    width="400"
+    />
+  </div>
+</Frame>
+
+4. Choose `Add` again and add a name to your webhook, then click on `Create`.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+<img
+src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204465/mcncjpvsnptd0gcsbb21.png"
+alt="Teams create webhook"
+width="400"
+/>
+  </div>
+</Frame>
+
+5. Copy the URL of the webhook.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+<img
+src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204718/gkt2uhz2qaow1lm1frnp.png"
+alt="Teams copy URL webhook"
+width="400"
+/>
+  </div>
+</Frame>
+
+
+</Accordion>
+
+4. Configure your Microsoft Teams webhooks, and give each one a name indicating it's connected channel:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739712/Select_channel_MS_teams_hu08sc.png"
+      alt="Provide webhooks"
+      width="800"
+    />
+  </div>
+</Frame>
+
+5. Select a default channel for alerts, and set the suppression interval.
+
+<Note>
+The default channel you select will automatically add a default [alert rule](/features/alerts-and-incidents/alert-rules)
+to sends all failures to this channel. Alerts on warnings are not sent by default. To modify and add tules, navigate to `Alert Rules` page.
+</Note>
+
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719906740/ms_teams_select_channel_and_suppression_vtbsks.png"
+      alt="Select channel and suppression interval"
+width="800"
+    />
+  </div>
+</Frame>
