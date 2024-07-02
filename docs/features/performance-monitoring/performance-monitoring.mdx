@@ -1,0 +1,40 @@
+---
+title: Performance Monitoring
+sidebarTitle: Performance monitoring
+---
+
+Monitoring the performance of your data pipeline is critical for maintaining data quality, reliability, and operational efficiency.
+Proactively monitoring performance issues enables to detect bottlenecks and opportunities for optimization, prevent data delays, and avoid unnecessary costs.
+
+Elementary monitors and logs the execution times of:
+- dbt models
+- dbt tests
+
+## Models performance
+
+Navigate to the `Model Duration` tab.
+
+On the table you could see the latest execution time, median execution time, and execution time trend for each model.
+You can order the table by these times, and dive into the execution times over time of the models with the longest duration.
+
+It is also useful to use the navigation bar to filter the results, and see run times per tag / owner / folder.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1719746949/9_-_Performance_-_white_wurwra.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Models Duration tab"
+>
+</iframe>
+
+## Tests performance
+
+Navigate to the `Test Execution History` tab.
+
+On the table you could see the median execution time and fail rate per test.
+You can order the table by this time column, and detect tests that are compute heavy.
+
+It is also useful to use the navigation bar to filter the results, and see run times per tag / owner / folder.
