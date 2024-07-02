@@ -1,5 +1,5 @@
 Unlike dbt and Elementary tests, the results of the command `dbt source-freshness` are not automatically collected.
-You can collect the results using Elementary CLI tool. 
+You can collect the results using the Elementary CLI tool. 
 
 If dbt source freshness results are collected, they will be presented in the UI, and in alerts upon failure. 
 
@@ -21,7 +21,7 @@ This operation will upload the results to a table, and the execution of `edr mon
 - Note that `dbt source freshness` and `upload-source-freshness` needs to run from the same machine.
 - Note that `upload-source-freshness` requires passing `--project-dir` argument.
 
-#### dbt cloud users
+#### dbt Cloud users
 
-The results can't be collected from dbt cloud.
+The results can't be collected from dbt Cloud.
 Here is a [suggestion from an Elementary user](https://elementary-community.slack.com/archives/C02CTC89LAX/p1688113609829869) for a solution you can implement.
