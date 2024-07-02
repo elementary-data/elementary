@@ -4,7 +4,7 @@ import uuid
 import pytest
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 
 class BaseDbtRunnerTest:
@@ -57,7 +57,7 @@ class BaseDbtRunnerTest:
         assert invocation["selected"] == json.dumps(["one"])
 
     @staticmethod
-    def _run_query(dbt_runner: DbtRunner, query: str):
+    def _run_query(dbt_runner: SubprocessDbtRunner, query: str):
         return json.loads(
             dbt_runner.run_operation(
                 "elementary.render_run_query", macro_args={"prerendered_query": query}
@@ -65,10 +65,10 @@ class BaseDbtRunnerTest:
         )
 
 
-class TestProcessDbtRunner(BaseDbtRunnerTest):
+class TestSubprocessDbtRunner(BaseDbtRunnerTest):
     @pytest.fixture
     def custom_dbt_runner(self, target, project_dir_copy):
-        return DbtRunner(
+        return SubprocessDbtRunner(
             project_dir_copy,
             target=target,
             vars={

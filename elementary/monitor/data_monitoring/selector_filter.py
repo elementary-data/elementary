@@ -1,7 +1,8 @@
 import re
 from typing import Optional
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
+from elementary.clients.dbt.factory import get_dbt_runner
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.schema import (
     FilterSchema,
@@ -132,9 +133,9 @@ class SelectorFilter:
                     return FiltersSchema(selector=selector, statuses=[])
         return data_monitoring_filter
 
-    def _create_user_dbt_runner(self, config: Config) -> Optional[DbtRunner]:
+    def _create_user_dbt_runner(self, config: Config) -> Optional[BaseDbtRunner]:
         if config.project_dir:
-            return DbtRunner(
+            return get_dbt_runner(
                 config.project_dir,
                 config.profiles_dir,
                 config.project_profile_target,

@@ -1,14 +1,14 @@
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 
-def init(dbt_runner: DbtRunner):
+def init(dbt_runner: SubprocessDbtRunner):
     tests_env = Environment(dbt_runner)
     tests_env.clear()
     tests_env.init()
 
 
 class Environment:
-    def __init__(self, dbt_runner: DbtRunner):
+    def __init__(self, dbt_runner: SubprocessDbtRunner):
         self.dbt_runner = dbt_runner
 
     def clear(self):

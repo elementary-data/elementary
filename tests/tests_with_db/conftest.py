@@ -7,7 +7,7 @@ import pytest
 from dbt.version import __version__ as dbt_version
 from packaging import version
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 DBT_PROJECT_PATH = Path(__file__).parent / "dbt_project"
 
@@ -74,8 +74,8 @@ def target(request) -> str:
 
 
 @pytest.fixture(scope="session")
-def dbt_runner(target: str, project_dir_copy: str) -> DbtRunner:
-    return DbtRunner(
+def dbt_runner(target: str, project_dir_copy: str) -> SubprocessDbtRunner:
+    return SubprocessDbtRunner(
         project_dir_copy,
         target=target,
         vars={

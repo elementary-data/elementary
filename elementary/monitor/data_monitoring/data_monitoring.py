@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, cast
 
 from packaging import version
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.factory import get_dbt_runner
 from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 from elementary.monitor.data_monitoring.schema import FiltersSchema, WarehouseInfo
@@ -58,7 +58,7 @@ class DataMonitoring:
         self.selector_filter = selector_filter
 
     def _init_internal_dbt_runner(self):
-        internal_dbt_runner = DbtRunner(
+        internal_dbt_runner = get_dbt_runner(
             dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,
