@@ -53,6 +53,11 @@
       "name": "Join Slack",
       "icon": "slack",
       "url": "https://elementary-data.com/community"
+    },
+    {
+      "name": "Changelog",
+      "icon": "list",
+      "url": "https://docs.elementary-data.com/changelog"
     }
   ],
   "navigation": [
