@@ -1,0 +1,53 @@
+---
+title: Incidents in Elementary
+sidebarTitle: Incidents
+---
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+One of the challenges data teams face is tracking and understand and collaborate on the status of data issues.
+Tests fail daily, pipelines are executed frequently, alerts are sent to different channels.
+There is a need for a centralized place to track:
+- What data issues are open? Which issues were already resolved?
+- Who is on it, and what's the latest status?
+- Are multiple failures part of the same issue?
+- What actions and events happened since the incident started?
+- Did such issue happen before? Who resolved it and how?
+
+In Elementary, these are solved with `Incidents`.
+
+A comprehensive view of all incidents can be found in the [Incidents page](/features/alerts-and-incidents/incident-management).
+
+## How incidents work?
+
+Every failure or warning in Elementary will automatically open a new incident or be added as an event to an ongoing incident.
+Based on grouping rules, different failures are grouped to the same incident.
+
+An incident has a [status, assignee and severity](/features/alerts-and-incidents/incident-management#interacting-with-incidents).
+These can be set in the [Incidents page](/features/alerts-and-incidents/incident-management), or from an alert in integrations that support alert actions.
+
+<Frame>
+<div className="dark:bg-white rounded-md p-1">
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1719927516/incidents_ducynb.png"
+    alt="Elementary Incidents"
+  />
+</div>
+</Frame>
+
+## How incidents are resolved?
+
+Each incident starts at the first failure, and ends when the status is changed manually or automatically to `Resolved`.
+An incident is **automatically resolved** when the failing tests, monitors and / or models are successful again.
+
+## Incident grouping rules
+
+Different failures and warnings are grouped to the same incident by the following grouping rules:
+
+1. Additional failures of the same test / monitor on a table that has an active incident.
+2. _ _Coming soon_ _ Freshness and volume issues that are downstream of an open incident on a model failure.
+3. _ _Coming soon_ _ Failures of the same test / monitor that are on downstream tables of an active incident.
+
+## Incident deep dive
+
+_ _Coming soon_ _

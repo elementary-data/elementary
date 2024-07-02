@@ -29,7 +29,7 @@
   },
   "tabs": [
     {
-      "name": "Data tests",
+      "name": "Elementary Tests",
       "url": "data-tests"
     },
     {
@@ -66,7 +66,6 @@
       "pages": [
         "introduction",
         "quickstart",
-        "cloud/general/security-and-privacy",
         {
           "group": "dbt package",
           "icon": "cube",
@@ -80,27 +79,98 @@
       ]
     },
     {
-      "group": "Features",
+      "group": "Cloud Platform",
       "pages": [
-        "features/data-tests",
-        "features/automated-monitors",
-        "features/elementary-alerts",
-        "features/data-observability-dashboard",
+        "cloud/introduction",
+        "cloud/features",
+        "features/integrations",
+        "cloud/general/security-and-privacy"
+      ]
+    },
+    {
+      "group": "Anomaly Detection Monitors",
+      "pages": [
+        "features/anomaly-detection/monitors-overview",
         {
-          "group": "End-to-End Lineage",
-          "icon": "arrow-progress",
-          "iconType": "solid",
+          "group": "Automated monitors",
           "pages": [
-            "features/lineage",
-            "features/exposures-lineage",
-            "features/column-level-lineage"
+            "features/anomaly-detection/automated-monitors",
+            "features/anomaly-detection/automated-freshness",
+            "features/anomaly-detection/automated-volume"
           ]
         },
+        "features/anomaly-detection/opt-in-monitors",
+        {
+        "group": "Configuration and Feedback",
+        "pages": [
+          "features/anomaly-detection/monitors-configuration",
+          "features/anomaly-detection/monitors-feedback",
+          "features/anomaly-detection/disable-or-mute-monitors"
+        ]
+        }
+      ]
+    },
+    {
+      "group": "Data Tests",
+      "pages": [
+        "features/data-tests/data-tests-overview",
+        "features/data-tests/dbt-tests",
+        "features/data-tests/custom-sql-tests",
+        "features/data-tests/schema-validation-test"
+      ]
+    },
+    {
+      "group": "Data Lineage",
+      "pages": [
+        "features/data-lineage/lineage",
+        "features/data-lineage/column-level-lineage",
+        "features/data-lineage/exposures-lineage"
+      ]
+    },
+    {
+      "group": "Alerts and Incidents",
+      "pages": [
+        "features/alerts-and-incidents/alerts-and-incidents-overview",
+        {
+          "group": "Setup & configure alerts",
+          "pages": [
+            "features/alerts-and-incidents/effective-alerts-setup",
+            "features/alerts-and-incidents/alert-rules",
+            "features/alerts-and-incidents/owners-and-subscribers",
+            "features/alerts-and-incidents/alert-configuration"
+          ]
+        },
+        "features/alerts-and-incidents/incidents",
+        "features/alerts-and-incidents/incident-management"
+      ]
+    },
+    {
+      "group": "Performance & Cost",
+      "pages": [
+        "features/performance-monitoring/performance-monitoring"
+      ]
+    },
+    {
+      "group": "Data Governance",
+      "pages": [
+        "features/data-governance/overview-and-best-practices",
+        "features/data-governance/define-ownership",
+        "features/data-governance/leverage-tags"
+      ]
+    },
+    {
+      "group": "Collaboration & Communication",
+      "pages": [
+        "features/collaboration-and-communication/data-observability-dashboard",
+        "features/collaboration-and-communication/catalog"
+      ]
+    },
+    {
+      "group": "Additional features",
+      "pages": [
         "features/config-as-code",
-        "features/catalog",
         "features/multi-env",
-        "features/ci",
-        "features/integrations"
+        "features/ci"
       ]
     },
     {
@@ -186,7 +256,7 @@
           ]
         },
         {
-          "group": "Communication & collaboration",
+          "group": "Alerts & Incidents",
           "pages": [
             "cloud/integrations/alerts/slack",
             "cloud/integrations/alerts/ms-teams",
@@ -202,6 +272,7 @@
     {
       "group": "Resources",
       "pages": [
+        "resources/business-case-data-observability-platform",
         "overview/cloud-vs-oss",
         "resources/pricing",
         "resources/community"
@@ -245,7 +316,8 @@
             "data-tests/anomaly-detection-configuration/ignore_small_changes",
             "data-tests/anomaly-detection-configuration/fail_on_zero",
             "data-tests/anomaly-detection-configuration/detection-delay",
-            "data-tests/anomaly-detection-configuration/anomaly-exclude-metrics"
+            "data-tests/anomaly-detection-configuration/anomaly-exclude-metrics",
+            "data-tests/anomaly-detection-configuration/exclude-final-results"
           ]
         },
         "data-tests/anomaly-detection-tests/volume-anomalies",
@@ -267,7 +339,9 @@
     },
     {
       "group": "Other Tests",
-      "pages": ["data-tests/python-tests"]
+      "pages": [
+        "data-tests/python-tests"
+      ]
     },
     {
       "group": "Elementary OSS",
@@ -313,7 +387,10 @@
     },
     {
       "group": "Configuration & usage",
-      "pages": ["oss/cli-install", "oss/cli-commands"]
+      "pages": [
+        "oss/cli-install",
+        "oss/cli-commands"
+      ]
     },
     {
       "group": "Deployment",
@@ -374,7 +451,8 @@
       ]
     }
   ],
-  "footerSocials": {
+  "footerSocials":
+    {
     "website": "https://www.elementary-data.com",
     "slack": "https://elementary-data.com/community"
   },
@@ -388,5 +466,43 @@
     "gtm": {
       "tagId": "GTM-TKR4HS3Q"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/features/lineage",
+      "destination": "/features/data-lineage/lineage"
+    },
+    {
+      "source": "/features/exposures-lineage",
+      "destination": "/features/data-lineage/exposures-lineage"
+    },
+    {
+      "source": "/features/column-level-lineage",
+      "destination": "/features/data-lineage/column-level-lineage"
+    },
+    {
+      "source": "/features/automated-monitors",
+      "destination": "/features/anomaly-detection/automated-monitors"
+    },
+    {
+      "source": "/features/data-tests",
+      "destination": "/features/data-tests/dbt-tests"
+    },
+    {
+      "source": "/features/elementary-alerts",
+      "destination": "/features/alerts-and-incidents/alerts-and-incidents-overview"
+    },
+    {
+      "source": "/cloud/guides/alert-rules",
+      "destination": "/features/alerts-and-incidents/alert-rules"
+    },
+    {
+      "source": "/features/catalog",
+      "destination": "/features/collaboration-and-communication/catalog"
+    },
+    {
+      "source": "/features/data-observability-dashboard",
+      "destination": "/features/collaboration-and-communication/data-observability-dashboard"
+    }
+  ]
 }

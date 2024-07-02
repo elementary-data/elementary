@@ -72,3 +72,43 @@ icon: "stars"
     Explore and discover data sets, manage your documentation in code.
   </Card>
 </CardGroup>
+
+
+
+#### Anomaly Detection
+
+<Card title="Automated Volume & Freshness Monitors">
+  Out-of-the-box ML-powered monitoring for freshness and volume issues on all production tables.
+  The monitors track updates to tables, and will detect data delays, incomplete updates, and significant volume changes.   
+  By qurying only metadata (e.g. information schema, query history), the monitors don't add compute costs.
+</Card>
+
+<Card title="Opt-in Anomaly Detection Monitors">
+  ML-powered anomaly detection on data quality metrics such as null rate, empty values, string length, numeric metrics (sum, max, min, avg), etc.
+  Elementary also supports monitoring for anomalies by dimensions.
+  The monitors are activated for specific data sets, and require minimal configuration (e.g. timestamp column, dimensions). 
+</Card>
+
+#### Schema Validation
+
+<Card title="Schema Tests">
+  Elementary offers a set of schema tests for validating there are no breaking changes. 
+  The tests support detecting any schema changes, only detecting changes from a configured baseline, JSON schema validation, 
+  and schema changes that break downstream exposures such as dashboards.
+</Card>
+
+<Card title="Automated Schema Monitors">
+  Coming soon!
+</Card>
+
+#### Data Tests
+
+Custom SQL Tests
+
+dbt tests
+
+Python tests
+
+#### Tests Coverage
+
+#### Performance monitoring

@@ -1,0 +1,54 @@
+---
+title: Incident Management
+sidebarTitle: Incident management
+---
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+The `Incidents` page is designed to enable your team to stay on top of open incidents and collaborate on resolving them.
+The page gives a comprehensive overview of all current and previous incidents, where users can view the status, prioritize, assign and resolve incidents.
+
+## Incidents view and filters
+
+The page provides a view of all incidents, and useful filters:
+
+- **Quick Filters:** Preset quick filters for all, unresolved and “open and unassigned” incidents.
+- **Filter:** Allows users to filter incidents based on various criteria such as status, severity, model name and assignee.
+- **Time frame:** Filter incidents which were open in a certain timeframe.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1719927342/incidents-wide_ki16tu.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Lineage"
+></iframe>
+
+
+## Interacting with Incidents
+
+An incident has a status, assignee and severity.
+These can be set in the Incidents page, or from an alert in integrations that support alert actions.
+
+- **Incident status**: Will be set to `open` by default, and can be changed to `Acknowledged` and back to `Open`. When an alert is manually or automatically set as `Resolved`, it will close and will no longer be modified.
+- **Incident assignee**: An incident can be assigned to any user on the team, and they will be notified.
+    - If you assign an incident to a user, it is recommended to leave the incident `Open` until the user changes status to `Acknowledged`.
+- **Incident severity**: Users can set a severity level (High, Low, Normal, Critical) to an incident. _Coming soon_ Severity will be automated by an analysis of the impacted assets.
+
+## Incidents overview and metrics
+
+The top bar of the page present aggregated metrics on incidents, to provide an overall status. 
+You will also be able to track your average resolution time.
+
+_ _Coming soon_ _ The option to create and share a periodic summary of incidents will be supported in the future.
+
+<Frame>
+<div className="dark:bg-white rounded-md p-1">
+  <img
+    src="https://res.cloudinary.com/diuctyblm/image/upload/v1719926968/Untitled_3_nvhcix.png"
+    alt="Incidents overview"
+  />
+</div>
+</Frame>

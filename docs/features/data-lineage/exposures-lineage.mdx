@@ -1,0 +1,64 @@
+---
+title: Lineage to Downstream Dashboards and Tools
+sidebarTitle: Lineage to BI
+---
+
+Some of your data is used downstream in dashboards, applications, data science pipelines, reverse ETLs, etc.
+These downstream data consumers are called _exposures_.
+
+The Elementary lineage graph presents downstream exposures of two origins:
+
+1. Elementary automated BI integrations
+2. Exposures configured in your dbt project. Read about [how to configure exposures](https://docs.getdbt.com/docs/build/exposures) in code.
+
+<Accordion title="Supported `exposures.yml` fields">
+
+```yaml
+exposures:
+  - name: returns_dashboard
+    label: Returned Orders # Pretty name, will be used if provided
+    type: dashboard
+    url: https://your.bi.tool/dashboards/2
+    description: >
+      Returned orders over time
+    platform: Tableau # Elementary field
+    path: Tableau # For the UI folders tree, elementary field
+
+    depends_on:
+      - ref('returned_orders')
+
+    owner:
+      name: Callum McData
+      email: data@jaffleshop.com
+
+    tags: ["finance"]
+
+    meta:
+      referenced_columns: # Used for exposure validation test
+        - column_name: "order_id"
+          data_type: "numeric"
+```
+
+</Accordion>
+
+### Automated lineage to the BI
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+Elementary will automatically and continuously extend the column-level lineage to the dashboard level of your data visualization tool.
+
+If your BI tool has its own modeling layers (e.g. data sources in Tableu, Explores in Looker), these will also be included in the graph and column lineage. 
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1710790204/colum-level-lineage-to-bi-better_c00lz0.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Lineage"
+></iframe>
+
+### Supported BI tools:
+
+<Snippet file="cloud/integrations/cards-groups/bi-cards.mdx" />
