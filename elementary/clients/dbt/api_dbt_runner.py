@@ -33,7 +33,8 @@ class APIDbtRunner(CommandLineDbtRunner):
         # The dbt python API always prints the output and we collect the logs using a programmatic callback so no
         # need to capture the output anymore here.
         dbt_command_args = list(dbt_command_args)
-        dbt_command_args.extend(["--quiet"])
+        if "-q" not in dbt_command_args and "--quiet" not in dbt_command_args:
+            dbt_command_args.extend(["--quiet"])
 
         dbt_logs = []
 
