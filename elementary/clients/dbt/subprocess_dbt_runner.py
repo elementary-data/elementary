@@ -16,8 +16,6 @@ logger = get_logger(__name__)
 
 
 class SubprocessDbtRunner(CommandLineDbtRunner):
-    ELEMENTARY_LOG_PREFIX = "Elementary: "
-
     def _inner_run_command(
         self,
         dbt_command_args: list[str],
@@ -47,11 +45,13 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
             if capture_output and (log_output or is_debug()):
                 for log in logs:
                     logger.info(log.msg)
-            raise DbtCommandError(err, dbt_command_args, logs=logs)
+            raise DbtCommandError(
+                base_command_args=dbt_command_args, logs=logs, err=err
+            )
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
-    ) -> list:
+    ) -> list[str]:
         command_outputs = result.output.splitlines() if result.output else []
         # ls command didn't match nodes.
         # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.

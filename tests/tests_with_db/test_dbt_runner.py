@@ -3,6 +3,7 @@ import uuid
 
 import pytest
 
+from elementary.clients.dbt.api_dbt_runner import APIDbtRunner
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
@@ -71,8 +72,15 @@ class TestSubprocessDbtRunner(BaseDbtRunnerTest):
         return SubprocessDbtRunner(
             project_dir_copy,
             target=target,
-            vars={
-                "debug_logs": True,
-            },
+            raise_on_failure=False,
+        )
+
+
+class TestAPIDbtRunner(BaseDbtRunnerTest):
+    @pytest.fixture
+    def custom_dbt_runner(self, target, project_dir_copy):
+        return APIDbtRunner(
+            project_dir_copy,
+            target=target,
             raise_on_failure=False,
         )

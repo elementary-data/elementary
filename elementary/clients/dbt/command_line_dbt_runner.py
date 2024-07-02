@@ -1,9 +1,9 @@
 import json
 import os
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.dbt_log import parse_dbt_output
@@ -15,7 +15,8 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class DbtCommandResult(BaseModel):
+@dataclass
+class DbtCommandResult:
     success: bool
     output: Optional[str]
 
@@ -63,7 +64,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
-    ) -> list:
+    ) -> list[str]:
         raise NotImplementedError
 
     def _run_command(
@@ -255,8 +256,9 @@ class CommandLineDbtRunner(BaseDbtRunner):
         except DbtCommandError:
             raise DbtLsCommandError(select)
 
-    def source_freshness(self):
-        self._run_command(command_args=["source", "freshness"])
+    def source_freshness(self) -> bool:
+        result = self._run_command(command_args=["source", "freshness"])
+        return result.success
 
     def _get_installed_packages_names(self):
         packages_dir = os.path.join(

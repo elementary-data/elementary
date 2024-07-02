@@ -1,7 +1,21 @@
 from typing import Any, Optional
 
+from dbt.version import __version__ as dbt_version_string
+from packaging import version
+
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
+from elementary.clients.dbt.command_line_dbt_runner import CommandLineDbtRunner
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
+
+DBT_VERSION = version.Version(dbt_version_string)
+
+RUNNER_CLASS: type[CommandLineDbtRunner]
+if DBT_VERSION >= version.Version("1.5.0"):
+    from elementary.clients.dbt.api_dbt_runner import APIDbtRunner
+
+    RUNNER_CLASS = APIDbtRunner
+else:
+    RUNNER_CLASS = SubprocessDbtRunner
 
 
 def get_dbt_runner(
@@ -16,7 +30,7 @@ def get_dbt_runner(
     run_deps_if_needed: bool = True,
     force_dbt_deps: bool = False,
 ) -> BaseDbtRunner:
-    return SubprocessDbtRunner(
+    return RUNNER_CLASS(
         project_dir=project_dir,
         profiles_dir=profiles_dir,
         target=target,
