@@ -2,6 +2,8 @@
 title: "Alert rules"
 ---
 
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
 Elementary Cloud allows you to create rules to route your alerts.
 Each rule is a combination of a filter and a destination.
 
@@ -9,13 +11,6 @@ The destination is a messaging app ([Slack](/cloud/integrations/alerts/slack), [
 or incident management ([PagerDuty](/cloud/integrations/alerts/pagerduty), [Opsgenie](/cloud/integrations/alerts/opsgenie), etc.)
 [integration](/features/alerts-and-incidents/alerts-and-incidents-overview#supported-alert-integrations), 
 and for supporting tools a specific channel.
-
-### Default alert rule
-
-The channel you choose when connecting your messaging app ([Slack](/cloud/integrations/alerts/slack), [Microsoft Teams](/cloud/integrations/alerts/ms-teams), etc.)
-is automatically added as a default alert rule, that sends all the failures to that channel without any filtering.
-By default, warnings do not send alerts. 
-To modify, deactivate or add more rules, simply navigate to the `Alert Rules` page in the menu.
 
 
 <Tip>
@@ -34,3 +29,10 @@ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; pic
 allowfullscreen
 alt="Elementary Alert Rules"
 ></iframe>
+
+### Default alert rule
+
+The channel you choose when connecting your messaging app ([Slack](/cloud/integrations/alerts/slack), [Microsoft Teams](/cloud/integrations/alerts/ms-teams), etc.)
+is automatically added as a default alert rule, that sends all the failures to that channel without any filtering.
+By default, warnings do not send alerts. 
+To modify, deactivate or add more rules, simply navigate to the `Alert Rules` page in the menu.
