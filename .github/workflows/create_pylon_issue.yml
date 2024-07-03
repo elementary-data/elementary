@@ -16,27 +16,29 @@ jobs:
       - name: Create Pylon Issue for GitHub Issue
         if: github.event_name == 'issues'
         run: |
-          curl -X POST "https://api.usepylon.com/v1/issues" \
-          -H "Authorization: Bearer ${{ secrets.PYLON_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{
+          curl --request POST \
+            --url https://api.usepylon.com/issues \
+            --header 'Authorization: ${{ secrets.PYLON_API_KEY }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+            "account_id": "${{ secrets.PYLON_ACCOUNT_ID }}",
+            "requester_id": "${{ secrets.PYLON_REQUESTER_ID }}",
+            "priority": "medium",
             "title": "${{ github.event.issue.title }}",
-            "description": "${{ github.event.issue.body }}",
-            "repository": "${{ github.repository }}",
-            "type": "GitHub Issue",
-            "url": "${{ github.event.issue.html_url }}"
+            "body_html": "<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GitHub Issue Details</title></head><body><h1>GitHub Issue Details</h1><p><strong>Description:</strong> ${{ github.event.issue.body }}</p><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Github Issue</p><p><strong>URL:</strong> <a href="${{ github.event.issue.html_url }}">${{ github.event.issue.html_url }}</a></p></body></html>"
           }'
 
       - name: Create Pylon Issue for Pull Request
         if: github.event_name == 'pull_request'
         run: |
-          curl -X POST "https://api.usepylon.com/v1/issues" \
-          -H "Authorization: Bearer ${{ secrets.PYLON_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{
+          curl --request POST \
+            --url https://api.usepylon.com/issues \
+            --header 'Authorization: ${{ secrets.PYLON_API_KEY }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+            "account_id": "${{ secrets.PYLON_ACCOUNT_ID }}",
+            "requester_id": "${{ secrets.PYLON_REQUESTER_ID }}",
+            "priority": "medium",
             "title": "${{ github.event.pull_request.title }}",
-            "description": "${{ github.event.pull_request.body }}",
-            "repository": "${{ github.repository }}",
-            "type": "Pull Request",
-            "url": "${{ github.event.pull_request.html_url }}"
+            "body_html": "<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GitHub Pull Request Details</title></head><body><h1>GitHub Pull Request Details</h1><p><strong>Description:</strong> ${{ github.event.pull_request.body }}</p><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Pull Request</p><p><strong>URL:</strong> <a href="${{ github.event.pull_request.html_url }}">${{ github.event.pull_request.html_url }}</a></p></body></html>"
           }'
