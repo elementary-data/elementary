@@ -57,7 +57,7 @@
     {
       "name": "Changelog",
       "icon": "list",
-      "url": "http://localhost:3000/changelog"
+      "url": "http://docs.elementary-data.com/changelog"
     }
   ],
 
