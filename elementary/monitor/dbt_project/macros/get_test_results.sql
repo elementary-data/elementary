@@ -57,12 +57,16 @@
     {% set test_results_agate = elementary.run_query(select_test_results) %}
     {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
-    {%- for test in tests -%}
-        {% set test_meta = fromjson(test.meta) %}
-        {% if not test_meta.get("elementary", {}).get("include", true) %}
-            {% continue %}
-        {% endif %}
 
+    {% set filtered_tests = [] %}
+    {% for test in tests %}
+        {% set test_meta = fromjson(test.meta) %}
+        {% if test_meta.get("elementary", {}).get("include", true) %}
+            {% do filtered_tests.append(test) %}
+        {% endif %}
+    {% endfor %}
+
+    {% for test in filtered_tests %}
         {% set test_rows_sample = none %}
         {% if test.invocations_rank_index == 1 %}
             {% set test_type = test.test_type %}
