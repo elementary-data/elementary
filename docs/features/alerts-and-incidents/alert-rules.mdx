@@ -2,34 +2,35 @@
 title: "Alert rules"
 ---
 
-Elementary Cloud allows you to create rules that route your alerts.
+Elementary Cloud allows you to create rules to route your alerts.
 Each rule is a combination of a filter and a destination.
 
-The Slack channel you choose when connecting your Slack workspace is automatically added as a default alert rule, that sends all the alerts to that channel without any filtering.
-To modify, deactivate or add more rules, simply navigate to the "Alert routing rules" page in the left menu.
+The destination is a messaging app ([Slack](/cloud/integrations/alerts/slack), [Microsoft Teams](/cloud/integrations/alerts/ms-teams), etc.) 
+or incident management ([PagerDuty](/cloud/integrations/alerts/pagerduty), [Opsgenie](/cloud/integrations/alerts/opsgenie), etc.)
+[integration](/features/alerts-and-incidents/alerts-and-incidents-overview#supported-alert-integrations), 
+and for supporting tools a specific channel.
 
-<p>
-  <Frame>
-    <div className="dark:bg-white rounded-md p-4">
-      <img src="/pics/cloud/alert_rules.png" alt="Alert routing rules screen" />
-    </div>
-  </Frame>
-</p>
+### Default alert rule
 
-<p>
-  <Frame>
-    <div className="dark:bg-white rounded-md p-4">
-      <img
-        src="/pics/cloud/alert_rules_drawer.png"
-        alt="Create a new alert rule or edit an existing one"
-      />
-    </div>
-  </Frame>
-</p>
+The channel you choose when connecting your messaging app ([Slack](/cloud/integrations/alerts/slack), [Microsoft Teams](/cloud/integrations/alerts/ms-teams), etc.)
+is automatically added as a default alert rule, that sends all the failures to that channel without any filtering.
+By default, warnings do not send alerts. 
+To modify, deactivate or add more rules, simply navigate to the `Alert Rules` page in the menu.
+
 
 <Tip>
+  The order of rules matters!
   When the alerts are fetched, each alert is evaluated against all the rules,
   until a rule matches. The alert is then routed to the destination of the
-  matching rule, and no further rules are evaluated. This is why the order of
-  the rules matters!
+  matching rule, and no further rules are evaluated. 
 </Tip>
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1720004495/alert-rules_vlbxre.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Alert Rules"
+></iframe>
