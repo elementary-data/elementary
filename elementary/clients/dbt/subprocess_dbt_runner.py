@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import Optional
+from typing import List, Optional
 
 from elementary.clients.dbt.command_line_dbt_runner import (
     CommandLineDbtRunner,
@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 class SubprocessDbtRunner(CommandLineDbtRunner):
     def _inner_run_command(
         self,
-        dbt_command_args: list[str],
+        dbt_command_args: List[str],
         capture_output: bool,
         quiet: bool,
         log_output: bool,
@@ -51,7 +51,7 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
-    ) -> list[str]:
+    ) -> List[str]:
         command_outputs = result.output.splitlines() if result.output else []
         # ls command didn't match nodes.
         # When no node is matched, ls command returns 2 dicts with warning message that there are no matches.

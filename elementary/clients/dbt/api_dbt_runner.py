@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Optional, cast
+from typing import List, Optional, cast
 
 from dbt.cli.main import dbtRunner, dbtRunnerResult
 from google.protobuf.json_format import MessageToDict
@@ -24,7 +24,7 @@ class APIDbtCommandResult(DbtCommandResult):
 class APIDbtRunner(CommandLineDbtRunner):
     def _inner_run_command(
         self,
-        dbt_command_args: list[str],
+        dbt_command_args: List[str],
         capture_output: bool,
         quiet: bool,
         log_output: bool,
@@ -55,6 +55,6 @@ class APIDbtRunner(CommandLineDbtRunner):
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
-    ) -> list[str]:
+    ) -> List[str]:
         ls_result = cast(APIDbtCommandResult, result).result_obj.result
-        return cast(list[str], ls_result)
+        return cast(List[str], ls_result)

@@ -54,7 +54,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
 
     def _inner_run_command(
         self,
-        dbt_command_args: list[str],
+        dbt_command_args: List[str],
         capture_output: bool,
         quiet: bool,
         log_output: bool,
@@ -64,7 +64,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
-    ) -> list[str]:
+    ) -> List[str]:
         raise NotImplementedError
 
     def _run_command(
