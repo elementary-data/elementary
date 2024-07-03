@@ -1,11 +1,11 @@
 import os
-from typing import Generator, Optional
+from typing import Dict, Generator, Optional
 
 from decorator import contextmanager
 
 
 @contextmanager
-def env_vars_context(env_vars: Optional[dict[str, str]]) -> Generator[None, None, None]:
+def env_vars_context(env_vars: Optional[Dict[str, str]]) -> Generator[None, None, None]:
     if env_vars is None:
         yield
         return

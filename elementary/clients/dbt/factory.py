@@ -1,15 +1,14 @@
-from typing import Any, Optional
+from typing import Any, Dict, Optional, Type
 
 from dbt.version import __version__ as dbt_version_string
 from packaging import version
 
-from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.command_line_dbt_runner import CommandLineDbtRunner
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 DBT_VERSION = version.Version(dbt_version_string)
 
-RUNNER_CLASS: type[CommandLineDbtRunner]
+RUNNER_CLASS: Type[CommandLineDbtRunner]
 if DBT_VERSION >= version.Version("1.5.0"):
     from elementary.clients.dbt.api_dbt_runner import APIDbtRunner
 
@@ -23,13 +22,13 @@ def create_dbt_runner(
     profiles_dir: Optional[str] = None,
     target: Optional[str] = None,
     raise_on_failure: bool = True,
-    env_vars: Optional[dict[str, str]] = None,
-    vars: Optional[dict[str, Any]] = None,
-    secret_vars: Optional[dict[str, Any]] = None,
+    env_vars: Optional[Dict[str, str]] = None,
+    vars: Optional[Dict[str, Any]] = None,
+    secret_vars: Optional[Dict[str, Any]] = None,
     allow_macros_without_package_prefix: bool = False,
     run_deps_if_needed: bool = True,
     force_dbt_deps: bool = False,
-) -> BaseDbtRunner:
+) -> CommandLineDbtRunner:
     return RUNNER_CLASS(
         project_dir=project_dir,
         profiles_dir=profiles_dir,
