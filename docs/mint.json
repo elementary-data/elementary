@@ -53,8 +53,14 @@
       "name": "Join Slack",
       "icon": "slack",
       "url": "https://elementary-data.com/community"
+    },
+    {
+      "name": "Changelog",
+      "icon": "list",
+      "url": "http://localhost:3000/changelog"
     }
   ],
+
   "navigation": [
     {
       "group": "Getting Started",
@@ -184,7 +190,6 @@
           "group": "Send Slack alerts",
           "pages": [
             "cloud/guides/enable-slack-alerts",
-            "cloud/guides/alert-rules",
             "cloud/guides/alerts-configuration"
           ]
         },
