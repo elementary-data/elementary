@@ -25,7 +25,7 @@ jobs:
             "requester_id": "${{ secrets.PYLON_REQUESTER_ID }}",
             "priority": "medium",
             "title": "${{ github.event.issue.title }}",
-            "body_html": "<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GitHub Issue Details</title></head><body><h1>GitHub Issue Details</h1><p><strong>Description:</strong> ${{ github.event.issue.body }}</p><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Github Issue</p><p><strong>URL:</strong> <a href="${{ github.event.issue.html_url }}">${{ github.event.issue.html_url }}</a></p></body></html>"
+            "body_html": "<html lang=en><head><title>GitHub Issue Details</title></head><body><h1>GitHub Issue Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Github Issue</p><p><strong>URL:</strong> <a href=${{ github.event.issue.html_url }}>${{ github.event.issue.html_url }}</a></p></body></html>"
           }'
 
       - name: Create Pylon Issue for Pull Request
@@ -40,5 +40,5 @@ jobs:
             "requester_id": "${{ secrets.PYLON_REQUESTER_ID }}",
             "priority": "medium",
             "title": "${{ github.event.pull_request.title }}",
-            "body_html": "<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GitHub Pull Request Details</title></head><body><h1>GitHub Pull Request Details</h1><p><strong>Description:</strong> ${{ github.event.pull_request.body }}</p><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Pull Request</p><p><strong>URL:</strong> <a href="${{ github.event.pull_request.html_url }}">${{ github.event.pull_request.html_url }}</a></p></body></html>"
+            "body_html": "<html lang=en><head><title>GitHub Pull Request Details</title></head><body><h1>GitHub Pull Request Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Pull Request</p><p><strong>URL:</strong> <a href=${{ github.event.pull_request.html_url }}>${{ github.event.pull_request.html_url }}</a></p></body></html>"
           }'
