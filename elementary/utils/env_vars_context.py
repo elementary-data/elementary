@@ -1,7 +1,6 @@
 import os
+from contextlib import contextmanager
 from typing import Dict, Generator, Optional
-
-from decorator import contextmanager
 
 
 @contextmanager
