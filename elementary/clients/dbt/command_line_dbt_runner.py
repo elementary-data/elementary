@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -14,6 +15,10 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+MACRO_RESULT_PATTERN = re.compile(
+    "Elementary: --ELEMENTARY-MACRO-OUTPUT-START--(.*)--ELEMENTARY-MACRO-OUTPUT-END--"
+)
+
 
 @dataclass
 class DbtCommandResult:
@@ -22,8 +27,6 @@ class DbtCommandResult:
 
 
 class CommandLineDbtRunner(BaseDbtRunner):
-    ELEMENTARY_LOG_PREFIX = "Elementary: "
-
     def __init__(
         self,
         project_dir: str,
@@ -185,10 +188,12 @@ class CommandLineDbtRunner(BaseDbtRunner):
                 if log_errors and log.level == "error":
                     logger.error(log.msg)
                     continue
-                if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
-                    run_operation_results.append(
-                        log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
-                    )
+
+                if log.msg:
+                    match = MACRO_RESULT_PATTERN.match(log.msg)
+                    if match:
+                        run_operation_results.append(match.group(1))
+
         return run_operation_results
 
     def run(

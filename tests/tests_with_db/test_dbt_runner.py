@@ -10,10 +10,10 @@ from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 class BaseDbtRunnerTest:
     def test_run_operation(self, custom_dbt_runner: BaseDbtRunner):
-        result = self._run_query(
-            custom_dbt_runner, "select 1 as bla union all select 2 as bla"
+        result = json.loads(
+            custom_dbt_runner.run_operation("elementary_tests.dummy_macro")[0]
         )
-        assert result == [{"bla": 1}, {"bla": 2}]
+        assert result == {"goodbye": "toodleoo"}
 
     def test_ls(self, custom_dbt_runner: BaseDbtRunner):
         result = custom_dbt_runner.ls()
