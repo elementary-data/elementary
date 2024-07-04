@@ -29,9 +29,12 @@ class DbtLog:
         return as_string
 
 
-def parse_dbt_output(output: str) -> Iterator[DbtLog]:
+def parse_dbt_output(output: str, log_format: str = "json") -> Iterator[DbtLog]:
     for log_line in output.strip().splitlines():
         try:
-            yield DbtLog.from_log_line(log_line)
+            if log_format == "json":
+                yield DbtLog.from_log_line(log_line)
+            elif log_format == "text":
+                yield DbtLog(msg=log_line, level="info", exception=None)
         except json.JSONDecodeError:
             logger.debug(f"Unable to parse dbt log message: {log_line}", exc_info=True)

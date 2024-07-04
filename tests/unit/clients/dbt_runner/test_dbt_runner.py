@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 
 @pytest.mark.parametrize(
@@ -18,7 +18,7 @@ from elementary.clients.dbt.dbt_runner import DbtRunner
 def test_dbt_runner_seed(mock_subprocess_run, command):
     project_dir = "proj_dir"
     profiles_dir = "prof_dir"
-    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
+    dbt_runner = SubprocessDbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
     if command == "seed":
         dbt_runner.seed()
     elif command == "snapshot":
@@ -49,7 +49,7 @@ def test_dbt_runner_run(mock_subprocess_run, model, full_refresh, dbt_vars):
     project_dir = "proj_dir"
     profiles_dir = "prof_dir"
     expanded_dbt_vars = json.dumps(dbt_vars)
-    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
+    dbt_runner = SubprocessDbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
     dbt_runner.run(model, full_refresh=full_refresh, vars=dbt_vars)
     mock_subprocess_run.assert_called()
     if model is not None:

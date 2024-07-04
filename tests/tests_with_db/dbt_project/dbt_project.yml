@@ -1,0 +1,30 @@
+name: "elementary_tests"
+version: "1.0.0"
+config-version: 2
+profile: "elementary_tests"
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["data", "seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target" # directory which will store compiled SQL files
+clean-targets: # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+  - "dbt_modules"
+
+vars:
+  debug_logs: "{{ env_var('DBT_EDR_DEBUG', False) }}"
+  mute_ensure_materialization_override: true
+
+models:
+  elementary_tests:
+    tmp:
+      +materialized: table
+
+  elementary:
+    +schema: elementary
+    +enabled: "{{ var('elementary_enabled', True) }}"

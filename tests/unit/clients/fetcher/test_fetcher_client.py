@@ -1,11 +1,11 @@
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.factory import create_dbt_runner
 from elementary.clients.fetcher.fetcher import FetcherClient
 
 
 def _initial_fetcher_client():
     project_dir = "proj_dir"
     profiles_dir = "prof_dir"
-    dbt_runner = DbtRunner(project_dir=project_dir, profiles_dir=profiles_dir)
+    dbt_runner = create_dbt_runner(project_dir=project_dir, profiles_dir=profiles_dir)
     return FetcherClient(dbt_runner=dbt_runner)
 
 

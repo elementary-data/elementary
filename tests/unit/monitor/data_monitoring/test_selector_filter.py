@@ -251,13 +251,17 @@ def anonymous_tracking_mock() -> MockAnonymousTracking:
 
 @pytest.fixture(scope="function")
 def dbt_runner_no_models_mock() -> Generator[MagicMock, None, None]:
-    with patch("elementary.clients.dbt.dbt_runner.DbtRunner.ls") as mock_ls:
+    with patch(
+        "elementary.clients.dbt.command_line_dbt_runner.CommandLineDbtRunner.ls"
+    ) as mock_ls:
         mock_ls.return_value = []
         yield mock_ls
 
 
 @pytest.fixture(scope="function")
 def dbt_runner_with_models_mock() -> Generator[MagicMock, None, None]:
-    with patch("elementary.clients.dbt.dbt_runner.DbtRunner.ls") as mock_ls:
+    with patch(
+        "elementary.clients.dbt.command_line_dbt_runner.CommandLineDbtRunner.ls"
+    ) as mock_ls:
         mock_ls.return_value = ["node_name_1", "node_name_2"]
         yield mock_ls

@@ -1,10 +1,10 @@
-from elementary.clients.dbt.dbt_runner import DbtRunner
+from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 MOCK_PROJECT_DIR = "project_dir"
 MOCK_PROFILES_DIR = "profiles_dir"
 
 
-class MockDbtRunner(DbtRunner):
+class MockDbtRunner(SubprocessDbtRunner):
     def __init__(self) -> None:
         super().__init__(
             project_dir=MOCK_PROJECT_DIR,

@@ -2,7 +2,7 @@ import json
 import subprocess
 from typing import List, Optional
 
-from elementary.clients.dbt.dbt_log import DbtLog, parse_dbt_output
+from elementary.clients.dbt.dbt_log import DbtLog
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -36,10 +36,10 @@ class DbtCommandError(Error):
 
     def __init__(
         self,
-        err: subprocess.CalledProcessError,
         base_command_args: List[str],
         err_msg: Optional[str] = None,
         logs: Optional[List[DbtLog]] = None,
+        err: Optional[subprocess.CalledProcessError] = None,
     ):
         msg = "Failed to run dbt command."
         if logs and not err_msg:
@@ -54,21 +54,8 @@ class DbtCommandError(Error):
         # dir)
         self.proc_err = err
         self.base_command_args = base_command_args
-        self.return_code = err.returncode
+        self.return_code = err.returncode if err else None
         self.logs = logs
-
-    @classmethod
-    def from_process_error(
-        cls,
-        err: subprocess.CalledProcessError,
-        base_command_args: List[str],
-        err_msg: Optional[str] = None,
-    ) -> "DbtCommandError":
-        if err.output is None:
-            return cls(err, base_command_args, err_msg, logs=None)
-        output = err.output.decode()
-        logs = list(parse_dbt_output(output))
-        return cls(err, base_command_args, err_msg, logs=logs)
 
     @property
     def anonymous_tracking_context(self):

@@ -1,0 +1,6 @@
+selectors:
+  - name: init
+    definition: one
+
+  - name: one
+    definition: one

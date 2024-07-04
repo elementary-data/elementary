@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: customers
+    description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
+    tests:
+      - elementary.exposure_schema_validity:
+          tags: [exposure_customers]
+
+    columns:
+      - name: id
+        description: This is a unique identifier for a customer
+
+      - name: name
+        data_type: string
+        description: Customer's name.
+
+  - name: orders
+    description: This table has basic information about orders, as well as some derived facts based on payments
+
+    tests:
+      - elementary.exposure_schema_validity:
+          tags: [exposure_orders]
+
+    columns:
+      - name: order_id
+        description: This is a unique identifier for an order
+
+      - name: customer_id
+        description: Foreign key to the customers table
+
+      - name: order_date
+        description: Date (UTC) that the order was placed
+
+      - name: amount
+        description: Total amount (AUD) of the order
+
+  - name: one
+    description: This model is a dummy model that generates a single row with a value of 1
+    columns:
+      - name: one
+        data_type: int
+        tests:
+          - unique
