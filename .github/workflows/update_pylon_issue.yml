@@ -28,16 +28,3 @@ jobs:
           echo $pylon_ticket_id
         fi
 
-    - name: Add Comment with Details
-      if: success()
-      run: |
-        comment_body="Commented on issue/pull request #${{ github.event.issue.number }}: ${{ github.event.comment.body }}"
-        if [[ "${{ github.event.issue.pull_request }}" != "" ]]; then
-          comment_body+="\n\nThis is a pull request."
-        else
-          comment_body+="\n\nThis is an issue."
-        fi
-        curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          -d "{\"body\": \"$comment_body\"}" \
-          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
