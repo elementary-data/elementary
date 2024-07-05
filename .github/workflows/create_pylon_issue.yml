@@ -64,11 +64,11 @@ jobs:
         if: success()
         run: |
           pr_body=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" | jq -r '.body')
+                     "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.body')
           new_body="$pr_body<!-- pylon-ticket-id: ${{ env.ticket_id }} -->"
           json_body=$(jq -R -s --arg body "$new_body" '{"body": $body}' <<< "$new_body")
           curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "$json_body" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}"
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
 
