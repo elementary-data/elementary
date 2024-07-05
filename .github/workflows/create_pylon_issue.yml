@@ -40,10 +40,11 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
           echo "body: $issue_body"
           new_body="$issue_body\n\n<!-- pylon-ticket-id: ${{ env.ticket_id }} -->"
-          echo "new body: new_body"
+          json_body=$(jq -R -s --arg body "new_body" '{"body": $body}' <<< "$new_body")
+          echo "json body: $json_body"
           curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"body\": \"$new_body\"}" \
+            -d "$json_body" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
 
       - name: Create Pylon Issue for Pull Request
