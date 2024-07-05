@@ -73,4 +73,3 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$json_body" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
-
