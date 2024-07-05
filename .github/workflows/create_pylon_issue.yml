@@ -59,3 +59,16 @@ jobs:
             "title": "${{ github.event.pull_request.title }}",
             "body_html": "<html lang=en><head><title>GitHub Pull Request Details</title></head><body><h1>GitHub Pull Request Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Pull Request</p><p><strong>URL:</strong> <a href=${{ github.event.pull_request.html_url }}>${{ github.event.pull_request.html_url }}</a></p></body></html>"
           }'
+
+      - name: Add Pylon ticket ID to PR body
+        if: success()
+        run: |
+          pr_body=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" | jq -r '.body')
+          new_body="$pr_body<!-- pylon-ticket-id: ${{ env.ticket_id }} -->"
+          json_body=$(jq -R -s --arg body "$new_body" '{"body": $body}' <<< "$new_body")
+          curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "$json_body" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}"
+
