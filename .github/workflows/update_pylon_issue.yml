@@ -1,0 +1,30 @@
+name: Issue or Pull Request Comment Trigger
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle_comment:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Extract Issue or Pull Request Details
+      id: extract_details
+      run: |
+        echo "Comment Body: ${{ github.event.comment.body }}"
+        if [[ "${{ github.event.issue.pull_request }}" != "" ]]; then
+          echo "This is a pull request comment."
+        else
+          echo "This is an issue comment."
+          # Extract ticket ID from issue body
+          ISSUE_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                       "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
+
+          # Assuming ticket ID is stored as a hidden attribute like <!-- Ticket ID: 12345 -->
+          pylon_ticket_id=$(echo "$ISSUE_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\d+(?= -->)')
+          echo $pylon_ticket_id
+        fi
+
