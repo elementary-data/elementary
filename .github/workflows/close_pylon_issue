@@ -27,6 +27,7 @@ jobs:
           fi
           echo "::set-output name=pylon_ticket_id::$pylon_ticket_id"
 
+
       - name: Close Pylon Ticket
         if: steps.extract_ticket_id.outputs.pylon_ticket_id != ''
         run: |
