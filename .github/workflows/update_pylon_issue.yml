@@ -22,7 +22,7 @@ jobs:
           # Extract ticket ID from issue body
           ISSUE_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                        "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
-
+          echo $ISSUE_BODY
           # Assuming ticket ID is stored as a hidden attribute like <!-- Ticket ID: 12345 -->
           pylon_ticket_id=$(echo "$ISSUE_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\d+(?= -->)')
           echo $pylon_ticket_id
