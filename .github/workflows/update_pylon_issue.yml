@@ -23,8 +23,16 @@ jobs:
           ISSUE_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                        "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
           echo $ISSUE_BODY
-          # Assuming ticket ID is stored as a hidden attribute like <!-- Ticket ID: 12345 -->
+
           pylon_ticket_id=$(echo "$ISSUE_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b(?= -->)')
           echo $pylon_ticket_id
+
+          curl --request PATCH \
+            --url "https://api.usepylon.com/issues/$pylon_ticket_id" \
+            --header "Authorization: ${{ secrets.PYLON_API_KEY }}" \
+            --header 'Content-Type: application/json' \
+            --data '{
+              "state": "waiting_on_you"
+            }'
         fi
 
