@@ -13,10 +13,13 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - name: Create Pylon Issue for GitHub Issue
         if: github.event_name == 'issues'
         run: |
-          curl --request POST \
+          response=$(curl --request POST \
             --url https://api.usepylon.com/issues \
             --header 'Authorization: ${{ secrets.PYLON_API_KEY }}' \
             --header 'Content-Type: application/json' \
@@ -26,7 +29,21 @@ jobs:
             "priority": "medium",
             "title": "${{ github.event.issue.title }}",
             "body_html": "<html lang=en><head><title>GitHub Issue Details</title></head><body><h1>GitHub Issue Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Github Issue</p><p><strong>URL:</strong> <a href=${{ github.event.issue.html_url }}>${{ github.event.issue.html_url }}</a></p></body></html>"
-          }'
+          }')
+          echo "response=$response" >> $GITHUB_ENV
+          ticket_id=$(echo $response | jq -r '.data.id')
+          echo "ticket_id=$ticket_id" >> $GITHUB_ENV
+
+      - name: Add Pylon ticket ID to issue body
+        if: success()
+        run: |
+          issue_body=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
+          new_body="$issue_body\n\n<!-- pylon_ticket_id: ${{ env.ticket_id }} -->"
+          curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": \"$new_body\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
 
       - name: Create Pylon Issue for Pull Request
         if: github.event_name == 'pull_request'
