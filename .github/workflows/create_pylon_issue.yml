@@ -30,7 +30,6 @@ jobs:
             "title": "${{ github.event.issue.title }}",
             "body_html": "<html lang=en><head><title>GitHub Issue Details</title></head><body><h1>GitHub Issue Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Github Issue</p><p><strong>URL:</strong> <a href=${{ github.event.issue.html_url }}>${{ github.event.issue.html_url }}</a></p></body></html>"
           }')
-          echo "response=$response" >> $GITHUB_ENV
           ticket_id=$(echo $response | jq -r '.data.id')
           echo "ticket_id=$ticket_id" >> $GITHUB_ENV
 
@@ -55,7 +54,7 @@ jobs:
             --data '{
             "account_id": "${{ secrets.PYLON_ACCOUNT_ID }}",
             "requester_id": "${{ secrets.PYLON_REQUESTER_ID }}",
-            "priority": "medium",
+            "priority": "high",
             "title": "${{ github.event.pull_request.title }}",
             "body_html": "<html lang=en><head><title>GitHub Pull Request Details</title></head><body><h1>GitHub Pull Request Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Pull Request</p><p><strong>URL:</strong> <a href=${{ github.event.pull_request.html_url }}>${{ github.event.pull_request.html_url }}</a></p></body></html>"
           }'
