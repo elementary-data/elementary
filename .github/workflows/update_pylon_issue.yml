@@ -20,8 +20,6 @@ jobs:
           # Extract ticket ID from pull request body
           PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                      "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" | jq -r '.body')
-          echo "Pull Request Body:"
-          echo "$PR_BODY"
 
           pylon_ticket_id=$(echo "$PR_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b(?= -->)')
           echo "Extracted Ticket ID: $pylon_ticket_id"
