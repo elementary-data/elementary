@@ -48,7 +48,7 @@ jobs:
       - name: Create Pylon Issue for Pull Request
         if: github.event_name == 'pull_request'
         run: |
-          curl --request POST \
+          response=$(curl --request POST \
             --url https://api.usepylon.com/issues \
             --header 'Authorization: ${{ secrets.PYLON_API_KEY }}' \
             --header 'Content-Type: application/json' \
@@ -58,7 +58,9 @@ jobs:
             "priority": "high",
             "title": "${{ github.event.pull_request.title }}",
             "body_html": "<html lang=en><head><title>GitHub Pull Request Details</title></head><body><h1>GitHub Pull Request Details</h1><p><strong>Repository:</strong> ${{ github.repository }}</p><p><strong>Type:</strong> Pull Request</p><p><strong>URL:</strong> <a href=${{ github.event.pull_request.html_url }}>${{ github.event.pull_request.html_url }}</a></p></body></html>"
-          }'
+          }')
+          ticket_id=$(echo $response | jq -r '.data.id')
+          echo "ticket_id=$ticket_id" >> $GITHUB_ENV
 
       - name: Add Pylon ticket ID to PR body
         if: success()
