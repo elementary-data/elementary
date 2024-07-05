@@ -45,7 +45,6 @@ jobs:
             -d "{\"body\": \"$new_body\"}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
 
-          
       - name: Create Pylon Issue for Pull Request
         if: github.event_name == 'pull_request'
         run: |
