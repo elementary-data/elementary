@@ -1,0 +1,51 @@
+name: Issue or Pull Request Comment Trigger
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle_comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract Issue or Pull Request Details
+        id: extract_details
+        run: |
+          echo "Comment Body: ${{ github.event.comment.body }}"
+          if [[ "${{ github.event.issue.pull_request }}" != "" ]]; then
+            echo "This is a pull request comment."
+            # Extract ticket ID from pull request body
+            PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                       "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" | jq -r '.body')
+
+            pylon_ticket_id=$(echo "$PR_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b(?= -->)')
+            echo "Extracted Ticket ID: $pylon_ticket_id"
+
+            curl --request PATCH \
+              --url "https://api.usepylon.com/issues/$pylon_ticket_id" \
+              --header "Authorization: ${{ secrets.PYLON_API_KEY }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "state": "waiting_on_you"
+              }'
+          else
+            echo "This is an issue comment."
+            # Extract ticket ID from issue body
+            ISSUE_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                         "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
+            echo $ISSUE_BODY
+
+            pylon_ticket_id=$(echo "$ISSUE_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b(?= -->)')
+            echo $pylon_ticket_id
+
+            curl --request PATCH \
+              --url "https://api.usepylon.com/issues/$pylon_ticket_id" \
+              --header "Authorization: ${{ secrets.PYLON_API_KEY }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "state": "waiting_on_you"
+              }'
+          fi
