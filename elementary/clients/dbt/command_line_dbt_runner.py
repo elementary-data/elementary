@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -14,6 +15,11 @@ from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+MACRO_RESULT_PATTERN = re.compile(
+    "Elementary: --ELEMENTARY-MACRO-OUTPUT-START--(.*)--ELEMENTARY-MACRO-OUTPUT-END--"
+)
+RAW_EDR_LOGS_PATTERN = re.compile("Elementary: (.*)")
+
 
 @dataclass
 class DbtCommandResult:
@@ -22,8 +28,6 @@ class DbtCommandResult:
 
 
 class CommandLineDbtRunner(BaseDbtRunner):
-    ELEMENTARY_LOG_PREFIX = "Elementary: "
-
     def __init__(
         self,
         project_dir: str,
@@ -150,8 +154,8 @@ class CommandLineDbtRunner(BaseDbtRunner):
         log_errors: bool = True,
         vars: Optional[dict] = None,
         quiet: bool = False,
-        should_log: bool = True,
         log_output: bool = False,
+        return_raw_edr_logs: bool = False,
     ) -> list:
         if "." not in macro_name and not self.allow_macros_without_package_prefix:
             raise ValueError(
@@ -160,7 +164,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
             )
         macro_to_run = macro_name
         macro_to_run_args = macro_args if macro_args else dict()
-        if should_log:
+        if not return_raw_edr_logs:
             macro_to_run = "elementary.log_macro_results"
             macro_to_run_args = dict(
                 macro_name=macro_name, macro_args=macro_args if macro_args else dict()
@@ -180,15 +184,21 @@ class CommandLineDbtRunner(BaseDbtRunner):
                 f'Failed to run macro: "{macro_name}"\nRun output: {result.output}'
             )
         run_operation_results = []
+
+        log_pattern = (
+            RAW_EDR_LOGS_PATTERN if return_raw_edr_logs else MACRO_RESULT_PATTERN
+        )
         if capture_output and result.output is not None:
             for log in parse_dbt_output(result.output):
                 if log_errors and log.level == "error":
                     logger.error(log.msg)
                     continue
-                if log.msg and log.msg.startswith(self.ELEMENTARY_LOG_PREFIX):
-                    run_operation_results.append(
-                        log.msg[len(self.ELEMENTARY_LOG_PREFIX) :]
-                    )
+
+                if log.msg:
+                    match = log_pattern.match(log.msg)
+                    if match:
+                        run_operation_results.append(match.group(1))
+
         return run_operation_results
 
     def run(
