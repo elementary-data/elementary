@@ -1,0 +1,43 @@
+---
+title: Data Health
+sidebarTitle: Data Health
+---
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+The Data Health Dashboard is intended for your data consumers and stakeholders, that want to get a summary of what is happening with the data in your organization.
+
+The dashboard is based on the 6 pillars of data observability:
+
+<CardGroup cols={3}>
+  <Card title="Accuracy" icon="bullseye-arrow">
+    The level to which data represents the real-world scenario and confirms with a verifiable source.
+  </Card>
+  <Card title="Consistency" icon="code-compare">
+    The degree to which data is the same across all instances of the data.
+  </Card>
+  <Card title="Completeness" icon="ballot-check">
+    Is the data sufficient to deliver meaningful inferences and decisions.
+  </Card>
+  <Card title="Freshness" icon="stopwatch">
+    Whether or not the data is updated according to the expected SLA
+  </Card>
+  <Card title="Uniqueness" icon="barcode-read">
+    Whether or not each record only exists in the system once and there are no duplications
+  </Card>
+  <Card title="Validity" icon="puzzle">
+    Whether the values are in the same data type / format / range as indicated by a predefined set of rules
+  </Card>
+</CardGroup>
+
+
+To give a high-level overview that doesn't require deep technical knowledge, the dashboard presents the data health in a simple way, using a color code to indicate the health of each pillar.
+The total score is a weighted average of the 6 pillars, where the weight is configurable.
+
+The thresholds for the color coding (green, yellow and red) are also configurable.
+
+Filters are available at the top of the page, making it easy to see the data health in different contexts.
+
+<Frame>
+    <img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1720528038/c6qvebsssbaivnimibbm.png" alt="Data Health Dashboard" />
+</Frame>
