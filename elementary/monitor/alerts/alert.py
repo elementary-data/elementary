@@ -7,7 +7,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link im
     ReportLinkData,
 )
 from elementary.utils.log import get_logger
-from elementary.utils.time import DATETIME_FORMAT
+from elementary.utils.time import DATETIME_WITH_TIMEZONE_FORMAT
 
 logger = get_logger(__name__)
 
@@ -46,7 +46,9 @@ class AlertModel:
             except Exception:
                 logger.error('Failed to parse "detected_at" field.')
         self.detected_at_str = (
-            self.detected_at.strftime(DATETIME_FORMAT) if self.detected_at else "N/A"
+            self.detected_at.strftime(DATETIME_WITH_TIMEZONE_FORMAT).strip()
+            if self.detected_at
+            else "N/A"
         )
         self.database_name = database_name
         self.schema_name = schema_name
