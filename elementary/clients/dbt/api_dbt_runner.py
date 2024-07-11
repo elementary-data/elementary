@@ -10,6 +10,7 @@ from elementary.clients.dbt.command_line_dbt_runner import (
     DbtCommandResult,
 )
 from elementary.exceptions.exceptions import DbtCommandError
+from elementary.utils.cwd import with_chdir
 from elementary.utils.env_vars_context import env_vars_context
 from elementary.utils.log import get_logger
 
@@ -45,7 +46,8 @@ class APIDbtRunner(CommandLineDbtRunner):
 
         with env_vars_context(self.env_vars):
             dbt = dbtRunner(callbacks=[collect_dbt_command_logs])
-            res: dbtRunnerResult = dbt.invoke(dbt_command_args)
+            with with_chdir(self.project_dir):
+                res: dbtRunnerResult = dbt.invoke(dbt_command_args)
         output = "\n".join(dbt_logs) or None
         if self.raise_on_failure and not res.success:
             raise DbtCommandError(base_command_args=dbt_command_args, err_msg=output)
