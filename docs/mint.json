@@ -163,6 +163,7 @@
       "group": "Collaboration & Communication",
       "pages": [
         "features/collaboration-and-communication/data-observability-dashboard",
+        "features/collaboration-and-communication/data-health",
         "features/collaboration-and-communication/catalog"
       ]
     },
