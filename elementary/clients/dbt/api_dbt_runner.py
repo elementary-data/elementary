@@ -40,8 +40,8 @@ class APIDbtRunner(CommandLineDbtRunner):
         dbt_logs = []
 
         def collect_dbt_command_logs(event):
-            event_dump = json.dumps(MessageToDict(event))  # type: ignore[arg-type]
             if event.info.name == "JinjaLogInfo":
+                event_dump = json.dumps(MessageToDict(event))  # type: ignore[arg-type]
                 dbt_logs.append(event_dump)
 
         with env_vars_context(self.env_vars):

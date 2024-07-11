@@ -37,7 +37,7 @@
             model_tags,
             meta,
             model_meta,
-            test_results_query,
+            case when invocations_rank_index = 1 then test_results_query else NULL end as test_results_query,
             other,
             test_name,
             test_params,

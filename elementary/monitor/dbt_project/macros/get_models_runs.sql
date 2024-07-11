@@ -1,7 +1,10 @@
 {%- macro get_models_runs(days_back = 7, exclude_elementary=false) -%}
     {% set models_runs_query %}
         with model_runs as (
-            select * from {{ ref('elementary', 'model_run_results') }}
+            select 
+                *,
+                rank() over (partition by unique_id order by generated_at desc) as invocations_rank_index
+            from {{ ref('elementary', 'model_run_results') }}
         )
 
         select
@@ -16,7 +19,7 @@
             end as execution_time,
             full_refresh,
             materialization,
-            compiled_code,
+            case when invocations_rank_index = 1 then compiled_code else NULL end as compiled_code,
             generated_at
         from model_runs
         where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
