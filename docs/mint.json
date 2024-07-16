@@ -105,8 +105,7 @@
         "group": "Configuration and Feedback",
         "pages": [
           "features/anomaly-detection/monitors-configuration",
-          "features/anomaly-detection/monitors-feedback",
-          "features/anomaly-detection/disable-or-mute-monitors"
+          "features/anomaly-detection/monitors-feedback"
         ]
         }
       ]
