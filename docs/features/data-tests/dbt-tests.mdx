@@ -3,10 +3,24 @@ title: dbt, Packages and Elementary Tests
 sidebarTitle: dbt tests
 ---
 
-_🚧 Under construction 🚧_
+<Snippet file="cloud/features/data-tests/benefits-dbt-tests.mdx" />
 
+### dbt Test Hub
 
-## Elementary dbt package tests
+<Snippet file="cloud/features/data-tests/dbt-test-hub.mdx" />
+
+### Supported dbt tests and packages
+
+Elementary collects and monitors the results of all dbt tests.
+
+The following packages are supported in the tests configuration wizard:
+
+- [dbt expectations](https://github.com/calogica/dbt-expectations) - A dbt package inspired by the Great Expectations package for Python. The intent is to allow dbt users to deploy GE-like tests in their data warehouse directly from dbt.
+- [dbt utils](https://github.com/dbt-labs/dbt-utils) - A package by dbt labs that offers useful generic tests. 
+
+<Warning>Note that you need to import these packages to your dbt project to use them.</Warning>
+
+### Elementary dbt package tests
 
 The Elementary dbt package also provides tests for detection of data quality issues.
 Elementary data tests are configured and executed like native tests in your dbt project.
@@ -14,11 +28,3 @@ Elementary data tests are configured and executed like native tests in your dbt 
 <Snippet file="data-tests/tests-cards.mdx" />
 
 
-## Supported dbt packages
-
-Elementary collects and monitors the results of all dbt tests.
-
-The following packages are supported in the tests configuration wizard:
-
-- dbt expectations
-- dbt utils

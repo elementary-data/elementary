@@ -8,8 +8,40 @@ Data tests are useful for validating and enforcing explicit expectations on your
 Elementary enables data validation and result tracking by leveraging dbt tests and dbt packages such as dbt-utils, dbt-expectations, and Elementary.
 This rich ecosystem of tests covers various use cases, and is widely adopted as a standard for data validations.
 Any custom dbt generic or singular test you develop will also be included.  
+Additionally, users can create custom SQL tests in Elementary, and add tests in bulk from the UI.
 
-Additionally, users can create custom SQL tests in Elementary.
+The combination of dbt tests, Elementary monitors, custom SQL tests and the rich dbt testing ecosystem provides the ability to achieve wide and comprehensive coverage.
 
+### Supported data tests
 
-_🚧 Under construction 🚧_
+<Snippet file="cloud/features/data-tests/data-tests-cards.mdx" />
+
+### Test configuration
+
+One of the desing principals in Elementary is that users should manage configuration in their code.
+This enables to maintain the same workflow for building the pipline and configuring coverage, it makes observability and governance part of the development cycle, 
+and provides control in review process and version management.
+
+However, adding many tests in code is tedious, and configuration in code isn't usable for everyone. 
+
+In Elementary, we designed a flow to incorporate the good of both worlds:
+
+- **Configuration in code or in UI** - The UI test configuration flow opens pull requests to the code base through the [code repository](/cloud/integration/code-repo/connect-code-repo) integration.
+- **The code is the single source of truth** - As configuration from UI goes to code, the code remains the place where configuration is managed and maintained.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320339/Changelog/YAML_for_all_tests_x0k48v.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+></iframe>
+
+### Benefits of leveraging dbt tests
+
+<Snippet file="cloud/features/data-tests/benefits-dbt-tests.mdx" />
+
+### dbt Test Hub
+
+<Snippet file="cloud/features/data-tests/dbt-test-hub.mdx" />

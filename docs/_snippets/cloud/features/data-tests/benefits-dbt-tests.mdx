@@ -1,0 +1,10 @@
+dbt tests are very powerful. The ease of use, simplicity, and usefulness in the dev process is unmatched.
+When you adopt any observability tool, you will still use dbt tests. This is why in Elementary, dbt tests are first class citizens.
+
+There are several benefits to this approach:
+
+- **Single interface for all observability** - Prevent the distribution of monitoring between different tools. All configuration is in code, all the results are in one interface.
+- **Avoid duplicate work and vendor lock in** - The tests you implemented already are effective in Elementary, as well as additional configuration. The future tests you add will remain in your code if you decide to offboard.
+- **Control of schedule and cost** - You have control of configuration and schedualing, tests can be executed when data is actually loaded and validation is needed.
+- **Prevent bad data from propogating** - As tests are in pipeline, you can leverage `dbt build` and fail the pipeline on critical test failures.
+- **Rich ecosystem** - The community of dbt users developes and supports various testing use cases.
