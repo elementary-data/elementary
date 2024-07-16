@@ -3,4 +3,53 @@ title: Monitors Configuration
 sidebarTitle: "Monitors configuration"
 ---
 
-_🚧 Under construction 🚧_
+You can change the default settings and finetune the monitors to your needs using the `Anomaly settings` on each test. 
+
+In general, users will rely on the automated machine learning model anomaly settings.
+However, in some cases, an anomaly in the data is not relevant to your business. For this cases, the custom settings are useful.
+
+### Settings simulator
+
+For some supported settings, Elementary offers a simulation of the change impact on latest results. 
+You can use the `Simulate Configuration` button after the change and before saving.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1721130444/anomaly_settings_dlm5sn.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Anomaly settings simulator"
+></iframe>
+
+### Supported settings
+
+#### All monitors
+
+<Snippet file="cloud/features/anomaly-detection/all-anomalies-configuration.mdx" />
+
+#### Volume monitor
+
+<Snippet file="cloud/features/anomaly-detection/volume-configuration.mdx" />
+
+#### Freshness monitor
+
+<Snippet file="cloud/features/anomaly-detection/freshness-configuration.mdx" />
+
+
+### Disable monitor
+
+To disable a monitor from running, press the `...` button on the top right of the test result and then `Delete test`. 
+This will disable the monitor. To re-activate deleted monitors, reach out to support.
+
+<iframe
+width="600"
+height="400"
+src="https://res.cloudinary.com/diuctyblm/video/upload/v1721130398/delete_automatedmonitor_itwosa.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Disable test"
+></iframe>
+

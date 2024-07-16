@@ -3,4 +3,27 @@ title: Schema Validation Tests
 sidebarTitle: Schema validation
 ---
 
-_🚧 Under construction 🚧_
+The Elementary dbt package includes the following schema validation tests:
+
+<Card title="Schema changes" href="/data-tests/schema-tests/schema-changes">
+  Fails on changes in schema: deleted or added columns, or change of data type
+  of a column.
+</Card>
+
+<Card
+title="Schema changes from baseline"
+href="/data-tests/schema-tests/schema-changes-from-baseline"
+>
+Fails if the table schema is different in columns names or column types than a
+configured baseline (can be generated with a macro).
+</Card>
+
+<Card title="JSON schema" href="/data-tests/schema-tests/json-schema">
+  Monitors a JSON type column and fails if there are JSON events that don't
+  match a configured JSON schema (can be generated with a macro).
+</Card>
+
+<Card title="Exposure schema" href="/data-tests/schema-tests/exposure-tests">
+  Monitors changes in your models' columns that break schema for downstream
+  exposures, such as BI dashboards.
+</Card>

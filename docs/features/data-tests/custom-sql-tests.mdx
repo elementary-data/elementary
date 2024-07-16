@@ -3,4 +3,67 @@ title: Custom SQL Tests
 sidebarTitle: Custom SQL test
 ---
 
-_🚧 Under construction 🚧_
+Custom SQL queries enable you to create tailored tests that align with your specific business needs. 
+These tests can be executed against any of the tables in your connected data warehouse. 
+
+### When to use custom SQL tests?
+
+A custom SQL test is easier to write than a new generic dbt test, but it can't be leveraged across different data sets.
+On the other hand, writing custom SQL tests enables testing complex custom calculation logic, relationships between many tables and more.
+
+This is why most Elementary users write custom SQL tests when the behavior to be tested is complex, specific and doesn’t exist in any out of the box test.
+A common use case is for data anlysts to add validations as custom SQL tests. 
+
+As non-technical users are often not familiar with dbt, 
+Elementary has an interface for adding custom SQL test that converts it to a pull request adding a singular dbt test.
+
+### Adding a custom SQL test
+
+1. In `Test Configuration` choose `New test` → `custom query test`.
+2. Add your query, it can be a regular SQL query on any tables in your environment. The query should only return results if something is wrong, meaning the test will pass on no results and fail on any results. Please be sure to use the full name of the table, including the db and schema. The query will then be validated and formatted, table names will be replaced with dbt model references. This can take a few seconds.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721140505/custom_SQL_uudno6.png"
+    />
+  </div>
+</Frame>
+
+3. Add your test configuration:
+
+- Test name (should be a valid file name- this will use as the name of your Singular test).
+- Description (recommended).
+- Location - this will be the directory in your dbt project where the test will be stored.
+- Severity - Failure or Warning.
+- Tested table (optional) - Adding the table the test is checking will link this test to that table, showing it in the table’s lineage, catalog page and more.
+- Tags and Owners (Optional)
+    - Some users use dbt tags to help with scheduling. Creating a “daily”, “hourly”, and having scheduled jobs for those tags can help determine the test’s schedule at the time of creation.
+    - It is recommended to add a tag that will be used to later route the alert on failure to the right recipient.
+
+4. Review & Submit. In this stage you’ll be able to see the translated test query and configuration.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721140505/review_custom_SQL_m8ddoo.png"
+    />
+  </div>
+</Frame>
+
+5. Clicking “Submit” will go on to create a pull request.
+6. After the pull requests is merged to production, tests should run on a `dbt test` job.
+
+### Custom SQL test results
+
+The results of all custom SQL tests can be found under a `tests` folder in the test results sidebar. 
+Additionally, if you configured a `tested table`, `tag` or `owner`, the test result will be visible under the relevant path. 
+
+### Alerts on custom SQL tests
+
+It's recommended to use tags and owners create an [alert rule](/features/alerts-and-incidents/alert-rules) that will route these tests to the relevant recipient.  
+
+### Scheduling custom SQL tests
+
+It's a common practice not to want these tests to run as part of your main job, or at the same frequency.
+We recommend to use a tag for all these tests, use dbt tags as selectors to exclude from the main job, and run a dedicated test job that includes these tests only in the required frequency.  

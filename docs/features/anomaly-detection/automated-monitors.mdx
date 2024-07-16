@@ -7,14 +7,27 @@ sidebarTitle: "Introduction"
 
 <Snippet file="cloud/features/anomaly-detection/automated-monitors-intro.mdx" />
 
+Once your environment is set up, we automatically collect metadata from your warehouse, which our ML models run on.
+The models are operational when the initial backfill is completed, there is no "loading / training period" - Elementary will collect enough historical data after setup to train the models.
+
+Monitors are created for all models and sources in your dbt project, and their results are displayed in the application in the same way as package tests.
+
+#### Benefits of automated monitors
+
+1. **Zero configuration** - Our machine learning models learn data behavior, eliminating the need for manual configuration.
+2. **Out-of-the-box coverage** - Rather than manually configuring a test for each model, Elementary automatically creates monitors for every model and source in your dbt project once you set up your environment.
+3. **Metadata only, minimal cost** - The monitors rely on data warehouse metadata, and don't consume compute resources. 
+
+
 ### How it works?
 
-The monitors collect metadata, and the [anomaly detection model](cloud/features/anomaly-detection/monitors-overview#how-anomaly-detection-works?) adjusts based on updates frequency, seasonality and trends. 
+The monitors collect metadata, and the [anomaly detection model](/features/anomaly-detection/monitors-overview#how-anomaly-detection-works?) adjusts based on updates frequency, seasonality and trends. 
 
 As soon as you connect Elementary Cloud Platform to your data warehouse, a backfill process will begin to collect historical metadata. 
 Within an average of a few hours, your automated monitors will be operational.
+By default, Elementary collects at least 21 days of historical metadata.
 
-You can fine tune the [configuration](cloud/features/anomaly-detection/monitors-configuration) and [provide feedback](cloud/features/anomaly-detection/monitors-feedback) to adjust the detection to your needs. 
+You can fine tune the [configuration](/features/anomaly-detection/monitors-configuration) and [provide feedback](/features/anomaly-detection/monitors-feedback) to adjust the detection to your needs. 
 
 <Info>As views are stateless, automated volume and freshness monitors only apply on tables.</Info>
 

@@ -3,4 +3,38 @@ title: Automated Freshness Monitor
 sidebarTitle: "Automated freshness"
 ---
 
-_🚧 Under construction 🚧_
+The freshness monitor learns the update frequency of your tables and consistently checks if the table is **currently** fresh based on our model's forecast.
+
+By default we use 21 days of training data to understand the intervals between table updates. 
+The only condition that determines the status of the monitor is the time that has passed since the last update, which is compared to the model's prediction.
+
+The model takes into account seasonality, and supports cases such as tables that update on weekdays and not weekends. 
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721131409/freshness_result_ma2riz.png"
+      alt="Automated freshness result"
+    />
+  </div>
+</Frame>
+
+### Understand the monitor result
+
+The test result is a timeline of updates.
+
+The right end of the timeline, marked with a black triangle ▽, is the timestamp of the test result, which is near real time (can be considered as "now").
+Each update to the table is presented as a line in the timeline.
+Hovering on the gaps between updates will show the updates time and time gap. 
+
+To understand the test result, focus on the gap between the last update and now (▽):
+
+- Green - The gap between latest update and now is still within the expected range.
+- Yellow / Red - The gap between latest update and now is above the expected range, a dotted line will show what was the expected gap limit. The color represents if this is a warning or failure.
+
+Use the `Anomaly settings` and `result feedback` buttons to impact the monitor.
+
+### Anonmaly settings
+
+<Snippet file="cloud/features/anomaly-detection/freshness-configuration.mdx" />
+<Snippet file="cloud/features/anomaly-detection/all-anomalies-configuration.mdx" />
