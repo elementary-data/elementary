@@ -5,8 +5,6 @@ import os.path
 import webbrowser
 from typing import Optional, Tuple
 
-import pkg_resources
-
 from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
@@ -70,7 +68,7 @@ class DataMonitoringReport(DataMonitoring):
             exclude_elementary_models=exclude_elementary_models,
             project_name=project_name,
         )
-        template_html_path = pkg_resources.resource_filename(__name__, "index.html")
+        template_html_path = os.path.join(os.path.dirname(__file__), "index.html")
 
         with open(template_html_path, "r", encoding="utf-8") as template_html_file:
             template_html_code = template_html_file.read()
