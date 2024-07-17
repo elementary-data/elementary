@@ -1,13 +1,13 @@
+import importlib.metadata
 from typing import Optional
 
-import pkg_resources
 import requests
 
 _PYPI_URL = "https://pypi.org/pypi/elementary-data/json"
 
 
 def get_package_version() -> str:
-    return pkg_resources.get_distribution("elementary-data").version
+    return importlib.metadata.version("elementary-data")
 
 
 def get_latest_package_version() -> Optional[str]:
