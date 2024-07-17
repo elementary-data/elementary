@@ -26,7 +26,7 @@ from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
 def initial_alerts():
     test_alerts = [
         PendingAlertSchema(
-            id="1",
+            id="test_alert_1",
             alert_class_id="test_id_1",
             type=AlertTypes.TEST,
             detected_at="2022-10-10 10:00:00",
@@ -58,7 +58,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="2",
+            id="test_alert_2",
             alert_class_id="test_id_2",
             type=AlertTypes.TEST,
             detected_at="2022-10-10 10:00:00",
@@ -90,7 +90,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="3",
+            id="test_alert_3",
             alert_class_id="test_id_3",
             type=AlertTypes.TEST,
             detected_at="2022-10-10 10:00:00",
@@ -123,7 +123,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="4",
+            id="test_alert_4",
             alert_class_id="test_id_4",
             type=AlertTypes.TEST,
             detected_at="2022-10-10 10:00:00",
@@ -157,7 +157,7 @@ def initial_alerts():
     ]
     model_alerts = [
         PendingAlertSchema(
-            id="1",
+            id="model_alert_1",
             alert_class_id="elementary.model_id_1",
             type=AlertTypes.MODEL,
             detected_at="2022-10-10 10:00:00",
@@ -185,7 +185,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="2",
+            id="model_alert_2",
             alert_class_id="elementary.model_id_1",
             type=AlertTypes.MODEL,
             detected_at="2022-10-10 10:00:00",
@@ -213,7 +213,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="3",
+            id="model_alert_3",
             alert_class_id="elementary.model_id_2",
             type=AlertTypes.MODEL,
             detected_at="2022-10-10 08:00:00",
@@ -243,7 +243,7 @@ def initial_alerts():
     ]
     source_freshness_alerts = [
         PendingAlertSchema(
-            id="1",
+            id="freshness_alert_1",
             alert_class_id="elementary.model_id_1",
             type=AlertTypes.SOURCE_FRESHNESS,
             detected_at="2022-10-10 08:00:00",
@@ -282,7 +282,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="2",
+            id="freshness_alert_2",
             alert_class_id="elementary.model_id_2",
             type=AlertTypes.SOURCE_FRESHNESS,
             detected_at="2022-10-10 08:00:00",
@@ -321,7 +321,7 @@ def initial_alerts():
             ),
         ),
         PendingAlertSchema(
-            id="3",
+            id="freshness_alert_3",
             alert_class_id="elementary.model_id_3",
             type=AlertTypes.SOURCE_FRESHNESS,
             detected_at="2022-10-10 08:00:00",
