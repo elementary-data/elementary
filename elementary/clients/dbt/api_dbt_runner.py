@@ -50,7 +50,10 @@ class APIDbtRunner(CommandLineDbtRunner):
                 res: dbtRunnerResult = dbt.invoke(dbt_command_args)
         output = "\n".join(dbt_logs) or None
         if self.raise_on_failure and not res.success:
-            raise DbtCommandError(base_command_args=dbt_command_args, err_msg=output)
+            raise DbtCommandError(
+                base_command_args=dbt_command_args,
+                err_msg=(str(res.exception) if res.exception else output),
+            )
 
         return APIDbtCommandResult(success=res.success, output=output, result_obj=res)
 
