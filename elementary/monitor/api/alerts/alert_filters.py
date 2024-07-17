@@ -1,4 +1,3 @@
-import json
 from functools import reduce
 from typing import List
 
@@ -53,13 +52,9 @@ def _find_common_alerts(
     first_alerts: List[PendingAlertSchema],
     second_alerts: List[PendingAlertSchema],
 ) -> List[PendingAlertSchema]:
-    first_hashable_alerts = [alert.json(sort_keys=True) for alert in first_alerts]
-    second_hashable_alerts = [alert.json(sort_keys=True) for alert in second_alerts]
-    common_hashable_alerts = [
-        json.loads(alert)
-        for alert in list(set(first_hashable_alerts) & set(second_hashable_alerts))
-    ]
-    common_alert_ids = [alert["id"] for alert in common_hashable_alerts]
+    first_alert_ids = [alert.id for alert in first_alerts]
+    second_alert_ids = [alert.id for alert in second_alerts]
+    common_alert_ids = list(set(first_alert_ids) & set(second_alert_ids))
 
     common_alerts = []
     # To handle dedupping common alerts
