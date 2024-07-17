@@ -165,7 +165,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
         macro_to_run = macro_name
         macro_to_run_args = macro_args if macro_args else dict()
         if not return_raw_edr_logs:
-            macro_to_run = "elementary.log_macro_results"
+            macro_to_run = "elementary_cli.log_macro_results"
             macro_to_run_args = dict(
                 macro_name=macro_name, macro_args=macro_args if macro_args else dict()
             )
