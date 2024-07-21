@@ -55,7 +55,10 @@ class SlackClient(ABC):
 
     @abstractmethod
     def send_file(
-        self, channel_name: str, file_path: str, message: SlackMessageSchema
+        self,
+        channel_name: str,
+        file_path: str,
+        message: Optional[SlackMessageSchema] = None,
     ) -> bool:
         raise NotImplementedError
 
@@ -126,8 +129,10 @@ class SlackWebClient(SlackClient):
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
-    def send_report(self, channel: str, report_file_path: str):
-        send_succeed = self.send_file(channel_name=channel, file_path=report_file_path)
+    def send_report(self, channel_name: str, report_file_path: str):
+        send_succeed = self.send_file(
+            channel_name=channel_name, file_path=report_file_path
+        )
         if send_succeed:
             logger.info("Sent report to Slack.")
         else:
@@ -240,10 +245,15 @@ class SlackWebhookClient(SlackClient):
             )
             return False
 
-    def send_file(self, **kwargs):
+    def send_file(
+        self,
+        channel_name: str,
+        file_path: str,
+        message: Optional[SlackMessageSchema] = None,
+    ) -> bool:
         raise NotImplementedError
 
-    def send_report(self, **kwargs):
+    def send_report(self, channel_name: str, report_file_path: str):
         raise NotImplementedError
 
     def get_user_id_from_email(self, email: str) -> Optional[str]:
