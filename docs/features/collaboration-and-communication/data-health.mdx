@@ -30,19 +30,51 @@ The dashboard is based on the 6 pillars of data observability:
   </Card>
 </CardGroup>
 
-
-To give a high-level overview that doesn't require deep technical knowledge or going into specific test results,
+The purpose of is to give a high-level overview that doesn't require deep technical knowledge or going into specific test results.
 the dashboard presents the data health in a simple way, by giving a health score, and using a color code to indicate if this score is healthy.
 Filters are available at the top of the page, making it easy to see the data health in different contexts.
 
 
 <img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1720701842/Data_Health_-_1280px_menu_included_pckgri.png" alt="Data Health Dashboard" />
 
+### How is the data health score calculated?
 
+Each test you run in either dbt or Elementary is mapped to one of these pillars, and given a score.
+The scoring method is very simple:
+- If the test passes, the score is 100
+- If the test is in `warn` status, the score is 50
+- If the test is in `fail` status, the score is 0
+
+The results are aggregated to give a health score for each pillar.
 The total score is a weighted average of the 6 pillars, where the weight is configurable.
 The thresholds for the color coding (green, yellow and red) are also configurable.
 
 <img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1720528475/dfxb2atgfkxthpwlrjkv.png" alt="Score weight and threshold configuration" />
+
+### Can I customize the quality dimension mapping of my tests?
+Of course!
+Each test you run, whether it's a generic or a custom test, can be mapped to one of the 6 quality dimensions.
+The way to do so is to add the `quality_dimension` tag to the test definition in your dbt project:
+
+<CodeGroup>
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      quality_dimension: completeness
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "quality_dimension": "completeness",
+    }
+) }}
+```
+
+</CodeGroup>
+
 
 ## Next steps
 
