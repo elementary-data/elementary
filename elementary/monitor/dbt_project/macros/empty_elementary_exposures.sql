@@ -16,6 +16,7 @@
                       ('original_path', 'long_string'),
                       ('path', 'string'),
                       ('generated_at', 'string'),
+                      ('created_at', 'string'),
                       ('metadata_hash', 'string'),
                       ('label', 'string'),
                       ('raw_queries', 'long_string'),
