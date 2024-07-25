@@ -146,9 +146,11 @@ class SourceFreshnessesAPI(APIClient):
                 totals.add_total(run.status)
 
             source_freshness_invocations[unique_id] = SourceFreshnessInvocationsSchema(
-                fail_rate=round((totals.errors + totals.failures) / len(invocations), 2)
-                if invocations
-                else 0,
+                fail_rate=(
+                    round((totals.errors + totals.failures) / len(invocations), 2)
+                    if invocations
+                    else 0
+                ),
                 totals=totals,
                 invocations=list(invocations.values()),
                 description=f"There were {totals.failures or 'no'} failures, {totals.errors or 'no'} errors and {totals.warnings or 'no'} warnings on the last {len(invocations)} source freshness runs.",
@@ -175,7 +177,7 @@ class SourceFreshnessesAPI(APIClient):
 
         return SourceFreshnessMetadataSchema(
             test_unique_id=source_freshness_results_db_row.unique_id,
-            elementary_unique_id=source_freshness_results_db_row.source_freshness_execution_id,
+            elementary_unique_id=source_freshness_results_db_row.unique_id,
             database_name=source_freshness_results_db_row.database_name,
             schema_name=source_freshness_results_db_row.schema_name,
             table_name=source_freshness_results_db_row.table_name,
