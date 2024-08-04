@@ -51,7 +51,13 @@ def unpack_and_flatten_and_dedup_list_of_strings(
     if isinstance(list_maybe_jsoned, str):
         ret = unpack_and_flatten_str_to_list(list_maybe_jsoned)
     elif isinstance(list_maybe_jsoned, list):
-        ret = sum_lists([unpack_and_flatten_str_to_list(x) for x in list_maybe_jsoned])
+        ret = sum_lists(
+            [
+                unpack_and_flatten_str_to_list(x)
+                for x in list_maybe_jsoned
+                if isinstance(x, str)
+            ]
+        )
     return list(set(ret))
 
 
