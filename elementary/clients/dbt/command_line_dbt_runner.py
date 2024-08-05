@@ -84,9 +84,11 @@ class CommandLineDbtRunner(BaseDbtRunner):
         if capture_output:
             dbt_command_args.extend(["--log-format", log_format])
         dbt_command_args.extend(command_args)
-        dbt_command_args.extend(["--project-dir", self.project_dir])
+        dbt_command_args.extend(["--project-dir", os.path.abspath(self.project_dir)])
         if self.profiles_dir:
-            dbt_command_args.extend(["--profiles-dir", self.profiles_dir])
+            dbt_command_args.extend(
+                ["--profiles-dir", os.path.abspath(self.profiles_dir)]
+            )
         if self.target:
             dbt_command_args.extend(["--target", self.target])
 
