@@ -1,3 +1,16 @@
+<Note>For users of dbt version 1.8 and above</Note>
+
+Add the following flag to your `dbt_project.yml` file:
+
+```yaml dbt_project.yml
+flags:
+  source_freshness_run_project_hooks: True
+```
+
+This flag enables Elementary to automatically collect `source-freshness` results, just like any other test results. 
+
+<Note>For dbt version under 1.8</Note>
+
 Unlike dbt and Elementary tests, the results of the command `dbt source-freshness` are not automatically collected.
 You can collect the results using the Elementary CLI tool. 
 
