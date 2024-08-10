@@ -187,7 +187,7 @@
           ]
         },
         {
-          "group": "Send Slack alerts",
+          "group": "Send alerts",
           "pages": [
             "cloud/guides/enable-slack-alerts",
             "cloud/guides/alerts-configuration"
@@ -382,7 +382,8 @@
             "oss/guides/alerts/alerts-configuration"
           ]
         },
-        "oss/guides/collect-job-data"
+        "oss/guides/collect-job-data",
+        "oss/guides/collect-dbt-source-freshness"
       ]
     },
     {
