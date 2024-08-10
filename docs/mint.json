@@ -369,8 +369,7 @@
             "oss/guides/share-observability-report/host-on-s3",
             "oss/guides/share-observability-report/host-on-gcs",
             "oss/guides/share-observability-report/host-on-azure",
-            "oss/guides/share-observability-report/send-report-summary",
-            "oss/guides/collect-dbt-source-freshness"
+            "oss/guides/share-observability-report/send-report-summary"
           ]
         },
         {
