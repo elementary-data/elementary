@@ -1,9 +1,10 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from elementary.clients.api.api_client import APIClient
 from elementary.monitor.api.filters.filters import FiltersAPI
 from elementary.monitor.api.groups.groups import GroupsAPI
+from elementary.monitor.api.groups.schema import GroupsSchema
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
 from elementary.monitor.api.models.models import ModelsAPI
@@ -30,10 +31,23 @@ from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.fetchers.tests.schema import NormalizedTestSchema
 from elementary.utils.time import get_now_utc_iso_format
 
 
 class ReportAPI(APIClient):
+    def _get_groups(
+        self,
+        models: Iterable[NormalizedModelSchema],
+        sources: Iterable[NormalizedSourceSchema],
+        exposures: Iterable[NormalizedExposureSchema],
+        singular_tests: Iterable[NormalizedTestSchema],
+    ) -> GroupsSchema:
+        groups_api = GroupsAPI(self.dbt_runner)
+        return groups_api.get_groups(
+            artifacts=[*models, *sources, *exposures, *singular_tests]
+        )
+
     def get_report_data(
         self,
         days_back: int = 7,
@@ -59,7 +73,6 @@ class ReportAPI(APIClient):
                 invocations_per_test=test_runs_amount,
             )
             models_api = ModelsAPI(dbt_runner=self.dbt_runner)
-            groups_api = GroupsAPI(dbt_runner=self.dbt_runner)
             lineage_api = LineageAPI(dbt_runner=self.dbt_runner)
             filters_api = FiltersAPI(dbt_runner=self.dbt_runner)
             invocations_api = InvocationsAPI(dbt_runner=self.dbt_runner)
@@ -73,13 +86,8 @@ class ReportAPI(APIClient):
             lineage_node_ids.extend(exposures.keys())
             singular_tests = tests_api.get_singular_tests()
 
-            groups = groups_api.get_groups(
-                artifacts=[
-                    *models.values(),
-                    *sources.values(),
-                    *exposures.values(),
-                    *singular_tests,
-                ]
+            groups = self._get_groups(
+                models.values(), sources.values(), exposures.values(), singular_tests
             )
 
             models_runs = models_api.get_models_runs(
