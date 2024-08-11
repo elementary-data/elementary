@@ -45,7 +45,7 @@ class GroupsAPI(APIClient):
         self,
         artifacts: List[GROUPABLE_ARTIFACT],
     ) -> TreeGroupSchema:
-        tree_builder = TreeBuilder[GroupItemSchema](seperator=posixpath.sep)
+        tree_builder = TreeBuilder[GroupItemSchema](separator=posixpath.sep)
         for artifact in artifacts:
             if artifact.unique_id is None:
                 continue
@@ -55,7 +55,7 @@ class GroupsAPI(APIClient):
         return tree_builder.get_tree()
 
     def get_dwh_group(self, artifacts: List[GROUPABLE_ARTIFACT]) -> TreeGroupSchema:
-        tree_builder = TreeBuilder[GroupItemSchema](seperator=".")
+        tree_builder = TreeBuilder[GroupItemSchema](separator=".")
         relevant_artifacts = (
             artifact
             for artifact in artifacts
