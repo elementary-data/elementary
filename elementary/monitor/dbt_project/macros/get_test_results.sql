@@ -13,11 +13,6 @@
                 {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank. #}
                 rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_rank_index
             from test_results
-        ),
-
-        test_result_rows as (
-            select * 
-            from {{ ref("elementary", "test_result_rows") }}
         )
 
         select 
@@ -50,25 +45,33 @@
             test_results.test_params,
             test_results.severity,
             test_results.status,
-
-            case when test_results.invocations_rank_index = 1 and ((test_results.test_type == 'dbt_test' and test_results.status in ('fail', 'warn')) or (test_type != 'dbt_test' and status in {{ elementary.strings_list_to_tuple(elementary_tests_allowlist_status) }})) then test_result_rows.result_row else NULL end as test_rows_sample,
-
             test_results.execution_time,
             test_results.days_diff,
             test_results.invocations_rank_index,
             test_results.failures,
             test_results.result_rows
         from ordered_test_results as test_results
-        join test_result_rows on test_result_rows.elementary_test_results_id = ordered_test_results.id
         where test_results.invocations_rank_index <= {{ invocations_per_test }}
         order by test_results.elementary_unique_id, test_results.invocations_rank_index desc
-
-
     {%- endset -%}
 
     {% set test_results = [] %}
-    {% set test_results_agate = elementary.run_query(select_test_results) %}
-    {# {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back) %} #}
+
+    {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
+    {% set relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
+
+    {% set test_results_agate_sql %}
+        select * from {{ relation }}
+    {% endset %}
+
+    {% set valid_ids_query %}
+        select distinct id 
+        from {{ relation }}
+        where invocations_rank_index = 1
+    {% endset %}
+
+    {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
+    {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
     {% set filtered_tests = [] %}
@@ -87,8 +90,7 @@
             {% set status = test.status | lower %}
 
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
-                {# {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %} #}
-                {% set test_rows_sample = test.test_rows_sample %}
+                {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
                 {# Currently we show only the anomalous for all of the dimensions. #}
                 {% if test.test_sub_type == 'dimension' or test_params.dimensions %}
