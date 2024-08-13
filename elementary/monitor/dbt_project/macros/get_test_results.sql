@@ -58,15 +58,15 @@
     {% set test_results = [] %}
 
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
-    {% set relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
+    {% set ordered_test_results_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
 
     {% set test_results_agate_sql %}
-        select * from {{ relation }}
+        select * from {{ ordered_test_results_relation }}
     {% endset %}
 
     {% set valid_ids_query %}
         select distinct id 
-        from {{ relation }}
+        from {{ ordered_test_results_relation }}
         where invocations_rank_index = 1
     {% endset %}
 
