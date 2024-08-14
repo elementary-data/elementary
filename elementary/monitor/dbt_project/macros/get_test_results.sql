@@ -1,4 +1,6 @@
 {%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
+    {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
+    
     {% set select_test_results %}
         with test_results as (
             {{ elementary_cli.current_tests_run_results_query(days_back=days_back) }}
@@ -14,48 +16,62 @@
         )
 
         select 
-            id,
-            invocation_id,
-            test_execution_id,
-            model_unique_id,
-            test_unique_id,
-            elementary_unique_id,
-            detected_at,
-            database_name,
-            schema_name,
-            table_name,
-            column_name,
-            test_type,
-            test_sub_type,
-            test_results_description,
-            original_path,
-            package_name,
-            owners,
-            model_owner,
-            tags,
-            test_tags,
-            model_tags,
-            meta,
-            model_meta,
-            case when invocations_rank_index = 1 then test_results_query else NULL end as test_results_query,
-            other,
-            test_name,
-            test_params,
-            severity,
-            status,
-            execution_time,
-            days_diff,
-            invocations_rank_index,
-            failures,
-            result_rows
-        from ordered_test_results
-        where invocations_rank_index <= {{ invocations_per_test }}
-        order by elementary_unique_id, invocations_rank_index desc
+            test_results.id,
+            test_results.invocation_id,
+            test_results.test_execution_id,
+            test_results.model_unique_id,
+            test_results.test_unique_id,
+            test_results.elementary_unique_id,
+            test_results.detected_at,
+            test_results.database_name,
+            test_results.schema_name,
+            test_results.table_name,
+            test_results.column_name,
+            test_results.test_type,
+            test_results.test_sub_type,
+            test_results.test_results_description,
+            test_results.original_path,
+            test_results.package_name,
+            test_results.owners,
+            test_results.model_owner,
+            test_results.tags,
+            test_results.test_tags,
+            test_results.model_tags,
+            test_results.meta,
+            test_results.model_meta,
+            case when test_results.invocations_rank_index = 1 then test_results.test_results_query else NULL end as test_results_query,
+            test_results.other,
+            test_results.test_name,
+            test_results.test_params,
+            test_results.severity,
+            test_results.status,
+            test_results.execution_time,
+            test_results.days_diff,
+            test_results.invocations_rank_index,
+            test_results.failures,
+            test_results.result_rows
+        from ordered_test_results as test_results
+        where test_results.invocations_rank_index <= {{ invocations_per_test }}
+        order by test_results.elementary_unique_id, test_results.invocations_rank_index desc
     {%- endset -%}
 
     {% set test_results = [] %}
-    {% set test_results_agate = elementary.run_query(select_test_results) %}
-    {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back) %}
+
+    {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
+    {% set ordered_test_results_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
+
+    {% set test_results_agate_sql %}
+        select * from {{ ordered_test_results_relation }}
+    {% endset %}
+
+    {% set valid_ids_query %}
+        select distinct id 
+        from {{ ordered_test_results_relation }}
+        where invocations_rank_index = 1
+    {% endset %}
+
+    {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
+    {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
     {% set filtered_tests = [] %}
@@ -73,10 +89,6 @@
             {% set test_params = fromjson(test.test_params) %}
             {% set status = test.status | lower %}
 
-            {% set elementary_tests_allowlist_status = ['fail', 'warn']  %}
-            {% if not disable_passed_test_metrics %}
-                {% do elementary_tests_allowlist_status.append('pass') %}
-            {% endif %}
             {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
                 {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
                 {# Dimension anomalies return multiple dimensions for the test rows sample, and needs to be handle differently. #}
