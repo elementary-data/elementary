@@ -24,10 +24,10 @@ We're always hustling to make them even better, and your feedback play a huge ro
 
 To get context on your false positive result feedback and trigger a response, we ask you to select a reason:
 
-- **Insignificant change** - 
-- **Expected outlier** - 
-- **Business anomaly** - 
-- **Not an interesting table** - 
+- **Insignificant change** - The anomaly is not drastic enough for me to care about it. Usually the action item is to relax anomaly detection sensitivity.
+- **Expected outlier** - This isn't an anomaly and should be within the expected range. The action item will be to re-train the model, sometimes with a wider training set.
+- **Business anomaly** - This is an anomaly, but one we expected to happen due to intentional change or business event. The action item will be to exclude the anomaly from the training set.
+- **Not an interesting table** - I don't want to monitor this table. The action item is to delete the monitor.
 - **Other** - Non of the other reasons are a fit. Please add a comment to describe the use case.
 
 <Frame>
