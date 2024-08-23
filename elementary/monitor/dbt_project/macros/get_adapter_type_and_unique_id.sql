@@ -17,3 +17,7 @@
 {% macro athena__get_adapter_unique_id() %}
     {{ return(target.s3_staging_dir) }}
 {% endmacro %}
+
+{% macro glue__get_adapter_unique_id() %}
+    {{ return(target.location) }}
+{% endmacro %}
