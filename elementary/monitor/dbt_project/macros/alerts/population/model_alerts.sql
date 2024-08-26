@@ -39,6 +39,9 @@
 
 
 {% macro populate_model_alerts_query(days_back=1) %}
+    {# This macro is invoked as part of alerts_v2 post-hook, so "this" references to alerts_v2 -#}
+    {% set seed_run_results_relation = adapter.get_relation(this.database, this.schema, 'seed_run_results') -%}
+
     with models as (
         select * from {{ ref('elementary', 'dbt_models') }}
     ),
@@ -67,9 +70,11 @@
         select * from {{ ref('snapshot_run_results') }}
     ),
 
+    {% if seed_run_results_relation -%}
     seed_run_results as (
         select * from {{ ref('seed_run_results') }}
     ),
+    {%- endif %}
 
     all_run_results as (
         {% set run_result_columns %}
@@ -92,8 +97,10 @@
         select {{ run_result_columns }} from model_run_results
         union all
         select {{ run_result_columns }} from snapshot_run_results
+        {% if seed_run_results_relation -%}
         union all
         select {{ run_result_columns }} from seed_run_results
+        {%- endif %}
     ),
 
     all_alerts as ( 
