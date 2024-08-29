@@ -7,4 +7,4 @@ packages:
   #  NOTE - for unreleased CLI versions we often need to update the package version to a commit hash (please leave this
   #  commented, so it will be easy to access)
   - git: https://github.com/elementary-data/dbt-data-reliability.git
-    revision: dbdbdea6783272530e73a062f9657937e73db906
+    revision: 9519543560be6658589c9fb7f65c922c19f53ab0
