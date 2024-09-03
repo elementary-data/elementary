@@ -231,9 +231,9 @@
             "cloud/integrations/bi/connect-bi-tool",
             "cloud/integrations/bi/looker",
             "cloud/integrations/bi/tableau",
-            "cloud/integrations/bi/metabase",
             "cloud/integrations/bi/power-bi",
             "cloud/integrations/bi/sigma",
+            "cloud/integrations/bi/metabase",
             "cloud/integrations/bi/thoughtspot",
             "cloud/integrations/bi/mode",
             "cloud/integrations/bi/hex",
@@ -252,7 +252,8 @@
           "pages": [
             "cloud/integrations/code-repo/connect-code-repo",
             "cloud/integrations/code-repo/github",
-            "cloud/integrations/code-repo/gitlab"
+            "cloud/integrations/code-repo/gitlab",
+            "cloud/integrations/code-repo/bitbucket"
           ]
         },
         {
