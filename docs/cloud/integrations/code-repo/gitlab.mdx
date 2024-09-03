@@ -4,7 +4,22 @@ title: "Gitlab"
 
 Elementary connects to the code repository where your dbt project code is managed, and opens PRs with configuration changes.
 
-### Create a Gitlab project token
+
+## Recommended: Connect using Elementary Gitlab App
+
+Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect the dbt project code repository.
+
+Simply Click the blue button that says "Connect with Elementary Gitlab App" and follow the instructions.
+In the menu that opens up later on, select the repository where your dbt project is stored, and if needed the branch and path to the dbt project.
+
+<Warning>Requires a user with permissions to install new applications in the repository</Warning>
+
+
+### Alternative: Create a Gitlab project token
+
+If connecting the Elementary Gitlab App isn't an option, you can connect using a token managed by your team instead.
+
+<Accordion title="Token creation and permissions">
 
 You need to create a [project access token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (token for a specific repository) with by following these steps:
 
@@ -15,14 +30,8 @@ You need to create a [project access token](https://docs.gitlab.com/ee/user/proj
 5. Select the following scopes: `api`, `read_api`, `read_repository`, `write_repository`.
 6. Select **Create project access token**.
 
-### Connect Gitlab to Elementary
+</Accordion>
 
-Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect the dbt project code repository.
-Select **Connect code repository**, and under Gitlab enter the generated token and repo full name:
+## Repository connection settings
 
-<Frame caption="Gitlab connection to Elementary">
-  <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1690200577/gitlab_form_ueo24t.png"
-    alt="Gitlab connection to Elementary"
-  />
-</Frame>
+<Snippet file="cloud/integrations/repo-connection-settings.mdx" />

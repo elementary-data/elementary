@@ -4,16 +4,21 @@ title: "Github"
 
 Elementary connects to the code repository where your dbt project code is managed, and opens PRs with configuration changes.
 
-### Recommended: Connect using Elementary Elementary Github App
+## Recommended: Connect using Elementary Github App
+
+Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect the dbt project code repository.
 
 Simply Click the blue button that says "Connect with Elementary Github App" and follow the instructions.
 In the menu that opens up later on, select the repository where your dbt project is stored, and if needed the branch and path to the dbt project.
 
-### Create a Github [fine-grained token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+<Warning>Requires a user with permissions to install new applications in the repository.</Warning>
 
-If for some reason you prefer to, you can connect to Github using a fine-grained token managed by your team instead.
-Here is how you can create one:
 
+## Alternative: Create a Github [fine-grained token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+
+If connecting the Elementary Github App isn't an option, you can connect to Github using a fine-grained token managed by your team instead.
+
+<Accordion title="Token creation and permissions">
 1. In the upper-right corner of any page, click your profile photo, then click **Settings**.
 2. On the bottom of the left sidebar, click **Developer settings**.
 3. On the left sidebar, select **Personal access tokens > Fine-grained tokens**.
@@ -42,15 +47,8 @@ Here is how you can create one:
 </Frame>
 
 9. Click **Generate token**.
+</Accordion>
 
-### Connect Github to Elementary
+## Repository connection settings
 
-Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect the dbt project code repository.
-Select **Connect code repository**, and under Github enter the generated token and repo full name:
-
-<Frame caption="Github connection to Elementary">
-  <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1690199481/github_foem_psuozi.png"
-    alt="Github connection to Elementary"
-  />
-</Frame>
+<Snippet file="cloud/integrations/repo-connection-settings.mdx" />
