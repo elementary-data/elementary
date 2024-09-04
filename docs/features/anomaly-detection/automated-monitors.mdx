@@ -37,4 +37,18 @@ You can fine tune the [configuration](/features/anomaly-detection/monitors-confi
 
 ## Alerts on Failures
 
-_🚧 Under construction 🚧_
+By default, automated monitors failures **don't create alerts**.
+
+To activate alerts on automated monitors, navigate to `Setup > Alert Rules`.
+- To alert on all automated monitors failures - Change the default rule (#1) alert categories to include automated monitors.
+- To alert on specific datasets - Change / Create alert rules for these specific datasets, and iclude automated monitors in their alert categories.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1725443568/alert_categories_ikzjqr.png"
+      alt="Alert categories in alert rules"
+      width="420"
+    />
+  </div>
+</Frame>
