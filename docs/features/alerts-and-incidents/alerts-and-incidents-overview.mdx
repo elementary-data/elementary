@@ -20,13 +20,11 @@ you will be able to track all open and historical incidents, and get metrics on 
 
 ## Alerts & incidents core functionality 
 
-- **Alert distribution rules** - 
-- **Incident status and assignee** -
-- **Owners and subscribers** -
-- **Severity and tags** -
-- **Alerts customization** -
-- **Group alerts to incidents** -
-- **Alerts suppression** -
+- **Alerts customization** - Alerts should include relevant context for quick triage such as **owner**, **tags**, **description*. In Elementary, alerts can be customized to include this information.
+- **Alert distribution rules** - Alerts should be sent to relevant recipients. By creating [Alert Rules](/features/alerts-and-incidents/alert-rules), alerts can be distributed to different channels and systems.
+- **Incidents management** - When alerts are distributed to different channels, it can become hard to track what is open. Elementary offers a centralized Incidents page to monitor what is open, and manage incident properties: **assignee**, **status** and **severity**.  
+- **Grouping alerts to incidents** - New failures related to already open incidents will not trigger new alerts, and will be automatically added to the opgoing incident. This reduces noise and alerts fatigue.  
+- **Automated resolution** - When there is a succesful run that means an open incident is resolved, Elementary will automatically resolve the incident. This will help you manage the state of incidents and communicate it to stake holders in real time. 
 
 ## Alert types
 
