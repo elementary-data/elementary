@@ -190,6 +190,10 @@ class Config:
             run_dbt_deps_if_needed, config.get("run_dbt_deps_if_needed"), True
         )
 
+        self.disable_elementary_version_check = config.get(
+            "disable_elementary_version_check", False
+        )
+
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
             os.makedirs(self.config_dir)
