@@ -15,7 +15,7 @@ CONFIG = {
         "channel_name": "test_channel_name",
         "workflows": False,
     },
-    "disable_elementary_version_check": True
+    "disable_elementary_version_check": True,
 }
 
 WORKFLOWS_CONFIG = {
@@ -54,9 +54,14 @@ def test_config_get_slack_token(config: Config):
 def test_config_get_slack_notification_channel_name(config: Config):
     assert config.slack_channel_name == CONFIG["slack"]["channel_name"]
 
+
 @pytest.mark.parametrize("config", [CONFIG], indirect=["config"])
 def test_disable_elementary_version_check(config: Config):
-    assert config.disable_elementary_version_check == CONFIG["disable_elementary_version_check"]
+    assert (
+        config.disable_elementary_version_check
+        == CONFIG["disable_elementary_version_check"]
+    )
+
 
 @pytest.mark.parametrize("config", [WORKFLOWS_CONFIG], indirect=["config"])
 def test_slack_workflows_config_get_workflows(config: Config):
