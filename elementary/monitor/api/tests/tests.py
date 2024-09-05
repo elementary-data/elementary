@@ -16,11 +16,13 @@ from elementary.monitor.api.tests.schema import (
     TestResultSchema,
     TestResultSummarySchema,
     TestRunSchema,
+    TestSchema,
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
 from elementary.monitor.fetchers.tests.schema import (
     NormalizedTestSchema,
+    TestDBRowSchema,
     TestResultDBRowSchema,
 )
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
@@ -129,6 +131,13 @@ class TestsAPI(APIClient):
 
     def get_singular_tests(self) -> List[NormalizedTestSchema]:
         return self.tests_fetcher.get_singular_tests()
+
+    def get_tests(self) -> Dict[str, TestSchema]:
+        tests_db_rows = self.tests_fetcher.get_tests()
+        return {
+            test_db_row.unique_id: self._parse_test_db_row(test_db_row)
+            for test_db_row in tests_db_rows
+        }
 
     def get_test_results(
         self,
@@ -379,6 +388,106 @@ class TestsAPI(APIClient):
             configuration=configuration,
             test_tags=test_result_db_row.test_tags,
             normalized_full_path=test_result_db_row.normalized_full_path,
+        )
+
+    @staticmethod
+    def _get_table_full_name(
+        database_name: Optional[str],
+        schema_name: Optional[str],
+        table_name: Optional[str],
+    ) -> str:
+        table_full_name_parts = [
+            name
+            for name in [
+                database_name,
+                schema_name,
+                table_name,
+            ]
+            if name
+        ]
+        table_full_name = ".".join(table_full_name_parts).lower()
+        return table_full_name
+
+    @staticmethod
+    def _get_display_name(test_name: str) -> str:
+        return test_name.replace("_", " ").title()
+
+    @staticmethod
+    def _get_test_configuration(
+        test_type: Optional[str], name: str, test_params: Dict
+    ) -> Dict[str, Any]:
+        if test_type is None:
+            return dict()
+        if test_type == "dbt_test":
+            return dict(
+                test_name=name,
+                test_params=test_params,
+            )
+        else:
+            time_bucket_configuration = test_params.get("time_bucket", {})
+            time_bucket_count = time_bucket_configuration.get("count", 1)
+            time_bucket_period = time_bucket_configuration.get("period", "day")
+            return dict(
+                test_name=name,
+                timestamp_column=test_params.get("timestamp_column"),
+                testing_timeframe=f"{time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
+                anomaly_threshold=test_params.get("sensitivity")
+                or test_params.get("anomaly_sensitivity"),
+            )
+
+    @staticmethod
+    def _get_normalized_full_path(
+        package_name: Optional[str], original_path: Optional[str]
+    ) -> Optional[str]:
+        if package_name:
+            return f"{package_name}/{original_path}"
+        return original_path
+
+    @classmethod
+    def _parse_test_db_row(cls, test_db_row: TestDBRowSchema) -> TestSchema:
+        latest_run_datetime = (
+            convert_utc_iso_format_to_datetime(test_db_row.latest_run_time)
+            if test_db_row.latest_run_time
+            else None
+        )
+
+        return TestSchema(
+            unique_id=test_db_row.unique_id,
+            model_unique_id=test_db_row.model_unique_id,
+            table_unique_id=cls._get_table_full_name(
+                test_db_row.database_name,
+                test_db_row.schema_name,
+                test_db_row.table_name,
+            ),
+            database_name=test_db_row.database_name,
+            schema_name=test_db_row.schema_name,
+            table_name=test_db_row.table_name,
+            column_name=test_db_row.column_name,
+            name=test_db_row.name,
+            display_name=cls._get_display_name(test_db_row.name),
+            original_path=test_db_row.original_path,
+            type=test_db_row.type,
+            test_type=test_db_row.test_type,
+            test_sub_type=test_db_row.test_sub_type,
+            test_params=test_db_row.test_params,
+            description=test_db_row.meta.get("description"),
+            configuration=cls._get_test_configuration(
+                test_db_row.test_type, test_db_row.name, test_db_row.test_params
+            ),
+            tags=list(set(test_db_row.tags + test_db_row.model_tags)),
+            normalized_full_path=cls._get_normalized_full_path(
+                test_db_row.package_name, test_db_row.original_path
+            ),
+            created_at=test_db_row.created_at if test_db_row.created_at else None,
+            latest_run_time=latest_run_datetime.isoformat()
+            if latest_run_datetime
+            else None,
+            latest_run_time_utc=latest_run_datetime.astimezone(tz.tzlocal()).isoformat()
+            if latest_run_datetime
+            else None,
+            latest_run_status=test_db_row.latest_run_status
+            if test_db_row.latest_run_status
+            else None,
         )
 
     @staticmethod
