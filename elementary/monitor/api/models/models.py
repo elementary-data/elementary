@@ -2,7 +2,7 @@ import json
 import os
 import statistics
 from collections import defaultdict
-from typing import Dict, List, Optional, Set, Union, overload
+from typing import Dict, List, Optional, Set, Union, cast, overload
 
 from elementary.clients.api.api_client import APIClient
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
@@ -13,6 +13,7 @@ from elementary.monitor.api.models.schema import (
     ModelRunsWithTotalsSchema,
     NormalizedExposureSchema,
     NormalizedModelSchema,
+    NormalizedSeedSchema,
     NormalizedSourceSchema,
     TotalsModelRunsSchema,
 )
@@ -22,7 +23,11 @@ from elementary.monitor.fetchers.models.schema import ArtifactSchemaType, Exposu
 from elementary.monitor.fetchers.models.schema import (
     ModelRunSchema as FetcherModelRunSchema,
 )
-from elementary.monitor.fetchers.models.schema import ModelSchema, SourceSchema
+from elementary.monitor.fetchers.models.schema import (
+    ModelSchema,
+    SeedSchema,
+    SourceSchema,
+)
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -30,6 +35,7 @@ logger = get_logger(__name__)
 
 class ModelsAPI(APIClient):
     _ARTIFACT_TYPE_DIR_MAP = {
+        SeedSchema: "seeds",
         SourceSchema: "sources",
         ModelSchema: "models",
         ExposureSchema: "exposures",
@@ -117,6 +123,16 @@ class ModelsAPI(APIClient):
         success_runs = len([run for run in runs if run.status == "success"])
         return TotalsModelRunsSchema(errors=error_runs, success=success_runs)
 
+    def get_seeds(self) -> Dict[str, NormalizedSeedSchema]:
+        seed_results = self.models_fetcher.get_seeds()
+        seeds = dict()
+        if seed_results:
+            for seed_result in seed_results:
+                normalized_seed = self._normalize_dbt_artifact_dict(seed_result)
+                seed_unique_id = cast(str, normalized_seed.unique_id)
+                seeds[seed_unique_id] = normalized_seed
+        return seeds
+
     def get_models(
         self, exclude_elementary_models: bool = False
     ) -> Dict[str, NormalizedModelSchema]:
@@ -127,12 +143,7 @@ class ModelsAPI(APIClient):
         if models_results:
             for model_result in models_results:
                 normalized_model = self._normalize_dbt_artifact_dict(model_result)
-
-                model_unique_id = normalized_model.unique_id
-                if model_unique_id is None:
-                    # Shouldn't happen, but handling this case for mypy
-                    continue
-
+                model_unique_id = cast(str, normalized_model.unique_id)
                 models[model_unique_id] = normalized_model
         return models
 
@@ -224,6 +235,12 @@ class ModelsAPI(APIClient):
 
     @overload
     def _normalize_dbt_artifact_dict(
+        self, artifact: SeedSchema
+    ) -> NormalizedSeedSchema:
+        ...
+
+    @overload
+    def _normalize_dbt_artifact_dict(
         self, artifact: ModelSchema
     ) -> NormalizedModelSchema:
         ...
@@ -241,9 +258,15 @@ class ModelsAPI(APIClient):
         ...
 
     def _normalize_dbt_artifact_dict(
-        self, artifact: Union[ModelSchema, ExposureSchema, SourceSchema]
-    ) -> Union[NormalizedModelSchema, NormalizedExposureSchema, NormalizedSourceSchema]:
+        self, artifact: Union[SeedSchema, ModelSchema, ExposureSchema, SourceSchema]
+    ) -> Union[
+        NormalizedSeedSchema,
+        NormalizedModelSchema,
+        NormalizedExposureSchema,
+        NormalizedSourceSchema,
+    ]:
         schema_to_normalized_schema_map = {
+            SeedSchema: NormalizedSeedSchema,
             ExposureSchema: NormalizedExposureSchema,
             ModelSchema: NormalizedModelSchema,
             SourceSchema: NormalizedSourceSchema,
@@ -285,7 +308,7 @@ class ModelsAPI(APIClient):
     @classmethod
     def _fqn(
         cls,
-        artifact: Union[ModelSchema, ExposureSchema, SourceSchema],
+        artifact: Union[ModelSchema, ExposureSchema, SourceSchema, SeedSchema],
     ) -> str:
         if isinstance(artifact, ExposureSchema):
             path = (artifact.meta or {}).get("path")

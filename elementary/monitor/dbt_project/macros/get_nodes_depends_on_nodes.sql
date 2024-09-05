@@ -7,6 +7,13 @@
     {% set models_depends_on_nodes_query %}
         select
             unique_id,
+            null as depends_on_nodes,
+            null as materialization,
+            'seed' as type
+        from {{ ref('elementary', 'dbt_seeds') }}
+        union all
+        select
+            unique_id,
             depends_on_nodes,
             materialization,
             'model' as type

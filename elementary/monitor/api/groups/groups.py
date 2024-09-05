@@ -14,6 +14,7 @@ from elementary.monitor.api.groups.tree_builder import TreeBuilder
 from elementary.monitor.api.models.schema import (
     NormalizedExposureSchema,
     NormalizedModelSchema,
+    NormalizedSeedSchema,
     NormalizedSourceSchema,
 )
 from elementary.monitor.fetchers.tests.schema import NormalizedTestSchema
@@ -28,6 +29,7 @@ GROUPABLE_ARTIFACT = Union[
     NormalizedSourceSchema,
     NormalizedExposureSchema,
     NormalizedTestSchema,
+    NormalizedSeedSchema,
 ]
 
 
