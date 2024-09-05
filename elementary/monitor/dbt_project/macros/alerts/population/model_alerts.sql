@@ -40,7 +40,7 @@
 
 {% macro populate_model_alerts_query(days_back=1) %}
     {# This macro is invoked as part of alerts_v2 post-hook, so "this" references to alerts_v2 -#}
-    {% set seed_run_results_relation = adapter.get_relation(this.database, this.schema, 'seed_run_results') -%}
+    {% set seed_run_results_relation = elementary.get_elementary_relation('seed_run_results') -%}
 
     with models as (
         select * from {{ ref('elementary', 'dbt_models') }}
@@ -72,7 +72,7 @@
 
     {% if seed_run_results_relation -%}
     seed_run_results as (
-        select * from {{ ref('seed_run_results') }}
+        select * from {{ seed_run_results_relation }}
     ),
     {%- endif %}
 

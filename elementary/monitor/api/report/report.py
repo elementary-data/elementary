@@ -13,6 +13,7 @@ from elementary.monitor.api.models.schema import (
     ModelRunsSchema,
     NormalizedExposureSchema,
     NormalizedModelSchema,
+    NormalizedSeedSchema,
     NormalizedSourceSchema,
 )
 from elementary.monitor.api.report.schema import ReportDataEnvSchema, ReportDataSchema
@@ -41,11 +42,12 @@ class ReportAPI(APIClient):
         models: Iterable[NormalizedModelSchema],
         sources: Iterable[NormalizedSourceSchema],
         exposures: Iterable[NormalizedExposureSchema],
+        seeds: Iterable[NormalizedSeedSchema],
         singular_tests: Iterable[NormalizedTestSchema],
     ) -> GroupsSchema:
         groups_api = GroupsAPI(self.dbt_runner)
         return groups_api.get_groups(
-            artifacts=[*models, *sources, *exposures, *singular_tests]
+            artifacts=[*models, *sources, *exposures, *seeds, *singular_tests]
         )
 
     def get_report_data(
@@ -78,6 +80,8 @@ class ReportAPI(APIClient):
             invocations_api = InvocationsAPI(dbt_runner=self.dbt_runner)
 
             lineage_node_ids: List[str] = []
+            seeds = models_api.get_seeds()
+            lineage_node_ids.extend(seeds.keys())
             models = models_api.get_models(exclude_elementary_models)
             lineage_node_ids.extend(models.keys())
             sources = models_api.get_sources()
@@ -87,7 +91,11 @@ class ReportAPI(APIClient):
             singular_tests = tests_api.get_singular_tests()
 
             groups = self._get_groups(
-                models.values(), sources.values(), exposures.values(), singular_tests
+                models.values(),
+                sources.values(),
+                exposures.values(),
+                seeds.values(),
+                singular_tests,
             )
 
             models_runs = models_api.get_models_runs(
@@ -133,7 +141,9 @@ class ReportAPI(APIClient):
             )
 
             serializable_groups = groups.dict()
-            serializable_models = self._serialize_models(models, sources, exposures)
+            serializable_models = self._serialize_models(
+                models, sources, exposures, seeds
+            )
             serializable_model_runs = self._serialize_models_runs(models_runs.runs)
             serializable_model_runs_totals = models_runs.dict(include={"totals"})[
                 "totals"
@@ -191,8 +201,9 @@ class ReportAPI(APIClient):
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
         exposures: Dict[str, NormalizedExposureSchema],
+        seeds: Dict[str, NormalizedSeedSchema],
     ) -> Dict[str, dict]:
-        nodes = dict(**models, **sources, **exposures)
+        nodes = dict(**models, **sources, **exposures, **seeds)
         serializable_nodes = dict()
         for key in nodes.keys():
             serializable_nodes[key] = dict(nodes[key])
