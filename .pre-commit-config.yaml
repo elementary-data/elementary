@@ -43,3 +43,9 @@ repos:
         entry: mypy --no-error-summary
         language: system
         files: ^elementary/.*\.py$
+
+  - repo: https://github.com/CoderJoshDK/precommit-mintlify-validate/
+    rev: v0.2.0
+    hooks:
+      - id: mintlify-validate
+        args: [docs]
