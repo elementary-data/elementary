@@ -494,7 +494,7 @@
       "destination": "/features/alerts-and-incidents/alerts-and-incidents-overview"
     },
     {
-      "source": "/cloud/guides/alert-rules",
+      "source": "/features/alerts-and-incidents/alert-rules",
       "destination": "/features/alerts-and-incidents/alert-rules"
     },
     {
@@ -502,7 +502,7 @@
       "destination": "/features/collaboration-and-communication/catalog"
     },
     {
-      "source": "/features/data-observability-dashboard",
+      "source": "/features/collaboration-and-communication/data-observability-dashboard",
       "destination": "/features/collaboration-and-communication/data-observability-dashboard"
     }
   ]
