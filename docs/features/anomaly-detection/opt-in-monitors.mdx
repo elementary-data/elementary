@@ -3,7 +3,106 @@ title: Opt-In Monitors
 sidebarTitle: "Opt-in monitors"
 ---
 
-_Coming Soon_
+In Elementary, you can monitor any metric you want on the content of your data, view the metric and set up anomaly detection tests on it!
 
-For now, please refer to the [Elementary Anomaly Detection dbt tests](/data-tests/introduction#anomaly-detection-tests).
+## How does it work?
 
+Elementary uses a type of dbt test to collect metrics on your data and sync them up to Elementary Cloud.
+The metrics will be collected each time you run `dbt test`, in a way that is similar to how training data for anomaly tests is collected.
+A metric can be collected with or without an anomaly detection test configured on it.
+
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1725882221/Screenshot_2024-08-27_at_11.58.41_nqtxrj.png" alt="Metrics screen in Elementary" />
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1725882221/Screenshot_2024-08-27_at_11.59.43_ieovck.png" alt="Metrics screen in Elementary" />
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1725882220/Screenshot_2024-08-27_at_11.59.29_h7mloh.png" alt="Metrics screen in Elementary" />
+
+
+## How to set up a data content metric?
+
+The monitored metrics are set up in the code, in a way similar to dbt tests.
+
+
+
+
+No mandatory configuration, however it is highly recommended to configure a `timestamp_column`.
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  tests:
+    &nbsp;&nbsp;-- elementary.collect_metrics:
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/dimensions"><font color="#CD7D55">dimensions: sql expression</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">metrics: monitors list</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">name: string</font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">type: monitor type</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">columns: list</font>
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    tests:
+      - elementary.collect_metrics:
+        time_bucket: # Daily by default
+          period: < time period >
+          count: < number of periods >
+        dimensions: < list of dimensions to group by >
+        metrics: < list of metrics >
+          - name: < user defined name for metric >
+            type: < which metric to calculate >
+            where_expression: < sql expression >
+            columns: < which columns to calculate the metric on- for column metrics >
+        cloud_monitored: < boolean, should Elementary automatically create anomaly tests for the collected metrics? >
+```
+
+```yml Models example
+
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: 'loaded_at'
+    tests:
+      - elementary.collect_metrics:
+        time_bucket:
+          period: hour
+          count: 1
+        dimensions:
+          - country_id
+          - platform_id
+        metrics:
+          - name: row_count
+            type: row_count
+          - name: filtered_row_count
+            type: row_count
+            where_expression: country = 'USA'
+          - name: null_count
+            type: null_count
+            columns: [hello, world]
+        cloud_monitored=True
+
+```
+
+</RequestExample>
+
+Upon running `dbt test`, your data is split into buckets:
+- The size of each bucket is configured by the `time bucket` field
+- Each row in the table is assigned to a bucket based on the timestamp of the `timestamp_column` selected
+- If dimensions were selected, each combination of dimensions will create a separate metric
+and then we compute the metric (or metrics) of choice for each bucket.
+We save the metrics in the Elementary schema and sync it to Elementary Cloud whenever you sync your environment.
+
+The metric chart will be visible in the Metrics screen, along with all the metrics Elementary has collected.
+If a test was created for the metric, it will be visible in Elementary just like any other test.
+
+To include alerts on Metrics Tests in your alert rules, simply edit your alert rule and check the box "Cloud content tests" under "Test Categories".
