@@ -100,7 +100,7 @@
             "features/anomaly-detection/automated-volume"
           ]
         },
-        "features/anomaly-detection/opt-in-monitors",
+        "features/anomaly-detection/metrics",
         {
         "group": "Configuration and Feedback",
         "pages": [
