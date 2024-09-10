@@ -87,6 +87,63 @@ def test_test_runs_are_sorted():
             assert invocation_times == sorted_invocation_times
 
 
+def test_report_tests():
+    report_data = get_report_data()
+    tests = report_data.get("tests")
+    test_results = report_data.get("test_results")
+
+    assert_test_with_results_included_in_the_tests(tests, test_results)
+    assert_test_without_results_do_not_have_results_dependent_fields(
+        tests, test_results
+    )
+
+
+def _get_test_unique_ids_with_results(test_results):
+    return [
+        result["metadata"]["test_unique_id"]
+        for results in test_results.values()
+        for result in results
+    ]
+
+
+def assert_test_with_results_included_in_the_tests(tests, test_results):
+    test_unique_ids_with_results = _get_test_unique_ids_with_results(test_results)
+    assert all(
+        test_unique_id in tests for test_unique_id in test_unique_ids_with_results
+    )
+
+
+def assert_test_without_results_do_not_have_results_dependent_fields(
+    tests, test_results
+):
+    test_unique_ids_with_results = _get_test_unique_ids_with_results(test_results)
+    test_unique_ids_with_no_results = [
+        test_unique_id
+        for test_unique_id in tests
+        if test_unique_id not in test_unique_ids_with_results
+    ]
+    assert all(
+        tests[test_unique_id]["test_type"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["test_sub_type"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["created_at"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["latest_run_time"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["latest_run_status"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+
+
 # This test currently uses fixed data points that are unmaintainable upon adding tests.
 # def test_duplicate_rows_for_latest_run_status(warehouse_type):
 #     report_data = get_report_data()
