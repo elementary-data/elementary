@@ -502,7 +502,7 @@
       "destination": "/features/collaboration-and-communication/catalog"
     },
     {
-      "source": "/features/collaboration-and-communication/data-observability-dashboard",
+      "source": "/features/data-observability-dashboard",
       "destination": "/features/collaboration-and-communication/data-observability-dashboard"
     }
   ]
