@@ -1,7 +1,7 @@
 import re
 import statistics
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List, Optional, Union, cast
+from typing import DefaultDict, Dict, List, Optional, Union, cast
 
 from dateutil import tz
 
@@ -17,6 +17,12 @@ from elementary.monitor.api.tests.schema import (
     TestResultSummarySchema,
     TestRunSchema,
     TestSchema,
+)
+from elementary.monitor.api.tests.utils import (
+    get_display_name,
+    get_normalized_full_path,
+    get_table_full_name,
+    get_test_configuration,
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -313,26 +319,17 @@ class TestsAPI(APIClient):
     def _get_test_metadata_from_test_result_db_row(
         test_result_db_row: TestResultDBRowSchema,
     ) -> TestMetadataSchema:
-        test_display_name = (
-            test_result_db_row.test_name.replace("_", " ").title()
-            if test_result_db_row.test_name
-            else ""
-        )
+        test_display_name = get_display_name(test_result_db_row.test_name)
         detected_at_datetime = convert_utc_iso_format_to_datetime(
             test_result_db_row.detected_at
         )
         detected_at_utc = detected_at_datetime
         detected_at = detected_at_datetime.astimezone(tz.tzlocal())
-        table_full_name_parts = [
-            name
-            for name in [
-                test_result_db_row.database_name,
-                test_result_db_row.schema_name,
-                test_result_db_row.table_name,
-            ]
-            if name
-        ]
-        table_full_name = ".".join(table_full_name_parts).lower()
+        table_full_name = get_table_full_name(
+            test_result_db_row.database_name,
+            test_result_db_row.schema_name,
+            test_result_db_row.table_name,
+        )
         test_params = test_result_db_row.test_params
         test_query = (
             test_result_db_row.test_results_query.strip()
@@ -345,23 +342,11 @@ class TestsAPI(APIClient):
             result_query=test_query,
         )
 
-        configuration: Dict[str, Any]
-        if test_result_db_row.test_type == "dbt_test":
-            configuration = dict(
-                test_name=test_result_db_row.test_name,
-                test_params=test_params,
-            )
-        else:
-            time_bucket_configuration = test_params.get("time_bucket", {})
-            time_bucket_count = time_bucket_configuration.get("count", 1)
-            time_bucket_period = time_bucket_configuration.get("period", "day")
-            configuration = dict(
-                test_name=test_result_db_row.test_name,
-                timestamp_column=test_params.get("timestamp_column"),
-                testing_timeframe=f"{time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
-                anomaly_threshold=test_params.get("sensitivity")
-                or test_params.get("anomaly_sensitivity"),
-            )
+        configuration = get_test_configuration(
+            test_type=test_result_db_row.test_type,
+            name=test_result_db_row.test_name,
+            test_params=test_params,
+        )
 
         return TestMetadataSchema(
             test_unique_id=test_result_db_row.test_unique_id,
@@ -387,61 +372,10 @@ class TestsAPI(APIClient):
             result=result,
             configuration=configuration,
             test_tags=test_result_db_row.test_tags,
-            normalized_full_path=test_result_db_row.normalized_full_path,
+            normalized_full_path=get_normalized_full_path(
+                test_result_db_row.package_name, test_result_db_row.original_path
+            ),
         )
-
-    @staticmethod
-    def _get_table_full_name(
-        database_name: Optional[str],
-        schema_name: Optional[str],
-        table_name: Optional[str],
-    ) -> str:
-        table_full_name_parts = [
-            name
-            for name in [
-                database_name,
-                schema_name,
-                table_name,
-            ]
-            if name
-        ]
-        table_full_name = ".".join(table_full_name_parts).lower()
-        return table_full_name
-
-    @staticmethod
-    def _get_display_name(test_name: str) -> str:
-        return test_name.replace("_", " ").title()
-
-    @staticmethod
-    def _get_test_configuration(
-        test_type: Optional[str], name: str, test_params: Dict
-    ) -> Dict[str, Any]:
-        if test_type is None:
-            return dict()
-        if test_type == "dbt_test":
-            return dict(
-                test_name=name,
-                test_params=test_params,
-            )
-        else:
-            time_bucket_configuration = test_params.get("time_bucket", {})
-            time_bucket_count = time_bucket_configuration.get("count", 1)
-            time_bucket_period = time_bucket_configuration.get("period", "day")
-            return dict(
-                test_name=name,
-                timestamp_column=test_params.get("timestamp_column"),
-                testing_timeframe=f"{time_bucket_count} {time_bucket_period}{'s' if time_bucket_count > 1 else ''}",
-                anomaly_threshold=test_params.get("sensitivity")
-                or test_params.get("anomaly_sensitivity"),
-            )
-
-    @staticmethod
-    def _get_normalized_full_path(
-        package_name: Optional[str], original_path: Optional[str]
-    ) -> Optional[str]:
-        if package_name:
-            return f"{package_name}/{original_path}"
-        return original_path
 
     @classmethod
     def _parse_test_db_row(cls, test_db_row: TestDBRowSchema) -> TestSchema:
@@ -454,7 +388,7 @@ class TestsAPI(APIClient):
         return TestSchema(
             unique_id=test_db_row.unique_id,
             model_unique_id=test_db_row.model_unique_id,
-            table_unique_id=cls._get_table_full_name(
+            table_unique_id=get_table_full_name(
                 test_db_row.database_name,
                 test_db_row.schema_name,
                 test_db_row.table_name,
@@ -464,18 +398,18 @@ class TestsAPI(APIClient):
             table_name=test_db_row.table_name,
             column_name=test_db_row.column_name,
             name=test_db_row.name,
-            display_name=cls._get_display_name(test_db_row.name),
+            display_name=get_display_name(test_db_row.name),
             original_path=test_db_row.original_path,
             type=test_db_row.type,
             test_type=test_db_row.test_type,
             test_sub_type=test_db_row.test_sub_type,
             test_params=test_db_row.test_params,
             description=test_db_row.meta.get("description"),
-            configuration=cls._get_test_configuration(
+            configuration=get_test_configuration(
                 test_db_row.test_type, test_db_row.name, test_db_row.test_params
             ),
             tags=list(set(test_db_row.tags + test_db_row.model_tags)),
-            normalized_full_path=cls._get_normalized_full_path(
+            normalized_full_path=get_normalized_full_path(
                 test_db_row.package_name, test_db_row.original_path
             ),
             created_at=test_db_row.created_at if test_db_row.created_at else None,

@@ -100,12 +100,6 @@ class TestResultDBRowSchema(ExtendedBaseModel):
         # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None
 
-    @property
-    def normalized_full_path(self) -> str:
-        if self.package_name:
-            return f"{self.package_name}/{self.original_path}"
-        return self.original_path
-
 
 class TestDBRowSchema(ExtendedBaseModel):
     unique_id: str
