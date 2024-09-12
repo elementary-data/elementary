@@ -28,7 +28,11 @@ from elementary.monitor.api.source_freshnesses.schema import (
 from elementary.monitor.api.source_freshnesses.source_freshnesses import (
     SourceFreshnessesAPI,
 )
-from elementary.monitor.api.tests.schema import TestResultSchema, TestRunSchema
+from elementary.monitor.api.tests.schema import (
+    TestResultSchema,
+    TestRunSchema,
+    TestSchema,
+)
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
@@ -103,6 +107,7 @@ class ReportAPI(APIClient):
             )
             coverages = models_api.get_test_coverages()
 
+            tests = tests_api.get_tests()
             test_invocation = invocations_api.get_test_invocation_from_filter(filter)
 
             test_results = tests_api.get_test_results(
@@ -149,6 +154,7 @@ class ReportAPI(APIClient):
                 "totals"
             ]
             serializable_models_coverages = self._serialize_coverages(coverages)
+            serializable_tests = self._serialize_tests(tests)
             serializable_test_results = self._serialize_test_results(union_test_results)
             serializable_test_results_totals = self._serialize_totals(
                 test_results_totals
@@ -175,6 +181,7 @@ class ReportAPI(APIClient):
                 days_back=days_back,
                 models=serializable_models,
                 groups=serializable_groups,
+                tests=serializable_tests,
                 invocation=serializable_invocation,
                 test_results=serializable_test_results,
                 test_results_totals=serializable_test_results_totals,
@@ -229,6 +236,12 @@ class ReportAPI(APIClient):
                 [result.dict() for result in test_result]
             )
         return serializable_test_results
+
+    def _serialize_tests(self, tests: Dict[str, TestSchema]) -> Dict[str, dict]:
+        serializable_tests = dict()
+        for key, test in tests.items():
+            serializable_tests[key] = test.dict()
+        return serializable_tests
 
     def _serialize_test_runs(
         self,

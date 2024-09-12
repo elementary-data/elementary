@@ -67,6 +67,31 @@ class TestMetadataSchema(BaseModel):
     normalized_full_path: Optional[str] = None
 
 
+class TestSchema(BaseModel):
+    unique_id: str
+    model_unique_id: Optional[str] = None
+    table_unique_id: Optional[str] = None
+    database_name: Optional[str] = None
+    schema_name: str
+    table_name: Optional[str] = None
+    column_name: Optional[str] = None
+    name: str
+    display_name: str
+    original_path: Optional[str] = None
+    type: str
+    test_type: Optional[str] = None
+    test_sub_type: Optional[str] = None
+    test_params: dict
+    description: Optional[str] = None
+    configuration: dict
+    tags: List[str] = Field(default_factory=list)
+    normalized_full_path: Optional[str] = None
+    created_at: Optional[str] = None
+    latest_run_time: Optional[str] = None
+    latest_run_time_utc: Optional[str] = None
+    latest_run_status: Optional[str] = None
+
+
 class TestResultSchema(BaseModel):
     metadata: TestMetadataSchema
     test_results: Union[DbtTestResultSchema, ElementaryTestResultSchema]

@@ -15,6 +15,7 @@ class ReportDataSchema(BaseModel):
     models: dict = dict()
     groups: dict = dict()
     invocation: dict = dict()
+    tests: dict = dict()
     test_results: dict = dict()
     test_results_totals: dict = dict()
     test_runs: dict = dict()

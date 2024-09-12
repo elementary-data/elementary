@@ -1,4 +1,7 @@
-from elementary.monitor.fetchers.tests.schema import TestResultDBRowSchema
+from elementary.monitor.fetchers.tests.schema import (
+    TestDBRowSchema,
+    TestResultDBRowSchema,
+)
 from elementary.monitor.fetchers.tests.tests import TestsFetcher
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
@@ -182,3 +185,53 @@ class MockTestsFetcher(TestsFetcher):
             ),
         ]
         return [*ELEMENTARY_TEST_RESULT_DB_ROWS, *DBT_TEST_RESULT_DB_ROWS]
+
+    def get_tests(self):
+        return [
+            TestDBRowSchema(
+                unique_id="test_id_1",
+                model_unique_id="model_id_1",
+                database_name="test_db",
+                schema_name="test_schema",
+                table_name="table",
+                column_name=None,
+                name="the_test_1",
+                description="This is a fine test",
+                package_name="elementary",
+                original_path="tests/elementary/tests/test_elementary.py",
+                test_params='{"table_anomalies": ["row_count"], "time_bucket": {"period": "hour", "count": 1}, "model": "{{ get_where_subquery(ref(\'customers\')) }}", "sensitivity": 3, "timestamp_column": "signup_date", "backfill_days": 2}',
+                meta='{ "subscribers": ["@jeff", "joe"], "alert_fields": ["table", "column", "description"] }',
+                model_meta="{}",
+                tags='["awesome", "awesome-o"]',
+                model_tags='["awesome"]',
+                type="generic",
+                test_type="anomaly_detection",
+                test_sub_type="row_count",
+                created_at="2023-01-01 09:00:00",
+                latest_run_time="2023-01-01 10:00:00",
+                latest_run_status="fail",
+            ),
+            TestDBRowSchema(
+                unique_id="test_id_2",
+                model_unique_id="model_id_2",
+                database_name="test_db",
+                schema_name="test_schema",
+                table_name="table",
+                column_name=None,
+                name="the_tests_2",
+                description="This is a fine test",
+                package_name="elementary",
+                original_path="tests/elementary/tests/test_elementary.py",
+                test_params='{"table_anomalies": ["freshness"], "time_bucket": {"period": "hour", "count": 1}, "model": "{{ get_where_subquery(ref(\'customers\')) }}", "sensitivity": 3, "timestamp_column": "signup_date", "backfill_days": 2}',
+                meta='{ "subscribers": ["@jeff", "joe"], "alert_fields": ["table", "column", "description"] }',
+                model_meta="{}",
+                tags="[]",
+                model_tags="[]",
+                type="generic",
+                test_type="anomaly_detection",
+                test_sub_type="freshness",
+                created_at="2023-01-01 09:00:00",
+                latest_run_time="2023-01-01 10:00:00",
+                latest_run_status="fail",
+            ),
+        ]

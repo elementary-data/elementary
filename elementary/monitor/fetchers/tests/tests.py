@@ -5,6 +5,7 @@ from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.monitor.fetchers.tests.schema import (
     NormalizedTestSchema,
+    TestDBRowSchema,
     TestResultDBRowSchema,
 )
 from elementary.utils.log import get_logger
@@ -55,3 +56,11 @@ class TestsFetcher(FetcherClient):
             for test_result in test_results
         ]
         return test_results
+
+    def get_tests(self) -> List[TestDBRowSchema]:
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="elementary_cli.get_tests"
+        )
+        return [
+            TestDBRowSchema(**test) for test in json.loads(run_operation_response[0])
+        ]
