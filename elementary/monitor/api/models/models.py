@@ -14,6 +14,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedExposureSchema,
     NormalizedModelSchema,
     NormalizedSeedSchema,
+    NormalizedSnapshotSchema,
     NormalizedSourceSchema,
     TotalsModelRunsSchema,
 )
@@ -26,6 +27,7 @@ from elementary.monitor.fetchers.models.schema import (
 from elementary.monitor.fetchers.models.schema import (
     ModelSchema,
     SeedSchema,
+    SnapshotSchema,
     SourceSchema,
 )
 from elementary.utils.log import get_logger
@@ -36,6 +38,7 @@ logger = get_logger(__name__)
 class ModelsAPI(APIClient):
     _ARTIFACT_TYPE_DIR_MAP = {
         SeedSchema: "seeds",
+        SnapshotSchema: "snapshots",
         SourceSchema: "sources",
         ModelSchema: "models",
         ExposureSchema: "exposures",
@@ -132,6 +135,18 @@ class ModelsAPI(APIClient):
                 seed_unique_id = cast(str, normalized_seed.unique_id)
                 seeds[seed_unique_id] = normalized_seed
         return seeds
+
+    def get_snapshots(self) -> Dict[str, NormalizedSnapshotSchema]:
+        snapshot_results = self.models_fetcher.get_snapshots()
+        snapshots = dict()
+        if snapshot_results:
+            for snapshot_result in snapshot_results:
+                logger.info(f"3 ----- snapshot_result: {snapshot_result}")
+                normalized_snapshot = self._normalize_dbt_artifact_dict(snapshot_result)
+                snapshot_unique_id = cast(str, normalized_snapshot.unique_id)
+                logger.info(f"4 ----- snapshot_unique_id: {snapshot_unique_id}")
+                snapshots[snapshot_unique_id] = normalized_snapshot
+        return snapshots
 
     def get_models(
         self, exclude_elementary_models: bool = False
@@ -241,6 +256,12 @@ class ModelsAPI(APIClient):
 
     @overload
     def _normalize_dbt_artifact_dict(
+        self, artifact: SnapshotSchema
+    ) -> NormalizedSnapshotSchema:
+        ...
+
+    @overload
+    def _normalize_dbt_artifact_dict(
         self, artifact: ModelSchema
     ) -> NormalizedModelSchema:
         ...
@@ -258,15 +279,20 @@ class ModelsAPI(APIClient):
         ...
 
     def _normalize_dbt_artifact_dict(
-        self, artifact: Union[SeedSchema, ModelSchema, ExposureSchema, SourceSchema]
+        self,
+        artifact: Union[
+            SeedSchema, SnapshotSchema, ModelSchema, ExposureSchema, SourceSchema
+        ],
     ) -> Union[
         NormalizedSeedSchema,
+        NormalizedSnapshotSchema,
         NormalizedModelSchema,
         NormalizedExposureSchema,
         NormalizedSourceSchema,
     ]:
         schema_to_normalized_schema_map = {
             SeedSchema: NormalizedSeedSchema,
+            SnapshotSchema: NormalizedSnapshotSchema,
             ExposureSchema: NormalizedExposureSchema,
             ModelSchema: NormalizedModelSchema,
             SourceSchema: NormalizedSourceSchema,
@@ -308,7 +334,9 @@ class ModelsAPI(APIClient):
     @classmethod
     def _fqn(
         cls,
-        artifact: Union[ModelSchema, ExposureSchema, SourceSchema, SeedSchema],
+        artifact: Union[
+            ModelSchema, ExposureSchema, SourceSchema, SeedSchema, SnapshotSchema
+        ],
     ) -> str:
         if isinstance(artifact, ExposureSchema):
             path = (artifact.meta or {}).get("path")

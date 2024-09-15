@@ -55,6 +55,12 @@ class ArtifactSchema(ExtendedBaseModel):
 ArtifactSchemaType = TypeVar("ArtifactSchemaType", bound=ArtifactSchema)
 
 
+class SnapshotSchema(ArtifactSchema):
+    database_name: Optional[str] = None
+    schema_name: str
+    table_name: str
+
+
 class SeedSchema(ArtifactSchema):
     database_name: Optional[str] = None
     schema_name: str
