@@ -17,7 +17,7 @@ def test_report_keys(report_data_fixture):
     assert sorted(list(report_data.keys())) == sorted(list(report_data_fixture.keys()))
 
 
-def test_group():
+def test_group():  # deprecated
     report_data = get_report_data()
     assert {
         "node_id": "model.elementary_integration_tests.error_model",
@@ -59,6 +59,58 @@ def test_group():
         "node_id": "model.elementary_integration_tests.string_column_anomalies",
         "resource_type": "model",
     } not in report_data["groups"]["tags"]["No tags"]
+
+
+def test_group_views():
+    report_data = get_report_data()
+    groups = report_data.get("groups")
+
+    assert "bi_assets" in groups
+    assert groups["bi_assets"] is None
+
+    assert "data_assets" in groups
+    data_assets_group = groups["data_assets"]
+    assert len(data_assets_group) == 4
+    assert data_assets_group[0]["name"] == "dwh"
+    dwh_view = data_assets_group[0]["data"]
+    assert data_assets_group[1]["name"] == "dbt"
+    dbt_view = data_assets_group[1]["data"]
+    assert data_assets_group[2]["name"] == "tags"
+    tags_view = data_assets_group[2]["data"]
+    assert data_assets_group[3]["name"] == "owners"
+    owners_view = data_assets_group[3]["data"]
+
+    assert "postgres" in dwh_view
+    assert {
+        "node_id": "model.elementary_integration_tests.error_model",
+        "resource_type": "model",
+    } in dbt_view["elementary_integration_tests"]["models"]["__files__"]
+    assert {
+        "node_id": "model.elementary_integration_tests.nested",
+        "resource_type": "model",
+    } in dbt_view["elementary_integration_tests"]["models"]["nested"]["models"]["tree"][
+        "__files__"
+    ]
+    assert {
+        "node_id": "source.elementary_integration_tests.training.any_type_column_anomalies_training",
+        "resource_type": "source",
+    } in dbt_view["elementary_integration_tests"]["sources"]["__files__"]
+    assert {
+        "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
+        "resource_type": "model",
+    } in owners_view["@edr"]
+    assert {
+        "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
+        "resource_type": "model",
+    } not in owners_view["No owners"]
+    assert {
+        "node_id": "model.elementary_integration_tests.string_column_anomalies",
+        "resource_type": "model",
+    } in tags_view["marketing"]
+    assert {
+        "node_id": "model.elementary_integration_tests.string_column_anomalies",
+        "resource_type": "model",
+    } not in tags_view["No tags"]
 
 
 def test_duplicate_test_runs():
