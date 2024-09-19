@@ -42,11 +42,9 @@ class GroupsAPI(APIClient):
         dbt_group = self.get_normalized_full_path_view(artifacts)
         tags_group = self.get_tags_view(artifacts)
         owners_group = self.get_owners_view(artifacts)
-        dwh_group = self.get_dwh_view(artifacts)
 
         return GroupsSchema(
             dbt=dbt_group,
-            dwh=dwh_group,
             tags=tags_group,
             owners=owners_group,
             data_assets=data_assets_group,
