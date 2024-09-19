@@ -26,5 +26,3 @@ class GroupsSchema(BaseModel):
     dbt: TreeGroupSchema = dict()
     tags: TagsGroupSchema = dict()
     owners: OwnersGroupSchema = dict()
-    dwh: TreeGroupSchema = dict()
-    bi: Optional[TreeGroupSchema] = None
