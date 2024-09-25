@@ -29,7 +29,7 @@ These can be set in the [Incidents page](/features/alerts-and-incidents/incident
 <Frame>
 <div className="dark:bg-white rounded-md p-1">
   <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1719927516/incidents_ducynb.png"
+    src="https://res.cloudinary.com/dvmtceykh/image/upload/v1727264653/Incident_MGT_Overview_tfmrtj.png"
     alt="Elementary Incidents"
   />
 </div>
@@ -50,4 +50,26 @@ Different failures and warnings are grouped to the same incident by the followin
 
 ## Incident deep dive
 
-_ _Coming soon_ _
+Clicking on an incident will open the test overview side panel, showing the following information:
+1. Test owner, tags and subscribers (if the incident is a model failure, the model owner, tags and subscribers will be shown).
+2. The execution history of the test / model, including the following information on each execution:
+   - Execution time
+   - Result (pass / fail / warning, etc)
+   - If the test failed -
+        - a sample of the failed rows
+        - The Slack channel where the alert was sent
+   - For anomaly tests - the result chart
+   - Compiled query
+3. Configuration of the test / model - the Yaml or SQL code of the test / model. For cloud tests, the configuration is also editable.
+
+
+You can also see the list of upstream and downstream assets - if the test is a column test you can see the upstream and downstream columns, if it's a table test you can see the upstream and downstream tables.
+
+<Frame>
+<div className="dark:bg-white rounded-md p-1">
+  <img
+    src="https://res.cloudinary.com/dvmtceykh/image/upload/v1727259579/Group_27036_ld1xad.png"
+    alt="Elementary Test Overview side panel"
+  />
+</div>
+</Frame>
