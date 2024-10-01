@@ -210,8 +210,8 @@ jobs:
           --aws-access-key-id "$AWS_ACCESS_KEY_ID"
           --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY"
           --s3-bucket-name elementary-ci-artifacts
-          --google-service-account-path /tmp/gcs_keyfile.json
-          --gcs-bucket-name elementary_ci_artifacts
+          # --google-service-account-path /tmp/gcs_keyfile.json
+          # --gcs-bucket-name elementary_ci_artifacts
           --azure-connection-string "$AZURE_CONNECTION_STRING"
           --azure-container-name reports
           --update-bucket-website true

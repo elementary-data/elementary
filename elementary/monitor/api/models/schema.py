@@ -6,6 +6,7 @@ from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.fetchers.models.schema import (
     ExposureSchema,
     ModelSchema,
+    SeedSchema,
     SourceSchema,
 )
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
@@ -33,6 +34,11 @@ class NormalizedArtifactSchema(ExtendedBaseModel):
     @validator("normalized_full_path", pre=True)
     def format_normalized_full_path_sep(cls, normalized_full_path: str) -> str:
         return posixpath.sep.join(normalized_full_path.split(os.path.sep))
+
+
+# NormalizedArtifactSchema must be first in the inheritance order
+class NormalizedSeedSchema(NormalizedArtifactSchema, SeedSchema):
+    artifact_type: str = Field("seed", const=True)  # type: ignore  # noqa
 
 
 # NormalizedArtifactSchema must be first in the inheritance order

@@ -1,5 +1,5 @@
 packages:
-  - local: ../../
+  - local: ../../../elementary/monitor/dbt_project
   - package: dbt-labs/dbt_utils
     version: |
       {%- set minor_to_utils_range_map = {

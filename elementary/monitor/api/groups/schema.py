@@ -13,9 +13,16 @@ TagsGroupSchema = Dict[str, List[GroupItemSchema]]
 OwnersGroupSchema = Dict[str, List[GroupItemSchema]]
 
 
+class TreeViewSchema(BaseModel):
+    name: str
+    data: Dict[str, Any]
+
+
 class GroupsSchema(BaseModel):
+    data_assets: List[TreeViewSchema] = []
+    bi_assets: Optional[List[TreeViewSchema]] = None
+
+    # deprecated
     dbt: TreeGroupSchema = dict()
     tags: TagsGroupSchema = dict()
     owners: OwnersGroupSchema = dict()
-    dwh: TreeGroupSchema = dict()
-    bi: Optional[TreeGroupSchema] = None

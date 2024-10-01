@@ -9,6 +9,7 @@ from elementary.clients.dbt.command_line_dbt_runner import (
     CommandLineDbtRunner,
     DbtCommandResult,
 )
+from elementary.clients.dbt.dbt_log import DbtLog
 from elementary.exceptions.exceptions import DbtCommandError
 from elementary.utils.cwd import with_chdir
 from elementary.utils.env_vars_context import env_vars_context
@@ -40,7 +41,7 @@ class APIDbtRunner(CommandLineDbtRunner):
         dbt_logs = []
 
         def collect_dbt_command_logs(event):
-            if event.info.name == "JinjaLogInfo":
+            if event.info.name in ["JinjaLogInfo", "RunningOperationCaughtError"]:
                 event_dump = json.dumps(MessageToDict(event))  # type: ignore[arg-type]
                 dbt_logs.append(event_dump)
 
@@ -53,6 +54,7 @@ class APIDbtRunner(CommandLineDbtRunner):
             raise DbtCommandError(
                 base_command_args=dbt_command_args,
                 err_msg=(str(res.exception) if res.exception else output),
+                logs=[DbtLog.from_log_line(log) for log in dbt_logs],
             )
 
         return APIDbtCommandResult(success=res.success, output=output, result_obj=res)

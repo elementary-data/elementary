@@ -17,7 +17,7 @@ def test_report_keys(report_data_fixture):
     assert sorted(list(report_data.keys())) == sorted(list(report_data_fixture.keys()))
 
 
-def test_group():
+def test_group():  # deprecated
     report_data = get_report_data()
     assert {
         "node_id": "model.elementary_integration_tests.error_model",
@@ -61,6 +61,58 @@ def test_group():
     } not in report_data["groups"]["tags"]["No tags"]
 
 
+def test_group_views():
+    report_data = get_report_data()
+    groups = report_data.get("groups")
+
+    assert "bi_assets" in groups
+    assert groups["bi_assets"] is None
+
+    assert "data_assets" in groups
+    data_assets_group = groups["data_assets"]
+    assert len(data_assets_group) == 4
+    assert data_assets_group[0]["name"] == "dwh"
+    dwh_view = data_assets_group[0]["data"]
+    assert data_assets_group[1]["name"] == "dbt"
+    dbt_view = data_assets_group[1]["data"]
+    assert data_assets_group[2]["name"] == "tags"
+    tags_view = data_assets_group[2]["data"]
+    assert data_assets_group[3]["name"] == "owners"
+    owners_view = data_assets_group[3]["data"]
+
+    assert "postgres" in dwh_view
+    assert {
+        "node_id": "model.elementary_integration_tests.error_model",
+        "resource_type": "model",
+    } in dbt_view["elementary_integration_tests"]["models"]["__files__"]
+    assert {
+        "node_id": "model.elementary_integration_tests.nested",
+        "resource_type": "model",
+    } in dbt_view["elementary_integration_tests"]["models"]["nested"]["models"]["tree"][
+        "__files__"
+    ]
+    assert {
+        "node_id": "source.elementary_integration_tests.training.any_type_column_anomalies_training",
+        "resource_type": "source",
+    } in dbt_view["elementary_integration_tests"]["sources"]["__files__"]
+    assert {
+        "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
+        "resource_type": "model",
+    } in owners_view["@edr"]
+    assert {
+        "node_id": "model.elementary_integration_tests.any_type_column_anomalies",
+        "resource_type": "model",
+    } not in owners_view["No owners"]
+    assert {
+        "node_id": "model.elementary_integration_tests.string_column_anomalies",
+        "resource_type": "model",
+    } in tags_view["marketing"]
+    assert {
+        "node_id": "model.elementary_integration_tests.string_column_anomalies",
+        "resource_type": "model",
+    } not in tags_view["No tags"]
+
+
 def test_duplicate_test_runs():
     report_data = get_report_data()
     test_runs = report_data.get("test_runs")
@@ -85,6 +137,63 @@ def test_test_runs_are_sorted():
             sorted_invocation_times = [*invocation_times]
             sorted_invocation_times.sort()
             assert invocation_times == sorted_invocation_times
+
+
+def test_report_tests():
+    report_data = get_report_data()
+    tests = report_data.get("tests")
+    test_results = report_data.get("test_results")
+
+    assert_test_with_results_included_in_the_tests(tests, test_results)
+    assert_test_without_results_do_not_have_results_dependent_fields(
+        tests, test_results
+    )
+
+
+def _get_test_unique_ids_with_results(test_results):
+    return [
+        result["metadata"]["test_unique_id"]
+        for results in test_results.values()
+        for result in results
+    ]
+
+
+def assert_test_with_results_included_in_the_tests(tests, test_results):
+    test_unique_ids_with_results = _get_test_unique_ids_with_results(test_results)
+    assert all(
+        test_unique_id in tests for test_unique_id in test_unique_ids_with_results
+    )
+
+
+def assert_test_without_results_do_not_have_results_dependent_fields(
+    tests, test_results
+):
+    test_unique_ids_with_results = _get_test_unique_ids_with_results(test_results)
+    test_unique_ids_with_no_results = [
+        test_unique_id
+        for test_unique_id in tests
+        if test_unique_id not in test_unique_ids_with_results
+    ]
+    assert all(
+        tests[test_unique_id]["test_type"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["test_sub_type"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["created_at"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["latest_run_time"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
+    assert all(
+        tests[test_unique_id]["latest_run_status"] is None
+        for test_unique_id in test_unique_ids_with_no_results
+    )
 
 
 # This test currently uses fixed data points that are unmaintainable upon adding tests.
