@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Union, cast
 
 from packaging import version
 
@@ -58,7 +58,7 @@ class DataMonitoring:
         self.selector_filter = selector_filter
 
     def _init_internal_dbt_runner(self):
-        internal_dbt_runner = create_dbt_runner(
+        return create_dbt_runner(
             dbt_project_utils.CLI_DBT_PROJECT_PATH,
             self.config.profiles_dir,
             self.config.profile_target,
@@ -66,13 +66,9 @@ class DataMonitoring:
             run_deps_if_needed=self.config.run_dbt_deps_if_needed,
             force_dbt_deps=self.force_update_dbt_package,
         )
-        return internal_dbt_runner
 
     def properties(self):
-        data_monitoring_properties = {
-            "data_monitoring_properties": self.execution_properties
-        }
-        return data_monitoring_properties
+        return {"data_monitoring_properties": self.execution_properties}
 
     def get_elementary_database_and_schema(self):
         try:
@@ -82,7 +78,7 @@ class DataMonitoring:
             logger.info(f"Elementary's database and schema: '{relation}'")
             return relation
         except Exception as ex:
-            logger.error("Failed to parse Elementary's database and schema.")
+            logger.error(f"Failed to parse Elementary's database and schema: {str(ex)}")
             if self.tracking:
                 self.tracking.record_internal_exception(ex)
             return "<elementary_database>.<elementary_schema>"
@@ -94,7 +90,7 @@ class DataMonitoring:
             )[0]
             return json.loads(latest_invocation)[0] if latest_invocation else {}
         except Exception as err:
-            logger.error(f"Unable to get the latest invocation: {err}")
+            logger.error(f"Unable to get the latest invocation: {str(err)}")
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             return {}
@@ -106,33 +102,16 @@ class DataMonitoring:
             logger.warning("Could not get package version!")
             return
 
-        dbt_pkg_ver = cast(version.Version, version.parse(dbt_pkg_ver_str))
-        py_pkg_ver = cast(version.Version, version.parse(py_pkg_ver_str))
-        if dbt_pkg_ver.major > py_pkg_ver.major or (
-            dbt_pkg_ver.major == py_pkg_ver.major
-            and dbt_pkg_ver.minor > py_pkg_ver.minor
-        ):
-            logger.warning(
-                f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
-                "To fix please run:\n"
-                "pip install --upgrade elementary-data\n",
-            )
-            return
+        dbt_pkg_ver, py_pkg_ver = map(version.parse, [dbt_pkg_ver_str, py_pkg_ver_str])
 
-        if dbt_pkg_ver.major < py_pkg_ver.major or (
-            dbt_pkg_ver.major == py_pkg_ver.major
-            and dbt_pkg_ver.minor < py_pkg_ver.minor
-        ):
+        if dbt_pkg_ver != py_pkg_ver:
+            action = "upgrade" if dbt_pkg_ver > py_pkg_ver else "update"
             logger.warning(
-                f"You are using incompatible versions between edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}).\n "
-                "To fix please update your packages.yml, and run:\n"
-                "dbt deps && dbt run --select elementary\n",
+                f"Incompatible versions: edr ({py_pkg_ver}) vs dbt package ({dbt_pkg_ver}). "
+                f"Please {action} the package."
             )
-            return
-
-        logger.info(
-            f"edr ({py_pkg_ver}) and Elementary's dbt package ({dbt_pkg_ver}) are compatible."
-        )
+        else:
+            logger.info(f"Versions are compatible: {py_pkg_ver}")
 
     def _get_warehouse_info(self, hash_id: bool = False) -> Optional[WarehouseInfo]:
         try:
@@ -145,6 +124,6 @@ class DataMonitoring:
                 id=warehouse_unique_id if not hash_id else hash(warehouse_unique_id),
                 type=warehouse_type,
             )
-        except Exception:
-            logger.debug("Could not get warehouse info.", exc_info=True)
+        except Exception as ex:
+            logger.debug(f"Could not get warehouse info: {str(ex)}", exc_info=True)
             return None
