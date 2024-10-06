@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
-from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel

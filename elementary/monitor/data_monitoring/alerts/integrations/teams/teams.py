@@ -7,7 +7,7 @@ from pymsteams import cardsection, potentialaction  # type: ignore
 
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
-from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
