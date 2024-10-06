@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
-from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.grouped_alerts import AllInOneAlert, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -22,6 +22,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AllInOneAlert,
         ],
         *args,
         **kwargs
@@ -40,6 +41,8 @@ class BaseIntegration(ABC):
             return self._get_source_freshness_template(alert)
         elif isinstance(alert, GroupedByTableAlerts):
             return self._get_group_by_table_template(alert)
+        elif isinstance(alert, AllInOneAlert):
+            return self._get_all_in_one_template(alert)
 
     @abstractmethod
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
@@ -67,6 +70,10 @@ class BaseIntegration(ABC):
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_all_in_one_template(self, alert: AllInOneAlert, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
