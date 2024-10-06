@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union
+from typing import Dict, List, Union
 
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
@@ -30,6 +30,24 @@ class GroupedAlert:
             return "failure"
         else:
             return "warn"
+
+    @property
+    def data(self) -> List[Dict]:
+        return [alert.data for alert in self.alerts]
+
+    @property
+    def unified_meta(self) -> Dict:
+        model_unified_meta = dict()
+        test_unified_meta = dict()
+        for alert in self.alerts:
+            alert_unified_meta = alert.unified_meta
+            if alert_unified_meta:
+                if isinstance(alert, ModelAlertModel):
+                    model_unified_meta = alert_unified_meta
+                    break
+
+                test_unified_meta = alert_unified_meta
+        return model_unified_meta or test_unified_meta
 
     def _sort_alerts(self):
         for alert in self.alerts:
