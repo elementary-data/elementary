@@ -17,7 +17,44 @@ class GroupingType(Enum):
     BY_TABLE = "table"
 
 
-class GroupedByTableAlerts:
+class GroupedAlert:
+    def __init__(
+        self,
+        alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]],
+    ) -> None:
+        self.alerts = alerts
+        self.test_errors: List[Union[TestAlertModel, SourceFreshnessAlertModel]] = []
+        self.test_warnings: List[Union[TestAlertModel, SourceFreshnessAlertModel]] = []
+        self.test_failures: List[Union[TestAlertModel, SourceFreshnessAlertModel]] = []
+        self.model_errors: List[ModelAlertModel] = []
+        self._sort_alerts()
+
+    @property
+    def detected_at(self) -> datetime:
+        return min(alert.detected_at or datetime.max for alert in self.alerts)
+
+    @property
+    def status(self) -> str:
+        if self.model_errors or self.test_errors:
+            return "error"
+        elif self.test_failures:
+            return "failure"
+        else:
+            return "warn"
+
+    def _sort_alerts(self):
+        for alert in self.alerts:
+            if isinstance(alert, ModelAlertModel):
+                self.model_errors.append(alert)
+            elif alert.status == "error":
+                self.test_errors.append(alert)
+            elif alert.status == "warn":
+                self.test_warnings.append(alert)
+            else:
+                self.test_failures.append(alert)
+
+
+class GroupedByTableAlerts(GroupedAlert):
     def __init__(
         self,
         alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]],
@@ -36,11 +73,6 @@ class GroupedByTableAlerts:
     @property
     def model(self) -> str:
         return get_shortened_model_name(self.model_unique_id)
-
-    @property
-    def detected_at(self) -> datetime:
-        # We return the minimum alert detected at time as the group detected at time
-        return min(alert.detected_at or datetime.max for alert in self.alerts)
 
     @property
     def report_url(self) -> Optional[str]:
@@ -70,28 +102,8 @@ class GroupedByTableAlerts:
     def summary(self) -> str:
         return f"{self.model}: {len(self.alerts)} issues detected"
 
-    @property
-    def status(self) -> str:
-        if self.model_errors or self.test_errors:
-            return "error"
-        elif self.test_failures:
-            return "failure"
-        else:
-            return "warn"
-
     def get_report_link(self) -> Optional[ReportLinkData]:
         if not self.model_errors:
             return get_model_test_runs_link(self.report_url, self.model_unique_id)
 
         return None
-
-    def _sort_alerts(self):
-        for alert in self.alerts:
-            if isinstance(alert, ModelAlertModel):
-                self.model_errors.append(alert)
-            elif alert.status == "error":
-                self.test_errors.append(alert)
-            elif alert.status == "warn":
-                self.test_warnings.append(alert)
-            else:
-                self.test_failures.append(alert)
