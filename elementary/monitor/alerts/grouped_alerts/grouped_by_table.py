@@ -1,9 +1,7 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from elementary.monitor.alerts.grouped_alerts.grouped_alert import GroupedAlert
 from elementary.monitor.alerts.model_alert import ModelAlertModel
-from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
-from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
     get_model_test_runs_link,
@@ -12,17 +10,6 @@ from elementary.utils.models import get_shortened_model_name
 
 
 class GroupedByTableAlerts(GroupedAlert):
-    def __init__(
-        self,
-        alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]],
-    ) -> None:
-        self.alerts = alerts
-        self.test_errors: List[Union[TestAlertModel, SourceFreshnessAlertModel]] = []
-        self.test_warnings: List[Union[TestAlertModel, SourceFreshnessAlertModel]] = []
-        self.test_failures: List[Union[TestAlertModel, SourceFreshnessAlertModel]] = []
-        self.model_errors: List[ModelAlertModel] = []
-        self._sort_alerts()
-
     @property
     def model_unique_id(self) -> Optional[str]:
         return self.alerts[0].model_unique_id
