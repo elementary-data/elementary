@@ -201,6 +201,12 @@ def get_cli_properties() -> dict:
     help="DEPRECATED! - A slack webhook URL for sending alerts to a specific channel.",
 )
 @click.option(
+    "--group-all-alerts-threshold",
+    type=int,
+    default=100,
+    help="The threshold for grouping all alerts in a single message.",
+)
+@click.option(
     "--timezone",
     "-tz",
     type=str,
@@ -276,6 +282,7 @@ def monitor(
     deprecated_slack_webhook,
     slack_token,
     slack_channel_name,
+    group_all_alerts_threshold,
     timezone,
     config_dir,
     profiles_dir,
@@ -322,6 +329,7 @@ def monitor(
         slack_webhook=slack_webhook,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
+        group_all_alerts_threshold=group_all_alerts_threshold,
         timezone=timezone,
         env=env,
         slack_group_alerts_by=group_by,

@@ -7,7 +7,7 @@ from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError  # type: ignore[import]
 
 from elementary.exceptions.exceptions import InvalidArgumentsError
-from elementary.monitor.alerts.group_of_alerts import GroupingType
+from elementary.monitor.alerts.grouped_alerts import GroupingType
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
@@ -49,6 +49,7 @@ class Config:
         slack_token: Optional[str] = None,
         slack_channel_name: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
+        group_all_alerts_threshold: Optional[int] = None,
         timezone: Optional[str] = None,
         aws_profile_name: Optional[str] = None,
         aws_region_name: Optional[str] = None,
@@ -123,6 +124,10 @@ class Config:
             slack_group_alerts_by,
             slack_config.get("group_alerts_by"),
             GroupingType.BY_ALERT.value,
+        )
+        self.group_all_alerts_threshold = self._first_not_none(
+            group_all_alerts_threshold,
+            slack_config.get("group_all_alerts_threshold"),
         )
 
         teams_config = config.get(self._TEAMS, {})
