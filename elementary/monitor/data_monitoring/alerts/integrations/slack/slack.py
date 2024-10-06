@@ -38,6 +38,8 @@ from elementary.utils.strings import prettify_and_dedup_list
 
 logger = get_logger(__name__)
 
+COMPACT_SCHEMA_THRESHOLD = 500
+
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
 DESCRIPTION_FIELD = "description"
@@ -881,9 +883,50 @@ class SlackIntegration(BaseIntegration):
             title=title_blocks, preview=preview_blocks, details=details_blocks
         )
 
+    def _get_all_in_one_compact_template(
+        self, alert: AllInOneAlert
+    ) -> SlackAlertMessageSchema:
+        self.message_builder.add_message_color(self._get_color(alert.status))
+
+        title_blocks = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
+
+        details_blocks = []
+        if alert.model_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block(
+                    f":X: {len(alert.model_errors)} Model errors"
+                )
+            )
+        if alert.test_failures:
+            details_blocks.append(
+                self.message_builder.create_text_section_block(
+                    f":small_red_triangle: {len(alert.test_failures)} Test failures"
+                )
+            )
+        if alert.test_warnings:
+            details_blocks.append(
+                self.message_builder.create_text_section_block(
+                    f":warning: {len(alert.test_warnings)} Test warnings"
+                )
+            )
+        if alert.test_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block(
+                    f":exclamation: {len(alert.test_errors)} Test errors"
+                )
+            )
+        return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
+
     def _get_all_in_one_template(
         self, alert: AllInOneAlert, *args, **kwargs
     ) -> SlackAlertMessageSchema:
+        if len(alert.alerts) >= COMPACT_SCHEMA_THRESHOLD:
+            return self._get_all_in_one_compact_template(alert)
+
         self.message_builder.add_message_color(self._get_color(alert.status))
 
         title_blocks = [
