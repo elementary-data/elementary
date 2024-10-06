@@ -9,7 +9,11 @@ from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
-from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.grouped_alerts import (
+    AllInOneAlert,
+    GroupedAlert,
+    GroupedByTableAlerts,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -97,6 +101,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AllInOneAlert,
         ],
         *args,
         **kwargs,
@@ -752,6 +757,26 @@ class SlackIntegration(BaseIntegration):
             ),
         )
 
+    def _get_alert_type_counters_block(self, alert: GroupedAlert) -> dict:
+        counters_text: List[str] = []
+        if alert.model_errors:
+            counters_text.append(f":X: Model errors: {len(alert.model_errors)}")
+        if alert.test_failures:
+            if counters_text:
+                counters_text.append("    |")
+            counters_text.append(
+                f":small_red_triangle: Test failures: {len(alert.test_failures)}"
+            )
+        if alert.test_warnings:
+            if counters_text:
+                counters_text.append("    |")
+            counters_text.append(f":warning: Test warnings: {len(alert.test_warnings)}")
+        if alert.test_errors:
+            if counters_text:
+                counters_text.append("    |")
+            counters_text.append(f":exclamation: Test errors: {len(alert.test_errors)}")
+        return self.message_builder.create_context_block(counters_text)
+
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ) -> SlackAlertMessageSchema:
@@ -762,26 +787,9 @@ class SlackIntegration(BaseIntegration):
         title_blocks = [
             self.message_builder.create_header_block(
                 f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
+            ),
+            self._get_alert_type_counters_block(alert),
         ]
-        # summary of number of failed, errors, etc.
-        fields_summary: List[str] = []
-        # summary of number of failed, errors, etc.
-        if alert.model_errors:
-            fields_summary.append(f":X: Model errors: {len(alert.model_errors)}    |")
-        if alert.test_failures:
-            fields_summary.append(
-                f":small_red_triangle: Test failures: {len(alert.test_failures)}    |"
-            )
-        if alert.test_warnings:
-            fields_summary.append(
-                f":warning: Test warnings: {len(alert.test_warnings)}    |"
-            )
-        if alert.test_errors:
-            fields_summary.append(
-                f":exclamation: Test errors: {len(alert.test_errors)}"
-            )
-        title_blocks.append(self.message_builder.create_context_block(fields_summary))
 
         report_link = None
         # No report link when there is only model error
@@ -873,6 +881,90 @@ class SlackIntegration(BaseIntegration):
             title=title_blocks, preview=preview_blocks, details=details_blocks
         )
 
+    def _get_all_in_one_template(
+        self, alert: AllInOneAlert, *args, **kwargs
+    ) -> SlackAlertMessageSchema:
+        self.message_builder.add_message_color(self._get_color(alert.status))
+
+        title_blocks = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            ),
+            self._get_alert_type_counters_block(alert),
+        ]
+
+        details_blocks = []
+
+        if alert.model_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Model errors*")
+            )
+            for model_error_alert in alert.model_errors:
+                text = f":X: {model_error_alert.summary}"
+                section = (
+                    self.message_builder.create_section_with_button(
+                        text,
+                        button_text="View Details",
+                        url=model_error_alert.report_url,
+                    )
+                    if model_error_alert.report_url
+                    else self.message_builder.create_text_section_block(text)
+                )
+                details_blocks.append(section)
+
+        if alert.test_failures:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test failures*")
+            )
+            for test_failure_alert in alert.test_failures:
+                text = f":small_red_triangle: {test_failure_alert.summary}"
+                section = (
+                    self.message_builder.create_section_with_button(
+                        text,
+                        button_text="View Details",
+                        url=test_failure_alert.report_url,
+                    )
+                    if test_failure_alert.report_url
+                    else self.message_builder.create_text_section_block(text)
+                )
+                details_blocks.append(section)
+
+        if alert.test_warnings:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test warnings*")
+            )
+            for test_warning_alert in alert.test_warnings:
+                text = f":warning: {test_warning_alert.summary}"
+                section = (
+                    self.message_builder.create_section_with_button(
+                        text,
+                        button_text="View Details",
+                        url=test_warning_alert.report_url,
+                    )
+                    if test_warning_alert.report_url
+                    else self.message_builder.create_text_section_block(text)
+                )
+                details_blocks.append(section)
+
+        if alert.test_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test errors*")
+            )
+            for test_error_alert in alert.test_errors:
+                text = f":exclamation: {test_error_alert.summary}"
+                section = (
+                    self.message_builder.create_section_with_button(
+                        text,
+                        button_text="View Details",
+                        url=test_error_alert.report_url,
+                    )
+                    if test_error_alert.report_url
+                    else self.message_builder.create_text_section_block(text)
+                )
+                details_blocks.append(section)
+
+        return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
+
     @staticmethod
     def _get_model_error_block_header(
         model_error_alerts: List[ModelAlertModel],
@@ -945,7 +1037,7 @@ class SlackIntegration(BaseIntegration):
             GroupedByTableAlerts,
         ],
     ):
-        if isinstance(alert, GroupedByTableAlerts):
+        if isinstance(alert, GroupedAlert):
             for grouped_alert in alert.alerts:
                 grouped_alert.owners = self._parse_emails_to_ids(grouped_alert.owners)
                 grouped_alert.subscribers = self._parse_emails_to_ids(
