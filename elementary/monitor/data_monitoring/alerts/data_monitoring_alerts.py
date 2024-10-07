@@ -255,8 +255,9 @@ class DataMonitoringAlerts(DataMonitoring):
 
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
-        for alert in alerts_with_progress_bar:
-            sent_successfully = self.alerts_integration.send_alert(alert=alert)
+        for alert, sent_successfully in self.alerts_integration.send_alerts(
+            alerts_with_progress_bar
+        ).items():
             if sent_successfully:
                 if isinstance(alert, GroupedAlert):
                     sent_successfully_alerts.extend(alert.alerts)
