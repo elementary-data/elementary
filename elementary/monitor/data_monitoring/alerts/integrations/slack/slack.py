@@ -110,9 +110,11 @@ class SlackIntegration(BaseIntegration):
     ) -> SlackMessageSchema:
         if self.config.is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(alert.data, sort_keys=True))
-        alert_schema: SlackAlertMessageSchema = super()._get_alert_template(
-            alert, *args, **kwargs
-        )
+
+        if isinstance(alert, AllInOneAlert):
+            alert_schema = self._get_all_in_one_template(alert)
+        else:
+            alert_schema = super()._get_alert_template(alert, *args, **kwargs)
         return self.message_builder.get_slack_message(alert_schema=alert_schema)
 
     def _get_dbt_test_template(
@@ -1036,6 +1038,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AllInOneAlert,
         ],
         *args,
         **kwargs,
@@ -1078,6 +1081,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AllInOneAlert,
         ],
     ):
         if isinstance(alert, GroupedAlert):
@@ -1097,6 +1101,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AllInOneAlert,
         ],
         *args,
         **kwargs,
@@ -1130,6 +1135,36 @@ class SlackIntegration(BaseIntegration):
         self.message_builder.reset_slack_message()
         return sent_successfully
 
+    def send_alerts(
+        self,
+        alerts: List[
+            TestAlertModel
+            | ModelAlertModel
+            | SourceFreshnessAlertModel
+            | GroupedByTableAlerts
+        ],
+        *args,
+        **kwargs,
+    ) -> Dict[
+        TestAlertModel
+        | ModelAlertModel
+        | SourceFreshnessAlertModel
+        | GroupedByTableAlerts,
+        bool,
+    ]:
+        falttened_alerts = []
+        for alert in alerts:
+            if isinstance(alert, GroupedByTableAlerts):
+                falttened_alerts.extend(alert.alerts)
+            else:
+                falttened_alerts.append(alert)
+
+        if len(falttened_alerts) > self.config.group_all_alerts_threshold:
+            single_alert = AllInOneAlert(alerts=falttened_alerts)
+            sent_successfully = self.send_alert(single_alert, *args, **kwargs)
+            return {alert: sent_successfully for alert in alerts}
+        return super().send_alerts(alerts, *args, **kwargs)
+
     def send_test_message(self, channel_name: str, *args, **kwargs) -> bool:
         test_message = self._get_test_message_template()
         return self.client.send_message(channel_name=channel_name, message=test_message)
@@ -1141,6 +1176,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AllInOneAlert,
         ],
         *args,
         **kwargs,
