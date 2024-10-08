@@ -38,7 +38,6 @@ from elementary.utils.strings import prettify_and_dedup_list
 
 logger = get_logger(__name__)
 
-COMPACT_SCHEMA_THRESHOLD = 500
 
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
@@ -71,6 +70,8 @@ STATUS_DISPLAYS: Dict[str, Dict] = {
 
 
 class SlackIntegration(BaseIntegration):
+    COMPACT_SCHEMA_THRESHOLD = 500
+
     def __init__(
         self,
         config: Config,
@@ -926,7 +927,7 @@ class SlackIntegration(BaseIntegration):
     def _get_all_in_one_template(
         self, alert: AllInOneAlert, *args, **kwargs
     ) -> SlackAlertMessageSchema:
-        if len(alert.alerts) >= COMPACT_SCHEMA_THRESHOLD:
+        if len(alert.alerts) >= self.COMPACT_SCHEMA_THRESHOLD:
             return self._get_all_in_one_compact_template(alert)
 
         self.message_builder.add_message_color(self._get_color(alert.status))
