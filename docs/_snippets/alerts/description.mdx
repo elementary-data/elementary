@@ -1,0 +1,30 @@
+Elementary supports configuring description for tests that are included in alerts.
+It's recommended to add an explanation of what does it mean if this test fails, so alert will include this context.
+
+<CodeGroup>
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      description: "This is the test description"
+```
+
+```yml test config block
+{{ config(
+    tags=["Tag1","Tag2"]
+    meta={
+        description: "This is the test description"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+tests:
+  path:
+    subfolder:
+      +meta:
+        description: "This is the test description"
+```
+
+</CodeGroup>

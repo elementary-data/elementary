@@ -1,3 +1,20 @@
 ---
 title: "Owners and subscribers"
 ---
+
+We highly recommend configuring owners and subscribers for your models and / or tests.
+an Owner is the person responsible for the model, and subscribers are the people who are interested in getting the alerts on the model or test.
+Owners and subscribers will be mentioned (tagged) in the Slack alerts. Also their name will appear in the alerts and the UI.
+
+
+In addition, Elementary UI has filters by owner and even the side tree can be grouped by owner.
+
+Owners and subscribers are configured in the dbt code:
+
+#### Owners
+
+<Snippet file="alerts/owner.mdx" />
+
+#### Subscribers
+
+<Snippet file="alerts/subscribers.mdx" />

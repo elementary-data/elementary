@@ -1,0 +1,46 @@
+Elementary enriches alerts with [owners for models or tests](https://docs.getdbt.com/reference/resource-configs/meta#designate-a-model-owner)).
+
+- If you want the owner to be tagged on slack use '@' and the email prefix of the slack user (@jessica.jones to tag jessica.jones@marvel.com).
+- You can configure a single owner or a list of owners (`["@jessica.jones", "@joe.joseph"]`).
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      owner: "@jessica.jones"
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      owner: ["@jessica.jones", "@joe.joseph"]
+```
+
+```yml test/model config block
+{{ config(
+    tags=["Tag1","Tag2"]
+    meta={
+        "description": "This is a description",
+        "owner": "@jessica.jones"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        owner: "@jessica.jones"
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        owner: "@jessica.jones"
+```
+
+</CodeGroup>

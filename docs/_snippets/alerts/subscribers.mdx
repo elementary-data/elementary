@@ -1,0 +1,44 @@
+If you want additional users besides the owner to be tagged on an alert, add them as subscribers.
+
+- If you want the subscriber to be tagged on slack use '@' and the email prefix of the slack user (@jessica.jones to tag jessica.jones@marvel.com).
+- You can configure a single subscriber or a list (`["@jessica.jones", "@joe.joseph"]`).
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    meta:
+      subscribers: "@jessica.jones"
+```
+
+```yml test
+tests:
+  - not_null:
+    meta:
+      subscribers: ["@jessica.jones", "@joe.joseph"]
+```
+
+```yml test/model config block
+{{ config(
+    meta={
+        "subscribers": "@jessica.jones"
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        subscribers: "@jessica.jones"
+
+tests:
+  path:
+    subfolder:
+      +meta:
+        subscribers: "@jessica.jones"
+```
+
+</CodeGroup>

@@ -1,0 +1,39 @@
+You can use [tags](https://docs.getdbt.com/reference/resource-configs/tags) to provide context to your alerts.
+
+- You can tag a group or a channel in a slack alert by adding `#channel_name` as a tag.
+- Tags are aggregated,so a test alert will include both the test and the parent model tags.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    tags: ["#marketing", "#data_ops"]
+```
+
+```yml test
+tests:
+  - not_null:
+    tags: ["#marketing", "#data_ops"]
+```
+
+```yml test/model config block
+{{ config(
+    tags=["#marketing", "#data_ops"]
+    }
+) }}
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      tags: ["#marketing", "#data_ops"]
+
+tests:
+  path:
+    subfolder:
+      tags: ["#marketing", "#data_ops"]
+```
+
+</CodeGroup>
