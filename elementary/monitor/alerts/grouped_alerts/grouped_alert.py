@@ -19,6 +19,10 @@ class GroupedAlert:
         self._sort_alerts()
 
     @property
+    def summary(self) -> str:
+        return f"{len(self.alerts)} issues detected"
+
+    @property
     def detected_at(self) -> datetime:
         return min(alert.detected_at or datetime.max for alert in self.alerts)
 

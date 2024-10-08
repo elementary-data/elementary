@@ -1,7 +1,7 @@
 import json
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -909,7 +909,7 @@ class SlackIntegration(BaseIntegration):
         )
 
     def _get_compact_all_in_one_sub_group_details_block(
-        self, alert: AllInOneAlert
+        self, alert: AllInOneAlert, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
         self._add_compact_all_in_one_sub_group_details_block(
@@ -986,7 +986,7 @@ class SlackIntegration(BaseIntegration):
             details_blocks.append(section)
 
     def _get_all_in_one_sub_group_details_blocks(
-        self, alert: AllInOneAlert
+        self, alert: AllInOneAlert, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
         self._add_all_in_one_sub_group_details_block(
@@ -1155,45 +1155,6 @@ class SlackIntegration(BaseIntegration):
 
         self.message_builder.reset_slack_message()
         return sent_successfully
-
-    def send_alerts(
-        self,
-        alerts: List[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-                GroupedByTableAlerts,
-            ]
-        ],
-        *args,
-        **kwargs,
-    ) -> Generator[
-        Tuple[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-                GroupedByTableAlerts,
-            ],
-            bool,
-        ],
-        None,
-        None,
-    ]:
-        falttened_alerts = []
-        for alert in alerts:
-            if isinstance(alert, GroupedByTableAlerts):
-                falttened_alerts.extend(alert.alerts)
-            else:
-                falttened_alerts.append(alert)
-
-        if len(falttened_alerts) > self.config.group_all_alerts_threshold:
-            single_alert = AllInOneAlert(alerts=falttened_alerts)
-            sent_successfully = self.send_alert(single_alert, *args, **kwargs)
-            for alert in falttened_alerts:
-                yield alert, sent_successfully
-        yield from super().send_alerts(alerts, *args, **kwargs)
 
     def send_test_message(self, channel_name: str, *args, **kwargs) -> bool:
         test_message = self._get_test_message_template()
