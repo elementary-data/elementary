@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Union
+from typing import Generator, List, Tuple, Union
 
 from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -109,16 +109,21 @@ class BaseIntegration(ABC):
         ],
         *args,
         **kwargs
-    ) -> Dict[
-        Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
+    ) -> Generator[
+        Tuple[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ],
+            bool,
         ],
-        bool,
+        None,
+        None,
     ]:
-        return {alert: self.send_alert(alert, *args, **kwargs) for alert in alerts}
+        for alert in alerts:
+            yield alert, self.send_alert(alert)
 
     @abstractmethod
     def send_test_message(self, *args, **kwargs) -> bool:

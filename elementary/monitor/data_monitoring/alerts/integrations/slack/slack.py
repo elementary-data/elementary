@@ -1,7 +1,7 @@
 import json
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -1139,19 +1139,27 @@ class SlackIntegration(BaseIntegration):
     def send_alerts(
         self,
         alerts: List[
-            TestAlertModel
-            | ModelAlertModel
-            | SourceFreshnessAlertModel
-            | GroupedByTableAlerts
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ]
         ],
         *args,
         **kwargs,
-    ) -> Dict[
-        TestAlertModel
-        | ModelAlertModel
-        | SourceFreshnessAlertModel
-        | GroupedByTableAlerts,
-        bool,
+    ) -> Generator[
+        Tuple[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ],
+            bool,
+        ],
+        None,
+        None,
     ]:
         falttened_alerts = []
         for alert in alerts:
@@ -1163,8 +1171,9 @@ class SlackIntegration(BaseIntegration):
         if len(falttened_alerts) > self.config.group_all_alerts_threshold:
             single_alert = AllInOneAlert(alerts=falttened_alerts)
             sent_successfully = self.send_alert(single_alert, *args, **kwargs)
-            return {alert: sent_successfully for alert in alerts}
-        return super().send_alerts(alerts, *args, **kwargs)
+            for alert in falttened_alerts:
+                yield alert, sent_successfully
+        yield from super().send_alerts(alerts, *args, **kwargs)
 
     def send_test_message(self, channel_name: str, *args, **kwargs) -> bool:
         test_message = self._get_test_message_template()
