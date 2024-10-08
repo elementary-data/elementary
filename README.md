@@ -183,6 +183,25 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/geo909"><img src="https://avatars.githubusercontent.com/u/7989227?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dmitrii-khr"><img src="https://avatars.githubusercontent.com/u/20114683?v=4" width="50" height="50" alt=""/></a>
 
+ Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/user/repo.git
+Install the dependencies:
+pip install -r requirements.txt
+Usage
+
+python script.py --option argument
+For detailed instructions on usage, refer to the documentation.
+Q: How do I install X?
+A: Run the following command:
+pip install X
+Q: I'm getting an error when I run the script.
+A: Make sure you've installed all the required dependencies by running:
+pip install -r requirements.txt
+Feel free to replace placeholder text like `"https://github.com/user/repo.git"` and `"link-t
+
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
