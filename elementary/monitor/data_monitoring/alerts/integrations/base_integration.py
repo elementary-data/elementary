@@ -1,11 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generator, List, Sequence, Tuple, Union
 
-from elementary.monitor.alerts.grouped_alerts import (
-    AllInOneAlert,
-    GroupedAlert,
-    GroupedByTableAlerts,
-)
+from elementary.monitor.alerts.grouped_alerts import GroupedAlert, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -29,7 +25,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
         *args,
         **kwargs,
@@ -48,8 +44,8 @@ class BaseIntegration(ABC):
             return self._get_source_freshness_template(alert)
         elif isinstance(alert, GroupedByTableAlerts):
             return self._get_group_by_table_template(alert)
-        elif isinstance(alert, AllInOneAlert):
-            return self._get_all_in_one_template(alert)
+        elif isinstance(alert, GroupedAlert):
+            return self._get_grouped_template(alert)
 
     @abstractmethod
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
@@ -80,7 +76,7 @@ class BaseIntegration(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_all_in_one_template(self, alert: AllInOneAlert, *args, **kwargs):
+    def _get_grouped_template(self, alert: GroupedAlert, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -105,7 +101,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
         *args,
         **kwargs,
@@ -129,7 +125,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ]
     ]:
         flattened_alerts: List[
@@ -144,7 +140,7 @@ class BaseIntegration(ABC):
         if len(flattened_alerts) >= threshold:
             logger.info(f"Grouping {len(flattened_alerts)} alerts into one")
             return [
-                AllInOneAlert(alerts=flattened_alerts),
+                GroupedAlert(alerts=flattened_alerts),
             ]
         return alerts
 

@@ -1,6 +1,7 @@
 from typing import Union
 
 from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.grouped_alerts.grouped_alert import GroupedAlert
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -34,6 +35,9 @@ class BaseIntegrationMock(BaseIntegration):
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ):
         return "grouped_by_table"
+
+    def _get_grouped_template(self, alert: GroupedAlert, *args, **kwargs):
+        return "grouped"
 
     def _get_fallback_template(
         self,

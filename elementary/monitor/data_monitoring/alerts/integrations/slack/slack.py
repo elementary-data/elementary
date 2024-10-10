@@ -9,11 +9,7 @@ from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
-from elementary.monitor.alerts.grouped_alerts import (
-    AllInOneAlert,
-    GroupedAlert,
-    GroupedByTableAlerts,
-)
+from elementary.monitor.alerts.grouped_alerts import GroupedAlert, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -104,18 +100,14 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
         *args,
         **kwargs,
     ) -> SlackMessageSchema:
         if self.config.is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(alert.data, sort_keys=True))
-
-        if isinstance(alert, AllInOneAlert):
-            alert_schema = self._get_all_in_one_template(alert)
-        else:
-            alert_schema = super()._get_alert_template(alert, *args, **kwargs)
+        alert_schema = super()._get_alert_template(alert, *args, **kwargs)
         return self.message_builder.get_slack_message(alert_schema=alert_schema)
 
     def _get_dbt_test_template(
@@ -886,7 +878,7 @@ class SlackIntegration(BaseIntegration):
             title=title_blocks, preview=preview_blocks, details=details_blocks
         )
 
-    def _add_compact_all_in_one_sub_group_details_block(
+    def _add_compact_sub_group_details_block(
         self,
         details_blocks: list,
         alerts: Sequence[
@@ -908,29 +900,29 @@ class SlackIntegration(BaseIntegration):
             )
         )
 
-    def _get_compact_all_in_one_sub_group_details_block(
-        self, alert: AllInOneAlert, *args, **kwargs
+    def _get_compact_sub_group_details_block(
+        self, alert: GroupedAlert, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
-        self._add_compact_all_in_one_sub_group_details_block(
+        self._add_compact_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.model_errors,
             sub_title="Model Errors",
             bullet_icon="X",
         )
-        self._add_compact_all_in_one_sub_group_details_block(
+        self._add_compact_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.test_failures,
             sub_title="Test Failures",
             bullet_icon="small_red_triangle",
         )
-        self._add_compact_all_in_one_sub_group_details_block(
+        self._add_compact_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.test_warnings,
             sub_title="Test Warnings",
             bullet_icon="warning",
         )
-        self._add_compact_all_in_one_sub_group_details_block(
+        self._add_compact_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.test_errors,
             sub_title="Test Errors",
@@ -938,8 +930,8 @@ class SlackIntegration(BaseIntegration):
         )
         return details_blocks
 
-    def _get_all_in_one_compact_template(
-        self, alert: AllInOneAlert
+    def _get_grouped_compact_template(
+        self, alert: GroupedAlert
     ) -> SlackAlertMessageSchema:
         self.message_builder.add_message_color(self._get_color(alert.status))
 
@@ -949,10 +941,10 @@ class SlackIntegration(BaseIntegration):
             )
         ]
 
-        details_blocks = self._get_compact_all_in_one_sub_group_details_block(alert)
+        details_blocks = self._get_compact_sub_group_details_block(alert)
         return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
 
-    def _add_all_in_one_sub_group_details_section(
+    def _add_sub_group_details_block(
         self,
         details_blocks: list,
         alerts: Sequence[
@@ -981,29 +973,29 @@ class SlackIntegration(BaseIntegration):
         )
         details_blocks.append(section)
 
-    def _get_all_in_one_sub_group_details_blocks(
-        self, alert: AllInOneAlert, *args, **kwargs
+    def _get_sub_group_details_blocks(
+        self, alert: GroupedAlert, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
-        self._add_all_in_one_sub_group_details_section(
+        self._add_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.model_errors,
             sub_title="Model Errors",
             bullet_icon="X",
         )
-        self._add_all_in_one_sub_group_details_section(
+        self._add_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.test_failures,
             sub_title="Test Failures",
             bullet_icon="small_red_triangle",
         )
-        self._add_all_in_one_sub_group_details_section(
+        self._add_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.test_warnings,
             sub_title="Test Warnings",
             bullet_icon="warning",
         )
-        self._add_all_in_one_sub_group_details_section(
+        self._add_sub_group_details_block(
             details_blocks=details_blocks,
             alerts=alert.test_errors,
             sub_title="Test Errors",
@@ -1011,11 +1003,11 @@ class SlackIntegration(BaseIntegration):
         )
         return details_blocks
 
-    def _get_all_in_one_template(
-        self, alert: AllInOneAlert, *args, **kwargs
+    def _get_grouped_template(
+        self, alert: GroupedAlert, *args, **kwargs
     ) -> SlackAlertMessageSchema:
         if len(alert.alerts) >= self.COMPACT_SCHEMA_THRESHOLD:
-            return self._get_all_in_one_compact_template(alert)
+            return self._get_grouped_compact_template(alert)
 
         self.message_builder.add_message_color(self._get_color(alert.status))
         title_blocks = [
@@ -1024,7 +1016,7 @@ class SlackIntegration(BaseIntegration):
             ),
             self._get_alert_type_counters_block(alert),
         ]
-        details_blocks = self._get_all_in_one_sub_group_details_blocks(alert)
+        details_blocks = self._get_sub_group_details_blocks(alert)
         return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
 
     @staticmethod
@@ -1055,7 +1047,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
         *args,
         **kwargs,
@@ -1098,7 +1090,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
     ):
         if isinstance(alert, GroupedAlert):
@@ -1118,7 +1110,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
         *args,
         **kwargs,
@@ -1163,7 +1155,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AllInOneAlert,
+            GroupedAlert,
         ],
         *args,
         **kwargs,
