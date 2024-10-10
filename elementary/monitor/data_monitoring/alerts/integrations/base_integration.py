@@ -9,11 +9,12 @@ from elementary.monitor.alerts.grouped_alerts import (
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class BaseIntegration(ABC):
-    GROUP_ALERTS_THRESHOLD = 100
-
     def __init__(self, *args, **kwargs) -> None:
         self.client = self._initial_client(*args, **kwargs)
 
@@ -31,7 +32,7 @@ class BaseIntegration(ABC):
             AllInOneAlert,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ):
         if isinstance(alert, TestAlertModel):
             if alert.is_elementary_test:
@@ -92,7 +93,7 @@ class BaseIntegration(ABC):
             GroupedByTableAlerts,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ):
         raise NotImplementedError
 
@@ -107,7 +108,7 @@ class BaseIntegration(ABC):
             AllInOneAlert,
         ],
         *args,
-        **kwargs
+        **kwargs,
     ) -> bool:
         raise NotImplementedError
 
@@ -121,6 +122,7 @@ class BaseIntegration(ABC):
                 GroupedByTableAlerts,
             ]
         ],
+        threshold: int,
     ) -> Sequence[
         Union[
             TestAlertModel,
@@ -139,7 +141,8 @@ class BaseIntegration(ABC):
             else:
                 flattened_alerts.append(alert)
 
-        if len(flattened_alerts) > self.GROUP_ALERTS_THRESHOLD:
+        if len(flattened_alerts) >= threshold:
+            logger.info(f"Grouping {len(flattened_alerts)} alerts into one")
             return [
                 AllInOneAlert(alerts=flattened_alerts),
             ]
@@ -155,8 +158,9 @@ class BaseIntegration(ABC):
                 GroupedByTableAlerts,
             ]
         ],
+        group_alerts_threshold: int,
         *args,
-        **kwargs
+        **kwargs,
     ) -> Generator[
         Tuple[
             Union[
@@ -169,11 +173,12 @@ class BaseIntegration(ABC):
         None,
         None,
     ]:
-        grouped_alerts = self._group_alerts(alerts)
+        grouped_alerts = self._group_alerts(alerts, group_alerts_threshold)
         for grouped_alert in grouped_alerts:
             if isinstance(grouped_alert, GroupedAlert):
+                sent_successfully = self.send_alert(grouped_alert, *args, **kwargs)
                 for alert in grouped_alert.alerts:
-                    yield alert, self.send_alert(alert, *args, **kwargs)
+                    yield alert, sent_successfully
             else:
                 yield grouped_alert, self.send_alert(grouped_alert, *args, **kwargs)
 

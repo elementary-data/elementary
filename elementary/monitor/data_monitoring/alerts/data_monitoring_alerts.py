@@ -256,7 +256,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
         for alert, sent_successfully in self.alerts_integration.send_alerts(
-            alerts_with_progress_bar
+            alerts_with_progress_bar, self.config.group_alerts_threshold
         ):
             if sent_successfully:
                 if isinstance(alert, GroupedAlert):
