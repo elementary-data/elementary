@@ -1,0 +1,111 @@
+integration_tests:
+  target: postgres
+  outputs:
+    postgres:
+      type: "postgres"
+      host: "{{ env_var('POSTGRES_HOST') }}"
+      user: "{{ env_var('POSTGRES_USER') }}"
+      pass: "{{ env_var('DBT_ENV_SECRET_POSTGRES_PASS') }}"
+      port: "{{ env_var('POSTGRES_PORT') | as_number }}"
+      dbname: "{{ env_var('POSTGRES_DATABASE') }}"
+      schema: "{{ env_var('POSTGRES_SCHEMA') }}"
+      threads: 5
+
+    redshift:
+      type: "redshift"
+      host: "{{ env_var('REDSHIFT_HOST') }}"
+      user: "{{ env_var('REDSHIFT_USER') }}"
+      pass: "{{ env_var('DBT_ENV_SECRET_REDSHIFT_PASS') }}"
+      dbname: "{{ env_var('REDSHIFT_DATABASE') }}"
+      port: "{{ env_var('REDSHIFT_PORT') | as_number }}"
+      schema: "{{ env_var('REDSHIFT_SCHEMA') }}"
+      threads: 5
+
+    bigquery:
+      type: "bigquery"
+      method: "service-account-json"
+      project: "{{ env_var('BIGQUERY_PROJECT') }}"
+      dataset: "{{ env_var('BIGQUERY_SCHEMA') }}"
+      threads: 10
+      keyfile_json:
+        "{{ env_var('BIGQUERY_KEYFILE_JSON') | as_native}}"
+      job_retries: 3
+
+    snowflake:
+      type: "snowflake"
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_ENV_SECRET_SNOWFLAKE_PASS') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      threads: 10
+
+    trino:
+      type: "trino"
+      method: "{{ env_var('TRINO_METHOD') }}"
+      user: "{{ env_var('TRINO_USER') }}"
+      password: "{{ env_var('DBT_ENV_SECRET_TRINO_PASS') }}"
+      host: "{{ env_var('TRINO_HOST') }}"
+      port: "{{ env_var('TRINO_PORT') | as_number}}"
+      catalog: "{{ env_var('TRINO_CATALOG') }}"
+      schema: "{{ env_var('TRINO_SCHEMA') }}"
+      timezone: "{{ env_var('TRINO_TIMEZONE') }}"
+      threads: 12
+
+    databricks:
+      type: "databricks"
+      schema: "{{ env_var('DATABRICKS_SCHEMA') }}"
+      host: "{{ env_var('DATABRICKS_HOST') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      token: "{{ env_var('DBT_SECRET_ENV_DATABRICKS_TOKEN') }}"
+      threads: 8
+      connect_retries: 5
+      connect_timeout: 300
+
+    spark:
+      type: spark
+      host: "{{ env_var('SPARK_HOST') }}"
+      schema: "{{ env_var('SPARK_SCHEMA') }}"
+      user: "{{ env_var('SPARK_USER') }}"
+      method: "{{ env_var('SPARK_METHOD') }}"
+      port: "{{ env_var('SPARK_PORT') | as_number}}"
+      connect_retries: 3
+      connect_timeout: 5
+
+    fabric:
+      type: fabric
+      driver: "{{ env_var('FABRIC_DRIVER') }}"
+      server: "{{ env_var('FABRIC_HOST') }}"
+      port: "{{ env_var('FABRIC_PORT') | as_number}}"
+      database: "{{ env_var('FABRIC_DATABASE') }}"
+      schema: "{{ env_var('FABRIC_SCHEMA') }}"
+      authentication: "{{ env_var('FABRIC_AUTHENTICATION') }}"
+      tenant_id: "{{ env_var('FABRIC_TENANT') }}"
+      client_id: "{{ env_var('FABRIC_CLIENT') }}"
+      client_secret: "{{ env_var('DBT_ENV_SECRET_FABRIC_CLIENT_SECRET') }}"
+
+    synapse:
+      type: synapse
+      driver: "{{ env_var('SYNAPSE_DRIVER') }}"
+      server: "{{ env_var('SYNAPSE_HOST') }}"
+      port: "{{ env_var('SYNAPSE_PORT') | as_number}}"
+      database: "{{ env_var('SYNAPSE_DATABASE') }}"
+      schema: "{{ env_var('SYNAPSE_SCHEMA') }}"
+      authentication: "{{ env_var('SYNAPSE_AUTHENTICATION') }}"
+      tenant_id: "{{ env_var('SYNAPSE_TENANT_ID') }}"
+      client_id: "{{ env_var('SYNAPSE_CLIENT_ID') }}"
+      client_secret: "{{ env_var('DBT_ENV_SECRET_SYNAPSE_CLIENT_SECRET') }}"
+
+    athena:
+      type: athena
+      s3_staging_dir: "{{ env_var('ATHENA_S3_STAGING_DIR') }}"
+      s3_data_dir: "{{ env_var('ATHENA_S3_DATA_DIR') }}"
+      s3_data_naming: "{{ env_var('ATHENA_S3_DATA_NAMING') }}"
+      region_name: "{{ env_var('ATHENA_REGION_NAME') }}"
+      schema: "{{ env_var('ATHENA_SCHEMA') }}"
+      database: "{{ env_var('ATHENA_DATABASE') }}"
+      threads: 4
+      aws_access_key_id: "{{ env_var('DBT_ENV_SECRET_ATHENA_AWS_ACCESS_KEY_ID') }}"
+      aws_secret_access_key: "{{ env_var('DBT_ENV_SECRET_ATHENA_AWS_SECRET_ACCESS_KEY') }}"
