@@ -5,14 +5,14 @@
 # To ensure that <this package> works as expected with all supported adapters
 
 # **when?**
-# On every PR, and every push to main and when manually triggered
+# On every PR, and every push to master and when manually triggered
 
 name: Package Integration Tests
 
 on:
     push:
         branches:
-            - main
+            - master
     pull_request:
     workflow_dispatch:
 
