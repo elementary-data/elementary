@@ -501,21 +501,21 @@ class TeamsIntegration(BaseIntegration):
 
         if alert.test_failures:
             rows = [alert.concise_name for alert in alert.test_failures]
-            text = "\n".join([f"&#x1F53A; {row}" for row in rows])
+            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test failures*", f"{text}")
             )
 
         if alert.test_warnings:
             rows = [alert.concise_name for alert in alert.test_warnings]
-            text = "\n".join([f"&#x26A0; {row}" for row in rows])
+            text = "<br>".join([f"&#x26A0; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test warnings*", f"{text}")
             )
 
         if alert.test_errors:
             rows = [alert.concise_name for alert in alert.test_errors]
-            text = "\n".join([f"&#x2757; {row}" for row in rows])
+            text = "<br>".join([f"&#x2757; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test errors*", f"{text}")
             )
@@ -557,28 +557,28 @@ class TeamsIntegration(BaseIntegration):
 
         if alert.model_errors:
             rows = [alert.summary for alert in alert.model_errors]
-            text = "\n".join([f"&#x1F53A; {row}" for row in rows])
+            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Model errors*", f"{text}")
             )
 
         if alert.test_failures:
             rows = [alert.summary for alert in alert.test_failures]
-            text = "\n".join([f"&#x1F53A; {row}" for row in rows])
+            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test failures*", f"{text}")
             )
 
         if alert.test_warnings:
             rows = [alert.summary for alert in alert.test_warnings]
-            text = "\n".join([f"&#x26A0; {row}" for row in rows])
+            text = "<br>".join([f"&#x26A0; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test warnings*", f"{text}")
             )
 
         if alert.test_errors:
             rows = [alert.summary for alert in alert.test_errors]
-            text = "\n".join([f"&#x2757; {row}" for row in rows])
+            text = "<br>".join([f"&#x2757; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test errors*", f"{text}")
             )
