@@ -49,7 +49,7 @@ class Config:
         slack_token: Optional[str] = None,
         slack_channel_name: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
-        group_all_alerts_threshold: Optional[int] = None,
+        group_alerts_threshold: Optional[int] = None,
         timezone: Optional[str] = None,
         aws_profile_name: Optional[str] = None,
         aws_region_name: Optional[str] = None,
@@ -125,9 +125,10 @@ class Config:
             slack_config.get("group_alerts_by"),
             GroupingType.BY_ALERT.value,
         )
-        self.group_all_alerts_threshold = self._first_not_none(
-            group_all_alerts_threshold,
-            slack_config.get("group_all_alerts_threshold"),
+        self.group_alerts_threshold = self._first_not_none(
+            group_alerts_threshold,
+            slack_config.get("group_alerts_threshold"),
+            100,
         )
 
         teams_config = config.get(self._TEAMS, {})
