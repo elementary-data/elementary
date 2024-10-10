@@ -952,7 +952,7 @@ class SlackIntegration(BaseIntegration):
         details_blocks = self._get_compact_all_in_one_sub_group_details_block(alert)
         return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
 
-    def _add_all_in_one_sub_group_details_block(
+    def _add_all_in_one_sub_group_details_section(
         self,
         details_blocks: list,
         alerts: Sequence[
@@ -969,45 +969,41 @@ class SlackIntegration(BaseIntegration):
         if not alerts:
             return
 
-        details_blocks.append(
-            self.message_builder.create_text_section_block(f"*{sub_title}*")
-        )
+        section_text_rows = [f"*{sub_title}*"]
         for alert in alerts:
             text = f":{bullet_icon}: {alert.summary}"
-            section = (
-                self.message_builder.create_section_with_button(
-                    text,
-                    button_text="View Details",
-                    url=alert.report_url,
-                )
-                if alert.report_url
-                else self.message_builder.create_text_section_block(text)
-            )
-            details_blocks.append(section)
+            if alert.report_url:
+                text = " - ".join([text, f"<{alert.get_report_link()}|View Details>"])
+            section_text_rows.append(text)
+
+        section = self.message_builder.create_text_section_block(
+            "\n".join(section_text_rows)
+        )
+        details_blocks.append(section)
 
     def _get_all_in_one_sub_group_details_blocks(
         self, alert: AllInOneAlert, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
-        self._add_all_in_one_sub_group_details_block(
+        self._add_all_in_one_sub_group_details_section(
             details_blocks=details_blocks,
             alerts=alert.model_errors,
             sub_title="Model Errors",
             bullet_icon="X",
         )
-        self._add_all_in_one_sub_group_details_block(
+        self._add_all_in_one_sub_group_details_section(
             details_blocks=details_blocks,
             alerts=alert.test_failures,
             sub_title="Test Failures",
             bullet_icon="small_red_triangle",
         )
-        self._add_all_in_one_sub_group_details_block(
+        self._add_all_in_one_sub_group_details_section(
             details_blocks=details_blocks,
             alerts=alert.test_warnings,
             sub_title="Test Warnings",
             bullet_icon="warning",
         )
-        self._add_all_in_one_sub_group_details_block(
+        self._add_all_in_one_sub_group_details_section(
             details_blocks=details_blocks,
             alerts=alert.test_errors,
             sub_title="Test Errors",
