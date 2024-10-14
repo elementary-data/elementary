@@ -1,7 +1,7 @@
 import json
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -9,7 +9,7 @@ from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
-from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -33,6 +33,7 @@ from elementary.utils.log import get_logger
 from elementary.utils.strings import prettify_and_dedup_list
 
 logger = get_logger(__name__)
+
 
 TABLE_FIELD = "table"
 COLUMN_FIELD = "column"
@@ -65,6 +66,8 @@ STATUS_DISPLAYS: Dict[str, Dict] = {
 
 
 class SlackIntegration(BaseIntegration):
+    COMPACT_SCHEMA_THRESHOLD = 500
+
     def __init__(
         self,
         config: Config,
@@ -97,15 +100,14 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
     ) -> SlackMessageSchema:
         if self.config.is_slack_workflow:
             return SlackMessageSchema(text=json.dumps(alert.data, sort_keys=True))
-        alert_schema: SlackAlertMessageSchema = super()._get_alert_template(
-            alert, *args, **kwargs
-        )
+        alert_schema = super()._get_alert_template(alert, *args, **kwargs)
         return self.message_builder.get_slack_message(alert_schema=alert_schema)
 
     def _get_dbt_test_template(
@@ -752,6 +754,26 @@ class SlackIntegration(BaseIntegration):
             ),
         )
 
+    def _get_alert_type_counters_block(self, alert: AlertsGroup) -> dict:
+        counters_texts: List[str] = []
+        if alert.model_errors:
+            counters_texts.append(f":X: Model errors: {len(alert.model_errors)}")
+        if alert.test_failures:
+            counters_texts.append(
+                f":small_red_triangle: Test failures: {len(alert.test_failures)}"
+            )
+        if alert.test_warnings:
+            counters_texts.append(
+                f":warning: Test warnings: {len(alert.test_warnings)}"
+            )
+        if alert.test_errors:
+            counters_texts.append(
+                f":exclamation: Test errors: {len(alert.test_errors)}"
+            )
+        return self.message_builder.create_context_block(
+            ["    |    ".join(counters_texts)]
+        )
+
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
     ) -> SlackAlertMessageSchema:
@@ -762,26 +784,9 @@ class SlackIntegration(BaseIntegration):
         title_blocks = [
             self.message_builder.create_header_block(
                 f"{self._get_display_name(alert.status)}: {alert.summary}"
-            )
+            ),
+            self._get_alert_type_counters_block(alert),
         ]
-        # summary of number of failed, errors, etc.
-        fields_summary: List[str] = []
-        # summary of number of failed, errors, etc.
-        if alert.model_errors:
-            fields_summary.append(f":X: Model errors: {len(alert.model_errors)}    |")
-        if alert.test_failures:
-            fields_summary.append(
-                f":small_red_triangle: Test failures: {len(alert.test_failures)}    |"
-            )
-        if alert.test_warnings:
-            fields_summary.append(
-                f":warning: Test warnings: {len(alert.test_warnings)}    |"
-            )
-        if alert.test_errors:
-            fields_summary.append(
-                f":exclamation: Test errors: {len(alert.test_errors)}"
-            )
-        title_blocks.append(self.message_builder.create_context_block(fields_summary))
 
         report_link = None
         # No report link when there is only model error
@@ -873,6 +878,147 @@ class SlackIntegration(BaseIntegration):
             title=title_blocks, preview=preview_blocks, details=details_blocks
         )
 
+    def _add_compact_sub_group_details_block(
+        self,
+        details_blocks: list,
+        alerts: Sequence[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ],
+        ],
+        sub_title: str,
+        bullet_icon: str,
+    ) -> None:
+        if not alerts:
+            return
+        details_blocks.append(
+            self.message_builder.create_text_section_block(
+                f":{bullet_icon}: {len(alerts)} {sub_title}"
+            )
+        )
+
+    def _get_compact_sub_group_details_block(
+        self, alert: AlertsGroup, *args, **kwargs
+    ) -> List[dict]:
+        details_blocks: List[dict] = []
+        self._add_compact_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.model_errors,
+            sub_title="Model Errors",
+            bullet_icon="X",
+        )
+        self._add_compact_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.test_failures,
+            sub_title="Test Failures",
+            bullet_icon="small_red_triangle",
+        )
+        self._add_compact_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.test_warnings,
+            sub_title="Test Warnings",
+            bullet_icon="warning",
+        )
+        self._add_compact_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.test_errors,
+            sub_title="Test Errors",
+            bullet_icon="exclamation",
+        )
+        return details_blocks
+
+    def _get_alerts_group_compact_template(
+        self, alert: AlertsGroup
+    ) -> SlackAlertMessageSchema:
+        self.message_builder.add_message_color(self._get_color(alert.status))
+
+        title_blocks = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            )
+        ]
+
+        details_blocks = self._get_compact_sub_group_details_block(alert)
+        return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
+
+    def _add_sub_group_details_block(
+        self,
+        details_blocks: list,
+        alerts: Sequence[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ],
+        ],
+        sub_title: str,
+        bullet_icon: str,
+    ) -> None:
+        if not alerts:
+            return
+
+        section_text_rows = [f"*{sub_title}*"]
+        for alert in alerts:
+            text = f":{bullet_icon}: {alert.summary}"
+            if alert.report_url:
+                text = " - ".join([text, f"<{alert.get_report_link()}|View Details>"])
+            section_text_rows.append(text)
+
+        section = self.message_builder.create_text_section_block(
+            "\n".join(section_text_rows)
+        )
+        details_blocks.append(section)
+
+    def _get_sub_group_details_blocks(
+        self, alert: AlertsGroup, *args, **kwargs
+    ) -> List[dict]:
+        details_blocks: List[dict] = []
+        self._add_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.model_errors,
+            sub_title="Model Errors",
+            bullet_icon="X",
+        )
+        self._add_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.test_failures,
+            sub_title="Test Failures",
+            bullet_icon="small_red_triangle",
+        )
+        self._add_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.test_warnings,
+            sub_title="Test Warnings",
+            bullet_icon="warning",
+        )
+        self._add_sub_group_details_block(
+            details_blocks=details_blocks,
+            alerts=alert.test_errors,
+            sub_title="Test Errors",
+            bullet_icon="exclamation",
+        )
+        return details_blocks
+
+    def _get_alerts_group_template(
+        self, alert: AlertsGroup, *args, **kwargs
+    ) -> SlackAlertMessageSchema:
+        if len(alert.alerts) >= self.COMPACT_SCHEMA_THRESHOLD:
+            return self._get_alerts_group_compact_template(alert)
+
+        self.message_builder.add_message_color(self._get_color(alert.status))
+        title_blocks = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            ),
+            self._get_alert_type_counters_block(alert),
+        ]
+        details_blocks = self._get_sub_group_details_blocks(alert)
+        return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
+
     @staticmethod
     def _get_model_error_block_header(
         model_error_alerts: List[ModelAlertModel],
@@ -901,6 +1047,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -943,13 +1090,14 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
     ):
-        if isinstance(alert, GroupedByTableAlerts):
-            for grouped_alert in alert.alerts:
-                grouped_alert.owners = self._parse_emails_to_ids(grouped_alert.owners)
-                grouped_alert.subscribers = self._parse_emails_to_ids(
-                    grouped_alert.subscribers
+        if isinstance(alert, AlertsGroup):
+            for inner_alert in alert.alerts:
+                inner_alert.owners = self._parse_emails_to_ids(inner_alert.owners)
+                inner_alert.subscribers = self._parse_emails_to_ids(
+                    inner_alert.subscribers
                 )
         else:
             alert.owners = self._parse_emails_to_ids(alert.owners)
@@ -962,6 +1110,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -1006,6 +1155,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
