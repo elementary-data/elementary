@@ -6,11 +6,8 @@ from typing import DefaultDict, Dict, List, Optional, Union
 from alive_progress import alive_it
 
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts_groups import (
-    AlertsGroup,
-    GroupedByTableAlerts,
-    GroupingType,
-)
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
+from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
