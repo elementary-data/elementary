@@ -6,7 +6,7 @@ from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAler
 from elementary.monitor.alerts.test_alert import TestAlertModel
 
 
-class GroupedAlert:
+class AlertsGroup:
     def __init__(
         self,
         alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]],

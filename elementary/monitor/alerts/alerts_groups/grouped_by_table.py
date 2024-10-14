@@ -1,6 +1,6 @@
 from typing import Optional
 
-from elementary.monitor.alerts.grouped_alerts.grouped_alert import GroupedAlert
+from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
     get_model_test_runs_link,
@@ -8,7 +8,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link im
 from elementary.utils.models import get_shortened_model_name
 
 
-class GroupedByTableAlerts(GroupedAlert):
+class GroupedByTableAlerts(AlertsGroup):
     @property
     def model_unique_id(self) -> Optional[str]:
         return self.alerts[0].model_unique_id

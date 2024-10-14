@@ -6,8 +6,8 @@ from typing import DefaultDict, Dict, List, Optional, Union
 from alive_progress import alive_it
 
 from elementary.config.config import Config
-from elementary.monitor.alerts.grouped_alerts import (
-    GroupedAlert,
+from elementary.monitor.alerts.alerts_groups import (
+    AlertsGroup,
     GroupedByTableAlerts,
     GroupingType,
 )
@@ -259,15 +259,15 @@ class DataMonitoringAlerts(DataMonitoring):
             alerts_with_progress_bar, self.config.group_alerts_threshold
         ):
             if sent_successfully:
-                if isinstance(alert, GroupedAlert):
+                if isinstance(alert, AlertsGroup):
                     sent_successfully_alerts.extend(alert.alerts)
                 else:
                     sent_successfully_alerts.append(alert)
             else:
-                if isinstance(alert, GroupedAlert):
-                    for grouped_alert in alert.alerts:
+                if isinstance(alert, AlertsGroup):
+                    for inner_alert in alert.alerts:
                         logger.error(
-                            f"Could not send the alert - {grouped_alert.id}. Full alert: {json.dumps(grouped_alert.data)}"
+                            f"Could not send the alert - {inner_alert.id}. Full alert: {json.dumps(inner_alert.data)}"
                         )
                 else:
                     logger.error(

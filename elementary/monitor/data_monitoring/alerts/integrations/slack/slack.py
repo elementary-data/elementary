@@ -9,7 +9,7 @@ from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
-from elementary.monitor.alerts.grouped_alerts import GroupedAlert, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -100,7 +100,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -754,7 +754,7 @@ class SlackIntegration(BaseIntegration):
             ),
         )
 
-    def _get_alert_type_counters_block(self, alert: GroupedAlert) -> dict:
+    def _get_alert_type_counters_block(self, alert: AlertsGroup) -> dict:
         counters_texts: List[str] = []
         if alert.model_errors:
             counters_texts.append(f":X: Model errors: {len(alert.model_errors)}")
@@ -901,7 +901,7 @@ class SlackIntegration(BaseIntegration):
         )
 
     def _get_compact_sub_group_details_block(
-        self, alert: GroupedAlert, *args, **kwargs
+        self, alert: AlertsGroup, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
         self._add_compact_sub_group_details_block(
@@ -930,8 +930,8 @@ class SlackIntegration(BaseIntegration):
         )
         return details_blocks
 
-    def _get_grouped_compact_template(
-        self, alert: GroupedAlert
+    def _get_alerts_group_compact_template(
+        self, alert: AlertsGroup
     ) -> SlackAlertMessageSchema:
         self.message_builder.add_message_color(self._get_color(alert.status))
 
@@ -974,7 +974,7 @@ class SlackIntegration(BaseIntegration):
         details_blocks.append(section)
 
     def _get_sub_group_details_blocks(
-        self, alert: GroupedAlert, *args, **kwargs
+        self, alert: AlertsGroup, *args, **kwargs
     ) -> List[dict]:
         details_blocks: List[dict] = []
         self._add_sub_group_details_block(
@@ -1003,11 +1003,11 @@ class SlackIntegration(BaseIntegration):
         )
         return details_blocks
 
-    def _get_grouped_template(
-        self, alert: GroupedAlert, *args, **kwargs
+    def _get_alerts_group_template(
+        self, alert: AlertsGroup, *args, **kwargs
     ) -> SlackAlertMessageSchema:
         if len(alert.alerts) >= self.COMPACT_SCHEMA_THRESHOLD:
-            return self._get_grouped_compact_template(alert)
+            return self._get_alerts_group_compact_template(alert)
 
         self.message_builder.add_message_color(self._get_color(alert.status))
         title_blocks = [
@@ -1047,7 +1047,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -1090,14 +1090,14 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
     ):
-        if isinstance(alert, GroupedAlert):
-            for grouped_alert in alert.alerts:
-                grouped_alert.owners = self._parse_emails_to_ids(grouped_alert.owners)
-                grouped_alert.subscribers = self._parse_emails_to_ids(
-                    grouped_alert.subscribers
+        if isinstance(alert, AlertsGroup):
+            for inner_alert in alert.alerts:
+                inner_alert.owners = self._parse_emails_to_ids(inner_alert.owners)
+                inner_alert.subscribers = self._parse_emails_to_ids(
+                    inner_alert.subscribers
                 )
         else:
             alert.owners = self._parse_emails_to_ids(alert.owners)
@@ -1110,7 +1110,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -1155,7 +1155,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,

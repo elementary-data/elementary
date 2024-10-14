@@ -7,7 +7,7 @@ from pymsteams import cardsection, potentialaction  # type: ignore
 
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
-from elementary.monitor.alerts.grouped_alerts import GroupedAlert, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -520,7 +520,7 @@ class TeamsIntegration(BaseIntegration):
                 self._get_section("*Test errors*", f"{text}")
             )
 
-    def _get_grouped_template(self, alert: GroupedAlert, *args, **kwargs):
+    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         subtitle = ""
@@ -590,7 +590,7 @@ class TeamsIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -614,7 +614,7 @@ class TeamsIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,

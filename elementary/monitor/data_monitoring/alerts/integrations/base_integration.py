@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generator, List, Sequence, Tuple, Union
 
-from elementary.monitor.alerts.grouped_alerts import GroupedAlert, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -25,7 +25,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -44,8 +44,8 @@ class BaseIntegration(ABC):
             return self._get_source_freshness_template(alert)
         elif isinstance(alert, GroupedByTableAlerts):
             return self._get_group_by_table_template(alert)
-        elif isinstance(alert, GroupedAlert):
-            return self._get_grouped_template(alert)
+        elif isinstance(alert, AlertsGroup):
+            return self._get_alerts_group_template(alert)
 
     @abstractmethod
     def _get_dbt_test_template(self, alert: TestAlertModel, *args, **kwargs):
@@ -76,7 +76,7 @@ class BaseIntegration(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_grouped_template(self, alert: GroupedAlert, *args, **kwargs):
+    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -101,7 +101,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -125,14 +125,14 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            GroupedAlert,
+            AlertsGroup,
         ]
     ]:
         flattened_alerts: List[
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ] = []
         for alert in alerts:
-            if isinstance(alert, GroupedAlert):
+            if isinstance(alert, AlertsGroup):
                 flattened_alerts.extend(alert.alerts)
             else:
                 flattened_alerts.append(alert)
@@ -140,7 +140,7 @@ class BaseIntegration(ABC):
         if len(flattened_alerts) >= threshold:
             logger.info(f"Grouping {len(flattened_alerts)} alerts into one")
             return [
-                GroupedAlert(alerts=flattened_alerts),
+                AlertsGroup(alerts=flattened_alerts),
             ]
         return alerts
 
@@ -170,13 +170,13 @@ class BaseIntegration(ABC):
         None,
     ]:
         grouped_alerts = self._group_alerts(alerts, group_alerts_threshold)
-        for grouped_alert in grouped_alerts:
-            if isinstance(grouped_alert, GroupedAlert):
-                sent_successfully = self.send_alert(grouped_alert, *args, **kwargs)
-                for alert in grouped_alert.alerts:
-                    yield alert, sent_successfully
+        for alert in grouped_alerts:
+            if isinstance(alert, AlertsGroup):
+                sent_successfully = self.send_alert(alert, *args, **kwargs)
+                for inner_alert in alert.alerts:
+                    yield inner_alert, sent_successfully
             else:
-                yield grouped_alert, self.send_alert(grouped_alert, *args, **kwargs)
+                yield alert, self.send_alert(alert, *args, **kwargs)
 
     @abstractmethod
     def send_test_message(self, *args, **kwargs) -> bool:

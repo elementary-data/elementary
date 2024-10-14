@@ -7,7 +7,7 @@ from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError  # type: ignore[import]
 
 from elementary.exceptions.exceptions import InvalidArgumentsError
-from elementary.monitor.alerts.grouped_alerts import GroupingType
+from elementary.monitor.alerts.alerts_groups import GroupingType
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
