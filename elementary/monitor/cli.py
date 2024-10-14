@@ -203,7 +203,7 @@ def get_cli_properties() -> dict:
 @click.option(
     "--group-alerts-threshold",
     type=int,
-    default=100,
+    default=Config.DEFAULT_GROUP_ALERTS_THRESHOLD,
     help="The threshold for all alerts in a single message.",
 )
 @click.option(

@@ -1,7 +1,6 @@
 from typing import Union
 
-from elementary.monitor.alerts.grouped_alerts import GroupedByTableAlerts
-from elementary.monitor.alerts.grouped_alerts.grouped_alert import AlertsGroup
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
