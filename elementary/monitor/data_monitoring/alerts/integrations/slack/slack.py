@@ -21,7 +21,6 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builde
     SlackAlertMessageSchema,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
-    get_model_runs_link,
     get_model_test_runs_link,
 )
 from elementary.tracking.tracking_interface import Tracking
@@ -561,7 +560,7 @@ class SlackIntegration(BaseIntegration):
             )
 
         model_runs_report_link = alert.get_report_link()
-        
+
         if model_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
