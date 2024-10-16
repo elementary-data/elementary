@@ -27,11 +27,15 @@ For every test or monitor you add, think about the following -
 
 According to these answers, you should add configuration that will impact the alert, alert distribution, and triage:
 
-- Add a test description that details what it means if this test fails, and context on resolving it. Descriptions can be added in UI or in code.
-- Each failure should have an owner, that should look into the failure. It can be the owner of the data set or an owner of a specific test.
-- If others need to be notified, add subscribers.
-- Use the [severity of failures](https://docs.getdbt.com/reference/resource-configs/severity) intentionally, and even leverage conditional expressions (`error_if`, `warn_if`)
-- Test failures and alerts include a sample of the failed results, and the test query. You can change the test query and / or add comments to it, that can provide triage context.
+<Check>
+    ### Recommendations
+    
+    - Add a test description that details what it means if this test fails, and context on resolving it. Descriptions can be added in UI or in code.
+    - Each failure should have an owner, that should look into the failure. It can be the owner of the data set or an owner of a specific test.
+    - If others need to be notified, add subscribers.
+    - Use the [severity of failures](https://docs.getdbt.com/reference/resource-configs/severity) intentionally, and even leverage conditional expressions (`error_if`, `warn_if`)
+    - Test failures and alerts include a sample of the failed results, and the test query. You can change the test query and / or add comments to it, that can provide triage context.
+</Check>
 
 ```yaml
 tests:
@@ -130,6 +134,7 @@ These are the questions that should be asked, and product tips on how to answer 
     - Check the **Model runs** section of the dashboard to see if there are skipped models, as failures in build cause the downstream models to be skipped.
 
     ![Model runs portion of the dashboard](/pics/dashboard-model-runs.png)
+
 
 - How important is the data asset?
   - Check in the catalog or node info section in the lineage if it has a tag like `critical` , `public` or a data product tag. You can also look at the description of the data asset, whether it’s a table or a column.

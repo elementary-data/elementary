@@ -30,8 +30,12 @@ Elementary offers two types of anomaly detection monitors:
 - **Automated Monitors** - Out-of-the-box volume and freshness monitors activated automatically, that query metadata only.
 - **Opt-in anomaly detection tests** - Monitors that query raw data and require configuration.
 
-- [ ] Deploy the packages dbt-utils and dbt-expectations in your dbt projects, to enrich your available tests
-- [ ] Refer to the [dbt test hub](https://www.elementary-data.com/dbt-test-hub) by Elementary, to explore available tests by use case
+<Check>
+### Recommendations
+
+- Deploy the packages dbt-utils and dbt-expectations in your dbt projects, to enrich your available tests
+- Refer to the [dbt test hub](https://www.elementary-data.com/dbt-test-hub) by Elementary, to explore available tests by use case
+</Check>
 
 ## Fine-tuning automated monitors
 
@@ -72,8 +76,12 @@ To detect issues in sources updates, you should monitor volume, freshness and sc
   - Low cardinality columns / strict set of values - If there are fields with a specific set of values you expect use `accepted_values`. If you also expect a consistency in ratio of these values, use `dimension_anomalies` and group by this column.
   - Business requirements - If you are aware of expectations specific to your business, try to enforce early to detect when issues are at the source. Some examples: `expect_column_values_to_be_between`, `expect_column_values_to_be_increasing`, `expect-column-values-to-have-consistent-casing`
 
-- [ ] Add data freshness and volume validations for relevant source tables, on top of the automated monitors (advanced)
-- [ ] Add schema tests for source tables
+<Check>
+### Recommendations
+
+- Add data freshness and volume validations for relevant source tables, on top of the automated monitors (advanced)
+- Add schema tests for source tables
+</Check>
 
 ### Primary / foreign key columns in your transformation models
 
@@ -84,7 +92,11 @@ Tables should be covered with:
 
 For incremental tables, it’s recommended to use a `where` clause in the tests, and only validate recent data. This will prevent running the tests on large data sets which is costly and slow.
 
-- [ ] Add `unique` and `not_null` tests to key columns
+<Check>
+#### Recommendations
+
+- Add `unique` and `not_null` tests to key columns
+</Check>
 
 ### Public tables
 

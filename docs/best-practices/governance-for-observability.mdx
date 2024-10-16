@@ -67,9 +67,15 @@ models:
   - Make sure to have clear ownership defined for all your public-facing tables. We also recommend adding subscribers to the relevant public tables.
   - Usually, the owners of these public tables are the analytics engineering team, and the subscribers are the relevant data analysts who rely on the data from these tables.
 
+<Check>
+### Recommendations
+
 - Add business domain tags to public tables
 - Define owners for public facing tables
 - Add data consumers as subscribers to relevant public facing tables
+</Check>
+
+
 
 ## Priorities (optional)
 
@@ -79,8 +85,12 @@ Decide how many levels of priority you wish to maintain, and implement by adding
 
 This will enable you to filter the results in Elementary by priority, and establish workflows such as sending `critical` alerts to Pagerduty, and the rest to Slack.
 
-- (Optional) Add priorities / critical tags to tables / tests
-- (Optional) Add owners to all top priority tables / tests
+<Check>
+### Recommendations
+
+- Add priorities / critical tags to tables / tests (Optional)
+- Add owners to all top priority tables / tests (Optional)
+</Check>
 
 ## Data sources
 
@@ -106,17 +116,19 @@ sources:
       subscribers: "@analytics.engineer"
 ```
 
+<Check>
+### Recommendations
+
 - Add tags to source tables that describe the source system and / or ingestion method
 - Add owners and subscribers to source tables
+</Check>
 
 ## Recommendations
 
 - Add business domain tags to public tables
 - Define owners for public facing tables
 - Add data consumers as subscribers to relevant public facing tables
-
 - (Optional) Add priorities / critical tags to tables / tests
 - (Optional) Add owners to all top priority tables / tests
-
 - Add tags to source tables that describe the source system and / or ingestion method
 - Add owners and subscribers to source tables
