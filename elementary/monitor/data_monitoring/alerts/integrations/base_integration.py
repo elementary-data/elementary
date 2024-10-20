@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Generator, List, Sequence, Tuple, Union
 
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -25,7 +26,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
         *args,
         **kwargs,
@@ -44,7 +45,7 @@ class BaseIntegration(ABC):
             return self._get_source_freshness_template(alert)
         elif isinstance(alert, GroupedByTableAlerts):
             return self._get_group_by_table_template(alert)
-        elif isinstance(alert, AlertsGroup):
+        elif isinstance(alert, BaseAlertsGroup):
             return self._get_alerts_group_template(alert)
 
     @abstractmethod
@@ -76,7 +77,7 @@ class BaseIntegration(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):
+    def _get_alerts_group_template(self, alert: BaseAlertsGroup, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -101,7 +102,7 @@ class BaseIntegration(ABC):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
         *args,
         **kwargs,
@@ -132,7 +133,7 @@ class BaseIntegration(ABC):
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ] = []
         for alert in alerts:
-            if isinstance(alert, AlertsGroup):
+            if isinstance(alert, BaseAlertsGroup):
                 flattened_alerts.extend(alert.alerts)
             else:
                 flattened_alerts.append(alert)
@@ -171,7 +172,7 @@ class BaseIntegration(ABC):
     ]:
         grouped_alerts = self._group_alerts(alerts, group_alerts_threshold)
         for alert in grouped_alerts:
-            if isinstance(alert, AlertsGroup):
+            if isinstance(alert, BaseAlertsGroup):
                 sent_successfully = self.send_alert(alert, *args, **kwargs)
                 for inner_alert in alert.alerts:
                     yield inner_alert, sent_successfully

@@ -520,7 +520,7 @@ class TeamsIntegration(BaseIntegration):
                 self._get_section("*Test errors*", f"{text}")
             )
 
-    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):
+    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):  # type: ignore[override]
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         subtitle = ""
@@ -557,7 +557,7 @@ class TeamsIntegration(BaseIntegration):
 
         if alert.model_errors:
             rows = [alert.summary for alert in alert.model_errors]
-            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
+            text = "<br>".join([f"&#x1F635; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Model errors*", f"{text}")
             )
@@ -609,7 +609,7 @@ class TeamsIntegration(BaseIntegration):
 
     def send_alert(
         self,
-        alert: Union[
+        alert: Union[  # type: ignore[override]
             TestAlertModel,
             ModelAlertModel,
             SourceFreshnessAlertModel,

@@ -6,7 +6,8 @@ from typing import DefaultDict, Dict, List, Optional, Union
 from alive_progress import alive_it
 
 from elementary.config.config import Config
-from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
@@ -256,12 +257,12 @@ class DataMonitoringAlerts(DataMonitoring):
             alerts_with_progress_bar, self.config.group_alerts_threshold
         ):
             if sent_successfully:
-                if isinstance(alert, AlertsGroup):
+                if isinstance(alert, BaseAlertsGroup):
                     sent_successfully_alerts.extend(alert.alerts)
                 else:
                     sent_successfully_alerts.append(alert)
             else:
-                if isinstance(alert, AlertsGroup):
+                if isinstance(alert, BaseAlertsGroup):
                     for inner_alert in alert.alerts:
                         logger.error(
                             f"Could not send the alert - {inner_alert.id}. Full alert: {json.dumps(inner_alert.data)}"
