@@ -557,7 +557,7 @@ class TeamsIntegration(BaseIntegration):
 
         if alert.model_errors:
             rows = [alert.summary for alert in alert.model_errors]
-            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
+            text = "<br>".join([f"&#x1F635; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Model errors*", f"{text}")
             )
