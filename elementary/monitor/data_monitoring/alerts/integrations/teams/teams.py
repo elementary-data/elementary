@@ -520,7 +520,7 @@ class TeamsIntegration(BaseIntegration):
                 self._get_section("*Test errors*", f"{text}")
             )
 
-    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):
+    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):  # type: ignore[override]
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
         subtitle = ""
@@ -609,7 +609,7 @@ class TeamsIntegration(BaseIntegration):
 
     def send_alert(
         self,
-        alert: Union[
+        alert: Union[  # type: ignore[override]
             TestAlertModel,
             ModelAlertModel,
             SourceFreshnessAlertModel,
