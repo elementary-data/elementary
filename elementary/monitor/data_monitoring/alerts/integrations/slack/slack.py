@@ -22,9 +22,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builde
     SlackAlertMessageSchema,
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
-    get_model_runs_link,
     get_model_test_runs_link,
-    get_test_runs_link,
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
@@ -148,9 +146,8 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.elementary_unique_id
-        )
+        test_runs_report_link = alert.get_report_link()
+
         if test_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -314,9 +311,8 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.elementary_unique_id
-        )
+        test_runs_report_link = alert.get_report_link()
+
         if test_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -461,9 +457,8 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        model_runs_report_link = get_model_runs_link(
-            alert.report_url, alert.model_unique_id
-        )
+        model_runs_report_link = alert.get_report_link()
+
         if model_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -565,9 +560,8 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        model_runs_report_link = get_model_runs_link(
-            alert.report_url, alert.model_unique_id
-        )
+        model_runs_report_link = alert.get_report_link()
+
         if model_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
@@ -653,9 +647,8 @@ class SlackIntegration(BaseIntegration):
                 ),
             )
 
-        test_runs_report_link = get_test_runs_link(
-            alert.report_url, alert.source_freshness_execution_id
-        )
+        test_runs_report_link = alert.get_report_link()
+
         if test_runs_report_link:
             report_link = self.message_builder.create_context_block(
                 [
