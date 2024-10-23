@@ -10,6 +10,7 @@ from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -100,7 +101,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
         *args,
         **kwargs,
@@ -964,8 +965,8 @@ class SlackIntegration(BaseIntegration):
         section_text_rows = [f"*{sub_title}*"]
         for alert in alerts:
             text = f":{bullet_icon}: {alert.summary}"
-            if alert.report_url:
-                text = " - ".join([text, f"<{alert.get_report_link()}|View Details>"])
+            if report_link := alert.get_report_link():
+                text = " - ".join([text, f"<{report_link.url}|{report_link.text}>"])
             section_text_rows.append(text)
 
         section = self.message_builder.create_text_section_block(
@@ -1004,19 +1005,19 @@ class SlackIntegration(BaseIntegration):
         return details_blocks
 
     def _get_alerts_group_template(
-        self, alert: AlertsGroup, *args, **kwargs
+        self, alert: BaseAlertsGroup, *args, **kwargs
     ) -> SlackAlertMessageSchema:
         if len(alert.alerts) >= self.COMPACT_SCHEMA_THRESHOLD:
-            return self._get_alerts_group_compact_template(alert)
+            return self._get_alerts_group_compact_template(alert)  # type: ignore[arg-type]
 
         self.message_builder.add_message_color(self._get_color(alert.status))
         title_blocks = [
             self.message_builder.create_header_block(
                 f"{self._get_display_name(alert.status)}: {alert.summary}"
             ),
-            self._get_alert_type_counters_block(alert),
+            self._get_alert_type_counters_block(alert),  # type: ignore[arg-type]
         ]
-        details_blocks = self._get_sub_group_details_blocks(alert)
+        details_blocks = self._get_sub_group_details_blocks(alert)  # type: ignore[arg-type]
         return SlackAlertMessageSchema(title=title_blocks, details=details_blocks)
 
     @staticmethod
@@ -1047,7 +1048,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
         *args,
         **kwargs,
@@ -1090,10 +1091,10 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
     ):
-        if isinstance(alert, AlertsGroup):
+        if isinstance(alert, BaseAlertsGroup):
             for inner_alert in alert.alerts:
                 inner_alert.owners = self._parse_emails_to_ids(inner_alert.owners)
                 inner_alert.subscribers = self._parse_emails_to_ids(
@@ -1110,7 +1111,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
         *args,
         **kwargs,
@@ -1155,7 +1156,7 @@ class SlackIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            AlertsGroup,
+            BaseAlertsGroup,
         ],
         *args,
         **kwargs,
