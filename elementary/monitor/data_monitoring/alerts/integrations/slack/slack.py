@@ -965,8 +965,8 @@ class SlackIntegration(BaseIntegration):
         section_text_rows = [f"*{sub_title}*"]
         for alert in alerts:
             text = f":{bullet_icon}: {alert.summary}"
-            if alert.report_url:
-                text = " - ".join([text, f"<{alert.get_report_link()}|View Details>"])
+            if report_link := alert.get_report_link():
+                text = " - ".join([text, f"<{report_link.url}|{report_link.text}>"])
             section_text_rows.append(text)
 
         section = self.message_builder.create_text_section_block(
