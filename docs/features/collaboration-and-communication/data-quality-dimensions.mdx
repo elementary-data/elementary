@@ -1,0 +1,65 @@
+---
+title: Data Quality Dimensions
+sidebarTitle: Data Quality Dimensions
+---
+
+## Measuring data quality
+
+<Snippet file="cloud/features/data-health/data-health-intro.mdx" />
+
+
+## Data quality dimensions
+
+The 6 Data Quality Dimensions are:
+
+<Snippet file="cloud/features/data-health/data-quality-dimensions.mdx" />
+
+## Data quality dimensions example
+
+To help understand different aspects of data quality, let's explore these concepts using a familiar example - the IMDb movie database. 
+IMDb is a comprehensive database of movies, TV shows, cast members, ratings, and more. 
+Through this example, we'll see how different data quality issues could affect user experience and data reliability.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1729685094/c8373447-3cfd-4181-aef6-31e26f9a3414-731323186_yqzaqc.jpg"
+      alt="IMDB banner"
+      width="1000"
+    />
+  </div>
+</Frame>
+
+#### Freshness
+- **Definition**: Ensures that data is up to date and reflects the latest information.
+- **Example**: Consider The Godfather's IMDb rating. If the rating hasn't been updated since 2000, despite users continuing to submit reviews every year, the displayed rating would be stale. This outdated information could mislead users about the current audience sentiment toward the movie.
+
+#### Completeness
+- **Definition**: Ensures all required fields are filled in, without missing values.
+- **Example**: Imagine the IMDb record for Pulp Fiction missing key cast members, such as Uma Thurman. This incomplete data would provide users with an inadequate picture of the movie's legendary cast, significantly reducing the dataset's usefulness.
+
+#### Uniqueness
+- **Definition**: Ensures that each entity is represented only once in the system.
+- **Example**: Consider having two separate records for The Matrix with the same primary key but different details - one showing a release year of 1999, another showing 1998. This duplication creates confusion about the correct information and could cause problems in downstream processes, like reporting or website display.
+
+#### Consistency
+- **Definition**: Ensures data remains uniform across multiple datasets and sources.
+- **Example**: If IMDb's Top 250 Movies page displays 254 movies due to a backend error, while the Ratings Summary page correctly shows 250 movies, this inconsistency would confuse users and diminish trust in the platform's data.
+
+#### Validity
+- **Definition**: Ensures that data conforms to rules or expectations, such as acceptable ranges or formats.
+- **Example**: If a movie's runtime is listed as 1500 minutes when the longest movie ever made was 873 minutes, this would be an invalid value. The runtime clearly doesn't conform to expected movie length ranges and would be considered invalid data.
+
+#### Accuracy
+- **Definition**: Ensures that data represents the real-world scenario correctly.
+- **Example**: If an IMDb record listed Leonardo DiCaprio as the director of Inception instead of Christopher Nolan, this would be inaccurate. While DiCaprio starred in the movie, he didn't direct it - this kind of error misrepresents the real-world facts.
+
+
+## Implementation in Elementary
+
+In Elementary, all the dbt tests and Elementary monitors are automatically attributed to the relvant data quality dimension. 
+Based on the results of tests and monitors, a data health score is calculated for each dimension, and a total score for the data set. 
+
+The data quality scores are presented in a [data health dashboard](/features/collaboration-and-communication/data-health#data-health-dashboard), data catalog integrations, and more. 
+
+<Tip>To learn more, **watch the webinar** [**Measuring Data Health with Elementary**](https://www.elementary-data.com/webinar/measuring-data-health-with-elementary)</Tip>

@@ -1,41 +1,25 @@
 ---
-title: Data Health
-sidebarTitle: Data Health
+title: Data Health Dashboard
+sidebarTitle: Data Health Dashboard
 ---
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
 
+<Snippet file="cloud/features/data-health/data-health-intro.mdx" />
+
+### Data Health Dashboard
+
 The Data Health Dashboard is intended for your data consumers and stakeholders, that want to get a summary of what is happening with the data in your organization.
 
-The dashboard is based on the 6 pillars of data observability:
-
-<CardGroup cols={3}>
-  <Card title="Accuracy" icon="bullseye-arrow">
-    The level to which data represents the real-world scenario and confirms with a verifiable source.
-  </Card>
-  <Card title="Consistency" icon="code-compare">
-    The degree to which data is the same across all instances of the data.
-  </Card>
-  <Card title="Completeness" icon="ballot-check">
-    Is the data sufficient to deliver meaningful inferences and decisions.
-  </Card>
-  <Card title="Freshness" icon="stopwatch">
-    Whether or not the data is updated according to the expected SLA
-  </Card>
-  <Card title="Uniqueness" icon="barcode-read">
-    Whether or not each record only exists in the system once and there are no duplications
-  </Card>
-  <Card title="Validity" icon="puzzle">
-    Whether the values are in the same data type / format / range as indicated by a predefined set of rules
-  </Card>
-</CardGroup>
-
-The purpose of is to give a high-level overview that doesn't require deep technical knowledge or going into specific test results.
+It gives a high-level overview that doesn't require deep technical knowledge or going into specific test results.
 the dashboard presents the data health in a simple way, by giving a health score, and using a color code to indicate if this score is healthy.
 Filters are available at the top of the page, making it easy to see the data health in different contexts.
 
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1720701842/Data_Health_-_1280px_menu_included_pckgri.png" alt="Data Health Score" />
 
-<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1720701842/Data_Health_-_1280px_menu_included_pckgri.png" alt="Data Health Dashboard" />
+The dashboard is based on the 6 [Data Quality Dimensions](/features/collaboration-and-communication/data-quality-dimensions#data-quality-dimensions):
+
+<Snippet file="cloud/features/data-health/data-quality-dimensions.mdx" />
 
 ### How is the data health score calculated?
 
@@ -52,6 +36,7 @@ The thresholds for the color coding (green, yellow and red) are also configurabl
 <img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1720528475/dfxb2atgfkxthpwlrjkv.png" alt="Score weight and threshold configuration" />
 
 ### Can I customize the quality dimension mapping of my tests?
+
 Of course!
 Each test you run, whether it's a generic or a custom test, can be mapped to one of the 6 quality dimensions.
 The way to do so is to add `quality_dimension` to the test definition in your dbt project:
@@ -76,7 +61,7 @@ tests:
 </CodeGroup>
 
 
-## Next steps
+## Coming soon
 
 - **Send a daily report** of the data health to your stakeholders
 - **Compare the data health** of different domains
