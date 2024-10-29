@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Sequence, Union
 
 import pandas as pd
 from pymsteams import cardsection, potentialaction  # type: ignore
@@ -520,6 +520,30 @@ class TeamsIntegration(BaseIntegration):
                 self._get_section("*Test errors*", f"{text}")
             )
 
+    def _get_sub_group_detailed_section(
+        self,
+        alerts: Sequence[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ],
+        ],
+        sub_title: str,
+        bullet_icon: str,
+    ) -> cardsection:
+        formatted_sub_title = f"*{sub_title}*"
+        rows = []
+        for alert in alerts:
+            row = f"{bullet_icon} {alert.summary}"
+            if report_link := alert.get_report_link():
+                link = f'<a href="{report_link.url}">{report_link.text}</a>'
+                row = f"{row} - {link}"
+            rows.append(row)
+        text = "<br>".join(rows)
+        return self._get_section(formatted_sub_title, text)
+
     def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):  # type: ignore[override]
         title = f"{self._get_display_name(alert.status)}: {alert.summary}"
 
@@ -556,31 +580,39 @@ class TeamsIntegration(BaseIntegration):
         self.message_builder.text(subtitle)
 
         if alert.model_errors:
-            rows = [alert.summary for alert in alert.model_errors]
-            text = "<br>".join([f"&#x1F635; {row}" for row in rows])
             self.message_builder.addSection(
-                self._get_section("*Model errors*", f"{text}")
+                self._get_sub_group_detailed_section(
+                    alerts=alert.model_errors,
+                    sub_title="Model errors",
+                    bullet_icon="&#x1F635;",
+                )
             )
 
         if alert.test_failures:
-            rows = [alert.summary for alert in alert.test_failures]
-            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
             self.message_builder.addSection(
-                self._get_section("*Test failures*", f"{text}")
+                self._get_sub_group_detailed_section(
+                    alerts=alert.test_failures,
+                    sub_title="Test failures",
+                    bullet_icon="&#x1F53A;",
+                )
             )
 
         if alert.test_warnings:
-            rows = [alert.summary for alert in alert.test_warnings]
-            text = "<br>".join([f"&#x26A0; {row}" for row in rows])
             self.message_builder.addSection(
-                self._get_section("*Test warnings*", f"{text}")
+                self._get_sub_group_detailed_section(
+                    alerts=alert.test_warnings,
+                    sub_title="Test warnings",
+                    bullet_icon="&#x26A0;",
+                )
             )
 
         if alert.test_errors:
-            rows = [alert.summary for alert in alert.test_errors]
-            text = "<br>".join([f"&#x2757; {row}" for row in rows])
             self.message_builder.addSection(
-                self._get_section("*Test errors*", f"{text}")
+                self._get_sub_group_detailed_section(
+                    alerts=alert.test_errors,
+                    sub_title="Test errors",
+                    bullet_icon="&#x2757;",
+                )
             )
 
     def _get_fallback_template(
