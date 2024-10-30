@@ -273,6 +273,12 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
             elementary_database_and_schema=elementary_database_and_schema,
         )
 
+    @validator("full_refresh", pre=True, always=True)
+    def validate_full_refresh(cls, full_refresh: Optional[bool]) -> bool:
+        if full_refresh is None:
+            return False
+        return full_refresh
+
 
 class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
     source_freshness_execution_id: str
