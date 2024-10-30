@@ -4,7 +4,18 @@ sidebarTitle: "Introduction"
 icon: "square-terminal"
 ---
 
-<Snippet file="oss/oss-introduction-opening.mdx" />
+Elementary OSS is a CLI tool you can deploy with the [Elementary dbt package](/guides/modules-overview/dbt-package) and orchestrate to send Slack alerts and self-host the Elementary report.
+
+To gain the most value from Elementary, we recommend using the [Elementary Cloud Platform](/cloud/introduction).
+
+### Elementary OSS vs Elementary Cloud Platform
+
+- **Elementary Cloud Platform**  - **Recommended for organizational data quality initiatives** (e.g., platform refactoring, governance projects, or AI/ML adoption).
+  The Elementary Cloud Platform offers pipeline monitoring, incident management, colum level lineage, dashboards, health scores, and alerts. It empowers data engineers, analytics engineers, and data analysts to collaborate, resolve issues efficiently, and deliver trusted data products. Learn more about the [Elementary Cloud Platform](/cloud/introduction) or [book a demo](https://cal.com/maayansa/elementary-intro-docs).
+- **Elementary OSS** - **Recommended for local or individual use.**
+  The CLI tool is used to send Slack alerts, and self-host the Elementary report. It is the right choice if you’ll be the primary user of Elementary and don't have collaboration needs. Learn more about the CLI tool below.
+
+See here a [detailed features comparison](/overview/cloud-vs-oss).
 
 <CardGroup cols={1}>
   <Card
@@ -17,4 +28,43 @@ icon: "square-terminal"
   </Card>
 </CardGroup>
 
-<Snippet file="oss/oss-introduction.mdx" />
+### CLI Guides
+
+<CardGroup cols={2}>
+  <Card
+    title="Generate a report"
+    icon="browsers"
+    iconType="solid"
+    href="/oss/guides/generate-report-ui"
+  ></Card>
+  <Card
+    title="Send alerts"
+    icon="bell-exclamation"
+    href="/oss/guides/alerts/elementary-alerts"
+  ></Card>
+  <Card
+    title="Share the report"
+    icon="share-all"
+    iconType="solid"
+    href="/oss/guides/share-report-ui"
+  ></Card>
+  <Card
+    title="Deploy in production"
+    icon="gear"
+    iconType="solid"
+    href="/oss/deployment-and-configuration/elementary-in-production"
+  ></Card>
+</CardGroup>
+
+<br />
+
+<Frame>
+  <img
+    src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif"
+    alt="Demo"
+  />
+</Frame>
+
+### Supported adapters
+
+<Snippet file="oss/adapters-cards.mdx" />

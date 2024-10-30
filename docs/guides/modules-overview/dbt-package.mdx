@@ -3,10 +3,24 @@ title: "Elementary dbt package"
 sidebarTitle: "Introduction"
 ---
 
-For data monitoring and dbt artifacts collection, Elementary uses a dbt package.
-The package adds models, macros, and Elementary tests as dbt tests to your project.
+The Elemenary dbt package serves as a collector of logs and metadata from your dbt project and offers a set of data anomaly detection and schema tests.
+To gain the most value from the dbt package, we recommend using it with the [Elementary Cloud Platform](/cloud/introduction) or with [Elementary open-source CLI tool](/oss/oss-introduction).
 
-The impact of the package on `dbt run` is minimal, and most of the processing happens as part of the data tests that are executed on `dbt test`.
+**What brings you here?**
+
+- **An organizational data quality initiative** (e.g., platform refactoring, governance projects, or AI/ML adoption): The Elementary Cloud Platform offers pipeline monitoring, incident management, lineage tracking, dashboards, health scores, and alerts, empowering data engineers, analytics engineers, and data analysts to resolve issues efficiently and deliver trusted data products. Learn more about the [Elementary Cloud Platform](/cloud/introduction) or [book a demo](https://cal.com/maayansa/elementary-intro-docs).
+- **Individual-use observability:** If you’ll be the primary user, try the open-source CLI tool to send Slack alerts, and self-host the Elementary report.
+
+The repository and source code of the Elementary dbt package can be [found here](https://github.com/elementary-data/dbt-data-reliability).
+
+## Package Features
+
+The Elementary dbt package is designed to power data observability use cases for dbt pipelines.
+This package will upload logs and metadata generated from your runs as dbt artifacts into tables in your datawarehouse.
+Additionaly, it offers a wide range of tests, including anomalies in volume, freshness, columns and different dimensions of your data.
+
+The impact of the package on **`dbt run`** is minimal, and most of the processing happens as part of the data tests that are executed on **`dbt test`**.
+
 
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
@@ -20,9 +34,6 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </Accordion>
 
-The repository and source code of the Elementary dbt package can be [found here](https://github.com/elementary-data/dbt-data-reliability).
-
-## Package Features
 
 After you deploy the dbt package, you can use Elementary tests, and your dbt artifacts will be uploaded automatically with on-run-end hooks:
 
