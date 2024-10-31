@@ -6,7 +6,9 @@ from typing import DefaultDict, Dict, List, Optional, Union
 from alive_progress import alive_it
 
 from elementary.config.config import Config
-from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts, GroupingType
+from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
+from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -251,18 +253,19 @@ class DataMonitoringAlerts(DataMonitoring):
 
         alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
-        for alert in alerts_with_progress_bar:
-            sent_successfully = self.alerts_integration.send_alert(alert=alert)
+        for alert, sent_successfully in self.alerts_integration.send_alerts(
+            alerts_with_progress_bar, self.config.group_alerts_threshold
+        ):
             if sent_successfully:
-                if isinstance(alert, GroupedByTableAlerts):
+                if isinstance(alert, BaseAlertsGroup):
                     sent_successfully_alerts.extend(alert.alerts)
                 else:
                     sent_successfully_alerts.append(alert)
             else:
-                if isinstance(alert, GroupedByTableAlerts):
-                    for grouped_alert in alert.alerts:
+                if isinstance(alert, BaseAlertsGroup):
+                    for inner_alert in alert.alerts:
                         logger.error(
-                            f"Could not send the alert - {grouped_alert.id}. Full alert: {json.dumps(grouped_alert.data)}"
+                            f"Could not send the alert - {inner_alert.id}. Full alert: {json.dumps(inner_alert.data)}"
                         )
                 else:
                     logger.error(
