@@ -652,6 +652,7 @@ class TeamsIntegration(BaseIntegration):
         **kwargs,
     ) -> bool:
         try:
+            logger.debug("Sending alert via Teams.")
             self._get_alert_template(alert)
             sent_successfully = self.client.send_message()
         except Exception as e:

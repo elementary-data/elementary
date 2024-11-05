@@ -1111,6 +1111,7 @@ class SlackIntegration(BaseIntegration):
     ) -> bool:
         integration_params = self._get_integration_params(alert=alert)
         channel_name = integration_params.get("channel")
+        logger.debug(f"Sending alert to Slack channel: {channel_name}")
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)
@@ -1156,18 +1157,15 @@ class SlackIntegration(BaseIntegration):
     ) -> Dict[str, Any]:
         integration_params = dict()
         if isinstance(self.client, SlackWebClient):
-            integration_params.update(
-                dict(
-                    channel=(
-                        self.config.slack_channel_name
-                        if self.override_config_defaults
-                        else (
-                            alert.unified_meta.get("channel")
-                            or self.config.slack_channel_name
-                        )
-                    )
-                )
-            )
+            if self.override_config_defaults:
+                channel = self.config.slack_channel_name
+                logger.debug(f"Using override config default channel: {channel}")
+            elif alert.unified_meta.get("channel"):
+                channel = alert.unified_meta.get("channel")
+                logger.debug(f"Using channel from meta: {channel}")
+            else:
+                channel = self.config.slack_channel_name
+            integration_params.update({"channel": channel})
         return integration_params
 
     def _create_single_alert_details_blocks(
