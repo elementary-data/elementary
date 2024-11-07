@@ -41,7 +41,7 @@ class GCSClient:
         bucket_website_url = None
         bucket_report_path = remote_bucket_file_path or report_filename
         logger.info(f'Uploading to GCS bucket "{self.config.gcs_bucket_name}"')
-        bucket = self.client.get_bucket(self.config.gcs_bucket_name)
+        bucket = self.client.bucket(self.config.gcs_bucket_name)
         blob = bucket.blob(bucket_report_path)
         blob.upload_from_filename(
             local_html_file_path,
