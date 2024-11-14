@@ -5,95 +5,60 @@ icon: "stars"
 ---
 
 <CardGroup cols={1}>
-  <Card
-    title="Data anomaly detection"
-    icon="monitor-waveform"
-    iconType="solid"
-    href="/features/data-tests"
-  >
-    Monitor data quality metrics, freshness, volume and schema changes.
+  <Card title="Data anomaly detection" icon="monitor-waveform" iconType="solid" href="/features/data-tests">
+    Monitor data quality metrics, freshness, volume and schema changes.dddd
   </Card>
-  <Card
-    title="dbt artifacts and run results"
-    icon="table-tree"
-    iconType="regular"
-    href="/dbt/dbt-artifacts"
-  >
+
+  <Card title="dbt artifacts and run results" icon="table-tree" iconType="regular" href="/dbt/dbt-artifacts">
     Upload metadata, run and test results to tables as part of your jobs.
   </Card>
-  <Card
-    title="Alerts"
-    icon="bell-exclamation"
-    iconType="regular"
-    href="/features/elementary-alerts"
-  >
+
+  <Card title="Alerts" icon="bell-exclamation" iconType="regular" href="/features/elementary-alerts">
     Send informative alerts to different channels and users.
   </Card>
-  <Card
-    title="Data observability dashboard"
-    icon="browsers"
-    iconType="solid"
-    href="/features/collaboration-and-communication/data-observability-dashboard"
-  >
+
+  <Card title="Data observability dashboard" icon="browsers" iconType="solid" href="/features/collaboration-and-communication/data-observability-dashboard">
     Inspect your data health overview, test results, models performance and data
     lineage.
   </Card>
-  <Card
-    title="End-to-end data lineage"
-    icon="arrow-progress"
-    iconType="solid"
-    href="/features/data-lineage/lineage"
-  >
+
+  <Card title="End-to-end data lineage" icon="arrow-progress" iconType="solid" href="/features/data-lineage/lineage">
     Inspect dependencies including Column Level Lineage and integration with BI
     tools.
   </Card>
-  <Card
-    title="Automated monitors"
-    href="/features/anomaly-detection/automated-monitors"
-    icon="wand-magic-sparkles"
-    iconType="solid"
-  >
+
+  <Card title="Automated monitors" href="/features/anomaly-detection/automated-monitors" icon="wand-magic-sparkles" iconType="solid">
     Out of the box freshness, volume and schema monitoring.
   </Card>
-  <Card
-    title="Configuration as code"
-    href="/features/config-as-code"
-    icon="code"
-    iconType="solid"
-  >
+
+  <Card title="Configuration as code" href="/features/config-as-code" icon="code" iconType="solid">
     All the Elementary configuration is managed in your dbt code.
   </Card>
-  <Card
-    title="Data Catalog"
-    icon="folder-tree"
-    iconType="solid"
-    href="/features/collaboration-and-communication/catalog"
-  >
+
+  <Card title="Data Catalog" icon="folder-tree" iconType="solid" href="/features/collaboration-and-communication/catalog">
     Explore and discover data sets, manage your documentation in code.
   </Card>
 </CardGroup>
-
-
 
 #### Anomaly Detection
 
 <Card title="Automated Volume & Freshness Monitors">
   Out-of-the-box ML-powered monitoring for freshness and volume issues on all production tables.
-  The monitors track updates to tables, and will detect data delays, incomplete updates, and significant volume changes.   
+  The monitors track updates to tables, and will detect data delays, incomplete updates, and significant volume changes.\
   By qurying only metadata (e.g. information schema, query history), the monitors don't add compute costs.
 </Card>
 
 <Card title="Opt-in Anomaly Detection Monitors">
   ML-powered anomaly detection on data quality metrics such as null rate, empty values, string length, numeric metrics (sum, max, min, avg), etc.
   Elementary also supports monitoring for anomalies by dimensions.
-  The monitors are activated for specific data sets, and require minimal configuration (e.g. timestamp column, dimensions). 
+  The monitors are activated for specific data sets, and require minimal configuration (e.g. timestamp column, dimensions).
 </Card>
 
 #### Schema Validation
 
 <Card title="Schema Tests">
-  Elementary offers a set of schema tests for validating there are no breaking changes. 
-  The tests support detecting any schema changes, only detecting changes from a configured baseline, JSON schema validation, 
+  Elementary offers a set of schema tests for validating there are no breaking changes.
+  The tests support detecting any schema changes, only detecting changes from a configured baseline, JSON schema validation,
   and schema changes that break downstream exposures such as dashboards.
 </Card>
 
