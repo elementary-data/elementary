@@ -100,8 +100,46 @@ class TestResultDBRowSchema(ExtendedBaseModel):
         # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None
 
-    @property
-    def normalized_full_path(self) -> str:
-        if self.package_name:
-            return f"{self.package_name}/{self.original_path}"
-        return self.original_path
+
+class TestDBRowSchema(ExtendedBaseModel):
+    unique_id: str
+    model_unique_id: Optional[str] = None
+    database_name: Optional[str] = None
+    schema_name: str
+    table_name: Optional[str] = None
+    column_name: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    package_name: Optional[str] = None
+    original_path: Optional[str] = None
+    test_params: dict
+    meta: dict
+    model_meta: dict
+    tags: List[str] = Field(default_factory=list)
+    model_tags: List[str] = Field(default_factory=list)
+    type: str
+    test_type: Optional[str]
+    test_sub_type: Optional[str]
+    created_at: Optional[str] = None
+    latest_run_time: Optional[str] = None
+    latest_run_status: Optional[str] = None
+
+    @validator("test_params", pre=True)
+    def load_test_params(cls, test_params):
+        return cls._load_var_to_dict(test_params) if test_params else {}
+
+    @validator("meta", pre=True)
+    def load_meta(cls, meta):
+        return cls._load_var_to_dict(meta) if meta else {}
+
+    @validator("model_meta", pre=True)
+    def load_model_meta(cls, model_meta):
+        return cls._load_var_to_dict(model_meta) if model_meta else {}
+
+    @validator("tags", pre=True)
+    def load_tags(cls, tags):
+        return cls._load_var_to_list(tags) if tags else []
+
+    @validator("model_tags", pre=True)
+    def load_model_tags(cls, model_tags):
+        return cls._load_var_to_list(model_tags) if model_tags else []

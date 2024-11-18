@@ -3,10 +3,16 @@ import sys
 import click
 from packaging import version
 
+from elementary.config.config import Config
 from elementary.utils import package
 
 
 def recommend_version_upgrade():
+    config = Config()
+
+    if config.disable_elementary_version_check:
+        return
+
     try:
         latest_version = package.get_latest_package_version()
         current_version = package.get_package_version()

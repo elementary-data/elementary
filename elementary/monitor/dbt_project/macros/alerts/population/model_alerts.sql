@@ -39,6 +39,9 @@
 
 
 {% macro populate_model_alerts_query(days_back=1) %}
+    {# This macro is invoked as part of alerts_v2 post-hook, so "this" references to alerts_v2 -#}
+    {% set seed_run_results_relation = elementary.get_elementary_relation('seed_run_results') -%}
+
     with models as (
         select * from {{ ref('elementary', 'dbt_models') }}
     ),
@@ -47,10 +50,16 @@
         select * from {{ ref('elementary', 'dbt_snapshots') }}
     ),
 
+    seeds as (
+        select * from {{ ref('elementary', 'dbt_seeds') }}
+    ),
+
     artifacts_meta as (
         select unique_id, meta from models
         union all
         select unique_id, meta from snapshots
+        union all
+        select unique_id, meta from seeds
     ),
 
     model_run_results as (
@@ -61,63 +70,43 @@
         select * from {{ ref('snapshot_run_results') }}
     ),
 
-    all_alerts as ( 
-        select 
-            model_execution_id,
+    {% if seed_run_results_relation -%}
+    seed_run_results as (
+        select * from {{ seed_run_results_relation }}
+    ),
+    {%- endif %}
+
+    all_run_results as (
+        {% set run_result_columns %}
             model_execution_id as alert_id,
             unique_id,
-            invocation_id,
-            name,
             generated_at,
             status,
             full_refresh,
             message,
-            execution_time,
-            execute_started_at,
-            execute_completed_at,
-            compile_started_at,
-            compile_completed_at,
-            compiled_code,
             database_name,
             schema_name,
             materialization,
             tags,
-            package_name,
-            path,
-            original_path,
-            owner,
-            alias 
-        from model_run_results
-        where lower(status) != 'success'
-        and {{ elementary.edr_cast_as_timestamp('generated_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
-        union all
-        select 
-            model_execution_id,
-            model_execution_id as alert_id,
-            unique_id,
-            invocation_id,
-            name,
-            generated_at,
-            status,
-            full_refresh,
-            message,
-            execution_time,
-            execute_started_at,
-            execute_completed_at,
-            compile_started_at,
-            compile_completed_at,
-            compiled_code,
-            database_name,
-            schema_name,
-            materialization,
-            tags,
-            package_name,
             path,
             original_path,
             owner,
             alias
-        from snapshot_run_results
-        where lower(status) != 'success' 
+        {% endset -%}
+
+        select {{ run_result_columns }} from model_run_results
+        union all
+        select {{ run_result_columns }} from snapshot_run_results
+        {% if seed_run_results_relation -%}
+        union all
+        select {{ run_result_columns }} from seed_run_results
+        {%- endif %}
+    ),
+
+    all_alerts as ( 
+        select *
+        from all_run_results
+        where lower(status) != 'success'
         and {{ elementary.edr_cast_as_timestamp('generated_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 

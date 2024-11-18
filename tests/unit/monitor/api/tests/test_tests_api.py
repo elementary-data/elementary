@@ -43,6 +43,27 @@ def test_get_test_metadata_from_test_result_db_row(
     )
 
 
+def test_parse_test_db_row(
+    tests_api_mock: MockTestsAPI,
+):
+    tests = tests_api_mock.tests_fetcher.get_tests()
+    test = tests_api_mock._parse_test_db_row(tests[0])
+    assert test.table_unique_id == "test_db.test_schema.table"
+    assert test.configuration.get("test_name") == test.name
+    assert test.configuration == {
+        "anomaly_threshold": 3,
+        "test_name": "the_test_1",
+        "testing_timeframe": "1 hour",
+        "timestamp_column": "signup_date",
+    }
+    assert test.display_name == "The Test 1"
+    assert set(test.tags) == {"awesome", "awesome-o"}
+    assert (
+        test.normalized_full_path
+        == "elementary/tests/elementary/tests/test_elementary.py"
+    )
+
+
 @pytest.fixture
 def tests_api_mock() -> MockTestsAPI:
     return MockTestsAPI()

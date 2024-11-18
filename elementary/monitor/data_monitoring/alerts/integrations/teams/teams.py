@@ -1,13 +1,13 @@
 import json
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Sequence, Union
 
 import pandas as pd
 from pymsteams import cardsection, potentialaction  # type: ignore
 
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
-from elementary.monitor.alerts.group_of_alerts import GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -501,23 +501,118 @@ class TeamsIntegration(BaseIntegration):
 
         if alert.test_failures:
             rows = [alert.concise_name for alert in alert.test_failures]
-            text = "\n".join([f"&#x1F53A; {row}" for row in rows])
+            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test failures*", f"{text}")
             )
 
         if alert.test_warnings:
             rows = [alert.concise_name for alert in alert.test_warnings]
-            text = "\n".join([f"&#x26A0; {row}" for row in rows])
+            text = "<br>".join([f"&#x26A0; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test warnings*", f"{text}")
             )
 
         if alert.test_errors:
             rows = [alert.concise_name for alert in alert.test_errors]
-            text = "\n".join([f"&#x2757; {row}" for row in rows])
+            text = "<br>".join([f"&#x2757; {row}" for row in rows])
             self.message_builder.addSection(
                 self._get_section("*Test errors*", f"{text}")
+            )
+
+    def _get_sub_group_detailed_section(
+        self,
+        alerts: Sequence[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+                GroupedByTableAlerts,
+            ],
+        ],
+        sub_title: str,
+        bullet_icon: str,
+    ) -> cardsection:
+        formatted_sub_title = f"*{sub_title}*"
+        rows = []
+        for alert in alerts:
+            row = f"{bullet_icon} {alert.summary}"
+            if report_link := alert.get_report_link():
+                link = f'<a href="{report_link.url}">{report_link.text}</a>'
+                row = f"{row} - {link}"
+            rows.append(row)
+        text = "<br>".join(rows)
+        return self._get_section(formatted_sub_title, text)
+
+    def _get_alerts_group_template(self, alert: AlertsGroup, *args, **kwargs):  # type: ignore[override]
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+
+        subtitle = ""
+        if alert.model_errors:
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x1F635; Model errors: {len(alert.model_errors)}")
+                if subtitle
+                else f"&#x1F635; Model errors: {len(alert.model_errors)}"
+            )
+        if alert.test_failures:
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x1F53A; Test failures: {len(alert.test_failures)}")
+                if subtitle
+                else f"&#x1F53A; Test failures: {len(alert.test_failures)}"
+            )
+        if alert.test_warnings:
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x26A0; Test warnings: {len(alert.test_warnings)}")
+                if subtitle
+                else f"&#x26A0; Test warnings: {len(alert.test_warnings)}"
+            )
+        if alert.test_errors:
+            subtitle = (
+                subtitle + (" | " + f"&#x2757; Test errors: {len(alert.test_errors)}")
+                if subtitle
+                else f"&#x2757; Test errors: {len(alert.test_errors)}"
+            )
+
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
+
+        if alert.model_errors:
+            self.message_builder.addSection(
+                self._get_sub_group_detailed_section(
+                    alerts=alert.model_errors,
+                    sub_title="Model errors",
+                    bullet_icon="&#x1F635;",
+                )
+            )
+
+        if alert.test_failures:
+            self.message_builder.addSection(
+                self._get_sub_group_detailed_section(
+                    alerts=alert.test_failures,
+                    sub_title="Test failures",
+                    bullet_icon="&#x1F53A;",
+                )
+            )
+
+        if alert.test_warnings:
+            self.message_builder.addSection(
+                self._get_sub_group_detailed_section(
+                    alerts=alert.test_warnings,
+                    sub_title="Test warnings",
+                    bullet_icon="&#x26A0;",
+                )
+            )
+
+        if alert.test_errors:
+            self.message_builder.addSection(
+                self._get_sub_group_detailed_section(
+                    alerts=alert.test_errors,
+                    sub_title="Test errors",
+                    bullet_icon="&#x2757;",
+                )
             )
 
     def _get_fallback_template(
@@ -527,6 +622,7 @@ class TeamsIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
@@ -545,16 +641,18 @@ class TeamsIntegration(BaseIntegration):
 
     def send_alert(
         self,
-        alert: Union[
+        alert: Union[  # type: ignore[override]
             TestAlertModel,
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            AlertsGroup,
         ],
         *args,
         **kwargs,
     ) -> bool:
         try:
+            logger.debug("Sending alert via Teams.")
             self._get_alert_template(alert)
             sent_successfully = self.client.send_message()
         except Exception as e:

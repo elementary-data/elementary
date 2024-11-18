@@ -7,6 +7,7 @@ from elementary.monitor.fetchers.models.schema import (
     ModelRunSchema,
     ModelSchema,
     ModelTestCoverage,
+    SeedSchema,
     SourceSchema,
 )
 from elementary.utils.log import get_logger
@@ -33,6 +34,14 @@ class ModelsFetcher(FetcherClient):
         )
         model_runs = [ModelRunSchema(**model_run) for model_run in model_run_dicts]
         return model_runs
+
+    def get_seeds(self) -> List[SeedSchema]:
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="elementary_cli.get_seeds",
+        )
+        seeds = json.loads(run_operation_response[0]) if run_operation_response else []
+        seeds = [SeedSchema(**seed) for seed in seeds]
+        return seeds
 
     def get_models(self, exclude_elementary_models: bool = False) -> List[ModelSchema]:
         run_operation_response = self.dbt_runner.run_operation(
@@ -63,9 +72,11 @@ class ModelsFetcher(FetcherClient):
         exposures = [
             {
                 **exposure,
-                "raw_queries": json.loads(exposure["raw_queries"])
-                if exposure.get("raw_queries")
-                else None,
+                "raw_queries": (
+                    json.loads(exposure["raw_queries"])
+                    if exposure.get("raw_queries")
+                    else None
+                ),
             }
             for exposure in exposures
         ]

@@ -36,8 +36,10 @@ class SlackClient(ABC):
         if not config.has_slack:
             return None
         if config.slack_token:
+            logger.debug("Creating Slack client with token.")
             return SlackWebClient(token=config.slack_token, tracking=tracking)
         elif config.slack_webhook:
+            logger.debug("Creating Slack client with webhook.")
             return SlackWebhookClient(webhook=config.slack_webhook, tracking=tracking)
         return None
 
