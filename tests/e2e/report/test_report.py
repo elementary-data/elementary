@@ -61,7 +61,7 @@ def test_group():  # deprecated
     } not in report_data["groups"]["tags"]["No tags"]
 
 
-def test_group_views(warehouse_type):
+def test_group_views():
     report_data = get_report_data()
     groups = report_data.get("groups")
 
@@ -80,7 +80,7 @@ def test_group_views(warehouse_type):
     assert data_assets_group[3]["name"] == "owners"
     owners_view = data_assets_group[3]["data"]
 
-    assert warehouse_type in dwh_view
+    assert len(dwh_view.keys()) == 1
     assert {
         "node_id": "model.elementary_integration_tests.error_model",
         "resource_type": "model",
