@@ -37,9 +37,9 @@ def get_test_configuration(
             test_params=test_params,
         )
     else:
-        time_bucket_configuration = test_params.get("time_bucket", {})
-        time_bucket_count = time_bucket_configuration.get("count", 1)
-        time_bucket_period = time_bucket_configuration.get("period", "day")
+        time_bucket_configuration = test_params.get("time_bucket") or {}
+        time_bucket_count = time_bucket_configuration.get("count") or 1
+        time_bucket_period = time_bucket_configuration.get("period") or "day"
         return dict(
             test_name=name,
             timestamp_column=test_params.get("timestamp_column"),

@@ -31,6 +31,8 @@ class LineageFetcher(FetcherClient):
                 sub_type=self.get_node_sub_type(node),
             )
             for node in nodes
+            # Ephemeral models are not included in the lineage graph.
+            if node["materialization"] != "ephemeral"
         ]
 
     @staticmethod
