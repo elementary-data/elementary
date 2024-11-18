@@ -43,3 +43,20 @@ repos:
         entry: mypy --no-error-summary
         language: system
         files: ^elementary/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: verify-dbt-project-packages-lock
+        name: Verify internal dbt project package lock
+        entry: |
+          bash -c '
+            dbt_version=$(python -c "from dbt.version import __version__; print(__version__)");
+            required_version="1.8";
+            if [[ $(echo -e "$dbt_version\n$required_version" | sort -V | tail -1) == "$dbt_version" ]]; then
+              dbt deps --lock --project-dir elementary/monitor/dbt_project && git diff --quiet elementary/monitor/dbt_project/package-lock.yml || (echo "Changes detected in package lock file!" && exit 1);
+            else
+              echo "Skipping hook, dbt version is $dbt_version (< 1.8).";
+            fi
+          '
+        language: system
+        pass_filenames: false
