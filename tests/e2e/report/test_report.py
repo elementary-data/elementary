@@ -80,7 +80,7 @@ def test_group_views():
     assert data_assets_group[3]["name"] == "owners"
     owners_view = data_assets_group[3]["data"]
 
-    assert "postgres" in dwh_view
+    assert len(dwh_view.keys()) == 1
     assert {
         "node_id": "model.elementary_integration_tests.error_model",
         "resource_type": "model",
