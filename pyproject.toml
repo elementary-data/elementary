@@ -29,7 +29,7 @@ slack-sdk = ">=3.20.1,<4.0.0"
 
 pydantic = "<3.0"
 networkx = ">=2.3,<3"
-packaging = ">=20.9,<=24.0"
+packaging = ">=20.9,<=25.0"
 azure-storage-blob = ">=12.11.0"
 pymsteams = ">=0.2.2,<1.0.0"
 pandas = ">=2.0.0"
