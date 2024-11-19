@@ -3,6 +3,7 @@ from typing import Optional
 
 from pymsteams import cardsection, connectorcard, potentialaction  # type: ignore
 from ratelimit import limits, sleep_and_retry
+from requests import Response
 
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
@@ -67,15 +68,13 @@ class TeamsWebhookClient(TeamsClient):
     @limits(calls=1, period=ONE_SECOND)
     def send_message(self, **kwargs) -> bool:
         self.client.send()
-        response = self.client.last_http_response
+        response: Response = self.client.last_http_response
 
         if response.status_code == OK_STATUS_CODE:
             return True
         else:
             logger.error(
-                "Could not post message to teams via webhook - %s. Error: %s",
-                {self.webhook},
-                {response.text},
+                f"Could not post message to teams via webhook - {self.webhook}. Status code: {response.status_code}, Error: {response.text}"
             )
         return False
 
