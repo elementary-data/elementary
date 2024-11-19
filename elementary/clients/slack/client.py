@@ -243,7 +243,7 @@ class SlackWebhookClient(SlackClient):
 
         else:
             logger.error(
-                f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}"
+                f"Could not post message to slack via webhook - {self.webhook}. Error: {response.text}"
             )
             return False
 

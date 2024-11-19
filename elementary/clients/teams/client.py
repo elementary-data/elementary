@@ -75,7 +75,7 @@ class TeamsWebhookClient(TeamsClient):
             logger.error(
                 "Could not post message to teams via webhook - %s. Error: %s",
                 {self.webhook},
-                {response.body},
+                {response.text},
             )
         return False
 
