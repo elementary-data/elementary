@@ -14,6 +14,13 @@
         union all
         select
             unique_id,
+            null as depends_on_nodes,
+            null as materialization,
+            'snapshot' as type
+        from {{ ref('elementary', 'dbt_snapshots') }}
+        union all
+        select
+            unique_id,
             depends_on_nodes,
             materialization,
             'model' as type
