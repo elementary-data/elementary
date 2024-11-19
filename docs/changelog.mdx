@@ -3,6 +3,248 @@ title: Changelog
 description: "See what's new at Elementary"
 ---
 
+## September 2024
+
+### Custom Resource-based Roles
+
+<div style={{ display: "table", width: "auto" }}>
+    <div style={{ display: "table-row", width: "auto" }}>
+        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
+            <span
+                style={{ 
+                background: "#FECDD8",
+                color: "#BD134F",
+                borderRadius: "8px",
+                fontSize: ".8em",
+                padding: "2px 10px",
+                display: "inline-block",
+                fontWeight: "500",
+                letterSpacing: ".5px",
+                whiteSpace: "nowrap",
+                }}
+            >Security and permissions</span>
+        </div>
+        <div
+            style={{
+            float: "left",
+            display: "table-column",
+            paddingLeft: "0px",
+            width: "100%",
+            marginTop: "-20px",
+            }}
+        >
+            Elementary now allows the creation of custom roles with access controls tailored to specific data.
+
+            These roles are based on criteria such as environments, model path, dbt tags, or dbt owners. This is in addition to the existing access control (View, Edit, Admin).
+            This ensures that users can only access the data they need, helping create focus and security. 
+
+            The creation of custom roles is currently done by our team (in the future you will be able to create custom roles on your own). To create a custom role reach out to us in the mutual Slack support channel, and we will create it for you. When the role is created it will appear in the roles dropdown you see when inviting a new user to Elementary. 
+
+        </div>
+    </div>
+</div>
+
+## August 2024
+
+### Automated Anomaly Monitors - now GA!
+
+<div style={{ display: "table", width: "auto" }}>
+    <div style={{ display: "table-row", width: "auto" }}>
+        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
+            <span
+                style={{ 
+                background: "#FECDD8",
+                color: "#BD134F",
+                borderRadius: "8px",
+                fontSize: ".8em",
+                padding: "2px 10px",
+                display: "inline-block",
+                fontWeight: "500",
+                letterSpacing: ".5px",
+                whiteSpace: "nowrap",
+                }}
+            >Automated monitors</span>
+        </div>
+        <div
+            style={{
+            float: "left",
+            display: "table-column",
+            paddingLeft: "0px",
+            width: "100%",
+            marginTop: "-20px",
+            }}
+        >
+            Elementary Cloud now offers out-of-the-box monitoring for freshness and volume issues across all production tables. This ensures comprehensive detection of critical pipeline issues without any configuration effort or access to raw data, relying solely on metadata.These monitors track table updates and will detect data delays, incomplete updates, and significant volume changes. Additionally, compute costs will not increase as the monitors leverage only warehouse metadata (e.g., information schema, query history).
+
+            **Instant operation with no training period**
+
+            Once your environment is set up, we automatically collect metadata from your warehouse, which our ML models run on. The models are operational when the initial backfill is completed; there is no “loading / training period” - Elementary will collect enough historical data after setup to train the models.
+
+            **Native Integrations with Major Data Warehouses**
+
+            Our anomaly detection monitors are decoupled from the pipeline and built on top of native integrations with each data warehouse. We currently support Snowflake, BigQuery, Databricks, and Redshift.
+
+            Read more [here](https://docs.elementary-data.com/features/anomaly-detection/automated-monitors). 
+
+
+            <Frame>
+            ![Automated Anomaly Monitors in UI](https://res.cloudinary.com/diuctyblm/image/upload/v1725533440/changelog-aug-24-auto-anomaly-monitors_w7nkbh.gif)
+            </Frame>
+
+        </div>
+    </div>
+</div>
+
+### Improvements to the Elementary Catalog
+
+<div style={{ display: "table", width: "auto" }}>
+    <div style={{ display: "table-row", width: "auto" }}>
+        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
+            <span
+                style={{ 
+                background: "#FECDD8",
+                color: "#BD134F",
+                borderRadius: "8px",
+                fontSize: ".8em",
+                padding: "2px 10px",
+                display: "inline-block",
+                fontWeight: "500",
+                letterSpacing: ".5px",
+                whiteSpace: "nowrap",
+                }}
+            >Catalog</span>
+        </div>
+        <div
+            style={{
+            float: "left",
+            display: "table-column",
+            paddingLeft: "0px",
+            width: "100%",
+            marginTop: "-20px",
+            }}
+        >
+            Our goal is to make Elementary valuable for your entire team and minimize the need to switch between Elementary and other interfaces.
+
+            The catalog tab enables you to explore your datasets, including details like descriptions, columns, column descriptions, latest update times, and dataset health.
+
+            We've just introduced new features to the catalog to make it even more powerful and user-friendly.
+
+            #### Expanded Support for More Data Assets!
+
+            - **BI Assets and Exposures**:
+                - All your BI assets are now accessible in the catalog, allowing you to explore their descriptions, owners, tags, columns, and dependencies.
+                - You can view dependencies for your dashboards and other BI assets as a list, in addition to the lineage view.
+            - **Custom SQL Tests (Singular Tests)**:
+                - Your custom logic validations are now visible in the catalog, making it easier for data consumers to see what's already defined.
+
+            #### Access Column Lineage and Test Results from the Catalog
+
+            Now you can directly access column lineage and column test results from the catalog, helping you answer key questions when exploring a dataset:
+
+            - Which tests are defined on this column?
+            - How is this column being used downstream? What impacts it upstream? 
+
+
+            <Frame>
+            ![Elementary Catalog in UI](https://res.cloudinary.com/diuctyblm/image/upload/v1725534280/changelog-july-aug-24-catalog_dlsegm.gif)
+            </Frame>
+
+        </div>
+    </div>
+</div>
+
+### Redshift SSH tunnel Connection
+
+<div style={{ display: "table", width: "auto" }}>
+    <div style={{ display: "table-row", width: "auto" }}>
+        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
+            <span
+                style={{ 
+                background: "#FECDD8",
+                color: "#BD134F",
+                borderRadius: "8px",
+                fontSize: ".8em",
+                padding: "2px 10px",
+                display: "inline-block",
+                fontWeight: "500",
+                letterSpacing: ".5px",
+                whiteSpace: "nowrap",
+                }}
+            >Integrations</span>
+        </div>
+        <div
+            style={{
+            float: "left",
+            display: "table-column",
+            paddingLeft: "0px",
+            width: "100%",
+            marginTop: "-20px",
+            }}
+        >
+            Elementary now supports connecting via SSH or reverse SSH tunnel. Reach out to our team for details and support in this deployment. 
+
+        </div>
+    </div>
+</div>
+
+## July 2024
+
+### Introducing Data Health Scores!
+
+<div style={{ display: "table", width: "auto" }}>
+    <div style={{ display: "table-row", width: "auto" }}>
+        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
+            <span
+                style={{ 
+                background: "#FECDD8",
+                color: "#BD134F",
+                borderRadius: "8px",
+                fontSize: ".8em",
+                padding: "2px 10px",
+                display: "inline-block",
+                fontWeight: "500",
+                letterSpacing: ".5px",
+                whiteSpace: "nowrap",
+                }}
+            >Data health</span>
+        </div>
+        <div
+            style={{
+            float: "left",
+            display: "table-column",
+            paddingLeft: "0px",
+            width: "100%",
+            marginTop: "-20px",
+            }}
+        >
+            Our new Data Health Dashboard lets you communicate the health state of a data set to users who are less familiar with specific tests and validations and need to know whether a data set is usable.
+
+            **How are health scores calculated?**
+
+            We calculate the health of each data set across six dimensions: Accuracy, consistency, completeness, freshness, uniqueness, and validity.Each test you run in dbt or in Elementary is mapped to one of these pillars, and given a score. The results are aggregated to give a health score for each pillar.Each dimension contributes to the overall table health score, which is a weighted average of these factors. The weight assigned to each dimension is configurable.
+
+            **Enhancing coverage**
+
+            The dashboard instantly highlights any dimensions lacking testing. We are working on adding suggestions for tests that can cover that dimension.
+
+            **Sharing with the team**
+
+            Easily share the dashboard with team members—granting view-only access if needed.
+
+            **Configurable Alerts (coming soon)**
+
+            We are working on adding alert configurations for data consumers when the score drops below a certain level.
+
+            [Read more on our docs.](https://link.usepylon.com/link?ri=1&url=https%3A%2F%2Fdocs.elementary-data.com%2Ffeatures%2Fcollaboration-and-communication%2Fdata-health&utm_campaign_id=febb4283-0e95-43a9-89eb-0a5cd707b0a8&utm_slack_channel=C06BF7333AR)
+
+            <Frame>
+            ![Data Health Scores in UI](https://res.cloudinary.com/diuctyblm/image/upload/v1725533044/changelog-july-health-scores_dpiavm.gif)
+            </Frame>
+
+        </div>
+    </div>
+</div>
+
 ## May 2024
 
 ### Test configuration supports ANY dbt TEST OUT THERE! 😱
