@@ -1,0 +1,38 @@
+---
+title: "Anomaly Detection Tests - OSS vs Cloud"
+description: "Elementary OSS and Elementary Cloud Platform both offer data anomaly detection. However, there are significant differences in implementation. "
+---
+
+Elementary OSS and Elementary Cloud Platform both offer data anomaly detection. However, there are significant differences in implementation.
+
+There are two types of anomaly detection tests:
+
+* **Pipeline health monitors** - Monitor the pipeline runs, ensuring timely and complete data ingestion and transformation. These monitors monitor metadata to detect volume and freshness issues.
+
+* **Data quality metrics tests** - Run as part of the pipeline, collect metrics by querying the data itself. These include various data quality metrics such as nullness, cardinality, average, length, etc.
+
+Here is a comparison between the implementation of these tests in Elementary Cloud and OSS:
+
+## Pipeline Health Monitors - Freshness and Volume
+
+|                         | OSS                                           | Cloud                                             |
+| ----------------------- | --------------------------------------------- | ------------------------------------------------- |
+| **Implementation**      | dbt tests                                     | Elementary Cloud monitors                         |
+| **Tests execution**     | Run in dbt                                    | Run in Cloud                                      |
+| **Coverage**            | Manually added in code                        | Automated, out-of-the-box full coverage           |
+| **Configuration**       | Manual, many parameters required for accuracy | No configuration, automated ML models             |
+| **Detection mechanism** | Z-score, statistical                          | ML anomaly detection, various models              |
+| **What is monitored?**  | Data                                          | Metadata (query history, information schema)      |
+| **Time to detection**   | Only when dbt runs                            | As soon as the problem happens, including sources |
+| **Cost**                | DWH compute                                   | No cost, only metadata is leveraged               |
+
+## Data Quality Metrics
+
+|                         | OSS                                           | Cloud                                                |
+| ----------------------- | --------------------------------------------- | ---------------------------------------------------- |
+| **Implementation**      | dbt tests                                     | Metrics collection in dbt, Elementary Cloud monitors |
+| **Tests execution**     | Run in dbt                                    | Metrics collection in dbt, detection in Cloud        |
+| **Coverage**            | Manually added in code                        | Opt-in, can be added in bulk in Cloud                |
+| **Configuration**       | Manual, many parameters required for accuracy | Automated ML models                                  |
+| **Detection mechanism** | Z-score, statistical                          | ML anomaly detection, various models                 |
+| **What is monitored?**  | Data                                          | Data                                                 |
