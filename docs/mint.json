@@ -289,6 +289,7 @@
       "group": "Elementary Data tests",
       "pages": [
         "data-tests/introduction",
+        "data-tests/anomaly-detection-tests-oss-vs-cloud",
         "data-tests/elementary-tests-configuration"
       ]
     },
