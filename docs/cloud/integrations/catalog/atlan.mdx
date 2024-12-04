@@ -1,0 +1,29 @@
+---
+title: "Atlan"
+---
+
+Elementary integrates with Atlan by pushing key insights as custom metadata to shared assets—
+assets visible in both Elementary and Atlan.
+This metadata includes data health scores and open incidents, providing visibility into the quality and status of your
+data.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1733326078/image_21_ygrpno.png"
+      alt="Elementary metadata in Atlan asset view"
+    />
+  </div>
+</Frame>
+
+## Required Authentication details for the Atlan integration
+### Atlan API Key
+To generate an API key, follow these steps:
+1. Create a new Persona in Atlan, with the following permissions:
+   - Assets: Read, Update
+   - Governance: Update custom metadata values
+
+### Atlan Base Url
+Your Atlan base URL, for example `https://my-company.atlan.com`
+
+

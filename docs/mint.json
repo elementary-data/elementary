@@ -273,6 +273,12 @@
             "cloud/integrations/alerts/linear",
             "cloud/integrations/alerts/webhooks"
           ]
+        },
+        {
+          "group": "Data Catalog",
+          "pages": [
+            "cloud/integrations/catalog/atlan"
+          ]
         }
       ]
     },
