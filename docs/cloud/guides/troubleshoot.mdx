@@ -47,6 +47,14 @@ Singular tests are sql queries that can reference more than one table, but are o
 In order to have that table name appear in the UI in the test results, test execution and more screens, you can set it up by adding the following to the config block of your singular test file:
 ```
 {{ config(
-    override_primary_test_model_id="model_name"
+    override_primary_test_model_id="model_unique_id"
 ) }}
+```
+
+Note: Use the `model_unique_id`, not the model name.
+The `model_unique_id` is the unique identifier of the model in dbt, and can be found by running the query:
+```
+SELECT unique_id
+FROM <elementary-schema-name>.dbt_models
+WHERE name=<model-name>
 ```
