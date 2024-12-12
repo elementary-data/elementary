@@ -28,7 +28,7 @@ class ResourceType(Enum):
     SOURCE_FRESHNESS = "source_freshness"
 
 
-class SupportedFilterTypes(Enum):
+class FilterType(Enum):
     IS = "is"
 
 
@@ -38,7 +38,7 @@ ValueT = TypeVar("ValueT")
 class FilterSchema(BaseModel, Generic[ValueT]):
     # The relation between values is OR.
     values: List[ValueT]
-    type: SupportedFilterTypes = SupportedFilterTypes.IS
+    type: FilterType = FilterType.IS
 
     class Config:
         # Make sure that serializing Enum return values
@@ -56,7 +56,7 @@ class ResourceTypeFilterSchema(FilterSchema[ResourceType]):
 def _get_default_statuses_filter() -> List[StatusFilterSchema]:
     return [
         StatusFilterSchema(
-            type=SupportedFilterTypes.IS,
+            type=FilterType.IS,
             values=[Status.FAIL, Status.ERROR, Status.RUNTIME_ERROR, Status.WARN],
         )
     ]
