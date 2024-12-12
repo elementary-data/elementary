@@ -86,13 +86,13 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
@@ -182,7 +182,7 @@ jobs:
           --project-profile-target "${{ inputs.warehouse-type }}"
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
           path: elementary/edr_target/elementary_report.html
@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload edr log
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: edr.log
           path: elementary/edr_target/edr.log
