@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -27,7 +27,7 @@ jobs:
         run: python -m build --sdist --wheel --outdir dist .
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build
           path: dist
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up QEMU for multi-platform support
         uses: docker/setup-qemu-action@v3
@@ -79,7 +79,7 @@ jobs:
   merge-to-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: PR master to docs
         uses: repo-sync/pull-request@v2
         with:
