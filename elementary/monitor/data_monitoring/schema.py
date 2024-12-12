@@ -14,7 +14,7 @@ class InvalidSelectorError(Exception):
     pass
 
 
-class Status(Enum):
+class Status(str, Enum):
     WARN = "warn"
     FAIL = "fail"
     SKIPPED = "skipped"
@@ -22,13 +22,13 @@ class Status(Enum):
     RUNTIME_ERROR = "runtime error"
 
 
-class ResourceType(Enum):
+class ResourceType(str, Enum):
     TEST = "test"
     MODEL = "model"
     SOURCE_FRESHNESS = "source_freshness"
 
 
-class FilterType(Enum):
+class FilterType(str, Enum):
     IS = "is"
 
 
