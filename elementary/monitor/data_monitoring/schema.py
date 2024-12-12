@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional, Pattern, Tuple
+from typing import Generic, List, Optional, Pattern, Tuple, TypeVar
 
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
@@ -32,9 +32,12 @@ class SupportedFilterTypes(Enum):
     IS = "is"
 
 
-class FilterSchema(BaseModel):
+ValueT = TypeVar("ValueT")
+
+
+class FilterSchema(BaseModel, Generic[ValueT]):
     # The relation between values is OR.
-    values: List[Any]
+    values: List[ValueT]
     type: SupportedFilterTypes = SupportedFilterTypes.IS
 
     class Config:
@@ -42,11 +45,11 @@ class FilterSchema(BaseModel):
         use_enum_values = True
 
 
-class StatusFilterSchema(FilterSchema):
+class StatusFilterSchema(FilterSchema[Status]):
     values: List[Status]
 
 
-class ResourceTypeFilterSchema(FilterSchema):
+class ResourceTypeFilterSchema(FilterSchema[ResourceType]):
     values: List[ResourceType]
 
 
