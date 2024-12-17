@@ -1,0 +1,33 @@
+# **what?**
+# Run tests for <this package> against supported adapters
+
+# **why?**
+# To ensure that <this package> works as expected with all supported adapters
+
+# **when?**
+# On every PR, and every push to master and when manually triggered
+
+name: Package Integration Tests
+
+on:
+    push:
+        branches:
+            - master
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+  run-tests:
+      uses: dbt-labs/dbt-package-testing/.github/workflows/run_tox.yml@v1
+      # this just tests with postgres so no variables need to be passed through.
+      # When it's time to add more adapters you will need to pass through inputs for
+      # the other adapters as shown in the below example for redshift
+    #   with:
+    #     # redshift
+    #     REDSHIFT_HOST: ${{ vars.REDSHIFT_HOST }}
+    #     REDSHIFT_USER: ${{ vars.REDSHIFT_USER }}
+    #     REDSHIFT_DATABASE: ${{ vars.REDSHIFT_DATABASE }}
+    #     REDSHIFT_SCHEMA: "integration_tests_redshift_${{ github.run_number }}"
+    #     REDSHIFT_PORT: ${{ vars.REDSHIFT_PORT }}
+    #   secrets:
+    #     DBT_ENV_SECRET_REDSHIFT_PASS: ${{ secrets.DBT_ENV_SECRET_REDSHIFT_PASS }}
