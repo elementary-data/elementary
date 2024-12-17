@@ -109,8 +109,8 @@ class BaseIntegration(ABC):
     ) -> bool:
         raise NotImplementedError
 
+    @staticmethod
     def _group_alerts(
-        self,
         alerts: Sequence[
             Union[
                 TestAlertModel,
