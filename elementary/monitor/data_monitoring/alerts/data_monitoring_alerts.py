@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import DefaultDict, Dict, List, Optional, Union
 
-from alive_progress import alive_it
+from alive_progress import alive_bar
 
 from elementary.config.config import Config
 from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
@@ -251,27 +251,29 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
 
-        alerts_with_progress_bar = alive_it(alerts, title="Sending alerts")
         sent_successfully_alerts = []
-        for alert, sent_successfully in self.alerts_integration.send_alerts(
-            alerts_with_progress_bar, self.config.group_alerts_threshold
-        ):
-            if sent_successfully:
-                if isinstance(alert, BaseAlertsGroup):
-                    sent_successfully_alerts.extend(alert.alerts)
+
+        with alive_bar(len(alerts), title="Sending alerts") as bar:
+            for alert, sent_successfully in self.alerts_integration.send_alerts(
+                alerts, self.config.group_alerts_threshold
+            ):
+                bar()
+                if sent_successfully:
+                    if isinstance(alert, BaseAlertsGroup):
+                        sent_successfully_alerts.extend(alert.alerts)
+                    else:
+                        sent_successfully_alerts.append(alert)
                 else:
-                    sent_successfully_alerts.append(alert)
-            else:
-                if isinstance(alert, BaseAlertsGroup):
-                    for inner_alert in alert.alerts:
+                    if isinstance(alert, BaseAlertsGroup):
+                        for inner_alert in alert.alerts:
+                            logger.error(
+                                f"Could not send the alert - {inner_alert.id}. Full alert: {json.dumps(inner_alert.data)}"
+                            )
+                    else:
                         logger.error(
-                            f"Could not send the alert - {inner_alert.id}. Full alert: {json.dumps(inner_alert.data)}"
+                            f"Could not send the alert - {alert.id}. Full alert: {json.dumps(alert.data)}"
                         )
-                else:
-                    logger.error(
-                        f"Could not send the alert - {alert.id}. Full alert: {json.dumps(alert.data)}"
-                    )
-                self.success = False
+                    self.success = False
 
         # Now update as sent:
         self.sent_alert_count = len(sent_successfully_alerts)
