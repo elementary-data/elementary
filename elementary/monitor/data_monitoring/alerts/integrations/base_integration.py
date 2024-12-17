@@ -109,8 +109,8 @@ class BaseIntegration(ABC):
     ) -> bool:
         raise NotImplementedError
 
+    @staticmethod
     def _group_alerts(
-        self,
         alerts: Sequence[
             Union[
                 TestAlertModel,
@@ -129,6 +129,9 @@ class BaseIntegration(ABC):
             AlertsGroup,
         ]
     ]:
+        if not alerts:
+            return []
+
         flattened_alerts: List[
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ] = []
