@@ -129,6 +129,9 @@ class BaseIntegration(ABC):
             AlertsGroup,
         ]
     ]:
+        if not alerts:
+            return []
+
         flattened_alerts: List[
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ] = []
