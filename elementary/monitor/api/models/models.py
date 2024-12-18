@@ -14,6 +14,7 @@ from elementary.monitor.api.models.schema import (
     NormalizedExposureSchema,
     NormalizedModelSchema,
     NormalizedSeedSchema,
+    NormalizedSnapshotSchema,
     NormalizedSourceSchema,
     TotalsModelRunsSchema,
 )
@@ -26,6 +27,7 @@ from elementary.monitor.fetchers.models.schema import (
 from elementary.monitor.fetchers.models.schema import (
     ModelSchema,
     SeedSchema,
+    SnapshotSchema,
     SourceSchema,
 )
 from elementary.utils.log import get_logger
@@ -39,6 +41,7 @@ class ModelsAPI(APIClient):
         SourceSchema: "sources",
         ModelSchema: "models",
         ExposureSchema: "exposures",
+        SnapshotSchema: "snapshots",
     }
 
     def __init__(self, dbt_runner: BaseDbtRunner):
@@ -162,6 +165,16 @@ class ModelsAPI(APIClient):
                 sources[source_unique_id] = normalized_source
         return sources
 
+    def get_snapshots(self) -> Dict[str, NormalizedSnapshotSchema]:
+        snapshots_results = self.models_fetcher.get_snapshots()
+        snapshots = dict()
+        if snapshots_results:
+            for snapshot_result in snapshots_results:
+                normalized_snapshot = self._normalize_dbt_artifact_dict(snapshot_result)
+                snapshot_unique_id = cast(str, normalized_snapshot.unique_id)
+                snapshots[snapshot_unique_id] = normalized_snapshot
+        return snapshots
+
     def get_exposures(
         self,
         upstream_node_ids: Optional[List[str]] = None,
@@ -257,19 +270,30 @@ class ModelsAPI(APIClient):
     ) -> NormalizedSourceSchema:
         ...
 
+    @overload
     def _normalize_dbt_artifact_dict(
-        self, artifact: Union[SeedSchema, ModelSchema, ExposureSchema, SourceSchema]
+        self, artifact: SnapshotSchema
+    ) -> NormalizedSnapshotSchema:
+        ...
+
+    def _normalize_dbt_artifact_dict(
+        self,
+        artifact: Union[
+            SeedSchema, ModelSchema, ExposureSchema, SourceSchema, SnapshotSchema
+        ],
     ) -> Union[
         NormalizedSeedSchema,
         NormalizedModelSchema,
         NormalizedExposureSchema,
         NormalizedSourceSchema,
+        NormalizedSnapshotSchema,
     ]:
         schema_to_normalized_schema_map = {
             SeedSchema: NormalizedSeedSchema,
             ExposureSchema: NormalizedExposureSchema,
             ModelSchema: NormalizedModelSchema,
             SourceSchema: NormalizedSourceSchema,
+            SnapshotSchema: NormalizedSnapshotSchema,
         }
         artifact_name = artifact.name
         normalized_artifact = json.loads(artifact.json())
@@ -308,7 +332,9 @@ class ModelsAPI(APIClient):
     @classmethod
     def _fqn(
         cls,
-        artifact: Union[ModelSchema, ExposureSchema, SourceSchema, SeedSchema],
+        artifact: Union[
+            ModelSchema, ExposureSchema, SourceSchema, SeedSchema, SnapshotSchema
+        ],
     ) -> str:
         if isinstance(artifact, ExposureSchema):
             path = (artifact.meta or {}).get("path")
