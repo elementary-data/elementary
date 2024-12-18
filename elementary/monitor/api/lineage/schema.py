@@ -5,7 +5,7 @@ import networkx as nx
 from elementary.utils.pydantic_shim import BaseModel, validator
 
 NodeUniqueIdType = str
-NodeType = Literal["seed", "model", "source", "exposure"]
+NodeType = Literal["snapshot", "seed", "model", "source", "exposure"]
 NodeSubType = Literal["table", "view"]
 
 
