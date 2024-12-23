@@ -47,11 +47,9 @@ No mandatory configuration, however it is highly recommended to configure a `tim
 ```yml Models
 models:
   - name: < model name >
-    config:
-      elementary:
-        timestamp_column: < timestamp column >
     tests:
       - elementary.collect_metrics:
+        timestamp_column: < timestamp column >
         time_bucket: # Daily by default
           period: < time period >
           count: < number of periods >
@@ -68,11 +66,9 @@ models:
 
 models:
   - name: login_events
-    config:
-      elementary:
-        timestamp_column: 'loaded_at'
     tests:
       - elementary.collect_metrics:
+        timestamp_column: 'loaded_at'
         time_bucket:
           period: hour
           count: 1
@@ -86,9 +82,9 @@ models:
             type: row_count
           - name: null_count
             type: null_count
-            columns: [hello, world]
+            columns: ["hello", "world"]
         where_expression: "country = 'USA'"
-        cloud_monitored=True
+        cloud_monitored: true
 
 ```
 
