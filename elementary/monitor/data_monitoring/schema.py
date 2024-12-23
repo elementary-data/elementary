@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Generic, List, Optional, Pattern, Tuple, TypeVar
+from typing import Any, Generic, List, Optional, Pattern, Tuple, TypeVar
 
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
@@ -32,6 +32,12 @@ class FilterType(str, Enum):
     IS = "is"
 
 
+def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
+    if filter_type == FilterType.IS:
+        return value == filter_value
+    raise ValueError(f"Unsupported filter type: {filter_type}")
+
+
 ValueT = TypeVar("ValueT")
 
 
@@ -43,6 +49,17 @@ class FilterSchema(BaseModel, Generic[ValueT]):
     class Config:
         # Make sure that serializing Enum return values
         use_enum_values = True
+
+    def _apply_filter_type(self, value: ValueT, filter_value: ValueT) -> bool:
+        return apply_filter(self.type, value, filter_value)
+
+    def apply_filter_on_value(self, value: ValueT) -> bool:
+        return any(
+            self._apply_filter_type(value, filter_value) for filter_value in self.values
+        )
+
+    def apply_filter_on_values(self, values: List[ValueT]) -> bool:
+        return any(self.apply_filter_on_value(value) for value in values)
 
 
 class StatusFilterSchema(FilterSchema[Status]):
