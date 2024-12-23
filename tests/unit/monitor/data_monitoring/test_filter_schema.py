@@ -44,3 +44,30 @@ def test_filter_schema_apply_filter_on_values_is_not_operator():
 def test_filter_schema_invalid_filter_type():
     with pytest.raises(ValueError):
         FilterSchema(values=["test1"], type="invalid")  # type: ignore[arg-type]
+
+
+def test_filter_schema_contains_operator():
+    filter_schema = FilterSchema(values=["test"], type=FilterType.CONTAINS)
+
+    # Should match when value contains the filter value
+    assert filter_schema.apply_filter_on_value("test123") is True
+    assert filter_schema.apply_filter_on_value("123test") is True
+    assert filter_schema.apply_filter_on_value("123test456") is True
+
+    # Should match case-insensitive
+    assert filter_schema.apply_filter_on_value("TEST123") is True
+    assert filter_schema.apply_filter_on_value("123TEST") is True
+
+    # Should not match when value doesn't contain filter value
+    assert filter_schema.apply_filter_on_value("123") is False
+
+
+def test_filter_schema_apply_filter_on_values_contains_operator():
+    filter_schema = FilterSchema(values=["test1", "test2"], type=FilterType.CONTAINS)
+
+    # Should match when any value contains any filter value
+    assert filter_schema.apply_filter_on_values(["abc_test1_def", "xyz"]) is True
+    assert filter_schema.apply_filter_on_values(["abc", "xyz_test2"]) is True
+
+    # Should not match when no values contain any filter values
+    assert filter_schema.apply_filter_on_values(["abc", "xyz"]) is False

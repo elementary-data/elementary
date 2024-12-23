@@ -31,6 +31,7 @@ class ResourceType(str, Enum):
 class FilterType(str, Enum):
     IS = "is"
     IS_NOT = "is_not"
+    CONTAINS = "contains"
 
 
 def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
@@ -38,13 +39,15 @@ def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool
         return value == filter_value
     elif filter_type == FilterType.IS_NOT:
         return value != filter_value
+    elif filter_type == FilterType.CONTAINS:
+        return str(filter_value).lower() in str(value).lower()
     raise ValueError(f"Unsupported filter type: {filter_type}")
 
 
 ValueT = TypeVar("ValueT")
 
 
-ANY_OPERATORS = [FilterType.IS]
+ANY_OPERATORS = [FilterType.IS, FilterType.CONTAINS]
 ALL_OPERATORS = [FilterType.IS_NOT]
 
 
