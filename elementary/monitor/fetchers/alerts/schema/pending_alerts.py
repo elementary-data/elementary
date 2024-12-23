@@ -68,6 +68,18 @@ class PendingAlertSchema(BaseModel):
         new_values = {**values}
 
         alert_type = AlertTypes(values.get("type"))
+        data = values.get("data")
+
+        if (
+            alert_type is AlertTypes.TEST
+            and isinstance(data, TestAlertDataSchema)
+            or alert_type is AlertTypes.MODEL
+            and isinstance(data, ModelAlertDataSchema)
+            or alert_type is AlertTypes.SOURCE_FRESHNESS
+            and isinstance(data, SourceFreshnessAlertDataSchema)
+        ):
+            return values
+
         raw_data = try_load_json(values.get("data"))
 
         data = None
