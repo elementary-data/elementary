@@ -30,15 +30,22 @@ class ResourceType(str, Enum):
 
 class FilterType(str, Enum):
     IS = "is"
+    IS_NOT = "is_not"
 
 
 def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
     if filter_type == FilterType.IS:
         return value == filter_value
+    elif filter_type == FilterType.IS_NOT:
+        return value != filter_value
     raise ValueError(f"Unsupported filter type: {filter_type}")
 
 
 ValueT = TypeVar("ValueT")
+
+
+ANY_OPERATORS = [FilterType.IS]
+ALL_OPERATORS = [FilterType.IS_NOT]
 
 
 class FilterSchema(BaseModel, Generic[ValueT]):
@@ -54,12 +61,24 @@ class FilterSchema(BaseModel, Generic[ValueT]):
         return apply_filter(self.type, value, filter_value)
 
     def apply_filter_on_value(self, value: ValueT) -> bool:
-        return any(
-            self._apply_filter_type(value, filter_value) for filter_value in self.values
-        )
+        if self.type in ANY_OPERATORS:
+            return any(
+                self._apply_filter_type(value, filter_value)
+                for filter_value in self.values
+            )
+        elif self.type in ALL_OPERATORS:
+            return all(
+                self._apply_filter_type(value, filter_value)
+                for filter_value in self.values
+            )
+        raise ValueError(f"Unsupported filter type: {self.type}")
 
     def apply_filter_on_values(self, values: List[ValueT]) -> bool:
-        return any(self.apply_filter_on_value(value) for value in values)
+        if self.type in ANY_OPERATORS:
+            return any(self.apply_filter_on_value(value) for value in values)
+        elif self.type in ALL_OPERATORS:
+            return all(self.apply_filter_on_value(value) for value in values)
+        raise ValueError(f"Unsupported filter type: {self.type}")
 
 
 class StatusFilterSchema(FilterSchema[Status]):
