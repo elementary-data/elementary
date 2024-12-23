@@ -59,8 +59,8 @@ models:
         metrics: < list of metrics >
           - name: < user defined name for metric >
             type: < which metric to calculate >
-            where_expression: < sql expression >
             columns: < which columns to calculate the metric on- for column metrics >
+        where_expression: < sql expression >
         cloud_monitored: < boolean, should Elementary automatically create anomaly tests for the collected metrics? >
 ```
 
@@ -84,10 +84,10 @@ models:
             type: row_count
           - name: filtered_row_count
             type: row_count
-            where_expression: country = 'USA'
           - name: null_count
             type: null_count
             columns: [hello, world]
+        where_expression: country = 'USA'
         cloud_monitored=True
 
 ```
