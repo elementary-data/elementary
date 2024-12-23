@@ -93,7 +93,7 @@ class FiltersSchema(BaseModel):
     resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
-    def format_invocation_time(cls, invocation_time):
+    def format_invocation_time(cls, invocation_time) -> Optional[str]:
         if invocation_time:
             try:
                 invocation_datetime = convert_local_time_to_timezone(
@@ -107,7 +107,7 @@ class FiltersSchema(BaseModel):
                 raise
         return None
 
-    def validate_report_selector(self):
+    def validate_report_selector(self) -> None:
         # If we start supporting multiple selectors we need to change this logic
         if not self.selector:
             return
