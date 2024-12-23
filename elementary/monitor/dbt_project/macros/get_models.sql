@@ -22,7 +22,8 @@
                   {% if patch_path_column_exists %}
                     patch_path,
                   {% endif %}
-                  original_path as full_path
+                  original_path as full_path,
+                  meta
                 from {{ dbt_models_relation }}
                 {% if exclude_elementary %}
                   where package_name != 'elementary'
