@@ -1,9 +1,7 @@
 from typing import List, Optional
 
 from elementary.monitor.data_monitoring.schema import (
-    FilterSchema,
     FiltersSchema,
-    FilterType,
     ResourceType,
     Status,
 )
@@ -16,9 +14,7 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-def get_string_ends(input_string: Optional[str], splitter: str) -> List[str]:
-    if input_string is None:
-        return []
+def get_string_ends(input_string: str, splitter: str) -> List[str]:
     parts = input_string.split(splitter)
     result = []
 
@@ -44,10 +40,14 @@ def apply_filters_schema_on_alert(
     alert: PendingAlertSchema, filters_schema: FiltersSchema
 ) -> bool:
     tags = alert.data.tags or []
-    models = [
-        alert.data.model_unique_id,
-        *get_string_ends(alert.data.model_unique_id, "."),
-    ]
+    models = (
+        [
+            alert.data.model_unique_id,
+            *get_string_ends(alert.data.model_unique_id, "."),
+        ]
+        if alert.data.model_unique_id
+        else []
+    )
     owners = alert.data.unified_owners or []
     status = Status(alert.data.status)
     resource_type = ResourceType(alert.data.resource_type)
@@ -59,34 +59,13 @@ def apply_filters_schema_on_alert(
         else []
     )
 
-    return (
-        all(
-            filter_schema.apply_filter_on_values(tags)
-            for filter_schema in filters_schema.tags
-        )
-        and all(
-            filter_schema.apply_filter_on_values(models)
-            for filter_schema in filters_schema.models
-        )
-        and all(
-            filter_schema.apply_filter_on_values(owners)
-            for filter_schema in filters_schema.owners
-        )
-        and all(
-            filter_schema.apply_filter_on_value(status)
-            for filter_schema in filters_schema.statuses
-        )
-        and all(
-            filter_schema.apply_filter_on_value(resource_type)
-            for filter_schema in filters_schema.resource_types
-        )
-        and (
-            FilterSchema(
-                values=filters_schema.node_names, type=FilterType.IS
-            ).apply_filter_on_values(node_names)
-            if filters_schema.node_names
-            else True
-        )
+    return filters_schema.apply(
+        tags=tags,
+        models=models,
+        owners=owners,
+        statuses=[status],
+        resource_types=[resource_type],
+        node_names=node_names,
     )
 
 

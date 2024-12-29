@@ -247,6 +247,45 @@ class FiltersSchema(BaseModel):
             resource_types=resource_types,
         )
 
+    def apply(
+        self,
+        tags: List[str],
+        models: List[str],
+        owners: List[str],
+        statuses: List[Status],
+        resource_types: List[ResourceType],
+        node_names: List[str],
+    ) -> bool:
+        return (
+            all(
+                filter_schema.apply_filter_on_values(tags)
+                for filter_schema in self.tags
+            )
+            and all(
+                filter_schema.apply_filter_on_values(models)
+                for filter_schema in self.models
+            )
+            and all(
+                filter_schema.apply_filter_on_values(owners)
+                for filter_schema in self.owners
+            )
+            and all(
+                filter_schema.apply_filter_on_values(statuses)
+                for filter_schema in self.statuses
+            )
+            and all(
+                filter_schema.apply_filter_on_values(resource_types)
+                for filter_schema in self.resource_types
+            )
+            and (
+                FilterSchema(
+                    values=self.node_names, type=FilterType.IS
+                ).apply_filter_on_values(node_names)
+                if self.node_names
+                else True
+            )
+        )
+
 
 class SelectorFilterSchema(BaseModel):
     selector: Optional[str] = None
