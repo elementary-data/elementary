@@ -1,0 +1,14 @@
+integration_tests:
+  target: postgres
+  outputs:
+    postgres:
+      type: "postgres"
+      host: "{{ env_var('POSTGRES_HOST') }}"
+      user: "{{ env_var('POSTGRES_USER') }}"
+      pass: "{{ env_var('DBT_ENV_SECRET_POSTGRES_PASS') }}"
+      port: "{{ env_var('POSTGRES_PORT') | as_number }}"
+      dbname: "{{ env_var('POSTGRES_DATABASE') }}"
+      schema: "{{ env_var('POSTGRES_SCHEMA') }}"
+      threads: 5
+
+# required format for other adapters can be found at https://github.com/dbt-labs/dbt-package-testing/blob/main/integration_tests/profiles.yml
