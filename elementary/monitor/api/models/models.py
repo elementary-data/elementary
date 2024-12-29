@@ -141,10 +141,8 @@ class ModelsAPI(APIClient):
         snapshots = dict()
         if snapshot_results:
             for snapshot_result in snapshot_results:
-                logger.info(f"3 ----- snapshot_result: {snapshot_result}")
                 normalized_snapshot = self._normalize_dbt_artifact_dict(snapshot_result)
                 snapshot_unique_id = cast(str, normalized_snapshot.unique_id)
-                logger.info(f"4 ----- snapshot_unique_id: {snapshot_unique_id}")
                 snapshots[snapshot_unique_id] = normalized_snapshot
         return snapshots
 
