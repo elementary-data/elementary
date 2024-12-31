@@ -81,6 +81,24 @@ class SourceSchema(ArtifactSchema):
         return f"source('{self.source_name}', '{self.table_name}')"
 
 
+class SnapshotSchema(ArtifactSchema):
+    database_name: str
+    schema_name: str
+    depends_on_macros: str
+    depends_on_nodes: str
+    path: str
+    patch_path: Optional[str]
+    generated_at: str
+    unique_key: str
+    incremental_strategy: Optional[str]
+
+    table_name: Optional[str] = None
+
+    @validator("table_name", always=True)
+    def set_table_name(cls, table_name, values):
+        return values.get("name")
+
+
 class OwnerSchema(ExtendedBaseModel):
     name: Optional[str] = None
     email: Optional[str] = None

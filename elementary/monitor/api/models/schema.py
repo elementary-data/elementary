@@ -7,6 +7,7 @@ from elementary.monitor.fetchers.models.schema import (
     ExposureSchema,
     ModelSchema,
     SeedSchema,
+    SnapshotSchema,
     SourceSchema,
 )
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
@@ -49,6 +50,11 @@ class NormalizedModelSchema(NormalizedArtifactSchema, ModelSchema):
 # NormalizedArtifactSchema must be first in the inheritance order
 class NormalizedSourceSchema(NormalizedArtifactSchema, SourceSchema):
     artifact_type: str = Field("source", const=True)  # type: ignore  # noqa
+
+
+# NormalizedArtifactSchema must be first in the inheritance order
+class NormalizedSnapshotSchema(NormalizedArtifactSchema, SnapshotSchema):
+    artifact_type: str = Field("snapshot", const=True)  # type: ignore  # noqa
 
 
 # NormalizedArtifactSchema must be first in the inheritance order

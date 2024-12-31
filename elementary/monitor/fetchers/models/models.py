@@ -8,6 +8,7 @@ from elementary.monitor.fetchers.models.schema import (
     ModelSchema,
     ModelTestCoverage,
     SeedSchema,
+    SnapshotSchema,
     SourceSchema,
 )
 from elementary.utils.log import get_logger
@@ -61,6 +62,16 @@ class ModelsFetcher(FetcherClient):
         )
         sources = [SourceSchema(**source) for source in sources]
         return sources
+
+    def get_snapshots(self) -> List[SnapshotSchema]:
+        run_operation_response = self.dbt_runner.run_operation(
+            macro_name="elementary_cli.get_snapshots"
+        )
+        snapshots = (
+            json.loads(run_operation_response[0]) if run_operation_response else []
+        )
+        snapshots = [SnapshotSchema(**snapshot) for snapshot in snapshots]
+        return snapshots
 
     def get_exposures(self) -> List[ExposureSchema]:
         run_operation_response = self.dbt_runner.run_operation(
