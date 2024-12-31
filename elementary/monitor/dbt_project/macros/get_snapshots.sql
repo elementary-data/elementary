@@ -6,7 +6,7 @@
                 select 
                   name,
                   unique_id,
-                  owner,
+                  owner as owners,
                   tags,
                   package_name,
                   description,

@@ -85,7 +85,14 @@ class GroupsAPI(APIClient):
         filtered_artifacts: List[GROUPABLE_ARTIFACT] = [
             artifact
             for artifact in artifacts
-            if isinstance(artifact, (NormalizedSourceSchema, NormalizedModelSchema))
+            if isinstance(
+                artifact,
+                (
+                    NormalizedSourceSchema,
+                    NormalizedModelSchema,
+                    NormalizedSnapshotSchema,
+                ),
+            )
         ]
         return self.get_fqn_view(filtered_artifacts)
 
@@ -109,7 +116,14 @@ class GroupsAPI(APIClient):
             for artifact in artifacts
             if artifact.unique_id is not None
             and artifact.fqn is not None
-            and isinstance(artifact, (NormalizedSourceSchema, NormalizedModelSchema))
+            and isinstance(
+                artifact,
+                (
+                    NormalizedSourceSchema,
+                    NormalizedModelSchema,
+                    NormalizedSnapshotSchema,
+                ),
+            )
         )
         tree_builder = TreeBuilder[GroupItemSchema](separator=".")
         for artifact in filtered_artifacts:
