@@ -1,4 +1,3 @@
-
 {% macro create_temp_table(database_name, schema_name, table_name, sql_query) %}
     {% do return(adapter.dispatch('create_temp_table','elementary_cli')(database_name, schema_name, table_name, sql_query)) %}
 {%- endmacro %}
