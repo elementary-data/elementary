@@ -65,12 +65,7 @@ class SnapshotSchema(ArtifactSchema):
     generated_at: str
     unique_key: str
     incremental_strategy: Optional[str]
-
-    table_name: Optional[str] = None
-
-    @validator("table_name", always=True)
-    def set_table_name(cls, table_name, values):
-        return values.get("name")
+    table_name: str
 
 
 class SeedSchema(ArtifactSchema):
