@@ -5,6 +5,8 @@
             with dbt_artifacts_snapshots as (
                 select 
                   name,
+                  case when alias is not null then alias
+                  else name end as table_name,
                   unique_id,
                   owner as owners,
                   tags,
