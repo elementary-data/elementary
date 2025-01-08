@@ -32,13 +32,12 @@ If you get an empty report, there are several steps to understand what went wron
 - Run the CLI with the flag for force updating the packages:
   `edr report -u true`
 
-**3. Validate that the CLI has a working connection profile**
+**3. Validate that the CLI has a working connection profile in the [right path and format](https://docs.elementary-data.com/oss/cli-install#how-to-create-profiles-yml)**
 
-- **Check that the connection profile exists in the [right path and format](https://docs.elementary-data.com/oss/cli-install#how-to-create-profiles-yml)**
-  -  Default path: `HOME_DIR/.dbt/profiles.yml` . If saved elsewhere, make sure to run dbt run and dbt test with `—profiles-dir <profiles.yml path>`
-  - Profile name: `elementary`
-  - Make sure that the elementary profile is a top-level profile, with the same indentation of the profiles you have already set up
-  - Schema name: The schema of the elementary models. The default name is  `<your_dbt_project_schema>_elementary`
+-  Default path: `HOME_DIR/.dbt/profiles.yml` . If saved elsewhere, make sure to run dbt run and dbt test with `—profiles-dir <profiles.yml path>`
+- Profile name: `elementary`
+- Make sure that the elementary profile is a top-level profile, with the same indentation of the profiles you have already set up
+- Schema name: The schema of the elementary models. The default name is  `<your_dbt_project_schema>_elementary`
 
 **4. Validate the schema configuration for elementary models in your dbt_project.yml**
 ```yaml
