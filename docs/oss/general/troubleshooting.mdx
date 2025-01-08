@@ -34,10 +34,21 @@ If you get an empty report, there are several steps to understand what went wron
 
 **3. Validate that the CLI has a working connection profile**
 
-- **Check that the connection profile exists in the right path and format**
-- **Check that the connection profile points to the elementary package schema**
+- **Check that the connection profile exists in the [right path and format](https://docs.elementary-data.com/oss/cli-install#how-to-create-profiles-yml)**
+  -  Default path: `HOME_DIR/.dbt/profiles.yml` . If saved elsewhere, make sure to run dbt run and dbt test with `—profiles-dir <profiles.yml path>`
+  - Profile name: `elementary`
+  - Make sure that the elementary profile is a top-level profile, with the same indentation of the profiles you have already set up
+  - Schema name: The schema of the elementary models. The default name is  `<your_dbt_project_schema>_elementary`
 
-**4. Still not working? Collect the following logs and reach our to the elementary team at [#support](https://elementary-data.com/community) on Slack**
+**4. Validate the schema configuration for elementary models in your dbt_project.yml**
+```yaml
+models:
+  jaffle_shop:
+    +materialized: table
+  elementary:
+    +schema: 'elementary'
+```
+**5. Still not working? Collect the following logs and reach our to the elementary team at [#community-support](https://elementary-data.com/community) on Slack**
 
 - **edr.log** - Created on the execution folder of the CLI.
 - **dbt.log** - Created under the package location at
