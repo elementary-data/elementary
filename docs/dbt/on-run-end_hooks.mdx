@@ -96,7 +96,7 @@ If you only want to disable dbt_columns but leave all other artifacts, configure
 
 ```yaml dbt_project.yml
 vars:
-  disable_dbt_columns_autoupload: true
+  columns_upload_strategy: "none"
 ```
 
 <Warning>
