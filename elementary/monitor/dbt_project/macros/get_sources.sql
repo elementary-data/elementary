@@ -16,7 +16,8 @@
                   tags,
                   package_name,
                   description,
-                  original_path as full_path
+                  original_path as full_path,
+                  meta
                 from {{ dbt_sources_relation }}
               )
 
