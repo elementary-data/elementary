@@ -276,6 +276,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
         packages_dir = os.path.join(
             self.project_dir, os.environ.get("DBT_PACKAGES_FOLDER", "dbt_packages")
         )
+        logger.info("Looking for installed packages in %s", packages_dir)
         try:
             return [
                 name
@@ -287,6 +288,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
 
     def _get_required_packages_names(self):
         packages_yaml_path = os.path.join(self.project_dir, "packages.yml")
+        logger.info("Looking for required packages in %s", packages_yaml_path)
         if not os.path.exists(packages_yaml_path):
             return []
 
@@ -305,7 +307,10 @@ class CommandLineDbtRunner(BaseDbtRunner):
         should_run_deps = False
 
         installed_package_names = set(self._get_installed_packages_names())
+        logger.info("Installed packages: %s", installed_package_names)
         required_package_names = set(self._get_required_packages_names())
+        logger.info("Required packages: %s", required_package_names)
+
         if not required_package_names.issubset(installed_package_names):
             logger.info("Installing packages for edr internal dbt package...")
             should_run_deps = True
