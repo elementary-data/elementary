@@ -4,6 +4,7 @@ on:
     branches: ["master"]
     paths:
       - elementary/**
+      - .github/**
       - pyproject.toml
   workflow_dispatch:
 
