@@ -8,8 +8,9 @@ To gain the most value from the dbt package, we recommend using it with the [Ele
 
 **What brings you here?**
 
-- **An organizational data quality initiative** (e.g., platform refactoring, governance projects, or AI/ML adoption): The Elementary Cloud Platform offers pipeline monitoring, incident management, lineage tracking, dashboards, health scores, and alerts, empowering data engineers, analytics engineers, and data analysts to resolve issues efficiently and deliver trusted data products. Learn more about the [Elementary Cloud Platform](/cloud/introduction) or [book a demo](https://cal.com/maayansa/elementary-intro-docs).
-- **Individual-use observability:** If you’ll be the primary user, try the open-source CLI tool to send Slack alerts, and self-host the Elementary report.
+* **An organizational data quality initiative** (e.g., platform refactoring, governance projects, or AI/ML adoption): The Elementary Cloud Platform offers pipeline monitoring, incident management, lineage tracking, dashboards, health scores, and alerts, empowering data engineers, analytics engineers, and data analysts to resolve issues efficiently and deliver trusted data products. Learn more about the [Elementary Cloud Platform](/cloud/introduction) or [book a demo](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs).
+
+* **Individual-use observability:** If you’ll be the primary user, try the open-source CLI tool to send Slack alerts, and self-host the Elementary report.
 
 The repository and source code of the Elementary dbt package can be [found here](https://github.com/elementary-data/dbt-data-reliability).
 
@@ -21,26 +22,25 @@ Additionally, it offers a wide range of tests, including anomalies in volume, fr
 
 The impact of the package on **`dbt run`** is minimal, and most of the processing happens as part of the data tests that are executed on **`dbt test`**.
 
-
 <Accordion title="What are dbt packages and packages.yml?">
-A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
+  A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
 
-Add packages to your project by creating a `packages.yml` file under the main project directory (where your `
-dbt_project.yml` is), and adding the relevant package. After you add a new package, run `dbt deps` to actually pull its
-code to your project. This is also how you update packages.
-Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/)
-, [dbt_date](https://github.com/calogica/dbt-date/tree/0.5.4/)
-, [codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.5.0/).
-
+  Add packages to your project by creating a `packages.yml` file under the main project directory (where your `
+  dbt_project.yml` is), and adding the relevant package. After you add a new package, run `dbt deps` to actually pull its
+  code to your project. This is also how you update packages.
+  Some packages we recommend you check out: [dbt\_utils](https://github.com/dbt-labs/dbt-utils/tree/0.8.2/)
+  , [dbt\_date](https://github.com/calogica/dbt-date/tree/0.5.4/)
+  , [codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.5.0/).
 </Accordion>
-
 
 After you deploy the dbt package, you can use Elementary tests, and your dbt artifacts will be uploaded automatically with on-run-end hooks:
 
 <CardGroup cols={3}>
-  <Card title="Elementary data tests" href="/features/data-tests"></Card>
-  <Card title="dbt artifacts" href="/dbt/dbt-artifacts"></Card>
-  <Card title="on-run-end hooks" href="/dbt/on-run-end_hooks"></Card>
+  <Card title="Elementary data tests" href="/features/data-tests" />
+
+  <Card title="dbt artifacts" href="/dbt/dbt-artifacts" />
+
+  <Card title="on-run-end hooks" href="/dbt/on-run-end_hooks" />
 </CardGroup>
 
 Although you can use the package only, we recommend using it with Elementary Cloud or OSS.
