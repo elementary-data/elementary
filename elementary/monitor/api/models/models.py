@@ -229,7 +229,7 @@ class ModelsAPI(APIClient):
         if not visited:
             visited = set()
 
-        return all(
+        return any(
             dep not in visited
             and (
                 dep in upstream_node_ids
