@@ -63,6 +63,11 @@ class ReportAPI(APIClient):
             ]
         )
 
+    def _get_exposures(
+        self, models_api: ModelsAPI, upstream_node_ids: Optional[List[str]] = None
+    ) -> Dict[str, NormalizedExposureSchema]:
+        return models_api.get_exposures(upstream_node_ids=upstream_node_ids)
+
     def get_report_data(
         self,
         days_back: int = 7,
@@ -101,7 +106,9 @@ class ReportAPI(APIClient):
             lineage_node_ids.extend(models.keys())
             sources = models_api.get_sources()
             lineage_node_ids.extend(sources.keys())
-            exposures = models_api.get_exposures(upstream_node_ids=lineage_node_ids)
+            exposures = self._get_exposures(
+                models_api, upstream_node_ids=lineage_node_ids
+            )
             lineage_node_ids.extend(exposures.keys())
             singular_tests = tests_api.get_singular_tests()
 
