@@ -292,6 +292,7 @@ class FiltersSchema(BaseModel):
             )
         )
 
+
 class SelectorFilterSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
