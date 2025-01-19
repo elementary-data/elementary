@@ -113,6 +113,7 @@ class FiltersSchema(BaseModel):
     models: List[FilterSchema] = Field(default_factory=list)
     statuses: List[StatusFilterSchema] = Field(default=_get_default_statuses_filter())
     resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
+    test_ids: List[FilterSchema[str]] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time) -> Optional[str]:
@@ -255,6 +256,7 @@ class FiltersSchema(BaseModel):
         statuses: List[Status],
         resource_types: List[ResourceType],
         node_names: List[str],
+        test_ids: List[str],
     ) -> bool:
         return (
             all(
@@ -284,8 +286,19 @@ class FiltersSchema(BaseModel):
                 if self.node_names
                 else True
             )
+            and all(
+                filter_schema.apply_filter_on_values(test_ids)
+                for filter_schema in self.test_ids
+            )
         )
 
+    def __gt__(self, other: 'FiltersSchema'):
+        if self.test_ids and not other.test_ids:
+            return True
+        if not self.test_ids and other.test_ids:
+            return False
+        
+        return True
 
 class SelectorFilterSchema(BaseModel):
     selector: Optional[str] = None
