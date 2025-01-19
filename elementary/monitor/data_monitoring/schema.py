@@ -292,14 +292,6 @@ class FiltersSchema(BaseModel):
             )
         )
 
-    def __gt__(self, other: 'FiltersSchema'):
-        if self.test_ids and not other.test_ids:
-            return True
-        if not self.test_ids and other.test_ids:
-            return False
-        
-        return True
-
 class SelectorFilterSchema(BaseModel):
     selector: Optional[str] = None
     invocation_id: Optional[str] = None
