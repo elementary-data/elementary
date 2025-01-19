@@ -51,7 +51,10 @@ def apply_filters_schema_on_alert(
     owners = alert.data.unified_owners or []
     status = Status(alert.data.status)
     resource_type = ResourceType(alert.data.resource_type)
-    test_ids = [alert.data.test_unique_id] if alert.data.test_unique_id else []
+    if hasattr(alert.data, "test_unique_id"):
+        test_ids = [alert.data.test_unique_id] if alert.data.test_unique_id else []
+    else:
+        test_ids = []
 
     alert_node_name = _get_alert_node_name(alert)
     node_names = (
