@@ -45,7 +45,7 @@ class FilterFields(BaseModel):
 
     @validator("statuses")
     def statuses_or_empty(cls, v):
-        result: Status = []
+        result: list[Status] = []
         for status in v:
             if status in list(Status):
                 result.append(status)
