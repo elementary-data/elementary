@@ -43,6 +43,14 @@ class FilterFields(BaseModel):
     node_names: List[str] = []
     test_ids: List[str] = []
 
+    @validator("name")
+    def statuses_or_empty(cls, v):
+        result: Status = []
+        for status in v:
+            if status in list(Status):
+                result.append(status)
+        return result
+
 
 def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
     if filter_type == FilterType.IS:
