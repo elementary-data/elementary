@@ -77,7 +77,6 @@ def apply_filters_schema_on_alert(
     )
 
 
-
 def filter_alerts(
     alerts: List[PendingAlertSchema],
     alerts_filter: FiltersSchema = FiltersSchema(),
