@@ -34,6 +34,16 @@ class FilterType(str, Enum):
     CONTAINS = "contains"
 
 
+class FilterFields(BaseModel):
+    tags: List[str]
+    models: List[str]
+    owners: List[str]
+    statuses: List[Status]
+    resource_types: List[ResourceType]
+    node_names: List[str] = []
+    test_ids: List[str] = []
+
+
 def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
     if filter_type == FilterType.IS:
         return value == filter_value
@@ -250,44 +260,38 @@ class FiltersSchema(BaseModel):
 
     def apply(
         self,
-        tags: List[str],
-        models: List[str],
-        owners: List[str],
-        statuses: List[Status],
-        resource_types: List[ResourceType],
-        node_names: List[str],
-        test_ids: List[str],
+        filter_fields: FilterFields,
     ) -> bool:
         return (
             all(
-                filter_schema.apply_filter_on_values(tags)
+                filter_schema.apply_filter_on_values(filter_fields.tags)
                 for filter_schema in self.tags
             )
             and all(
-                filter_schema.apply_filter_on_values(models)
+                filter_schema.apply_filter_on_values(filter_fields.models)
                 for filter_schema in self.models
             )
             and all(
-                filter_schema.apply_filter_on_values(owners)
+                filter_schema.apply_filter_on_values(filter_fields.owners)
                 for filter_schema in self.owners
             )
             and all(
-                filter_schema.apply_filter_on_values(statuses)
+                filter_schema.apply_filter_on_values(filter_fields.statuses)
                 for filter_schema in self.statuses
             )
             and all(
-                filter_schema.apply_filter_on_values(resource_types)
+                filter_schema.apply_filter_on_values(filter_fields.resource_types)
                 for filter_schema in self.resource_types
             )
             and (
                 FilterSchema(
                     values=self.node_names, type=FilterType.IS
-                ).apply_filter_on_values(node_names)
+                ).apply_filter_on_values(filter_fields.node_names)
                 if self.node_names
                 else True
             )
             and all(
-                filter_schema.apply_filter_on_values(test_ids)
+                filter_schema.apply_filter_on_values(filter_fields.test_ids)
                 for filter_schema in self.test_ids
             )
         )
