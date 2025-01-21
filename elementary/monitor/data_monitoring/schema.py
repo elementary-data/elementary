@@ -43,7 +43,7 @@ class FilterFields(BaseModel):
     node_names: List[str] = []
     test_ids: List[str] = []
 
-    @validator("statuses")
+    @validator("statuses", pre=True)
     def statuses_or_empty(cls, v):
         result: list[Status] = []
         for status in v:
