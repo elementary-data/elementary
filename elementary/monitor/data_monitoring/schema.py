@@ -38,7 +38,7 @@ class FilterFields(BaseModel):
     tags: List[str]
     models: List[str]
     owners: List[str]
-    statuses: List[Status | str]
+    statuses: List[str]
     resource_types: List[ResourceType]
     node_names: List[str] = []
     test_ids: List[str] = []
