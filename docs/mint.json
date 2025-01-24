@@ -259,7 +259,8 @@
             "cloud/integrations/code-repo/connect-code-repo",
             "cloud/integrations/code-repo/github",
             "cloud/integrations/code-repo/gitlab",
-            "cloud/integrations/code-repo/bitbucket"
+            "cloud/integrations/code-repo/bitbucket",
+            "cloud/integrations/code-repo/azure-devops"
           ]
         },
         {
