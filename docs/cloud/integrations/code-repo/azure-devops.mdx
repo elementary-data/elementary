@@ -1,0 +1,31 @@
+# Azure DevOps Integration
+
+Elementary can integrate with Azure DevOps to connect to the code repository where your **dbt project code** is managed, and it opens pull requests with configuration changes.
+
+## Connecting Through the Azure DevOps App
+
+1. Navigate to **Settings > Code repository** in Elementary Cloud.  
+2. Click on **Connect** and select **Azure DevOps**.  
+3. Enter your Azure DevOps organization URL (e.g., `https://dev.azure.com/your-organization`).  
+4. Click **Save**.  
+5. You will be redirected to the OAuth screen to connect to Azure DevOps.  
+
+---
+
+## Required Permissions
+
+Elementary requires the following permissions in your Azure DevOps **dbt repository**:
+
+- **Read and write** access to the repository  
+- Access to **file contents**  
+- Permission to **open and read pull requests**  
+
+---
+
+## Troubleshooting
+
+If you encounter issues with the Azure DevOps integration, ensure the following:  
+
+1. Your **organization URL** is correct.  
+2. You have **sufficient permissions** in Azure DevOps.  
+3. Elementary is properly **authorized** in your Azure DevOps organization.  
