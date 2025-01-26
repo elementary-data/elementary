@@ -59,6 +59,14 @@ the [Elementary report](/features/collaboration-and-communication/data-observabi
 Each row is the result of a single test, including native dbt tests, packages tests and elementary tests.
 New data is loaded to this model on an on-run-end hook named `elementary.handle_tests_results`.
 
+
+### test_result_rows
+
+_Incremental model_
+
+Failed test row samples. Each row contains a sample of data that caused a test to fail, including the test result ID that links to the parent test result, the actual sample data stored as JSON, and timestamps for detection and creation. By default, up to 5 sample rows are stored per failed test (configurable via [test_sample_row_count](https://docs.elementary-data.com/oss/general/faq#can-i-see-more-result-samples-in-the-report)). 
+
+
 ## dbt artifacts
 
 The dbt artifacts models are created as empty tables, and a post-hook macro inserts data from the dbt graph object to
