@@ -1,0 +1,32 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "- First bullet",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "- Second bullet",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2705 Check item 1",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2705 Check item 2",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}
