@@ -43,13 +43,9 @@ class FilterFields(BaseModel):
     node_names: List[str] = []
     test_ids: List[str] = []
 
-    @validator("statuses", pre=True)
-    def statuses_or_empty(cls, v):
-        result: List[Status] = []
-        for status in v:
-            if status in list(Status):
-                result.append(status)
-        return result
+    @property
+    def normalized_status(self) -> List[Status]:
+        return [Status(status) for status in self.statuses if status in list(Status)]
 
 
 def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
@@ -284,7 +280,7 @@ class FiltersSchema(BaseModel):
                 for filter_schema in self.owners
             )
             and all(
-                filter_schema.apply_filter_on_values(filter_fields.statuses)
+                filter_schema.apply_filter_on_values(filter_fields.normalized_status)
                 for filter_schema in self.statuses
             )
             and all(
