@@ -1,0 +1,77 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Outer Block",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000001"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000001",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "\ud83d\udd0e **Title with Icon**",
+                  "wrap": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Some content with a [link](https://example.com)",
+                  "wrap": true
+                },
+                {
+                  "type": "ActionSet",
+                  "actions": [
+                    {
+                      "type": "Action.ToggleVisibility",
+                      "title": "Inner Block",
+                      "targetElements": [
+                        "expandable-00000000-0000-0000-0000-000000000002"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Container",
+                  "id": "expandable-00000000-0000-0000-0000-000000000002",
+                  "items": [
+                    {
+                      "type": "Container",
+                      "separator": true,
+                      "items": [
+                        {
+                          "type": "TextBlock",
+                          "text": "Inner content",
+                          "wrap": true
+                        }
+                      ]
+                    }
+                  ],
+                  "isVisible": true
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}
