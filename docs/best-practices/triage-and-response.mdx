@@ -75,7 +75,7 @@ As part of the data health scores release, we will be supporting a new type of a
 
 Elementary has an incident page, new failures will either create an incident or be attached to an open incident.
 This page is designed to enable your team to stay on top of open incidents and collaborate on resolving them. The page gives a comprehensive overview of all current and previous incidents, where users can view the status, prioritize, assign and resolve incidents.
-![Incident management dashboard](/pics/incident-management.png)
+![Incident management dashboard](https://res.cloudinary.com/diuctyblm/image/upload/v1738149956/Docs/incident-management_up6jzx.png)
 
 ### Incident management usability
 
@@ -108,7 +108,7 @@ Incidents is a beta feature, and we are working on adding functionality. The imm
 - Advanced grouping of failures to incidents according to lineage (example: model failure + all downstream freshness and volume failures)
 - Initiating triage from incident management (see picture)
 
-![An interface showing initiating triage from incident management](/pics/triage-response-via-incident-management.png)
+![An interface showing initiating triage from incident management](https://res.cloudinary.com/diuctyblm/image/upload/v1738149956/Docs/triage-response-via-incident-management_acjqow.png)
 
 ## Triage incidents
 
@@ -133,7 +133,7 @@ These are the questions that should be asked, and product tips on how to answer 
 
     - Check the **Model runs** section of the dashboard to see if there are skipped models, as failures in build cause the downstream models to be skipped.
 
-    ![Model runs portion of the dashboard](/pics/dashboard-model-runs.png)
+    ![Model runs portion of the dashboard](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/dashboard-model-runs_zzgnd2.png)
 
 
 - How important is the data asset?
@@ -144,11 +144,11 @@ These are the questions that should be asked, and product tips on how to answer 
 
     - Check in the lineage if there are downstream important BI assets / public tables. To see the downstream assets you can navigate to the lineage directly from the test results, but clicking `view in lineage`. If the incident is a failed column test, you can filter only the downstream lineage of the specific column by clicking on `filter column`.
 
-    ![Lineage filters](/pics/lineage-filters.png)
+    ![Lineage filters](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/lineage-filters_ipjze3.png)
 
     - Use the lineage filters to color and highlight all the tables in a path that match your filtering criteria.
 
-    ![Lineage filters showing the add filter interface](/pics/lineage-filters-2.webp)
+    ![Lineage filters showing the add filter interface](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/lineage-filters-2_cda4on.webp)
 
   - If there are downstream critical tables, you might want to check if the issue actually propagated to it. A quick way to do it is to copy the test query, and run it on downstream assets (by changing the referenced table and column).
 
@@ -159,7 +159,7 @@ These are the questions that should be asked, and product tips on how to answer 
     - You can see the total number of failures as part of the test result / alert.
     - On the `Test performance` page, you can compare this number to previous failures of the same tests.
 
-    ![Graph showing test performance](/pics/test-performance-graph.png)
+    ![Graph showing test performance](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/test-performance-graph_g5t5p5.png)
 
 ## Root cause analysis
 
