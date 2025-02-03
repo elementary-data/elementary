@@ -46,6 +46,14 @@ def get_color(alert_status: Optional[str]) -> Optional[Color]:
     return STATUS_COLORS.get(alert_status)
 
 
+def get_test_alert_title(
+    summary: str, status: Optional[str], test_type: Optional[str]
+) -> str:
+    if test_type == "schema_change":
+        return summary
+    return f"{get_display_name(status)}: {summary}" if status else summary
+
+
 def get_test_alert_title_block(summary: str, status: Optional[str]) -> HeaderBlock:
     title = f"{get_display_name(status)}: {summary}" if status else summary
     return HeaderBlock(text=title)
@@ -113,6 +121,7 @@ def get_test_alert_details_blocks(
 def get_test_alert_result_blocks(
     result_message: Optional[str],
     result_sample: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]],
+    result_query: Optional[str] = None,
     anomalous_value: Optional[dict] = None,
 ) -> List[MessageBlock]:
     result_blocks: List[MessageBlock] = []
@@ -140,6 +149,15 @@ def get_test_alert_result_blocks(
         result_blocks.append(
             JsonCodeBlock(content=result_sample),
         )
+    if result_query:
+        result_blocks.append(
+            LinesBlock(
+                lines=[
+                    BoldTextLineBlock(text=["Test Results Query"]),
+                ]
+            )
+        )
+        result_blocks.append(CodeBlock(text=result_query.strip()))
     if anomalous_value:
         result_blocks.append(
             LinesBlock(
@@ -176,7 +194,8 @@ def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
     color = get_color(alert.status)
     blocks: List[MessageBlock] = []
 
-    title_block = get_test_alert_title_block(alert.summary, alert.status)
+    title = get_test_alert_title(alert.summary, alert.status, alert.test_type)
+    title_block = HeaderBlock(text=title)
     blocks.append(title_block)
     subtitle_block = get_test_alert_subtitle_block(
         test=alert.concise_name,
@@ -200,8 +219,64 @@ def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
         blocks.append(DividerBlock())
 
     result_blocks = get_test_alert_result_blocks(
-        alert.error_message, alert.test_rows_sample
+        result_message=alert.error_message,
+        result_sample=alert.test_rows_sample,
     )
+    if result_blocks:
+        blocks.append(ExpandableBlock(title="Test Result", body=result_blocks))
+
+    config_blocks = get_test_alert_config_blocks(alert.test_params)
+    if config_blocks:
+        blocks.append(ExpandableBlock(title="Test Configuration", body=config_blocks))
+
+    if isinstance(blocks[-1], DividerBlock):
+        blocks.pop()
+
+    message_body = MessageBody(
+        color=color,
+        blocks=blocks,
+    )
+    return message_body
+
+
+def get_elementary_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
+    color = get_color(alert.status)
+    blocks: List[MessageBlock] = []
+
+    anomalous_value = alert.other if alert.test_type == "anomaly_detection" else None
+    title = get_test_alert_title(alert.summary, alert.status, alert.test_type)
+    blocks.append(HeaderBlock(text=title))
+    subtitle_block = get_test_alert_subtitle_block(
+        test=alert.concise_name,
+        status=alert.status,
+        detected_at_str=alert.detected_at_str,
+        suppression_interval=alert.suppression_interval,
+        report_link=alert.get_report_link(),
+    )
+    blocks.append(subtitle_block)
+    blocks.append(DividerBlock())
+
+    details_blocks = get_test_alert_details_blocks(
+        table=alert.table_full_name,
+        column=alert.column_name,
+        tags=alert.tags,
+        owners=alert.owners,
+        subscribers=alert.subscribers,
+        description=alert.test_description,
+    )
+    if details_blocks:
+        blocks.extend(details_blocks)
+        blocks.append(DividerBlock())
+
+    result_blocks = get_test_alert_result_blocks(
+        result_message=alert.error_message,
+        result_sample=alert.test_rows_sample,
+        anomalous_value=(
+            anomalous_value if alert.test_type == "anomaly_detection" else None
+        ),
+        result_query=alert.test_results_query,
+    )
+
     if result_blocks:
         blocks.append(ExpandableBlock(title="Test Result", body=result_blocks))
 

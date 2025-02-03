@@ -1,7 +1,5 @@
 import itertools
-import uuid
 from pathlib import Path
-from typing import List, Optional
 
 import pytest
 
@@ -9,77 +7,20 @@ from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from elementary.monitor.alerts.alert_messages.test_alert_message import (
     get_dbt_test_alert_message_body,
 )
-from elementary.monitor.alerts.test_alert import TestAlertModel
-from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
-    ReportLinkData as ReportLink,
+from tests.unit.alerts.alert_messages.test_alert_utils import (
+    BOOLEAN_VALUES,
+    STATUS_VALUES,
+    build_base_test_alert_model,
+    get_mock_report_link,
 )
 from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
-@pytest.fixture(autouse=True)
-def mock_uuid(monkeypatch):
-    class MockUUID:
-        def __init__(self):
-            self.counter = 0
-
-        def __call__(self):
-            self.counter += 1
-            return uuid.UUID(
-                f"00000000-0000-0000-0000-{self.counter:012d}"  # noqa: E231
-            )
-
-    mock = MockUUID()
-    monkeypatch.setattr(uuid, "uuid4", mock)
-    return mock
-
-
-def build_dbt_test_alert_model(
-    status: str,
-    table_name: Optional[str],
-    tags: Optional[List[str]],
-    owners: Optional[List[str]],
-    test_description: Optional[str],
-    error_message: Optional[str],
-    test_rows_sample: Optional[dict],
-    test_results_query: Optional[str],
-    test_params: Optional[dict],
-) -> TestAlertModel:
-    data = {
-        "id": "test_id",
-        "test_unique_id": "test_unique_id",
-        "elementary_unique_id": "elementary_unique_id",
-        "test_name": "test_name",
-        "severity": "error",
-        "test_type": "dbt_test",
-        "test_sub_type": "generic",
-        "test_short_name": "test_short_name",
-        "alert_class_id": "test_alert_class_id",
-        "test_results_description": error_message,
-        "test_results_query": test_results_query,
-        "table_name": table_name,
-        "model_unique_id": None,
-        "test_description": test_description,
-        "other": None,
-        "test_params": test_params,
-        "test_meta": None,
-        "test_rows_sample": test_rows_sample,
-        "column_name": None,
-        "detected_at": None,
-        "database_name": None,
-        "schema_name": None,
-        "owners": owners,
-        "tags": tags,
-        "subscribers": None,
-        "status": status,
-        "model_meta": {},
-        "timezone": None,
-        "report_url": None,
-        "alert_fields": None,
-        "elementary_database_and_schema": "test_db.test_schema",
-    }
-    return TestAlertModel(**data)
+def build_dbt_test_alert_model(*args, **kwargs):
+    kwargs.pop("test_type", None)  # Remove test_type if present
+    return build_base_test_alert_model(*args, test_type="dbt_test", **kwargs)
 
 
 def get_expected_adaptive_filename(
@@ -95,18 +36,17 @@ def get_expected_adaptive_filename(
     return f"adaptive_card_dbt_test_alert_status-{status}_link-{has_link}_description-{has_description}_tags-{has_tags}_owners-{has_owners}_table-{has_table}_error-{has_error}_sample-{has_sample}.json"
 
 
-STATUS_VALUES = ["fail", "warn", "error", None]
-BOOLEAN_VALUES = [True, False]
-
-combinations = itertools.product(
-    STATUS_VALUES,
-    BOOLEAN_VALUES,
-    BOOLEAN_VALUES,
-    BOOLEAN_VALUES,
-    BOOLEAN_VALUES,
-    BOOLEAN_VALUES,
-    BOOLEAN_VALUES,
-    BOOLEAN_VALUES,
+combinations = list(
+    itertools.product(
+        STATUS_VALUES,
+        BOOLEAN_VALUES,  # has_link
+        BOOLEAN_VALUES,  # has_description
+        BOOLEAN_VALUES,  # has_tags
+        BOOLEAN_VALUES,  # has_owners
+        BOOLEAN_VALUES,  # has_table
+        BOOLEAN_VALUES,  # has_error
+        BOOLEAN_VALUES,  # has_sample
+    )
 )
 
 
@@ -139,12 +79,9 @@ def test_get_dbt_test_alert_message_body(
         test_params=None,
     )
 
-    def mock_report_link() -> Optional[ReportLink]:
-        if has_link:
-            return ReportLink(url="http://test.com", text="View Report")
-        return None
-
-    monkeypatch.setattr(test_alert_model, "get_report_link", mock_report_link)
+    monkeypatch.setattr(
+        test_alert_model, "get_report_link", lambda: get_mock_report_link(has_link)
+    )
 
     message_body = get_dbt_test_alert_message_body(test_alert_model)
     adaptive_card_filename = get_expected_adaptive_filename(
