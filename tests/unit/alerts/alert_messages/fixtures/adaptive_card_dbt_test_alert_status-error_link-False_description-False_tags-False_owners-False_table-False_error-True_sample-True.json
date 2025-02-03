@@ -1,0 +1,103 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Error: \"test_short_name\" test failed on ",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Attention"
+        },
+        {
+          "type": "TextBlock",
+          "text": "**Test:** test_short_name | **Status:** error | **Time:** N/A",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Test Result",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000001"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000001",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "**Result Message**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "Test error message",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "\ud83d\udd0e **Test Results Sample**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}

@@ -1,0 +1,35 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Error: \"test_short_name\" test failed on ",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Attention"
+        },
+        {
+          "type": "TextBlock",
+          "text": "**Test:** test_short_name | **Status:** error | **Time:** N/A",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "[View in Elementary](http://test.com)",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}
