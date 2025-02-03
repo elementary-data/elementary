@@ -1,0 +1,94 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Failure: dbt failed to build table \"test_model\"",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Attention"
+        },
+        {
+          "type": "TextBlock",
+          "text": "**Model:** test_model | **Status:** fail | **Time:** 2025-02-03 11:21:07 UTC",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "\u2139\ufe0f **Details**",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Owners",
+              "value": "owner1, owner2"
+            },
+            {
+              "title": "Path",
+              "value": "unknown_path"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Model Configuration",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000001"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000001",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    {
+                      "title": "Materialization",
+                      "value": "table"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": true
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}

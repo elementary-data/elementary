@@ -9,47 +9,15 @@ from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from elementary.monitor.alerts.alert_messages.test_alert_message import (
     get_snapshot_alert_message_body,
 )
-from elementary.monitor.alerts.model_alert import ModelAlertModel
 from tests.unit.alerts.alert_messages.test_alert_utils import (
     BOOLEAN_VALUES,
     STATUS_VALUES,
+    build_base_model_alert_model,
     get_mock_report_link,
 )
 from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
-
-
-def build_snapshot_alert_model(
-    status: str,
-    has_message: bool,
-    has_tags: bool,
-    has_owners: bool,
-    has_path: bool,
-    has_suppression_interval: bool,
-) -> ModelAlertModel:
-    path = "models/test_snapshot.sql" if has_path else ""
-    return ModelAlertModel(
-        id="test_id",
-        alias="test_snapshot",
-        path=path,
-        original_path=path,
-        materialization="snapshot",
-        full_refresh=False,
-        alert_class_id="test_alert_class_id",
-        message="Test message" if has_message else None,
-        model_unique_id="test_model_unique_id",
-        detected_at=datetime(2025, 2, 3, 13, 21, 7),
-        owners=["owner1", "owner2"] if has_owners else None,
-        tags=["tag1", "tag2"] if has_tags else None,
-        subscribers=None,
-        status=status,
-        model_meta={},
-        suppression_interval=24 if has_suppression_interval else None,
-        timezone="UTC",
-        report_url=None,
-        alert_fields=None,
-    )
 
 
 # Generate all combinations of test parameters
@@ -79,13 +47,18 @@ def test_get_snapshot_alert_message_body(
     has_path: bool,
     has_suppression_interval: bool,
 ):
-    snapshot_alert_model = build_snapshot_alert_model(
+    path = "models/test_snapshot.sql" if has_path else ""
+    snapshot_alert_model = build_base_model_alert_model(
         status=status,
-        has_message=has_message,
-        has_tags=has_tags,
-        has_owners=has_owners,
-        has_path=has_path,
-        has_suppression_interval=has_suppression_interval,
+        tags=["tag1", "tag2"] if has_tags else None,
+        owners=["owner1", "owner2"] if has_owners else None,
+        path=path,
+        materialization="snapshot",  # Always snapshot for this test
+        full_refresh=False,
+        detected_at=datetime(2025, 2, 3, 13, 21, 7),
+        alias="test_snapshot",
+        message=("Test message" if has_message else None),
+        suppression_interval=24 if has_suppression_interval else None,
     )
 
     monkeypatch.setattr(

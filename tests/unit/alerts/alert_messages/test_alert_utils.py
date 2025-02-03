@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import List, Optional
 
+from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData as ReportLink,
@@ -56,6 +58,41 @@ def build_base_test_alert_model(
     return TestAlertModel(**data)
 
 
+def build_base_model_alert_model(
+    status: str,
+    tags: Optional[List[str]],
+    owners: Optional[List[str]],
+    path: str,
+    materialization: str,
+    full_refresh: bool,
+    detected_at: Optional[datetime],
+    alias: str,
+    message: Optional[str] = None,
+    suppression_interval: Optional[int] = None,
+) -> ModelAlertModel:
+    return ModelAlertModel(
+        id="test_id",
+        alias=alias,
+        path=path,
+        original_path=path,
+        materialization=materialization,
+        full_refresh=full_refresh,
+        alert_class_id="test_alert_class_id",
+        message=message,
+        model_unique_id="test_model_unique_id",
+        detected_at=detected_at,
+        owners=owners,
+        tags=tags,
+        subscribers=None,
+        status=status,
+        model_meta={},
+        suppression_interval=suppression_interval,
+        timezone="UTC",
+        report_url=None,
+        alert_fields=None,
+    )
+
+
 def get_mock_report_link(has_link: bool) -> Optional[ReportLink]:
     if has_link:
         return ReportLink(url="http://test.com", text="View Report")
@@ -65,3 +102,4 @@ def get_mock_report_link(has_link: bool) -> Optional[ReportLink]:
 # Common test parameters
 STATUS_VALUES = ["fail", "warn", "error", None]
 BOOLEAN_VALUES = [True, False]
+MATERIALIZATION_VALUES = ["table", "view", "incremental"]

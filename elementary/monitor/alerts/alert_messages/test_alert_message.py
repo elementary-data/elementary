@@ -200,6 +200,18 @@ def get_test_alert_config_blocks(
     return config_blocks
 
 
+def get_model_alert_config_blocks(
+    materialization: Optional[str] = None,
+    full_refresh: Optional[bool] = None,
+) -> List[MessageBlock]:
+    facts = []
+    if materialization:
+        facts.append(("Materialization", materialization))
+    if full_refresh:
+        facts.append(("Full Refresh", "Yes" if full_refresh else "No"))
+    return [FactsBlock(facts=facts)]
+
+
 def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
     color = get_color(alert.status)
     blocks: List[MessageBlock] = []
@@ -344,7 +356,60 @@ def get_snapshot_alert_message_body(alert: ModelAlertModel) -> MessageBody:
     if isinstance(blocks[-1], DividerBlock):
         blocks.pop()
 
-    return MessageBody(
+    message_body = MessageBody(
         color=color,
         blocks=blocks,
     )
+    return message_body
+
+
+def get_model_alert_message_body(alert: ModelAlertModel) -> MessageBody:
+    color = get_color(alert.status)
+    blocks: List[MessageBlock] = []
+
+    # Title using helper function
+    title = get_test_alert_title(alert.summary, alert.status, None)
+    blocks.append(HeaderBlock(text=title))
+
+    # Subtitle using helper function
+    subtitle_block = get_test_alert_subtitle_block(
+        model=alert.alias,
+        status=alert.status,
+        detected_at_str=alert.detected_at_str,
+        suppression_interval=alert.suppression_interval,
+        report_link=alert.get_report_link(),
+    )
+    blocks.append(subtitle_block)
+    blocks.append(DividerBlock())
+
+    details_blocks = get_details_blocks(
+        tags=alert.tags,
+        owners=alert.owners,
+        subscribers=alert.subscribers,
+        path=alert.original_path,
+    )
+    if details_blocks:
+        blocks.extend(details_blocks)
+        blocks.append(DividerBlock())
+
+    config_blocks = get_model_alert_config_blocks(
+        materialization=alert.materialization,
+        full_refresh=alert.full_refresh,
+    )
+    if config_blocks:
+        blocks.append(
+            ExpandableBlock(
+                title="Model Configuration",
+                body=config_blocks,
+                expanded=True,
+            )
+        )
+
+    if isinstance(blocks[-1], DividerBlock):
+        blocks.pop()
+
+    message_body = MessageBody(
+        color=color,
+        blocks=blocks,
+    )
+    return message_body
