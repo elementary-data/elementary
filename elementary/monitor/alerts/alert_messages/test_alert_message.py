@@ -1,7 +1,9 @@
-from typing import Any, Dict, List, Optional, Union
+from datetime import timedelta
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from elementary.messages.block_builders import (
     BoldTextLineBlock,
+    BulletListBlock,
     FactsBlock,
     JsonCodeBlock,
     LinkLineBlock,
@@ -13,9 +15,15 @@ from elementary.messages.blocks import (
     ExpandableBlock,
     HeaderBlock,
     Icon,
+    InlineBlock,
+    LineBlock,
     LinesBlock,
+    LinkBlock,
+    TextBlock,
+    TextStyle,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -63,7 +71,7 @@ def get_test_alert_title_block(summary: str, status: Optional[str]) -> HeaderBlo
     return HeaderBlock(text=title)
 
 
-def get_test_alert_subtitle_block(
+def get_run_alert_subtitle_block(
     test: Optional[str] = None,
     snapshot: Optional[str] = None,
     model: Optional[str] = None,
@@ -93,6 +101,28 @@ def get_test_alert_subtitle_block(
         subtitle_lines.append(
             LinkLineBlock(text="View in Elementary", url=report_link.url)
         )
+    return LinesBlock(lines=subtitle_lines)
+
+
+def get_alert_type_counters_subtitle_block(
+    model_errors_count: int = 0,
+    test_failures_count: int = 0,
+    test_warnings_count: int = 0,
+    test_errors_count: int = 0,
+) -> LinesBlock:
+    summary = []
+    if model_errors_count:
+        summary.append(((Icon.X, "Model Errors:"), str(model_errors_count)))
+    if test_failures_count:
+        summary.append(
+            ((Icon.RED_TRIANGLE, "Test Failures:"), str(test_failures_count))
+        )
+    if test_warnings_count:
+        summary.append(((Icon.WARNING, "Test Warnings:"), str(test_warnings_count)))
+    if test_errors_count:
+        summary.append(((Icon.EXCLAMATION, "Test Errors:"), str(test_errors_count)))
+    subtitle_lines = [SummaryLineBlock(summary=summary)]
+
     return LinesBlock(lines=subtitle_lines)
 
 
@@ -249,6 +279,51 @@ def get_source_freshness_alert_config_blocks(
     return [FactsBlock(facts=facts)] if facts else []
 
 
+def get_alert_list_line(
+    alert: Union[
+        TestAlertModel,
+        ModelAlertModel,
+        SourceFreshnessAlertModel,
+    ]
+) -> LineBlock:
+    inlines: List[InlineBlock] = [
+        TextBlock(text=alert.summary, style=TextStyle.BOLD),
+    ]
+    if owners := set(alert.owners):
+        inlines.append(TextBlock(text="-"))
+        if len(owners) == 1:
+            inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
+        else:
+            inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
+
+    if report_link := alert.get_report_link():
+        inlines.append(TextBlock(text="-"))
+        inlines.append(LinkBlock(text=report_link.text, url=report_link.url))
+
+    return LineBlock(inlines=inlines)
+
+
+def get_alert_list_blocks(
+    title: str,
+    bullet_icon: Icon,
+    alerts: Sequence[
+        Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+        ]
+    ],
+) -> List[MessageBlock]:
+    blocks: List[MessageBlock] = []
+    if not alerts:
+        return blocks
+    blocks.append(LinesBlock(lines=[BoldTextLineBlock(text=title)]))
+    lines = [get_alert_list_line(alert) for alert in alerts]
+    bullet_list = BulletListBlock(icon=bullet_icon, lines=lines)
+    blocks.append(bullet_list)
+    return blocks
+
+
 def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
     color = get_color(alert.status)
     blocks: List[MessageBlock] = []
@@ -256,7 +331,7 @@ def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
     title = get_test_alert_title(alert.summary, alert.status, alert.test_type)
     title_block = HeaderBlock(text=title)
     blocks.append(title_block)
-    subtitle_block = get_test_alert_subtitle_block(
+    subtitle_block = get_run_alert_subtitle_block(
         test=alert.concise_name,
         status=alert.status,
         detected_at_str=alert.detected_at_str,
@@ -305,7 +380,7 @@ def get_elementary_test_alert_message_body(alert: TestAlertModel) -> MessageBody
     anomalous_value = alert.other if alert.test_type == "anomaly_detection" else None
     title = get_test_alert_title(alert.summary, alert.status, alert.test_type)
     blocks.append(HeaderBlock(text=title))
-    subtitle_block = get_test_alert_subtitle_block(
+    subtitle_block = get_run_alert_subtitle_block(
         test=alert.concise_name,
         status=alert.status,
         detected_at_str=alert.detected_at_str,
@@ -362,7 +437,7 @@ def get_snapshot_alert_message_body(alert: ModelAlertModel) -> MessageBody:
     blocks.append(HeaderBlock(text=title))
 
     # Subtitle using helper function
-    subtitle_block = get_test_alert_subtitle_block(
+    subtitle_block = get_run_alert_subtitle_block(
         snapshot=alert.alias,
         status=alert.status,
         detected_at_str=alert.detected_at_str,
@@ -409,7 +484,7 @@ def get_model_alert_message_body(alert: ModelAlertModel) -> MessageBody:
     blocks.append(HeaderBlock(text=title))
 
     # Subtitle using helper function
-    subtitle_block = get_test_alert_subtitle_block(
+    subtitle_block = get_run_alert_subtitle_block(
         model=alert.alias,
         status=alert.status,
         detected_at_str=alert.detected_at_str,
@@ -459,7 +534,7 @@ def get_source_freshness_alert_message_body(alert: SourceFreshnessAlertModel) ->
     title = get_test_alert_title(alert.summary, alert.status, None)
     blocks.append(HeaderBlock(text=title))
 
-    subtitle_block = get_test_alert_subtitle_block(
+    subtitle_block = get_run_alert_subtitle_block(
         source=f"{alert.source_name}.{alert.identifier}",
         status=alert.status,
         detected_at_str=alert.detected_at_str,
@@ -506,6 +581,60 @@ def get_source_freshness_alert_message_body(alert: SourceFreshnessAlertModel) ->
                 body=config_blocks,
             )
         )
+
+    if isinstance(blocks[-1], DividerBlock):
+        blocks.pop()
+
+    message_body = MessageBody(
+        color=color,
+        blocks=blocks,
+    )
+    return message_body
+
+
+def get_alerts_group_message_body(alert: AlertsGroup) -> MessageBody:
+    color = get_color(alert.status)
+    blocks: List[MessageBlock] = []
+
+    title = get_test_alert_title(alert.summary, alert.status, None)
+    blocks.append(HeaderBlock(text=title))
+
+    subtitle_block = get_alert_type_counters_subtitle_block(
+        model_errors_count=len(alert.model_errors),
+        test_failures_count=len(alert.test_failures),
+        test_warnings_count=len(alert.test_warnings),
+        test_errors_count=len(alert.test_errors),
+    )
+    blocks.append(subtitle_block)
+    blocks.append(DividerBlock())
+
+    model_errors_alert_list_blocks = get_alert_list_blocks(
+        title="Model Errors",
+        bullet_icon=Icon.X,
+        alerts=alert.model_errors,
+    )
+    blocks.extend(model_errors_alert_list_blocks)
+
+    test_failures_alert_list_blocks = get_alert_list_blocks(
+        title="Test Failures",
+        bullet_icon=Icon.RED_TRIANGLE,
+        alerts=alert.test_failures,
+    )
+    blocks.extend(test_failures_alert_list_blocks)
+
+    test_warnings_alert_list_blocks = get_alert_list_blocks(
+        title="Test Warnings",
+        bullet_icon=Icon.WARNING,
+        alerts=alert.test_warnings,
+    )
+    blocks.extend(test_warnings_alert_list_blocks)
+
+    test_errors_alert_list_blocks = get_alert_list_blocks(
+        title="Test Errors",
+        bullet_icon=Icon.EXCLAMATION,
+        alerts=alert.test_errors,
+    )
+    blocks.extend(test_errors_alert_list_blocks)
 
     if isinstance(blocks[-1], DividerBlock):
         blocks.pop()
