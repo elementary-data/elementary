@@ -1,0 +1,30 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Error: dbt failed to build snapshot \"test_snapshot\"",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Attention"
+        },
+        {
+          "type": "TextBlock",
+          "text": "**Snapshot:** test_snapshot | **Status:** error | **Time:** 2025-02-03 11:21:07 UTC",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}

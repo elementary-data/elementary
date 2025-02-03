@@ -16,6 +16,7 @@ from elementary.messages.blocks import (
     LinesBlock,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
@@ -61,6 +62,8 @@ def get_test_alert_title_block(summary: str, status: Optional[str]) -> HeaderBlo
 
 def get_test_alert_subtitle_block(
     test: Optional[str] = None,
+    snapshot: Optional[str] = None,
+    model: Optional[str] = None,
     status: Optional[str] = None,
     detected_at_str: Optional[str] = None,
     suppression_interval: Optional[int] = None,
@@ -69,6 +72,10 @@ def get_test_alert_subtitle_block(
     summary = []
     if test:
         summary.append(("Test:", test))
+    if snapshot:
+        summary.append(("Snapshot:", snapshot))
+    if model:
+        summary.append(("Model:", model))
     summary.append(("Status:", status or "Unknown"))
     if detected_at_str:
         summary.append(("Time:", detected_at_str))
@@ -83,16 +90,17 @@ def get_test_alert_subtitle_block(
     return LinesBlock(lines=subtitle_lines)
 
 
-def get_test_alert_details_blocks(
+def get_details_blocks(
     table: Optional[str] = None,
     column: Optional[str] = None,
     tags: Optional[List[str]] = None,
     owners: Optional[List[str]] = None,
     subscribers: Optional[List[str]] = None,
     description: Optional[str] = None,
+    path: Optional[str] = None,
 ) -> List[MessageBlock]:
     blocks: List[MessageBlock] = []
-    if not (table or tags or owners or subscribers or description):
+    if not (table or column or tags or owners or subscribers or description or path):
         return blocks
     blocks.append(
         LinesBlock(
@@ -114,13 +122,15 @@ def get_test_alert_details_blocks(
         facts.append(("Subscribers", ", ".join(subscribers or [])))
     if description:
         facts.append(("Description", description))
+    if path:
+        facts.append(("Path", path))
     blocks.append(FactsBlock(facts=facts))
     return blocks
 
 
-def get_test_alert_result_blocks(
+def get_result_blocks(
     result_message: Optional[str],
-    result_sample: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]],
+    result_sample: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = None,
     result_query: Optional[str] = None,
     anomalous_value: Optional[dict] = None,
 ) -> List[MessageBlock]:
@@ -206,7 +216,7 @@ def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
     blocks.append(subtitle_block)
     blocks.append(DividerBlock())
 
-    details_blocks = get_test_alert_details_blocks(
+    details_blocks = get_details_blocks(
         table=alert.table_full_name,
         column=alert.column_name,
         tags=alert.tags,
@@ -218,7 +228,7 @@ def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
         blocks.extend(details_blocks)
         blocks.append(DividerBlock())
 
-    result_blocks = get_test_alert_result_blocks(
+    result_blocks = get_result_blocks(
         result_message=alert.error_message,
         result_sample=alert.test_rows_sample,
     )
@@ -256,7 +266,7 @@ def get_elementary_test_alert_message_body(alert: TestAlertModel) -> MessageBody
     blocks.append(subtitle_block)
     blocks.append(DividerBlock())
 
-    details_blocks = get_test_alert_details_blocks(
+    details_blocks = get_details_blocks(
         table=alert.table_full_name,
         column=alert.column_name,
         tags=alert.tags,
@@ -268,7 +278,7 @@ def get_elementary_test_alert_message_body(alert: TestAlertModel) -> MessageBody
         blocks.extend(details_blocks)
         blocks.append(DividerBlock())
 
-    result_blocks = get_test_alert_result_blocks(
+    result_blocks = get_result_blocks(
         result_message=alert.error_message,
         result_sample=alert.test_rows_sample,
         anomalous_value=(
@@ -292,3 +302,49 @@ def get_elementary_test_alert_message_body(alert: TestAlertModel) -> MessageBody
         blocks=blocks,
     )
     return message_body
+
+
+def get_snapshot_alert_message_body(alert: ModelAlertModel) -> MessageBody:
+    color = get_color(alert.status)
+    blocks: List[MessageBlock] = []
+
+    # Title using helper function
+    title = get_test_alert_title(alert.summary, alert.status, None)
+    blocks.append(HeaderBlock(text=title))
+
+    # Subtitle using helper function
+    subtitle_block = get_test_alert_subtitle_block(
+        snapshot=alert.alias,
+        status=alert.status,
+        detected_at_str=alert.detected_at_str,
+        suppression_interval=alert.suppression_interval,
+        report_link=alert.get_report_link(),
+    )
+    blocks.append(subtitle_block)
+    blocks.append(DividerBlock())
+
+    # Details section
+    details_blocks = get_details_blocks(
+        tags=alert.tags,
+        owners=alert.owners,
+        subscribers=alert.subscribers,
+        path=alert.original_path,
+    )
+    if details_blocks:
+        blocks.extend(details_blocks)
+        blocks.append(DividerBlock())
+
+    # Result section
+    result_blocks = get_result_blocks(
+        result_message=alert.message,
+    )
+    if result_blocks:
+        blocks.append(ExpandableBlock(title="Result", body=result_blocks))
+
+    if isinstance(blocks[-1], DividerBlock):
+        blocks.pop()
+
+    return MessageBody(
+        color=color,
+        blocks=blocks,
+    )
