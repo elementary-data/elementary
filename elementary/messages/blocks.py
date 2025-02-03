@@ -109,4 +109,5 @@ InExpandableBlock = Union[
     "ExpandableBlock",
 ]
 
-ExpandableBlock.model_rebuild()
+# Update forward references for recursive types
+ExpandableBlock.update_forward_refs()
