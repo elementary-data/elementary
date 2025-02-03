@@ -1,0 +1,164 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Runtime Error: Failed to calculate the source freshness of \"test_source\"",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Attention"
+        },
+        {
+          "type": "TextBlock",
+          "text": "**Source:** test_source.test_identifier | **Status:** runtime error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "[View in Elementary](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2139\ufe0f **Details**",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Tags",
+              "value": "tag1, tag2"
+            },
+            {
+              "title": "Description",
+              "value": "Test freshness description"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Result",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000001"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000001",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "**Result Message**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "Failed to calculate the source freshness\n```None```",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    {
+                      "title": "Time Elapsed",
+                      "value": "2:00:00"
+                    },
+                    {
+                      "title": "Last Record At",
+                      "value": "2025-02-03 11:21:07"
+                    },
+                    {
+                      "title": "Sampled At",
+                      "value": "2025-02-03 13:21:07"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        },
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Source Freshness Configuration",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000002"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000002",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    {
+                      "title": "Error after",
+                      "value": "2 hours"
+                    },
+                    {
+                      "title": "Warn after",
+                      "value": "1 hour"
+                    },
+                    {
+                      "title": "Filter",
+                      "value": "test_filter"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}

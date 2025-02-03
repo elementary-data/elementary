@@ -17,6 +17,7 @@ from elementary.messages.blocks import (
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
 from elementary.monitor.alerts.model_alert import ModelAlertModel
+from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
@@ -26,12 +27,14 @@ STATUS_DISPLAYS: Dict[str, str] = {
     "fail": "Failure",
     "warn": "Warning",
     "error": "Error",
+    "runtime error": "Runtime Error",
 }
 
 STATUS_COLORS: Dict[str, Color] = {
     "fail": Color.RED,
     "warn": Color.YELLOW,
     "error": Color.RED,
+    "runtime error": Color.RED,
 }
 
 
@@ -64,6 +67,7 @@ def get_test_alert_subtitle_block(
     test: Optional[str] = None,
     snapshot: Optional[str] = None,
     model: Optional[str] = None,
+    source: Optional[str] = None,
     status: Optional[str] = None,
     detected_at_str: Optional[str] = None,
     suppression_interval: Optional[int] = None,
@@ -76,6 +80,8 @@ def get_test_alert_subtitle_block(
         summary.append(("Snapshot:", snapshot))
     if model:
         summary.append(("Model:", model))
+    if source:
+        summary.append(("Source:", source))
     summary.append(("Status:", status or "Unknown"))
     if detected_at_str:
         summary.append(("Time:", detected_at_str))
@@ -133,6 +139,9 @@ def get_result_blocks(
     result_sample: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = None,
     result_query: Optional[str] = None,
     anomalous_value: Optional[dict] = None,
+    time_elapsed: Optional[str] = None,
+    last_record_at: Optional[str] = None,
+    sampled_at: Optional[str] = None,
 ) -> List[MessageBlock]:
     result_blocks: List[MessageBlock] = []
     if result_message:
@@ -179,6 +188,19 @@ def get_result_blocks(
         result_blocks.append(
             JsonCodeBlock(content=anomalous_value),
         )
+
+    # facts
+    facts = []
+    if time_elapsed:
+        facts.append(("Time Elapsed", time_elapsed))
+    if last_record_at:
+        facts.append(("Last Record At", last_record_at))
+    if sampled_at:
+        facts.append(("Sampled At", sampled_at))
+
+    if facts:
+        result_blocks.append(FactsBlock(facts=facts))
+
     return result_blocks
 
 
@@ -210,6 +232,21 @@ def get_model_alert_config_blocks(
     if full_refresh:
         facts.append(("Full Refresh", "Yes" if full_refresh else "No"))
     return [FactsBlock(facts=facts)]
+
+
+def get_source_freshness_alert_config_blocks(
+    error_after: Optional[str] = None,
+    warn_after: Optional[str] = None,
+    filter: Optional[str] = None,
+) -> List[MessageBlock]:
+    facts = []
+    if error_after:
+        facts.append(("Error after", error_after))
+    if warn_after:
+        facts.append(("Warn after", warn_after))
+    if filter:
+        facts.append(("Filter", filter))
+    return [FactsBlock(facts=facts)] if facts else []
 
 
 def get_dbt_test_alert_message_body(alert: TestAlertModel) -> MessageBody:
@@ -402,6 +439,71 @@ def get_model_alert_message_body(alert: ModelAlertModel) -> MessageBody:
                 title="Model Configuration",
                 body=config_blocks,
                 expanded=True,
+            )
+        )
+
+    if isinstance(blocks[-1], DividerBlock):
+        blocks.pop()
+
+    message_body = MessageBody(
+        color=color,
+        blocks=blocks,
+    )
+    return message_body
+
+
+def get_source_freshness_alert_message_body(alert: SourceFreshnessAlertModel) -> MessageBody:  # type: ignore
+    color = get_color(alert.status)
+    blocks: List[MessageBlock] = []
+
+    title = get_test_alert_title(alert.summary, alert.status, None)
+    blocks.append(HeaderBlock(text=title))
+
+    subtitle_block = get_test_alert_subtitle_block(
+        source=f"{alert.source_name}.{alert.identifier}",
+        status=alert.status,
+        detected_at_str=alert.detected_at_str,
+        suppression_interval=alert.suppression_interval,
+        report_link=alert.get_report_link(),
+    )
+    blocks.append(subtitle_block)
+
+    details_blocks = get_details_blocks(
+        tags=alert.tags,
+        owners=alert.owners,
+        subscribers=alert.subscribers,
+        path=alert.path,
+        description=alert.freshness_description,
+    )
+    if details_blocks:
+        blocks.extend(details_blocks)
+        blocks.append(DividerBlock())
+
+    message = (
+        (f"Failed to calculate the source freshness\n" f"```{alert.error}```")
+        if alert.status == "runtime error"
+        else alert.result_description
+    )
+
+    result_blocks = get_result_blocks(
+        result_message=message,
+        time_elapsed=f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}",
+        last_record_at=alert.max_loaded_at,
+        sampled_at=alert.snapshotted_at_str,
+    )
+    if result_blocks:
+        blocks.append(ExpandableBlock(title="Result", body=result_blocks))
+
+    config_blocks = get_source_freshness_alert_config_blocks(
+        error_after=alert.error_after,
+        warn_after=alert.warn_after,
+        filter=alert.filter,
+    )
+    if config_blocks:
+        blocks.append(
+            ExpandableBlock(
+                title="Source Freshness Configuration",
+                body=config_blocks,
             )
         )
 
