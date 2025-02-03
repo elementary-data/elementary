@@ -5,55 +5,53 @@ description: "Detailed comparison of Elementary product offerings."
 icon: "list-check"
 ---
 
-### Elementary Cloud
+If you’re just beginning your data quality journey, the decision between OSS and Cloud depends on your goals and team setup:
 
-Ideal for teams monitoring mission-critical data pipelines, requiring guaranteed uptime and reliability, short-time-to-value, advanced features, collaboration, and professional support. The solution is secure by design, and requires no access to your data from cloud.
+A detailed comparison of Elementary product offerings.
 
-### Elementary OSS
+If you’re just beginning your data quality journey, the decision between OSS and Cloud depends on your goals and team setup:
 
-An open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report. It is best for data and analytics engineers that require basic observability capabilities or for evaluating features without vendor approval.
+- **Start with OSS** if you have 1-2 users focused primarily on detection and the capability to manage an open-source solution. OSS integrates seamlessly into dbt workflows but requires dedicated resources for setup and ongoing maintenance. It’s best suited for small teams of data and/or analytics engineers looking to add basic detection to their dbt project.
+  
+- **Choose Cloud** if you’re looking to set up a scalable, collaborative data quality program. The Elementary Cloud Platform integrates into dbt workflows, providing a developer-centric tool for engineers to maintain and govern data quality rules while also offering a cloud-based interface for business users and data stewards. This enables engineers to proactively identify and resolve data issues while consumers can monitor data health, receive notifications, view health scores, and add their own validations in a user-friendly environment. It offers advanced features like automated freshness and volume monitoring, ML-powered anomaly detection, a simple data catalog,  and rich integrations.
 
-### Features comparison
+This short video covers the difference between OSS and Cloud:
 
-|                                                                        |  Community (OSS)  | Elementary Cloud |
-| ---------------------------------------------------------------------- | :---------------: | :--------------: |
-| **Data monitoring and detection**                                      |                   |                  |
-| Automated freshness, volume <br /> and schema monitors                 |         ❌         |         ✅        |
-| In-pipeline data tests (via dbt)                                       |         ✅         |         ✅        |
-| Data anomaly detection                                                 |         ✅         |         ✅        |
-| Custom SQL tests                                                       |         ✅         |         ✅        |
-| Jobs performance and run results                                       |         ✅         |         ✅        |
-| Monitored data sets                                                    |      dbt only     |    All tables    |
-| **Root cause and impact analysis**                                     |                   |                  |
-| Table-level lineage                                                    |         ✅         |         ✅        |
-| Column-level lineage                                                   |         ❌         |         ✅        |
-| Lineage to BI tools                                                    |         ❌         |         ✅        |
-| **Coverage and configuration**                                         |                   |                  |
-| Configuration as code (dbt YAML)                                       |         ✅         |         ✅        |
-| Add tests from UI                                                      |         ❌         |         ✅        |
-| 🚧 *Auto-tune configurations <br /> for improved accuracy*             |         ❌         |         ✅        |
-| 🚧 *Automated test recommendations*                                    |         ❌         |         ✅        |
-| **Communication and collaboration**                                    |                   |                  |
-| Slack and MS Teams alerts                                              |         ✅         |         ✅        |
-| Alert distribution rules, multiple <br /> destinations, custom formats |         ❌         |         ✅        |
-| Additional alert destinations: <br /> PagerDuty, OpsGenie, Webhook     |         ❌         |         ✅        |
-| Alert actions                                                          |         ❌         |         ✅        |
-| Data catalog                                                           |         ❌         |         ✅        |
-| Data Health Scores                                                     |         ❌         |         ✅        |
-| Incident management                                                    |         ❌         |         ✅        |
-| **Deployment, security and service**                                   |                   |                  |
-| Deployment                                                             |  Self hosted, CLI |   Cloud service  |
-| Multiple environments and data warehouses                              |         ❌         |         ✅        |
-| Secure by design - <br /> Elementary has no access to raw data         |         ❌         |         ✅        |
-| Managed service - 99.9% uptime,<br /> no maintenance                   |         ❌         |         ✅        |
-| Social login with Google                                               |         ❌         |         ✅        |
-| SSO using OKTA / OneLogin / AD                                         |         ❌         |         ✅        |
-| Custom deployment options                                              |         ❌         |         ✅        |
-| Role based access control                                              |         ❌         |         ✅        |
-| Support SLA                                                            | Community support |   24 hours SLA   |
+<Frame>
+  <div style={{ paddingBottom: "64.98194945848375%" }}>
+    <iframe
+      src="https://www.loom.com/embed/01c6e1ae1ec045f2a594aa05ac56600f"
+      frameborder="0"
+      webkitAllowFullScreen
+      mozAllowFullScreen
+      allowfullscreen
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+      }}
+    ></iframe>
+  </div>
+</Frame>
+
+### Comparing Elementary OSS to Elementary Cloud
+
+Below is a detailed comparison between the OSS and Cloud features: 
+
+| Feature                | **OSS**                                  | **Cloud**                                                                                          |
+|------------------------|------------------------------------------|---------------------------------------------------------------------------------------------------|
+| **Detection**          | <ul><li>Anomaly detection and dbt tests</li></ul>       | <ul><li>Automated freshness & volume monitors</li><li>ML-powered anomaly detection</li><li>dbt and cloud tests</li><li>Bulk add/edit for tests</li></ul> |
+| **Triage & Response**  | <ul><li>Basic alerts</li><li>Table-level lineage</li></ul> | <ul><li>Interactive alerts</li><li>Column-level lineage up to BI</li><li>BI integrations</li><li>Test results history</li><li>Incident management</li></ul> |
+| **Performance Monitoring** | <ul><li>Model and test performance</li></ul>            | <ul><li>Model and test performance</li><li>Performance alerts</li></ul> |
+| **Enabling Non-Tech Users** | X                                      | <ul><li>No-code test editor</li><li>Data health scores</li><li>External catalog integrations</li><li>Ticketing system integrations</li></ul> |
+| **Governance**         | X                                      | <ul><li>Catalog</li><li>Metadata in code and UI</li></ul> |
+
+---
 
 ### Want to know more?
 
 <Card title="Book a call with our team" href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs" />
 
-<Card title="Reach out to us on Slack" href="https://elementary-data.com/community" />
+<Card title="Get started with a free trial" href="https://app.elementary-data.com/" />
