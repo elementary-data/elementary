@@ -34,4 +34,4 @@ class MessageBody(BaseModel):
     color: Optional[Color] = None
 
 
-MessageBody.model_rebuild()
+MessageBody.update_forward_refs()
