@@ -46,7 +46,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner2, owner1 - [View Report](http://test.com)",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -61,7 +61,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner2, owner1 - [View Report](http://test.com)",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -76,7 +76,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner2, owner1 - [View Report](http://test.com)",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - [View Report](http://test.com)",
           "wrap": true
         },
         {

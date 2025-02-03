@@ -24,6 +24,9 @@ from elementary.messages.blocks import (
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
+from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
+    GroupedByTableAlerts,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -64,11 +67,6 @@ def get_test_alert_title(
     if test_type == "schema_change":
         return summary
     return f"{get_display_name(status)}: {summary}" if status else summary
-
-
-def get_test_alert_title_block(summary: str, status: Optional[str]) -> HeaderBlock:
-    title = f"{get_display_name(status)}: {summary}" if status else summary
-    return HeaderBlock(text=title)
 
 
 def get_run_alert_subtitle_block(
@@ -289,11 +287,13 @@ def get_alert_list_line(
     inlines: List[InlineBlock] = [
         TextBlock(text=alert.summary, style=TextStyle.BOLD),
     ]
-    if owners := set(alert.owners):
+    if owners := list(set(alert.owners)):
         inlines.append(TextBlock(text="-"))
         if len(owners) == 1:
             inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
         else:
+            # order owners by alphabetical order
+            owners.sort()
             inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
 
     if report_link := alert.get_report_link():
@@ -639,6 +639,68 @@ def get_alerts_group_message_body(alert: AlertsGroup) -> MessageBody:
     if isinstance(blocks[-1], DividerBlock):
         blocks.pop()
 
+    message_body = MessageBody(
+        color=color,
+        blocks=blocks,
+    )
+    return message_body
+
+
+def get_group_by_table_alert_message_body(alert: GroupedByTableAlerts) -> MessageBody:
+    color = get_color(alert.status)
+    blocks: List[MessageBlock] = []
+
+    title = get_test_alert_title(alert.summary, alert.status, None)
+    blocks.append(HeaderBlock(text=title))
+
+    subtitle_block = get_alert_type_counters_subtitle_block(
+        model_errors_count=len(alert.model_errors),
+        test_failures_count=len(alert.test_failures),
+        test_warnings_count=len(alert.test_warnings),
+        test_errors_count=len(alert.test_errors),
+    )
+    blocks.append(subtitle_block)
+    blocks.append(DividerBlock())
+
+    details_blocks = get_details_blocks(
+        tags=alert.tags,
+        owners=alert.owners,
+        subscribers=alert.subscribers,
+    )
+    if details_blocks:
+        blocks.extend(details_blocks)
+        blocks.append(DividerBlock())
+
+    model_errors_alert_list_blocks = get_alert_list_blocks(
+        title="Model Errors",
+        bullet_icon=Icon.X,
+        alerts=alert.model_errors,
+    )
+    blocks.extend(model_errors_alert_list_blocks)
+
+    test_failures_alert_list_blocks = get_alert_list_blocks(
+        title="Test Failures",
+        bullet_icon=Icon.RED_TRIANGLE,
+        alerts=alert.test_failures,
+    )
+    blocks.extend(test_failures_alert_list_blocks)
+
+    test_warnings_alert_list_blocks = get_alert_list_blocks(
+        title="Test Warnings",
+        bullet_icon=Icon.WARNING,
+        alerts=alert.test_warnings,
+    )
+    blocks.extend(test_warnings_alert_list_blocks)
+
+    test_errors_alert_list_blocks = get_alert_list_blocks(
+        title="Test Errors",
+        bullet_icon=Icon.EXCLAMATION,
+        alerts=alert.test_errors,
+    )
+    blocks.extend(test_errors_alert_list_blocks)
+
+    if isinstance(blocks[-1], DividerBlock):
+        blocks.pop()
     message_body = MessageBody(
         color=color,
         blocks=blocks,

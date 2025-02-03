@@ -46,7 +46,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner2, owner1",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -61,7 +61,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner2, owner1",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -76,7 +76,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner2, owner1",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -101,7 +101,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_3** - Owners: owner2, owner1",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -116,7 +116,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_6** - Owners: owner2, owner1",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -131,7 +131,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_9** - Owners: owner2, owner1",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -156,7 +156,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_3** - Owners: owner2, owner1",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -171,7 +171,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_6** - Owners: owner2, owner1",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2",
           "wrap": true
         },
         {
@@ -186,7 +186,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_9** - Owners: owner2, owner1",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2",
           "wrap": true
         },
         {
