@@ -86,6 +86,7 @@ class FactBlock(BaseBlock):
     type: Literal["fact"] = "fact"
     title: LineBlock
     value: LineBlock
+    primary: bool = False
 
 
 class FactListBlock(BaseBlock):
