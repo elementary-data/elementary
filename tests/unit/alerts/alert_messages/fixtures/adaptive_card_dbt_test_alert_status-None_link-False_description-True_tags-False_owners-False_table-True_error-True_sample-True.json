@@ -42,6 +42,18 @@
               "value": "test_table"
             },
             {
+              "title": "Tags",
+              "value": "No tags"
+            },
+            {
+              "title": "Owners",
+              "value": "No owners"
+            },
+            {
+              "title": "Subscribers",
+              "value": "No subscribers"
+            },
+            {
               "title": "Description",
               "value": "Test description"
             }

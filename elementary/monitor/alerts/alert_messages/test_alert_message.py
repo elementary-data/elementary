@@ -148,12 +148,13 @@ def get_details_blocks(
         facts.append(("Table", table))
     if column:
         facts.append(("Column", column))
-    if tags:
-        facts.append(("Tags", ", ".join(tags or [])))
-    if owners:
-        facts.append(("Owners", ", ".join(owners or [])))
-    if subscribers:
-        facts.append(("Subscribers", ", ".join(subscribers or [])))
+
+    facts.append(("Tags", ", ".join(tags) if tags else "No tags"))
+    facts.append(("Owners", ", ".join(owners) if owners else "No owners"))
+    facts.append(
+        ("Subscribers", ", ".join(subscribers) if subscribers else "No subscribers")
+    )
+
     if description:
         facts.append(("Description", description))
     if path:

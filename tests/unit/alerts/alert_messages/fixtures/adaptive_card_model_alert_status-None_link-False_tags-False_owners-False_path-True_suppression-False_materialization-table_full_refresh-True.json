@@ -38,6 +38,18 @@
           "type": "FactSet",
           "facts": [
             {
+              "title": "Tags",
+              "value": "No tags"
+            },
+            {
+              "title": "Owners",
+              "value": "No owners"
+            },
+            {
+              "title": "Subscribers",
+              "value": "No subscribers"
+            },
+            {
               "title": "Path",
               "value": "models/test_model.sql"
             }

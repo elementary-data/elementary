@@ -32,8 +32,16 @@
           "type": "FactSet",
           "facts": [
             {
+              "title": "Tags",
+              "value": "No tags"
+            },
+            {
               "title": "Owners",
               "value": "owner1, owner2"
+            },
+            {
+              "title": "Subscribers",
+              "value": "No subscribers"
             },
             {
               "title": "Description",

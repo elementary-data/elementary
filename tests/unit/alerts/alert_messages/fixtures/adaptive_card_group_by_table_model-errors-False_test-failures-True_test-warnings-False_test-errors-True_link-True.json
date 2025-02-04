@@ -43,7 +43,11 @@
             },
             {
               "title": "Owners",
-              "value": "owner2, owner1"
+              "value": "owner1, owner2"
+            },
+            {
+              "title": "Subscribers",
+              "value": "No subscribers"
             }
           ]
         }

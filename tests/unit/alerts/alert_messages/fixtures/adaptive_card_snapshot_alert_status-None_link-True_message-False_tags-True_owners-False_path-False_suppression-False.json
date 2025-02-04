@@ -45,6 +45,14 @@
             {
               "title": "Tags",
               "value": "tag1, tag2"
+            },
+            {
+              "title": "Owners",
+              "value": "No owners"
+            },
+            {
+              "title": "Subscribers",
+              "value": "No subscribers"
             }
           ]
         }

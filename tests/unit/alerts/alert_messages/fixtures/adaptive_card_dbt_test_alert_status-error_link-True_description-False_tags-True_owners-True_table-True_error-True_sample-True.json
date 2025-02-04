@@ -53,6 +53,10 @@
             {
               "title": "Owners",
               "value": "owner1, owner2"
+            },
+            {
+              "title": "Subscribers",
+              "value": "No subscribers"
             }
           ]
         }

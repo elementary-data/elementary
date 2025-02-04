@@ -46,6 +46,10 @@
               "value": "owner1, owner2"
             },
             {
+              "title": "Subscribers",
+              "value": "No subscribers"
+            },
+            {
               "title": "Path",
               "value": "models/test_snapshot.sql"
             }
