@@ -5,14 +5,19 @@ from elementary.messages.block_builders import (
     BoldTextLineBlock,
     BulletListBlock,
     FactsBlock,
+    ItalicTextLineBlock,
     JsonCodeBlock,
     LinkLineBlock,
+    NonPrimaryFactBlock,
+    PrimaryFactBlock,
     SummaryLineBlock,
+    TextLineBlock,
 )
 from elementary.messages.blocks import (
     CodeBlock,
     DividerBlock,
     ExpandableBlock,
+    FactListBlock,
     HeaderBlock,
     Icon,
     InlineBlock,
@@ -217,23 +222,54 @@ class AlertMessageBuilder:
                 ]
             )
         )
-        facts = []
+        fact_blocks = []
         if table:
-            facts.append(("Table", table))
+            fact_blocks.append(
+                PrimaryFactBlock(
+                    (TextLineBlock(text="Table"), TextLineBlock(text=table))
+                )
+            )
         if column:
-            facts.append(("Column", column))
+            fact_blocks.append(
+                NonPrimaryFactBlock(
+                    (TextLineBlock(text="Column"), TextLineBlock(text=column))
+                )
+            )
 
-        facts.append(("Tags", ", ".join(tags) if tags else "No tags"))
-        facts.append(("Owners", ", ".join(owners) if owners else "No owners"))
-        facts.append(
-            ("Subscribers", ", ".join(subscribers) if subscribers else "No subscribers")
+        tags_line = (
+            TextLineBlock(text=", ".join(tags))
+            if tags
+            else ItalicTextLineBlock(text="No tags")
+        )
+        owners_line = (
+            TextLineBlock(text=", ".join(owners))
+            if owners
+            else ItalicTextLineBlock(text="No owners")
+        )
+        subscribers_line = (
+            TextLineBlock(text=", ".join(subscribers))
+            if subscribers
+            else ItalicTextLineBlock(text="No subscribers")
+        )
+        fact_blocks.append(NonPrimaryFactBlock((TextLineBlock(text="Tags"), tags_line)))
+        fact_blocks.append(
+            NonPrimaryFactBlock((TextLineBlock(text="Owners"), owners_line))
+        )
+        fact_blocks.append(
+            NonPrimaryFactBlock((TextLineBlock(text="Subscribers"), subscribers_line))
         )
 
         if description:
-            facts.append(("Description", description))
+            fact_blocks.append(
+                PrimaryFactBlock(
+                    (TextLineBlock(text="Description"), TextLineBlock(text=description))
+                )
+            )
         if path:
-            facts.append(("Path", path))
-        blocks.append(FactsBlock(facts=facts))
+            fact_blocks.append(
+                PrimaryFactBlock((TextLineBlock(text="Path"), TextLineBlock(text=path)))
+            )
+        blocks.append(FactListBlock(facts=fact_blocks))
         return blocks
 
     def _get_result_blocks(
@@ -333,7 +369,7 @@ class AlertMessageBuilder:
         facts = []
         if materialization:
             facts.append(("Materialization", materialization))
-        if full_refresh is not None:
+        if full_refresh:
             facts.append(("Full Refresh", "Yes" if full_refresh else "No"))
         return [FactsBlock(facts=facts)]
 
@@ -368,6 +404,7 @@ class AlertMessageBuilder:
             if len(owners) == 1:
                 inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
             else:
+                # order owners by alphabetical order
                 owners.sort()
                 inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
 

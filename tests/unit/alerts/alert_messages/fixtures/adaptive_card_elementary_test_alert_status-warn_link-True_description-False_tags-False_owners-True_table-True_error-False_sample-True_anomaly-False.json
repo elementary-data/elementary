@@ -48,7 +48,7 @@
             },
             {
               "title": "Tags",
-              "value": "No tags"
+              "value": "_No tags_"
             },
             {
               "title": "Owners",
@@ -56,7 +56,7 @@
             },
             {
               "title": "Subscribers",
-              "value": "No subscribers"
+              "value": "_No subscribers_"
             }
           ]
         }
