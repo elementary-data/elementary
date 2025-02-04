@@ -6,9 +6,19 @@ from typing import DefaultDict, Dict, List, Optional, Union
 from alive_progress import alive_bar
 
 from elementary.config.config import Config
+from elementary.messages.block_builders import TextLineBlock
+from elementary.messages.blocks import HeaderBlock, LinesBlock
+from elementary.messages.message_body import MessageBody
+from elementary.messages.messaging_integrations.base_messaging_integration import (
+    BaseMessagingIntegration,
+    MessageSendResult,
+)
+from elementary.messages.messaging_integrations.exceptions import (
+    MessagingIntegrationError,
+)
+from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
 from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
-from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
@@ -32,7 +42,26 @@ from elementary.utils.time import convert_time_to_timezone
 logger = get_logger(__name__)
 
 
+def get_health_check_message() -> MessageBody:
+    return MessageBody(
+        blocks=[
+            HeaderBlock(text="Elementary monitor ran successfully"),
+            LinesBlock(
+                lines=[
+                    TextLineBlock(
+                        text=f"Elementary monitor ran successfully on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                    ),
+                ]
+            ),
+        ]
+    )
+
+
 class DataMonitoringAlerts(DataMonitoring):
+    # The alerts_integration field now supports both the legacy BaseIntegration and the new BaseMessagingIntegration
+    # This dual support allows for a gradual migration from the old integration system to the new messaging system
+    alerts_integration: Union[BaseIntegration, BaseMessagingIntegration]
+
     def __init__(
         self,
         config: Config,
@@ -61,7 +90,9 @@ class DataMonitoringAlerts(DataMonitoring):
         self.override_config_defaults = override_config
         self.alerts_integration = self._get_integration_client()
 
-    def _get_integration_client(self) -> BaseIntegration:
+    def _get_integration_client(
+        self,
+    ) -> Union[BaseIntegration, BaseMessagingIntegration]:
         return Integrations.get_integration(
             config=self.config,
             tracking=self.tracking,
@@ -183,7 +214,7 @@ class DataMonitoringAlerts(DataMonitoring):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
-            BaseAlertsGroup,
+            AlertsGroup,
         ]
     ]:
         group_all_alerts = len(alerts) >= self.config.group_alerts_threshold  # type: ignore[arg-type]
@@ -247,10 +278,56 @@ class DataMonitoringAlerts(DataMonitoring):
                 key=lambda alert: alert.detected_at or datetime.max,
             )
 
-    def _send_test_message(self):
-        self.alerts_integration.send_test_message(
-            channel_name=self.config.slack_channel_name
+    def _send_message(
+        self, integration: BaseMessagingIntegration, message_body: MessageBody
+    ) -> MessageSendResult:
+        destination = Integrations.get_destination(
+            integration=integration, config=self.config
         )
+        return integration.send_message(
+            destination=destination, message_body=message_body
+        )
+
+    def _send_test_message(self):
+        if isinstance(self.alerts_integration, BaseIntegration):
+            self.alerts_integration.send_test_message(
+                channel_name=self.config.slack_channel_name
+            )
+        else:
+            test_message = get_health_check_message()
+            return self._send_message(
+                integration=self.alerts_integration, message_body=test_message
+            )
+
+    def _send_alert(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+            GroupedByTableAlerts,
+            AlertsGroup,
+        ],
+    ):
+        # Support both legacy BaseIntegration and new BaseMessagingIntegration
+        # BaseIntegration will be deprecated in favor of BaseMessagingIntegration
+        if isinstance(self.alerts_integration, BaseIntegration):
+            return self.alerts_integration.send_alert(alert)
+        else:
+            # New messaging integration path - converts alerts to message bodies
+            alert_message_builder = AlertMessageBuilder()
+            alert_message_body = alert_message_builder.build(
+                alert=alert,
+            )
+            try:
+                self._send_message(
+                    integration=self.alerts_integration,
+                    message_body=alert_message_body,
+                )
+                return True
+            except MessagingIntegrationError:
+                logger.error(f"Could not send the alert - {type(alert)}.")
+                return False
 
     def _send_alerts(
         self,
@@ -260,7 +337,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 ModelAlertModel,
                 SourceFreshnessAlertModel,
                 GroupedByTableAlerts,
-                BaseAlertsGroup,
+                AlertsGroup,
             ]
         ],
     ):
@@ -278,15 +355,15 @@ class DataMonitoringAlerts(DataMonitoring):
 
         with alive_bar(len(alerts), title="Sending alerts") as bar:
             for alert in alerts:
-                sent_successfully = self.alerts_integration.send_alert(alert)
+                sent_successfully = self._send_alert(alert)
                 bar()
                 if sent_successfully:
-                    if isinstance(alert, BaseAlertsGroup):
+                    if isinstance(alert, AlertsGroup):
                         sent_successfully_alerts.extend(alert.alerts)
                     else:
                         sent_successfully_alerts.append(alert)
                 else:
-                    if isinstance(alert, BaseAlertsGroup):
+                    if isinstance(alert, AlertsGroup):
                         for inner_alert in alert.alerts:
                             logger.error(
                                 f"Could not send the alert - {inner_alert.id}. Full alert: {json.dumps(inner_alert.data)}"
