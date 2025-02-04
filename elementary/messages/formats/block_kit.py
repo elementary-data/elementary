@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from slack_sdk.models import blocks as slack_blocks
 
@@ -33,8 +33,8 @@ class BlockKitBuilder:
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3  # length of markdown's code suffix (```)
 
     def __init__(self) -> None:
-        self._blocks: list[dict] = []
-        self._attachment_blocks: list[dict] = []
+        self._blocks: List[dict] = []
+        self._attachment_blocks: List[dict] = []
         self._is_divided = False
 
     def _format_icon(self, icon: Icon) -> str:
@@ -139,7 +139,7 @@ class BlockKitBuilder:
 
     def _add_fact_list_block(self, block: FactListBlock) -> None:
         remaining_facts = block.facts[:]
-        secondary_facts: list[FactBlock] = []
+        secondary_facts: List[FactBlock] = []
         while remaining_facts:
             current_fact = remaining_facts.pop(0)
             if current_fact.primary:
@@ -192,10 +192,10 @@ class BlockKitBuilder:
 
     def _get_final_blocks(
         self, color: Optional[Color]
-    ) -> tuple[list[dict], list[dict]]:
+    ) -> Tuple[List[dict], List[dict]]:
         """
         Slack does not support coloring regular messages, only attachments.
-        Also, regular messages are allways displayed in full, while attachments show the first 5 blocks (with a "show more" button).
+        Also, regular messages are always displayed in full, while attachments show the first 5 blocks (with a "show more" button).
         The way we handle this is as follows:
         - If we have a divider block, everything up to it and including it is a regular message, and everything after it is an attachment.
         - If we don't have a divider block:
