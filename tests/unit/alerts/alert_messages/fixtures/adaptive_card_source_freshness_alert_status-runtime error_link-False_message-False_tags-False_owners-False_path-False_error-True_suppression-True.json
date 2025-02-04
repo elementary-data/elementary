@@ -22,7 +22,13 @@
           "type": "TextBlock",
           "text": "**Source:** test_source.test_identifier | **Status:** runtime error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
-        },
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
         {
           "type": "ActionSet",
           "actions": [

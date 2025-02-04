@@ -543,6 +543,7 @@ def get_source_freshness_alert_message_body(alert: SourceFreshnessAlertModel) ->
         report_link=alert.get_report_link(),
     )
     blocks.append(subtitle_block)
+    blocks.append(DividerBlock())
 
     details_blocks = get_details_blocks(
         tags=alert.tags,

@@ -27,7 +27,13 @@
           "type": "TextBlock",
           "text": "[View in Elementary](http://test.com)",
           "wrap": true
-        },
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
         {
           "type": "ActionSet",
           "actions": [
