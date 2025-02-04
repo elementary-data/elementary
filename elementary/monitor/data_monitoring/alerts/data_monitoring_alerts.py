@@ -7,6 +7,7 @@ from alive_progress import alive_bar
 
 from elementary.config.config import Config
 from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -182,8 +183,10 @@ class DataMonitoringAlerts(DataMonitoring):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            BaseAlertsGroup,
         ]
     ]:
+        group_all_alerts = len(alerts) >= self.config.group_alerts_threshold  # type: ignore[arg-type]
         formatted_alerts = []
         grouped_by_table_alerts = []
         model_ids_to_alerts_map = defaultdict(lambda: [])
@@ -204,6 +207,10 @@ class DataMonitoringAlerts(DataMonitoring):
                 disable_samples=self.disable_samples,
                 env=self.config.specified_env,
             )
+            if group_all_alerts:
+                formatted_alerts.append(formatted_alert)
+                continue
+
             try:
                 grouping_type = GroupingType(group_alerts_by)
                 if grouping_type == GroupingType.BY_TABLE:
@@ -218,24 +225,27 @@ class DataMonitoringAlerts(DataMonitoring):
                     f"Failed to extract value as a group-by config: '{group_alerts_by}'. Allowed Values: {list(GroupingType.__members__.keys())} Ignoring it for now and default grouping strategy will be used"
                 )
 
-        for alerts_by_model in model_ids_to_alerts_map.values():
-            grouped_by_table_alerts.append(
-                GroupedByTableAlerts(
-                    alerts=alerts_by_model,
-                    env=self.config.specified_env,
+        if group_all_alerts:
+            return [AlertsGroup(alerts=formatted_alerts, env=self.config.specified_env)]
+
+        else:
+            for alerts_by_model in model_ids_to_alerts_map.values():
+                grouped_by_table_alerts.append(
+                    GroupedByTableAlerts(
+                        alerts=alerts_by_model, env=self.config.specified_env
+                    )
                 )
+
+            self.execution_properties["had_group_by_table"] = (
+                len(grouped_by_table_alerts) > 0
             )
+            self.execution_properties["had_group_by_alert"] = len(formatted_alerts) > 0
 
-        self.execution_properties["had_group_by_table"] = (
-            len(grouped_by_table_alerts) > 0
-        )
-        self.execution_properties["had_group_by_alert"] = len(formatted_alerts) > 0
-
-        all_alerts = formatted_alerts + grouped_by_table_alerts
-        return sorted(
-            all_alerts,
-            key=lambda alert: alert.detected_at or datetime.max,
-        )
+            all_alerts = formatted_alerts + grouped_by_table_alerts
+            return sorted(
+                all_alerts,
+                key=lambda alert: alert.detected_at or datetime.max,
+            )
 
     def _send_test_message(self):
         self.alerts_integration.send_test_message(
@@ -250,6 +260,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 ModelAlertModel,
                 SourceFreshnessAlertModel,
                 GroupedByTableAlerts,
+                BaseAlertsGroup,
             ]
         ],
     ):
@@ -257,12 +268,17 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
 
-        sent_successfully_alerts = []
+        sent_successfully_alerts: List[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+            ]
+        ] = []
 
         with alive_bar(len(alerts), title="Sending alerts") as bar:
-            for alert, sent_successfully in self.alerts_integration.send_alerts(
-                alerts, self.config.group_alerts_threshold
-            ):
+            for alert in alerts:
+                sent_successfully = self.alerts_integration.send_alert(alert)
                 bar()
                 if sent_successfully:
                     if isinstance(alert, BaseAlertsGroup):

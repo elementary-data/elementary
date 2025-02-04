@@ -129,6 +129,7 @@ class BaseIntegration(ABC):
             AlertsGroup,
         ]
     ]:
+        # Deprecated: the grouping logic is now handled outside of the integration, and the integration only sends the alerts
         if not alerts:
             return []
 
@@ -176,6 +177,7 @@ class BaseIntegration(ABC):
         None,
         None,
     ]:
+        # Deprecated: the grouping logic is now handled outside of the integration, and the integration only sends the alerts
         grouped_alerts = self._group_alerts(alerts, group_alerts_threshold)
         for alert in grouped_alerts:
             if isinstance(alert, BaseAlertsGroup):
