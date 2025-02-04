@@ -49,10 +49,10 @@ STATUS_COLORS: Dict[str, Color] = {
 }
 
 
-def get_display_name(alert_status: Optional[str]) -> str:
-    if alert_status is None:
-        return "Unknown"
-    return STATUS_DISPLAYS.get(alert_status, alert_status.capitalize())
+def get_display_name(status: Optional[str]) -> Optional[str]:
+    if status is None:
+        return None
+    return STATUS_DISPLAYS.get(status, status.capitalize())
 
 
 def get_color(alert_status: Optional[str]) -> Optional[Color]:
