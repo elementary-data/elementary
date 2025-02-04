@@ -1,0 +1,16 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "RED_TRIANGLE \ud83d\udd3a X \u274c WARNING \u26a0\ufe0f EXCLAMATION \u2757 CHECK \u2705 MAGNIFYING_GLASS \ud83d\udd0e HAMMER_AND_WRENCH \ud83d\udee0\ufe0f POLICE_LIGHT \ud83d\udea8 INFO \u2139\ufe0f EYE \ud83d\udc41\ufe0f GEAR \u2699\ufe0f BELL \ud83d\udd14"
+      }
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": []
+    }
+  ]
+}

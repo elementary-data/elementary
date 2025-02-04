@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from slack_sdk.models import blocks as slack_blocks
 
@@ -190,15 +190,19 @@ class BlockKitBuilder:
         for block in blocks:
             self._add_message_block(block)
 
-    def _get_final_blocks(self) -> tuple[list[dict], list[dict]]:
+    def _get_final_blocks(
+        self, color: Optional[Color]
+    ) -> tuple[list[dict], list[dict]]:
         """
         Slack does not support coloring regular messages, only attachments.
         Also, regular messages are allways displayed in full, while attachments show the first 5 blocks (with a "show more" button).
         The way we handle this is as follows:
         - If we have a divider block, everything up to it and including it is a regular message, and everything after it is an attachment.
-        - If we don't have a divider block, everything is an attachment (in order to always display colored messages).
+        - If we don't have a divider block:
+          - If we have a color, everything is an attachment (in order to always display colored messages).
+          - If we don't have a color, everything is a regular message.
         """
-        if self._is_divided:
+        if self._is_divided or not color:
             return self._blocks, self._attachment_blocks
         else:
             return [], self._blocks
@@ -208,16 +212,18 @@ class BlockKitBuilder:
         self._attachment_blocks = []
         self._add_message_blocks(message.blocks)
         color_code = COLOR_MAP.get(message.color) if message.color else None
-        blocks, attachment_blocks = self._get_final_blocks()
-        return {
+        blocks, attachment_blocks = self._get_final_blocks(message.color)
+        built_message = {
             "blocks": blocks,
             "attachments": [
                 {
                     "blocks": attachment_blocks,
-                    "color": color_code,
                 }
             ],
         }
+        if color_code:
+            built_message["attachments"][0]["color"] = color_code
+        return built_message
 
 
 def format_block_kit(message: MessageBody) -> Dict[str, Any]:

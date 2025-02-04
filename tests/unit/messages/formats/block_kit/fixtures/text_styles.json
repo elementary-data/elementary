@@ -1,0 +1,16 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Normal text *Bold text* _Italic text_"
+      }
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": []
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Status*\nPassed"
+        }
+      ]
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": []
+    }
+  ]
+}
