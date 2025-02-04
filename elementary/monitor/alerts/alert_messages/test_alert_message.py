@@ -133,6 +133,10 @@ def get_details_blocks(
     description: Optional[str] = None,
     path: Optional[str] = None,
 ) -> List[MessageBlock]:
+    tags = sorted(list(set(tags))) if tags else None
+    owners = sorted(list(set(owners))) if owners else None
+    subscribers = sorted(list(set(subscribers))) if subscribers else None
+
     blocks: List[MessageBlock] = []
     if not (table or column or tags or owners or subscribers or description or path):
         return blocks
