@@ -6,13 +6,11 @@ from typing import Any, List
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
-from elementary.monitor.alerts.alert_messages.test_alert_message import (
-    get_snapshot_alert_message_body,
-)
 from tests.unit.alerts.alert_messages.test_alert_utils import (
     BOOLEAN_VALUES,
     STATUS_VALUES,
     build_base_model_alert_model,
+    get_alert_message_body,
     get_mock_report_link,
 )
 from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
@@ -65,7 +63,7 @@ def test_get_snapshot_alert_message_body(
         snapshot_alert_model, "get_report_link", lambda: get_mock_report_link(has_link)
     )
 
-    message_body = get_snapshot_alert_message_body(snapshot_alert_model)
+    message_body = get_alert_message_body(snapshot_alert_model)
     adaptive_card_filename = f"adaptive_card_snapshot_alert_status-{status}_link-{has_link}_message-{has_message}_tags-{has_tags}_owners-{has_owners}_path-{has_path}_suppression-{has_suppression_interval}.json"
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(

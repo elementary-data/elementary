@@ -2,6 +2,12 @@ import itertools
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from elementary.messages.message_body import MessageBody
+from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
+from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
+from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
+    GroupedByTableAlerts,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -270,3 +276,16 @@ def build_base_source_freshness_alert_model(
         alert_fields=None,
         elementary_database_and_schema="test_db.test_schema",
     )
+
+
+def get_alert_message_body(
+    alert: Union[
+        TestAlertModel,
+        ModelAlertModel,
+        SourceFreshnessAlertModel,
+        GroupedByTableAlerts,
+        AlertsGroup,
+    ],
+) -> MessageBody:
+    alert_message_builder = AlertMessageBuilder()
+    return alert_message_builder.build(alert)

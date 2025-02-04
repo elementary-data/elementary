@@ -4,13 +4,11 @@ from pathlib import Path
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
-from elementary.monitor.alerts.alert_messages.test_alert_message import (
-    get_dbt_test_alert_message_body,
-)
 from tests.unit.alerts.alert_messages.test_alert_utils import (
     BOOLEAN_VALUES,
     STATUS_VALUES,
     build_base_test_alert_model,
+    get_alert_message_body,
     get_mock_report_link,
 )
 from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
@@ -83,7 +81,7 @@ def test_get_dbt_test_alert_message_body(
         test_alert_model, "get_report_link", lambda: get_mock_report_link(has_link)
     )
 
-    message_body = get_dbt_test_alert_message_body(test_alert_model)
+    message_body = get_alert_message_body(test_alert_model)
     adaptive_card_filename = get_expected_adaptive_filename(
         status=status,
         has_link=has_link,

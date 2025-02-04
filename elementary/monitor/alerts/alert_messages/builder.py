@@ -1,0 +1,614 @@
+from datetime import timedelta
+from typing import Any, Dict, List, Literal, Optional, Sequence, Union
+
+from elementary.messages.block_builders import (
+    BoldTextLineBlock,
+    BulletListBlock,
+    FactsBlock,
+    JsonCodeBlock,
+    LinkLineBlock,
+    SummaryLineBlock,
+)
+from elementary.messages.blocks import (
+    CodeBlock,
+    DividerBlock,
+    ExpandableBlock,
+    HeaderBlock,
+    Icon,
+    InlineBlock,
+    LineBlock,
+    LinesBlock,
+    LinkBlock,
+    TextBlock,
+    TextStyle,
+)
+from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
+from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
+    GroupedByTableAlerts,
+)
+from elementary.monitor.alerts.model_alert import ModelAlertModel
+from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
+from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
+    ReportLinkData,
+)
+
+AlertType = Union[
+    TestAlertModel,
+    ModelAlertModel,
+    SourceFreshnessAlertModel,
+    GroupedByTableAlerts,
+    AlertsGroup,
+]
+
+
+class AlertMessageBuilder:
+    STATUS_DISPLAYS: Dict[str, str] = {
+        "fail": "Failure",
+        "warn": "Warning",
+        "error": "Error",
+        "runtime error": "Runtime Error",
+    }
+
+    STATUS_COLORS: Dict[str, Color] = {
+        "fail": Color.RED,
+        "warn": Color.YELLOW,
+        "error": Color.RED,
+        "runtime error": Color.RED,
+    }
+
+    def _get_display_name(self, status: Optional[str]) -> Optional[str]:
+        if status is None:
+            return None
+        return self.STATUS_DISPLAYS.get(status, status.capitalize())
+
+    def _get_color(self, alert_status: Optional[str]) -> Optional[Color]:
+        if alert_status is None:
+            return None
+        return self.STATUS_COLORS.get(alert_status)
+
+    def _get_alert_title(
+        self, summary: str, status: Optional[str], test_type: Optional[str]
+    ) -> str:
+        if test_type == "schema_change":
+            return summary
+        return f"{self._get_display_name(status)}: {summary}" if status else summary
+
+    def _get_run_alert_subtitle_block(
+        self,
+        type: Literal["test", "snapshot", "model", "source"],
+        name: str,
+        status: Optional[str] = None,
+        detected_at_str: Optional[str] = None,
+        suppression_interval: Optional[int] = None,
+        report_link: Optional[ReportLinkData] = None,
+    ) -> LinesBlock:
+        summary = []
+        summary.append((type.capitalize() + ":", name))
+        summary.append(("Status:", status or "Unknown"))
+        if detected_at_str:
+            summary.append(("Time:", detected_at_str))
+        if suppression_interval:
+            summary.append(("Suppression interval:", str(suppression_interval)))
+        subtitle_lines = [SummaryLineBlock(summary=summary)]
+
+        if report_link:
+            subtitle_lines.append(
+                LinkLineBlock(text="View in Elementary", url=report_link.url)
+            )
+        return LinesBlock(lines=subtitle_lines)
+
+    def _get_model_alert_subtitle_blocks(
+        self,
+        alert: ModelAlertModel,
+    ) -> List[MessageBlock]:
+        if alert.materialization == "snapshot":
+            return [
+                self._get_run_alert_subtitle_block(
+                    type="snapshot",
+                    name=alert.alias,
+                    status=alert.status,
+                    detected_at_str=alert.detected_at_str,
+                    suppression_interval=alert.suppression_interval,
+                    report_link=alert.get_report_link(),
+                )
+            ]
+        else:
+            return [
+                self._get_run_alert_subtitle_block(
+                    type="model",
+                    name=alert.alias,
+                    status=alert.status,
+                    detected_at_str=alert.detected_at_str,
+                    suppression_interval=alert.suppression_interval,
+                    report_link=alert.get_report_link(),
+                )
+            ]
+
+    def _get_test_alert_subtitle_blocks(
+        self,
+        alert: TestAlertModel,
+    ) -> List[MessageBlock]:
+        return [
+            self._get_run_alert_subtitle_block(
+                type="test",
+                name=alert.concise_name,
+                status=alert.status,
+                detected_at_str=alert.detected_at_str,
+                suppression_interval=alert.suppression_interval,
+                report_link=alert.get_report_link(),
+            )
+        ]
+
+    def _get_source_freshness_alert_subtitle_blocks(
+        self,
+        alert: SourceFreshnessAlertModel,
+    ) -> List[MessageBlock]:
+        return [
+            self._get_run_alert_subtitle_block(
+                type="source",
+                name=f"{alert.source_name}.{alert.identifier}",
+                status=alert.status,
+                detected_at_str=alert.detected_at_str,
+                suppression_interval=alert.suppression_interval,
+                report_link=alert.get_report_link(),
+            )
+        ]
+
+    def _get_alert_counters_subtitle_block(
+        self,
+        model_errors_count: int = 0,
+        test_failures_count: int = 0,
+        test_warnings_count: int = 0,
+        test_errors_count: int = 0,
+    ) -> LinesBlock:
+        summary = []
+        if model_errors_count:
+            summary.append(((Icon.X, "Model Errors:"), str(model_errors_count)))
+        if test_failures_count:
+            summary.append(
+                ((Icon.RED_TRIANGLE, "Test Failures:"), str(test_failures_count))
+            )
+        if test_warnings_count:
+            summary.append(((Icon.WARNING, "Test Warnings:"), str(test_warnings_count)))
+        if test_errors_count:
+            summary.append(((Icon.EXCLAMATION, "Test Errors:"), str(test_errors_count)))
+        subtitle_lines = [SummaryLineBlock(summary=summary)]
+
+        return LinesBlock(lines=subtitle_lines)
+
+    def _get_alerts_group_subtitle_blocks(
+        self,
+        alert: Union[AlertsGroup, GroupedByTableAlerts],
+    ) -> List[MessageBlock]:
+        return [
+            self._get_alert_counters_subtitle_block(
+                model_errors_count=len(alert.model_errors),
+                test_failures_count=len(alert.test_failures),
+                test_warnings_count=len(alert.test_warnings),
+                test_errors_count=len(alert.test_errors),
+            )
+        ]
+
+    def _get_details_blocks(
+        self,
+        table: Optional[str] = None,
+        column: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        owners: Optional[List[str]] = None,
+        subscribers: Optional[List[str]] = None,
+        description: Optional[str] = None,
+        path: Optional[str] = None,
+    ) -> List[MessageBlock]:
+        tags = sorted(list(set(tags))) if tags else None
+        owners = sorted(list(set(owners))) if owners else None
+        subscribers = sorted(list(set(subscribers))) if subscribers else None
+
+        blocks: List[MessageBlock] = []
+        if not (
+            table or column or tags or owners or subscribers or description or path
+        ):
+            return blocks
+        blocks.append(
+            LinesBlock(
+                lines=[
+                    BoldTextLineBlock(text=[Icon.INFO, "Details"]),
+                ]
+            )
+        )
+        facts = []
+        if table:
+            facts.append(("Table", table))
+        if column:
+            facts.append(("Column", column))
+
+        facts.append(("Tags", ", ".join(tags) if tags else "No tags"))
+        facts.append(("Owners", ", ".join(owners) if owners else "No owners"))
+        facts.append(
+            ("Subscribers", ", ".join(subscribers) if subscribers else "No subscribers")
+        )
+
+        if description:
+            facts.append(("Description", description))
+        if path:
+            facts.append(("Path", path))
+        blocks.append(FactsBlock(facts=facts))
+        return blocks
+
+    def _get_result_blocks(
+        self,
+        result_message: Optional[str],
+        result_sample: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = None,
+        result_query: Optional[str] = None,
+        anomalous_value: Optional[dict] = None,
+        time_elapsed: Optional[str] = None,
+        last_record_at: Optional[str] = None,
+        sampled_at: Optional[str] = None,
+    ) -> List[MessageBlock]:
+        result_blocks: List[MessageBlock] = []
+        if result_message:
+            result_blocks.append(
+                LinesBlock(
+                    lines=[
+                        BoldTextLineBlock(text="Result Message"),
+                    ]
+                )
+            )
+            result_blocks.append(
+                CodeBlock(text=result_message.strip()),
+            )
+        if result_sample:
+            result_blocks.append(
+                LinesBlock(
+                    lines=[
+                        BoldTextLineBlock(
+                            text=[Icon.MAGNIFYING_GLASS, "Test Results Sample"]
+                        ),
+                    ]
+                )
+            )
+            result_blocks.append(
+                JsonCodeBlock(content=result_sample),
+            )
+        if result_query:
+            result_blocks.append(
+                LinesBlock(
+                    lines=[
+                        BoldTextLineBlock(text=["Test Results Query"]),
+                    ]
+                )
+            )
+            result_blocks.append(CodeBlock(text=result_query.strip()))
+        if anomalous_value:
+            result_blocks.append(
+                LinesBlock(
+                    lines=[
+                        BoldTextLineBlock(text=["Anomalous Values"]),
+                    ]
+                )
+            )
+            result_blocks.append(
+                JsonCodeBlock(content=anomalous_value),
+            )
+
+        # facts
+        facts = []
+        if time_elapsed:
+            facts.append(("Time Elapsed", time_elapsed))
+        if last_record_at:
+            facts.append(("Last Record At", last_record_at))
+        if sampled_at:
+            facts.append(("Sampled At", sampled_at))
+
+        if facts:
+            result_blocks.append(FactsBlock(facts=facts))
+
+        return result_blocks
+
+    def _get_test_alert_config_blocks(
+        self, test_params: Optional[Dict[str, Any]]
+    ) -> List[MessageBlock]:
+        config_blocks: List[MessageBlock] = []
+        if test_params:
+            config_blocks.append(
+                LinesBlock(
+                    lines=[
+                        BoldTextLineBlock(
+                            text=[Icon.HAMMER_AND_WRENCH, "Test Parameters"]
+                        ),
+                    ]
+                )
+            )
+            config_blocks.append(
+                JsonCodeBlock(content=test_params),
+            )
+        return config_blocks
+
+    def _get_model_alert_config_blocks(
+        self,
+        materialization: Optional[str] = None,
+        full_refresh: Optional[bool] = None,
+    ) -> List[MessageBlock]:
+        facts = []
+        if materialization:
+            facts.append(("Materialization", materialization))
+        if full_refresh is not None:
+            facts.append(("Full Refresh", "Yes" if full_refresh else "No"))
+        return [FactsBlock(facts=facts)]
+
+    def _get_source_freshness_alert_config_blocks(
+        self,
+        error_after: Optional[str] = None,
+        warn_after: Optional[str] = None,
+        filter: Optional[str] = None,
+    ) -> List[MessageBlock]:
+        facts = []
+        if error_after:
+            facts.append(("Error after", error_after))
+        if warn_after:
+            facts.append(("Warn after", warn_after))
+        if filter:
+            facts.append(("Filter", filter))
+        return [FactsBlock(facts=facts)] if facts else []
+
+    def _get_alert_list_line(
+        self,
+        alert: Union[
+            TestAlertModel,
+            ModelAlertModel,
+            SourceFreshnessAlertModel,
+        ],
+    ) -> LineBlock:
+        inlines: List[InlineBlock] = [
+            TextBlock(text=alert.summary, style=TextStyle.BOLD),
+        ]
+        if owners := list(set(alert.owners)):
+            inlines.append(TextBlock(text="-"))
+            if len(owners) == 1:
+                inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
+            else:
+                owners.sort()
+                inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
+
+        if report_link := alert.get_report_link():
+            inlines.append(TextBlock(text="-"))
+            inlines.append(LinkBlock(text=report_link.text, url=report_link.url))
+
+        return LineBlock(inlines=inlines)
+
+    def _get_alert_list_blocks(
+        self,
+        title: str,
+        bullet_icon: Icon,
+        alerts: Sequence[
+            Union[
+                TestAlertModel,
+                ModelAlertModel,
+                SourceFreshnessAlertModel,
+            ]
+        ],
+    ) -> List[MessageBlock]:
+        blocks: List[MessageBlock] = []
+        if not alerts:
+            return blocks
+        blocks.append(LinesBlock(lines=[BoldTextLineBlock(text=title)]))
+        lines = [self._get_alert_list_line(alert) for alert in alerts]
+        bullet_list = BulletListBlock(icon=bullet_icon, lines=lines)
+        blocks.append(bullet_list)
+        return blocks
+
+    def _get_sub_alert_groups_blocks(
+        self,
+        test_errors: List[Union[TestAlertModel, SourceFreshnessAlertModel]],
+        test_warnings: List[Union[TestAlertModel, SourceFreshnessAlertModel]],
+        test_failures: List[Union[TestAlertModel, SourceFreshnessAlertModel]],
+        model_errors: List[ModelAlertModel],
+    ) -> List[MessageBlock]:
+        blocks: List[MessageBlock] = []
+        model_errors_alert_list_blocks = self._get_alert_list_blocks(
+            title="Model Errors",
+            bullet_icon=Icon.X,
+            alerts=model_errors,
+        )
+        blocks.extend(model_errors_alert_list_blocks)
+
+        test_failures_alert_list_blocks = self._get_alert_list_blocks(
+            title="Test Failures",
+            bullet_icon=Icon.RED_TRIANGLE,
+            alerts=test_failures,
+        )
+        blocks.extend(test_failures_alert_list_blocks)
+
+        test_warnings_alert_list_blocks = self._get_alert_list_blocks(
+            title="Test Warnings",
+            bullet_icon=Icon.WARNING,
+            alerts=test_warnings,
+        )
+        blocks.extend(test_warnings_alert_list_blocks)
+
+        test_errors_alert_list_blocks = self._get_alert_list_blocks(
+            title="Test Errors",
+            bullet_icon=Icon.EXCLAMATION,
+            alerts=test_errors,
+        )
+        blocks.extend(test_errors_alert_list_blocks)
+
+        return blocks
+
+    def _get_alert_title_blocks(
+        self,
+        alert: AlertType,
+    ) -> List[MessageBlock]:
+        test_type = alert.test_type if isinstance(alert, TestAlertModel) else None
+        title = self._get_alert_title(alert.summary, alert.status, test_type)
+        return [HeaderBlock(text=title)]
+
+    def _get_alert_subtitle_blocks(
+        self,
+        alert: AlertType,
+    ) -> List[MessageBlock]:
+        if isinstance(alert, TestAlertModel):
+            return self._get_test_alert_subtitle_blocks(alert)
+        elif isinstance(alert, ModelAlertModel):
+            return self._get_model_alert_subtitle_blocks(alert)
+        elif isinstance(alert, SourceFreshnessAlertModel):
+            return self._get_source_freshness_alert_subtitle_blocks(alert)
+        elif isinstance(alert, AlertsGroup):
+            return self._get_alerts_group_subtitle_blocks(alert)
+
+    def _get_alert_details_blocks(
+        self,
+        alert: AlertType,
+    ) -> List[MessageBlock]:
+        if isinstance(alert, TestAlertModel):
+            return self._get_details_blocks(
+                table=alert.table_full_name,
+                column=alert.column_name,
+                tags=alert.tags,
+                owners=alert.owners,
+                subscribers=alert.subscribers,
+                description=alert.test_description,
+            )
+        elif isinstance(alert, ModelAlertModel):
+            return self._get_details_blocks(
+                tags=alert.tags,
+                owners=alert.owners,
+                subscribers=alert.subscribers,
+                path=alert.original_path,
+            )
+        elif isinstance(alert, SourceFreshnessAlertModel):
+            return self._get_details_blocks(
+                tags=alert.tags,
+                owners=alert.owners,
+                subscribers=alert.subscribers,
+                path=alert.path,
+                description=alert.freshness_description,
+            )
+        elif isinstance(alert, GroupedByTableAlerts):
+            return self._get_details_blocks(
+                tags=alert.tags,
+                owners=alert.owners,
+                subscribers=alert.subscribers,
+            )
+        return []
+
+    def _get_alert_result_blocks(
+        self,
+        alert: AlertType,
+    ) -> List[MessageBlock]:
+        result_blocks: List[MessageBlock] = []
+        title = "Result"
+
+        if isinstance(alert, TestAlertModel):
+            result_blocks = self._get_result_blocks(
+                result_message=alert.error_message,
+                result_sample=alert.test_rows_sample,
+                anomalous_value=(
+                    alert.other if alert.test_type == "anomaly_detection" else None
+                ),
+                result_query=alert.test_results_query,
+            )
+            title = "Test Result"
+        elif isinstance(alert, ModelAlertModel):
+            if alert.materialization == "snapshot":
+                result_blocks = self._get_result_blocks(
+                    result_message=alert.message,
+                )
+        elif isinstance(alert, SourceFreshnessAlertModel):
+            result_blocks = self._get_result_blocks(
+                result_message=alert.error_message,
+                time_elapsed=f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}",
+                last_record_at=alert.max_loaded_at,
+                sampled_at=alert.snapshotted_at_str,
+            )
+
+        if result_blocks:
+            return [ExpandableBlock(title=title, body=result_blocks)]
+        return []
+
+    def _get_alert_config_blocks(
+        self,
+        alert: AlertType,
+    ) -> List[MessageBlock]:
+        config_blocks: List[MessageBlock] = []
+        title = "Configuration"
+        expandable = False
+
+        if isinstance(alert, TestAlertModel):
+            config_blocks = self._get_test_alert_config_blocks(alert.test_params)
+            title = "Test Configuration"
+        elif isinstance(alert, ModelAlertModel):
+            if alert.materialization != "snapshot":
+                config_blocks = self._get_model_alert_config_blocks(
+                    materialization=alert.materialization,
+                    full_refresh=alert.full_refresh,
+                )
+                title = "Model Configuration"
+                expandable = True
+        elif isinstance(alert, SourceFreshnessAlertModel):
+            config_blocks = self._get_source_freshness_alert_config_blocks(
+                error_after=alert.error_after,
+                warn_after=alert.warn_after,
+                filter=alert.filter,
+            )
+            title = "Source Freshness Configuration"
+
+        if config_blocks:
+            return [
+                ExpandableBlock(title=title, body=config_blocks, expanded=expandable)
+            ]
+        return []
+
+    def _get_alert_groups_blocks(
+        self,
+        alert: Union[AlertsGroup, GroupedByTableAlerts],
+    ) -> List[MessageBlock]:
+        if isinstance(alert, AlertsGroup):
+            return self._get_sub_alert_groups_blocks(
+                model_errors=alert.model_errors,
+                test_failures=alert.test_failures,
+                test_warnings=alert.test_warnings,
+                test_errors=alert.test_errors,
+            )
+        return []
+
+    def build(
+        self,
+        alert: AlertType,
+    ) -> MessageBody:
+        color = self._get_color(alert.status)
+
+        blocks: List[MessageBlock] = []
+
+        title_blocks = self._get_alert_title_blocks(alert)
+        blocks.extend(title_blocks)
+
+        subtitle_blocks = self._get_alert_subtitle_blocks(alert)
+        blocks.extend(subtitle_blocks)
+
+        blocks.append(DividerBlock())
+
+        details_blocks = self._get_alert_details_blocks(alert)
+        if details_blocks:
+            blocks.extend(details_blocks)
+            blocks.append(DividerBlock())
+
+        result_blocks = self._get_alert_result_blocks(alert)
+        blocks.extend(result_blocks)
+
+        config_blocks = self._get_alert_config_blocks(alert)
+        blocks.extend(config_blocks)
+
+        if isinstance(alert, (AlertsGroup, GroupedByTableAlerts)):
+            alert_groups_blocks = self._get_alert_groups_blocks(alert)
+            blocks.extend(alert_groups_blocks)
+
+        if isinstance(blocks[-1], DividerBlock):
+            blocks.pop()
+
+        message_body = MessageBody(
+            color=color,
+            blocks=blocks,
+        )
+        return message_body
