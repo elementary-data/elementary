@@ -29,6 +29,7 @@ def build_base_test_alert_model(
     test_sub_type: str = "generic",
     other: Optional[dict] = None,
     model_unique_id: Optional[str] = "test_model_unique_id",
+    env: Optional[str] = None,
 ) -> TestAlertModel:
     return TestAlertModel(
         id="test_id",
@@ -62,6 +63,7 @@ def build_base_test_alert_model(
         report_url=None,
         alert_fields=None,
         elementary_database_and_schema="test_db.test_schema",
+        env=env,
     )
 
 
@@ -76,6 +78,7 @@ def build_base_model_alert_model(
     alias: str,
     message: str,
     suppression_interval: Optional[int] = None,
+    env: Optional[str] = None,
 ) -> ModelAlertModel:
     return ModelAlertModel(
         id="test_id",
@@ -113,6 +116,7 @@ def build_base_model_alert_model(
         alert_fields=None,
         elementary_database_and_schema="test_db.test_schema",
         suppression_interval=suppression_interval,
+        env=env,
     )
 
 
@@ -139,6 +143,7 @@ def create_test_alerts(
     has_test_errors: bool,
     detected_at: datetime,
     count: int,
+    env: Optional[str] = None,
 ) -> List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]]:
     alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]] = []
 
@@ -156,6 +161,7 @@ def create_test_alerts(
                 alias="test_model",
                 message="Test model error",
                 suppression_interval=None,
+                env=env,
             )
             alerts.append(model_alert)
 
@@ -172,6 +178,7 @@ def create_test_alerts(
                 test_rows_sample=None,
                 test_results_query=None,
                 test_params=None,
+                env=env,
             )
             alerts.append(test_alert)
 
@@ -188,6 +195,7 @@ def create_test_alerts(
                 test_rows_sample=None,
                 test_results_query=None,
                 test_params=None,
+                env=env,
             )
             alerts.append(test_alert)
 
@@ -204,6 +212,7 @@ def create_test_alerts(
                 test_rows_sample=None,
                 test_results_query=None,
                 test_params=None,
+                env=env,
             )
             alerts.append(test_alert)
 
@@ -222,6 +231,7 @@ def build_base_source_freshness_alert_model(
     max_loaded_at: Optional[datetime] = None,
     max_loaded_at_time_ago_in_s: Optional[float] = None,
     suppression_interval: Optional[int] = None,
+    env: Optional[str] = None,
 ) -> SourceFreshnessAlertModel:
     return SourceFreshnessAlertModel(
         id="test_id",
@@ -250,6 +260,7 @@ def build_base_source_freshness_alert_model(
         report_url=None,
         alert_fields=None,
         elementary_database_and_schema="test_db.test_schema",
+        env=env,
     )
 
 

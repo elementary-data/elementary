@@ -15,18 +15,18 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
 @pytest.mark.parametrize(
-    "status,has_link,has_tags,has_owners,has_path,has_suppression_interval,materialization,has_full_refresh",
+    "status,has_link,has_tags,has_owners,has_path,has_suppression_interval,materialization,has_full_refresh,has_env",
     [
-        ("fail", True, True, True, True, True, "table", True),
-        ("fail", False, False, False, False, False, "table", False),
-        ("warn", True, True, True, False, True, "view", True),
-        ("error", False, True, True, True, False, "incremental", True),
-        (None, True, False, True, True, True, "table", False),
-        ("warn", False, True, False, True, True, "incremental", False),
-        ("error", True, True, False, False, True, "view", True),
-        (None, False, False, True, False, True, "table", True),
-        ("fail", True, False, False, True, False, "incremental", True),
-        ("warn", False, True, True, True, True, "view", False),
+        ("fail", True, True, True, True, True, "table", True, True),
+        ("fail", False, False, False, False, False, "table", False, False),
+        ("warn", True, True, True, False, True, "view", True, True),
+        ("error", False, True, True, True, False, "incremental", True, False),
+        (None, True, False, True, True, True, "table", False, True),
+        ("warn", False, True, False, True, True, "incremental", False, False),
+        ("error", True, True, False, False, True, "view", True, True),
+        (None, False, False, True, False, True, "table", True, True),
+        ("fail", True, False, False, True, False, "incremental", True, False),
+        ("warn", False, True, True, True, True, "view", False, False),
     ],
 )
 def test_get_model_alert_message_body(
@@ -39,7 +39,9 @@ def test_get_model_alert_message_body(
     has_suppression_interval: bool,
     materialization: str,
     has_full_refresh: bool,
+    has_env: bool,
 ):
+    env = "Test Env" if has_env else None
     path = "models/test_model.sql" if has_path else "unknown_path"
     model_alert_model = build_base_model_alert_model(
         status=status,
@@ -52,6 +54,7 @@ def test_get_model_alert_message_body(
         alias="test_model",
         message=None,
         suppression_interval=24 if has_suppression_interval else None,
+        env=env,
     )
 
     monkeypatch.setattr(
@@ -68,7 +71,9 @@ def test_get_model_alert_message_body(
         f"_path-{has_path}"
         f"_suppression-{has_suppression_interval}"
         f"_materialization-{materialization}"
-        f"_full_refresh-{has_full_refresh}.json"
+        f"_full_refresh-{has_full_refresh}"
+        f"_env-{has_env}"
+        ".json"
     )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(

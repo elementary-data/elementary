@@ -10,17 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Warning: \"test_short_name\" test failed on test_table",
+              "text": "Error: \"test_short_name\" test failed on ",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Warning"
+          "style": "Attention"
         },
         {
           "type": "TextBlock",
-          "text": "**Test:** test_short_name | **Status:** warn | **Time:** N/A",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** error | **Time:** N/A",
           "wrap": true
         },
         {
@@ -43,16 +43,12 @@
           "type": "FactSet",
           "facts": [
             {
-              "title": "Table",
-              "value": "test_table"
-            },
-            {
               "title": "Tags",
-              "value": "tag1, tag2"
+              "value": "_No tags_"
             },
             {
               "title": "Owners",
-              "value": "owner1, owner2"
+              "value": "_No owners_"
             },
             {
               "title": "Subscribers",
@@ -113,7 +109,7 @@
                 },
                 {
                   "type": "TextBlock",
-                  "text": "\ud83d\udd0e **Test Results Sample**",
+                  "text": "**Anomalous Values**",
                   "wrap": true
                 },
                 {
@@ -125,7 +121,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
+                          "text": "{\n  \"anomalous_value\": 42\n}",
                           "fontType": "Monospace"
                         }
                       ]

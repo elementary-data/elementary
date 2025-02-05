@@ -10,17 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "dbt failed to build table \"test_model\"",
+              "text": "Error: \"test_short_name\" test failed on test_table",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Default"
+          "style": "Attention"
         },
         {
           "type": "TextBlock",
-          "text": "**Model:** test_model | **Status:** Unknown | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** error | **Time:** N/A",
           "wrap": true
         },
         {
@@ -43,8 +43,12 @@
           "type": "FactSet",
           "facts": [
             {
+              "title": "Table",
+              "value": "test_table"
+            },
+            {
               "title": "Tags",
-              "value": "_No tags_"
+              "value": "tag1, tag2"
             },
             {
               "title": "Owners",
@@ -55,8 +59,8 @@
               "value": "_No subscribers_"
             },
             {
-              "title": "Path",
-              "value": "models/test_model.sql"
+              "title": "Description",
+              "value": "Test description"
             }
           ]
         }
@@ -71,7 +75,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Model Configuration",
+              "title": "Test Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -87,18 +91,51 @@
               "separator": true,
               "items": [
                 {
-                  "type": "FactSet",
-                  "facts": [
+                  "type": "TextBlock",
+                  "text": "**Result Message**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Materialization",
-                      "value": "table"
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "Test error message",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "\ud83d\udd0e **Test Results Sample**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
+                          "fontType": "Monospace"
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           ],
-          "isVisible": true
+          "isVisible": false
         }
       ]
     }

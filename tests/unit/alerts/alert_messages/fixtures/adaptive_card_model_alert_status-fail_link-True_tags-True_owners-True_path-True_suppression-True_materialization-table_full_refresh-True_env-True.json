@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Error: \"test_short_name\" test failed on test_table",
+              "text": "Failure: dbt failed to build table \"test_model\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -20,7 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Test:** test_short_name | **Status:** error | **Time:** N/A",
+          "text": "**Model:** test_model | **Env:** Test Env | **Status:** fail | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
         },
         {
@@ -43,10 +43,6 @@
           "type": "FactSet",
           "facts": [
             {
-              "title": "Table",
-              "value": "test_table"
-            },
-            {
               "title": "Tags",
               "value": "tag1, tag2"
             },
@@ -59,8 +55,8 @@
               "value": "_No subscribers_"
             },
             {
-              "title": "Description",
-              "value": "Test description"
+              "title": "Path",
+              "value": "models/test_model.sql"
             }
           ]
         }
@@ -75,7 +71,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Test Result",
+              "title": "Model Configuration",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -91,51 +87,22 @@
               "separator": true,
               "items": [
                 {
-                  "type": "TextBlock",
-                  "text": "**Result Message**",
-                  "wrap": true
-                },
-                {
-                  "type": "Container",
-                  "style": "emphasis",
-                  "items": [
+                  "type": "FactSet",
+                  "facts": [
                     {
-                      "type": "RichTextBlock",
-                      "inlines": [
-                        {
-                          "type": "TextRun",
-                          "text": "Test error message",
-                          "fontType": "Monospace"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "TextBlock",
-                  "text": "\ud83d\udd0e **Test Results Sample**",
-                  "wrap": true
-                },
-                {
-                  "type": "Container",
-                  "style": "emphasis",
-                  "items": [
+                      "title": "Materialization",
+                      "value": "table"
+                    },
                     {
-                      "type": "RichTextBlock",
-                      "inlines": [
-                        {
-                          "type": "TextRun",
-                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
-                          "fontType": "Monospace"
-                        }
-                      ]
+                      "title": "Full Refresh",
+                      "value": "Yes"
                     }
                   ]
                 }
               ]
             }
           ],
-          "isVisible": false
+          "isVisible": true
         }
       ]
     }

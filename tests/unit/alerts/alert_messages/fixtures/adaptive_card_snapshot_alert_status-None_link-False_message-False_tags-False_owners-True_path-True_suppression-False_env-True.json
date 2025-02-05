@@ -10,22 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Warning: dbt failed to build snapshot \"test_snapshot\"",
+              "text": "dbt failed to build snapshot \"test_snapshot\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Warning"
+          "style": "Default"
         },
         {
           "type": "TextBlock",
-          "text": "**Snapshot:** test_snapshot | **Status:** warn | **Time:** 2025-02-03 11:21:07 UTC",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "[View in Elementary](http://test.com)",
+          "text": "**Snapshot:** test_snapshot | **Env:** Test Env | **Status:** Unknown | **Time:** 2025-02-03 11:21:07 UTC",
           "wrap": true
         }
       ]
@@ -44,11 +39,11 @@
           "facts": [
             {
               "title": "Tags",
-              "value": "tag1, tag2"
+              "value": "_No tags_"
             },
             {
               "title": "Owners",
-              "value": "_No owners_"
+              "value": "owner1, owner2"
             },
             {
               "title": "Subscribers",

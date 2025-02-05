@@ -10,17 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Warning: dbt failed to build view \"test_model\"",
+              "text": "dbt failed to build table \"test_model\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Warning"
+          "style": "Default"
         },
         {
           "type": "TextBlock",
-          "text": "**Model:** test_model | **Status:** warn | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Model:** test_model | **Env:** Test Env | **Status:** Unknown | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
         },
         {
@@ -44,7 +44,7 @@
           "facts": [
             {
               "title": "Tags",
-              "value": "tag1, tag2"
+              "value": "_No tags_"
             },
             {
               "title": "Owners",
@@ -56,7 +56,7 @@
             },
             {
               "title": "Path",
-              "value": "unknown_path"
+              "value": "models/test_model.sql"
             }
           ]
         }
@@ -91,11 +91,7 @@
                   "facts": [
                     {
                       "title": "Materialization",
-                      "value": "view"
-                    },
-                    {
-                      "title": "Full Refresh",
-                      "value": "Yes"
+                      "value": "table"
                     }
                   ]
                 }

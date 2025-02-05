@@ -10,22 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Error: dbt failed to build view \"test_model\"",
+              "text": "\"test_short_name\" test failed on ",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Attention"
+          "style": "Default"
         },
         {
           "type": "TextBlock",
-          "text": "**Model:** test_model | **Status:** error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "[View in Elementary](http://test.com)",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** Unknown | **Time:** N/A",
           "wrap": true
         }
       ]
@@ -44,19 +39,19 @@
           "facts": [
             {
               "title": "Tags",
-              "value": "tag1, tag2"
+              "value": "_No tags_"
             },
             {
               "title": "Owners",
-              "value": "_No owners_"
+              "value": "owner1, owner2"
             },
             {
               "title": "Subscribers",
               "value": "_No subscribers_"
             },
             {
-              "title": "Path",
-              "value": "unknown_path"
+              "title": "Description",
+              "value": "Test description"
             }
           ]
         }
@@ -71,7 +66,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Model Configuration",
+              "title": "Test Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -87,22 +82,51 @@
               "separator": true,
               "items": [
                 {
-                  "type": "FactSet",
-                  "facts": [
+                  "type": "TextBlock",
+                  "text": "**Result Message**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Materialization",
-                      "value": "view"
-                    },
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "Test error message",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "**Anomalous Values**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Full Refresh",
-                      "value": "Yes"
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"anomalous_value\": 42\n}",
+                          "fontType": "Monospace"
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           ],
-          "isVisible": true
+          "isVisible": false
         }
       ]
     }

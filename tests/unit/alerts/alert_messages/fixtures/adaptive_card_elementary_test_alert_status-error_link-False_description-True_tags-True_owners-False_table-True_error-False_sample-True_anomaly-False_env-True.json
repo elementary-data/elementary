@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Error: Freshness exceeded the acceptable times on source \"test_source\"",
+              "text": "Generic on test_table",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -20,12 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Source:** test_source.test_identifier | **Status:** error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "[View in Elementary](http://test.com)",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** error | **Time:** N/A",
           "wrap": true
         }
       ]
@@ -43,8 +38,12 @@
           "type": "FactSet",
           "facts": [
             {
+              "title": "Table",
+              "value": "test_table"
+            },
+            {
               "title": "Tags",
-              "value": "_No tags_"
+              "value": "tag1, tag2"
             },
             {
               "title": "Owners",
@@ -56,11 +55,7 @@
             },
             {
               "title": "Description",
-              "value": "Test freshness description"
-            },
-            {
-              "title": "Path",
-              "value": "sources/test_source.yml"
+              "value": "Test description"
             }
           ]
         }
@@ -75,7 +70,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Result",
+              "title": "Test Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -92,7 +87,7 @@
               "items": [
                 {
                   "type": "TextBlock",
-                  "text": "**Result Message**",
+                  "text": "\ud83d\udd0e **Test Results Sample**",
                   "wrap": true
                 },
                 {
@@ -104,7 +99,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Test error message",
+                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
                           "fontType": "Monospace"
                         }
                       ]
@@ -112,19 +107,23 @@
                   ]
                 },
                 {
-                  "type": "FactSet",
-                  "facts": [
+                  "type": "TextBlock",
+                  "text": "**Test Results Query**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Time Elapsed",
-                      "value": "2:00:00"
-                    },
-                    {
-                      "title": "Last Record At",
-                      "value": "2025-02-03 11:21:07"
-                    },
-                    {
-                      "title": "Sampled At",
-                      "value": "2025-02-03 13:21:07"
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "SELECT * FROM test",
+                          "fontType": "Monospace"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -138,7 +137,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Source Freshness Configuration",
+              "title": "Test Configuration",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000002"
               ]
@@ -154,19 +153,23 @@
               "separator": true,
               "items": [
                 {
-                  "type": "FactSet",
-                  "facts": [
+                  "type": "TextBlock",
+                  "text": "\ud83d\udee0\ufe0f **Test Parameters**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Error after",
-                      "value": "2 hours"
-                    },
-                    {
-                      "title": "Warn after",
-                      "value": "1 hour"
-                    },
-                    {
-                      "title": "Filter",
-                      "value": "test_filter"
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"param1\": \"value1\"\n}",
+                          "fontType": "Monospace"
+                        }
+                      ]
                     }
                   ]
                 }

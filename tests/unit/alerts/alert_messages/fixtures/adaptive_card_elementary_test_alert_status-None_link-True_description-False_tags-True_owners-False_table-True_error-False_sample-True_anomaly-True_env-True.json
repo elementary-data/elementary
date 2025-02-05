@@ -10,17 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Runtime Error: Failed to calculate the source freshness of \"test_source\"",
+              "text": "\"test_short_name\" test failed on test_table",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Attention"
+          "style": "Default"
         },
         {
           "type": "TextBlock",
-          "text": "**Source:** test_source.test_identifier | **Status:** runtime error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** Unknown | **Time:** N/A",
           "wrap": true
         },
         {
@@ -43,24 +43,20 @@
           "type": "FactSet",
           "facts": [
             {
+              "title": "Table",
+              "value": "test_table"
+            },
+            {
               "title": "Tags",
               "value": "tag1, tag2"
             },
             {
               "title": "Owners",
-              "value": "owner1, owner2"
+              "value": "_No owners_"
             },
             {
               "title": "Subscribers",
               "value": "_No subscribers_"
-            },
-            {
-              "title": "Description",
-              "value": "Test freshness description"
-            },
-            {
-              "title": "Path",
-              "value": "sources/test_source.yml"
             }
           ]
         }
@@ -75,7 +71,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Result",
+              "title": "Test Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -92,7 +88,7 @@
               "items": [
                 {
                   "type": "TextBlock",
-                  "text": "**Result Message**",
+                  "text": "\ud83d\udd0e **Test Results Sample**",
                   "wrap": true
                 },
                 {
@@ -104,7 +100,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Failed to calculate the source freshness\n```Test error message```",
+                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
                           "fontType": "Monospace"
                         }
                       ]
@@ -112,19 +108,44 @@
                   ]
                 },
                 {
-                  "type": "FactSet",
-                  "facts": [
+                  "type": "TextBlock",
+                  "text": "**Test Results Query**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Time Elapsed",
-                      "value": "2:00:00"
-                    },
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "SELECT * FROM test",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "**Anomalous Values**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Last Record At",
-                      "value": "2025-02-03 11:21:07"
-                    },
-                    {
-                      "title": "Sampled At",
-                      "value": "2025-02-03 13:21:07"
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"anomalous_value\": 42\n}",
+                          "fontType": "Monospace"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -138,7 +159,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Source Freshness Configuration",
+              "title": "Test Configuration",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000002"
               ]
@@ -154,19 +175,23 @@
               "separator": true,
               "items": [
                 {
-                  "type": "FactSet",
-                  "facts": [
+                  "type": "TextBlock",
+                  "text": "\ud83d\udee0\ufe0f **Test Parameters**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
                     {
-                      "title": "Error after",
-                      "value": "2 hours"
-                    },
-                    {
-                      "title": "Warn after",
-                      "value": "1 hour"
-                    },
-                    {
-                      "title": "Filter",
-                      "value": "test_filter"
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"param1\": \"value1\"\n}",
+                          "fontType": "Monospace"
+                        }
+                      ]
                     }
                   ]
                 }

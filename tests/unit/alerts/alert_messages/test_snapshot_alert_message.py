@@ -15,18 +15,18 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
 @pytest.mark.parametrize(
-    "status,has_link,has_message,has_tags,has_owners,has_path,has_suppression_interval",
+    "status,has_link,has_message,has_tags,has_owners,has_path,has_suppression_interval,has_env",
     [
-        ("fail", True, True, True, True, True, True),
-        ("fail", False, False, False, False, False, False),
-        ("warn", True, False, True, False, True, False),
-        ("warn", False, True, False, True, False, True),
-        ("error", True, True, False, True, True, False),
-        ("error", False, True, True, False, False, True),
-        (None, True, False, True, False, False, True),
-        (None, False, False, False, True, True, False),
-        ("fail", True, False, True, True, False, True),
-        ("warn", False, True, True, False, True, False),
+        ("fail", True, True, True, True, True, True, True),
+        ("fail", False, False, False, False, False, False, False),
+        ("warn", True, False, True, False, True, False, True),
+        ("warn", False, True, False, True, False, True, False),
+        ("error", True, True, False, True, True, False, True),
+        ("error", False, True, True, False, False, True, False),
+        (None, True, False, True, False, False, True, True),
+        (None, False, False, False, True, True, False, True),
+        ("fail", True, False, True, True, False, True, False),
+        ("warn", False, True, True, False, True, False, False),
     ],
 )
 def test_get_snapshot_alert_message_body(
@@ -38,7 +38,9 @@ def test_get_snapshot_alert_message_body(
     has_owners: bool,
     has_path: bool,
     has_suppression_interval: bool,
+    has_env: bool,
 ):
+    env = "Test Env" if has_env else None
     path = "models/test_snapshot.sql" if has_path else ""
     snapshot_alert_model = build_base_model_alert_model(
         status=status,
@@ -49,8 +51,9 @@ def test_get_snapshot_alert_message_body(
         full_refresh=False,
         detected_at=datetime(2025, 2, 3, 13, 21, 7),
         alias="test_snapshot",
-        message=("Test message" if has_message else None),
+        message="Test message" if has_message else None,
         suppression_interval=24 if has_suppression_interval else None,
+        env=env,
     )
 
     monkeypatch.setattr(
@@ -66,7 +69,9 @@ def test_get_snapshot_alert_message_body(
         f"_tags-{has_tags}"
         f"_owners-{has_owners}"
         f"_path-{has_path}"
-        f"_suppression-{has_suppression_interval}.json"
+        f"_suppression-{has_suppression_interval}"
+        f"_env-{has_env}"
+        ".json"
     )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(

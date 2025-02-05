@@ -20,7 +20,12 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Snapshot:** test_snapshot | **Status:** Unknown | **Time:** 2025-02-03 11:21:07 UTC",
+          "text": "**Snapshot:** test_snapshot | **Env:** Test Env | **Status:** Unknown | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "[View in Elementary](http://test.com)",
           "wrap": true
         }
       ]
@@ -39,19 +44,15 @@
           "facts": [
             {
               "title": "Tags",
-              "value": "_No tags_"
+              "value": "tag1, tag2"
             },
             {
               "title": "Owners",
-              "value": "owner1, owner2"
+              "value": "_No owners_"
             },
             {
               "title": "Subscribers",
               "value": "_No subscribers_"
-            },
-            {
-              "title": "Path",
-              "value": "models/test_snapshot.sql"
             }
           ]
         }

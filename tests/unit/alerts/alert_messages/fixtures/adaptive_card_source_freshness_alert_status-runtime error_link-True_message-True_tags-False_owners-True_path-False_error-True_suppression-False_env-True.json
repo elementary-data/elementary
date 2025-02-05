@@ -10,17 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "\"test_short_name\" test failed on test_table",
+              "text": "Runtime Error: Failed to calculate the source freshness of \"test_source\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Default"
+          "style": "Attention"
         },
         {
           "type": "TextBlock",
-          "text": "**Test:** test_short_name | **Status:** Unknown | **Time:** N/A",
+          "text": "**Source:** test_source.test_identifier | **Env:** Test Env | **Status:** runtime error | **Time:** 2025-02-03 11:21:07 UTC",
           "wrap": true
         },
         {
@@ -43,16 +43,12 @@
           "type": "FactSet",
           "facts": [
             {
-              "title": "Table",
-              "value": "test_table"
-            },
-            {
               "title": "Tags",
               "value": "_No tags_"
             },
             {
               "title": "Owners",
-              "value": "_No owners_"
+              "value": "owner1, owner2"
             },
             {
               "title": "Subscribers",
@@ -60,7 +56,7 @@
             },
             {
               "title": "Description",
-              "value": "Test description"
+              "value": "Test freshness description"
             }
           ]
         }
@@ -75,7 +71,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Test Result",
+              "title": "Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -104,10 +100,69 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Test error message",
+                          "text": "Failed to calculate the source freshness\n```Test error message```",
                           "fontType": "Monospace"
                         }
                       ]
+                    }
+                  ]
+                },
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    {
+                      "title": "Time Elapsed",
+                      "value": "2:00:00"
+                    },
+                    {
+                      "title": "Last Record At",
+                      "value": "2025-02-03 11:21:07"
+                    },
+                    {
+                      "title": "Sampled At",
+                      "value": "2025-02-03 13:21:07"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        },
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Source Freshness Configuration",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000002"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000002",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    {
+                      "title": "Error after",
+                      "value": "2 hours"
+                    },
+                    {
+                      "title": "Warn after",
+                      "value": "1 hour"
+                    },
+                    {
+                      "title": "Filter",
+                      "value": "test_filter"
                     }
                   ]
                 }

@@ -10,17 +10,17 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "dbt failed to build snapshot \"test_snapshot\"",
+              "text": "Warning: dbt failed to build snapshot \"test_snapshot\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Default"
+          "style": "Warning"
         },
         {
           "type": "TextBlock",
-          "text": "**Snapshot:** test_snapshot | **Status:** Unknown | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Snapshot:** test_snapshot | **Env:** Test Env | **Status:** warn | **Time:** 2025-02-03 11:21:07 UTC",
           "wrap": true
         },
         {
@@ -53,6 +53,10 @@
             {
               "title": "Subscribers",
               "value": "_No subscribers_"
+            },
+            {
+              "title": "Path",
+              "value": "models/test_snapshot.sql"
             }
           ]
         }

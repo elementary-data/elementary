@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, Dict, List, Literal, Optional, Sequence, Union
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 from elementary.messages.block_builders import (
     BoldTextLineBlock,
@@ -87,10 +87,13 @@ class AlertMessageBuilder:
         status: Optional[str] = None,
         detected_at_str: Optional[str] = None,
         suppression_interval: Optional[int] = None,
+        env: Optional[str] = None,
         report_link: Optional[ReportLinkData] = None,
     ) -> LinesBlock:
         summary = []
         summary.append((type.capitalize() + ":", name))
+        if env:
+            summary.append(("Env:", env))
         summary.append(("Status:", status or "Unknown"))
         if detected_at_str:
             summary.append(("Time:", detected_at_str))
@@ -116,6 +119,7 @@ class AlertMessageBuilder:
                     status=alert.status,
                     detected_at_str=alert.detected_at_str,
                     suppression_interval=alert.suppression_interval,
+                    env=alert.env,
                     report_link=alert.get_report_link(),
                 )
             ]
@@ -127,6 +131,7 @@ class AlertMessageBuilder:
                     status=alert.status,
                     detected_at_str=alert.detected_at_str,
                     suppression_interval=alert.suppression_interval,
+                    env=alert.env,
                     report_link=alert.get_report_link(),
                 )
             ]
@@ -142,6 +147,7 @@ class AlertMessageBuilder:
                 status=alert.status,
                 detected_at_str=alert.detected_at_str,
                 suppression_interval=alert.suppression_interval,
+                env=alert.env,
                 report_link=alert.get_report_link(),
             )
         ]
@@ -157,6 +163,7 @@ class AlertMessageBuilder:
                 status=alert.status,
                 detected_at_str=alert.detected_at_str,
                 suppression_interval=alert.suppression_interval,
+                env=alert.env,
                 report_link=alert.get_report_link(),
             )
         ]
@@ -167,8 +174,9 @@ class AlertMessageBuilder:
         test_failures_count: int = 0,
         test_warnings_count: int = 0,
         test_errors_count: int = 0,
+        env: Optional[str] = None,
     ) -> LinesBlock:
-        summary = []
+        summary: List[Tuple[Union[Tuple[Icon, str], str], str]] = []
         if model_errors_count:
             summary.append(((Icon.X, "Model Errors:"), str(model_errors_count)))
         if test_failures_count:
@@ -179,6 +187,8 @@ class AlertMessageBuilder:
             summary.append(((Icon.WARNING, "Test Warnings:"), str(test_warnings_count)))
         if test_errors_count:
             summary.append(((Icon.EXCLAMATION, "Test Errors:"), str(test_errors_count)))
+        if env:
+            summary.append(("Env:", env))
         subtitle_lines = [SummaryLineBlock(summary=summary)]
 
         return LinesBlock(lines=subtitle_lines)
@@ -193,6 +203,7 @@ class AlertMessageBuilder:
                 test_failures_count=len(alert.test_failures),
                 test_warnings_count=len(alert.test_warnings),
                 test_errors_count=len(alert.test_errors),
+                env=alert.env,
             )
         ]
 

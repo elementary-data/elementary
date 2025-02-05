@@ -22,17 +22,17 @@ def build_elementary_test_alert_model(*args, **kwargs):
 
 
 @pytest.mark.parametrize(
-    "status,has_link,has_description,has_tags,has_owners,has_table,has_error,has_sample,has_anomaly",
+    "status,has_link,has_description,has_tags,has_owners,has_table,has_error,has_sample,has_anomaly,has_env",
     [
-        (None, False, False, False, False, False, False, False, False),
-        ("fail", True, True, True, True, True, True, True, True),
-        ("fail", False, False, False, False, False, False, False, False),
-        ("warn", True, False, True, False, True, False, True, False),
-        ("warn", False, True, False, True, False, True, False, True),
-        ("error", True, True, False, False, False, True, False, True),
-        ("error", False, True, True, False, True, False, True, False),
-        (None, True, False, True, False, True, False, True, True),
-        (None, False, True, False, True, False, True, False, True),
+        (None, False, False, False, False, False, False, False, False, False),
+        ("fail", True, True, True, True, True, True, True, True, True),
+        ("fail", False, False, False, False, False, False, False, False, False),
+        ("warn", True, False, True, False, True, False, True, False, True),
+        ("warn", False, True, False, True, False, True, False, True, False),
+        ("error", True, True, False, False, False, True, False, True, True),
+        ("error", False, True, True, False, True, False, True, False, True),
+        (None, True, False, True, False, True, False, True, True, True),
+        (None, False, True, False, True, False, True, False, True, True),
     ],
 )
 def test_get_elementary_test_alert_message_body(
@@ -46,7 +46,9 @@ def test_get_elementary_test_alert_message_body(
     has_error: bool,
     has_sample: bool,
     has_anomaly: bool,
+    has_env: bool,
 ):
+    env = "Test Env" if has_env else None
     test_alert_model = build_elementary_test_alert_model(
         status=status,
         table_name=None if not has_table else "test_table",
@@ -61,6 +63,7 @@ def test_get_elementary_test_alert_message_body(
         test_params={"param1": "value1"} if has_sample else None,
         has_anomaly=has_anomaly,
         other={"anomalous_value": 42} if has_anomaly else None,
+        env=env,
     )
 
     monkeypatch.setattr(
@@ -78,7 +81,9 @@ def test_get_elementary_test_alert_message_body(
         f"_table-{has_table}"
         f"_error-{has_error}"
         f"_sample-{has_sample}"
-        f"_anomaly-{has_anomaly}.json"
+        f"_anomaly-{has_anomaly}"
+        f"_env-{has_env}"
+        ".json"
     )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(

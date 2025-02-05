@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Failure: dbt failed to build snapshot \"test_snapshot\"",
+              "text": "Error: \"test_short_name\" test failed on ",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -20,12 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Snapshot:** test_snapshot | **Status:** fail | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "[View in Elementary](http://test.com)",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** error | **Time:** N/A",
           "wrap": true
         }
       ]
@@ -44,7 +39,7 @@
           "facts": [
             {
               "title": "Tags",
-              "value": "tag1, tag2"
+              "value": "_No tags_"
             },
             {
               "title": "Owners",
@@ -55,8 +50,8 @@
               "value": "_No subscribers_"
             },
             {
-              "title": "Path",
-              "value": "models/test_snapshot.sql"
+              "title": "Description",
+              "value": "Test description"
             }
           ]
         }
@@ -71,7 +66,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Result",
+              "title": "Test Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -100,7 +95,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Test message",
+                          "text": "Test error message",
                           "fontType": "Monospace"
                         }
                       ]

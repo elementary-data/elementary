@@ -20,7 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **Test Failures:** 10 | \u26a0\ufe0f **Test Warnings:** 10 | \u2757 **Test Errors:** 10",
+          "text": "\ud83d\udd3a **Test Failures:** 10 | \u26a0\ufe0f **Test Warnings:** 10 | \u2757 **Test Errors:** 10 | **Env:** Test Env",
           "wrap": true
         }
       ]

@@ -10,17 +10,22 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "\"test_short_name\" test failed on ",
+              "text": "Generic on test_table",
               "weight": "bolder",
               "size": "large",
               "wrap": true
             }
           ],
-          "style": "Default"
+          "style": "Warning"
         },
         {
           "type": "TextBlock",
-          "text": "**Test:** test_short_name | **Status:** Unknown | **Time:** N/A",
+          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** warn | **Time:** N/A",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "[View in Elementary](http://test.com)",
           "wrap": true
         }
       ]
@@ -38,20 +43,20 @@
           "type": "FactSet",
           "facts": [
             {
+              "title": "Table",
+              "value": "test_table"
+            },
+            {
               "title": "Tags",
-              "value": "_No tags_"
+              "value": "tag1, tag2"
             },
             {
               "title": "Owners",
-              "value": "owner1, owner2"
+              "value": "_No owners_"
             },
             {
               "title": "Subscribers",
               "value": "_No subscribers_"
-            },
-            {
-              "title": "Description",
-              "value": "Test description"
             }
           ]
         }
@@ -83,7 +88,7 @@
               "items": [
                 {
                   "type": "TextBlock",
-                  "text": "**Result Message**",
+                  "text": "\ud83d\udd0e **Test Results Sample**",
                   "wrap": true
                 },
                 {
@@ -95,7 +100,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Test error message",
+                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
                           "fontType": "Monospace"
                         }
                       ]
@@ -104,7 +109,7 @@
                 },
                 {
                   "type": "TextBlock",
-                  "text": "**Anomalous Values**",
+                  "text": "**Test Results Query**",
                   "wrap": true
                 },
                 {
@@ -116,7 +121,53 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "{\n  \"anomalous_value\": 42\n}",
+                          "text": "SELECT * FROM test",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        },
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Test Configuration",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000002"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000002",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "\ud83d\udee0\ufe0f **Test Parameters**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "{\n  \"param1\": \"value1\"\n}",
                           "fontType": "Monospace"
                         }
                       ]

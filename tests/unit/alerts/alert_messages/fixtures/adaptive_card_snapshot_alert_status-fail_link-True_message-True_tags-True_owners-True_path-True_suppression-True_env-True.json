@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Runtime Error: Failed to calculate the source freshness of \"test_source\"",
+              "text": "Failure: dbt failed to build snapshot \"test_snapshot\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -20,7 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Source:** test_source.test_identifier | **Status:** runtime error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Snapshot:** test_snapshot | **Env:** Test Env | **Status:** fail | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
         },
         {
@@ -48,7 +48,7 @@
             },
             {
               "title": "Owners",
-              "value": "_No owners_"
+              "value": "owner1, owner2"
             },
             {
               "title": "Subscribers",
@@ -56,7 +56,7 @@
             },
             {
               "title": "Path",
-              "value": "sources/test_source.yml"
+              "value": "models/test_snapshot.sql"
             }
           ]
         }
@@ -100,23 +100,10 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Failed to calculate the source freshness\n```None```",
+                          "text": "Test message",
                           "fontType": "Monospace"
                         }
                       ]
-                    }
-                  ]
-                },
-                {
-                  "type": "FactSet",
-                  "facts": [
-                    {
-                      "title": "Time Elapsed",
-                      "value": "N/A"
-                    },
-                    {
-                      "title": "Sampled At",
-                      "value": "2025-02-03 13:21:07"
                     }
                   ]
                 }

@@ -27,6 +27,7 @@ def get_expected_adaptive_filename(
     has_table: bool,
     has_error: bool,
     has_sample: bool,
+    has_env: bool,
 ) -> str:
     return (
         f"adaptive_card_dbt_test_alert"
@@ -37,21 +38,23 @@ def get_expected_adaptive_filename(
         f"_owners-{has_owners}"
         f"_table-{has_table}"
         f"_error-{has_error}"
-        f"_sample-{has_sample}.json"
+        f"_sample-{has_sample}"
+        f"_env-{has_env}"
+        ".json"
     )
 
 
 @pytest.mark.parametrize(
-    "status,has_link,has_description,has_tags,has_owners,has_table,has_error,has_sample",
+    "status,has_link,has_description,has_tags,has_owners,has_table,has_error,has_sample,has_env",
     [
-        (None, False, False, False, False, False, False, False),
-        ("fail", False, False, False, False, False, False, False),
-        ("fail", True, True, True, True, True, True, True),
-        ("warn", True, False, True, False, True, False, True),
-        ("error", False, True, False, True, False, True, False),
-        ("error", True, True, True, True, True, True, True),
-        ("warn", True, True, True, True, True, True, True),
-        (None, True, True, False, False, True, True, False),
+        (None, False, False, False, False, False, False, False, False),
+        ("fail", False, False, False, False, False, False, False, False),
+        ("fail", True, True, True, True, True, True, True, False),
+        ("warn", True, False, True, False, True, False, True, False),
+        ("error", False, True, False, True, False, True, False, True),
+        ("error", True, True, True, True, True, True, True, True),
+        ("warn", True, True, True, True, True, True, True, True),
+        (None, True, True, False, False, True, True, False, True),
     ],
 )
 def test_get_dbt_test_alert_message_body(
@@ -64,7 +67,9 @@ def test_get_dbt_test_alert_message_body(
     has_table: bool,
     has_error: bool,
     has_sample: bool,
+    has_env: bool,
 ):
+    env = "Test Env" if has_env else None
     test_alert_model = build_dbt_test_alert_model(
         status=status,
         table_name=None if not has_table else "test_table",
@@ -77,6 +82,7 @@ def test_get_dbt_test_alert_message_body(
         ),
         test_results_query=None,
         test_params=None,
+        env=env,
     )
 
     monkeypatch.setattr(
@@ -93,6 +99,7 @@ def test_get_dbt_test_alert_message_body(
         has_table=has_table,
         has_error=has_error,
         has_sample=has_sample,
+        has_env=has_env,
     )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(

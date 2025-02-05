@@ -15,18 +15,18 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
 @pytest.mark.parametrize(
-    "status,has_link,has_message,has_tags,has_owners,has_path,has_error,has_suppression_interval",
+    "status,has_link,has_message,has_tags,has_owners,has_path,has_error,has_suppression_interval,has_env",
     [
-        ("runtime error", False, False, False, False, False, False, False),
-        ("runtime error", True, True, True, True, True, True, True),
-        ("runtime error", True, True, False, True, False, True, False),
-        ("runtime error", True, False, True, False, True, False, True),
-        ("runtime error", False, True, True, False, False, True, True),
-        ("error", False, True, True, True, False, True, False),
-        ("error", True, False, True, True, True, False, True),
-        ("error", True, True, False, False, True, True, True),
-        ("error", False, False, True, True, True, True, False),
-        ("error", True, False, False, False, False, False, True),
+        ("runtime error", False, False, False, False, False, False, False, False),
+        ("runtime error", True, True, True, True, True, True, True, True),
+        ("runtime error", True, True, False, True, False, True, False, True),
+        ("runtime error", True, False, True, False, True, False, True, True),
+        ("runtime error", False, True, True, False, False, True, True, True),
+        ("error", False, True, True, True, False, True, False, True),
+        ("error", True, False, True, True, True, False, True, False),
+        ("error", True, True, False, False, True, True, True, True),
+        ("error", False, False, True, True, True, True, False, False),
+        ("error", True, False, False, False, False, False, True, False),
     ],
 )
 def test_get_source_freshness_alert_message_body(
@@ -39,7 +39,9 @@ def test_get_source_freshness_alert_message_body(
     has_path: bool,
     has_error: bool,
     has_suppression_interval: bool,
+    has_env: bool,
 ):
+    env = "Test Env" if has_env else None
     path = "sources/test_source.yml" if has_path else ""
     detected_at = datetime(2025, 2, 3, 13, 21, 7)
     snapshotted_at = detected_at
@@ -58,6 +60,7 @@ def test_get_source_freshness_alert_message_body(
         max_loaded_at=max_loaded_at,
         max_loaded_at_time_ago_in_s=max_loaded_at_time_ago_in_s,
         suppression_interval=24 if has_suppression_interval else None,
+        env=env,
     )
 
     monkeypatch.setattr(
@@ -76,7 +79,9 @@ def test_get_source_freshness_alert_message_body(
         f"_owners-{has_owners}"
         f"_path-{has_path}"
         f"_error-{has_error}"
-        f"_suppression-{has_suppression_interval}.json"
+        f"_suppression-{has_suppression_interval}"
+        f"_env-{has_env}"
+        ".json"
     )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(
