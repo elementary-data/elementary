@@ -3,6 +3,9 @@ from typing import Generator, List, Sequence, Tuple, Union
 
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
+from elementary.monitor.alerts.alerts_groups.grouped_by_owner import (
+    GroupedByOwnerAlerts,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -45,6 +48,8 @@ class BaseIntegration(ABC):
             return self._get_source_freshness_template(alert)
         elif isinstance(alert, GroupedByTableAlerts):
             return self._get_group_by_table_template(alert)
+        elif isinstance(alert, GroupedByOwnerAlerts):
+            return self._get_group_by_owner_template(alert)
         elif isinstance(alert, BaseAlertsGroup):
             return self._get_alerts_group_template(alert)
 
@@ -73,6 +78,12 @@ class BaseIntegration(ABC):
     @abstractmethod
     def _get_group_by_table_template(
         self, alert: GroupedByTableAlerts, *args, **kwargs
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_group_by_owner_template(
+        self, alert: GroupedByOwnerAlerts, *args, **kwargs
     ):
         raise NotImplementedError
 

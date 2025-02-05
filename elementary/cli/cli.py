@@ -38,12 +38,12 @@ class ElementaryCLI(click.MultiCommand):
         "run-operation": run_operation,
     }
 
-    def list_commands(self, ctx):
-        return self._CMD_MAP.keys()
+    def list_commands(self, ctx) -> list[str]:
+        return list(self._CMD_MAP.keys())
 
-    def get_command(self, ctx, name):
+    def get_command(self, ctx, cmd_name):
         ctx.auto_envvar_prefix = "EDR"
-        return self._CMD_MAP.get(name)
+        return self._CMD_MAP.get(cmd_name)
 
     def format_help(self, ctx, formatter):
         try:

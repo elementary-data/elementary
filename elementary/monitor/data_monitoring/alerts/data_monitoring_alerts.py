@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import DefaultDict, Dict, List, Optional, Union
 
 from alive_progress import alive_bar
@@ -17,7 +17,10 @@ from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
 from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
-from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import (
+    GroupedByOwnerAlerts,
+    GroupedByTableAlerts,
+)
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -159,7 +162,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts_last_sent_times: Dict[str, datetime],
     ) -> List[str]:
         suppressed_alerts = []
-        current_time_utc = convert_time_to_timezone(datetime.utcnow())
+        current_time_utc = convert_time_to_timezone(datetime.now(timezone.utc))
         for alert in alerts:
             alert_class_id = alert.alert_class_id
             suppression_interval = alert.data.get_suppression_interval(
@@ -221,6 +224,7 @@ class DataMonitoringAlerts(DataMonitoring):
         formatted_alerts = []
         grouped_by_table_alerts = []
         model_ids_to_alerts_map = defaultdict(lambda: [])
+        owner_to_alerts_map = defaultdict(lambda: [])
 
         default_alerts_group_by_strategy = GroupingType(
             self.config.slack_group_alerts_by
@@ -248,6 +252,9 @@ class DataMonitoringAlerts(DataMonitoring):
                     model_ids_to_alerts_map[formatted_alert.model_unique_id].append(
                         formatted_alert
                     )
+                elif grouping_type == GroupingType.BY_OWNER:
+                    for owner in formatted_alert.owners:
+                        owner_to_alerts_map[owner].append(formatted_alert)
                 else:
                     formatted_alerts.append(formatted_alert)
             except ValueError:
@@ -266,7 +273,10 @@ class DataMonitoringAlerts(DataMonitoring):
                         alerts=alerts_by_model, env=self.config.specified_env
                     )
                 )
-
+            for owner, alerts_by_owner in owner_to_alerts_map.items():
+                grouped_by_table_alerts.append(
+                    GroupedByOwnerAlerts(owner=owner, alerts=alerts_by_owner)
+                )
             self.execution_properties["had_group_by_table"] = (
                 len(grouped_by_table_alerts) > 0
             )

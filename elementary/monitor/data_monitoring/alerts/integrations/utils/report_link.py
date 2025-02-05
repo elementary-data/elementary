@@ -66,3 +66,20 @@ def get_model_test_runs_link(
         report_link = ReportLinkData(url=url, text=TEST_RUNS_LINK_TEXT)
 
     return report_link
+
+
+def get_owner_test_runs_link(
+    report_url: Optional[str], owner: Optional[str]
+) -> Optional[ReportLinkData]:
+    report_link = None
+
+    if owner and report_url:
+        formatted_report_url = _get_formatted_report_url(report_url)
+        url = (
+            f"{formatted_report_url}/report/{ReportPath.TEST_RUNS.value}/?treeType=owners"
+            f'&treeFilters=["failures","warnings"]'
+            f'&treeNode={{"id":"folderNode_{owner}"}}'
+        )
+        report_link = ReportLinkData(url=url, text=TEST_RUNS_LINK_TEXT)
+
+    return report_link

@@ -3,6 +3,7 @@ import sys
 import click
 
 from elementary.config.config import Config
+from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.monitor.data_monitoring.alerts.data_monitoring_alerts import (
     DataMonitoringAlerts,
 )
@@ -241,9 +242,9 @@ def get_cli_properties() -> dict:
 )
 @click.option(
     "--group-by",
-    type=click.Choice(["alert", "table"]),
+    type=click.Choice(list(map(lambda e: e.value, GroupingType))),
     default=None,
-    help="Whether to group alerts by 'alert' or by 'table'",
+    help=f"Whether to group alerts by: {', '.join(map(lambda e: e.value, GroupingType))}",
 )
 @click.option(
     "--override-dbt-project-config",

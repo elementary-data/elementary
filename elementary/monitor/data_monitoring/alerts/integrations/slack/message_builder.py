@@ -49,7 +49,8 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
     ):
         if preview_blocks:
             validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
-            self._add_blocks_as_attachments(validated_preview_blocks)
+            if validated_preview_blocks:
+                self._add_blocks_as_attachments(validated_preview_blocks)
 
     def add_details_to_slack_alert(
         self,

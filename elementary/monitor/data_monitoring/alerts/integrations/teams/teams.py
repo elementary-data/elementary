@@ -8,6 +8,9 @@ from pymsteams import cardsection, potentialaction  # type: ignore
 from elementary.clients.teams.client import TeamsClient
 from elementary.config.config import Config
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups.grouped_by_owner import (
+    GroupedByOwnerAlerts,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -129,6 +132,7 @@ class TeamsIntegration(BaseIntegration):
             ModelAlertModel,
             SourceFreshnessAlertModel,
             GroupedByTableAlerts,
+            GroupedByOwnerAlerts,
         ],
     ):
         report_link = alert.get_report_link()
@@ -485,6 +489,100 @@ class TeamsIntegration(BaseIntegration):
         self.message_builder.addSection(
             self._get_section(
                 "*Subscribers*", f'_{subscribers if subscribers else "No subscribers"}_'
+            )
+        )
+
+        if alert.model_errors:
+            section = cardsection()
+            section.activityTitle("*Model errors*")
+            section.activitySubtitle(
+                f"{self._get_model_error_block_header(alert.model_errors)}"
+            )
+            section.activityText(
+                f"{self._get_model_error_block_body(alert.model_errors)}"
+            )
+            self.message_builder.addSection(section)
+
+        if alert.test_failures:
+            rows = [alert.concise_name for alert in alert.test_failures]
+            text = "<br>".join([f"&#x1F53A; {row}" for row in rows])
+            self.message_builder.addSection(
+                self._get_section("*Test failures*", f"{text}")
+            )
+
+        if alert.test_warnings:
+            rows = [alert.concise_name for alert in alert.test_warnings]
+            text = "<br>".join([f"&#x26A0; {row}" for row in rows])
+            self.message_builder.addSection(
+                self._get_section("*Test warnings*", f"{text}")
+            )
+
+        if alert.test_errors:
+            rows = [alert.concise_name for alert in alert.test_errors]
+            text = "<br>".join([f"&#x2757; {row}" for row in rows])
+            self.message_builder.addSection(
+                self._get_section("*Test errors*", f"{text}")
+            )
+
+    def _get_group_by_owner_template(
+        self, alert: GroupedByOwnerAlerts, *args, **kwargs
+    ):
+        alerts = alert.alerts
+        title = f"{self._get_display_name(alert.status)}: {alert.summary}"
+        subtitle = ""
+
+        if alert.model_errors:
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x1F635; Model errors: {len(alert.model_errors)}")
+                if subtitle
+                else f"&#x1F635; Model errors: {len(alert.model_errors)}"
+            )
+        if alert.test_failures:
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x1F53A; Test failures: {len(alert.test_failures)}")
+                if subtitle
+                else f"&#x1F53A; Test failures: {len(alert.test_failures)}"
+            )
+        if alert.test_warnings:
+            subtitle = (
+                subtitle
+                + (" | " + f"&#x26A0; Test warnings: {len(alert.test_warnings)}")
+                if subtitle
+                else f"&#x26A0; Test warnings: {len(alert.test_warnings)}"
+            )
+        if alert.test_errors:
+            subtitle = (
+                subtitle + (" | " + f"&#x2757; Test errors: {len(alert.test_errors)}")
+                if subtitle
+                else f"&#x2757; Test errors: {len(alert.test_errors)}"
+            )
+
+        self._add_report_link_if_applicable(alert)
+
+        self.message_builder.title(title)
+        self.message_builder.text(subtitle)
+
+        tags = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [alert.tags or [] for alert in alerts]
+        )
+        owners = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [[alert.owner] if alert.owner else []]
+        )
+        subscribers = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [alert.subscribers or [] for alert in alerts]
+        )
+
+        self.message_builder.addSection(
+            self._get_section("*Tags*", f"_{tags if tags else "No tags"}_")
+        )
+        self.message_builder.addSection(
+            self._get_section("*Owners*", f"_{owners if owners else "No owners"}_")
+        )
+        self.message_builder.addSection(
+            self._get_section(
+                "*Subscribers*", f"_{subscribers if subscribers else 'No subscribers'}_"
             )
         )
 

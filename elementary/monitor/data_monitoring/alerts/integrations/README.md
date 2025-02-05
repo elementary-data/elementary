@@ -122,7 +122,16 @@ The different alert types are:
 - Owners
 - Subscribers
 
-#### 6. Fallback template (_method name:_ `_get_fallback_template`)
+##### 6. Alerts grouped by owner (_method name:_ `_get_group_by_owner_template`)
+
+- link to report (filter by owner)
+- Owner
+- List of failures, using `alert.summary` to include model and test name.
+- List of warnings, using `alert.summary` to include model and test name.
+- Tags
+- Subscribers
+
+#### 7. Fallback template (_method name:_ `_get_fallback_template`)
 
 We try to send the formatted message and in case it fails (due to a bug or API change) we send the fallback alert, which is usually a raw JSON of the alert object.
 You can find an example of this in the Slack integration (`elementary/monitor/data_monitoring/alerts/integrations/slack.py`).

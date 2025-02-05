@@ -223,11 +223,13 @@ class Config:
 
     @property
     def has_slack(self) -> bool:
-        return self.slack_webhook or (self.slack_token and self.slack_channel_name)
+        return self.slack_webhook is not None or (
+            self.slack_token is not None and self.slack_channel_name is not None
+        )
 
     @property
     def has_teams(self) -> bool:
-        return self.teams_webhook
+        return self.teams_webhook is not None
 
     @property
     def has_s3(self):
