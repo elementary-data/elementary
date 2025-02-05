@@ -14,6 +14,7 @@ class ReportLinkData(BaseModel):
 
 class ReportPath(Enum):
     TEST_RUNS = "test-runs"
+    TEST_RESULTS = "test-results"
     MODEL_RUNS = "model-runs"
 
 
@@ -76,9 +77,9 @@ def get_owner_test_runs_link(
     if owner and report_url:
         formatted_report_url = _get_formatted_report_url(report_url)
         url = (
-            f"{formatted_report_url}/report/{ReportPath.TEST_RUNS.value}/?treeType=owners"
-            f'&treeFilters=["failures","warnings"]'
-            f'&treeNode={{"id":"folderNode_{owner}"}}'
+            f"{formatted_report_url}/report/{ReportPath.TEST_RESULTS.value}/?tree_view_by=owners"
+            f'&tree_filters=["failures","warnings"]'
+            f'&tree_node={{"id":"folderNode_{owner}"}}'
         )
         report_link = ReportLinkData(url=url, text=TEST_RUNS_LINK_TEXT)
 
