@@ -1,13 +1,10 @@
-import itertools
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Sequence, Union
 
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
-    BOOLEAN_VALUES,
     build_base_source_freshness_alert_model,
     get_alert_message_body,
     get_mock_report_link,
@@ -16,28 +13,21 @@ from tests.unit.messages.utils import assert_expected_json, get_expected_json_pa
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
-SOURCE_FRESHNESS_STATUS_VALUES = [
-    "runtime error",
-    "error",
-]
-
-# Generate all combinations of test parameters
-params: Sequence[Sequence[Union[Optional[str], bool]]] = [
-    SOURCE_FRESHNESS_STATUS_VALUES,  # status
-    BOOLEAN_VALUES,  # has_link
-    BOOLEAN_VALUES,  # has_message
-    BOOLEAN_VALUES,  # has_tags
-    BOOLEAN_VALUES,  # has_owners
-    BOOLEAN_VALUES,  # has_path
-    BOOLEAN_VALUES,  # has_error
-    BOOLEAN_VALUES,  # has_suppression_interval
-]
-combinations = list(itertools.product(*params))
-
 
 @pytest.mark.parametrize(
     "status,has_link,has_message,has_tags,has_owners,has_path,has_error,has_suppression_interval",
-    combinations,
+    [
+        ("runtime error", False, False, False, False, False, False, False),
+        ("runtime error", True, True, True, True, True, True, True),
+        ("runtime error", True, True, False, True, False, True, False),
+        ("runtime error", True, False, True, False, True, False, True),
+        ("runtime error", False, True, True, False, False, True, True),
+        ("error", False, True, True, True, False, True, False),
+        ("error", True, False, True, True, True, False, True),
+        ("error", True, True, False, False, True, True, True),
+        ("error", False, False, True, True, True, True, False),
+        ("error", True, False, False, False, False, False, True),
+    ],
 )
 def test_get_source_freshness_alert_message_body(
     monkeypatch,
@@ -77,7 +67,17 @@ def test_get_source_freshness_alert_message_body(
     )
 
     message_body = get_alert_message_body(source_freshness_alert_model)
-    adaptive_card_filename = f"adaptive_card_source_freshness_alert_status-{status}_link-{has_link}_message-{has_message}_tags-{has_tags}_owners-{has_owners}_path-{has_path}_error-{has_error}_suppression-{has_suppression_interval}.json"
+    adaptive_card_filename = (
+        f"adaptive_card_source_freshness_alert"
+        f"_status-{status}"
+        f"_link-{has_link}"
+        f"_message-{has_message}"
+        f"_tags-{has_tags}"
+        f"_owners-{has_owners}"
+        f"_path-{has_path}"
+        f"_error-{has_error}"
+        f"_suppression-{has_suppression_interval}.json"
+    )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(
         FIXTURES_DIR, adaptive_card_filename

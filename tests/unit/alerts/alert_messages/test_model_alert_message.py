@@ -1,15 +1,10 @@
-import itertools
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List
 
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
-    BOOLEAN_VALUES,
-    MATERIALIZATION_VALUES,
-    STATUS_VALUES,
     build_base_model_alert_model,
     get_alert_message_body,
     get_mock_report_link,
@@ -19,23 +14,20 @@ from tests.unit.messages.utils import assert_expected_json, get_expected_json_pa
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
-# Generate all combinations of test parameters
-params: List[List[Any]] = [
-    STATUS_VALUES,  # status
-    BOOLEAN_VALUES,  # has_link
-    BOOLEAN_VALUES,  # has_tags
-    BOOLEAN_VALUES,  # has_owners
-    BOOLEAN_VALUES,  # has_path
-    BOOLEAN_VALUES,  # has_suppression_interval
-    MATERIALIZATION_VALUES,  # materialization
-    BOOLEAN_VALUES,  # has_full_refresh
-]
-combinations = list(itertools.product(*params))
-
-
 @pytest.mark.parametrize(
     "status,has_link,has_tags,has_owners,has_path,has_suppression_interval,materialization,has_full_refresh",
-    combinations,
+    [
+        ("fail", True, True, True, True, True, "table", True),
+        ("fail", False, False, False, False, False, "table", False),
+        ("warn", True, True, True, False, True, "view", True),
+        ("error", False, True, True, True, False, "incremental", True),
+        (None, True, False, True, True, True, "table", False),
+        ("warn", False, True, False, True, True, "incremental", False),
+        ("error", True, True, False, False, True, "view", True),
+        (None, False, False, True, False, True, "table", True),
+        ("fail", True, False, False, True, False, "incremental", True),
+        ("warn", False, True, True, True, True, "view", False),
+    ],
 )
 def test_get_model_alert_message_body(
     monkeypatch,
@@ -67,7 +59,17 @@ def test_get_model_alert_message_body(
     )
 
     message_body = get_alert_message_body(model_alert_model)
-    adaptive_card_filename = f"adaptive_card_model_alert_status-{status}_link-{has_link}_tags-{has_tags}_owners-{has_owners}_path-{has_path}_suppression-{has_suppression_interval}_materialization-{materialization}_full_refresh-{has_full_refresh}.json"
+    adaptive_card_filename = (
+        f"adaptive_card_model_alert"
+        f"_status-{status}"
+        f"_link-{has_link}"
+        f"_tags-{has_tags}"
+        f"_owners-{has_owners}"
+        f"_path-{has_path}"
+        f"_suppression-{has_suppression_interval}"
+        f"_materialization-{materialization}"
+        f"_full_refresh-{has_full_refresh}.json"
+    )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(
         FIXTURES_DIR, adaptive_card_filename

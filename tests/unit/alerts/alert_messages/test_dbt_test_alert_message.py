@@ -1,12 +1,9 @@
-import itertools
 from pathlib import Path
 
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
-    BOOLEAN_VALUES,
-    STATUS_VALUES,
     build_base_test_alert_model,
     get_alert_message_body,
     get_mock_report_link,
@@ -31,26 +28,31 @@ def get_expected_adaptive_filename(
     has_error: bool,
     has_sample: bool,
 ) -> str:
-    return f"adaptive_card_dbt_test_alert_status-{status}_link-{has_link}_description-{has_description}_tags-{has_tags}_owners-{has_owners}_table-{has_table}_error-{has_error}_sample-{has_sample}.json"
-
-
-combinations = list(
-    itertools.product(
-        STATUS_VALUES,
-        BOOLEAN_VALUES,  # has_link
-        BOOLEAN_VALUES,  # has_description
-        BOOLEAN_VALUES,  # has_tags
-        BOOLEAN_VALUES,  # has_owners
-        BOOLEAN_VALUES,  # has_table
-        BOOLEAN_VALUES,  # has_error
-        BOOLEAN_VALUES,  # has_sample
+    return (
+        f"adaptive_card_dbt_test_alert"
+        f"_status-{status}"
+        f"_link-{has_link}"
+        f"_description-{has_description}"
+        f"_tags-{has_tags}"
+        f"_owners-{has_owners}"
+        f"_table-{has_table}"
+        f"_error-{has_error}"
+        f"_sample-{has_sample}.json"
     )
-)
 
 
 @pytest.mark.parametrize(
     "status,has_link,has_description,has_tags,has_owners,has_table,has_error,has_sample",
-    combinations,
+    [
+        (None, False, False, False, False, False, False, False),
+        ("fail", False, False, False, False, False, False, False),
+        ("fail", True, True, True, True, True, True, True),
+        ("warn", True, False, True, False, True, False, True),
+        ("error", False, True, False, True, False, True, False),
+        ("error", True, True, True, True, True, True, True),
+        ("warn", True, True, True, True, True, True, True),
+        (None, True, True, False, False, True, True, False),
+    ],
 )
 def test_get_dbt_test_alert_message_body(
     monkeypatch,

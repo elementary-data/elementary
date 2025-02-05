@@ -1,6 +1,5 @@
-import itertools
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from elementary.messages.message_body import MessageBody
 from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
@@ -123,24 +122,6 @@ def get_mock_report_link(has_link: bool) -> Optional[ReportLink]:
     return None
 
 
-def get_alerts_group_test_params() -> List[Tuple[bool, bool, bool, bool, bool]]:
-    return [
-        (
-            has_model_errors,
-            has_test_failures,
-            has_test_warnings,
-            has_test_errors,
-            has_link,
-        )
-        for has_model_errors, has_test_failures, has_test_warnings, has_test_errors, has_link in itertools.product(
-            [True, False], repeat=5
-        )
-        if any(
-            [has_model_errors, has_test_failures, has_test_warnings, has_test_errors]
-        )
-    ]
-
-
 def _get_owners_by_mod(i: int) -> List[str]:
     mod_value = i % 3
     if mod_value == 0:
@@ -227,12 +208,6 @@ def create_test_alerts(
             alerts.append(test_alert)
 
     return alerts
-
-
-# Common test parameters
-STATUS_VALUES = ["fail", "warn", "error", None]
-BOOLEAN_VALUES = [True, False]
-MATERIALIZATION_VALUES = ["table", "view", "incremental"]
 
 
 def build_base_source_freshness_alert_model(

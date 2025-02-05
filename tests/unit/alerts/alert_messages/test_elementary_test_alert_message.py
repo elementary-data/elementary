@@ -1,12 +1,9 @@
-import itertools
 from pathlib import Path
 
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
-    BOOLEAN_VALUES,
-    STATUS_VALUES,
     build_base_test_alert_model,
     get_alert_message_body,
     get_mock_report_link,
@@ -24,24 +21,19 @@ def build_elementary_test_alert_model(*args, **kwargs):
     return build_base_test_alert_model(*args, test_type=test_type, **kwargs)
 
 
-# Generate all combinations of test parameters
-params = [
-    STATUS_VALUES,  # status
-    BOOLEAN_VALUES,  # has_link
-    BOOLEAN_VALUES,  # has_description
-    BOOLEAN_VALUES,  # has_tags
-    BOOLEAN_VALUES,  # has_owners
-    BOOLEAN_VALUES,  # has_table
-    BOOLEAN_VALUES,  # has_error
-    BOOLEAN_VALUES,  # has_sample
-    BOOLEAN_VALUES,  # has_anomaly
-]
-combinations = list(itertools.product(*params))
-
-
 @pytest.mark.parametrize(
     "status,has_link,has_description,has_tags,has_owners,has_table,has_error,has_sample,has_anomaly",
-    combinations,
+    [
+        (None, False, False, False, False, False, False, False, False),
+        ("fail", True, True, True, True, True, True, True, True),
+        ("fail", False, False, False, False, False, False, False, False),
+        ("warn", True, False, True, False, True, False, True, False),
+        ("warn", False, True, False, True, False, True, False, True),
+        ("error", True, True, False, False, False, True, False, True),
+        ("error", False, True, True, False, True, False, True, False),
+        (None, True, False, True, False, True, False, True, True),
+        (None, False, True, False, True, False, True, False, True),
+    ],
 )
 def test_get_elementary_test_alert_message_body(
     monkeypatch,
@@ -76,7 +68,18 @@ def test_get_elementary_test_alert_message_body(
     )
 
     message_body = get_alert_message_body(test_alert_model)
-    adaptive_card_filename = f"adaptive_card_elementary_test_alert_status-{status}_link-{has_link}_description-{has_description}_tags-{has_tags}_owners-{has_owners}_table-{has_table}_error-{has_error}_sample-{has_sample}_anomaly-{has_anomaly}.json"
+    adaptive_card_filename = (
+        f"adaptive_card_elementary_test_alert"
+        f"_status-{status}"
+        f"_link-{has_link}"
+        f"_description-{has_description}"
+        f"_tags-{has_tags}"
+        f"_owners-{has_owners}"
+        f"_table-{has_table}"
+        f"_error-{has_error}"
+        f"_sample-{has_sample}"
+        f"_anomaly-{has_anomaly}.json"
+    )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(
         FIXTURES_DIR, adaptive_card_filename

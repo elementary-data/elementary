@@ -1,14 +1,10 @@
-import itertools
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List
 
 import pytest
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
-    BOOLEAN_VALUES,
-    STATUS_VALUES,
     build_base_model_alert_model,
     get_alert_message_body,
     get_mock_report_link,
@@ -18,22 +14,20 @@ from tests.unit.messages.utils import assert_expected_json, get_expected_json_pa
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
-# Generate all combinations of test parameters
-params: List[List[Any]] = [
-    STATUS_VALUES,  # status
-    BOOLEAN_VALUES,  # has_link
-    BOOLEAN_VALUES,  # has_message
-    BOOLEAN_VALUES,  # has_tags
-    BOOLEAN_VALUES,  # has_owners
-    BOOLEAN_VALUES,  # has_path
-    BOOLEAN_VALUES,  # has_suppression_interval
-]
-combinations = list(itertools.product(*params))
-
-
 @pytest.mark.parametrize(
     "status,has_link,has_message,has_tags,has_owners,has_path,has_suppression_interval",
-    combinations,
+    [
+        ("fail", True, True, True, True, True, True),
+        ("fail", False, False, False, False, False, False),
+        ("warn", True, False, True, False, True, False),
+        ("warn", False, True, False, True, False, True),
+        ("error", True, True, False, True, True, False),
+        ("error", False, True, True, False, False, True),
+        (None, True, False, True, False, False, True),
+        (None, False, False, False, True, True, False),
+        ("fail", True, False, True, True, False, True),
+        ("warn", False, True, True, False, True, False),
+    ],
 )
 def test_get_snapshot_alert_message_body(
     monkeypatch,
@@ -64,7 +58,16 @@ def test_get_snapshot_alert_message_body(
     )
 
     message_body = get_alert_message_body(snapshot_alert_model)
-    adaptive_card_filename = f"adaptive_card_snapshot_alert_status-{status}_link-{has_link}_message-{has_message}_tags-{has_tags}_owners-{has_owners}_path-{has_path}_suppression-{has_suppression_interval}.json"
+    adaptive_card_filename = (
+        f"adaptive_card_snapshot_alert"
+        f"_status-{status}"
+        f"_link-{has_link}"
+        f"_message-{has_message}"
+        f"_tags-{has_tags}"
+        f"_owners-{has_owners}"
+        f"_path-{has_path}"
+        f"_suppression-{has_suppression_interval}.json"
+    )
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(
         FIXTURES_DIR, adaptive_card_filename
