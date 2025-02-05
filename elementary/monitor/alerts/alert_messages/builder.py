@@ -107,59 +107,25 @@ class AlertMessageBuilder:
             )
         return LinesBlock(lines=subtitle_lines)
 
-    def _get_model_alert_subtitle_blocks(
+    def _get_run_alert_subtitle_blocks(
         self,
-        alert: ModelAlertModel,
+        alert: Union[TestAlertModel, SourceFreshnessAlertModel, ModelAlertModel],
     ) -> List[MessageBlock]:
-        if alert.materialization == "snapshot":
-            return [
-                self._get_run_alert_subtitle_block(
-                    type="snapshot",
-                    name=alert.alias,
-                    status=alert.status,
-                    detected_at_str=alert.detected_at_str,
-                    suppression_interval=alert.suppression_interval,
-                    env=alert.env,
-                    report_link=alert.get_report_link(),
-                )
-            ]
-        else:
-            return [
-                self._get_run_alert_subtitle_block(
-                    type="model",
-                    name=alert.alias,
-                    status=alert.status,
-                    detected_at_str=alert.detected_at_str,
-                    suppression_interval=alert.suppression_interval,
-                    env=alert.env,
-                    report_link=alert.get_report_link(),
-                )
-            ]
-
-    def _get_test_alert_subtitle_blocks(
-        self,
-        alert: TestAlertModel,
-    ) -> List[MessageBlock]:
+        asset_type: Literal["test", "snapshot", "model", "source"]
+        asset_name: str
+        if isinstance(alert, TestAlertModel):
+            asset_type = "test"
+            asset_name = alert.concise_name
+        elif isinstance(alert, SourceFreshnessAlertModel):
+            asset_type = "source"
+            asset_name = f"{alert.source_name}.{alert.identifier}"
+        elif isinstance(alert, ModelAlertModel):
+            asset_type = "snapshot" if alert.materialization == "snapshot" else "model"
+            asset_name = alert.alias
         return [
             self._get_run_alert_subtitle_block(
-                type="test",
-                name=alert.concise_name,
-                status=alert.status,
-                detected_at_str=alert.detected_at_str,
-                suppression_interval=alert.suppression_interval,
-                env=alert.env,
-                report_link=alert.get_report_link(),
-            )
-        ]
-
-    def _get_source_freshness_alert_subtitle_blocks(
-        self,
-        alert: SourceFreshnessAlertModel,
-    ) -> List[MessageBlock]:
-        return [
-            self._get_run_alert_subtitle_block(
-                type="source",
-                name=f"{alert.source_name}.{alert.identifier}",
+                type=asset_type,
+                name=asset_name,
                 status=alert.status,
                 detected_at_str=alert.detected_at_str,
                 suppression_interval=alert.suppression_interval,
@@ -503,12 +469,10 @@ class AlertMessageBuilder:
         self,
         alert: AlertType,
     ) -> List[MessageBlock]:
-        if isinstance(alert, TestAlertModel):
-            return self._get_test_alert_subtitle_blocks(alert)
-        elif isinstance(alert, ModelAlertModel):
-            return self._get_model_alert_subtitle_blocks(alert)
-        elif isinstance(alert, SourceFreshnessAlertModel):
-            return self._get_source_freshness_alert_subtitle_blocks(alert)
+        if isinstance(
+            alert, (TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel)
+        ):
+            return self._get_run_alert_subtitle_blocks(alert)
         elif isinstance(alert, AlertsGroup):
             return self._get_alerts_group_subtitle_blocks(alert)
 
