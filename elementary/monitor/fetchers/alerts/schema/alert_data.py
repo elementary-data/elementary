@@ -105,6 +105,7 @@ class BaseAlertDataSchema(BaseModel):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         *args,
         **kwargs
     ):
@@ -185,6 +186,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         disable_samples: bool = False,
         *args,
         **kwargs
@@ -224,6 +226,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
             report_url=report_url,
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
+            env=env,
         )
 
 
@@ -243,6 +246,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         *args,
         **kwargs
     ) -> ModelAlertModel:
@@ -271,6 +275,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
             report_url=report_url,
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
+            env=env,
         )
 
     @validator("full_refresh", pre=True, always=True)
@@ -303,6 +308,7 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         *args,
         **kwargs
     ) -> SourceFreshnessAlertModel:
@@ -338,4 +344,5 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
             report_url=report_url,
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
+            env=env,
         )

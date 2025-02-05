@@ -47,6 +47,7 @@ class TestAlertModel(AlertModel):
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
+        env: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(
@@ -66,6 +67,7 @@ class TestAlertModel(AlertModel):
             report_url,
             alert_fields,
             elementary_database_and_schema,
+            env=env,
         )
         self.table_name = table_name
         self.test_type = test_type
@@ -148,6 +150,7 @@ class TestAlertModel(AlertModel):
             test_params=self.test_params,
             test_rows_sample=self.test_rows_sample,
             column_name=self.column_name,
+            env=self.env,
         )
 
     @property

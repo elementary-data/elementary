@@ -202,6 +202,7 @@ class DataMonitoringAlerts(DataMonitoring):
                 global_suppression_interval=self.global_suppression_interval,
                 override_config=self.override_config,
                 disable_samples=self.disable_samples,
+                env=self.config.specified_env,
             )
             try:
                 grouping_type = GroupingType(group_alerts_by)
