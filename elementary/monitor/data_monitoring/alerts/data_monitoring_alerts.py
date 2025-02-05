@@ -219,7 +219,12 @@ class DataMonitoringAlerts(DataMonitoring):
                 )
 
         for alerts_by_model in model_ids_to_alerts_map.values():
-            grouped_by_table_alerts.append(GroupedByTableAlerts(alerts=alerts_by_model))
+            grouped_by_table_alerts.append(
+                GroupedByTableAlerts(
+                    alerts=alerts_by_model,
+                    env=self.config.specified_env,
+                )
+            )
 
         self.execution_properties["had_group_by_table"] = (
             len(grouped_by_table_alerts) > 0
