@@ -83,7 +83,13 @@
           "type": "TextBlock",
           "text": "\u274c **dbt failed to build table \"test_model\"** - [View Report](http://test.com)",
           "wrap": true
-        },
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
         {
           "type": "TextBlock",
           "text": "**Test Warnings**",

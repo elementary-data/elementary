@@ -448,27 +448,34 @@ class AlertMessageBuilder:
             bullet_icon=Icon.X,
             alerts=model_errors,
         )
-        blocks.extend(model_errors_alert_list_blocks)
 
         test_failures_alert_list_blocks = self._get_alert_list_blocks(
             title="Test Failures",
             bullet_icon=Icon.RED_TRIANGLE,
             alerts=test_failures,
         )
-        blocks.extend(test_failures_alert_list_blocks)
 
         test_warnings_alert_list_blocks = self._get_alert_list_blocks(
             title="Test Warnings",
             bullet_icon=Icon.WARNING,
             alerts=test_warnings,
         )
-        blocks.extend(test_warnings_alert_list_blocks)
 
         test_errors_alert_list_blocks = self._get_alert_list_blocks(
             title="Test Errors",
             bullet_icon=Icon.EXCLAMATION,
             alerts=test_errors,
         )
+
+        blocks.extend(model_errors_alert_list_blocks)
+        if blocks:
+            blocks.append(DividerBlock())
+        blocks.extend(test_failures_alert_list_blocks)
+        if blocks and not isinstance(blocks[-1], DividerBlock):
+            blocks.append(DividerBlock())
+        blocks.extend(test_warnings_alert_list_blocks)
+        if blocks and not isinstance(blocks[-1], DividerBlock):
+            blocks.append(DividerBlock())
         blocks.extend(test_errors_alert_list_blocks)
 
         return blocks

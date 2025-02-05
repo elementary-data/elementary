@@ -83,7 +83,13 @@
           "type": "TextBlock",
           "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_10** - [View Report](http://test.com)",
           "wrap": true
-        },
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
         {
           "type": "TextBlock",
           "text": "**Test Errors**",
