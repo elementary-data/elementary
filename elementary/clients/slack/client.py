@@ -1,8 +1,10 @@
 import json
+import ssl
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
+import certifi
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
@@ -25,8 +27,9 @@ class SlackClient(ABC):
     def __init__(
         self,
         tracking: Optional[Tracking] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
     ):
-        self.client = self._initial_client()
+        self.client = self._initial_client(ssl_context)
         self.tracking = tracking
         self._initial_retry_handlers()
         self.email_to_user_id_cache: Dict[str, str] = {}
@@ -38,19 +41,38 @@ class SlackClient(ABC):
         if not config.has_slack:
             return None
         if config.slack_token:
-            logger.debug("Creating Slack client with token.")
-            return SlackWebClient(token=config.slack_token, tracking=tracking)
+            logger.debug(
+                "Creating Slack client with token (system CA? = %s).",
+                config.use_system_ca_files,
+            )
+            ssl_context = (
+                None
+                if config.use_system_ca_files
+                else ssl.create_default_context(cafile=certifi.where())
+            )
+            return SlackWebClient(
+                token=config.slack_token, tracking=tracking, ssl_context=ssl_context
+            )
         elif config.slack_webhook:
-            logger.debug("Creating Slack client with webhook.")
+            logger.debug(
+                "Creating Slack client with webhook (system CA? = %s).",
+                config.use_system_ca_files,
+            )
+            ssl_context = (
+                ssl.create_default_context(cafile=certifi.where())
+                if not config.use_system_ca_files
+                else None
+            )
             return SlackWebhookClient(
                 webhook=config.slack_webhook,
                 is_workflow=config.is_slack_workflow,
                 tracking=tracking,
+                ssl_context=ssl_context
             )
         return None
 
     @abstractmethod
-    def _initial_client(self):
+    def _initial_client(self, ssl_context: Optional[ssl.SSLContext]):
         raise NotImplementedError
 
     def _initial_retry_handlers(self):
@@ -85,12 +107,13 @@ class SlackWebClient(SlackClient):
         self,
         token: str,
         tracking: Optional[Tracking] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
     ):
         self.token = token
-        super().__init__(tracking)
+        super().__init__(tracking, ssl_context)
 
-    def _initial_client(self):
-        return WebClient(token=self.token)
+    def _initial_client(self, ssl_context: Optional[ssl.SSLContext]):
+        return WebClient(token=self.token, ssl=ssl_context)
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
@@ -231,16 +254,20 @@ class SlackWebhookClient(SlackClient):
         webhook: str,
         is_workflow: bool,
         tracking: Optional[Tracking] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
     ):
         self.webhook = webhook
         self.is_workflow = is_workflow
-        super().__init__(tracking)
+        super().__init__(tracking, ssl_context)
 
-    def _initial_client(self):
+    def _initial_client(self, ssl_context: Optional[ssl.SSLContext]):
         if self.is_workflow:
             return requests.Session()
+
         return WebhookClient(
-            url=self.webhook, default_headers={"Content-type": "application/json"}
+            url=self.webhook,
+            default_headers={"Content-type": "application/json"},
+            ssl=ssl_context,
         )
 
     @sleep_and_retry

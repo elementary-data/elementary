@@ -76,6 +76,7 @@ class Config:
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
         quiet_logs: Optional[bool] = None,
+        use_system_ca_files: bool = True,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -222,6 +223,8 @@ class Config:
         self.quiet_logs = self._first_not_none(
             quiet_logs, config.get("quiet_logs"), False
         )
+        
+        self.use_system_ca_files = use_system_ca_files
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
