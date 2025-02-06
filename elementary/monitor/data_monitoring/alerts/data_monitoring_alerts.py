@@ -279,14 +279,12 @@ class DataMonitoringAlerts(DataMonitoring):
             )
 
     def _send_message(
-        self, integration: BaseMessagingIntegration, message_body: MessageBody
+        self, integration: BaseMessagingIntegration, body: MessageBody
     ) -> MessageSendResult:
         destination = Integrations.get_destination(
             integration=integration, config=self.config
         )
-        return integration.send_message(
-            destination=destination, message_body=message_body
-        )
+        return integration.send_message(destination=destination, body=body)
 
     def _send_test_message(self):
         if isinstance(self.alerts_integration, BaseIntegration):
@@ -296,7 +294,7 @@ class DataMonitoringAlerts(DataMonitoring):
         else:
             test_message = get_health_check_message()
             return self._send_message(
-                integration=self.alerts_integration, message_body=test_message
+                integration=self.alerts_integration, body=test_message
             )
 
     def _send_alert(
@@ -322,7 +320,7 @@ class DataMonitoringAlerts(DataMonitoring):
             try:
                 self._send_message(
                     integration=self.alerts_integration,
-                    message_body=alert_message_body,
+                    body=alert_message_body,
                 )
                 return True
             except MessagingIntegrationError:

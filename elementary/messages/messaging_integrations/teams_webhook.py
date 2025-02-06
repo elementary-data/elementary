@@ -54,9 +54,9 @@ class TeamsWebhookMessagingIntegration(
     def send_message(
         self,
         destination: ChannelWebhook,
-        message_body: MessageBody,
+        body: MessageBody,
     ) -> MessageSendResult[ChannelWebhook]:
-        card = format_adaptive_card(message_body)
+        card = format_adaptive_card(body)
         try:
             send_adaptive_card(destination.webhook, card)
             return MessageSendResult(
@@ -75,7 +75,7 @@ class TeamsWebhookMessagingIntegration(
         self,
         destination: ChannelWebhook,
         message_context: ChannelWebhook,
-        message_body: MessageBody,
+        body: MessageBody,
     ) -> MessageSendResult[ChannelWebhook]:
         raise MessageIntegrationReplyNotSupportedError(
             "Teams webhook message integration does not support replying to messages"

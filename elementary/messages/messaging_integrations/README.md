@@ -41,7 +41,7 @@ To add a new messaging platform integration:
 1. Create a new class that extends `BaseMessagingIntegration`
 2. Implement the required abstract methods:
    ```python
-   def send_message(self, destination: DestinationType, message_body: MessageBody) -> MessageSendResult
+   def send_message(self, destination: DestinationType, body: MessageBody) -> MessageSendResult
    def supports_reply(self) -> bool
    def reply_to_message(self, destination, message_context, message_body) -> MessageSendResult  # if supported
    ```

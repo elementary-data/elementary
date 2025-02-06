@@ -30,7 +30,7 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
     def send_message(
         self,
         destination: DestinationType,
-        message_body: MessageBody,
+        body: MessageBody,
     ) -> MessageSendResult[MessageContextType]:
         raise NotImplementedError
 
@@ -42,7 +42,7 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
         self,
         destination: DestinationType,
         message_context: MessageContextType,
-        message_body: MessageBody,
+        body: MessageBody,
     ) -> MessageSendResult[MessageContextType]:
         if not self.supports_reply():
             raise MessageIntegrationReplyNotSupportedError
