@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 import google.auth  # type: ignore[import]
 from dateutil import tz
@@ -88,11 +88,11 @@ class Config:
 
         config = self._load_configuration()
 
-        self.target_dir = self._first_not_none(
+        self.target_dir = str(self._first_not_none(
             target_path,
             config.get("target-path"),
             os.getcwd(),
-        )
+        ))
         os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
         os.environ["DBT_LOG_PATH"] = os.path.abspath(target_path)
 
@@ -129,11 +129,11 @@ class Config:
             slack_config.get("group_alerts_by"),
             GroupingType.BY_ALERT.value,
         )
-        self.group_alerts_threshold = self._first_not_none(
+        self.group_alerts_threshold = cast(int, self._first_not_none(
             group_alerts_threshold,
             slack_config.get("group_alerts_threshold"),
             self.DEFAULT_GROUP_ALERTS_THRESHOLD,
-        )
+        ))
 
         teams_config = config.get(self._TEAMS, {})
         self.teams_webhook = self._first_not_none(

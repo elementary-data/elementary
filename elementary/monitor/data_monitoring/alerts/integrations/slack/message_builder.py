@@ -87,6 +87,6 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         padding_length = (
             SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
         )
-        padding = [cls.create_empty_section_block() for i in range(padding_length)]
+        padding = [cls.create_empty_section_block() for _ in range(padding_length)]
         padded_preview_blocks.extend(padding)
         return padded_preview_blocks
