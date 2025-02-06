@@ -1,0 +1,195 @@
+---
+title: "Triage & response"
+---
+
+Maintaining high data quality is much more than adding tests - It’s about creating processes.
+
+The processes that will improve your data quality, reduce response times, and prevent repeating incidents have to do with:
+
+- Clear ownership and response plan
+- Incident management
+- Effective triage and resolution
+- Ending incidents with improvements, not just resolution
+
+Elementary has tools in place to help, and this guide is meant to help get as much value as possible from Elementary in the process of handling data incidents.
+
+## Plan the response in advance
+
+Your response to a data incident doesn’t actually start when the failure happens. An effective response starts when you add a test / monitor / dataset.
+
+For every test or monitor you add, think about the following -
+
+- Who should look into a failure?
+- Who should be notified of the failure?
+- What is the potential impact and severity of a failure?
+- What information should the notification include?
+- How to go about resolving the issue? What are the steps?
+
+According to these answers, you should add configuration that will impact the alert, alert distribution, and triage:
+
+<Check>
+    ### Recommendations
+    
+    - Add a test description that details what it means if this test fails, and context on resolving it. Descriptions can be added in UI or in code.
+    - Each failure should have an owner, that should look into the failure. It can be the owner of the data set or an owner of a specific test.
+    - If others need to be notified, add subscribers.
+    - Use the [severity of failures](https://docs.getdbt.com/reference/resource-configs/severity) intentionally, and even leverage conditional expressions (`error_if`, `warn_if`)
+    - Test failures and alerts include a sample of the failed results, and the test query. You can change the test query and / or add comments to it, that can provide triage context.
+</Check>
+
+```yaml
+tests:
+  - unique:
+		  config:
+		    error_if: ">10"
+      meta:
+        description: "More than 10 duplicate records arriving from the source, as this is a staging table"
+        owner: "@data.provider"
+        tags: "critical", "mongo-db", "raw-production-replica"
+```
+
+## Alert distribution
+
+As far as alerts are concerned, the desired situation is that team members will only get alerts they need to do something about - Fix the issue, wait for resolution to refresh a dashboard, etc.
+Alert distribution can be configured in the [Alert rules](https://docs.elementary-data.com/features/alerts-and-incidents/alert-rules) feature.
+The alerts can be distributed to different channels (within Slack / MS Teams) and to different tools (Pagerduty, Ops Genie, etc).
+Elementary users usually distribute alerts by:
+
+1.  Business domain tags - In teams where each domain has their own data teams, it’s recommended to have a separate Slack channel for alerts on that domain’s models. The domain alert rules are usually defined by tags.
+2.  Responsible team - For example, if there is a problem with null values in a Salesforce source, it makes sense to send the alert straight to the Salesforce team. These alert rules can be defined by model / source name, tag or owner.
+3.  Criticality - The most critical alerts are usually model error alerts, and handling them is critical because it blocks the pipeline. Since those issues are sometimes time sensitive, some teams choose to send them to Pager Duty or Ops Genie, or at least a dedicated Slack channel with different notification settings.
+4.  Low priority alerts / warnings - We generally recommend refraining from sending Slack alerts for failures that don’t have a clear response plan yet. These failures can not be sent at all, or sent to a muted channel that will operate as a “feed”.
+    Such failures can be: 1. Newley configured anomaly detection tests or explicit tests where you have low certainty about the threshold / expectation. 2. Anomaly detection tests that you consider as a safety measure, not a clear failure.
+        This is not to say that they are not interesting - but, they can be investigated within the Elementary UI, using the incidents page, at a time of convenience. We believe alerts are an interruption to the daily schedule and such an interruption should only occur if it’s justified. To avoid getting such alerts, we recommend filtering your alert rules on “Failure” or “Error” statuses.
+
+## Notifying stakeholders
+
+There are several ways to notify data consumers and stakeholders about ongoing problems.
+While some customers prefer to do it personally after triaging the incidents, others prefer saving this time and going with automated notifications.
+For models intended for public consumption (by BI dashboards, ML models etc) we recommend setting up [subscribers](https://docs.elementary-data.com/oss/guides/alerts/alerts-configuration#subscribers). Those subscribers will be tagged in Slack on every alert that is sent on those tables. Unlike owners, there can be many subscribers to an alert.
+Tagging subscribers is of course optional, and simply adding them to the relevant channels can also suffice.
+Coming soon:
+As part of the data health scores release, we will be supporting a new type of alerts, that notifies a drop in the health score of an asset. This type of alert is intended for data consumers, who don’t need the details and just want a high-level notification in case the data asset shouldn’t be used. We will also support sending daily digests on all assets’ health scores.
+
+## Incident management
+
+Elementary has an incident page, new failures will either create an incident or be attached to an open incident.
+This page is designed to enable your team to stay on top of open incidents and collaborate on resolving them. The page gives a comprehensive overview of all current and previous incidents, where users can view the status, prioritize, assign and resolve incidents.
+![Incident management dashboard](https://res.cloudinary.com/diuctyblm/image/upload/v1738149956/Docs/incident-management_up6jzx.png)
+
+### Incident management usability
+
+- Each incident has 3 settings: Assignee, status and severity.
+  - These can be changed directly from the Slack notification.
+  - The severity is set to `high` for failures and `normal` for warnings. You can manually change to `critical` or `low` .
+  - You can select several incidents and make changes to the settings in bulk.
+- Failures of the same test / model of an open incident will not open a new incident, these will be added to an ongoing incident.
+
+### Incident management best practices
+
+- Your goal should be to lower the time to resolution of incidents.
+  - Incidents should have a clear assignee.
+    - Use the quick view of open and unassigned incident to monitor this.
+    - The best implementation for this is pre-defining the assignee as owner, so they will get tagged on the failure.
+  - Set clear expectations with assignees.
+    - These can be set on severity of incidents. For example:
+      - Critical - Should be handled immediately.
+      - High - Should be resolved by end of day.
+      - Normal - Should be resolved by end of week.
+      - Low - Should be evaluated weekly, might trigger a change in coverage.
+- If no one cares about an incident, this should impact coverage.
+
+### Coming soon
+
+Incidents is a beta feature, and we are working on adding functionality. The immediate roadmap includes:
+
+- Notifications to assignees
+- Mute / Snooze
+- Advanced grouping of failures to incidents according to lineage (example: model failure + all downstream freshness and volume failures)
+- Initiating triage from incident management (see picture)
+
+![An interface showing initiating triage from incident management](https://res.cloudinary.com/diuctyblm/image/upload/v1738149956/Docs/triage-response-via-incident-management_acjqow.png)
+
+## Triage incidents
+
+When triaging incidents, there are 4 steps to go through:
+
+1. Impact analysis - Although root cause analysis will lead you to resolve the issue, impact analysis should be done first. The reason is the impact determines the criticality of the incidents, and therefore the priority and response time.
+2. Root cause analysis
+3. Resolution
+4. Post mortem - Quality learnings from incidents is how you improve over time, and reduce the time to resolution and frequency of future incidents.
+
+### Impact analysis
+
+The goal of doing an impact analysis is to determine the severity and urgency of the incident, and understand if you need to communicate the incident to consumers (if there isn’t a relevant alert rule).
+These are the questions that should be asked, and product tips on how to answer with Elementary:
+
+- Was this a failure or just a warning?
+  - As long as you and your team are intentional in determining severities, this can focus you on failures first.
+- Does the incident break the pipeline / create delay?
+
+  - Is the failure is a model failure, or a freshness issue?
+  - Do we run `dbt build` and this failure stoped the pipeline?
+
+    - Check the **Model runs** section of the dashboard to see if there are skipped models, as failures in build cause the downstream models to be skipped.
+
+    ![Model runs portion of the dashboard](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/dashboard-model-runs_zzgnd2.png)
+
+
+- How important is the data asset?
+  - Check in the catalog or node info section in the lineage if it has a tag like `critical` , `public` or a data product tag. You can also look at the description of the data asset, whether it’s a table or a column.
+- Does the failure impact important downstream assets? Did the issue propagate to downstream assets?
+
+  - A table might not be critical, but it’s upstream from a critical one, making it part of a critical path.
+
+    - Check in the lineage if there are downstream important BI assets / public tables. To see the downstream assets you can navigate to the lineage directly from the test results, but clicking `view in lineage`. If the incident is a failed column test, you can filter only the downstream lineage of the specific column by clicking on `filter column`.
+
+    ![Lineage filters](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/lineage-filters_ipjze3.png)
+
+    - Use the lineage filters to color and highlight all the tables in a path that match your filtering criteria.
+
+    ![Lineage filters showing the add filter interface](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/lineage-filters-2_cda4on.webp)
+
+  - If there are downstream critical tables, you might want to check if the issue actually propagated to it. A quick way to do it is to copy the test query, and run it on downstream assets (by changing the referenced table and column).
+
+- What is the magnitude of the failure? How many failed results out of the total volume?
+
+  - Most tests return the number of failed results. A failure in a `unique` test for can be dramatic if it impacts many rows, but insignificant if there is just one case of duplicates.
+
+    - You can see the total number of failures as part of the test result / alert.
+    - On the `Test performance` page, you can compare this number to previous failures of the same tests.
+
+    ![Graph showing test performance](https://res.cloudinary.com/diuctyblm/image/upload/v1738149955/Docs/test-performance-graph_g5t5p5.png)
+
+## Root cause analysis
+
+If the incident is not important we recommend resolving the incident and then removing / disabling the test.
+If the incident is important we need to start the investigation process, and understand the root cause. Your failures would usually be caused by issues at the source, code changes, or an infrastructure issue.
+
+- Is there a data issue at the source?
+  - Check in the lineage and see if there is coverage and failures on upstream tables, you can use the lineage filters to limit the scope to relevant failures (if `not_null` failed, filter on `not_null` tests).
+  - Check the test result sample. If you want to see more results copy the test SQL and run it in your DWH console.
+    - Sometimes an issue would be in a certain dimension, like a specific product event that stopped arriving or changed. Aggregate the test query by key dimensions in the table to understand if it’s relevant to specific subset of the data.
+      - _Coming soon - Automated post failure queries._
+  - Check if the test is flaky in the `test performance` screen. This usually means it’s a problem that happens frequently at the source data.
+  - _Coming soon - Check the metric graphs of the source tables._
+- Is it a code issue?
+  - Check recent PRs to the underlying monitored table.
+    - _Coming soon - Incident timeline with recent PRs and changes._
+  - Check recent PRs merged to upstream tables.
+  - Are there any other related failures that happen at the same time following a recent release?
+    - Check metrics and test results like volume of tables to see if there is a wrong join.
+- If the result is an `error` and not `fail` or `warning`, it means the test / model failed to run. This can either be caused by a timeout or issue at the DWH, or by a code change that lead to a syntax error / broken lineage.
+  - Look at the error message to understand if it comes from dbt or the DWH, and what is the issue.
+
+## Post mortem - Learning from incidents
+
+Learning from incidents we had is how we improve our coverage, response times and reliability.
+
+Here are some common actions to take following an incident:
+
+- Incident wasn’t important - If the incident wasn’t important or significant, remove the test or change the severity to warning.
+- It was hard to determine the severity of the incident - Make changes to the tags and descriptions of the test / asset, to make it easier next time.
+- The relevant people weren’t notified - Make changes to owners and subscribers, and create the relevant alert rules.
+- The result sample was not helpful - Make changes to the test query, to make it easier next time.
+- Reoccurring incidents at the source - For incidents that keep happening, the most productive approach is to have a conversation with your data providers, and figure out how to improve response. You can use the `test performance` page, and past incidents on the `incidents` page to communicate stats on the previous incidents.
