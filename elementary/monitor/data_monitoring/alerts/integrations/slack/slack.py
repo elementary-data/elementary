@@ -1,7 +1,8 @@
 import json
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Sequence, Union
+from itertools import groupby
+from typing import Any, Dict, List, Optional, Sequence, Union 
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -26,7 +27,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builde
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     get_model_test_runs_link,
-    get_owner_test_runs_link,
+    get_test_runs_by_owner_link,
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
@@ -889,8 +890,7 @@ class SlackIntegration(BaseIntegration):
             self._get_alert_type_counters_block(alert),
         ]
 
-        report_link = get_owner_test_runs_link(alert.report_url, alert.owner)
-
+        report_link = get_test_runs_by_owner_link(alert.report_url, alert.owner)
         if report_link:
             report_link_block = self.message_builder.create_context_block(
                 [
@@ -899,22 +899,13 @@ class SlackIntegration(BaseIntegration):
             )
             title_blocks.append(report_link_block)
 
-        # attention required : tags, owners, subscribers
+        # attention required : owner, subscribers
         preview_blocks = []
-
-        tags = list_of_lists_of_strings_to_comma_delimited_unique_strings(
-            [alert.tags or [] for alert in alerts],
-        )
         owners = list_of_lists_of_strings_to_comma_delimited_unique_strings(
             [[alert.owner] if alert.owner else []]
         )
         subscribers = list_of_lists_of_strings_to_comma_delimited_unique_strings(
             [alert.subscribers or [] for alert in alerts]
-        )
-        preview_blocks.append(
-            self.message_builder.create_text_section_block(
-                f"*Tags*: {tags if tags else '_No tags_'}"
-            )
         )
         preview_blocks.append(
             self.message_builder.create_text_section_block(
@@ -947,8 +938,15 @@ class SlackIntegration(BaseIntegration):
             details_blocks.append(
                 self.message_builder.create_text_section_block("*Test failures*")
             )
-            rows = [alert.summary for alert in alert.test_failures]
-            text = "\n".join([f":small_red_triangle: {row}" for row in rows])
+
+            text = ""
+            for model, errors in self._group_alerts_by_model(
+                alert.test_failures
+            ).items():
+                rows = [alert.concise_name for alert in errors]
+                text += f":small_blue_diamond: *{model} ({len(errors)})*\n"
+                text += "\n".join([f"\t:small_red_triangle: {row}" for row in rows])
+                text += "\n"
             details_blocks.append(self.message_builder.create_text_section_block(text))
 
         # Test warnings
@@ -956,8 +954,14 @@ class SlackIntegration(BaseIntegration):
             details_blocks.append(
                 self.message_builder.create_text_section_block("*Test warnings*")
             )
-            rows = [alert.summary for alert in alert.test_warnings]
-            text = "\n".join([f":warning: {row}" for row in rows])
+            text = ""
+            for model, errors in self._group_alerts_by_model(
+                alert.test_warnings
+            ).items():
+                rows = [alert.concise_name for alert in errors]
+                text += f":small_blue_diamond: *{model} ({len(errors)})*\n"
+                text += "\n".join([f"\t:warning: {row}" for row in rows])
+                text += "\n"
             details_blocks.append(self.message_builder.create_text_section_block(text))
 
         # Test errors
@@ -965,13 +969,31 @@ class SlackIntegration(BaseIntegration):
             details_blocks.append(
                 self.message_builder.create_text_section_block("*Test errors*")
             )
-            rows = [alert.summary for alert in alert.test_errors]
-            text = "\n".join([f":exclamation: {row}" for row in rows])
+            text = ""
+            for model, errors in self._group_alerts_by_model(
+                alert.test_errors
+            ).items():
+                rows = [alert.concise_name for alert in errors]
+                text += f":small_blue_diamond: *{model} ({len(errors)})*\n"
+                text += "\n".join([f"\t:exclamation: {row}" for row in rows])
+                text += "\n"
             details_blocks.append(self.message_builder.create_text_section_block(text))
 
         return SlackAlertMessageSchema(
             title=title_blocks, preview=preview_blocks, details=details_blocks
         )
+
+    @staticmethod
+    def _group_alerts_by_model(
+        alerts: List[TestAlertModel | SourceFreshnessAlertModel],
+    ) -> dict[str, list[TestAlertModel | SourceFreshnessAlertModel]]:
+        def key(e: TestAlertModel | SourceFreshnessAlertModel):
+            if isinstance(e, TestAlertModel):
+                return f"{e.schema_name}.{e.table_name}"
+            else:
+                return f"{e.schema_name}.{e.source_name}"
+
+        return {key: list(group) for key, group in groupby(alerts, key=key)}
 
     def _add_compact_sub_group_details_block(
         self,

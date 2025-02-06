@@ -69,7 +69,7 @@ def get_model_test_runs_link(
     return report_link
 
 
-def get_owner_test_runs_link(
+def get_test_runs_by_owner_link(
     report_url: Optional[str], owner: Optional[str]
 ) -> Optional[ReportLinkData]:
     report_link = None

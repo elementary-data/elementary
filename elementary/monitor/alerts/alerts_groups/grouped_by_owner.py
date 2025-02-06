@@ -6,7 +6,7 @@ from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAler
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
-    get_owner_test_runs_link,
+    get_test_runs_by_owner_link,
 )
 
 
@@ -31,7 +31,7 @@ class GroupedByOwnerAlerts(AlertsGroup):
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         if not self.model_errors:
-            return get_owner_test_runs_link(self.report_url, self.owner)
+            return get_test_runs_by_owner_link(self.report_url, self.owner)
 
         return None
 
