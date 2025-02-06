@@ -135,16 +135,19 @@ class BaseIntegration(ABC):
         flattened_alerts: List[
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ] = []
+        env = None
         for alert in alerts:
             if isinstance(alert, BaseAlertsGroup):
                 flattened_alerts.extend(alert.alerts)
+                if env is None and alert.env is not None:
+                    env = alert.env
             else:
                 flattened_alerts.append(alert)
 
         if len(flattened_alerts) >= threshold:
             logger.info(f"Grouping {len(flattened_alerts)} alerts into one")
             return [
-                AlertsGroup(alerts=flattened_alerts),
+                AlertsGroup(alerts=flattened_alerts, env=env),
             ]
         return alerts
 

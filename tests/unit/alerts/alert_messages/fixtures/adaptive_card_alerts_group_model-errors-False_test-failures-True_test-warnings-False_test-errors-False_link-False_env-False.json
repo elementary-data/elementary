@@ -1,0 +1,91 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Failure: 10 issues detected",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Default"
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **Test Failures:** 10",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "**Test Failures**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_1**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_2** - Owner: owner1",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_4**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_5** - Owner: owner1",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_7**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_8** - Owner: owner1",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_10**",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}
