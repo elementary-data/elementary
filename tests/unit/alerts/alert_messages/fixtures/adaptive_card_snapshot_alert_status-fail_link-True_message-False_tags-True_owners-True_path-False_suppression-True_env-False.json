@@ -20,7 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Snapshot:** test_snapshot | **Status:** fail | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Snapshot:** test_snapshot | **Status:** fail | **Time:** 2025-02-03 13:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
         },
         {

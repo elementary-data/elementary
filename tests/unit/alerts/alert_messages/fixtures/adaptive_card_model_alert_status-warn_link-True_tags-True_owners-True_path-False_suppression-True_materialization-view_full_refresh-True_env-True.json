@@ -20,7 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Model:** test_model | **Env:** Test Env | **Status:** warn | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Model:** test_model | **Env:** Test Env | **Status:** warn | **Time:** 2025-02-03 13:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
         },
         {

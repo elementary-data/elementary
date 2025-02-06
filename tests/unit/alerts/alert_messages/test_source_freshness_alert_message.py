@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -43,9 +43,11 @@ def test_get_source_freshness_alert_message_body(
 ):
     env = "Test Env" if has_env else None
     path = "sources/test_source.yml" if has_path else ""
-    detected_at = datetime(2025, 2, 3, 13, 21, 7)
+    detected_at = datetime(2025, 2, 3, 13, 21, 7, tzinfo=timezone.utc)
     snapshotted_at = detected_at
-    max_loaded_at = datetime(2025, 2, 3, 11, 21, 7) if has_message else None
+    max_loaded_at = (
+        datetime(2025, 2, 3, 11, 21, 7, tzinfo=timezone.utc) if has_message else None
+    )
     max_loaded_at_time_ago_in_s = 7200.0 if has_message else None
 
     source_freshness_alert_model = build_base_source_freshness_alert_model(

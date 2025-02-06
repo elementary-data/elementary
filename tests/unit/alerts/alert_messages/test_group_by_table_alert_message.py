@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -41,7 +41,7 @@ def test_get_group_by_table_alert_message_body(
     has_link: bool,
     has_env: bool,
 ):
-    detected_at = datetime(2025, 2, 3, 13, 21, 7)
+    detected_at = datetime(2025, 2, 3, 13, 21, 7, tzinfo=timezone.utc)
 
     env = "Test Env" if has_env else None
 

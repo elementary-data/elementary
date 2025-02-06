@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -49,7 +49,7 @@ def test_get_snapshot_alert_message_body(
         path=path,
         materialization="snapshot",  # Always snapshot for this test
         full_refresh=False,
-        detected_at=datetime(2025, 2, 3, 13, 21, 7),
+        detected_at=datetime(2025, 2, 3, 13, 21, 7, tzinfo=timezone.utc),
         alias="test_snapshot",
         message="Test message" if has_message else None,
         suppression_interval=24 if has_suppression_interval else None,

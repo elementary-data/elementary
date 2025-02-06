@@ -20,7 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Source:** test_source.test_identifier | **Env:** Test Env | **Status:** runtime error | **Time:** 2025-02-03 11:21:07 UTC | **Suppression interval:** 24",
+          "text": "**Source:** test_source.test_identifier | **Env:** Test Env | **Status:** runtime error | **Time:** 2025-02-03 13:21:07 UTC | **Suppression interval:** 24",
           "wrap": true
         },
         {
