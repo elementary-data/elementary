@@ -58,6 +58,11 @@
       "name": "Changelog",
       "icon": "list",
       "url": "https://docs.elementary-data.com/changelog"
+    },
+    {
+      "name": "Best Practices Guide",
+      "icon": "check",
+      "url": "https://docs.elementary-data.com/best-practices/introduction"
     }
   ],
 
@@ -288,6 +293,16 @@
       "pages": [
         "resources/business-case-data-observability-platform",
         "overview/cloud-vs-oss",
+        {
+          "group": "Best Practices Guide",
+          "icon": "check",
+          "pages": [
+            "best-practices/introduction",
+            "best-practices/governance-for-observability",
+            "best-practices/detection-and-coverage",
+            "best-practices/triage-and-response"
+          ]
+        },
         "resources/pricing",
         "resources/community"
       ]
