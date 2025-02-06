@@ -346,7 +346,7 @@ class AlertMessageBuilder:
         facts = []
         if materialization:
             facts.append(("Materialization", materialization))
-        if full_refresh:
+        if full_refresh is not None:
             facts.append(("Full Refresh", "Yes" if full_refresh else "No"))
         return [FactsBlock(facts=facts)]
 
@@ -381,7 +381,6 @@ class AlertMessageBuilder:
             if len(owners) == 1:
                 inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
             else:
-                # order owners by alphabetical order
                 owners.sort()
                 inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
 

@@ -87,6 +87,10 @@
                     {
                       "title": "Materialization",
                       "value": "incremental"
+                    },
+                    {
+                      "title": "Full Refresh",
+                      "value": "No"
                     }
                   ]
                 }
