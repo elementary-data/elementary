@@ -1,6 +1,6 @@
 ---
 title: "Anomaly Tests Troubleshooting"
-sidebarTitle: "Anomaly Tests Troubleshooting"
+sidebarTitle: "Anomaly tests troubleshooting"
 ---
 
 <Accordion title="Verify the data collection for your anomaly test">
@@ -11,7 +11,7 @@ First, check if your test uses a timestamp column:
 # In your YAML configuration
 tests:
   - elementary.volume_anomalies:
-      timestamp_column: created_at# If this exists, you have a timestamp-based test
+      timestamp_column: created_at# If this is configured, you have a timestamp-based test
 ```
 
 <Accordion title="If you have a timestamp-based test (recommended)">
@@ -23,7 +23,8 @@ tests:
     Verify data collection:
     
     ```sql
-    -- Check if metrics are being collected in time bucketsSELECT
+    -- Check if metrics are being collected in time buckets
+    SELECT
         metric_timestamp,
         metric_value,
         COUNT(*) as metrics_per_bucket
