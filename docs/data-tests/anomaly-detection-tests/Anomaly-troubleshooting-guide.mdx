@@ -1,0 +1,147 @@
+---
+title: "Anomaly Tests Troubleshooting"
+sidebarTitle: "Anomaly Tests Troubleshooting"
+---
+
+
+## **1. Understand the data collection for your anomaly test**
+
+First, check if your test uses a timestamp column:
+
+```yaml
+# In your YAML configuration
+tests:
+  - elementary.volume_anomalies:
+      timestamp_column: created_at# If this exists, you have a timestamp-based test
+```
+
+<Accordion title="If you have a timestamp-based test (recommended)">
+
+    - Metrics are calculated by grouping data into time buckets (default: 'day')
+    - Detection period (default: 2 days) determines how many buckets are being tested
+    - Training period data (default: 14 days) comes from historical buckets, allowing immediate anomaly detection with sufficient history
+    
+    Verify data collection:
+    
+    ```sql
+    -- Check if metrics are being collected in time bucketsSELECT
+        metric_timestamp,
+        metric_value,
+        COUNT(*) as metrics_per_bucket
+    FROM your_schema.data_monitoring_metrics
+    WHERE table_name = 'your_table'
+    GROUP BY metric_timestamp, metric_value
+    ORDER BY metric_timestamp DESC;
+    
+    ```
+    
+    - Each bucket should represent one time bucket (e.g., daily metrics)
+    - Gaps in `metric_timestamp` might indicate data collection issues
+    - Training uses historical buckets for anomaly detection
+    
+    **Common collection issues:**
+    
+    - Missing or null values in timestamp column
+    - Timestamp column not in expected format
+    - No data in specified training period
+
+</Accordion>
+
+<Accordion title="If you don't have a timestamp configured">
+
+    - Training period data builds up over multiple test runs, using the test run time as its timestamp column. This requires time to collect enough points; for a 14 day training period, the test would need 14 different runs on different days to have a full training set.
+    - Metrics are calculated for the entire table in each test run
+    - Detection period (default: 2 days) determines how many buckets are being tested
+    
+    Check metric collection across test runs:
+    
+    ```sql
+    -- Check metrics from different test runsSELECT
+        updated_at,
+        metric_value
+    FROM your_schema.data_monitoring_metrics
+    WHERE table_name = 'your_table'
+    ORDER BY updated_at DESC;
+    
+    ```
+    
+    - Should see one metric per test run and per dimension
+    - Training requires multiple test runs over time
+    - Each new test run creates the training point for a time bucket. A second test run within the same bucket will override the first one.
+    
+    **Common collection issues:**
+    
+    - Test hasn't run enough times
+    - Previous test runs failed
+    - Metrics not being saved between runs
+
+</Accordion>
+
+
+## **2. Verify anomaly calculations**
+
+Anomaly detection is influenced by:
+
+- Detection period (default: 2 days) - the time window being tested
+- Sensitivity (default: 3.0) - how many standard deviations from normal before flagging
+- Training data from previous periods/runs
+- `metrics_anomaly_score` calculates the anomaly based on the data in `data_monitoring metrics`.
+
+Check calculations in `metrics_anomaly_score`:
+
+```sql
+-- Check how anomalies are being calculatedSELECT
+    metric_name,
+    metric_value,
+    training_avg,
+    training_stddev,
+    zscore,
+    severity
+FROM your_schema.metrics_anomaly_score
+WHERE table_name = 'your_table'
+ORDER BY detected_at DESC;
+```
+
+## **3. "Not enough data to calculate anomaly" error**
+
+This occurs when there are fewer than 7 training data points. To resolve:
+
+### For timestamp-based tests:
+
+- Check if your timestamp column has enough historical data
+- Verify time buckets are being created correctly in `data_monitoring_metrics`
+- Look for gaps in your data that might affect bucket creation
+
+### For non-timestamp tests:
+
+- Run your tests multiple times to build up training data.
+- Check `data_monitoring_metrics` to verify the data collection. The test will need data for at least 7 time buckets (e.g 7 days) to calculate the anomaly.
+
+## **4. Missing data in data_monitoring_metrics**
+
+If your test isn't appearing in `data_monitoring_metrics`:
+
+Verify test configuration:
+
+```yaml
+tests:
+  - elementary.volume_anomalies:
+      timestamp_column: created_at# Check if specified correctly
+```
+
+### Common causes:
+
+- Incorrect timestamp column name
+- Timestamp column contains null values or is not of type timestamp or date
+- For non-timestamp tests: Test hasn't run successfully
+- Incorrect test syntax
+
+## 5. Training period changed, but results are the same
+
+If you change it after executing elementary tests, you will need to run a full refresh to the metrics collected. This will make the next tests collect data for the new **`training_period`** timeframe. The steps are:
+
+1. Change var **`training_period`** in your **`dbt_project.yml`**.
+2. Full refresh of the model ‘data_monitoring_metrics’ by running **`dbt run --select data_monitoring_metrics --full-refresh`**.
+3. Running the elementary tests again.
+
+If you want the Elementary UI to show data for a longer period of time, use the days-back option of the CLI: **`edr report --days-back 45`**
