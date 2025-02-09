@@ -73,6 +73,9 @@ class AlertMessageBuilder:
             return None
         return self.STATUS_COLORS.get(alert_status)
 
+    def _get_alert_color(self, alert: AlertType) -> Optional[Color]:
+        return self._get_color(alert.status)
+
     def _get_alert_title(
         self, summary: str, status: Optional[str], test_type: Optional[str]
     ) -> str:
@@ -580,22 +583,20 @@ class AlertMessageBuilder:
 
     def _get_alert_groups_blocks(
         self,
-        alert: Union[AlertsGroup, GroupedByTableAlerts],
+        alert: AlertsGroup,
     ) -> List[MessageBlock]:
-        if isinstance(alert, AlertsGroup):
-            return self._get_sub_alert_groups_blocks(
-                model_errors=alert.model_errors,
-                test_failures=alert.test_failures,
-                test_warnings=alert.test_warnings,
-                test_errors=alert.test_errors,
-            )
-        return []
+        return self._get_sub_alert_groups_blocks(
+            model_errors=alert.model_errors,
+            test_failures=alert.test_failures,
+            test_warnings=alert.test_warnings,
+            test_errors=alert.test_errors,
+        )
 
     def build(
         self,
         alert: AlertType,
     ) -> MessageBody:
-        color = self._get_color(alert.status)
+        color = self._get_alert_color(alert)
 
         blocks: List[MessageBlock] = []
 
@@ -618,7 +619,7 @@ class AlertMessageBuilder:
         config_blocks = self._get_alert_config_blocks(alert)
         blocks.extend(config_blocks)
 
-        if isinstance(alert, (AlertsGroup, GroupedByTableAlerts)):
+        if isinstance(alert, AlertsGroup):
             alert_groups_blocks = self._get_alert_groups_blocks(alert)
             blocks.extend(alert_groups_blocks)
 
