@@ -1,4 +1,8 @@
-# Anomaly Test Troubleshooting Guide
+---
+title: "Anomaly Tests Troubleshooting"
+sidebarTitle: "Anomaly Tests Troubleshooting"
+---
+
 
 ## **1. Understand the data collection for your anomaly test**
 
@@ -11,7 +15,7 @@ tests:
       timestamp_column: created_at# If this exists, you have a timestamp-based test
 ```
 
-<Accordion title="If you have a timestamp-based test (recommended)">
+<Accordion title="If you have a timestamp-based test (recommended">
 
     - Metrics are calculated by grouping data into time buckets (default: 'day')
     - Detection period (default: 2 days) determines how many buckets are being tested
@@ -44,6 +48,7 @@ tests:
 </Accordion>
 
 <Accordion title="If you don't have a timestamp configured">
+
     - Training period data builds up over multiple test runs, using the test run time as its timestamp column. This requires time to collect enough points; for a 14 day training period, the test would need 14 different runs on different days to have a full training set.
     - Metrics are calculated for the entire table in each test run
     - Detection period (default: 2 days) determines how many buckets are being tested
@@ -69,6 +74,9 @@ tests:
     - Test hasn't run enough times
     - Previous test runs failed
     - Metrics not being saved between runs
+
+</Accordion>
+
 
 ## **2. Verify anomaly calculations**
 
