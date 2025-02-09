@@ -3,8 +3,7 @@ title: "Anomaly Tests Troubleshooting"
 sidebarTitle: "Anomaly Tests Troubleshooting"
 ---
 
-
-## **1. Understand the data collection for your anomaly test**
+<Accordion title="Verify the data collection for your anomaly test">
 
 First, check if your test uses a timestamp column:
 
@@ -76,9 +75,9 @@ tests:
     - Metrics not being saved between runs
 
 </Accordion>
+</Accordion>
 
-
-## **2. Verify anomaly calculations**
+<Accordion title="Verify anomaly calculations">
 
 Anomaly detection is influenced by:
 
@@ -102,7 +101,9 @@ WHERE table_name = 'your_table'
 ORDER BY detected_at DESC;
 ```
 
-## **3. "Not enough data to calculate anomaly" error**
+</Accordion>
+
+<Accordion title="'Not enough data to calculate anomaly' error">
 
 This occurs when there are fewer than 7 training data points. To resolve:
 
@@ -117,7 +118,9 @@ This occurs when there are fewer than 7 training data points. To resolve:
 - Run your tests multiple times to build up training data.
 - Check `data_monitoring_metrics` to verify the data collection. The test will need data for at least 7 time buckets (e.g 7 days) to calculate the anomaly.
 
-## **4. Missing data in data_monitoring_metrics**
+</Accordion>
+
+<Accordion title="Missing data in data_monitoring_metrics">
 
 If your test isn't appearing in `data_monitoring_metrics`:
 
@@ -136,7 +139,8 @@ tests:
 - For non-timestamp tests: Test hasn't run successfully
 - Incorrect test syntax
 
-## 5. Training period changed, but results are the same
+</Accordion>
+<Accordion title="Training period changed, but results are the same">
 
 If you change it after executing elementary tests, you will need to run a full refresh to the metrics collected. This will make the next tests collect data for the new **`training_period`** timeframe. The steps are:
 
@@ -145,3 +149,4 @@ If you change it after executing elementary tests, you will need to run a full r
 3. Running the elementary tests again.
 
 If you want the Elementary UI to show data for a longer period of time, use the days-back option of the CLI: **`edr report --days-back 45`**
+</Accordion>
