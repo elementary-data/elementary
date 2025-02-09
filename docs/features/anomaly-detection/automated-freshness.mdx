@@ -3,12 +3,37 @@ title: Automated Freshness Monitor
 sidebarTitle: "Automated freshness"
 ---
 
-The freshness monitor learns the update frequency of your tables and consistently checks if the table is **currently** fresh based on our model's forecast.
+The purpose of the Freshness monitor is to alert when a data asset hasn't been updated in a period of time that exceeds the update SLA of that table.
+Freshness monitors are by default created for all sources in your dbt project. They can be created for additional tables upon request.
+
+The freshness monitoring has 2 operation modes, it's possible to choose the desired one from the Test Overview side panel:
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1739128141/skeyzp5p5jqpciqshsft.png"
+      alt="Automated freshness result"
+    />
+  </div>
+</Frame>
+
+
+### Anomaly detection based
+The default operation mode of the freshness monitors.
+It learns the update frequency of your tables and consistently checks if the table is **currently** fresh based on our model's forecast.
 
 By default we use 21 days of training data to understand the intervals between table updates. 
 The only condition that determines the status of the monitor is the time that has passed since the last update, which is compared to the model's prediction.
 
 The model takes into account seasonality, and supports cases such as tables that update on weekdays and not weekends. 
+
+### SLA based
+Sometimes you might want to monitor a table based on a fixed SLA, in order to have full control over when the monitor will alert.
+This mode is based on a fixed SLA that you define for each table.
+The monitor will alert if the table hasn't been updated in the defined SLA period.
+
+
+## Understand the monitor result
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -18,8 +43,6 @@ The model takes into account seasonality, and supports cases such as tables that
     />
   </div>
 </Frame>
-
-### Understand the monitor result
 
 The test result is a timeline of updates.
 
