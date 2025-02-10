@@ -16,22 +16,8 @@ from elementary.messages.blocks import (
     TextBlock,
     TextStyle,
 )
+from elementary.messages.formats.html import ICON_TO_HTML
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
-
-ICON_TO_HTML = {
-    Icon.RED_TRIANGLE: "🔺",
-    Icon.X: "❌",
-    Icon.WARNING: "⚠️",
-    Icon.EXCLAMATION: "❗",
-    Icon.CHECK: "✅",
-    Icon.MAGNIFYING_GLASS: "🔎",
-    Icon.HAMMER_AND_WRENCH: "🛠️",
-    Icon.POLICE_LIGHT: "🚨",
-    Icon.INFO: "ℹ️",
-    Icon.EYE: "👁️",
-    Icon.GEAR: "⚙️",
-    Icon.BELL: "🔔",
-}
 
 COLOR_TO_STYLE = {
     Color.RED: "Attention",
