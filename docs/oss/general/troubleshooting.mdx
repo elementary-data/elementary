@@ -189,22 +189,19 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 
 </Accordion>
 
-<Accordion title="I want to disable elementary models and / or tests temporarily">
-  
-If you want to prevent elementary tests from running the simplest way is to exclude the tag that marks all of them in your dbt command:
 
-```shell
-dbt test --exclude tag:elementary-tests
+
+<Accordion title="Error when trying to run parallel dbt jobs">
+
+When writing to the `dbt_artifacts` tables in the Elementary schema, data is deleted and reinserted. Running parallel jobs through an orchestrator can lead to errors, as multiple jobs may attempt to modify the same tables simultaneously. To prevent this, you should [disable the on-run-end hooks](https://docs.elementary-data.com/oss/general/faq#can-i-disable-the-on-run-end-hooks-or-results-uploading) **and** [exclude the Elementary models](https://docs.elementary-data.com/oss/general/faq#can-i-disable-exclude-the-elementary-models). For scheduled updates to `dbt_artifacts` (e.g., a daily job), run:
+
 ```
+dbt run --select elementary --vars '{"enable_elementary_models": true}'
 
-If you add the following to your dbt_project.yml, elementary models will not run and elementary tests will be executed but will do nothing and always pass.
-```shell
-models:
-  elementary:
-    enabled: false
 ```
 
 </Accordion>
+
 
 <Accordion title="My problem is not listed here">
 

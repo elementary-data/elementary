@@ -1,6 +1,6 @@
 <Accordion title="Can I disable / exclude the Elementary models?">
 
-Elementary only needs you to run the models once after you install, and on upgrades of minor versions (like 0.7.X -> 0.8.X).
+Elementary only needs you to run the models once after you install, and on upgrades of minor versions (like 0.15.X -> 0.16.X).
 On such upgrades we make schema changes, so we need you to rebuild the tables.
 
 For excluding the elementary models from your runs we suggest 2 options:
@@ -20,10 +20,14 @@ models:
       +enabled: "{{ var('enable_elementary_models', false) }}"
 ```
 
-- When you upgrade elementary run:
+You will run the Elementary models explicitly in one of two cases:
+1. When you upgrade elementary run
+2. If you choose to disable Elementary models from your runs and want to update them at your own time.
+
+To run Elementary models:
 
 ```shell
-dbt run --select elementary --vars {enable_elementary_models: true}
+dbt run --select elementary --vars '{"enable_elementary_models": true}'
 ```
 
 </Accordion>
