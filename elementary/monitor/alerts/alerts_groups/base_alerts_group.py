@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, List, Sequence, Union
+from typing import Dict, List, Optional, Sequence, Union
 
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
@@ -13,8 +13,10 @@ class BaseAlertsGroup(ABC):
         alerts: Sequence[
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ],
+        env: Optional[str] = None,
     ) -> None:
         self.alerts = alerts
+        self.env = env
 
     @property
     def summary(self) -> str:

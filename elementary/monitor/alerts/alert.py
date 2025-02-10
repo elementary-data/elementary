@@ -31,6 +31,7 @@ class AlertModel:
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
+        env: Optional[str] = None,
         **kwargs,
     ):
         self.id = id
@@ -63,6 +64,7 @@ class AlertModel:
         self.report_url = report_url
         self.alert_fields = alert_fields
         self.elementary_database_and_schema = elementary_database_and_schema
+        self.env = env
 
     @property
     def unified_meta(self) -> Dict:

@@ -129,22 +129,26 @@ class BaseIntegration(ABC):
             AlertsGroup,
         ]
     ]:
+        # Deprecated: the grouping logic is now handled outside of the integration, and the integration only sends the alerts
         if not alerts:
             return []
 
         flattened_alerts: List[
             Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
         ] = []
+        env = None
         for alert in alerts:
             if isinstance(alert, BaseAlertsGroup):
                 flattened_alerts.extend(alert.alerts)
+                if env is None and alert.env is not None:
+                    env = alert.env
             else:
                 flattened_alerts.append(alert)
 
         if len(flattened_alerts) >= threshold:
             logger.info(f"Grouping {len(flattened_alerts)} alerts into one")
             return [
-                AlertsGroup(alerts=flattened_alerts),
+                AlertsGroup(alerts=flattened_alerts, env=env),
             ]
         return alerts
 
@@ -173,6 +177,7 @@ class BaseIntegration(ABC):
         None,
         None,
     ]:
+        # Deprecated: the grouping logic is now handled outside of the integration, and the integration only sends the alerts
         grouped_alerts = self._group_alerts(alerts, group_alerts_threshold)
         for alert in grouped_alerts:
             if isinstance(alert, BaseAlertsGroup):

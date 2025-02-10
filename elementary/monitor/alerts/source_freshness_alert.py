@@ -45,6 +45,7 @@ class SourceFreshnessAlertModel(AlertModel):
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
+        env: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(
@@ -64,6 +65,7 @@ class SourceFreshnessAlertModel(AlertModel):
             report_url,
             alert_fields,
             elementary_database_and_schema,
+            env=env,
         )
         self.snapshotted_at_str = (
             convert_datetime_utc_str_to_timezone_str(

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -15,8 +15,9 @@ class AlertsGroup(BaseAlertsGroup):
     def __init__(
         self,
         alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]],
+        env: Optional[str] = None,
     ) -> None:
-        super().__init__(alerts)
+        super().__init__(alerts, env=env)
         self.test_errors = []
         self.test_warnings = []
         self.test_failures = []
