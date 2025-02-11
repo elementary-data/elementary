@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Generic on ",
+              "text": "Generic",
               "weight": "bolder",
               "size": "large",
               "wrap": true
