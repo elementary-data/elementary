@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Warning: \"test_short_name\" test failed on ",
+              "text": "Warning: \"test_short_name\" test failed",
               "weight": "bolder",
               "size": "large",
               "wrap": true
