@@ -3,6 +3,7 @@ title: "Microsoft Teams"
 ---
 
 Elementary's Microsoft Teams integration enables sending alerts when data issues happen.
+The alerts are sent using Adaptive Cards format, which provides rich formatting and interactive capabilities.
 
 The alerts include rich context, and you can create [alert rules](/features/alerts-and-incidents/alert-rules) to distribute alerts to different channels and destinations.
 
@@ -30,30 +31,29 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook.
+3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook. There are two ways to create a webhook:
 
-<Accordion title="How to create a Microsoft Teams webhook?">
-  1. Go to a channel in your Team and choose `Manage channel`
+<Accordion title="Option 1: Using Microsoft Teams Connectors (Legacy)">
+1. Go to a channel in your Team and choose `Manage channel`
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-        src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
-        alt="Teams manage channel"
-        width="400"
+      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
+      alt="Teams manage channel"
+      width="400"
     />
   </div>
 </Frame>
-
 
 2. Click on `Edit` connectors.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-        src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
-        alt="Teams edit connectors"
-        width="500"
+      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
+      alt="Teams edit connectors"
+      width="500"
     />
   </div>
 </Frame>
@@ -63,9 +63,9 @@ The alerts include rich context, and you can create [alert rules](/features/aler
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-    src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
-    alt="Teams add incoming webhook"
-    width="400"
+      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
+      alt="Teams add incoming webhook"
+      width="400"
     />
   </div>
 </Frame>
@@ -74,11 +74,11 @@ The alerts include rich context, and you can create [alert rules](/features/aler
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-<img
-src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204465/mcncjpvsnptd0gcsbb21.png"
-alt="Teams create webhook"
-width="400"
-/>
+    <img
+      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204465/mcncjpvsnptd0gcsbb21.png"
+      alt="Teams create webhook"
+      width="400"
+    />
   </div>
 </Frame>
 
@@ -86,16 +86,42 @@ width="400"
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-<img
-src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204718/gkt2uhz2qaow1lm1frnp.png"
-alt="Teams copy URL webhook"
-width="400"
-/>
+    <img
+      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204718/gkt2uhz2qaow1lm1frnp.png"
+      alt="Teams copy URL webhook"
+      width="400"
+    />
   </div>
 </Frame>
 
+**Note:** Microsoft 365 Connectors (previously called Office 365 Connectors) are nearing deprecation, and the creation of new Microsoft 365 Connectors will soon be blocked. Consider using Power Automate Workflows instead.
 
 </Accordion>
+
+<Accordion title="Option 2: Using Power Automate Workflows (Recommended)">
+
+You can create a webhook using Power Automate in two ways:
+
+### Method 1: Directly from Teams (Recommended)
+
+1. Go to your Teams channel
+2. Click the three dots (...) next to the channel name
+3. Select `Workflows`
+4. Choose the template "Post to channel when a webhook request is received"
+5. Copy the webhook URL
+
+### Method 2: From Power Automate Website
+
+1. Go to [Power Automate](https://flow.microsoft.com)
+2. Create a new instant cloud flow
+3. Search for "When a HTTP request is received" as your trigger
+4. In the flow, add a "Post adaptive card in a chat or channel" action
+5. Configure the team and channel where you want to post
+6. Save the flow and copy the HTTP POST URL
+
+**Important Note:** When using Power Automate Workflows, Elementary CLI cannot directly verify if messages were successfully delivered. You'll need to monitor your workflow runs in Power Automate to check for any errors.
+
+  </Accordion>
 
 4. Configure your Microsoft Teams webhooks, and give each one a name indicating it's connected channel:
 
@@ -112,10 +138,11 @@ width="400"
 5. Select a default channel for alerts, and set the suppression interval.
 
 <Note>
-The default channel you select will automatically add a default [alert rule](/features/alerts-and-incidents/alert-rules)
-to sends all failures to this channel. Alerts on warnings are not sent by default. To modify and add tules, navigate to `Alert Rules` page.
+  The default channel you select will automatically add a default [alert
+  rule](/features/alerts-and-incidents/alert-rules) to sends all failures to
+  this channel. Alerts on warnings are not sent by default. To modify and add
+  tules, navigate to `Alert Rules` page.
 </Note>
-
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
