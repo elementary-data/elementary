@@ -29,6 +29,7 @@ from elementary.messages.blocks import (
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
+from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
     GroupedByTableAlerts,
 )
@@ -43,8 +44,7 @@ AlertType = Union[
     TestAlertModel,
     ModelAlertModel,
     SourceFreshnessAlertModel,
-    GroupedByTableAlerts,
-    AlertsGroup,
+    BaseAlertsGroup,
 ]
 
 
@@ -477,6 +477,8 @@ class AlertMessageBuilder:
             return self._get_run_alert_subtitle_blocks(alert)
         elif isinstance(alert, AlertsGroup):
             return self._get_alerts_group_subtitle_blocks(alert)
+        else:
+            raise ValueError(f"Unknown alert type: {type(alert)}")
 
     def _get_alert_details_blocks(
         self,
@@ -583,14 +585,17 @@ class AlertMessageBuilder:
 
     def _get_alert_groups_blocks(
         self,
-        alert: AlertsGroup,
+        alert: BaseAlertsGroup,
     ) -> List[MessageBlock]:
-        return self._get_sub_alert_groups_blocks(
-            model_errors=alert.model_errors,
-            test_failures=alert.test_failures,
-            test_warnings=alert.test_warnings,
-            test_errors=alert.test_errors,
-        )
+        if isinstance(alert, AlertsGroup):
+            return self._get_sub_alert_groups_blocks(
+                model_errors=alert.model_errors,
+                test_failures=alert.test_failures,
+                test_warnings=alert.test_warnings,
+                test_errors=alert.test_errors,
+            )
+        else:
+            raise ValueError(f"Unknown alert type: {type(alert)}")
 
     def build(
         self,
@@ -619,7 +624,7 @@ class AlertMessageBuilder:
         config_blocks = self._get_alert_config_blocks(alert)
         blocks.extend(config_blocks)
 
-        if isinstance(alert, AlertsGroup):
+        if isinstance(alert, BaseAlertsGroup):
             alert_groups_blocks = self._get_alert_groups_blocks(alert)
             blocks.extend(alert_groups_blocks)
 
