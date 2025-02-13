@@ -16,6 +16,5 @@ types-pytz
 types-jsonschema
 types-PyYAML
 types-setuptools
-pandas-stubs
 types-retry
 types-decorator
