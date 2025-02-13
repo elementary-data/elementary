@@ -36,6 +36,7 @@ class ModelAlertModel(AlertModel):
         report_url: Optional[str] = None,
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
+        env: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(
@@ -55,6 +56,7 @@ class ModelAlertModel(AlertModel):
             report_url,
             alert_fields,
             elementary_database_and_schema,
+            env=env,
         )
         self.alias = alias
         self.path = path

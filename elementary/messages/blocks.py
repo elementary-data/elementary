@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
+from typing_extensions import Literal
 
 
 class Icon(Enum):
@@ -25,6 +26,7 @@ class TextStyle(Enum):
 
 
 class BaseBlock(BaseModel):
+    type: str
     pass
 
 
@@ -33,16 +35,19 @@ class BaseInlineTextBlock(BaseBlock):
 
 
 class TextBlock(BaseInlineTextBlock):
+    type: Literal["text"] = "text"
     text: str
     style: Optional[TextStyle] = None
 
 
 class LinkBlock(BaseInlineTextBlock):
+    type: Literal["link"] = "link"
     text: str
     url: str
 
 
 class IconBlock(BaseInlineTextBlock):
+    type: Literal["icon"] = "icon"
     icon: Icon
 
 
@@ -50,18 +55,21 @@ InlineBlock = Union[TextBlock, LinkBlock, IconBlock]
 
 
 class HeaderBlock(BaseBlock):
+    type: Literal["header"] = "header"
     text: str
 
 
 class CodeBlock(BaseBlock):
+    type: Literal["code"] = "code"
     text: str
 
 
 class DividerBlock(BaseBlock):
-    pass
+    type: Literal["divider"] = "divider"
 
 
 class LineBlock(BaseBlock):
+    type: Literal["line"] = "line"
     inlines: List[InlineBlock]
     sep: str = " "
 
@@ -71,19 +79,23 @@ class BaseLinesBlock(BaseBlock):
 
 
 class LinesBlock(BaseLinesBlock):
-    pass
+    type: Literal["lines"] = "lines"
 
 
 class FactBlock(BaseBlock):
+    type: Literal["fact"] = "fact"
     title: LineBlock
     value: LineBlock
+    primary: bool = False
 
 
 class FactListBlock(BaseBlock):
+    type: Literal["fact_list"] = "fact_list"
     facts: List[FactBlock]
 
 
 class ExpandableBlock(BaseBlock):
+    type: Literal["expandable"] = "expandable"
     title: str
     body: List["InExpandableBlock"]
     expanded: bool = False
@@ -98,4 +110,5 @@ InExpandableBlock = Union[
     "ExpandableBlock",
 ]
 
-ExpandableBlock.model_rebuild()
+# Update forward references for recursive types
+ExpandableBlock.update_forward_refs()

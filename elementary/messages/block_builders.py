@@ -1,5 +1,5 @@
 import json
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 from .blocks import (
     CodeBlock,
@@ -16,7 +16,7 @@ from .blocks import (
 )
 
 SimpleInlineBlock = Union[str, Icon]
-SimpleLineBlock = Union[str, Icon, List[SimpleInlineBlock]]
+SimpleLineBlock = Union[str, Icon, Sequence[SimpleInlineBlock]]
 
 
 def _build_inline_block(
@@ -28,9 +28,9 @@ def _build_inline_block(
 def _build_inlines(
     content: SimpleLineBlock, style: Optional[TextStyle] = None
 ) -> List[InlineBlock]:
-    if isinstance(content, list):
-        return [_build_inline_block(line, style) for line in content]
-    return [_build_inline_block(content)]
+    if isinstance(content, (str, Icon)):
+        return [_build_inline_block(content, style)]
+    return [_build_inline_block(line, style) for line in content]
 
 
 def BulletListBlock(
@@ -73,7 +73,7 @@ def LinkLineBlock(*, text: str, url: str) -> LineBlock:
 
 def SummaryLineBlock(
     *,
-    summary: List[Tuple[SimpleLineBlock, SimpleLineBlock]],
+    summary: Sequence[Tuple[SimpleLineBlock, SimpleLineBlock]],
     include_empty_values: bool = False,
 ) -> LineBlock:
     text_blocks: List[InlineBlock] = []
@@ -87,9 +87,27 @@ def SummaryLineBlock(
     return LineBlock(inlines=text_blocks)
 
 
+def NonPrimaryFactBlock(fact: Tuple[LineBlock, LineBlock]) -> FactBlock:
+    title, value = fact
+    return FactBlock(
+        title=title,
+        value=value,
+        primary=False,
+    )
+
+
+def PrimaryFactBlock(fact: Tuple[LineBlock, LineBlock]) -> FactBlock:
+    title, value = fact
+    return FactBlock(
+        title=title,
+        value=value,
+        primary=True,
+    )
+
+
 def FactsBlock(
     *,
-    facts: List[
+    facts: Sequence[
         Tuple[
             SimpleLineBlock,
             SimpleLineBlock,

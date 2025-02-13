@@ -20,9 +20,16 @@ def get_expected_json_path(fixture_dir: Path, filename: str) -> Path:
 
 
 def assert_expected_json(result: dict, expected_json_path: Path) -> None:
+    expected = json.loads(expected_json_path.read_text())
     if OVERRIDE:
         logger.warning(f"Overriding expected JSON file: {expected_json_path}")
-        print("writing to file", OVERRIDE)
-        expected_json_path.write_text(json.dumps(result, indent=2))
-    expected = json.loads(expected_json_path.read_text())
-    assert json.dumps(result, indent=2) == json.dumps(expected, indent=2)
+        expected_json_path.write_text(json.dumps(result, indent=2) + "\n")
+    else:
+        try:
+            assert result == expected
+        except AssertionError as e:
+            error_message = (
+                f"\nExpected JSON: \n{json.dumps(expected, indent=2)}\n"
+                f"\nActual JSON: \n{json.dumps(result, indent=2)}\n"
+            )
+            raise AssertionError(error_message) from e

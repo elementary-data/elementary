@@ -1,0 +1,106 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Warning: dbt failed to build incremental \"test_model\"",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Warning"
+        },
+        {
+          "type": "TextBlock",
+          "text": "**Model:** test_model | **Status:** warn | **Time:** 2025-02-03 13:21:07 UTC | **Suppression interval:** 24",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "\u2139\ufe0f **Details**",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Tags",
+              "value": "tag1, tag2"
+            },
+            {
+              "title": "Owners",
+              "value": "_No owners_"
+            },
+            {
+              "title": "Subscribers",
+              "value": "_No subscribers_"
+            },
+            {
+              "title": "Path",
+              "value": "models/test_model.sql"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Model Configuration",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000001"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000001",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "FactSet",
+                  "facts": [
+                    {
+                      "title": "Materialization",
+                      "value": "incremental"
+                    },
+                    {
+                      "title": "Full Refresh",
+                      "value": "No"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": true
+        }
+      ]
+    }
+  ],
+  "version": "1.6"
+}
