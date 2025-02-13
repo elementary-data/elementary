@@ -3,17 +3,23 @@ title: "Teams setup for Elementary CLI"
 sidebarTitle: "Teams"
 ---
 
-Elementary Teams integration includes sending [Teams alerts](/oss/guides/alerts/send-teams-alerts) on failures in dbt tests and models.
+Elementary Teams integration includes sending [Teams alerts](/oss/guides/alerts/send-teams-alerts) on failures in dbt tests and models. The alerts are sent using Microsoft Teams Adaptive Cards format, which provides rich formatting and interactive capabilities.
 
 ## Integration options
 
-There is one integration option for Microsoft Teams: a Webhook. This method let you receive alerts from Elementary, but lacks
-some support that is available in the Slack integration solution.
-Below is features support comparison table (with Slack), to help you select the integration method.
+There are two ways to create a webhook for Microsoft Teams:
 
-| Integration   | Elementary alerts | Elementary report | Multiple channels | Slack workflows |
-| ------------- | ----------------- | ----------------- | ----------------- | --------------- |
-| Teams Webhook | ✅                | ❌                | ❌                | ❌              |
+1. **Microsoft Teams Connectors (Legacy)**: The traditional way of creating webhooks, but this method is being deprecated by Microsoft.
+2. **Power Automate Workflows (Recommended)**: The newer, more flexible way to create webhooks. Note that when using this method, Elementary CLI cannot directly verify if messages were delivered - you'll need to monitor your workflow runs in Power Automate.
+
+Below is a features support comparison table (with Slack), to help you select the integration method.
+
+| Integration              | Elementary alerts | Elementary report | Multiple channels |
+| ------------------------ | ----------------- | ----------------- | ----------------- |
+| Teams Connector (Legacy) | ✅                | ❌                | ❌                |
+| Power Automate Workflows | ✅                | ❌                | ❌                |
+
+**Note:** Microsoft 365 Connectors (previously called Office 365 Connectors) are nearing deprecation. We recommend using Power Automate Workflows for new integrations.
 
 ## Teams integration setup
 
