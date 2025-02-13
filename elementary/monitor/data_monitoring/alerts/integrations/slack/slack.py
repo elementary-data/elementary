@@ -1,7 +1,8 @@
 import json
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Sequence, Union
+from itertools import groupby
+from typing import Any, Dict, List, Optional, Sequence, Union 
 
 from slack_sdk.models.blocks import SectionBlock
 
@@ -11,6 +12,9 @@ from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
+from elementary.monitor.alerts.alerts_groups.grouped_by_owner import (
+    GroupedByOwnerAlerts,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -23,6 +27,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builde
 )
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     get_model_test_runs_link,
+    get_test_runs_by_owner_link,
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.json_utils import (
@@ -687,8 +692,7 @@ class SlackIntegration(BaseIntegration):
                 [
                     self.message_builder.create_context_block(["*Result message*"]),
                     self.message_builder.create_text_section_block(
-                        f"Failed to calculate the source freshness\n"
-                        f"```{alert.error}```"
+                        f"Failed to calculate the source freshness\n```{alert.error}```"
                     ),
                 ]
             )
@@ -871,6 +875,125 @@ class SlackIntegration(BaseIntegration):
         return SlackAlertMessageSchema(
             title=title_blocks, preview=preview_blocks, details=details_blocks
         )
+
+    def _get_group_by_owner_template(
+        self, alert: GroupedByOwnerAlerts, *args, **kwargs
+    ) -> SlackAlertMessageSchema:
+        alerts = alert.alerts
+
+        self.message_builder.add_message_color(self._get_color(alert.status))
+
+        title_blocks = [
+            self.message_builder.create_header_block(
+                f"{self._get_display_name(alert.status)}: {alert.summary}"
+            ),
+            self._get_alert_type_counters_block(alert),
+        ]
+
+        report_link = get_test_runs_by_owner_link(alert.report_url, alert.owner)
+        if report_link:
+            report_link_block = self.message_builder.create_context_block(
+                [
+                    f"<{report_link.url}|{report_link.text}>",
+                ],
+            )
+            title_blocks.append(report_link_block)
+
+        # attention required : owner, subscribers
+        preview_blocks = []
+        owners = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [[alert.owner] if alert.owner else []]
+        )
+        subscribers = list_of_lists_of_strings_to_comma_delimited_unique_strings(
+            [alert.subscribers or [] for alert in alerts]
+        )
+        preview_blocks.append(
+            self.message_builder.create_text_section_block(
+                f"*Owner*: {owners if owners else '_No owners_'}"
+            )
+        )
+        preview_blocks.append(
+            self.message_builder.create_text_section_block(
+                f"*Subscribers*: {subscribers if subscribers else '_No subscribers_'}"
+            )
+        )
+
+        details_blocks = []
+        # Model errors
+        if alert.model_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Model errors*")
+            )
+            details_blocks.append(self.message_builder.create_divider_block())
+            block_header = self.message_builder.create_context_block(
+                self._get_model_error_block_header(alert.model_errors)
+            )
+            block_body = self.message_builder.create_text_section_block(
+                self._get_model_error_block_body(alert.model_errors)
+            )
+            details_blocks.extend([block_header, block_body])
+
+        # Test failures
+        if alert.test_failures:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test failures*")
+            )
+
+            text = ""
+            for model, errors in self._group_alerts_by_model(
+                alert.test_failures
+            ).items():
+                rows = [alert.concise_name for alert in errors]
+                text += f":small_blue_diamond: *{model} ({len(errors)})*\n"
+                text += "\n".join([f"\t:small_red_triangle: {row}" for row in rows])
+                text += "\n"
+            details_blocks.append(self.message_builder.create_text_section_block(text))
+
+        # Test warnings
+        if alert.test_warnings:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test warnings*")
+            )
+            text = ""
+            for model, errors in self._group_alerts_by_model(
+                alert.test_warnings
+            ).items():
+                rows = [alert.concise_name for alert in errors]
+                text += f":small_blue_diamond: *{model} ({len(errors)})*\n"
+                text += "\n".join([f"\t:warning: {row}" for row in rows])
+                text += "\n"
+            details_blocks.append(self.message_builder.create_text_section_block(text))
+
+        # Test errors
+        if alert.test_errors:
+            details_blocks.append(
+                self.message_builder.create_text_section_block("*Test errors*")
+            )
+            text = ""
+            for model, errors in self._group_alerts_by_model(
+                alert.test_errors
+            ).items():
+                rows = [alert.concise_name for alert in errors]
+                text += f":small_blue_diamond: *{model} ({len(errors)})*\n"
+                text += "\n".join([f"\t:exclamation: {row}" for row in rows])
+                text += "\n"
+            details_blocks.append(self.message_builder.create_text_section_block(text))
+
+        return SlackAlertMessageSchema(
+            title=title_blocks, preview=preview_blocks, details=details_blocks
+        )
+
+    @staticmethod
+    def _group_alerts_by_model(
+        alerts: List[TestAlertModel | SourceFreshnessAlertModel],
+    ) -> dict[str, list[TestAlertModel | SourceFreshnessAlertModel]]:
+        def key(e: TestAlertModel | SourceFreshnessAlertModel):
+            if isinstance(e, TestAlertModel):
+                return f"{e.schema_name}.{e.table_name}"
+            else:
+                return f"{e.schema_name}.{e.source_name}"
+
+        return {key: list(group) for key, group in groupby(alerts, key=key)}
 
     def _add_compact_sub_group_details_block(
         self,
@@ -1112,6 +1235,7 @@ class SlackIntegration(BaseIntegration):
         integration_params = self._get_integration_params(alert=alert)
         channel_name = integration_params.get("channel")
         logger.debug(f"Sending alert to Slack channel: {channel_name}")
+        template: SlackMessageSchema | None = None
         try:
             self._fix_owners_and_subscribers(alert)
             template = self._get_alert_template(alert)

@@ -49,7 +49,8 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
     ):
         if preview_blocks:
             validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
-            self._add_blocks_as_attachments(validated_preview_blocks)
+            if validated_preview_blocks:
+                self._add_blocks_as_attachments(validated_preview_blocks)
 
     def add_details_to_slack_alert(
         self,
@@ -86,6 +87,6 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         padding_length = (
             SlackMessageBuilder._MAX_ALERT_PREVIEW_BLOCKS - preview_blocks_count
         )
-        padding = [cls.create_empty_section_block() for i in range(padding_length)]
+        padding = [cls.create_empty_section_block() for _ in range(padding_length)]
         padded_preview_blocks.extend(padding)
         return padded_preview_blocks
