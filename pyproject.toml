@@ -62,3 +62,26 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 edr = "elementary.cli.cli:cli"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+pytest-parametrization = "^2022.2"
+pre-commit = "*"
+mypy = "^1.15"
+
+# MyPy stubs
+types-requests = "^2.32"
+networkx-stubs = "^0.0"
+types-python-dateutil = "^2.9"
+boto3-stubs = "^1.36"
+google-auth-stubs = "^0.3"
+ratelimit-stubs = "^2.2"
+types-google-cloud-ndb = "^2.3"
+types-protobuf = "^5.29"
+types-pytz = "^2025.1"
+types-jsonschema = "^4.23"
+types-PyYAML = "^6.0"
+types-setuptools = "^75.8"
+pandas-stubs = "^2.2"
+types-retry = "^0.9"
+types-decorator = "^5.1"

@@ -60,8 +60,8 @@ jobs:
 
       - name: Install Elementary
         run: |
-          pip install -r dev-requirements.txt
-          pip install ".[snowflake]"
+          pip install poetry
+          poetry install --with dev --extras snowflake
 
       - name: Install dbt package
         run: |
