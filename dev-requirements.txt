@@ -19,3 +19,8 @@ types-setuptools
 pandas-stubs
 types-retry
 types-decorator
+
+Jinja2
+oauthlib
+requests_oauthlib
+simplejson

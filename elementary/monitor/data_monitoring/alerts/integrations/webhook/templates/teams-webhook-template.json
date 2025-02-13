@@ -1,0 +1,309 @@
+{
+  "target_type": "{{ target_type }}",
+  "target_channel": "{{ target_channel }}",
+  "target_recipients": "{{ target_recipients }}",
+  "adaptative_card":
+    {
+    "type": "AdaptiveCard",
+    "body": [
+      {
+        "type": "TextBlock",
+        "size": "Large",
+        "weight": "Bolder",
+        "text": "{{ title| replace('\"', '\\\"') }}",
+        "wrap": true
+      }
+      {% if subtitle and subtitle != None -%},
+      {
+        "type": "TextBlock",
+        "size": "Medium",
+        "weight": "Normal",
+        "text": "{{ subtitle| replace('\"', '\\\"') }}",
+        "wrap": true
+      }
+      {% endif %}
+      {% if text and text != None -%},
+      {
+        "type": "TextBlock",
+        "size": "Small",
+        "weight": "Normal",
+        "text": "{{ text| replace('\"', '\\\"') }}",
+        "wrap": true
+      }
+      {% endif %}
+      {% if report_link and report_link != None -%},
+      {
+        "type": "ActionSet",
+        "actions": [
+            {
+              "type": "Action.OpenUrl",
+              "title": "{{ report_link.text }}",
+              "url": "{{ report_link.url }}"
+            }
+        ]
+      }
+      {% endif %}
+      {% if fields -%},
+      {
+        "type": "FactSet",
+        "facts": [
+          {% for field in fields %}
+          {% if loop.index > 1 %},{% endif %}
+          {
+            "title": "{{ field.key }}",
+            "value": "{{ field.value| replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}"
+          }
+          {% endfor %}
+        ]
+      }
+      {% endif %}
+      {% if model_errors -%},
+      {
+        "type": "TextBlock",
+        "size": "Medium",
+        "weight": "Normal",
+        "text": "Model errors"
+      },
+      {
+        "type": "Table",
+        "columns": [
+          {
+            "width": 1
+          },
+          {
+            "width": 1
+          }
+        ],
+        "rows": [
+          {% for error in model_errors %}
+          {% if loop.index > 1 %},{% endif %}
+          {
+            "type": "TableRow",
+            "cells": [
+              {
+                "type": "TableCell",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "⚫ {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}",
+                    "wrap": true
+                  }
+                ]
+              },
+              {
+                "type": "TableCell",
+                "items": [
+                  {% if error.get_report_link() and error.get_report_link() != None %}
+                  {
+                    "type": "ActionSet",
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "{{ error.get_report_link().text }}",
+                        "url": "{{ error.get_report_link().url }}"
+                      }
+                    ]
+                  }
+                  {% endif %}
+                ]
+              }
+            ]
+          }
+          {% endfor %}
+        ]
+      }
+      {% endif %}
+      {% if test_failures -%},
+      {
+        "type": "TextBlock",
+        "size": "Medium",
+        "weight": "Normal",
+        "text": "Test failures"
+      },
+      {
+        "type": "Table",
+        "columns": [
+          {
+            "width": 1
+          },
+          {
+            "width": 1
+          }
+        ],
+        "rows": [
+          {% for error in test_failures %}
+          {% if loop.index > 1 %},{% endif %}
+          {
+            "type": "TableRow",
+            "cells": [
+              {
+                "type": "TableCell",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "\uD83D\uDED1 {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}",
+                    "wrap": true
+                  }
+                ]
+              },
+              {
+                "type": "TableCell",
+                "items": [
+                  {% if error.get_report_link() and error.get_report_link() != None %}
+                  {
+                    "type": "ActionSet",
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "{{ error.get_report_link().text }}",
+                        "url": "{{ error.get_report_link().url }}"
+                      }
+                    ]
+                  }
+                  {% endif %}
+                ]
+              }
+            ]
+          }
+          {% endfor %}
+        ]
+      }
+      {% endif %}
+      {% if test_warnings -%},
+      {
+        "type": "TextBlock",
+        "size": "Medium",
+        "weight": "Normal",
+        "text": "Test warnings"
+      },
+      {
+        "type": "Table",
+        "columns": [
+          {
+            "width": 1
+          },
+          {
+            "width": 1
+          }
+        ],
+        "rows": [
+          {% for error in test_warnings %}
+          {% if loop.index > 1 %},{% endif %}
+          {
+            "type": "TableRow",
+            "cells": [
+              {
+                "type": "TableCell",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "\uD83D\uDD36 {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}",
+                    "wrap": true
+                  }
+                ]
+              },
+              {
+                "type": "TableCell",
+                "items": [
+                  {% if error.get_report_link() and error.get_report_link() != None %}
+                  {
+                    "type": "ActionSet",
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "{{ error.get_report_link().text }}",
+                        "url": "{{ error.get_report_link().url }}"
+                      }
+                    ]
+                  }
+                  {% endif %}
+                ]
+              }
+            ]
+          }
+          {% endfor %}
+        ]
+      }
+      {% endif %}
+      {% if test_errors -%},
+      {
+        "type": "TextBlock",
+        "size": "Medium",
+        "weight": "Normal",
+        "text": "Test errors"
+      },
+      {
+        "type": "Table",
+        "columns": [
+          {
+            "width": 1
+          },
+          {
+            "width": 1
+          }
+        ],
+        "rows": [
+          {% for error in test_errors %}
+          {% if loop.index > 1 %},{% endif %}
+          {
+            "type": "TableRow",
+            "cells": [
+              {
+                "type": "TableCell",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "\uD83D\uDD34 {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}",
+                    "wrap": true
+                  }
+                ]
+              },
+              {
+                "type": "TableCell",
+                "items": [
+                  {% if error.get_report_link() and error.get_report_link() != None %}
+                  {
+                    "type": "ActionSet",
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "{{ error.get_report_link().text }}",
+                        "url": "{{ error.get_report_link().url }}"
+                      }
+                    ]
+                  }
+                  {% endif %}
+                ]
+              }
+            ]
+          }
+          {% endfor %}
+        ]
+      }
+      {% endif %}
+      {% if anomalous_value and anomalous_value != None %},
+      {
+        "type": "FactSet",
+        "facts": [
+          {
+            "title": "Test results sample",
+            "value": "{{ anomalous_value| replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}"
+          }
+        ]
+      },
+      {% endif %}
+      {% if test_results_sample and test_results_sample != None %},
+      {
+        "type": "FactSet",
+        "facts": [
+          {
+            "title": "Test results sample",
+            "value": "{{ test_results_sample| replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ')  }}"
+          }
+        ]
+      }
+      {% endif %}
+
+    ]
+  }
+}

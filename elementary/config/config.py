@@ -15,6 +15,7 @@ DEFAULT_ENV = "dev"
 
 class Config:
     _SLACK = "slack"
+    _WEBHOOK = "webhook"
     _AWS = "aws"
     _GOOGLE = "google"
     _AZURE = "azure"
@@ -73,6 +74,23 @@ class Config:
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
+
+        webhook_template: Optional[str] = None,
+        webhook_template_dir: Optional[str] = None,
+        webhook_included_html_template: Optional[str] = None,
+        webhook_http_url: Optional[str] = None,
+        webhook_http_content_type: Optional[str] = None,
+        webhook_http_proxy: Optional[str] = None,
+        webhook_http_ssl_verify: Optional[str] = None,
+        webhook_http_auth_scheme: Optional[str] = None,
+        webhook_http_auth_basic_user: Optional[str] = None,
+        webhook_http_auth_basic_pass: Optional[str] = None,
+        webhook_http_auth_oauth2_url: Optional[str] = None,
+        webhook_http_auth_oauth2_client_id: Optional[str] = None,
+        webhook_http_auth_oauth2_secret: Optional[str] = None,
+        webhook_http_auth_oauth2_scope: Optional[str] = None,
+        webhook_target_type: Optional[str] = None,
+        webhook_target_channel: Optional[str] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -107,6 +125,73 @@ class Config:
             config.get("timezone"),
         )
 
+        webhook_config = config.get(self._WEBHOOK, {})
+        self.webhook_template = self._first_not_none(
+            webhook_template,
+            webhook_config.get("template"),
+        )
+        self.webhook_template_dir = self._first_not_none(
+            webhook_template_dir,
+            webhook_config.get("template_dir"),
+        )
+        self.webhook_included_html_template = self._first_not_none(
+            webhook_included_html_template,
+            webhook_config.get("included_html_template"),
+        )
+        self.webhook_http_url = self._first_not_none(
+            webhook_http_url,
+            webhook_config.get("http_url"),
+        )
+        self.webhook_http_content_type = self._first_not_none(
+            webhook_http_content_type,
+            webhook_config.get("http_content_type"),
+        )
+        self.webhook_http_proxy = self._first_not_none(
+            webhook_http_proxy,
+            webhook_config.get("http_proxy"),
+        )
+        self.webhook_http_auth_scheme = self._first_not_none(
+            webhook_http_auth_scheme,
+            webhook_config.get("http_auth_scheme"),
+        )
+        self.webhook_http_ssl_verify = self._first_not_none(
+            webhook_http_ssl_verify,
+            webhook_config.get("http_ssl_verify"),
+        )
+        self.webhook_http_auth_basic_user = self._first_not_none(
+            webhook_http_auth_basic_user,
+            webhook_config.get("http_auth_basic_user"),
+        )
+        self.webhook_http_auth_basic_pass = self._first_not_none(
+            webhook_http_auth_basic_pass,
+            webhook_config.get("http_auth_basic_pass"),
+        )
+        self.webhook_http_auth_oauth2_url = self._first_not_none(
+            webhook_http_auth_oauth2_url,
+            webhook_config.get("http_auth_oauth2_url"),
+        )
+        self.webhook_http_auth_oauth2_client_id = self._first_not_none(
+            webhook_http_auth_oauth2_client_id,
+            webhook_config.get("http_auth_oauth2_client_id"),
+        )
+        self.webhook_http_auth_oauth2_secret = self._first_not_none(
+            webhook_http_auth_oauth2_secret,
+            webhook_config.get("http_auth_oauth2_secret"),
+        ),
+        self.webhook_http_auth_oauth2_scope = self._first_not_none(
+            webhook_http_auth_oauth2_scope,
+            webhook_config.get("http_auth_oauth2_scope"),
+        )
+        self.webhook_target_type = self._first_not_none(
+            webhook_target_type,
+            webhook_config.get("target_type"),
+        )
+        self.webhook_target_channel = self._first_not_none(
+            webhook_target_channel,
+            webhook_config.get("target_channel"),
+        )
+
+
         slack_config = config.get(self._SLACK, {})
         self.slack_webhook = self._first_not_none(
             slack_webhook,
@@ -132,6 +217,7 @@ class Config:
         self.group_alerts_threshold = self._first_not_none(
             group_alerts_threshold,
             slack_config.get("group_alerts_threshold"),
+            webhook_config.get("group_alerts_threshold"),
             self.DEFAULT_GROUP_ALERTS_THRESHOLD,
         )
 
@@ -230,6 +316,10 @@ class Config:
         return self.teams_webhook
 
     @property
+    def has_webhook(self) -> bool:
+        return self.webhook_template
+
+    @property
     def has_s3(self):
         return self.s3_bucket_name
 
@@ -259,17 +349,17 @@ class Config:
         provided_integrations = list(
             filter(
                 lambda provided_integration: provided_integration,
-                [self.has_slack, self.has_teams],
+                [self.has_slack, self.has_teams, self.has_webhook],
             )
         )
         self._validate_timezone()
         if not provided_integrations:
             raise InvalidArgumentsError(
-                "Either a Slack token and a channel, a Slack webhook or a Microsoft Teams webhook is required."
+                "Either a Slack token and a channel, or a webhook is required."
             )
         if len(provided_integrations) > 1:
             raise InvalidArgumentsError(
-                "You provided both a Slack and Teams integration. Please provide only one so we know where to send the alerts."
+                "You provided several integrations. Please provide only one so we know where to send the alerts."
             )
 
     def validate_send_report(self):

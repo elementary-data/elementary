@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Card</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .large {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .medium {
+            font-size: 18px;
+        }
+        .small {
+            font-size: 14px;
+        }
+        .fact-set {
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="large">{{ title| replace('\"', '\\\"') }}</div>
+    
+    {% if subtitle and subtitle != None %}
+    <div class="medium">{{ subtitle| replace('\"', '\\\"') }}</div>
+    {% endif %}
+    
+    {% if text and text != None %}
+    <div class="small">{{ text| replace('\"', '\\\"') }}</div>
+    {% endif %}
+    
+    {% if report_link and report_link != None %}
+    <div>
+        <a href="{{ report_link.url }}">{{ report_link.text }}</a>
+    </div>
+    {% endif %}
+    
+    {% if fields %}
+    <div class="fact-set">
+        <h4>Facts</h4>
+        <ul>
+            {% for field in fields %}
+            <li><strong>{{ field.key }}:</strong> {{ field.value| replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    {% if model_errors %}
+    <div class="medium">Model errors</div>
+    <table>
+        <tr>
+            <th>Error Summary</th>
+            <th>Report Link</th>
+        </tr>
+        {% for error in model_errors %}
+        <tr>
+            <td>⚫ {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}</td>
+            <td>
+                {% if error.get_report_link() and error.get_report_link() != None %}
+                <a href="{{ error.get_report_link().url }}">{{ error.get_report_link().text }}</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    
+    {% if test_failures %}
+    <div class="medium">Test failures</div>
+    <table>
+        <tr>
+            <th>Failure Summary</th>
+            <th>Report Link</th>
+        </tr>
+        {% for error in test_failures %}
+        <tr>
+            <td>🚧 {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}</td>
+            <td>
+                {% if error.get_report_link() and error.get_report_link() != None %}
+                <a href="{{ error.get_report_link().url }}">{{ error.get_report_link().text }}</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    
+    {% if test_warnings %}
+    <div class="medium">Test warnings</div>
+    <table>
+        <tr>
+            <th>Warning Summary</th>
+            <th>Report Link</th>
+        </tr>
+        {% for error in test_warnings %}
+        <tr>
+            <td>⚠️ {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}</td>
+            <td>
+                {% if error.get_report_link() and error.get_report_link() != None %}
+                <a href="{{ error.get_report_link().url }}">{{ error.get_report_link().text }}</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    
+    {% if test_errors %}
+    <div class="medium">Test errors</div>
+    <table>
+        <tr>
+            <th>Error Summary</th>
+            <th>Report Link</th>
+        </tr>
+        {% for error in test_errors %}
+        <tr>
+            <td>🔴 {{ error.summary | replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}</td>
+            <td>
+                {% if error.get_report_link() and error.get_report_link() != None %}
+                <a href="{{ error.get_report_link().url }}">{{ error.get_report_link().text }}</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    
+    {% if anomalous_value and anomalous_value != None %}
+    <div class="fact-set">
+        <strong>Test results sample:</strong> {{ anomalous_value| replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}
+    </div>
+    {% endif %}
+    
+    {% if test_results_sample and test_results_sample != None %}
+    <div class="fact-set">
+        <strong>Test results sample:</strong> {{ test_results_sample| replace('\\', '') | replace('\"', '\\\"') | replace('\n', ' ') }}
+    </div>
+    {% endif %}
+
+</body>
+</html>

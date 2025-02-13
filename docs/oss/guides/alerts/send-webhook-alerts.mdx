@@ -1,0 +1,265 @@
+---
+title: "Setup Webhook alerts"
+---
+
+<Info>
+
+**Before you start**
+
+Before you can start using the alerts, make sure to [install the dbt package](/oss/quickstart/quickstart-cli-package), [configure a profile and install the CLI](/oss/quickstart/quickstart-cli).
+This is **required for the alerts to work.**
+
+<br />
+</Info>
+
+Webhook alerts is a Jinja2 templated system that can be used with any http API.
+
+They need to be configured in the `config.yml`, for which actual parameters are :
+
+```
+webhook:
+
+  # general parameters
+  template: <the name of the jinja2 template> # mandatory
+  template_dir: <the local directory where reside the templates>
+  group_alerts_threshold: <the min number of alerts to send grouped>
+  included_html_template: <the name of another template to facilitate the definition of an html body>
+  target_type: <a type, that can be communicated to the API>
+  target_channel: <a channel, that can be communicated to the API>
+
+  # transport parameters
+  http_url: <the url of the API/webhook> # mandatory
+  http_content_type: <content type of the API, eg application/json> # mandatory
+  http_ssl_verify: <False, True (default) or a crt bundle file path>
+  http_auth_scheme: <basic or oauth2>
+  http_proxy: <url of a proxy eg http://myproxy:80, http://user:pass@myproxy:80>
+  http_auth_basic_user: <the username for basic auth>
+  http_auth_basic_pass: <the password for basic auth>
+  http_auth_oauth2_url: <the authentication API URL for Oauth2>
+  http_auth_oauth2_client_id: <the client id for Oauth2>
+  http_auth_oauth2_secret: <the secret for Oauth2>
+  http_auth_oauth2_scope: <the scopes for Oauth2, "," separator>
+
+```
+
+##Usage example
+
+Teams integration : Teams webhooks are deprecated. The only way to send alarts to Teams will soon be PowerAutomate workflows
+
+Let's create a Teams notification
+
+<Accordion title="Create a new Team">
+
+##Create a new Team
+
+Go to the Microsoft Teams desktop app and create a new team.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707202577/ghoizqzywicyipr7nbrm.png"
+  alt="Microsoft Teams team"
+/>
+
+Create a team from from a template and use the `From Scratch` template.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707202897/dhftnz4zc0jsuay6eh2c.png"
+  alt="Microsoft Teams template"
+/>
+
+Choose `Public` as the kind of a team.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203017/s2buhk5yncmortzlvge5.png"
+  alt="Microsoft Teams public team"
+/>
+
+Call it `Elementary` (or whatever you prefer) and connect it to the workspace of your choice.
+
+<img
+  src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203137/jw2wgscz9cruarapmzpj.png"
+  alt="Microsoft Teams Elementary team"
+/>
+
+</Accordion>
+
+<Accordion title="Create a new workflow">
+
+## Create the workflow
+
+Create a new `instant cloud flow` and choose "When a HTTP request is received" as trigger
+
+<img
+  src="https://drive.google.com/file/d/1ZMoi6vEzz-NxOHuLTsy1v3r0N0KThsr0/view?usp=sharing"
+  alt="Power automate new instant cloud flow"
+/>
+
+Choose "Anyone" for the parameter "Who can trigger the flow" and paste this JSON schema
+
+```
+{
+    "type": "object",
+    "properties": {
+        "target_type": {
+            "type": "string"
+        },
+        "target_channel": {
+            "type": "string"
+        },
+        "target_recipients": {
+            "type": "string"
+        },
+        "adaptative_card": {
+            "type": "object"
+        }
+    }
+}
+```
+
+<img
+  src="https://drive.google.com/file/d/16F9WzrlSddVf1GqzVB0buOltdOXNU8it/view?usp=sharing"
+  alt="When a HTTP request is received trigger"
+/>
+
+Add a new action "Post card in a chat or channel"
+
+<img
+  src="https://drive.google.com/file/d/1k13XIREpLcZs1wPoHNUnKPmYGSbtSj8U/view?usp=sharing"
+  alt="Post card in channel action"
+/>
+
+Verify on the bottom that you are connected to your Teams and choose the destination of the notification, eg a channel
+
+Choose your team, then channel, and use the dynamic tool to select "adaptative_card" pour the so named field
+
+<img
+  src="https://drive.google.com/file/d/1z6E5ncAhu_Ww-FO3HSt8oANEFmJaotII/view?usp=sharing"
+  alt="Action configuration"
+/>
+
+Note : you can use the field "target_type' et "target_channel" coming from the trigger to make the channel dynamic
+
+Save your instant flow, you can now copy the trigger public URL
+
+<img
+  src="https://drive.google.com/file/d/1PokK1Pp_JXVEkfZ-QtaOD4XKhtMYsLgK/view?usp=sharing"
+  alt="Trigger URL"
+/>
+
+</Accordion>
+
+<Accordion title="Configure alert">
+
+## Configure elementary alerts
+
+Create or update your config.yml elementary config file with theses parameters :
+
+```
+webhook:
+  http_content_type: application/json
+  template: teams-webhook-template.json
+  http_url: <The previous trigger URL>
+```
+
+That's all. Monitor action should now send alerts to the teams channel
+
+A single test failure alert :
+
+<img
+  src="https://drive.google.com/file/d/1OYsTONGVWXNUmOQ9QgXMA84kP7Yn5g6Y/view?usp=sharing"
+  alt="Test alert"
+/>
+
+A grouped alert :
+
+<img
+  src="https://drive.google.com/file/d/1yEBWqzpfdSNKVnDarSP2xK8nC9Z4ZEcP/view?usp=sharing"
+  alt="Grouped alert"
+/>
+
+</Accordion>
+
+## Custom template
+
+Stock templates reside in elementary/monitor/data_monitoring/alerts/integrations/webhook/templates directory
+
+You can copy anyone of the template in a local directory, adapt it and use it with any HTTP webhook system.
+
+If you need to embed HTML into a JSON payload, you can define the HTML in a HTML template the embed it into a JSON template
+
+The HTML template :
+
+```
+<!DOCTYPE html>
+<html lang="fr">
+<body>
+    <div class="large">{{ title }}</div>
+</body>
+</html>
+```
+
+The JSON template :
+
+```
+{
+    "messages": [
+      {
+        "html": {{ included_html }},
+        "from": {
+          "email": "god@even.com"
+        },
+        "replyTo": {
+          "email": "god@even.com"
+        },
+        "subject": "{{ title }}",
+        "to": [
+          {% for  recipient in recipients %}
+          {% if loop.index > 1 %},{% endif %}
+          {
+            "email": "{{ recipient }}"
+          }
+          {% endfor %}
+        ]
+      }
+    ]
+}
+```
+
+The config.yml file :
+
+```
+webhook:
+  http_content_type: application/json
+  template_dir: /home/workspace/templates
+  template: json-template.json
+  included_html_template: html-template.html
+  http_url: https://some_unauthenticated_private_api/v1/email/send
+
+```
+
+## Execute the CLI
+
+Make sure to run the following command after your dbt runs and tests:
+
+```
+edr monitor --group-by [table | alert]
+```
+---
+
+## Alert on source freshness failures
+
+_Not supported in dbt cloud_
+
+To alert on source freshness, you will need to run `edr run-operation upload-source-freshness` right after each execution of `dbt source freshness`.
+This operation will upload the results to a table, and the execution of `edr monitor` will send the actual alert.
+
+- Note that `dbt source freshness` and `upload-source-freshness` needs to run from the same machine.
+- Note that `upload-source-freshness` requires passing `--project-dir` argument.
+
+## Continuous alerting
+
+In order to monitor continuously, use your orchestrator to execute it regularly (we recommend running it right after
+your dbt job ends to monitor the latest data updates).
+
+Read more about how to deploy [Elementary in production](/oss/deployment-and-configuration/elementary-in-production).
+If you need help or wish to consult on this, reach out to us
+on [Slack](https://elementary-data.com/community).
