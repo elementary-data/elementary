@@ -71,7 +71,7 @@
           "actions": [
             {
               "type": "Action.ToggleVisibility",
-              "title": "Model Configuration",
+              "title": "Result",
               "targetElements": [
                 "expandable-00000000-0000-0000-0000-000000000001"
               ]
@@ -81,6 +81,52 @@
         {
           "type": "Container",
           "id": "expandable-00000000-0000-0000-0000-000000000001",
+          "items": [
+            {
+              "type": "Container",
+              "separator": true,
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "**Result Message**",
+                  "wrap": true
+                },
+                {
+                  "type": "Container",
+                  "style": "emphasis",
+                  "items": [
+                    {
+                      "type": "RichTextBlock",
+                      "inlines": [
+                        {
+                          "type": "TextRun",
+                          "text": "Database Error in incremental my_failed_dbt_model\n(models/example/my_failed_dbt_model.sql)\n syntax error at or near \")\"\n LINE 19: \t); \n\t\t^",
+                          "fontType": "Monospace"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "isVisible": false
+        },
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.ToggleVisibility",
+              "title": "Model Configuration",
+              "targetElements": [
+                "expandable-00000000-0000-0000-0000-000000000002"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "id": "expandable-00000000-0000-0000-0000-000000000002",
           "items": [
             {
               "type": "Container",
@@ -107,5 +153,5 @@
       ]
     }
   ],
-  "version": "1.6"
+  "version": "1.5"
 }

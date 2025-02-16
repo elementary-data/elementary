@@ -205,7 +205,7 @@ def format_adaptive_card_body(message: MessageBody) -> List[Dict[str, Any]]:
     return format_message_blocks(message.blocks, message.color)
 
 
-def format_adaptive_card(message: MessageBody, version: str = "1.6") -> Dict[str, Any]:
+def format_adaptive_card(message: MessageBody, version: str = "1.5") -> Dict[str, Any]:
     if version < "1.2" or version > "1.6":
         raise ValueError(f"Version {version} is not supported")
     return {

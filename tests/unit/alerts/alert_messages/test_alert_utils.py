@@ -76,7 +76,7 @@ def build_base_model_alert_model(
     full_refresh: bool,
     detected_at: datetime,
     alias: str,
-    message: str,
+    message: Optional[str] = None,
     suppression_interval: Optional[int] = None,
     env: Optional[str] = None,
 ) -> ModelAlertModel:
