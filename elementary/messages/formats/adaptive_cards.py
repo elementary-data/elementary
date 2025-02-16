@@ -52,6 +52,8 @@ def format_inline_block(block: InlineBlock) -> str:
         return block.code
     elif isinstance(block, MentionBlock):
         return block.user
+    elif isinstance(block, LineBlock):
+        return format_line_block_text(block)
     else:
         raise ValueError(f"Unsupported inline block type: {type(block)}")
 

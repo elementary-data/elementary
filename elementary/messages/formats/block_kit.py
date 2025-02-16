@@ -76,6 +76,8 @@ class BlockKitBuilder:
                 return f"<@{resolved_user}>"
             else:
                 return block.user
+        elif isinstance(block, LineBlock):
+            return self._format_line_block_text(block)
         else:
             raise ValueError(f"Unsupported inline block type: {type(block)}")
 

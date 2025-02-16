@@ -26,6 +26,7 @@ from elementary.messages.blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TextBlock,
     TextStyle,
 )
@@ -389,10 +390,12 @@ class AlertMessageBuilder:
         if owners := list(set(alert.owners)):
             inlines.append(TextBlock(text="-"))
             if len(owners) == 1:
-                inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
+                inlines.append(TextBlock(text="Owner:"))
+                inlines.append(MentionBlock(user=owners.pop()))
             else:
                 owners.sort()
-                inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
+                inlines.append(TextBlock(text="Owners:"))
+                inlines.append(MentionLineBlock(*owners))
 
         if report_link := alert.get_report_link():
             inlines.append(TextBlock(text="-"))

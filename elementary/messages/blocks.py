@@ -61,7 +61,22 @@ class MentionBlock(BaseInlineTextBlock):
     user: str
 
 
-InlineBlock = Union[TextBlock, LinkBlock, IconBlock, InlineCodeBlock, MentionBlock]
+class LineBlock(BaseBlock):
+    type: Literal["line"] = "line"
+    inlines: Sequence["InlineBlock"]
+    sep: str = " "
+
+
+InlineBlock = Union[
+    TextBlock,
+    LinkBlock,
+    IconBlock,
+    InlineCodeBlock,
+    MentionBlock,
+    "LineBlock",
+]
+
+LineBlock.update_forward_refs()
 
 
 class HeaderBlock(BaseBlock):
@@ -76,12 +91,6 @@ class CodeBlock(BaseBlock):
 
 class DividerBlock(BaseBlock):
     type: Literal["divider"] = "divider"
-
-
-class LineBlock(BaseBlock):
-    type: Literal["line"] = "line"
-    inlines: Sequence[InlineBlock]
-    sep: str = " "
 
 
 class BaseLinesBlock(BaseBlock):

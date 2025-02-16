@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Iterator, NewType, Optional
+from typing import Dict, Iterator, NewType, Optional, TypeAlias
 
 from pydantic import BaseModel
 from ratelimit import limits, sleep_and_retry
@@ -28,7 +28,7 @@ ONE_MINUTE = 60
 ONE_SECOND = 1
 
 
-Channel = NewType("Channel", str)
+Channel: TypeAlias = str
 
 
 class SlackWebMessageContext(BaseModel):
