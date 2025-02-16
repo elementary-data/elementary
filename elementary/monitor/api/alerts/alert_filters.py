@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from elementary.monitor.data_monitoring.schema import (
+    FilterFields,
     FiltersSchema,
     ResourceType,
     Status,
@@ -51,6 +52,10 @@ def apply_filters_schema_on_alert(
     owners = alert.data.unified_owners or []
     status = Status(alert.data.status)
     resource_type = ResourceType(alert.data.resource_type)
+    if hasattr(alert.data, "test_unique_id"):
+        test_ids = [alert.data.test_unique_id] if alert.data.test_unique_id else []
+    else:
+        test_ids = []
 
     alert_node_name = _get_alert_node_name(alert)
     node_names = (
@@ -60,12 +65,15 @@ def apply_filters_schema_on_alert(
     )
 
     return filters_schema.apply(
-        tags=tags,
-        models=models,
-        owners=owners,
-        statuses=[status],
-        resource_types=[resource_type],
-        node_names=node_names,
+        FilterFields(
+            tags=tags,
+            models=models,
+            owners=owners,
+            statuses=[status],
+            resource_types=[resource_type],
+            node_names=node_names,
+            test_ids=test_ids,
+        )
     )
 
 

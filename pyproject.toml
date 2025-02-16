@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elementary-data"
-version = "0.16.1"
+version = "0.16.2"
 description = "Data monitoring and lineage"
 authors = ["Elementary"]
 keywords = ["data", "lineage", "data lineage", "data warehouse", "DWH", "observability", "data monitoring", "data observability", "Snowflake", "BigQuery", "Redshift", "data reliability", "analytics engineering"]
