@@ -309,8 +309,9 @@ def assert_expected_json_on_all_formats(
         messaging_integration = SlackWebMessagingIntegration.from_token(
             token=os.environ["TEST_SLACK_TOKEN"],
         )
-        messaging_integration.send_message(
-            os.environ["TEST_SLACK_CHANNEL"], message_body
+        messaging_integration._send_message(
+            os.environ["TEST_SLACK_CHANNEL"],
+            block_kit_json,
         )
     expected_block_kit_json_path = get_expected_json_path(
         FIXTURES_DIR, block_kit_filename

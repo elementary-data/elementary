@@ -64,7 +64,7 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owner: owner1\n\u274c *dbt failed to build table \"test_model\"* - Owners: owner1, owner2\n\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owner: owner1\n\u274c *dbt failed to build table \"test_model\"* - Owners: owner1, owner2\n\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owner: owner1\n\u274c *dbt failed to build table \"test_model\"* - Owners: owner1, owner2\n\u274c *dbt failed to build table \"test_model\"*"
+            "text": "\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owner: <@resolved_owner1>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owner: <@resolved_owner1>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owner: <@resolved_owner1>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u274c *dbt failed to build table \"test_model\"*"
           }
         },
         {
@@ -81,7 +81,7 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "\u2757 *\"test_short_name\" test failed on test_table_1*\n\u2757 *\"test_short_name\" test failed on test_table_2* - Owner: owner1\n\u2757 *\"test_short_name\" test failed on test_table_3* - Owners: owner1, owner2\n\u2757 *\"test_short_name\" test failed on test_table_4*\n\u2757 *\"test_short_name\" test failed on test_table_5* - Owner: owner1\n\u2757 *\"test_short_name\" test failed on test_table_6* - Owners: owner1, owner2\n\u2757 *\"test_short_name\" test failed on test_table_7*\n\u2757 *\"test_short_name\" test failed on test_table_8* - Owner: owner1\n\u2757 *\"test_short_name\" test failed on test_table_9* - Owners: owner1, owner2\n\u2757 *\"test_short_name\" test failed on test_table_10*"
+            "text": "\u2757 *\"test_short_name\" test failed on test_table_1*\n\u2757 *\"test_short_name\" test failed on test_table_2* - Owner: <@resolved_owner1>\n\u2757 *\"test_short_name\" test failed on test_table_3* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u2757 *\"test_short_name\" test failed on test_table_4*\n\u2757 *\"test_short_name\" test failed on test_table_5* - Owner: <@resolved_owner1>\n\u2757 *\"test_short_name\" test failed on test_table_6* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u2757 *\"test_short_name\" test failed on test_table_7*\n\u2757 *\"test_short_name\" test failed on test_table_8* - Owner: <@resolved_owner1>\n\u2757 *\"test_short_name\" test failed on test_table_9* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u2757 *\"test_short_name\" test failed on test_table_10*"
           }
         }
       ],
