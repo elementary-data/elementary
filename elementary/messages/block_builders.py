@@ -43,7 +43,7 @@ def BulletListBlock(
         IconBlock(icon=icon) if isinstance(icon, Icon) else TextBlock(text=icon)
     )
     lines = [
-        LineBlock(inlines=[icon_inline] + line.inlines, sep=line.sep) for line in lines
+        LineBlock(inlines=[icon_inline, *line.inlines], sep=line.sep) for line in lines
     ]
     return LinesBlock(lines=lines)
 

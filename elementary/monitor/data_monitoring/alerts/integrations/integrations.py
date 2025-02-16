@@ -68,5 +68,5 @@ class Integrations:
                 return config.slack_channel_name
             return metadata.get("channel", config.slack_channel_name)
         elif isinstance(integration, SlackWebhookMessagingIntegration):
-            return None
+            return cast(DestinationType, None)
         raise UnsupportedAlertIntegrationError

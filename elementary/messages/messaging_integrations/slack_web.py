@@ -1,11 +1,12 @@
 import json
-from typing import Dict, Iterator, NewType, Optional, TypeAlias
+from typing import Dict, Iterator, Optional
 
 from pydantic import BaseModel
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+from typing_extensions import TypeAlias
 
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,
@@ -89,7 +90,7 @@ class SlackWebMessagingIntegration(
             )
         except SlackApiError as e:
             self._handle_send_err(e, destination)
-            return self._send_message(destination, body, thread_ts)
+            return self._send_message(destination, formatted_message, thread_ts)
 
         return MessageSendResult(
             message_context=SlackWebMessageContext(
