@@ -1,0 +1,57 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Failure: dbt failed to build snapshot \"test_snapshot\""
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Snapshot:* test_snapshot | *Status:* fail | *Time:* 2025-02-03 13:21:07 UTC | *Suppression interval:* 24\n<http://test.com|View in Elementary>"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\ntag1, tag2"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

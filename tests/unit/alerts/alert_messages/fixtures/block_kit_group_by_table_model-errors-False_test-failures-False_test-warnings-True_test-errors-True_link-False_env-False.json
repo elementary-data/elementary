@@ -1,0 +1,91 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Error: test_model_unique_id: 20 issues detected"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "\u26a0\ufe0f *Test Warnings:* 10 | \u2757 *Test Errors:* 10"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\ntag1"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Warnings*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u26a0\ufe0f *\"test_short_name\" test failed on test_table_1*\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_2* - Owner: owner1\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_3* - Owners: owner1, owner2\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_4*\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_5* - Owner: owner1\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_6* - Owners: owner1, owner2\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_7*\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_8* - Owner: owner1\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_9* - Owners: owner1, owner2\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_10*"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Errors*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2757 *\"test_short_name\" test failed on test_table_1*\n\u2757 *\"test_short_name\" test failed on test_table_2* - Owner: owner1\n\u2757 *\"test_short_name\" test failed on test_table_3* - Owners: owner1, owner2\n\u2757 *\"test_short_name\" test failed on test_table_4*\n\u2757 *\"test_short_name\" test failed on test_table_5* - Owner: owner1\n\u2757 *\"test_short_name\" test failed on test_table_6* - Owners: owner1, owner2\n\u2757 *\"test_short_name\" test failed on test_table_7*\n\u2757 *\"test_short_name\" test failed on test_table_8* - Owner: owner1\n\u2757 *\"test_short_name\" test failed on test_table_9* - Owners: owner1, owner2\n\u2757 *\"test_short_name\" test failed on test_table_10*"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

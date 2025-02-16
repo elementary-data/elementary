@@ -2,13 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
+    assert_expected_json_on_all_formats,
     build_base_test_alert_model,
     get_alert_message_body,
     get_mock_report_link,
 )
-from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -18,7 +17,7 @@ def build_dbt_test_alert_model(*args, **kwargs):
     return build_base_test_alert_model(*args, test_type="dbt_test", **kwargs)
 
 
-def get_expected_adaptive_filename(
+def get_expected_filename(
     status: str,
     has_link: bool,
     has_description: bool,
@@ -30,7 +29,7 @@ def get_expected_adaptive_filename(
     has_env: bool,
 ) -> str:
     return (
-        f"adaptive_card_dbt_test_alert"
+        f"dbt_test_alert"
         f"_status-{status}"
         f"_link-{has_link}"
         f"_description-{has_description}"
@@ -40,7 +39,6 @@ def get_expected_adaptive_filename(
         f"_error-{has_error}"
         f"_sample-{has_sample}"
         f"_env-{has_env}"
-        ".json"
     )
 
 
@@ -90,7 +88,7 @@ def test_get_dbt_test_alert_message_body(
     )
 
     message_body = get_alert_message_body(test_alert_model)
-    adaptive_card_filename = get_expected_adaptive_filename(
+    filename = get_expected_filename(
         status=status,
         has_link=has_link,
         has_description=has_description,
@@ -101,8 +99,4 @@ def test_get_dbt_test_alert_message_body(
         has_sample=has_sample,
         has_env=has_env,
     )
-    adaptive_card_json = format_adaptive_card(message_body)
-    expected_adaptive_card_json_path = get_expected_json_path(
-        FIXTURES_DIR, adaptive_card_filename
-    )
-    assert_expected_json(adaptive_card_json, expected_adaptive_card_json_path)
+    assert_expected_json_on_all_formats(filename, message_body)

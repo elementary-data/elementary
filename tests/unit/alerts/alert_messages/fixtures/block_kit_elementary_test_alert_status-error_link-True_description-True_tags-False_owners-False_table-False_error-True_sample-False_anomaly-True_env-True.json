@@ -1,0 +1,95 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Error: \"test_short_name\" test failed"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Test:* test_short_name | *Env:* Test Env | *Status:* error | *Time:* N/A\n<http://test.com|View in Elementary>"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\n_No tags_"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n_No owners_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Description*\nTest description"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Result Message*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```Test error message```"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Anomalous Values*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```{\n  \"anomalous_value\": 42\n}```"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}
