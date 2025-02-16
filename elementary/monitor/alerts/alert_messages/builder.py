@@ -534,7 +534,7 @@ class AlertMessageBuilder:
             )
             title = "Test Result"
         elif isinstance(alert, ModelAlertModel):
-            if alert.materialization == "snapshot":
+            if alert.message:
                 result_blocks = self._get_result_blocks(
                     result_message=alert.message,
                 )
