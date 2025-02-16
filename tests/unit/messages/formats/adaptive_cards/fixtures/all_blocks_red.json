@@ -85,6 +85,11 @@
             }
           ],
           "isVisible": false
+        },
+        {
+          "type": "TextBlock",
+          "text": "user1 select 1",
+          "wrap": true
         }
       ]
     }

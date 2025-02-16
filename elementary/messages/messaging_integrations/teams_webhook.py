@@ -11,7 +11,6 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
     MessageSendResult,
 )
 from elementary.messages.messaging_integrations.exceptions import (
-    MessageIntegrationReplyNotSupportedError,
     MessagingIntegrationError,
 )
 from elementary.utils.log import get_logger
@@ -25,7 +24,6 @@ class ChannelWebhook(BaseModel):
 
 
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
-    """Sends an Adaptive Card to the specified webhook URL."""
     payload = {
         "type": "message",
         "attachments": [
@@ -70,13 +68,3 @@ class TeamsWebhookMessagingIntegration(
 
     def supports_reply(self) -> bool:
         return False
-
-    def reply_to_message(
-        self,
-        destination: ChannelWebhook,
-        message_context: ChannelWebhook,
-        body: MessageBody,
-    ) -> MessageSendResult[ChannelWebhook]:
-        raise MessageIntegrationReplyNotSupportedError(
-            "Teams webhook message integration does not support replying to messages"
-        )

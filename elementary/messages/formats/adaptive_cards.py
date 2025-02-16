@@ -10,9 +10,11 @@ from elementary.messages.blocks import (
     Icon,
     IconBlock,
     InlineBlock,
+    InlineCodeBlock,
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TextBlock,
     TextStyle,
 )
@@ -46,6 +48,10 @@ def format_inline_block(block: InlineBlock) -> str:
         return format_text_block(block)
     elif isinstance(block, LinkBlock):
         return f"[{block.text}]({block.url})"
+    elif isinstance(block, InlineCodeBlock):
+        return block.code
+    elif isinstance(block, MentionBlock):
+        return block.user
     else:
         raise ValueError(f"Unsupported inline block type: {type(block)}")
 

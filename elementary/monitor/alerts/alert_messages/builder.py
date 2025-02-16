@@ -8,6 +8,7 @@ from elementary.messages.block_builders import (
     ItalicTextLineBlock,
     JsonCodeBlock,
     LinkLineBlock,
+    MentionLineBlock,
     NonPrimaryFactBlock,
     PrimaryFactBlock,
     SummaryLineBlock,
@@ -21,6 +22,7 @@ from elementary.messages.blocks import (
     HeaderBlock,
     Icon,
     InlineBlock,
+    InlineCodeBlock,
     LineBlock,
     LinesBlock,
     LinkBlock,
@@ -222,12 +224,12 @@ class AlertMessageBuilder:
             else ItalicTextLineBlock(text="No tags")
         )
         owners_line = (
-            TextLineBlock(text=", ".join(owners))
+            MentionLineBlock(*owners)
             if owners
             else ItalicTextLineBlock(text="No owners")
         )
         subscribers_line = (
-            TextLineBlock(text=", ".join(subscribers))
+            MentionLineBlock(*subscribers)
             if subscribers
             else ItalicTextLineBlock(text="No subscribers")
         )
@@ -247,7 +249,12 @@ class AlertMessageBuilder:
             )
         if path:
             fact_blocks.append(
-                PrimaryFactBlock((TextLineBlock(text="Path"), TextLineBlock(text=path)))
+                PrimaryFactBlock(
+                    (
+                        TextLineBlock(text="Path"),
+                        LineBlock(inlines=[InlineCodeBlock(code=path)]),
+                    )
+                )
             )
         blocks.append(FactListBlock(facts=fact_blocks))
         return blocks

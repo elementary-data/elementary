@@ -4,13 +4,6 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "*Show More*"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
         "text": "Hidden content"
       }
     }

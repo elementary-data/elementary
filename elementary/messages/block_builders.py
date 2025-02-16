@@ -11,6 +11,7 @@ from .blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TextBlock,
     TextStyle,
 )
@@ -138,3 +139,7 @@ def TitledParagraphBlock(
 
 def JsonCodeBlock(*, content: Union[str, dict, list], indent: int = 2) -> CodeBlock:
     return CodeBlock(text=json.dumps(content, indent=indent))
+
+
+def MentionLineBlock(*users: str) -> LineBlock:
+    return LineBlock(inlines=[MentionBlock(user=user) for user in users], sep=", ")
