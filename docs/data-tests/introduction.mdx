@@ -3,6 +3,17 @@ title: "Elementary Data Tests"
 sidebarTitle: "Introduction"
 ---
 
+The Elementary dbt package offers two test types:
+
+- **Pipeline tests:** Monitor the health of data pipelines, ensuring timely and smooth data ingestion, transformation, and loading.
+- **Data quality tests:** Validate data accuracy, completeness, and correctness, detect anomalies and schema changes, and ensure the data meets predefined business rules.
+
+Together, these tests ensure reliable pipelines and trusted data.
+
+<Tip>In addition to the previously mentioned tests, the [Elementary Cloud Platform](https://docs.elementary-data.com/cloud/introduction) offers **automated pipeline tests.** While traditional tests query the dbt tables directly, automated pipeline tests analyze **query history metadata**. This method is both **faster and more cost-efficient**, as it eliminates the need to query large datasets, focusing solely on the metadata layer.</Tip>
+
+Elementary automatically creates monitors for every model and source in your dbt project once you set up your environment, no configuration is required. Learn more about [automated tests](https://docs.elementary-data.com/features/anomaly-detection/automated-monitors).
+
 Elementary provides tests for detection of data quality issues.
 Elementary data tests are configured and executed like native tests in your dbt project.
 

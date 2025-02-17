@@ -1,0 +1,134 @@
+---
+title: "Governance for observability"
+---
+
+For an effective data observability process, it’s recommended to establish clear ownership, priorities and segmentation of data assets. This structure enhances governance, speeds up issue resolution, and improves data health tracking.
+
+Segmenting assets organizes data into manageable units, making monitoring and triage easier. Ownership ensures accountability, with specific individuals responsible for quality and response to incidents.
+
+## Introduction to tags, owners and subscribers
+
+### Tags
+
+As your data platform evolves and more people are maintaining it, structure and context become significantly more important. Tags are a great tool to create that context, and segment your data assets by business domains, data products, priority, etc.
+
+In Elementary tags are automatically included in alerts, and you can create rules to distribute alerts to different channels by tag. Additionally, different views in the platform can be filtered by tag, and provide a view for a subset of your data assets.
+
+- Tags for tables can be added in code at the model or folder level, and the `tags` key.
+- It’s recommended to leverage dbt directories hierarchy to set tags to entire directories (in the dbt_project.yml). Tags are aggregated, so if a specific model under the directory has a different tag, the model will have both tags.
+
+```yaml
+models:
+	analytics:
+    marketing:
+	    +tags: marketing
+	    public:
+		    +tags: marketing-public
+```
+
+- Tags for tests can be added in code or in the Elementary UI when adding a test.
+
+### Owners and subscribers
+
+The best method to reduce time to response when there is a data issue is having a clear owner that is in charge of initial triage and accountable for the asset health. In Elementary owners are automatically tagged in alerts. Additionally, different views in the platform can be filtered by owner.
+
+A data asset or test should have only one owner, but other people might want to be notified on issues. These people can be listed as subscribers, and will be automatically tagged in alerts.
+
+- If you use a valid Slack / MS teams user as owner / subscriber, they will be tagged in alerts.
+- The owner of an asset should be the person / team that is expected to respond to an issue in that asset.
+- If there are specific tests or monitors that are relevant to other people, they can be the owners of these tests.
+  For example: A data engineer is the owner of a model and will be notified on freshness, volume, and data validations issues. A data analyst added some custom SQL tests to validate business logic on this model, and he owns these tests.
+- It’s recommended to leverage dbt directories hierarchy to set owners to entire directories (in the dbt_project.yml). Owners are unique, so an owner that is defined on a model overrides the directory configuration. (Subscribers are aggregated).
+
+```yaml
+models:
+  - name: return_on_ad_spend
+    tags:
+	    - marketing-public
+	    - marketing
+    meta:
+	    owner: :"@analytics.engineer"
+      subscribers:
+      - "@marketing.data.analyst"
+      - "@another.marketing.data.analyst"
+```
+
+## Business domains & Data products
+
+- We recommend configuring the following tags for models:
+  - **Business domains** - These tags should be useful to understand what is the business context of the asset, and for stakeholders to filter and view the status of assets relevant to their business unit. Relevant examples are tags such as: `product-analytics` , `marketing` , `finance` , etc.
+  - **Data products** - Public tables that are exposed as “data products” to data consumers. These are the most important tables within a specific domain, similar to an API for an application. Public tables are usually the interface and focal point between analytics engineers and data analysts. It's crucial for both to be aware of any data issues in these tables. Relevant examples are tags such as: `product-analytics-public` , `marketing-public` , `data-science-public` , etc.
+  - Another possible implementation is using 3 types of tags -
+    - `marketing-internal` for all internal transformations on marketing data.
+    - `marketing-public` for all public-facing marketing data.
+    - `marketing` for all marketing-related data assets.
+- **Owners and subscribers -**
+
+  - Make sure to have clear ownership defined for all your public-facing tables. We also recommend adding subscribers to the relevant public tables.
+  - Usually, the owners of these public tables are the analytics engineering team, and the subscribers are the relevant data analysts who rely on the data from these tables.
+
+<Check>
+### Recommendations
+
+- Add business domain tags to public tables
+- Define owners for public facing tables
+- Add data consumers as subscribers to relevant public facing tables
+</Check>
+
+
+
+## Priorities (optional)
+
+Another useful tagging convention can be to set a tag that filters a subset of assets by their priority, so you could establish a process of response to issues with higher criticality.
+
+Decide how many levels of priority you wish to maintain, and implement by adding a `critical` tag to your critical assets, or create a `P0`, `P1` , `P2` tags for several priority levels.
+
+This will enable you to filter the results in Elementary by priority, and establish workflows such as sending `critical` alerts to Pagerduty, and the rest to Slack.
+
+<Check>
+### Recommendations
+
+- Add priorities / critical tags to tables / tests (Optional)
+- Add owners to all top priority tables / tests (Optional)
+</Check>
+
+## Data sources
+
+Many data issues are a result of a problem in the source data, so effectively monitoring source tables is significant to your pipeline health.
+
+Use tags to segment your source tables:
+
+- If multiple source tables are loaded from the same source, we recommend grouping them by tags, such as: `mongo-db-replica`, `salesforce`, `prod-postgres`, etc.
+- To make triage easier, you can also add tags of the ingestion system, such as: `fivetran`, `airflow` , `airbyte` , `kafka` , etc.
+
+Ownership and subscribers:
+
+- Usually, sources are managed by data engineers and analytics engineers are their consumers. One common way to manage this is to set data engineers as the owners and analytics engineering team members as the subscribers.
+
+```yaml
+sources:
+  - name: fivetran_salesforce_sync
+    tags:
+     - fivetran
+     - salesforce
+    meta:
+	    owner: :"@data.engineer"
+      subscribers: "@analytics.engineer"
+```
+
+<Check>
+### Recommendations
+
+- Add tags to source tables that describe the source system and / or ingestion method
+- Add owners and subscribers to source tables
+</Check>
+
+## Recommendations
+
+- Add business domain tags to public tables
+- Define owners for public facing tables
+- Add data consumers as subscribers to relevant public facing tables
+- (Optional) Add priorities / critical tags to tables / tests
+- (Optional) Add owners to all top priority tables / tests
+- Add tags to source tables that describe the source system and / or ingestion method
+- Add owners and subscribers to source tables
