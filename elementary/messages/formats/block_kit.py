@@ -66,7 +66,7 @@ class BlockKitBuilder:
             [self._format_inline_block(inline) for inline in block.inlines]
         )
 
-    def _formate_table_cell(self, cell_value: Any) -> str:
+    def _format_table_cell(self, cell_value: Any) -> str:
         value = str(cell_value)
         if len(value) > self._MAX_CELL_LENGTH:
             return value[: self._MAX_CELL_LENGTH - 2] + ".."
@@ -168,9 +168,9 @@ class BlockKitBuilder:
 
     def _add_table_block(self, block: TableBlock) -> None:
         new_rows = [
-            [self._formate_table_cell(cell) for cell in row] for row in block.rows
+            [self._format_table_cell(cell) for cell in row] for row in block.rows
         ]
-        new_headers = [self._formate_table_cell(cell) for cell in block.headers]
+        new_headers = [self._format_table_cell(cell) for cell in block.headers]
         table = tabulate(new_rows, headers=new_headers, tablefmt="simple")
         self._add_block(self._format_markdown_section(f"```{table}```"))
 
