@@ -1,0 +1,65 @@
+{
+  "blocks": [],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Main Header"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "Normal text *Bold text* _Italic text_"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "- First bullet point\n- Second bullet point"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2705 Check item"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Status*\nPassed"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\ntest, example"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Show Details*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\ud83d\udd0e *Details Section*\nHere's some content with a <https://example.com|link>"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

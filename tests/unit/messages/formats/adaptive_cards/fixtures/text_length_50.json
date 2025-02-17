@@ -1,0 +1,17 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Lorem ipsum dolor sit amet, consectetur adipiscing",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.5"
+}

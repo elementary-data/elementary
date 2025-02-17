@@ -144,7 +144,7 @@ def common_options(cmd: str):
             default=None,
             help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
             if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tag:<TAG> / owner:<OWNER> / model:<MODEL> / "
+            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tags:<TAGS> / owners:<OWNERS> / models:<MODELS> / "
             "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
         return func
@@ -199,6 +199,12 @@ def get_cli_properties() -> dict:
     type=str,
     default=None,
     help="DEPRECATED! - A slack webhook URL for sending alerts to a specific channel.",
+)
+@click.option(
+    "--group-alerts-threshold",
+    type=int,
+    default=Config.DEFAULT_GROUP_ALERTS_THRESHOLD,
+    help="The threshold for all alerts in a single message.",
 )
 @click.option(
     "--timezone",
@@ -276,6 +282,7 @@ def monitor(
     deprecated_slack_webhook,
     slack_token,
     slack_channel_name,
+    group_alerts_threshold,
     timezone,
     config_dir,
     profiles_dir,
@@ -322,6 +329,7 @@ def monitor(
         slack_webhook=slack_webhook,
         slack_token=slack_token,
         slack_channel_name=slack_channel_name,
+        group_alerts_threshold=group_alerts_threshold,
         timezone=timezone,
         env=env,
         slack_group_alerts_by=group_by,

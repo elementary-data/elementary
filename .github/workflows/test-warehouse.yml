@@ -86,13 +86,13 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
@@ -106,7 +106,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
@@ -182,9 +182,9 @@ jobs:
           --project-profile-target "${{ inputs.warehouse-type }}"
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html
+          name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}_dbt_${{ inputs.dbt-version }}.html
           path: elementary/edr_target/elementary_report.html
 
       - name: Write GCS keyfile
@@ -218,9 +218,9 @@ jobs:
 
       - name: Upload edr log
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: edr.log
+          name: edr_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}_dbt_${{ inputs.dbt-version }}.log
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests

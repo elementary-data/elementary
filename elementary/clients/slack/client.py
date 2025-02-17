@@ -6,6 +6,7 @@ from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+from slack_sdk.webhook.webhook_response import WebhookResponse
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
@@ -36,8 +37,10 @@ class SlackClient(ABC):
         if not config.has_slack:
             return None
         if config.slack_token:
+            logger.debug("Creating Slack client with token.")
             return SlackWebClient(token=config.slack_token, tracking=tracking)
         elif config.slack_webhook:
+            logger.debug("Creating Slack client with webhook.")
             return SlackWebhookClient(webhook=config.slack_webhook, tracking=tracking)
         return None
 
@@ -93,9 +96,9 @@ class SlackWebClient(SlackClient):
                 channel=channel_name,
                 text=message.text,
                 blocks=json.dumps(message.blocks) if message.blocks else None,
-                attachments=json.dumps(message.attachments)
-                if message.attachments
-                else None,
+                attachments=(
+                    json.dumps(message.attachments) if message.attachments else None
+                ),
             )
             return True
         except SlackApiError as err:
@@ -233,7 +236,7 @@ class SlackWebhookClient(SlackClient):
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
-        response = self.client.send(
+        response: WebhookResponse = self.client.send(
             text=message.text, blocks=message.blocks, attachments=message.attachments
         )
         if response.status_code == OK_STATUS_CODE:
@@ -241,7 +244,7 @@ class SlackWebhookClient(SlackClient):
 
         else:
             logger.error(
-                f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}"
+                f"Could not post message to slack via webhook - {self.webhook}. Status code: {response.status_code}, Error: {response.body}"
             )
             return False
 

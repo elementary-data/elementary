@@ -7,8 +7,10 @@ from dateutil import tz
 from google.auth.exceptions import DefaultCredentialsError  # type: ignore[import]
 
 from elementary.exceptions.exceptions import InvalidArgumentsError
-from elementary.monitor.alerts.group_of_alerts import GroupingType
+from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.utils.ordered_yaml import OrderedYaml
+
+DEFAULT_ENV = "dev"
 
 
 class Config:
@@ -35,6 +37,8 @@ class Config:
 
     DEFAULT_TARGET_PATH = os.getcwd() + "/edr_target"
 
+    DEFAULT_GROUP_ALERTS_THRESHOLD = 100
+
     def __init__(
         self,
         config_dir: str = DEFAULT_CONFIG_DIR,
@@ -49,6 +53,7 @@ class Config:
         slack_token: Optional[str] = None,
         slack_channel_name: Optional[str] = None,
         slack_group_alerts_by: Optional[str] = None,
+        group_alerts_threshold: Optional[int] = None,
         timezone: Optional[str] = None,
         aws_profile_name: Optional[str] = None,
         aws_region_name: Optional[str] = None,
@@ -65,7 +70,7 @@ class Config:
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
         teams_webhook: Optional[str] = None,
-        env: str = "dev",
+        env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
     ):
@@ -123,6 +128,11 @@ class Config:
             slack_group_alerts_by,
             slack_config.get("group_alerts_by"),
             GroupingType.BY_ALERT.value,
+        )
+        self.group_alerts_threshold = self._first_not_none(
+            group_alerts_threshold,
+            slack_config.get("group_alerts_threshold"),
+            self.DEFAULT_GROUP_ALERTS_THRESHOLD,
         )
 
         teams_config = config.get(self._TEAMS, {})
@@ -240,6 +250,10 @@ class Config:
     @property
     def has_gcs(self):
         return self.gcs_bucket_name and self.has_gcloud
+
+    @property
+    def specified_env(self) -> Optional[str]:
+        return self.env if self.env != DEFAULT_ENV else None
 
     def validate_monitor(self):
         provided_integrations = list(

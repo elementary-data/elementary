@@ -8,6 +8,16 @@ from tests.mocks.data_monitoring.alerts.integrations.base_integration_mock impor
 )
 
 
+@pytest.fixture
+def base_integration_mock() -> BaseIntegrationMock:
+    return BaseIntegrationMock()
+
+
+@pytest.fixture
+def alerts_data_mock() -> AlertsDataMock:
+    return AlertsDataMock()
+
+
 def test_get_alert_template(
     base_integration_mock: BaseIntegrationMock, alerts_data_mock: AlertsDataMock
 ):
@@ -41,13 +51,3 @@ def test_get_alert_template(
         )
         == "grouped_by_table"
     )
-
-
-@pytest.fixture
-def base_integration_mock() -> BaseIntegrationMock:
-    return BaseIntegrationMock()
-
-
-@pytest.fixture
-def alerts_data_mock() -> AlertsDataMock:
-    return AlertsDataMock()
