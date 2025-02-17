@@ -10,7 +10,7 @@ sidebarTitle: "Introduction"
 Once your environment is set up, we automatically collect metadata from your warehouse, which our ML models run on.
 The models are operational when the initial backfill is completed, there is no "loading / training period" - Elementary will collect enough historical data after setup to train the models.
 
-Monitors are created for all models and sources in your dbt project, and their results are displayed in the application in the same way as package tests.
+Monitors are automatically created according to your preferences, and their results are displayed in the application in the same way as package tests.
 
 #### Benefits of automated monitors
 
@@ -26,6 +26,8 @@ The monitors collect metadata, and the [anomaly detection model](/features/anoma
 As soon as you connect Elementary Cloud Platform to your data warehouse, a backfill process will begin to collect historical metadata. 
 Within an average of a few hours, your automated monitors will be operational.
 By default, Elementary collects at least 21 days of historical metadata.
+The automated freshness monitors are created for all the sources in your dbt project, and the volume monitors are created for all the tables.
+If you would like a different configuration of which tables to create the monitors on, you can reach out to us.
 
 You can fine tune the [configuration](/features/anomaly-detection/monitors-configuration) and [provide feedback](/features/anomaly-detection/monitors-feedback) to adjust the detection to your needs. 
 
