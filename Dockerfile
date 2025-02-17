@@ -7,7 +7,6 @@ WORKDIR $USR_APP_PATH
 RUN chmod 777 .
 
 RUN apt-get update \
-    && apt-get dist-upgrade -y \
     && apt-get install -y --no-install-recommends \
     python-dev \
     libsasl2-dev \
