@@ -17,6 +17,7 @@ from elementary.messages.blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
+    TableBlock,
     TextBlock,
     TextStyle,
 )
@@ -323,5 +324,32 @@ class BaseTestFormat(Generic[T]):
             blocks=[LinesBlock(lines=[LineBlock(inlines=[TextBlock(text=lorem_text)])])]
         )
         expected_file_path = self.get_expected_file_path(f"text_length_{text_length}")
+        result = self.format(message_body)
+        self.assert_expected_value(result, expected_file_path)
+
+    @pytest.mark.parametrize(
+        "text_length",
+        [
+            pytest.param(8, id="short_text"),
+            pytest.param(30, id="long_text"),
+            pytest.param(200, id="very_long_text"),
+        ],
+    )
+    def test_format_table_block(self, text_length: int):
+        lorem_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " * (
+            (text_length + 49) // 50
+        )
+        lorem_text = lorem_text[:text_length]
+
+        column_count = 4
+        row_count = 5
+
+        table_block = TableBlock(
+            headers=[f"Column {i}" for i in range(column_count)],
+            rows=[[lorem_text for _ in range(column_count)] for _ in range(row_count)],
+        )
+
+        message_body = MessageBody(blocks=[table_block])
+        expected_file_path = self.get_expected_file_path(f"table_block_{text_length}")
         result = self.format(message_body)
         self.assert_expected_value(result, expected_file_path)

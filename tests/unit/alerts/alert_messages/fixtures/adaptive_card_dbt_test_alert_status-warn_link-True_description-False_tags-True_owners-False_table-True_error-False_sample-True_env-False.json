@@ -92,16 +92,59 @@
                   "wrap": true
                 },
                 {
-                  "type": "Container",
-                  "style": "emphasis",
-                  "items": [
+                  "type": "Table",
+                  "columns": [
                     {
-                      "type": "RichTextBlock",
-                      "inlines": [
+                      "width": 1
+                    },
+                    {
+                      "width": 1
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "type": "TableRow",
+                      "cells": [
                         {
-                          "type": "TextRun",
-                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
-                          "fontType": "Monospace"
+                          "type": "TableCell",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "column1"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "TableCell",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "column2"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "TableRow",
+                      "cells": [
+                        {
+                          "type": "TableCell",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "value1"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "TableCell",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "value2"
+                            }
+                          ]
                         }
                       ]
                     }
