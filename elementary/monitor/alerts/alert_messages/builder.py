@@ -285,7 +285,7 @@ class AlertMessageBuilder:
                     ]
                 )
             )
-            if isinstance(result_sample, list) and len(result_sample[0].keys()) < 4:
+            if isinstance(result_sample, list) and len(result_sample[0].keys()) <= 4:
                 result_blocks.append(
                     TableBlock.from_dicts(result_sample),
                 )
