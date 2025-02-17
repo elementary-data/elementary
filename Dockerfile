@@ -6,15 +6,18 @@ ENV DBT_TARGET_PATH=$USR_APP_PATH/target
 WORKDIR $USR_APP_PATH
 RUN chmod 777 .
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    python3-dev \
+RUN apt-get update
+
+RUN apt-get install -y --no-install-recommends \
     libsasl2-dev \
     && apt-get clean \
-    && rm -rf \
-    /var/lib/apt/lists/* \
-    /tmp/* \
-    /var/tmp/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY . /app
 RUN pip install --upgrade pip
