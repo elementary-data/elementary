@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Failure: \"test_short_name\" test failed on test_table",
+              "text": "Failure: \"test_short_name\" test failed on test_table.test_column",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -20,12 +20,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "**Test:** test_short_name | **Env:** Test Env | **Status:** fail | **Time:** N/A",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "[View in Elementary](http://test.com)",
+          "text": "**Test:** test_short_name | **Status:** fail | **Time:** N/A",
           "wrap": true
         }
       ]
@@ -45,6 +40,10 @@
             {
               "title": "Table",
               "value": "test_table"
+            },
+            {
+              "title": "Column",
+              "value": "test_column"
             },
             {
               "title": "Tags",
@@ -92,7 +91,7 @@
               "items": [
                 {
                   "type": "TextBlock",
-                  "text": "**Result Message**",
+                  "text": "\ud83d\udd0e **Test Results Sample**",
                   "wrap": true
                 },
                 {
@@ -104,22 +103,12 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "Test error message",
+                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
                           "fontType": "Monospace"
                         }
                       ]
                     }
                   ]
-                },
-                {
-                  "type": "TextBlock",
-                  "text": "\ud83d\udd0e **Test Results Sample**",
-                  "wrap": true
-                },
-                {
-                  "type": "TextBlock",
-                  "text": "**Anomalous Value:** {'anomalous_value': 42}",
-                  "wrap": true
                 },
                 {
                   "type": "TextBlock",
@@ -135,7 +124,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "SELECT * FROM test",
+                          "text": "select 1",
                           "fontType": "Monospace"
                         }
                       ]
@@ -181,7 +170,7 @@
                       "inlines": [
                         {
                           "type": "TextRun",
-                          "text": "{\n  \"param1\": \"value1\"\n}",
+                          "text": "{\n  \"param1\": \"value1\",\n  \"param2\": \"value2\"\n}",
                           "fontType": "Monospace"
                         }
                       ]

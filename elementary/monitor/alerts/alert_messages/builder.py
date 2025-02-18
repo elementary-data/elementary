@@ -29,6 +29,7 @@ from elementary.messages.blocks import (
     TextStyle,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.monitor.alerts.alert_messages.alert_fields import AlertField
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
@@ -186,6 +187,7 @@ class AlertMessageBuilder:
         subscribers: Optional[List[str]] = None,
         description: Optional[str] = None,
         path: Optional[str] = None,
+        fields: List[str] = [],
     ) -> List[MessageBlock]:
         tags = sorted(list(set(tags))) if tags else None
         owners = sorted(list(set(owners))) if owners else None
@@ -204,13 +206,13 @@ class AlertMessageBuilder:
             )
         )
         fact_blocks = []
-        if table:
+        if table and AlertField.TABLE in fields:
             fact_blocks.append(
                 PrimaryFactBlock(
                     (TextLineBlock(text="Table"), TextLineBlock(text=table))
                 )
             )
-        if column:
+        if column and AlertField.COLUMN in fields:
             fact_blocks.append(
                 NonPrimaryFactBlock(
                     (TextLineBlock(text="Column"), TextLineBlock(text=column))
@@ -232,15 +234,22 @@ class AlertMessageBuilder:
             if subscribers
             else ItalicTextLineBlock(text="No subscribers")
         )
-        fact_blocks.append(NonPrimaryFactBlock((TextLineBlock(text="Tags"), tags_line)))
-        fact_blocks.append(
-            NonPrimaryFactBlock((TextLineBlock(text="Owners"), owners_line))
-        )
-        fact_blocks.append(
-            NonPrimaryFactBlock((TextLineBlock(text="Subscribers"), subscribers_line))
-        )
+        if AlertField.TAGS in fields:
+            fact_blocks.append(
+                NonPrimaryFactBlock((TextLineBlock(text="Tags"), tags_line))
+            )
+        if AlertField.OWNERS in fields:
+            fact_blocks.append(
+                NonPrimaryFactBlock((TextLineBlock(text="Owners"), owners_line))
+            )
+        if AlertField.SUBSCRIBERS in fields:
+            fact_blocks.append(
+                NonPrimaryFactBlock(
+                    (TextLineBlock(text="Subscribers"), subscribers_line)
+                )
+            )
 
-        if description:
+        if description and AlertField.DESCRIPTION in fields:
             fact_blocks.append(
                 PrimaryFactBlock(
                     (TextLineBlock(text="Description"), TextLineBlock(text=description))
@@ -262,9 +271,10 @@ class AlertMessageBuilder:
         time_elapsed: Optional[str] = None,
         last_record_at: Optional[str] = None,
         sampled_at: Optional[str] = None,
+        fields: List[str] = [],
     ) -> List[MessageBlock]:
         result_blocks: List[MessageBlock] = []
-        if result_message:
+        if result_message and AlertField.RESULT_MESSAGE in fields:
             result_blocks.append(
                 LinesBlock(
                     lines=[
@@ -275,7 +285,9 @@ class AlertMessageBuilder:
             result_blocks.append(
                 CodeBlock(text=result_message.strip()),
             )
-        if result_sample:
+        if (
+            result_sample or anomalous_value
+        ) and AlertField.TEST_RESULTS_SAMPLE in fields:
             result_blocks.append(
                 LinesBlock(
                     lines=[
@@ -285,15 +297,34 @@ class AlertMessageBuilder:
                     ]
                 )
             )
-            if isinstance(result_sample, list) and len(result_sample[0].keys()) <= 4:
+            if anomalous_value:
                 result_blocks.append(
-                    TableBlock.from_dicts(result_sample),
+                    LinesBlock(
+                        lines=[
+                            LineBlock(
+                                inlines=[
+                                    TextBlock(
+                                        text="Anomalous Value:", style=TextStyle.BOLD
+                                    ),
+                                    TextBlock(text=str(anomalous_value)),
+                                ]
+                            ),
+                        ]
+                    )
                 )
-            else:
-                result_blocks.append(
-                    JsonCodeBlock(content=result_sample),
-                )
-        if result_query:
+            elif result_sample:
+                if (
+                    isinstance(result_sample, list)
+                    and len(result_sample[0].keys()) <= 4
+                ):
+                    result_blocks.append(
+                        TableBlock.from_dicts(result_sample),
+                    )
+                else:
+                    result_blocks.append(
+                        JsonCodeBlock(content=result_sample),
+                    )
+        if result_query and AlertField.TEST_QUERY in fields:
             result_blocks.append(
                 LinesBlock(
                     lines=[
@@ -302,17 +333,6 @@ class AlertMessageBuilder:
                 )
             )
             result_blocks.append(CodeBlock(text=result_query.strip()))
-        if anomalous_value:
-            result_blocks.append(
-                LinesBlock(
-                    lines=[
-                        BoldTextLineBlock(text=["Anomalous Values"]),
-                    ]
-                )
-            )
-            result_blocks.append(
-                JsonCodeBlock(content=anomalous_value),
-            )
 
         # facts
         facts = []
@@ -329,10 +349,10 @@ class AlertMessageBuilder:
         return result_blocks
 
     def _get_test_alert_config_blocks(
-        self, test_params: Optional[Dict[str, Any]]
+        self, test_params: Optional[Dict[str, Any]], fields: List[str]
     ) -> List[MessageBlock]:
         config_blocks: List[MessageBlock] = []
-        if test_params:
+        if test_params and AlertField.TEST_PARAMS in fields:
             config_blocks.append(
                 LinesBlock(
                     lines=[
@@ -489,6 +509,7 @@ class AlertMessageBuilder:
     def _get_alert_details_blocks(
         self,
         alert: AlertType,
+        fields: List[str],
     ) -> List[MessageBlock]:
         if isinstance(alert, TestAlertModel):
             return self._get_details_blocks(
@@ -498,6 +519,7 @@ class AlertMessageBuilder:
                 owners=alert.owners,
                 subscribers=alert.subscribers,
                 description=alert.test_description,
+                fields=fields,
             )
         elif isinstance(alert, ModelAlertModel):
             return self._get_details_blocks(
@@ -505,6 +527,7 @@ class AlertMessageBuilder:
                 owners=alert.owners,
                 subscribers=alert.subscribers,
                 path=alert.original_path,
+                fields=fields,
             )
         elif isinstance(alert, SourceFreshnessAlertModel):
             return self._get_details_blocks(
@@ -513,36 +536,42 @@ class AlertMessageBuilder:
                 subscribers=alert.subscribers,
                 path=alert.path,
                 description=alert.freshness_description,
+                fields=fields,
             )
         elif isinstance(alert, GroupedByTableAlerts):
             return self._get_details_blocks(
                 tags=alert.tags,
                 owners=alert.owners,
                 subscribers=alert.subscribers,
+                fields=fields,
             )
         return []
 
     def _get_alert_result_blocks(
         self,
         alert: AlertType,
+        fields: List[str],
     ) -> List[MessageBlock]:
         result_blocks: List[MessageBlock] = []
         title = "Result"
 
         if isinstance(alert, TestAlertModel):
+            is_anomaly_detection = alert.test_type == "anomaly_detection"
             result_blocks = self._get_result_blocks(
                 result_message=alert.error_message,
-                result_sample=alert.test_rows_sample,
-                anomalous_value=(
-                    alert.other if alert.test_type == "anomaly_detection" else None
+                result_sample=(
+                    alert.test_rows_sample if not is_anomaly_detection else None
                 ),
+                anomalous_value=(alert.other if is_anomaly_detection else None),
                 result_query=alert.test_results_query,
+                fields=fields,
             )
             title = "Test Result"
         elif isinstance(alert, ModelAlertModel):
             if alert.message:
                 result_blocks = self._get_result_blocks(
                     result_message=alert.message,
+                    fields=fields,
                 )
         elif isinstance(alert, SourceFreshnessAlertModel):
             result_blocks = self._get_result_blocks(
@@ -550,6 +579,7 @@ class AlertMessageBuilder:
                 time_elapsed=f"{timedelta(seconds=alert.max_loaded_at_time_ago_in_s) if alert.max_loaded_at_time_ago_in_s else 'N/A'}",
                 last_record_at=alert.max_loaded_at,
                 sampled_at=alert.snapshotted_at_str,
+                fields=fields,
             )
 
         if result_blocks:
@@ -559,13 +589,16 @@ class AlertMessageBuilder:
     def _get_alert_config_blocks(
         self,
         alert: AlertType,
+        fields: List[str],
     ) -> List[MessageBlock]:
         config_blocks: List[MessageBlock] = []
         title = "Configuration"
         expandable = False
 
         if isinstance(alert, TestAlertModel):
-            config_blocks = self._get_test_alert_config_blocks(alert.test_params)
+            config_blocks = self._get_test_alert_config_blocks(
+                alert.test_params, fields
+            )
             title = "Test Configuration"
         elif isinstance(alert, ModelAlertModel):
             if alert.materialization != "snapshot":
@@ -609,6 +642,9 @@ class AlertMessageBuilder:
     ) -> MessageBody:
         color = self._get_alert_color(alert)
 
+        fields = alert.alert_fields if not isinstance(alert, BaseAlertsGroup) else None
+        fields = fields or [field.value for field in AlertField]
+
         blocks: List[MessageBlock] = []
 
         title_blocks = self._get_alert_title_blocks(alert)
@@ -619,15 +655,15 @@ class AlertMessageBuilder:
 
         blocks.append(DividerBlock())
 
-        details_blocks = self._get_alert_details_blocks(alert)
+        details_blocks = self._get_alert_details_blocks(alert, fields)
         if details_blocks:
             blocks.extend(details_blocks)
             blocks.append(DividerBlock())
 
-        result_blocks = self._get_alert_result_blocks(alert)
+        result_blocks = self._get_alert_result_blocks(alert, fields)
         blocks.extend(result_blocks)
 
-        config_blocks = self._get_alert_config_blocks(alert)
+        config_blocks = self._get_alert_config_blocks(alert, fields)
         blocks.extend(config_blocks)
 
         if isinstance(alert, BaseAlertsGroup):

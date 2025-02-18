@@ -92,20 +92,9 @@
                   "wrap": true
                 },
                 {
-                  "type": "Container",
-                  "style": "emphasis",
-                  "items": [
-                    {
-                      "type": "RichTextBlock",
-                      "inlines": [
-                        {
-                          "type": "TextRun",
-                          "text": "{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}",
-                          "fontType": "Monospace"
-                        }
-                      ]
-                    }
-                  ]
+                  "type": "TextBlock",
+                  "text": "**Anomalous Value:** {'anomalous_value': 42}",
+                  "wrap": true
                 },
                 {
                   "type": "TextBlock",
@@ -122,27 +111,6 @@
                         {
                           "type": "TextRun",
                           "text": "SELECT * FROM test",
-                          "fontType": "Monospace"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "TextBlock",
-                  "text": "**Anomalous Values**",
-                  "wrap": true
-                },
-                {
-                  "type": "Container",
-                  "style": "emphasis",
-                  "items": [
-                    {
-                      "type": "RichTextBlock",
-                      "inlines": [
-                        {
-                          "type": "TextRun",
-                          "text": "{\n  \"anomalous_value\": 42\n}",
                           "fontType": "Monospace"
                         }
                       ]
