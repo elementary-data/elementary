@@ -41,8 +41,7 @@
     "name": "Get Started Now",
     "url": "https://app.elementary-data.com/"
   },
-  "topbarLinks": [
-  ],
+  "topbarLinks": [],
   "anchors": [
     {
       "name": "Book a Demo",
@@ -75,6 +74,16 @@
             "dbt/on-run-end_hooks",
             "dbt/package-models"
           ]
+        },
+        {
+          "group": "Best Practices Guide",
+          "icon": "check",
+          "pages": [
+            "best-practices/introduction",
+            "best-practices/governance-for-observability",
+            "best-practices/detection-and-coverage",
+            "best-practices/triage-and-response"
+          ]
         }
       ]
     },
@@ -101,12 +110,12 @@
         },
         "features/anomaly-detection/opt-in-monitors",
         {
-        "group": "Configuration and Feedback",
-        "pages": [
-          "features/anomaly-detection/monitors-configuration",
-          "features/anomaly-detection/monitors-feedback",
-          "features/anomaly-detection/disable-or-mute-monitors"
-        ]
+          "group": "Configuration and Feedback",
+          "pages": [
+            "features/anomaly-detection/monitors-configuration",
+            "features/anomaly-detection/monitors-feedback",
+            "features/anomaly-detection/disable-or-mute-monitors"
+          ]
         }
       ]
     },
@@ -451,8 +460,7 @@
       ]
     }
   ],
-  "footerSocials":
-    {
+  "footerSocials": {
     "website": "https://www.elementary-data.com",
     "slack": "https://elementary-data.com/community"
   },
