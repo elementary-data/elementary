@@ -60,7 +60,7 @@ To detect issues in sources updates, you should monitor volume, freshness and sc
   - Data updates - Elementary cloud provides automated monitors for freshness and volume. **These are metadata monitors.**
     - Updates freshness vs. data freshness - The automated freshness will detect delays in **updates**. \*\*\*\*However, sometimes the update will be on time, but the data itself will be outdated.
   - Data freshness (advanced) - Sometimes a table can update on time, but the data itself will be outdated. If you want to validate the freshness of the raw data by relaying on the actual timestamp, you can use:
-    - Explicit treshold [freshness dbt tests](https://www.elementary-data.com/dbt-test-hub) such as `dbt_utils.recency` , or [dbt source freshness](https://docs.getdbt.com/docs/deploy/source-freshness).
+    - Explicit threshold [freshness dbt tests](https://www.elementary-data.com/dbt-test-hub) such as `dbt_utils.recency` , or [dbt source freshness](https://docs.getdbt.com/docs/deploy/source-freshness).
     - Elementary `event_freshness_anomalies` to detect anomalies.
   - Data volume (advanced) - Although a table can be updated as expected, the data itself might still be imbalanced in terms of volume per specific segment. There are several tests available to monitor that:
     - Explicit [volume expectations](https://www.elementary-data.com/dbt-test-hub) such as `expect_table_row_count_to_be_between`.
