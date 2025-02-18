@@ -78,7 +78,7 @@ def test_get_dbt_test_alert_message_body(
         test_description="Test description" if has_description else None,
         error_message="Test error message" if has_error else None,
         test_rows_sample=(
-            {"column1": "value1", "column2": "value2"} if has_sample else None
+            [{"column1": "value1", "column2": "value2"}] if has_sample else None
         ),
         test_results_query=None,
         test_params=None,
