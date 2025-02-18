@@ -30,6 +30,7 @@ def build_base_test_alert_model(
     other: Optional[dict] = None,
     model_unique_id: Optional[str] = "test_model_unique_id",
     env: Optional[str] = None,
+    column_name: Optional[str] = None,
 ) -> TestAlertModel:
     return TestAlertModel(
         id="test_id",
@@ -50,7 +51,7 @@ def build_base_test_alert_model(
         test_params=test_params,
         test_meta=None,
         test_rows_sample=test_rows_sample,
-        column_name=None,
+        column_name=column_name,
         detected_at=None,
         database_name=None,
         schema_name=None,

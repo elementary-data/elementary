@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class AlertFields(str, Enum):
+class AlertField(str, Enum):
     TABLE = "table"
     COLUMN = "column"
     DESCRIPTION = "description"

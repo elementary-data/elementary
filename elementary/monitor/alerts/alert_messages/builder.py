@@ -28,7 +28,7 @@ from elementary.messages.blocks import (
     TextStyle,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
-from elementary.monitor.alerts.alert_messages.alert_fields import AlertFields
+from elementary.monitor.alerts.alert_messages.alert_fields import AlertField
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
@@ -205,13 +205,13 @@ class AlertMessageBuilder:
             )
         )
         fact_blocks = []
-        if table and AlertFields.TABLE in fields:
+        if table and AlertField.TABLE in fields:
             fact_blocks.append(
                 PrimaryFactBlock(
                     (TextLineBlock(text="Table"), TextLineBlock(text=table))
                 )
             )
-        if column and AlertFields.COLUMN in fields:
+        if column and AlertField.COLUMN in fields:
             fact_blocks.append(
                 NonPrimaryFactBlock(
                     (TextLineBlock(text="Column"), TextLineBlock(text=column))
@@ -233,22 +233,22 @@ class AlertMessageBuilder:
             if subscribers
             else ItalicTextLineBlock(text="No subscribers")
         )
-        if AlertFields.TAGS in fields:
+        if AlertField.TAGS in fields:
             fact_blocks.append(
                 NonPrimaryFactBlock((TextLineBlock(text="Tags"), tags_line))
             )
-        if AlertFields.OWNERS in fields:
+        if AlertField.OWNERS in fields:
             fact_blocks.append(
                 NonPrimaryFactBlock((TextLineBlock(text="Owners"), owners_line))
             )
-        if AlertFields.SUBSCRIBERS in fields:
+        if AlertField.SUBSCRIBERS in fields:
             fact_blocks.append(
                 NonPrimaryFactBlock(
                     (TextLineBlock(text="Subscribers"), subscribers_line)
                 )
             )
 
-        if description and AlertFields.DESCRIPTION in fields:
+        if description and AlertField.DESCRIPTION in fields:
             fact_blocks.append(
                 PrimaryFactBlock(
                     (TextLineBlock(text="Description"), TextLineBlock(text=description))
@@ -273,7 +273,7 @@ class AlertMessageBuilder:
         fields: List[str] = [],
     ) -> List[MessageBlock]:
         result_blocks: List[MessageBlock] = []
-        if result_message and AlertFields.RESULT_MESSAGE in fields:
+        if result_message and AlertField.RESULT_MESSAGE in fields:
             result_blocks.append(
                 LinesBlock(
                     lines=[
@@ -286,7 +286,7 @@ class AlertMessageBuilder:
             )
         if (
             result_sample or anomalous_value
-        ) and AlertFields.TEST_RESULTS_SAMPLE in fields:
+        ) and AlertField.TEST_RESULTS_SAMPLE in fields:
             result_blocks.append(
                 LinesBlock(
                     lines=[
@@ -315,7 +315,7 @@ class AlertMessageBuilder:
                 result_blocks.append(
                     JsonCodeBlock(content=result_sample),
                 )
-        if result_query and AlertFields.TEST_QUERY in fields:
+        if result_query and AlertField.TEST_QUERY in fields:
             result_blocks.append(
                 LinesBlock(
                     lines=[
@@ -343,7 +343,7 @@ class AlertMessageBuilder:
         self, test_params: Optional[Dict[str, Any]], fields: List[str]
     ) -> List[MessageBlock]:
         config_blocks: List[MessageBlock] = []
-        if test_params and AlertFields.TEST_PARAMS in fields:
+        if test_params and AlertField.TEST_PARAMS in fields:
             config_blocks.append(
                 LinesBlock(
                     lines=[
@@ -547,12 +547,13 @@ class AlertMessageBuilder:
         title = "Result"
 
         if isinstance(alert, TestAlertModel):
+            is_anomaly_detection = alert.test_type == "anomaly_detection"
             result_blocks = self._get_result_blocks(
                 result_message=alert.error_message,
-                result_sample=alert.test_rows_sample,
-                anomalous_value=(
-                    alert.other if alert.test_type == "anomaly_detection" else None
+                result_sample=(
+                    alert.test_rows_sample if not is_anomaly_detection else None
                 ),
+                anomalous_value=(alert.other if is_anomaly_detection else None),
                 result_query=alert.test_results_query,
                 fields=fields,
             )
@@ -629,10 +630,11 @@ class AlertMessageBuilder:
     def build(
         self,
         alert: AlertType,
-        fields: Optional[List[str]] = None,
     ) -> MessageBody:
         color = self._get_alert_color(alert)
-        fields = fields or [field.value for field in AlertFields]
+
+        fields = alert.alert_fields if not isinstance(alert, BaseAlertsGroup) else None
+        fields = fields or [field.value for field in AlertField]
 
         blocks: List[MessageBlock] = []
 
