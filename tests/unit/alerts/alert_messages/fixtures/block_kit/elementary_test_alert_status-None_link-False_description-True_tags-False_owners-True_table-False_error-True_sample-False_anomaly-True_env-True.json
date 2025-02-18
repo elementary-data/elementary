@@ -78,14 +78,14 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "*Anomalous Values*"
+            "text": "\ud83d\udd0e *Test Results Sample*"
           }
         },
         {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "```{\n  \"anomalous_value\": 42\n}```"
+            "text": "*Anomalous Value:* {'anomalous_value': 42}"
           }
         }
       ]

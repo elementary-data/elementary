@@ -4,14 +4,14 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Warning: \"test_short_name\" test failed"
+        "text": "Failure: \"test_short_name\" test failed on test_table.test_column"
       }
     },
     {
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "*Test:* test_short_name | *Status:* warn | *Time:* N/A"
+        "text": "*Test:* test_short_name | *Status:* fail | *Time:* N/A"
       }
     },
     {
@@ -30,32 +30,36 @@
         },
         {
           "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Table*\ntest_table"
+          }
+        },
+        {
+          "type": "section",
           "fields": [
             {
               "type": "mrkdwn",
-              "text": "*Tags*\n_No tags_"
+              "text": "*Column*\ntest_column"
             },
             {
               "type": "mrkdwn",
-              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
+              "text": "*Tags*\ntag1, tag2"
             }
           ]
         },
         {
           "type": "section",
           "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
+            },
             {
               "type": "mrkdwn",
               "text": "*Subscribers*\n_No subscribers_"
             }
           ]
-        },
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "*Description*\nTest description"
-          }
         },
         {
           "type": "divider"
@@ -85,11 +89,39 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "*Anomalous Value:* {'anomalous_value': 42}"
+            "text": "```{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}```"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Results Query*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```select 1```"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\ud83d\udee0\ufe0f *Test Parameters*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```{\n  \"param1\": \"value1\",\n  \"param2\": \"value2\"\n}```"
           }
         }
       ],
-      "color": "#ffcc00"
+      "color": "#ff0000"
     }
   ]
 }

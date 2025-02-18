@@ -71,7 +71,7 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "```{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}```"
+            "text": "*Anomalous Value:* {'anomalous_value': 42}"
           }
         },
         {
@@ -86,20 +86,6 @@
           "text": {
             "type": "mrkdwn",
             "text": "```SELECT * FROM test```"
-          }
-        },
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "*Anomalous Values*"
-          }
-        },
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "```{\n  \"anomalous_value\": 42\n}```"
           }
         },
         {

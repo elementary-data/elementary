@@ -34,6 +34,6 @@ def assert_expected_json(result: dict, expected_json_path: Path) -> None:
             error_message = (
                 f"\nExpected JSON: \n{json.dumps(expected, indent=2)}\n"
                 f"\nActual JSON: \n{json.dumps(result, indent=2)}\n"
-                f"\nDiff: \n{json.dumps(diff, indent=2)}\n"
+                f"\nDiff: \n{diff.to_json(indent=2)}\n"
             )
             raise AssertionError(error_message) from e

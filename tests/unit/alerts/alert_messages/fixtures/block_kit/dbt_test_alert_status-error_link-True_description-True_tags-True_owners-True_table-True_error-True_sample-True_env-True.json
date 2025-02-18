@@ -92,7 +92,7 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "```{\n  \"column1\": \"value1\",\n  \"column2\": \"value2\"\n}```"
+            "text": "```column1    column2\n---------  ---------\nvalue1     value2```"
           }
         }
       ],
