@@ -2,11 +2,15 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Optional
 
+from pydantic import BaseModel
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebhookClient
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 
-from elementary.messages.formats.block_kit import format_block_kit
+from elementary.messages.formats.block_kit import (
+    FormattedBlockKitMessage,
+    format_block_kit,
+)
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
@@ -20,40 +24,43 @@ from elementary.tracking.tracking_interface import Tracking
 ONE_SECOND = 1
 
 
-class SlackWebhookMessagingIntegration(BaseMessagingIntegration[None, None]):
-    def __init__(
-        self, client: WebhookClient, tracking: Optional[Tracking] = None
-    ) -> None:
-        self.client = client
+class SlackWebhookDestination(BaseModel):
+    webhook: str
+
+
+class SlackWebhookMessagingIntegration(
+    BaseMessagingIntegration[SlackWebhookDestination, SlackWebhookDestination]
+):
+    def __init__(self, tracking: Optional[Tracking] = None) -> None:
         self.tracking = tracking
 
-    @classmethod
-    def from_url(
-        cls, url: str, tracking: Optional[Tracking] = None
-    ) -> "SlackWebhookMessagingIntegration":
-        client = WebhookClient(url)
+    def _get_client(self, destination: SlackWebhookDestination) -> WebhookClient:
+        client = WebhookClient(destination.webhook)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
-        return cls(client, tracking)
+        return client
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
-    def _send_message(self, formatted_message: dict) -> None:
-        response = self.client.send(
-            blocks=formatted_message["blocks"],
-            attachments=formatted_message["attachments"],
+    def _send_message(
+        self, client: WebhookClient, formatted_message: FormattedBlockKitMessage
+    ) -> None:
+        response = client.send(
+            blocks=formatted_message.blocks,
+            attachments=formatted_message.attachments,
         )
         if response.status_code != HTTPStatus.OK:
             raise MessagingIntegrationError(
-                f"Could not post message to slack via webhook - {self.client.url}. Status code: {response.status_code}, Error: {response.body}"
+                f"Could not post message to slack via webhook - {client.url}. Status code: {response.status_code}, Error: {response.body}"
             )
 
     def send_message(
-        self, destination: None, body: MessageBody
-    ) -> MessageSendResult[None]:
+        self, destination: SlackWebhookDestination, body: MessageBody
+    ) -> MessageSendResult[SlackWebhookDestination]:
         formatted_message = format_block_kit(body)
-        self._send_message(formatted_message)
+        client = self._get_client(destination)
+        self._send_message(client, formatted_message)
         return MessageSendResult(
-            message_context=None,
+            message_context=destination,
             timestamp=datetime.utcnow(),
         )
 

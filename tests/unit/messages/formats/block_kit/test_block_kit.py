@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import cast
@@ -36,4 +37,4 @@ class TestBlockKit(BaseTestFormat[FormattedBlockKitMessage]):
             messaging_integration._send_message(
                 os.environ["TEST_SLACK_CHANNEL"], result
             )
-        assert_expected_json(cast(dict, result), expected_file_path)
+        assert_expected_json(result.dict(), expected_file_path)

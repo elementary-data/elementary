@@ -287,19 +287,24 @@ def get_alert_message_body(
     return alert_message_builder.build(alert)
 
 
-def assert_expected_json_on_all_formats(
+def assert_expected_json_adaptive_card(
     filename: str,
     message_body: MessageBody,
 ):
-    adaptive_card_filename = f"adaptive_card_{filename}.json"
+    adaptive_card_filename = f"{filename}.json"
     adaptive_card_json = format_adaptive_card(message_body)
     expected_adaptive_card_json_path = get_expected_json_path(
-        FIXTURES_DIR, adaptive_card_filename
+        FIXTURES_DIR / "adaptive_card", adaptive_card_filename
     )
     assert_expected_json(adaptive_card_json, expected_adaptive_card_json_path)
 
-    block_kit_filename = f"block_kit_{filename}.json"
-    block_kit_json = format_block_kit(
+
+def assert_expected_json_block_kit(
+    filename: str,
+    message_body: MessageBody,
+):
+    block_kit_filename = f"{filename}.json"
+    formatted_block_kit_message = format_block_kit(
         message_body, resolve_mention=lambda x: f"resolved_{x}"
     )
     if "TEST_SLACK_TOKEN" in os.environ and "TEST_SLACK_CHANNEL" in os.environ:
@@ -311,9 +316,22 @@ def assert_expected_json_on_all_formats(
         )
         messaging_integration._send_message(
             os.environ["TEST_SLACK_CHANNEL"],
-            block_kit_json,
+            formatted_block_kit_message,
         )
     expected_block_kit_json_path = get_expected_json_path(
-        FIXTURES_DIR, block_kit_filename
+        FIXTURES_DIR / "block_kit", block_kit_filename
     )
-    assert_expected_json(cast(dict, block_kit_json), expected_block_kit_json_path)
+    assert_expected_json(
+        formatted_block_kit_message.dict(), expected_block_kit_json_path
+    )
+
+
+def assert_expected_json_on_all_formats(
+    filename: str,
+    message_body: MessageBody,
+):
+    for validator in [
+        assert_expected_json_adaptive_card,
+        assert_expected_json_block_kit,
+    ]:
+        validator(filename, message_body)

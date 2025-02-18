@@ -10,6 +10,7 @@ from elementary.messages.messaging_integrations.slack_web import (
     SlackWebMessagingIntegration,
 )
 from elementary.messages.messaging_integrations.slack_webhook import (
+    SlackWebhookDestination,
     SlackWebhookMessagingIntegration,
 )
 from elementary.messages.messaging_integrations.teams_webhook import (
@@ -17,6 +18,9 @@ from elementary.messages.messaging_integrations.teams_webhook import (
     TeamsWebhookMessagingIntegration,
 )
 from elementary.tracking.tracking_interface import Tracking
+from elementary.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class UnsupportedAlertIntegrationError(Error):
@@ -40,9 +44,7 @@ class Integrations:
                     config.slack_token, tracking
                 )
             elif config.slack_webhook:
-                return SlackWebhookMessagingIntegration.from_url(
-                    config.slack_webhook, tracking
-                )
+                return SlackWebhookMessagingIntegration(tracking)
             else:
                 raise UnsupportedAlertIntegrationError
         elif config.has_teams:
@@ -65,8 +67,14 @@ class Integrations:
             return cast(DestinationType, ChannelWebhook(webhook=config.teams_webhook))
         elif isinstance(integration, SlackWebMessagingIntegration):
             if override_config_defaults:
+                if "channel" in metadata:
+                    logger.info(
+                        f"ignoring channel from metadata: {metadata['channel']}"
+                    )
                 return config.slack_channel_name
             return metadata.get("channel", config.slack_channel_name)
         elif isinstance(integration, SlackWebhookMessagingIntegration):
-            return cast(DestinationType, None)
+            return cast(
+                DestinationType, SlackWebhookDestination(webhook=config.slack_webhook)
+            )
         raise UnsupportedAlertIntegrationError

@@ -84,8 +84,8 @@ class SlackWebMessagingIntegration(
         try:
             response = self.client.chat_postMessage(
                 channel=destination,
-                blocks=json.dumps(formatted_message["blocks"]),
-                attachments=json.dumps(formatted_message["attachments"]),
+                blocks=json.dumps(formatted_message.blocks),
+                attachments=json.dumps(formatted_message.attachments),
                 thread_ts=thread_ts,
             )
         except SlackApiError as e:
@@ -99,13 +99,17 @@ class SlackWebMessagingIntegration(
             timestamp=response["ts"],
         )
 
-    def _handle_send_err(self, err: SlackApiError, channel_name: str) -> bool:
+    def _handle_send_err(self, err: SlackApiError, channel_name: str):
         if self.tracking:
             self.tracking.record_internal_exception(err)
         err_type = err.response.data["error"]
         if err_type == "not_in_channel":
+            logger.info(
+                f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
+            )
             channel_id = self._get_channel_id(channel_name)
             self._join_channel(channel_id=channel_id)
+            logger.info(f"Joined channel {channel_name}")
         elif err_type == "channel_not_found":
             raise MessagingIntegrationError(
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."

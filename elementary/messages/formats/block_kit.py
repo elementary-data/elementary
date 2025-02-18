@@ -1,5 +1,6 @@
 from typing import Callable, List, Optional, Tuple, TypedDict, cast
 
+from pydantic import BaseModel
 from slack_sdk.models import blocks as slack_blocks
 
 from elementary.messages.blocks import (
@@ -30,7 +31,7 @@ COLOR_MAP = {
 }
 
 
-class FormattedBlockKitMessage(TypedDict):
+class FormattedBlockKitMessage(BaseModel):
     blocks: List[dict]
     attachments: List[dict]
 
@@ -230,17 +231,18 @@ class BlockKitBuilder:
         self._add_message_blocks(message.blocks)
         color_code = COLOR_MAP.get(message.color) if message.color else None
         blocks, attachment_blocks = self._get_final_blocks(message.color)
-        built_message = {
-            "blocks": blocks,
-            "attachments": [
+        built_message = FormattedBlockKitMessage(
+            blocks=blocks,
+            attachments=[
                 {
                     "blocks": attachment_blocks,
                 }
             ],
-        }
+        )
         if color_code:
-            built_message["attachments"][0]["color"] = color_code
-        return cast(FormattedBlockKitMessage, built_message)
+            for attachment in built_message.attachments:
+                attachment["color"] = color_code
+        return built_message
 
 
 def format_block_kit(

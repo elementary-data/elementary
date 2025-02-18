@@ -283,7 +283,7 @@ class DataMonitoringAlerts(DataMonitoring):
         )
         return integration.send_message(destination=destination, body=body)
 
-    def _send_test_message(self):
+    def _send_test_message(self) -> MessageSendResult:
         test_message = get_health_check_message()
         return self._send_message(
             integration=self.alerts_integration, body=test_message, metadata={}
