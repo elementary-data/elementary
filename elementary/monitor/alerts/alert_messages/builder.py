@@ -24,6 +24,7 @@ from elementary.messages.blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
+    TableBlock,
     TextBlock,
     TextStyle,
 )
@@ -312,9 +313,17 @@ class AlertMessageBuilder:
                     )
                 )
             elif result_sample:
-                result_blocks.append(
-                    JsonCodeBlock(content=result_sample),
-                )
+                if (
+                    isinstance(result_sample, list)
+                    and len(result_sample[0].keys()) <= 4
+                ):
+                    result_blocks.append(
+                        TableBlock.from_dicts(result_sample),
+                    )
+                else:
+                    result_blocks.append(
+                        JsonCodeBlock(content=result_sample),
+                    )
         if result_query and AlertField.TEST_QUERY in fields:
             result_blocks.append(
                 LinesBlock(
