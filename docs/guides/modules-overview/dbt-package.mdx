@@ -3,10 +3,24 @@ title: "Elementary dbt package"
 sidebarTitle: "Introduction"
 ---
 
-For data monitoring and dbt artifacts collection, Elementary uses a dbt package.
-The package adds models, macros, and Elementary tests as dbt tests to your project.
+The dbt package serves as a collector of logs and metadata from your dbt projects. To gain the most value from the dbt package, we recommend using it with the Elementary Cloud Platform or with Elementary’s open-source CLI tool. To understand which one best fits your needs, continue reading.
 
-The impact of the package on `dbt run` is minimal, and most of the processing happens as part of the data tests that are executed on `dbt test`.
+**What brings you here?**
+
+- **An organizational data quality initiative** (e.g., platform refactoring, governance projects, or AI/ML adoption): The Elementary Cloud Platform offers pipeline monitoring, incident management, lineage tracking, dashboards, health scores, and alerts, empowering data engineers, analytics engineers, and data analysts to resolve issues efficiently and deliver trusted data products. Learn more about the [Elementary Cloud Platform](https://docs.elementary-data.com/cloud/introduction) or [book a demo](https://cal.com/maayansa/elementary-intro-docs).
+- **Individual-use observability:** If you’ll be the primary user, try the open-source CLI tool to detect issues, send Slack alerts, and self-host the Elementary report.
+
+---
+
+## **Elementary dbt package**
+
+The Elementary dbt package offers a wide range of testing, including anomalies in volume, freshness, and different dimensions of your data. 
+
+The package adds models, macros, and Elementary’s anomaly detection tests as dbt tests to your project. 
+
+This package will upload the information generated as dbt_artifacts into tables in your target database.
+
+The impact of the package on **`dbt run`** is minimal, and most of the processing happens as part of the data tests that are executed on **`dbt test`**.
 
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
@@ -20,34 +34,43 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 
 </Accordion>
 
-The repository and source code of the Elementary dbt package can be [found here](https://github.com/elementary-data/dbt-data-reliability).
+The repository and source code of the Elementary dbt package can be [**found here**](https://github.com/elementary-data/dbt-data-reliability).
 
 ## Package Features
 
 After you deploy the dbt package, you can use Elementary tests, and your dbt artifacts will be uploaded automatically with on-run-end hooks:
 
 <CardGroup cols={3}>
-  <Card title="Elementary data tests" href="/features/data-tests"></Card>
-  <Card title="dbt artifacts" href="/dbt/dbt-artifacts"></Card>
-  <Card title="on-run-end hooks" href="/dbt/on-run-end_hooks"></Card>
+  <Card title="Elementary data tests" href="/features/data-tests" />
+  <Card title="dbt artifacts" href="/dbt/dbt-artifacts" />
+  <Card title="on-run-end hooks" href="/dbt/on-run-end_hooks" />
 </CardGroup>
 
-Although you can use the package only, we recommend using it with Elementary Cloud or OSS.
-
-<Snippet file="products-cards.mdx" />
+---
 
 ## Elementary schema
 
-<Snippet file="faq/question-schema-no-accordion.mdx" />
+The Elementary package creates various models to store information about collected dbt artifacts and test results.
+
+To avoid mixing with your existing models, we recommend configuring a dedicated schema for the Elementary models using the [**dbt custom schema**](https://docs.getdbt.com/docs/building-a-dbt-project/building-models/using-custom-schemas) option. Here is an example configuration, that creates a schema with the suffix '_elementary' for elementary models:
+
+<CodeGroup>
+
+```javascript dbt_project.yml
+models:
+  elementary:
+    +schema: elementary
+```
+
+</CodeGroup>
+
+---
 
 ## Package full refresh
 
-Elementary incremental models are not full-refreshed by default. This is because these models contain
-information such as historical runs and test results, which typically you'd want to maintain even when full refreshing
-the models of your main dbt project.
+Elementary incremental models are not full-refreshed by default. This is because these models contain information such as historical runs and test results, which typically you’d want to maintain even when full refreshing the models of your main dbt project.
 
-However, if you wish to change this behavior and include Elementary models as a part of the full refresh, you can set
-the following var:
+However, if you wish to change this behavior and include Elementary models as a part of the full refresh, you can set the following var:
 
 ```yaml
 vars:

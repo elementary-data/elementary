@@ -2,7 +2,6 @@ import os
 from typing import Any
 
 import click
-from pyfiglet import Figlet
 
 import elementary.cli.upgrade
 from elementary.config.config import Config
@@ -12,8 +11,15 @@ from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import package
 from elementary.utils.log import get_logger, set_root_logger_handlers
 
-f = Figlet(font="slant")
-click.echo(f.renderText("Elementary"))
+ELEMENTARY_LOGO = r"""
+    ________                          __
+   / ____/ /__  ____ ___  ___  ____  / /_____ ________  __
+  / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/ __ `/ ___/ / / /
+ / /___/ /  __/ / / / / /  __/ / / / /_/ /_/ / /  / /_/ /
+/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/\__,_/_/   \__, /
+                                                 /____/
+"""
+click.echo(f"{ELEMENTARY_LOGO}\n")
 elementary.cli.upgrade.recommend_version_upgrade()
 
 logger = get_logger(__name__)

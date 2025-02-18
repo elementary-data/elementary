@@ -1,0 +1,220 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Table",
+          "columns": [
+            {
+              "width": 1
+            },
+            {
+              "width": 1
+            },
+            {
+              "width": 1
+            }
+          ],
+          "rows": [
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Column 0"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Column 1"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Column 2"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Lorem ip"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "version": "1.5"
+}

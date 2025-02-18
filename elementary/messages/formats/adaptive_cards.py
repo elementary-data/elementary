@@ -15,6 +15,7 @@ from elementary.messages.blocks import (
     LinesBlock,
     LinkBlock,
     MentionBlock,
+    TableBlock,
     TextBlock,
     TextStyle,
 )
@@ -126,6 +127,31 @@ def format_fact_list_block(block: FactListBlock) -> Dict[str, Any]:
     }
 
 
+def format_table_block(block: TableBlock) -> Dict[str, Any]:
+    return {
+        "type": "Table",
+        "columns": [{"width": 1} for _ in block.headers],
+        "rows": [
+            {
+                "type": "TableRow",
+                "cells": [
+                    {
+                        "type": "TableCell",
+                        "items": [
+                            {
+                                "type": "TextBlock",
+                                "text": str(cell),
+                            }
+                        ],
+                    }
+                    for cell in row
+                ],
+            }
+            for row in [block.headers, *block.rows]
+        ],
+    }
+
+
 def format_message_block(
     block: MessageBlock, color: Optional[Color] = None
 ) -> List[Dict[str, Any]]:
@@ -139,6 +165,8 @@ def format_message_block(
         return [format_fact_list_block(block)]
     elif isinstance(block, ExpandableBlock):
         return format_expandable_block(block)
+    elif isinstance(block, TableBlock):
+        return [format_table_block(block)]
     else:
         raise ValueError(f"Unsupported message block type: {type(block)}")
 

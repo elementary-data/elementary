@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from pydantic import BaseModel
 from typing_extensions import Literal
@@ -113,6 +113,21 @@ class FactListBlock(BaseBlock):
     facts: List[FactBlock]
 
 
+class TableBlock(BaseBlock):
+    type: Literal["table"] = "table"
+    headers: List[str]
+    rows: List[List[Any]]
+
+    @classmethod
+    def from_dicts(cls, data: List[Dict[str, Any]]) -> "TableBlock":
+        if not data:
+            return cls(headers=[], rows=[])
+
+        headers = list(data[0].keys())
+        rows = [[row.get(header) for header in headers] for row in data]
+        return cls(headers=headers, rows=rows)
+
+
 class ExpandableBlock(BaseBlock):
     type: Literal["expandable"] = "expandable"
     title: str
@@ -126,6 +141,7 @@ InExpandableBlock = Union[
     DividerBlock,
     LinesBlock,
     FactListBlock,
+    TableBlock,
     "ExpandableBlock",
 ]
 
