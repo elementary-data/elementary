@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from elementary.messages.formats.block_kit import format_block_kit

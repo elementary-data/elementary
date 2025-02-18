@@ -1,7 +1,5 @@
-import json
 import os
 from pathlib import Path
-from typing import cast
 
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,

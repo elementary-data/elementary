@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Tuple, TypedDict, cast
+from typing import Callable, List, Optional, Tuple
 
 from pydantic import BaseModel
 from slack_sdk.models import blocks as slack_blocks
