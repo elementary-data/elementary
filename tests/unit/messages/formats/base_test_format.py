@@ -328,20 +328,31 @@ class BaseTestFormat(Generic[T]):
         self.assert_expected_value(result, expected_file_path)
 
     @pytest.mark.parametrize(
-        "text_length",
+        "text_length,column_count",
         [
-            pytest.param(8, id="short_text"),
-            pytest.param(30, id="long_text"),
-            pytest.param(200, id="very_long_text"),
+            pytest.param(8, 5, id="short_text_5_columns"),
+            pytest.param(30, 5, id="long_text_5_columns"),
+            pytest.param(200, 5, id="very_long_text_5_columns"),
+            pytest.param(8, 4, id="short_text_4_columns"),
+            pytest.param(30, 4, id="long_text_4_columns"),
+            pytest.param(200, 4, id="very_long_text_4_columns"),
+            pytest.param(8, 3, id="short_text_3_columns"),
+            pytest.param(30, 3, id="long_text_3_columns"),
+            pytest.param(200, 3, id="very_long_text_3_columns"),
+            pytest.param(8, 2, id="short_text_2_columns"),
+            pytest.param(30, 2, id="long_text_2_columns"),
+            pytest.param(200, 2, id="very_long_text_2_columns"),
+            pytest.param(8, 1, id="short_text_1_column"),
+            pytest.param(30, 1, id="long_text_1_column"),
+            pytest.param(200, 1, id="very_long_text_1_column"),
         ],
     )
-    def test_format_table_block(self, text_length: int):
+    def test_format_table_block(self, text_length: int, column_count: int):
         lorem_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " * (
             (text_length + 49) // 50
         )
         lorem_text = lorem_text[:text_length]
 
-        column_count = 4
         row_count = 5
 
         table_block = TableBlock(
@@ -350,6 +361,8 @@ class BaseTestFormat(Generic[T]):
         )
 
         message_body = MessageBody(blocks=[table_block])
-        expected_file_path = self.get_expected_file_path(f"table_block_{text_length}")
+        expected_file_path = self.get_expected_file_path(
+            f"table_block_{text_length}_{column_count}"
+        )
         result = self.format(message_body)
         self.assert_expected_value(result, expected_file_path)
