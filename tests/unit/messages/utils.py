@@ -2,6 +2,8 @@ import json
 import os
 from pathlib import Path
 
+from deepdiff import DeepDiff
+
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -28,8 +30,10 @@ def assert_expected_json(result: dict, expected_json_path: Path) -> None:
         try:
             assert result == expected
         except AssertionError as e:
+            diff = DeepDiff(expected, result)
             error_message = (
                 f"\nExpected JSON: \n{json.dumps(expected, indent=2)}\n"
                 f"\nActual JSON: \n{json.dumps(result, indent=2)}\n"
+                f"\nDiff: \n{diff.to_json(indent=2)}\n"
             )
             raise AssertionError(error_message) from e

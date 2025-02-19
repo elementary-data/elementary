@@ -1,7 +1,14 @@
+import os
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from elementary.messages.formats.adaptive_cards import format_adaptive_card
+from elementary.messages.formats.block_kit import format_block_kit
 from elementary.messages.message_body import MessageBody
+from elementary.messages.messaging_integrations.slack_web import (
+    SlackWebMessagingIntegration,
+)
 from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
@@ -13,6 +20,9 @@ from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData as ReportLink,
 )
+from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
+
+FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
 def build_base_test_alert_model(
@@ -30,6 +40,7 @@ def build_base_test_alert_model(
     other: Optional[dict] = None,
     model_unique_id: Optional[str] = "test_model_unique_id",
     env: Optional[str] = None,
+    column_name: Optional[str] = None,
 ) -> TestAlertModel:
     return TestAlertModel(
         id="test_id",
@@ -50,7 +61,7 @@ def build_base_test_alert_model(
         test_params=test_params,
         test_meta=None,
         test_rows_sample=test_rows_sample,
-        column_name=None,
+        column_name=column_name,
         detected_at=None,
         database_name=None,
         schema_name=None,
@@ -76,7 +87,7 @@ def build_base_model_alert_model(
     full_refresh: bool,
     detected_at: datetime,
     alias: str,
-    message: str,
+    message: Optional[str] = None,
     suppression_interval: Optional[int] = None,
     env: Optional[str] = None,
 ) -> ModelAlertModel:
@@ -275,3 +286,53 @@ def get_alert_message_body(
 ) -> MessageBody:
     alert_message_builder = AlertMessageBuilder()
     return alert_message_builder.build(alert)
+
+
+def assert_expected_json_adaptive_card(
+    filename: str,
+    message_body: MessageBody,
+):
+    adaptive_card_filename = f"{filename}.json"
+    adaptive_card_json = format_adaptive_card(message_body)
+    expected_adaptive_card_json_path = get_expected_json_path(
+        FIXTURES_DIR / "adaptive_card", adaptive_card_filename
+    )
+    assert_expected_json(adaptive_card_json, expected_adaptive_card_json_path)
+
+
+def assert_expected_json_block_kit(
+    filename: str,
+    message_body: MessageBody,
+):
+    block_kit_filename = f"{filename}.json"
+    formatted_block_kit_message = format_block_kit(
+        message_body, resolve_mention=lambda x: f"resolved_{x}"
+    )
+    if "TEST_SLACK_TOKEN" in os.environ and "TEST_SLACK_CHANNEL" in os.environ:
+        """
+        For testing purposes, add the ability to send messages to Slack channels to see how the message looks.
+        """
+        messaging_integration = SlackWebMessagingIntegration.from_token(
+            token=os.environ["TEST_SLACK_TOKEN"],
+        )
+        messaging_integration._send_message(
+            os.environ["TEST_SLACK_CHANNEL"],
+            formatted_block_kit_message,
+        )
+    expected_block_kit_json_path = get_expected_json_path(
+        FIXTURES_DIR / "block_kit", block_kit_filename
+    )
+    assert_expected_json(
+        formatted_block_kit_message.dict(), expected_block_kit_json_path
+    )
+
+
+def assert_expected_json_on_all_formats(
+    filename: str,
+    message_body: MessageBody,
+):
+    for validator in [
+        assert_expected_json_adaptive_card,
+        assert_expected_json_block_kit,
+    ]:
+        validator(filename, message_body)

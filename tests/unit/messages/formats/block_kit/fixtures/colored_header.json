@@ -1,0 +1,17 @@
+{
+  "blocks": [],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Test Header"
+          }
+        }
+      ],
+      "color": "#33b989"
+    }
+  ]
+}

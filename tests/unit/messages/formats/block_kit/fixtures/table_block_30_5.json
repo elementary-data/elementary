@@ -1,0 +1,16 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "```[\n  {\n    \"Column 0\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 1\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 2\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 3\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 4\": \"Lorem ipsum dolor sit amet, co\"\n  },\n  {\n    \"Column 0\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 1\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 2\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 3\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 4\": \"Lorem ipsum dolor sit amet, co\"\n  },\n  {\n    \"Column 0\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 1\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 2\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 3\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 4\": \"Lorem ipsum dolor sit amet, co\"\n  },\n  {\n    \"Column 0\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 1\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 2\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 3\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 4\": \"Lorem ipsum dolor sit amet, co\"\n  },\n  {\n    \"Column 0\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 1\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 2\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 3\": \"Lorem ipsum dolor sit amet, co\",\n    \"Column 4\": \"Lorem ipsum dolor sit amet, co\"\n  }\n]```"
+      }
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": []
+    }
+  ]
+}

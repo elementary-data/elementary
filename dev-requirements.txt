@@ -2,7 +2,7 @@ pytest
 pytest-parametrization>=2022.2.1
 pre-commit
 mypy
-
+deepdiff
 # MyPy stubs
 types-requests
 networkx-stubs
@@ -16,10 +16,9 @@ types-pytz
 types-jsonschema
 types-PyYAML
 types-setuptools
-pandas-stubs
 types-retry
 types-decorator
-
+types-tabulate
 Jinja2
 oauthlib
 requests_oauthlib

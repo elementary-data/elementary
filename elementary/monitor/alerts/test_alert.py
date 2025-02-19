@@ -173,8 +173,16 @@ class TestAlertModel(AlertModel):
         )
 
         if self.test_type == "schema_change":
-            return f"{self.test_sub_type_display_name} on {asset_name}"
-        return f'"{self.concise_name}" test failed on {asset_name}'
+            return (
+                f"{self.test_sub_type_display_name} on {asset_name}"
+                if asset_name
+                else self.test_sub_type_display_name
+            )
+        return (
+            f'"{self.concise_name}" test failed on {asset_name}'
+            if asset_name
+            else f'"{self.concise_name}" test failed'
+        )
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         return get_test_runs_link(self.report_url, self.elementary_unique_id)

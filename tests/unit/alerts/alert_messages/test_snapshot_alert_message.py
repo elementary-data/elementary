@@ -3,13 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from tests.unit.alerts.alert_messages.test_alert_utils import (
+    assert_expected_json_on_all_formats,
     build_base_model_alert_model,
     get_alert_message_body,
     get_mock_report_link,
 )
-from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -61,8 +60,8 @@ def test_get_snapshot_alert_message_body(
     )
 
     message_body = get_alert_message_body(snapshot_alert_model)
-    adaptive_card_filename = (
-        f"adaptive_card_snapshot_alert"
+    filename = (
+        f"snapshot_alert"
         f"_status-{status}"
         f"_link-{has_link}"
         f"_message-{has_message}"
@@ -71,10 +70,5 @@ def test_get_snapshot_alert_message_body(
         f"_path-{has_path}"
         f"_suppression-{has_suppression_interval}"
         f"_env-{has_env}"
-        ".json"
     )
-    adaptive_card_json = format_adaptive_card(message_body)
-    expected_adaptive_card_json_path = get_expected_json_path(
-        FIXTURES_DIR, adaptive_card_filename
-    )
-    assert_expected_json(adaptive_card_json, expected_adaptive_card_json_path)
+    assert_expected_json_on_all_formats(filename, message_body)

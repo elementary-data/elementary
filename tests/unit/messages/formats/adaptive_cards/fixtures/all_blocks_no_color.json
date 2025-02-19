@@ -85,9 +85,14 @@
             }
           ],
           "isVisible": false
+        },
+        {
+          "type": "TextBlock",
+          "text": "user1 select 1",
+          "wrap": true
         }
       ]
     }
   ],
-  "version": "1.6"
+  "version": "1.5"
 }

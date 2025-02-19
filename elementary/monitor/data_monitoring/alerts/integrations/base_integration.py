@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Generator, List, Sequence, Tuple, Union
+from typing import Union
 
-from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
+from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
@@ -108,82 +108,6 @@ class BaseIntegration(ABC):
         **kwargs,
     ) -> bool:
         raise NotImplementedError
-
-    @staticmethod
-    def _group_alerts(
-        alerts: Sequence[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-                GroupedByTableAlerts,
-            ]
-        ],
-        threshold: int,
-    ) -> Sequence[
-        Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            AlertsGroup,
-        ]
-    ]:
-        if not alerts:
-            return []
-
-        flattened_alerts: List[
-            Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
-        ] = []
-        env = None
-        for alert in alerts:
-            if isinstance(alert, BaseAlertsGroup):
-                flattened_alerts.extend(alert.alerts)
-                if env is None and alert.env is not None:
-                    env = alert.env
-            else:
-                flattened_alerts.append(alert)
-
-        if len(flattened_alerts) >= threshold:
-            logger.info(f"Grouping {len(flattened_alerts)} alerts into one")
-            return [
-                AlertsGroup(alerts=flattened_alerts, env=env),
-            ]
-        return alerts
-
-    def send_alerts(
-        self,
-        alerts: Sequence[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-                GroupedByTableAlerts,
-            ]
-        ],
-        group_alerts_threshold: int,
-        *args,
-        **kwargs,
-    ) -> Generator[
-        Tuple[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-            ],
-            bool,
-        ],
-        None,
-        None,
-    ]:
-        grouped_alerts = self._group_alerts(alerts, group_alerts_threshold)
-        for alert in grouped_alerts:
-            if isinstance(alert, BaseAlertsGroup):
-                sent_successfully = self.send_alert(alert, *args, **kwargs)
-                for inner_alert in alert.alerts:
-                    yield inner_alert, sent_successfully
-            else:
-                yield alert, self.send_alert(alert, *args, **kwargs)
 
     @abstractmethod
     def send_test_message(self, *args, **kwargs) -> bool:
