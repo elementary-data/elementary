@@ -14,6 +14,7 @@ from .blocks import (
     MentionBlock,
     TextBlock,
     TextStyle,
+    WhitespaceBlock,
 )
 
 SimpleInlineBlock = Union[str, Icon]
@@ -38,12 +39,23 @@ def BulletListBlock(
     *,
     icon: Union[Icon, str],
     lines: List[LineBlock] = [],
+    indent: int = 0,
 ) -> LinesBlock:
+    whitespaces = [WhitespaceBlock()] * indent
     icon_inline: InlineBlock = (
         IconBlock(icon=icon) if isinstance(icon, Icon) else TextBlock(text=icon)
     )
     lines = [
-        LineBlock(inlines=[icon_inline, *line.inlines], sep=line.sep) for line in lines
+        LineBlock(
+            inlines=[
+                *whitespaces,
+                icon_inline,
+                TextBlock(text=" "),
+                line,
+            ],
+            sep="",
+        )
+        for line in lines
     ]
     return LinesBlock(lines=lines)
 

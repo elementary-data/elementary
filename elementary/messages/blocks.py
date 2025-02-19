@@ -18,6 +18,7 @@ class Icon(Enum):
     EYE = "eye"
     GEAR = "gear"
     BELL = "bell"
+    GEM = "gem"
 
 
 class TextStyle(Enum):
@@ -67,12 +68,17 @@ class LineBlock(BaseBlock):
     sep: str = " "
 
 
+class WhitespaceBlock(BaseBlock):
+    type: Literal["whitespace"] = "whitespace"
+
+
 InlineBlock = Union[
     TextBlock,
     LinkBlock,
     IconBlock,
     InlineCodeBlock,
     MentionBlock,
+    WhitespaceBlock,
     "LineBlock",
 ]
 

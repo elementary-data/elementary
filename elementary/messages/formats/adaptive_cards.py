@@ -18,6 +18,7 @@ from elementary.messages.blocks import (
     TableBlock,
     TextBlock,
     TextStyle,
+    WhitespaceBlock,
 )
 from elementary.messages.formats.html import ICON_TO_HTML
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
@@ -55,6 +56,8 @@ def format_inline_block(block: InlineBlock) -> str:
         return block.user
     elif isinstance(block, LineBlock):
         return format_line_block_text(block)
+    elif isinstance(block, WhitespaceBlock):
+        return "&emsp;"
     else:
         raise ValueError(f"Unsupported inline block type: {type(block)}")
 

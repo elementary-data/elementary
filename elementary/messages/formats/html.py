@@ -13,6 +13,7 @@ ICON_TO_HTML = {
     Icon.EYE: "👁️",
     Icon.GEAR: "⚙️",
     Icon.BELL: "🔔",
+    Icon.GEM: "💎",
 }
 
 for icon in Icon:

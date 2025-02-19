@@ -23,6 +23,7 @@ from elementary.messages.blocks import (
     TableBlock,
     TextBlock,
     TextStyle,
+    WhitespaceBlock,
 )
 from elementary.messages.formats.html import ICON_TO_HTML
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
@@ -83,6 +84,8 @@ class BlockKitBuilder:
                 return block.user
         elif isinstance(block, LineBlock):
             return self._format_line_block_text(block)
+        elif isinstance(block, WhitespaceBlock):
+            return " "
         else:
             raise ValueError(f"Unsupported inline block type: {type(block)}")
 
