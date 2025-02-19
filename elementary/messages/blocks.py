@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from pydantic import BaseModel
 from typing_extensions import Literal
@@ -51,7 +51,32 @@ class IconBlock(BaseInlineTextBlock):
     icon: Icon
 
 
-InlineBlock = Union[TextBlock, LinkBlock, IconBlock]
+class InlineCodeBlock(BaseInlineTextBlock):
+    type: Literal["inline_code"] = "inline_code"
+    code: str
+
+
+class MentionBlock(BaseInlineTextBlock):
+    type: Literal["mention"] = "mention"
+    user: str
+
+
+class LineBlock(BaseBlock):
+    type: Literal["line"] = "line"
+    inlines: Sequence["InlineBlock"]
+    sep: str = " "
+
+
+InlineBlock = Union[
+    TextBlock,
+    LinkBlock,
+    IconBlock,
+    InlineCodeBlock,
+    MentionBlock,
+    "LineBlock",
+]
+
+LineBlock.update_forward_refs()
 
 
 class HeaderBlock(BaseBlock):
@@ -66,12 +91,6 @@ class CodeBlock(BaseBlock):
 
 class DividerBlock(BaseBlock):
     type: Literal["divider"] = "divider"
-
-
-class LineBlock(BaseBlock):
-    type: Literal["line"] = "line"
-    inlines: List[InlineBlock]
-    sep: str = " "
 
 
 class BaseLinesBlock(BaseBlock):

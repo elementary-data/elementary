@@ -48,14 +48,14 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "*Show Details*"
+            "text": "\ud83d\udd0e *Details Section*\nHere's some content with a <https://example.com|link>"
           }
         },
         {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "\ud83d\udd0e *Details Section*\nHere's some content with a <https://example.com|link>"
+            "text": "<@resolved_user1> `select 1`"
           }
         }
       ],

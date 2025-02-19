@@ -25,9 +25,6 @@ from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAler
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.alerts import AlertsAPI
-from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
-    BaseIntegration,
-)
 from elementary.monitor.data_monitoring.alerts.integrations.integrations import (
     Integrations,
 )
@@ -58,9 +55,7 @@ def get_health_check_message() -> MessageBody:
 
 
 class DataMonitoringAlerts(DataMonitoring):
-    # The alerts_integration field now supports both the legacy BaseIntegration and the new BaseMessagingIntegration
-    # This dual support allows for a gradual migration from the old integration system to the new messaging system
-    alerts_integration: Union[BaseIntegration, BaseMessagingIntegration]
+    alerts_integration: BaseMessagingIntegration
 
     def __init__(
         self,
@@ -92,11 +87,10 @@ class DataMonitoringAlerts(DataMonitoring):
 
     def _get_integration_client(
         self,
-    ) -> Union[BaseIntegration, BaseMessagingIntegration]:
+    ) -> BaseMessagingIntegration:
         return Integrations.get_integration(
             config=self.config,
             tracking=self.tracking,
-            override_config_defaults=self.override_config_defaults,
         )
 
     def _populate_data(
@@ -279,23 +273,21 @@ class DataMonitoringAlerts(DataMonitoring):
             )
 
     def _send_message(
-        self, integration: BaseMessagingIntegration, body: MessageBody
+        self, integration: BaseMessagingIntegration, body: MessageBody, metadata: dict
     ) -> MessageSendResult:
         destination = Integrations.get_destination(
-            integration=integration, config=self.config
+            integration=integration,
+            config=self.config,
+            metadata=metadata,
+            override_config_defaults=self.override_config_defaults,
         )
         return integration.send_message(destination=destination, body=body)
 
-    def _send_test_message(self):
-        if isinstance(self.alerts_integration, BaseIntegration):
-            self.alerts_integration.send_test_message(
-                channel_name=self.config.slack_channel_name
-            )
-        else:
-            test_message = get_health_check_message()
-            return self._send_message(
-                integration=self.alerts_integration, body=test_message
-            )
+    def _send_test_message(self) -> MessageSendResult:
+        test_message = get_health_check_message()
+        return self._send_message(
+            integration=self.alerts_integration, body=test_message, metadata={}
+        )
 
     def _send_alert(
         self,
@@ -307,25 +299,20 @@ class DataMonitoringAlerts(DataMonitoring):
             AlertsGroup,
         ],
     ):
-        # Support both legacy BaseIntegration and new BaseMessagingIntegration
-        # BaseIntegration will be deprecated in favor of BaseMessagingIntegration
-        if isinstance(self.alerts_integration, BaseIntegration):
-            return self.alerts_integration.send_alert(alert)
-        else:
-            # New messaging integration path - converts alerts to message bodies
-            alert_message_builder = AlertMessageBuilder()
-            alert_message_body = alert_message_builder.build(
-                alert=alert,
+        alert_message_builder = AlertMessageBuilder()
+        alert_message_body = alert_message_builder.build(
+            alert=alert,
+        )
+        try:
+            self._send_message(
+                integration=self.alerts_integration,
+                body=alert_message_body,
+                metadata=alert.unified_meta,
             )
-            try:
-                self._send_message(
-                    integration=self.alerts_integration,
-                    body=alert_message_body,
-                )
-                return True
-            except MessagingIntegrationError:
-                logger.error(f"Could not send the alert - {type(alert)}.")
-                return False
+            return True
+        except MessagingIntegrationError:
+            logger.error(f"Could not send the alert - {type(alert)}.")
+            return False
 
     def _send_alerts(
         self,

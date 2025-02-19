@@ -45,5 +45,5 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
         body: MessageBody,
     ) -> MessageSendResult[MessageContextType]:
         if not self.supports_reply():
-            raise MessageIntegrationReplyNotSupportedError
+            raise MessageIntegrationReplyNotSupportedError(type(self).__name__)
         raise NotImplementedError

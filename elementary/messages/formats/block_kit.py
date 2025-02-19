@@ -1,6 +1,7 @@
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
+from pydantic import BaseModel
 from slack_sdk.models import blocks as slack_blocks
 from tabulate import tabulate
 
@@ -14,9 +15,11 @@ from elementary.messages.blocks import (
     Icon,
     IconBlock,
     InlineBlock,
+    InlineCodeBlock,
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TableBlock,
     TextBlock,
     TextStyle,
@@ -31,15 +34,26 @@ COLOR_MAP = {
 }
 
 
+class FormattedBlockKitMessage(BaseModel):
+    blocks: List[dict]
+    attachments: List[dict]
+
+
+ResolveMentionCallback = Callable[[str], Optional[str]]
+
+
 class BlockKitBuilder:
     _SECONDARY_FACT_CHUNK_SIZE = 2
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3  # length of markdown's code suffix (```)
     _MAX_CELL_LENGTH_BY_COLUMN_COUNT = {4: 11, 3: 14, 2: 22, 1: 40, 0: 40}
 
-    def __init__(self) -> None:
+    def __init__(
+        self, resolve_mention: Optional[ResolveMentionCallback] = None
+    ) -> None:
         self._blocks: List[dict] = []
         self._attachment_blocks: List[dict] = []
         self._is_divided = False
+        self._resolve_mention = resolve_mention or (lambda x: None)
 
     def _format_icon(self, icon: Icon) -> str:
         return ICON_TO_HTML[icon]
@@ -59,6 +73,16 @@ class BlockKitBuilder:
             return self._format_text_block(block)
         elif isinstance(block, LinkBlock):
             return f"<{block.url}|{block.text}>"
+        elif isinstance(block, InlineCodeBlock):
+            return f"`{block.code}`"
+        elif isinstance(block, MentionBlock):
+            resolved_user = self._resolve_mention(block.user)
+            if resolved_user:
+                return f"<@{resolved_user}>"
+            else:
+                return block.user
+        elif isinstance(block, LineBlock):
+            return self._format_line_block_text(block)
         else:
             raise ValueError(f"Unsupported inline block type: {type(block)}")
 
@@ -192,12 +216,6 @@ class BlockKitBuilder:
         Expandable blocks are not supported in Slack Block Kit.
         However, slack automatically collapses a large section block into an expandable block.
         """
-        self._add_block(
-            {
-                "type": "section",
-                "text": self._format_markdown_section_text(f"*{block.title}*"),
-            }
-        )
         self._add_message_blocks(block.body)
 
     def _add_message_block(self, block: MessageBlock) -> None:
@@ -239,25 +257,28 @@ class BlockKitBuilder:
         else:
             return [], self._blocks
 
-    def build(self, message: MessageBody) -> Dict[str, Any]:
+    def build(self, message: MessageBody) -> FormattedBlockKitMessage:
         self._blocks = []
         self._attachment_blocks = []
         self._add_message_blocks(message.blocks)
         color_code = COLOR_MAP.get(message.color) if message.color else None
         blocks, attachment_blocks = self._get_final_blocks(message.color)
-        built_message = {
-            "blocks": blocks,
-            "attachments": [
+        built_message = FormattedBlockKitMessage(
+            blocks=blocks,
+            attachments=[
                 {
                     "blocks": attachment_blocks,
                 }
             ],
-        }
+        )
         if color_code:
-            built_message["attachments"][0]["color"] = color_code
+            for attachment in built_message.attachments:
+                attachment["color"] = color_code
         return built_message
 
 
-def format_block_kit(message: MessageBody) -> Dict[str, Any]:
-    builder = BlockKitBuilder()
+def format_block_kit(
+    message: MessageBody, resolve_mention: Optional[ResolveMentionCallback] = None
+) -> FormattedBlockKitMessage:
+    builder = BlockKitBuilder(resolve_mention)
     return builder.build(message)

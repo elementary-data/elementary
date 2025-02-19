@@ -14,9 +14,11 @@ from elementary.messages.blocks import (
     HeaderBlock,
     Icon,
     IconBlock,
+    InlineCodeBlock,
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TableBlock,
     TextBlock,
     TextStyle,
@@ -278,6 +280,16 @@ class BaseTestFormat(Generic[T]):
                         )
                     ],
                     expanded=False,
+                ),
+                LinesBlock(
+                    lines=[
+                        LineBlock(
+                            inlines=[
+                                MentionBlock(user="user1"),
+                                InlineCodeBlock(code="select 1"),
+                            ]
+                        )
+                    ]
                 ),
             ],
             color=color,

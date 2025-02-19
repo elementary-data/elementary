@@ -1,0 +1,24 @@
+{
+  "blocks": [],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Failure: dbt failed to build snapshot \"test_snapshot\""
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Snapshot:* test_snapshot | *Status:* fail | *Time:* 2025-02-03 13:21:07 UTC"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

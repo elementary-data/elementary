@@ -8,6 +8,7 @@ from elementary.messages.block_builders import (
     ItalicTextLineBlock,
     JsonCodeBlock,
     LinkLineBlock,
+    MentionLineBlock,
     NonPrimaryFactBlock,
     PrimaryFactBlock,
     SummaryLineBlock,
@@ -21,9 +22,11 @@ from elementary.messages.blocks import (
     HeaderBlock,
     Icon,
     InlineBlock,
+    InlineCodeBlock,
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TableBlock,
     TextBlock,
     TextStyle,
@@ -225,12 +228,12 @@ class AlertMessageBuilder:
             else ItalicTextLineBlock(text="No tags")
         )
         owners_line = (
-            TextLineBlock(text=", ".join(owners))
+            MentionLineBlock(*owners)
             if owners
             else ItalicTextLineBlock(text="No owners")
         )
         subscribers_line = (
-            TextLineBlock(text=", ".join(subscribers))
+            MentionLineBlock(*subscribers)
             if subscribers
             else ItalicTextLineBlock(text="No subscribers")
         )
@@ -257,7 +260,12 @@ class AlertMessageBuilder:
             )
         if path:
             fact_blocks.append(
-                PrimaryFactBlock((TextLineBlock(text="Path"), TextLineBlock(text=path)))
+                PrimaryFactBlock(
+                    (
+                        TextLineBlock(text="Path"),
+                        LineBlock(inlines=[InlineCodeBlock(code=path)]),
+                    )
+                )
             )
         blocks.append(FactListBlock(facts=fact_blocks))
         return blocks
@@ -408,10 +416,12 @@ class AlertMessageBuilder:
         if owners := list(set(alert.owners)):
             inlines.append(TextBlock(text="-"))
             if len(owners) == 1:
-                inlines.append(TextBlock(text=f"Owner: {owners.pop()}"))
+                inlines.append(TextBlock(text="Owner:"))
+                inlines.append(MentionBlock(user=owners.pop()))
             else:
                 owners.sort()
-                inlines.append(TextBlock(text=f"Owners: {', '.join(owners)}"))
+                inlines.append(TextBlock(text="Owners:"))
+                inlines.append(MentionLineBlock(*owners))
 
         if report_link := alert.get_report_link():
             inlines.append(TextBlock(text="-"))

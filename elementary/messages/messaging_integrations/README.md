@@ -47,6 +47,8 @@ If your platform's message format is not yet supported:
    - LinesBlock: Plain text content
    - FactListBlock: Key-value pairs
    - ExpandableBlock: Collapsible sections
+   - MentionBlock: Mention a user
+   - TableBlock: Table of data
    ```
 3. Add tests in `tests/unit/messages/formats/`
 
@@ -92,19 +94,6 @@ Once the message format is ready:
    - Make sure to get all required information from users to create your destination type
    - See Teams implementation for reference (webhook URL configuration)
 
-## Migration Strategy
-
-The system currently supports both:
-
-- Legacy `BaseIntegration` implementations (e.g., Slack)
-- New `BaseMessagingIntegration` implementations (e.g., Teams)
-
-This dual support allows for a gradual migration path where:
-
-1. New integrations are implemented using `BaseMessagingIntegration`
-2. Existing integrations can be migrated one at a time
-3. The legacy `BaseIntegration` will eventually be deprecated
-
 ## Implementing a New Integration
 
 To add a new messaging platform integration:
@@ -120,10 +109,9 @@ To add a new messaging platform integration:
 
 ## Current Implementations
 
-- **Teams**: Uses the new `BaseMessagingIntegration` system with webhook support and Adaptive Cards format
-- **Slack**: Currently uses the legacy `BaseIntegration` system (planned for migration)
+- **Teams**: Webhook support, Adaptive Cards format
+- **Slack**: Webhook and token support, Block Kit format
 
 ## Future Improvements
 
-1. Complete migration of Slack to `BaseMessagingIntegration`
-2. Add support for more messaging platforms
+1. Add support for more messaging platforms

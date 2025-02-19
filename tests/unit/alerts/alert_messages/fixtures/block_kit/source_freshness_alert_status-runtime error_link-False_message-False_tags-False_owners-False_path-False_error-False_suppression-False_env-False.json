@@ -1,0 +1,55 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Runtime Error: Failed to calculate the source freshness of \"test_source\""
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Source:* test_source.test_identifier | *Status:* runtime error | *Time:* 2025-02-03 13:21:07 UTC"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Result Message*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```Failed to calculate the source freshness\n```None``````"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Time Elapsed*\nN/A"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Sampled At*\n2025-02-03 13:21:07"
+            }
+          ]
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

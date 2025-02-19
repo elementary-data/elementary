@@ -1,0 +1,125 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Error: test_model_unique_id: 40 issues detected"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "\u274c *Model Errors:* 10 | \ud83d\udd3a *Test Failures:* 10 | \u26a0\ufe0f *Test Warnings:* 10 | \u2757 *Test Errors:* 10"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\ntag1"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Model Errors*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u274c *dbt failed to build table \"test_model\"* - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u274c *dbt failed to build table \"test_model\"* - <http://test.com|View Report>"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Failures*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\ud83d\udd3a *\"test_short_name\" test failed on test_table_1* - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_2* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_3* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_4* - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_5* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_6* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_7* - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_8* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_9* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_10* - <http://test.com|View Report>"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Warnings*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u26a0\ufe0f *\"test_short_name\" test failed on test_table_1* - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_2* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_3* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_4* - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_5* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_6* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_7* - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_8* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_9* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u26a0\ufe0f *\"test_short_name\" test failed on test_table_10* - <http://test.com|View Report>"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Errors*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2757 *\"test_short_name\" test failed on test_table_1* - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_2* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_3* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_4* - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_5* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_6* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_7* - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_8* - Owner: <@resolved_owner1> - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_9* - Owners: <@resolved_owner1>, <@resolved_owner2> - <http://test.com|View Report>\n\u2757 *\"test_short_name\" test failed on test_table_10* - <http://test.com|View Report>"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

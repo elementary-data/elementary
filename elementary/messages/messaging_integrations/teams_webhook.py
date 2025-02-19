@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 import requests
-from pydantic import BaseModel
+from typing_extensions import TypeAlias
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from elementary.messages.message_body import MessageBody
@@ -11,7 +11,6 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
     MessageSendResult,
 )
 from elementary.messages.messaging_integrations.exceptions import (
-    MessageIntegrationReplyNotSupportedError,
     MessagingIntegrationError,
 )
 from elementary.utils.log import get_logger
@@ -19,13 +18,10 @@ from elementary.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-class ChannelWebhook(BaseModel):
-    webhook: str
-    channel: Optional[str] = None
+Channel: TypeAlias = Optional[str]
 
 
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
-    """Sends an Adaptive Card to the specified webhook URL."""
     payload = {
         "type": "message",
         "attachments": [
@@ -48,17 +44,18 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     return response
 
 
-class TeamsWebhookMessagingIntegration(
-    BaseMessagingIntegration[ChannelWebhook, ChannelWebhook]
-):
+class TeamsWebhookMessagingIntegration(BaseMessagingIntegration[Channel, Channel]):
+    def __init__(self, url: str) -> None:
+        self.url = url
+
     def send_message(
         self,
-        destination: ChannelWebhook,
+        destination: Channel,
         body: MessageBody,
-    ) -> MessageSendResult[ChannelWebhook]:
+    ) -> MessageSendResult[Channel]:
         card = format_adaptive_card(body)
         try:
-            send_adaptive_card(destination.webhook, card)
+            send_adaptive_card(self.url, card)
             return MessageSendResult(
                 message_context=destination,
                 timestamp=datetime.utcnow(),
@@ -70,13 +67,3 @@ class TeamsWebhookMessagingIntegration(
 
     def supports_reply(self) -> bool:
         return False
-
-    def reply_to_message(
-        self,
-        destination: ChannelWebhook,
-        message_context: ChannelWebhook,
-        body: MessageBody,
-    ) -> MessageSendResult[ChannelWebhook]:
-        raise MessageIntegrationReplyNotSupportedError(
-            "Teams webhook message integration does not support replying to messages"
-        )

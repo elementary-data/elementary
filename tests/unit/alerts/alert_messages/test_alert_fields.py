@@ -2,13 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from elementary.monitor.alerts.alert_messages.alert_fields import AlertField
 from tests.unit.alerts.alert_messages.test_alert_utils import (
+    assert_expected_json_on_all_formats,
     build_base_test_alert_model,
     get_alert_message_body,
 )
-from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -43,11 +42,5 @@ def test_get_dbt_test_alert_message_body(
     ]
 
     message_body = get_alert_message_body(test_alert_model)
-    adaptive_card_filename = (
-        f"adaptive_card_dbt_test_alert_removed_field-{removed_field.value}.json"
-    )
-    adaptive_card_json = format_adaptive_card(message_body)
-    expected_adaptive_card_json_path = get_expected_json_path(
-        FIXTURES_DIR, adaptive_card_filename
-    )
-    assert_expected_json(adaptive_card_json, expected_adaptive_card_json_path)
+    filename = f"dbt_test_alert_removed_field-{removed_field.value}"
+    assert_expected_json_on_all_formats(filename, message_body)
