@@ -47,6 +47,8 @@ If your platform's message format is not yet supported:
    - LinesBlock: Plain text content
    - FactListBlock: Key-value pairs
    - ExpandableBlock: Collapsible sections
+   - MentionBlock: Mention a user
+   - TableBlock: Table of data
    ```
 3. Add tests in `tests/unit/messages/formats/`
 
