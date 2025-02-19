@@ -17,13 +17,13 @@ Elementary detection includes:
 - Anomaly detection monitors - Track a data quality metric over time, and fail if there is an anomaly comparing to previous values and trend.
   - Example: track the rate of null values in a column over time, fail if there is a spike.
 
-### Data tests -
+### Data tests
 
 - dbt tests - Built in dbt tests (`not_null`, `unique`, `accepted_values`, `relationship` )
 - dbt packages - Any dbt package test, we recommend installing `dbt-utils` and `dbt-expectations` .
 - Custom SQL tests - Custom query, will pass if no results and fail if any results are returned.
 
-### Anomaly detection monitors -
+### Anomaly detection monitors
 
 Elementary offers two types of anomaly detection monitors:
 

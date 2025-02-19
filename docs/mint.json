@@ -158,9 +158,7 @@
     {
       "group": "Data Governance",
       "pages": [
-        "features/data-governance/overview-and-best-practices",
-        "features/data-governance/define-ownership",
-        "features/data-governance/leverage-tags"
+        "best-practices/governance-for-observability.mdx"
       ]
     },
     {
