@@ -34,11 +34,13 @@ Call it `Elementary` (or whatever you prefer) and connect it to the workspace of
 
 </Accordion>
 
-Now it is time to setup the webhook for this channel.
+Now it's time to set up a webhook. You have two options for creating a webhook:
 
-<Accordion title="Create Teams Webhook">
+<Accordion title="Option 1: Create Teams Webhook using Connectors">
 
-## Create a webhook
+## Create a webhook using Connectors
+
+**Note:** Microsoft 365 Connectors are set to be deprecated end of 2025. Consider using Power Automate Workflows (Option 2) for new integrations.
 
 Go to a channel in your Team and choose `Manage channel`
 
@@ -61,6 +63,7 @@ Search for `Incoming webhook` and choose `Add`.
   alt="Teams add incoming webhook"
 />
 
+
 Choose `Add` again and add name your webhook `ElementaryWebhook` (or whatever you prefer). And `Create` the webhook.
 
 <img
@@ -77,7 +80,38 @@ Copy the URL of the webhook.
 
 </Accordion>
 
-Lastly, pass the webhook to the CLI as a param or in the `config.yml` file:
+<Accordion title="Option 2: Create Teams Webhook using Power Automate (OSS)">
+
+## Create a webhook using Power Automate
+
+You can create a webhook using Power Automate in two ways:
+
+### Method 1: Directly from Teams (Recommended)
+
+1. Go to your Teams channel
+2. Click the three dots (...) next to the channel name
+3. Select `Workflows`
+4. Choose the template "Post to channel when a webhook request is received"
+5. Copy the webhook URL
+
+### Method 2: From Power Automate Website
+
+1. Go to [Power Automate](https://flow.microsoft.com)
+2. Create a new instant cloud flow
+3. Search for "When a HTTP request is received" as your trigger
+4. In the flow, add a "Post adaptive card in a chat or channel" action
+5. Configure the team and channel where you want to post
+6. Save the flow and copy the HTTP POST URL
+
+**Important Notes:**
+
+- When using Power Automate Workflows, Elementary CLI cannot directly verify if messages were successfully delivered. You'll need to monitor your workflow runs in Power Automate to check for any delivery issues.
+- Workflows can't post in private channels as a flow bot, but can post on behalf of a user
+- Workflows can only be created in your default environment
+
+</Accordion>
+
+Lastly, pass the webhook URL (from either method) to the CLI as a param or in the `config.yml` file:
 
 <Accordion title="Teams config as CLI params">
 
