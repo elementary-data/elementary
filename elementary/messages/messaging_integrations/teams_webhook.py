@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Optional, TypeAlias
+from typing import Optional
 
 import requests
+from typing_extensions import TypeAlias
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
 from elementary.messages.message_body import MessageBody
