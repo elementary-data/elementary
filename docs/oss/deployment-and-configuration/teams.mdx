@@ -5,6 +5,8 @@ sidebarTitle: "Teams"
 
 Elementary Teams integration includes sending [Teams alerts](/oss/guides/alerts/send-teams-alerts) on failures in dbt tests and models. The alerts are sent using Microsoft Teams Adaptive Cards format, which provides rich formatting and interactive capabilities.
 
+MS Teams supports Elementary Alerts, but unlike Slack, it does not support the Elementary report or multiple channels.
+
 ## Integration options
 
 There are two ways to create a webhook for Microsoft Teams:
@@ -12,7 +14,6 @@ There are two ways to create a webhook for Microsoft Teams:
 1. **Microsoft Teams Connectors (Legacy)**: The traditional way of creating webhooks, but this method is being deprecated by Microsoft.
 2. **Power Automate Workflows (Recommended)**: The newer, more flexible way to create webhooks. Note that when using this method, Elementary CLI cannot directly verify if messages were delivered - you'll need to monitor your workflow runs in Power Automate.
 
-<Warning>MS Teams supports Elementary Alerts, but unlike Slack, it does not support the Elementary report or multiple channels.</Warning>
 
 
 <Warning>Microsoft 365 Connectors (previously called Office 365 Connectors) are nearing deprecation. We recommend using Power Automate Workflows for new integrations.</Warning>
