@@ -1,5 +1,9 @@
 # Integration contribution guide
 
+> **DEPRECATED**: This guide describes the legacy integration system. For new integrations, please refer to the [Messaging Integrations Guide](../../messages/messaging_integrations/README.md) which describes the new `BaseMessagingIntegration` system.
+
+The content below is kept for reference while existing integrations are migrated to the new system.
+
 First of all, thank you for contributing a new integration to Elementary! We appreciate it :)
 This guide is meant to make this process easier for you and make the review process faster.
 

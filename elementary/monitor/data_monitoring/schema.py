@@ -34,6 +34,20 @@ class FilterType(str, Enum):
     CONTAINS = "contains"
 
 
+class FilterFields(BaseModel):
+    tags: List[str] = []
+    models: List[str] = []
+    owners: List[str] = []
+    statuses: List[str] = []
+    resource_types: List[ResourceType] = []
+    node_names: List[str] = []
+    test_ids: List[str] = []
+
+    @property
+    def normalized_status(self) -> List[Status]:
+        return [Status(status) for status in self.statuses if status in list(Status)]
+
+
 def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
     if filter_type == FilterType.IS:
         return value == filter_value
@@ -113,6 +127,7 @@ class FiltersSchema(BaseModel):
     models: List[FilterSchema] = Field(default_factory=list)
     statuses: List[StatusFilterSchema] = Field(default=_get_default_statuses_filter())
     resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
+    test_ids: List[FilterSchema[str]] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
     def format_invocation_time(cls, invocation_time) -> Optional[str]:
@@ -249,40 +264,39 @@ class FiltersSchema(BaseModel):
 
     def apply(
         self,
-        tags: List[str],
-        models: List[str],
-        owners: List[str],
-        statuses: List[Status],
-        resource_types: List[ResourceType],
-        node_names: List[str],
+        filter_fields: FilterFields,
     ) -> bool:
         return (
             all(
-                filter_schema.apply_filter_on_values(tags)
+                filter_schema.apply_filter_on_values(filter_fields.tags)
                 for filter_schema in self.tags
             )
             and all(
-                filter_schema.apply_filter_on_values(models)
+                filter_schema.apply_filter_on_values(filter_fields.models)
                 for filter_schema in self.models
             )
             and all(
-                filter_schema.apply_filter_on_values(owners)
+                filter_schema.apply_filter_on_values(filter_fields.owners)
                 for filter_schema in self.owners
             )
             and all(
-                filter_schema.apply_filter_on_values(statuses)
+                filter_schema.apply_filter_on_values(filter_fields.normalized_status)
                 for filter_schema in self.statuses
             )
             and all(
-                filter_schema.apply_filter_on_values(resource_types)
+                filter_schema.apply_filter_on_values(filter_fields.resource_types)
                 for filter_schema in self.resource_types
             )
             and (
                 FilterSchema(
                     values=self.node_names, type=FilterType.IS
-                ).apply_filter_on_values(node_names)
+                ).apply_filter_on_values(filter_fields.node_names)
                 if self.node_names
                 else True
+            )
+            and all(
+                filter_schema.apply_filter_on_values(filter_fields.test_ids)
+                for filter_schema in self.test_ids
             )
         )
 

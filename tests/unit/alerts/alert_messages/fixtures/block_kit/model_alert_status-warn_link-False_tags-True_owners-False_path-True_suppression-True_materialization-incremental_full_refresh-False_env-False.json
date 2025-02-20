@@ -1,0 +1,80 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Warning: dbt failed to build incremental \"test_model\""
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Model:* test_model | *Status:* warn | *Time:* 2025-02-03 13:21:07 UTC | *Suppression interval:* 24"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\ntag1, tag2"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n_No owners_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Path*\n`models/test_model.sql`"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Materialization*\nincremental"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Full Refresh*\nNo"
+            }
+          ]
+        }
+      ],
+      "color": "#ffcc00"
+    }
+  ]
+}

@@ -10,6 +10,7 @@ from elementary.messages.blocks import (
     FactListBlock,
     HeaderBlock,
     LinesBlock,
+    TableBlock,
 )
 
 
@@ -26,6 +27,7 @@ MessageBlock = Union[
     LinesBlock,
     FactListBlock,
     ExpandableBlock,
+    TableBlock,
 ]
 
 

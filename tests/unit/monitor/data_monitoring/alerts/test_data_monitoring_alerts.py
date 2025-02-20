@@ -3,12 +3,12 @@ from datetime import datetime
 
 import pytest
 
+from elementary.messages.messaging_integrations.slack_web import (
+    SlackWebMessagingIntegration,
+)
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
-from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
-    SlackIntegration,
-)
 from elementary.monitor.fetchers.alerts.schema.alert_data import (
     ModelAlertDataSchema,
     SourceFreshnessAlertDataSchema,
@@ -23,7 +23,7 @@ from tests.mocks.data_monitoring.alerts.data_monitoring_alerts_mock import (
 
 def test_get_integration_client(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
     integration = data_monitoring_alerts_mock._get_integration_client()
-    assert isinstance(integration, SlackIntegration)
+    assert isinstance(integration, SlackWebMessagingIntegration)
 
 
 def test_fetch_data(data_monitoring_alerts_mock: DataMonitoringAlertsMock):

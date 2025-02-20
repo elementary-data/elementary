@@ -1,0 +1,80 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Failure: dbt failed to build table \"test_model\""
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Model:* test_model | *Status:* fail | *Time:* 2025-02-03 13:21:07 UTC"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\n_No tags_"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n_No owners_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Path*\n`unknown_path`"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Materialization*\ntable"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Full Refresh*\nNo"
+            }
+          ]
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

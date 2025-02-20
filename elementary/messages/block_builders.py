@@ -11,6 +11,7 @@ from .blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
     TextBlock,
     TextStyle,
 )
@@ -41,7 +42,9 @@ def BulletListBlock(
     icon_inline: InlineBlock = (
         IconBlock(icon=icon) if isinstance(icon, Icon) else TextBlock(text=icon)
     )
-    lines = [LineBlock(inlines=[icon_inline] + line.inlines) for line in lines]
+    lines = [
+        LineBlock(inlines=[icon_inline, *line.inlines], sep=line.sep) for line in lines
+    ]
     return LinesBlock(lines=lines)
 
 
@@ -87,6 +90,24 @@ def SummaryLineBlock(
     return LineBlock(inlines=text_blocks)
 
 
+def NonPrimaryFactBlock(fact: Tuple[LineBlock, LineBlock]) -> FactBlock:
+    title, value = fact
+    return FactBlock(
+        title=title,
+        value=value,
+        primary=False,
+    )
+
+
+def PrimaryFactBlock(fact: Tuple[LineBlock, LineBlock]) -> FactBlock:
+    title, value = fact
+    return FactBlock(
+        title=title,
+        value=value,
+        primary=True,
+    )
+
+
 def FactsBlock(
     *,
     facts: Sequence[
@@ -120,3 +141,7 @@ def TitledParagraphBlock(
 
 def JsonCodeBlock(*, content: Union[str, dict, list], indent: int = 2) -> CodeBlock:
     return CodeBlock(text=json.dumps(content, indent=indent))
+
+
+def MentionLineBlock(*users: str) -> LineBlock:
+    return LineBlock(inlines=[MentionBlock(user=user) for user in users], sep=", ")

@@ -10,28 +10,17 @@ from elementary.messages.blocks import (
     Icon,
     IconBlock,
     InlineBlock,
+    InlineCodeBlock,
     LineBlock,
     LinesBlock,
     LinkBlock,
+    MentionBlock,
+    TableBlock,
     TextBlock,
     TextStyle,
 )
+from elementary.messages.formats.html import ICON_TO_HTML
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
-
-ICON_TO_HTML = {
-    Icon.RED_TRIANGLE: "🔺",
-    Icon.X: "❌",
-    Icon.WARNING: "⚠️",
-    Icon.EXCLAMATION: "❗",
-    Icon.CHECK: "✅",
-    Icon.MAGNIFYING_GLASS: "🔎",
-    Icon.HAMMER_AND_WRENCH: "🛠️",
-    Icon.POLICE_LIGHT: "🚨",
-    Icon.INFO: "ℹ️",
-    Icon.EYE: "👁️",
-    Icon.GEAR: "⚙️",
-    Icon.BELL: "🔔",
-}
 
 COLOR_TO_STYLE = {
     Color.RED: "Attention",
@@ -60,6 +49,12 @@ def format_inline_block(block: InlineBlock) -> str:
         return format_text_block(block)
     elif isinstance(block, LinkBlock):
         return f"[{block.text}]({block.url})"
+    elif isinstance(block, InlineCodeBlock):
+        return block.code
+    elif isinstance(block, MentionBlock):
+        return block.user
+    elif isinstance(block, LineBlock):
+        return format_line_block_text(block)
     else:
         raise ValueError(f"Unsupported inline block type: {type(block)}")
 
@@ -132,6 +127,31 @@ def format_fact_list_block(block: FactListBlock) -> Dict[str, Any]:
     }
 
 
+def format_table_block(block: TableBlock) -> Dict[str, Any]:
+    return {
+        "type": "Table",
+        "columns": [{"width": 1} for _ in block.headers],
+        "rows": [
+            {
+                "type": "TableRow",
+                "cells": [
+                    {
+                        "type": "TableCell",
+                        "items": [
+                            {
+                                "type": "TextBlock",
+                                "text": str(cell),
+                            }
+                        ],
+                    }
+                    for cell in row
+                ],
+            }
+            for row in [block.headers, *block.rows]
+        ],
+    }
+
+
 def format_message_block(
     block: MessageBlock, color: Optional[Color] = None
 ) -> List[Dict[str, Any]]:
@@ -145,6 +165,8 @@ def format_message_block(
         return [format_fact_list_block(block)]
     elif isinstance(block, ExpandableBlock):
         return format_expandable_block(block)
+    elif isinstance(block, TableBlock):
+        return [format_table_block(block)]
     else:
         raise ValueError(f"Unsupported message block type: {type(block)}")
 
@@ -219,7 +241,7 @@ def format_adaptive_card_body(message: MessageBody) -> List[Dict[str, Any]]:
     return format_message_blocks(message.blocks, message.color)
 
 
-def format_adaptive_card(message: MessageBody, version: str = "1.6") -> Dict[str, Any]:
+def format_adaptive_card(message: MessageBody, version: str = "1.5") -> Dict[str, Any]:
     if version < "1.2" or version > "1.6":
         raise ValueError(f"Version {version} is not supported")
     return {

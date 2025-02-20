@@ -1,0 +1,23 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Generic"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Test:* test_short_name | *Status:* Unknown | *Time:* N/A"
+      }
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": []
+    }
+  ]
+}

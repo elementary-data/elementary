@@ -1,0 +1,16 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "```Column 0                Column 1\n----------------------  ----------------------\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..```"
+      }
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": []
+    }
+  ]
+}
