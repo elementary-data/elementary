@@ -6,8 +6,9 @@ description: "See what's new on the Elementary Cloud Platform"
 export const Tag = ({ children = "Text goes here", type }) => (
   <div
     style={{
-      background: type === "date" ? "#6b6b6b" : "#FECDD8",
-      color: type === "date" ? "#ffffff" : "#BD134F",
+      background: type === "date" ? "transparent" : "#FECDD8",
+      color: type === "date" ? "#6b6b6b" : "#BD134F", 
+      border: type === "date" ? "1px solid #6b6b6b" : "none",
       borderRadius: "8px",
       fontSize: ".8em",
       padding: "2px 10px",
