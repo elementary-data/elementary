@@ -87,3 +87,11 @@ If configured otherwise in the dbt project config block or meta, the CLI value w
 ```shell
 edr monitor --suppression-interval 24
 ```
+
+#### Alert group threshold
+
+Set a minimum alert threshold before grouping notifications into a summary alert — keeping noise low while ensuring nothing gets missed.
+
+```shell
+edr monitor --group-alerts-threshold 5
+```
