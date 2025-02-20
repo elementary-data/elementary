@@ -27,9 +27,9 @@ MessageBlock = Union[
     DividerBlock,
     LinesBlock,
     FactListBlock,
-    ExpandableBlock,
     TableBlock,
     ActionsBlock,
+    ExpandableBlock,
 ]
 
 

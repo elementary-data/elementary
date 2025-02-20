@@ -86,7 +86,7 @@ class DropdownOptionBlock(BaseBlock):
 
 class DropdownActionBlock(ActionBlock):
     action: Literal["dropdown"] = "dropdown"
-    options: list[DropdownOptionBlock]
+    options: List[DropdownOptionBlock]
     placeholder: Optional[str] = None
     initial_option: Optional[DropdownOptionBlock] = None
 
@@ -178,6 +178,7 @@ InExpandableBlock = Union[
     LinesBlock,
     FactListBlock,
     TableBlock,
+    ActionsBlock,
     "ExpandableBlock",
 ]
 
