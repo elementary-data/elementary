@@ -337,6 +337,7 @@ class BlockKitBuilder:
         color_code = COLOR_MAP.get(message.color) if message.color else None
         blocks, attachment_blocks = self._get_final_blocks(message.color)
         if message.id and blocks:
+            # The only place in a slack message where we can set a custom id is in blocks, so we set the id of the first block
             blocks[0]["block_id"] = message.id
         built_message = FormattedBlockKitMessage(
             blocks=blocks,
