@@ -22,7 +22,7 @@ export const Tags = ({ date, tags = [] }) => (
   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
     <Tag type="date">{date}</Tag>
     {tags.map((tag, i) => (
-      <Tag key={i}>{tag}</Tag>
+      <Tag>{tag}</Tag>
     ))}
   </div>
 );
