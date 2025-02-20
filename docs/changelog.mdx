@@ -3,50 +3,35 @@ title: Elementary Changelog
 description: "See what's new on the Elementary Cloud Platform"
 ---
 
+export const Chip = ({ children = "Text goes here", type }) => (
+  <div
+    style={{
+      background: type === "date" ? "#6b6b6b" : "#FECDD8",
+      color: type === "date" ? "#ffffff" : "#BD134F",
+      borderRadius: "8px",
+      fontSize: ".8em",
+      padding: "2px 10px",
+      fontWeight: "500",
+    }}
+  >
+    {children}
+  </div>
+);
+
+export const ChipWrapper = ({ children }) => (
+  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+    {children}
+  </div>
+);
+
 ## Introducing: Incident Management
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >July 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Incident management</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-       Managing alerts is a common challenge for our users. Daily test failures generate numerous alerts, making tracking each issue's status difficult. Alerts are just the starting point—users need a tool to manage the entire process.
-       
+<ChipWrapper>
+  <Chip type="date">July 2024</Chip>
+  <Chip>Incident management</Chip>
+</ChipWrapper>
+
+Managing alerts is a common challenge for our users. Daily test failures generate numerous alerts, making tracking each issue's status difficult. Alerts are just the starting point—users need a tool to manage the entire process.
 
 We’ve been working hard to solve these issues and are excited to introduce incidents in Elementary.
 
@@ -55,331 +40,100 @@ An incident consists of one or more failure events. Each failure or warning open
 
 **New Incident Management Page**
 Our new [Incident Management Page](https://docs.elementary-data.com/features/alerts-and-incidents/incident-management) helps your team stay on top of open incidents and collaborate to resolve them. It provides a comprehensive overview of all incidents, allowing users to view statuses, prioritize issues, assign responsibilities, and resolve incidents efficiently.
- <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719927342/incidents-wide_ki16tu.mp4"
-        ></video>
 
-
-       </div>
-  </div>
-</div>
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719927342/incidents-wide_ki16tu.mp4"
+></video>
 
 ## New Alert Integrations!
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-        <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >July 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Integrations</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-       Introducing three new integrations with communication and incident management tools:
-          - [Microsoft Teams](https://docs.elementary-data.com/cloud/integrations/alerts/ms-teams)
-          - [PagerDuty](https://docs.elementary-data.com/cloud/integrations/alerts/pagerduty)
-          - [Opsgenie](https://docs.elementary-data.com/cloud/integrations/alerts/opsgenie)
-       </div>
-  </div>
-</div>
+<ChipWrapper>
+  <Chip type="date">July 2024</Chip>
+  <Chip>Integrations</Chip>
+</ChipWrapper>
 
+Introducing three new integrations with communication and incident management tools: - [Microsoft Teams](https://docs.elementary-data.com/cloud/integrations/alerts/ms-teams) - [PagerDuty](https://docs.elementary-data.com/cloud/integrations/alerts/pagerduty) - [Opsgenie](https://docs.elementary-data.com/cloud/integrations/alerts/opsgenie)
 
 ## Add any dbt test via UI
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >May 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginLeft: "5px",
-                marginRight: "5px",
-                }}
-            >Test configuration</span>
-        <span
-            style={{ 
-            background: "#FECDD8",
-            color: "#BD134F",
-            borderRadius: "8px",
-            fontSize: ".8em",
-            padding: "2px 10px",
-            display: "inline-block",
-            fontWeight: "500",
-            letterSpacing: ".5px",
-            whiteSpace: "nowrap",
-            marginLeft: "5px",
-            marginRight: "5px",
-            }}
-        >Data tests</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        Elementary now supports adding any dbt test in bulk and directly from the UI!
-        We added support for dbt-expectation and dbt-utils packages, and you can use it to add your own custom generic tests to tables and columns.
+<ChipWrapper>
+  <Chip type="date">May 2024</Chip>
+  <Chip>Test configuration</Chip>
+  <Chip>Data tests</Chip>
+</ChipWrapper>
 
-        <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320339/Changelog/YAML_for_all_tests_x0k48v.mp4"
-        ></video>
+Elementary now supports adding any dbt test in bulk and directly from the UI!
+We added support for dbt-expectation and dbt-utils packages, and you can use it to add your own custom generic tests to tables and columns.
 
-        </div>
-    </div>
-</div>
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320339/Changelog/YAML_for_all_tests_x0k48v.mp4"
+></video>
 
 ## Column anomalies by dimensions
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >May 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Anomaly detection monitors</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        You can now add a new parameter to your column anomaly tests -  `dimensions`.
+<ChipWrapper>
+  <Chip type="date">May 2024</Chip>
+  <Chip>Anomaly detection monitors</Chip>
+</ChipWrapper>
 
-        This will calculate the column metrics for every time bucket and table dimension values, allowing you to detect anomalies in specific segments of your data.
+You can now add a new parameter to your column anomaly tests - `dimensions`.
 
-        For example, if you want to detect anomalies in a revenue column and you have multiple apps in different countries - now you can detect anomalies in revenue in a specific country.
+This will calculate the column metrics for every time bucket and table dimension values, allowing you to detect anomalies in specific segments of your data.
 
-        Here is an example of how this can be configured -
+For example, if you want to detect anomalies in a revenue column and you have multiple apps in different countries - now you can detect anomalies in revenue in a specific country.
 
-        ```yaml
-            columns:
-            - name: in_app_purchase_revenue
-                tests:
-                - elementary.column_anomalies:
-                    column_anomalies:
-                        - sum
-                    dimensions:
-                        - app_name
-                        - country
-        ```
-        </div>
-    </div>
+Here is an example of how this can be configured -
 
-</div>
+```yaml
+    columns:
+    - name: in_app_purchase_revenue
+        tests:
+        - elementary.column_anomalies:
+            column_anomalies:
+                - sum
+            dimensions:
+                - app_name
+                - country
+```
 
 ## Column level test results in lineage
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-        <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >May 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Data lineage</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        You can now investigate test results right on top of your column level lineage graph. 
-        With this new release you can filter the lineage graph on a specific column that has an issue, and see if upstream or downstream columns 
-        have similar test failures to understand the root cause fast. 
+<ChipWrapper>
+  <Chip type="date">May 2024</Chip>
+  <Chip>Data lineage</Chip>
+</ChipWrapper>
 
-        <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320341/Changelog/Test_results_in_lineage_p6wy8y.mp4"
-        ></video>
+You can now investigate test results right on top of your column level lineage graph.
+With this new release you can filter the lineage graph on a specific column that has an issue, and see if upstream or downstream columns
+have similar test failures to understand the root cause fast.
 
-        </div>
-    </div>
-
-</div>
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320341/Changelog/Test_results_in_lineage_p6wy8y.mp4"
+></video>
 
 ## Monitor test durations
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-        <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >May 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginLeft: "5px",
-                marginRight: "5px",
-                }}
-            >Performance monitoring</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginLeft: "5px",
-                marginRight: "5px",
-                }}
-            >Data tests</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
+<ChipWrapper>
+  <Chip type="date">May 2024</Chip>
+  <Chip>Performance monitoring</Chip>
+  <Chip>Data tests</Chip>
+</ChipWrapper>
+
         We added test durations to the Test Execution History (the command and control center for your tests). You can now monitor your tests performance and see which tests are taking the longest or if there was any degradation in performance of specific tests.
 
         Easily sort your tests by execution duration and see which ones are taking the longest and choose the most promising candidates for optimization. This can also be used for cost analysis as slow tests tend to be more expensive.
@@ -395,338 +149,93 @@ Our new [Incident Management Page](https://docs.elementary-data.com/features/ale
         src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320330/Changelog/Test_duration_waxg1j.mp4"
         ></video>
 
-        </div>
-    </div>
-
-</div>
-
 ## Sync now
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-        <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >May 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Environments</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        We are excited to launch a new `Sync Now` button right in your environments page. You can think of is as a "refresh now" button for your environment.
-        If you introduced a change in your environment and you want to see it in Elementary immediately - just click ‘sync now’.
+<ChipWrapper>
+  <Chip type="date">May 2024</Chip>
+  <Chip>Environments</Chip>
+</ChipWrapper>
 
-        Here is what it looks like -
+We are excited to launch a new `Sync Now` button right in your environments page. You can think of is as a "refresh now" button for your environment.
+If you introduced a change in your environment and you want to see it in Elementary immediately - just click ‘sync now’.
 
-        <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320332/Changelog/sync_now2_qbb6n3.mp4"
-        ></video>
+Here is what it looks like -
 
-        </div>
-    </div>
-
-</div>
-
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320332/Changelog/sync_now2_qbb6n3.mp4"
+></video>
 
 ## Status and assignee for alerts
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >April 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Alerts</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        An alert is just the start of a triage and response process. We have big plans for making this process much more effective. 
-        The first step was alert rules, and now we are introducing status and assignee selection in our alerts.
+<ChipWrapper>
+  <Chip type="date">April 2024</Chip>
+  <Chip>Alerts</Chip>
+</ChipWrapper>
 
-        This should help you manage incidents and collaborate more effectively with your team.
+An alert is just the start of a triage and response process. We have big plans for making this process much more effective.
+The first step was alert rules, and now we are introducing status and assignee selection in our alerts.
 
-        <Frame>
-          <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/status-and-assignee-for-alerts_mj0evg.png" />
-        </Frame>
+This should help you manage incidents and collaborate more effectively with your team.
 
-    </div>
-
-</div>
-</div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/status-and-assignee-for-alerts_mj0evg.png" />
+</Frame>
 
 ## Custom SQL tests in UI
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >April 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Test configuration</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        Custom query testing is a must-have to validate business logic specific to your data team. You can now create custom SQL tests with Elementary, which will be translated into singular tests in your dbt project.
+<ChipWrapper>
+  <Chip type="date">April 2024</Chip>
+  <Chip>Test configuration</Chip>
+</ChipWrapper>
 
-        <Frame>
-         <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/custom-sql-tests-in-ui_xepafv.gif" />
-        </Frame>
+Custom query testing is a must-have to validate business logic specific to your data team. You can now create custom SQL tests with Elementary, which will be translated into singular tests in your dbt project.
 
-        </div>
-    </div>
-
-</div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/custom-sql-tests-in-ui_xepafv.gif" />
+</Frame>
 
 ## Model runs in dashboard
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >April 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Dashboard</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        The results of your jobs are critical to the data health. These are now included in the Elementary dashboard, for you to get a complete overview of the status of your pipelines. We added a breakdown of the latest result of each model, and the aggregated failures over time.
+<ChipWrapper>
+  <Chip type="date">April 2024</Chip>
+  <Chip>Dashboard</Chip>
+</ChipWrapper>
 
-        <Frame>
-            <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/model-runs-in-dashboard_uvl8tn.gif" />
-        </Frame>
+The results of your jobs are critical to the data health. These are now included in the Elementary dashboard, for you to get a complete overview of the status of your pipelines. We added a breakdown of the latest result of each model, and the aggregated failures over time.
 
-        </div>
-    </div>
-
-</div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/model-runs-in-dashboard_uvl8tn.gif" />
+</Frame>
 
 ## DAG subset in Lineage
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >April 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Data lineage</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        To improve UX and performance, we changed the default behavior in the lineage. 
-        When a node or group of nodes is chosen, only the first hop in both directions is loaded. To see the rest of the hops you can use the +/- buttons (see video).
+<ChipWrapper>
+  <Chip type="date">April 2024</Chip>
+  <Chip>Data lineage</Chip>
+</ChipWrapper>
 
-        <Frame>
-            <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/lineage-load-dag-subset_dcxgo9.gif" />
-        </Frame>
+To improve UX and performance, we changed the default behavior in the lineage.
+When a node or group of nodes is chosen, only the first hop in both directions is loaded. To see the rest of the hops you can use the +/- buttons (see video).
 
-        </div>
-    </div>
-
-</div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/lineage-load-dag-subset_dcxgo9.gif" />
+</Frame>
 
 ## Role-based access control
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#6b6b6b",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginRight: "6px"
-                }}
-            >April 2024</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Security and permissions</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        Elementary now allows creating users with different roles. 
-        This will allow you to add more users from your team to Elementary, allowing them to view results without giving them the ability to change environment settings.
-        <Frame>
-            <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008670/role-based-access-control_kze9a7.gif" />
-        </Frame>
+<ChipWrapper>
+  <Chip type="date">April 2024</Chip>
+  <Chip>Security and permissions</Chip>
+</ChipWrapper>
 
-        </div>
-    </div>
+Elementary now allows creating users with different roles.
+This will allow you to add more users from your team to Elementary, allowing them to view results without giving them the ability to change environment settings.
 
-</div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008670/role-based-access-control_kze9a7.gif" />
+</Frame>
