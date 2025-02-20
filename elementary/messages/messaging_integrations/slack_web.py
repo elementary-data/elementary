@@ -84,16 +84,6 @@ class SlackWebMessagingIntegration(
         formatted_message: FormattedBlockKitMessage,
         thread_ts: Optional[str] = None,
     ) -> MessageSendResult[SlackWebMessageContext]:
-        print("AAAAAAAAA")
-        print(
-            json.dumps(
-                {
-                    "blocks": formatted_message.blocks,
-                    "attachments": formatted_message.attachments,
-                },
-                indent=2,
-            )
-        )
         try:
             response = self.client.chat_postMessage(
                 channel=destination,
