@@ -158,7 +158,8 @@
     {
       "group": "Data Governance",
       "pages": [
-        "best-practices/governance-for-observability"
+        "best-practices/governance-for-observability",
+        "features/data-governance/critical_assets"
       ]
     },
     {
