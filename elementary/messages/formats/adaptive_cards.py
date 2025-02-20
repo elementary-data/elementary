@@ -2,6 +2,7 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 from elementary.messages.blocks import (
+    ActionsBlock,
     CodeBlock,
     DividerBlock,
     ExpandableBlock,
@@ -170,6 +171,10 @@ def format_message_block(
         return format_expandable_block(block)
     elif isinstance(block, TableBlock):
         return [format_table_block(block)]
+    elif isinstance(block, ActionsBlock):
+        # Not supported in webhooks, so we don't need to format it.
+        # When we add support for teams apps, we will need to format it.
+        return []
     else:
         raise ValueError(f"Unsupported message block type: {type(block)}")
 
