@@ -3,7 +3,7 @@ title: Elementary Changelog
 description: "See what's new on the Elementary Cloud Platform"
 ---
 
-export const Chip = ({ children = "Text goes here", type }) => (
+export const Tag = ({ children = "Text goes here", type }) => (
   <div
     style={{
       background: type === "date" ? "#6b6b6b" : "#FECDD8",
@@ -18,18 +18,21 @@ export const Chip = ({ children = "Text goes here", type }) => (
   </div>
 );
 
-export const ChipWrapper = ({ children }) => (
+export const Tags = ({ date, tags = [] }) => (
   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-    {children}
+    <Tag type="date">{date}</Tag>
+    {tags.map((tag, i) => (
+      <Tag key={i}>{tag}</Tag>
+    ))}
   </div>
 );
 
 ## Introducing: Incident Management
 
-<ChipWrapper>
-  <Chip type="date">July 2024</Chip>
-  <Chip>Incident management</Chip>
-</ChipWrapper>
+<Tags 
+  date="July 2024"
+  tags={["Incident management"]}
+/>
 
 Managing alerts is a common challenge for our users. Daily test failures generate numerous alerts, making tracking each issue's status difficult. Alerts are just the starting point—users need a tool to manage the entire process.
 
@@ -52,20 +55,19 @@ Our new [Incident Management Page](https://docs.elementary-data.com/features/ale
 
 ## New Alert Integrations!
 
-<ChipWrapper>
-  <Chip type="date">July 2024</Chip>
-  <Chip>Integrations</Chip>
-</ChipWrapper>
+<Tags
+  date="July 2024"
+  tags={["Integrations"]}
+/>
 
 Introducing three new integrations with communication and incident management tools: - [Microsoft Teams](https://docs.elementary-data.com/cloud/integrations/alerts/ms-teams) - [PagerDuty](https://docs.elementary-data.com/cloud/integrations/alerts/pagerduty) - [Opsgenie](https://docs.elementary-data.com/cloud/integrations/alerts/opsgenie)
 
 ## Add any dbt test via UI
 
-<ChipWrapper>
-  <Chip type="date">May 2024</Chip>
-  <Chip>Test configuration</Chip>
-  <Chip>Data tests</Chip>
-</ChipWrapper>
+<Tags
+  date="May 2024"
+  tags={["Test configuration", "Data tests"]}
+/>
 
 Elementary now supports adding any dbt test in bulk and directly from the UI!
 We added support for dbt-expectation and dbt-utils packages, and you can use it to add your own custom generic tests to tables and columns.
@@ -81,10 +83,10 @@ We added support for dbt-expectation and dbt-utils packages, and you can use it 
 
 ## Column anomalies by dimensions
 
-<ChipWrapper>
-  <Chip type="date">May 2024</Chip>
-  <Chip>Anomaly detection monitors</Chip>
-</ChipWrapper>
+<Tags 
+  date="May 2024"
+  tags={["Anomaly detection monitors"]}
+/>
 
 You can now add a new parameter to your column anomaly tests - `dimensions`.
 
@@ -108,10 +110,10 @@ Here is an example of how this can be configured -
 
 ## Column level test results in lineage
 
-<ChipWrapper>
-  <Chip type="date">May 2024</Chip>
-  <Chip>Data lineage</Chip>
-</ChipWrapper>
+<Tags 
+  date="May 2024"
+  tags={["Data lineage"]}
+/>
 
 You can now investigate test results right on top of your column level lineage graph.
 With this new release you can filter the lineage graph on a specific column that has an issue, and see if upstream or downstream columns
@@ -128,11 +130,10 @@ have similar test failures to understand the root cause fast.
 
 ## Monitor test durations
 
-<ChipWrapper>
-  <Chip type="date">May 2024</Chip>
-  <Chip>Performance monitoring</Chip>
-  <Chip>Data tests</Chip>
-</ChipWrapper>
+<Tags 
+  date="May 2024"
+  tags={["Performance monitoring", "Data tests"]}
+/>
 
         We added test durations to the Test Execution History (the command and control center for your tests). You can now monitor your tests performance and see which tests are taking the longest or if there was any degradation in performance of specific tests.
 
@@ -151,10 +152,10 @@ have similar test failures to understand the root cause fast.
 
 ## Sync now
 
-<ChipWrapper>
-  <Chip type="date">May 2024</Chip>
-  <Chip>Environments</Chip>
-</ChipWrapper>
+<Tags 
+  date="May 2024"
+  tags={["Environments"]}
+/>
 
 We are excited to launch a new `Sync Now` button right in your environments page. You can think of is as a "refresh now" button for your environment.
 If you introduced a change in your environment and you want to see it in Elementary immediately - just click ‘sync now’.
@@ -172,10 +173,10 @@ Here is what it looks like -
 
 ## Status and assignee for alerts
 
-<ChipWrapper>
-  <Chip type="date">April 2024</Chip>
-  <Chip>Alerts</Chip>
-</ChipWrapper>
+<Tags 
+  date="April 2024"
+  tags={["Alerts"]}
+/>
 
 An alert is just the start of a triage and response process. We have big plans for making this process much more effective.
 The first step was alert rules, and now we are introducing status and assignee selection in our alerts.
@@ -188,10 +189,10 @@ This should help you manage incidents and collaborate more effectively with your
 
 ## Custom SQL tests in UI
 
-<ChipWrapper>
-  <Chip type="date">April 2024</Chip>
-  <Chip>Test configuration</Chip>
-</ChipWrapper>
+<Tags 
+  date="April 2024"
+  tags={["Test configuration"]}
+/>
 
 Custom query testing is a must-have to validate business logic specific to your data team. You can now create custom SQL tests with Elementary, which will be translated into singular tests in your dbt project.
 
@@ -201,10 +202,10 @@ Custom query testing is a must-have to validate business logic specific to your 
 
 ## Model runs in dashboard
 
-<ChipWrapper>
-  <Chip type="date">April 2024</Chip>
-  <Chip>Dashboard</Chip>
-</ChipWrapper>
+<Tags 
+  date="April 2024"
+  tags={["Dashboard"]}
+/>
 
 The results of your jobs are critical to the data health. These are now included in the Elementary dashboard, for you to get a complete overview of the status of your pipelines. We added a breakdown of the latest result of each model, and the aggregated failures over time.
 
@@ -214,10 +215,10 @@ The results of your jobs are critical to the data health. These are now included
 
 ## DAG subset in Lineage
 
-<ChipWrapper>
-  <Chip type="date">April 2024</Chip>
-  <Chip>Data lineage</Chip>
-</ChipWrapper>
+<Tags 
+  date="April 2024"
+  tags={["Data lineage"]}
+/>
 
 To improve UX and performance, we changed the default behavior in the lineage.
 When a node or group of nodes is chosen, only the first hop in both directions is loaded. To see the rest of the hops you can use the +/- buttons (see video).
@@ -228,10 +229,10 @@ When a node or group of nodes is chosen, only the first hop in both directions i
 
 ## Role-based access control
 
-<ChipWrapper>
-  <Chip type="date">April 2024</Chip>
-  <Chip>Security and permissions</Chip>
-</ChipWrapper>
+<Tags 
+  date="April 2024"
+  tags={["Security and permissions"]}
+/>
 
 Elementary now allows creating users with different roles.
 This will allow you to add more users from your team to Elementary, allowing them to view results without giving them the ability to change environment settings.
