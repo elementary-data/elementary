@@ -18,6 +18,7 @@ class Icon(Enum):
     EYE = "eye"
     GEAR = "gear"
     BELL = "bell"
+    GEM = "gem"
 
 
 class TextStyle(Enum):
@@ -67,12 +68,47 @@ class LineBlock(BaseBlock):
     sep: str = " "
 
 
+class WhitespaceBlock(BaseBlock):
+    type: Literal["whitespace"] = "whitespace"
+
+
+class ActionBlock(BaseBlock):
+    type: Literal["action"] = "action"
+    action: str
+    action_id: str
+
+
+class DropdownOptionBlock(BaseBlock):
+    type: Literal["dropdown_option"] = "dropdown_option"
+    text: str
+    value: str
+
+
+class DropdownActionBlock(ActionBlock):
+    action: Literal["dropdown"] = "dropdown"
+    options: List[DropdownOptionBlock]
+    placeholder: Optional[str] = None
+    initial_option: Optional[DropdownOptionBlock] = None
+
+
+class UserSelectActionBlock(ActionBlock):
+    action: Literal["users_select"] = "users_select"
+    placeholder: Optional[str] = None
+    initial_user: Optional[str] = None
+
+
+class ActionsBlock(BaseBlock):
+    type: Literal["actions"] = "actions"
+    actions: Sequence[ActionBlock]
+
+
 InlineBlock = Union[
     TextBlock,
     LinkBlock,
     IconBlock,
     InlineCodeBlock,
     MentionBlock,
+    WhitespaceBlock,
     "LineBlock",
 ]
 
@@ -142,6 +178,7 @@ InExpandableBlock = Union[
     LinesBlock,
     FactListBlock,
     TableBlock,
+    ActionsBlock,
     "ExpandableBlock",
 ]
 

@@ -22,6 +22,7 @@ from elementary.messages.blocks import (
     TableBlock,
     TextBlock,
     TextStyle,
+    WhitespaceBlock,
 )
 from elementary.messages.message_body import Color, MessageBody
 
@@ -376,5 +377,27 @@ class BaseTestFormat(Generic[T]):
         expected_file_path = self.get_expected_file_path(
             f"table_block_{text_length}_{column_count}"
         )
+        result = self.format(message_body)
+        self.assert_expected_value(result, expected_file_path)
+
+    def test_format_message_body_whitespace_block(self):
+        message_body = MessageBody(
+            blocks=[
+                LinesBlock(
+                    lines=[
+                        LineBlock(
+                            inlines=[TextBlock(text="This should not be indented")]
+                        ),
+                        LineBlock(
+                            inlines=[
+                                WhitespaceBlock(),
+                                TextBlock(text="This should be indented"),
+                            ]
+                        ),
+                    ]
+                )
+            ]
+        )
+        expected_file_path = self.get_expected_file_path("whitespace_block")
         result = self.format(message_body)
         self.assert_expected_value(result, expected_file_path)

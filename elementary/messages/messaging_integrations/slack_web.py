@@ -56,6 +56,9 @@ class SlackWebMessagingIntegration(
     def supports_reply(self) -> bool:
         return True
 
+    def supports_actions(self) -> bool:
+        return True
+
     def send_message(
         self, destination: Channel, body: MessageBody
     ) -> MessageSendResult[SlackWebMessageContext]:

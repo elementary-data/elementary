@@ -38,6 +38,9 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
     def supports_reply(self) -> bool:
         raise NotImplementedError
 
+    def supports_actions(self) -> bool:
+        return False
+
     def reply_to_message(
         self,
         destination: DestinationType,

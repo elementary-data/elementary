@@ -1,0 +1,22 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "This should not be indented",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "&emsp; This should be indented",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.5"
+}

@@ -6,8 +6,11 @@ from slack_sdk.models import blocks as slack_blocks
 from tabulate import tabulate
 
 from elementary.messages.blocks import (
+    ActionBlock,
+    ActionsBlock,
     CodeBlock,
     DividerBlock,
+    DropdownActionBlock,
     ExpandableBlock,
     FactBlock,
     FactListBlock,
@@ -23,6 +26,8 @@ from elementary.messages.blocks import (
     TableBlock,
     TextBlock,
     TextStyle,
+    UserSelectActionBlock,
+    WhitespaceBlock,
 )
 from elementary.messages.formats.html import ICON_TO_HTML
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
@@ -83,6 +88,8 @@ class BlockKitBuilder:
                 return block.user
         elif isinstance(block, LineBlock):
             return self._format_line_block_text(block)
+        elif isinstance(block, WhitespaceBlock):
+            return " "
         else:
             raise ValueError(f"Unsupported inline block type: {type(block)}")
 
@@ -119,6 +126,60 @@ class BlockKitBuilder:
             "type": "section",
             "text": self._format_markdown_section_text(text),
         }
+
+    def _format_action_block(self, block: ActionBlock) -> dict:
+        if isinstance(block, DropdownActionBlock):
+            return self._format_dropdown_action_block(block)
+        elif isinstance(block, UserSelectActionBlock):
+            return self._format_user_select_action_block(block)
+        else:
+            raise ValueError(f"Unsupported action block type: {type(block)}")
+
+    def _format_dropdown_action_block(self, block: DropdownActionBlock) -> dict:
+        formatted_block = {
+            "type": "static_select",
+            "placeholder": {
+                "type": "plain_text",
+                "text": block.placeholder,
+                "emoji": True,
+            },
+            "options": [
+                {
+                    "text": {
+                        "type": "plain_text",
+                        "text": option.text,
+                        "emoji": True,
+                    },
+                    "value": option.value,
+                }
+                for option in block.options
+            ],
+        }
+        if block.initial_option:
+            formatted_block["initial_option"] = {
+                "text": {
+                    "type": "plain_text",
+                    "text": block.initial_option.text,
+                    "emoji": True,
+                },
+                "value": block.initial_option.value,
+            }
+        return formatted_block
+
+    def _format_user_select_action_block(self, block: UserSelectActionBlock) -> dict:
+        formatted_block = {
+            "type": "users_select",
+            "placeholder": {
+                "type": "plain_text",
+                "text": block.placeholder,
+                "emoji": True,
+            },
+        }
+        if block.initial_user:
+            resolved_user = self._resolve_mention(block.initial_user)
+            if resolved_user:
+                formatted_block["initial_user"] = resolved_user
+        return formatted_block
 
     def _add_block(self, block: dict) -> None:
         if not self._is_divided:
@@ -211,6 +272,16 @@ class BlockKitBuilder:
             table_text = tabulate(new_rows, headers=new_headers, tablefmt="simple")
         self._add_block(self._format_markdown_section(f"```{table_text}```"))
 
+    def _add_actions_block(self, block: ActionsBlock) -> None:
+        self._add_block(
+            {
+                "type": "actions",
+                "elements": [
+                    self._format_action_block(action) for action in block.actions
+                ],
+            }
+        )
+
     def _add_expandable_block(self, block: ExpandableBlock) -> None:
         """
         Expandable blocks are not supported in Slack Block Kit.
@@ -233,6 +304,8 @@ class BlockKitBuilder:
             self._add_expandable_block(block)
         elif isinstance(block, TableBlock):
             self._add_table_block(block)
+        elif isinstance(block, ActionsBlock):
+            self._add_actions_block(block)
         else:
             raise ValueError(f"Unsupported message block type: {type(block)}")
 
@@ -263,6 +336,9 @@ class BlockKitBuilder:
         self._add_message_blocks(message.blocks)
         color_code = COLOR_MAP.get(message.color) if message.color else None
         blocks, attachment_blocks = self._get_final_blocks(message.color)
+        if message.id and blocks:
+            # The only place in a slack message where we can set a custom id is in blocks, so we set the id of the first block
+            blocks[0]["block_id"] = message.id
         built_message = FormattedBlockKitMessage(
             blocks=blocks,
             attachments=[
