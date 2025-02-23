@@ -35,7 +35,9 @@ These can be set in the Incidents page, or from an alert in integrations that su
 - **Incident status**: Will be set to `open` by default, and can be changed to `Acknowledged` and back to `Open`. When an alert is manually or automatically set as `Resolved`, it will close and will no longer be modified.
 - **Incident assignee**: An incident can be assigned to any user on the team, and they will be notified.
     - If you assign an incident to a user, it is recommended to leave the incident `Open` until the user changes status to `Acknowledged`.
-- **Incident severity**: Users can set a severity level (High, Low, Normal, Critical) to an incident. _Coming soon_ : Severity will be automated by an analysis of the impacted assets.
+- **Incident severity**: Severity of an incident can be Low, Normal, High or Critical. By default, model errors are set to Critical, test failures set to High and warnings are marked as Normal, but the severity can be changed manually.  _Coming soon_ : Severity will be automated by an analysis of the impacted assets.
+
+<note> Incident severity is used to prioritize incidents and to set the urgency of resolving them. it is not the same as dbt test severity </note>
 
 ## Incidents overview and metrics
 
