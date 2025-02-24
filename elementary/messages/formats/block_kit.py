@@ -164,6 +164,8 @@ class BlockKitBuilder:
                 },
                 "value": block.initial_option.value,
             }
+        if block.action_id:
+            formatted_block["action_id"] = block.action_id
         return formatted_block
 
     def _format_user_select_action_block(self, block: UserSelectActionBlock) -> dict:
@@ -179,6 +181,8 @@ class BlockKitBuilder:
             resolved_user = self._resolve_mention(block.initial_user)
             if resolved_user:
                 formatted_block["initial_user"] = resolved_user
+        if block.action_id:
+            formatted_block["action_id"] = block.action_id
         return formatted_block
 
     def _add_block(self, block: dict) -> None:
