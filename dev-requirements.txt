@@ -19,3 +19,7 @@ types-setuptools
 types-retry
 types-decorator
 types-tabulate
+Jinja2
+oauthlib
+requests_oauthlib
+simplejson
