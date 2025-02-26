@@ -4,16 +4,40 @@ title: "Data Catalog"
 
 <Snippet file="cloud/cloud-feature-tag.mdx" />
 
-On the Catalog tab you can now explore your datasets information - descriptions, columns, columns descriptions, latest update time and datasets health.
-From the dataset you can navigate directly to its lineage and test results.
+The Elementary Data Catalog is designed to make a curated collection of datasets easily discoverable by data consumers, along with their dependencies, health status and more.
 
-The catalog content is generated from the descriptions you maintain in your dbt project YML files.
+The Catalog tab provides a comprehensive view of the datasets created for the various analytics teams, enabling easy discovery and access to key metadata for data consumers within your team. It centralizes dataset information, including descriptions, columns, column descriptions, latest update times, and dataset health.
 
-The goal is to make Elementary useful for more members of the data team, and to prevent the need to navigate between Elementary and other interfaces.
+From each dataset, you can navigate directly to its lineage and test results, ensuring seamless exploration of data dependencies and quality insights.
 
-<Frame>
-  <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1700485957/catalog-croped_r35636.gif"
-    alt="Elementary Catalog"
-  />
-</Frame>
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/dvmtceykh/video/upload/v1740567475/catalog_tnroqf.mp4"
+></video>
+
+## Key Features
+### Easily Discoverable Data Assets
+Quickly and easily navigate the catalog using the side tree and its search bar. Easily find tables, views, BI dashboard and more.
+
+### Custom Metadata Support
+Need to display additional metadata fields from your dbt `meta` config? Reach out to our team to customize the catalog with fields that best fit your data workflows.
+
+### Critical Asset Tagging
+Mark key datasets as critical to highlight their importance and prioritize monitoring efforts. Read more [here](/features/data-governance/critical_assets).
+
+### Lineage & Dependency Export
+View upstream and downstream dependencies for each dataset, and export the full dependency list as a CSV for further analysis or documentation.
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740576976/ec20159d-7d83-4f88-8cc3-c0f9d539d9d2.png" alt="Lineage export" />
+
+## Data Source
+The catalog content is automatically generated from the descriptions maintained in your dbt project YML files, ensuring consistency with your existing documentation.
+In addition, Elementary enriches the catalog with health scores, test coverage status and results, as well as metadata from your DWH information schema, providing a comprehensive view of your datasets.
+
+## Coming soon
+- Edit asset descriptions, tags and owners, for a single asset or in bulk
+- Easily find gaps in your data governance coverage such as missing descriptions, owners or tags
+- Discover datasets by smart search
