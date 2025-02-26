@@ -523,10 +523,6 @@
       "destination": "/features/alerts-and-incidents/alerts-and-incidents-overview"
     },
     {
-      "source": "/features/alerts-and-incidents/alert-rules",
-      "destination": "/features/alerts-and-incidents/alert-rules"
-    },
-    {
       "source": "/features/catalog",
       "destination": "/features/collaboration-and-communication/catalog"
     },
