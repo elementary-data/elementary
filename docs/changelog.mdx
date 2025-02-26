@@ -3,38 +3,306 @@ title: Elementary Changelog
 description: "See what's new on the Elementary Cloud Platform"
 ---
 
-## July 2024
+export const Tag = ({ children = "Text goes here", type }) => (
+  <div
+    style={{
+      background: type === "date" ? "transparent" : "#FECDD8",
+      color: type === "date" ? "#6b6b6b" : "#BD134F", 
+      border: type === "date" ? "1px solid #6b6b6b" : "none",
+      borderRadius: "8px",
+      fontSize: ".7em",
+      padding: "1px 8px",
+      fontWeight: "500",
+    }}
+  >
+    {children}
+  </div>
+);
 
-### Introducing: Incident Management
+export const Tags = ({ date, tags = [] }) => (
+  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+    <Tag type="date">{date}</Tag>
+    {tags.map((tag, i) => (
+      <Tag>{tag}</Tag>
+    ))}
+  </div>
+);
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Incident management</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-       Managing alerts is a common challenge for our users. Daily test failures generate numerous alerts, making tracking each issue's status difficult. Alerts are just the starting point—users need a tool to manage the entire process.
-       
+## Mute tests
+
+<Tags 
+  date="February 2025"
+/>
+
+We’re pleased to introduce the Mute Test feature! 
+
+This allows you to run tests without triggering alerts, giving you greater control over notifications while still monitoring your data. It’s perfect for scenarios where you’re testing new data sets, refining thresholds, or adjusting test logic—without unnecessary noise. 
+
+With this feature, you can ensure everything is working as expected before enabling alerts, keeping your team focused and informed only when it truly matters.
+
+Learn more how to [mute tests](https://docs.elementary-data.com/features/alerts-and-incidents/alerts-and-incidents-overview) in our docs.
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079310/Changelog/Mute_Tests_gif_omflcw.gif)
+
+## Edit dbt Tests Directly from the Elementary UI
+
+<Tags 
+  date="February 2025"
+/>
+
+We’re thrilled to announce a long-awaited feature: the ability to edit **dbt tests** directly from the Elementary UI!
+
+Until now, the UI only supported test creation, but this release marks the first milestone in providing full test editing capabilities. You can now update test configurations from the **Test Overview** screen, including settings like owners, tags, severity levels, and descriptions. All changes automatically generate a pull request, ensuring proper version control and documentation.
+
+This is just the beginning—more enhancements for editing test configurations are on the way!
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079259/Changelog/Alert_destination_is_Connected_udazqq.png)
+
+## Custom metadata
+
+<Tags 
+  date="February 2025"
+/>
+
+Custom attributes from ****[dbt’s meta field](https://docs.getdbt.com/reference/resource-configs/meta) are now visible in the Elementary catalog, enhancing context and improving collaboration by bringing key metadata directly into your observability workflows.
+
+We understand that not all meta attributes are relevant for every team. If there are specific meta attributes you’d like to see in the catalog, please reach out to us at Elementary. Let us know your preferences, and we’ll configure the catalog to display the metadata most valuable to you.
+
+https://www.figma.com/design/8eLzVmlrf4c2v13PVTVcVv?node-id=55-5726#1119830403
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079225/Changelog/Fields_j6jumx.png)
+
+## Manually Set SLAs for Freshness Tests
+
+<Tags 
+  date="February 2025"
+/>
+
+You can now set a manual threshold for Elementary's freshness tests. 
+
+While our automated freshness test uses anomaly detection to identify unusual delays in table updates, sometimes you need more precise control. With manual thresholds, you can explicitly define when a freshness test should fail, giving you full control over monitoring your data freshness requirements. Simply set your desired threshold, and you'll be notified whenever a table hasn't refreshed within that time limit.
+
+Learn more about [automated freshness tests](https://docs.elementary-data.com/features/anomaly-detection/automated-freshness) in our docs.
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079192/Changelog/image_55_ktvski.png)
+
+## Connect Multiple BI Tools in Lineage
+
+<Tags 
+  date="February 2025"
+  tags={["Integration"]}
+/>
+
+Elementary now supports connecting multiple BI tools, bringing even more visibility into your data. Once connected, BI metadata will appear in both the **catalog** and the **lineage graph**.
+
+Currently, Elementary integrates with **Looker**, **Tableau**, **Power BI**, and **Sigma**—with more to come!
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079164/Changelog/image_43_hgu2zu.png)
+
+## Easier Test Creation
+
+<Tags 
+  date="February 2025"
+/>
+
+We improved the test creation UI to make it easier to create tests. Given the fantastic response to the [dbt tests hub](https://www.elementary-data.com/dbt-test-hub) we introduced a few months ago, we decided to bring the test hub into the platform. You can now search directly from the Elementary UI, select the desired test, and create it directly from the UI using the YAML format provided with examples and explanations, then add owners, tags, severity, etc, and open a PR.
+
+Learn more about [test creation in Elementary](https://docs.elementary-data.com/features/data-tests/data-tests-overview).
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079128/Changelog/New_Test_Creation_UI_new_eftsw3.gif)
+
+## New Integrations: Jira & Linear 
+
+<Tags 
+  date="February 2025"
+  tags={["Integration"]}
+/>
+
+We’re excited to announce that you can now integrate Elementary with Jira or Linear to streamline your incident management process.
+
+With this integration, you can create new Jira or Linear tickets directly from Elementary. Once you connect your account, a **‘Create Ticket’** button will appear next to each incident in the incident management screen.
+
+Jira and Linear tickets created through Elementary will automatically include key details like the test name, description, query, results, and more—ensuring all relevant context is captured and shared.
+
+Learn more about connecting Elementary to [Jira](https://docs.elementary-data.com/cloud/integrations/alerts/jira) or [Linear](https://docs.elementary-data.com/cloud/integrations/alerts/linear) in our docs.
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079070/Changelog/image_6_dubecv.png)
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079094/Changelog/image_51_r2pbsr.png)
+
+## Critical Assets
+
+<Tags 
+  date="February 2025"
+/>
+
+We’re excited to introduce the **Critical Assets** feature, designed to help you prioritize and protect your most important data assets. 
+
+**What is a Critical Asset?**
+
+A critical asset is ***any*** data asset (such as a model, exposure, or report) that plays a crucial role in your ***company's*** data ecosystem. Issues affecting these assets can have a significant impact on business operations, dashboards, and decision-making.
+
+Marking an asset as **critical** ensures it receives **higher priority in monitoring and alerting**, helping you quickly identify and respond to issues that may impact it.
+
+Once an asset is marked as **critical**, you will be able to:
+
+✅ **Identify it in the UI**, where it will be visually highlighted.
+
+✅ **Receive alerts** when upstream issues may impact the critical asset.
+
+✅ **Filter incidents** by their impact on critical assets.
+
+Learn more about how to use Critical Assets in our [docs.](https://docs.elementary-data.com/features/data-governance/critical_assets)
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079005/Changelog/Critical_Assets_3_gjw9nc.gif)
+
+## Compact navbar
+
+<Tags 
+  date="November 2024"
+/>
+
+You can now minimize the navigation bar for a better experience on smaller screens.
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740078816/Changelog/Compact_Nav_wcfmif.gif)
+
+## Sigma integration
+
+<Tags 
+  date="November 2024"
+  tags={["Integration"]}
+/>
+
+Elementary now connects with Sigma!
+
+With this integration, Elementary automatically extends data lineage down to the workbook page and element level. This means you’ll have full end-to-end visibility into your data, making it easier to understand downstream dependencies, also known as exposures. [Learn more about connecting to Sigma](https://docs.elementary-data.com/cloud/integrations/bi/sigma).
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740078782/Changelog/Screenshot_2024-12-09_at_16.31.03_etmoap.png)
+
+## Performance improvements
+
+<Tags 
+  date="November 2024"
+  tags={["Performance"]}
+/>
+
+In the past few months, we have made significant performance efforts to improve loading times within our platform. In particular, we created dedicated and efficient GraphQL API endpoints in our backend to speed up the dashboard, which now loads in a couple of seconds and usually less. 
+
+We have also made considerable efforts to improve our database infrastructure to support additional scale and customers, which has resulted in an overall improvement throughout the platform.
+
+## Lineage Export
+
+<Tags 
+  date="November 2024"
+  tags={["Lineage"]}
+/>
+
+Before making changes to a column or any other asset, you can assess the impact by exporting a textual summary of its lineage as a .csv file. The export includes:
+
+- Upstream and downstream assets
+- Number of hops
+- Names, owners, and tags of each dependency
+
+You can export the lineage for either a column or a table. This feature is accessible from both the lineage screen and the test overview dependencies tab.
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740078717/Changelog/Lineage_Export_mesth8.gif)
+
+## Enhanced Test Results
+
+<Tags 
+  date="November 2024"
+  tags={["Integrations"]}
+/>
+
+The test overview side panel, previously only accessible from the incidents page, is now available on the test results page as well. This means you can view a full test overview even for tests that aren’t failing, not just for incidents.
+
+We’ve also introduced several updates to the panel:
+
+- View asset dependencies directly in a table format, with the option to export them as a .csv file or explore the lineage graph.
+- Inspect the asset in the catalog with a single click.
+- Disable automated freshness or volume tests directly from the test overview screen.
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740078639/Changelog/Test_Overview_naed5h.gif)
+
+## Custom Resource-based Roles
+
+<Tags 
+  date="October 2024"
+/>
+
+Elementary now allows the creation of custom roles with access controls tailored to specific data.
+
+These roles are based on criteria such as environments, model path, dbt tags, or dbt owners. This is in addition to the existing access control (View, Edit, Admin). This ensures that users can only access the data they need, helping create focus and security. 
+
+For now, our team will create the custom role for you. In the future, you will be able to do this on your own in the UI. To create a custom role reach out to us in the mutual Slack support channel, and we will create it for you. When the role is created, it will appear in the roles dropdown you see when inviting a new user to Elementary.
+
+## Bitbucket
+
+<Tags 
+  date="October 2024"
+  tags={["Integrations"]}
+/>
+
+You can now connect Elementary to your Bitbucket code repository, where your dbt project code is managed. Once connected, Elementary will open PRs with configuration changes.
+
+https://docs.elementary-data.com/cloud/integrations/code-repo/bitbucket 
+
+## Power BI
+
+<Tags 
+  date="October 2024"
+  tags={["Integrations"]}
+/>
+
+You can now connect Power BI to Elementary!
+
+This will provide you with end-to-end data lineage to understand your downstream dependencies. 
+Once connected, Elementary will automatically and continuously extend the lineage to the report/dashboard level.
+
+https://docs.elementary-data.com/cloud/integrations/bi/power-bi
+
+## Elementary + Atlan: See your Elementary data quality insights in Atlan!
+
+<Tags 
+  date="October 2024"
+  tags={["Integrations"]}
+/>
+
+We introduced a new test overview side panel that will make it much easier to investigate incidents. 
+
+This overview is available directly from the Incidents Management screen and will soon be available from additional screens (test results, test coverage). 
+
+The new view includes the complete test configuration and execution history, and for each result, it includes the result description, test query, and a row sample/anomaly chart (depending on the test type) 
+
+This new side panel is also available for model build error incidents, allowing you to view dbt model build error messages right in the Elementary UI for the first time!
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740078239/Changelog/Screenshot_2024-09-29_at_17.17.16_mpw6ni.png)
+
+## A better way to triage test and model failures
+
+<Tags 
+  date="September 2024"
+  tags={["Incident management"]}
+/>
+
+We introduced a new test overview side panel that will make it much easier to investigate incidents. 
+
+This overview is available directly from the Incidents Management screen and will soon be available from additional screens (test results, test coverage). 
+
+The new view includes the complete test configuration and execution history, and for each result, it includes the result description, test query, and a row sample/anomaly chart (depending on the test type) 
+
+This new side panel is also available for model build error incidents, allowing you to view dbt model build error messages right in the Elementary UI for the first time!
+
+![](https://res.cloudinary.com/diuctyblm/image/upload/v1740078239/Changelog/Screenshot_2024-09-29_at_17.17.16_mpw6ni.png)
+
+## Introducing: Incident Management
+
+<Tags 
+  date="July 2024"
+  tags={["Incident management"]}
+/>
+
+Managing alerts is a common challenge for our users. Daily test failures generate numerous alerts, making tracking each issue's status difficult. Alerts are just the starting point—users need a tool to manage the entire process.
 
 We’ve been working hard to solve these issues and are excited to introduce incidents in Elementary.
 
@@ -43,262 +311,98 @@ An incident consists of one or more failure events. Each failure or warning open
 
 **New Incident Management Page**
 Our new [Incident Management Page](https://docs.elementary-data.com/features/alerts-and-incidents/incident-management) helps your team stay on top of open incidents and collaborate to resolve them. It provides a comprehensive overview of all incidents, allowing users to view statuses, prioritize issues, assign responsibilities, and resolve incidents efficiently.
- <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719927342/incidents-wide_ki16tu.mp4"
-        ></video>
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719927342/incidents-wide_ki16tu.mp4"
+></video>
 
-       </div>
-  </div>
-</div>
+## New Alert Integrations!
 
-### New Alert Integrations!
+<Tags
+  date="July 2024"
+  tags={["Integrations"]}
+/>
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Integrations</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-       Introducing three new integrations with communication and incident management tools:
-          - [Microsoft Teams](https://docs.elementary-data.com/cloud/integrations/alerts/ms-teams)
-          - [PagerDuty](https://docs.elementary-data.com/cloud/integrations/alerts/pagerduty)
-          - [Opsgenie](https://docs.elementary-data.com/cloud/integrations/alerts/opsgenie)
-       </div>
-  </div>
-</div>
+Introducing three new integrations with communication and incident management tools: - [Microsoft Teams](https://docs.elementary-data.com/cloud/integrations/alerts/ms-teams) - [PagerDuty](https://docs.elementary-data.com/cloud/integrations/alerts/pagerduty) - [Opsgenie](https://docs.elementary-data.com/cloud/integrations/alerts/opsgenie)
 
-## May 2024
+## Add any dbt test via UI
 
-### Add any dbt test via UI
+<Tags
+  date="May 2024"
+  tags={["Test configuration", "Data tests"]}
+/>
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginLeft: "5px",
-                marginRight: "5px",
-                }}
-            >Test configuration</span>
-        <span
-            style={{ 
-            background: "#FECDD8",
-            color: "#BD134F",
-            borderRadius: "8px",
-            fontSize: ".8em",
-            padding: "2px 10px",
-            display: "inline-block",
-            fontWeight: "500",
-            letterSpacing: ".5px",
-            whiteSpace: "nowrap",
-            marginLeft: "5px",
-            marginRight: "5px",
-            }}
-        >Data tests</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        Elementary now supports adding any dbt test in bulk and directly from the UI!
-        We added support for dbt-expectation and dbt-utils packages, and you can use it to add your own custom generic tests to tables and columns.
+Elementary now supports adding any dbt test in bulk and directly from the UI!
+We added support for dbt-expectation and dbt-utils packages, and you can use it to add your own custom generic tests to tables and columns.
 
-        <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320339/Changelog/YAML_for_all_tests_x0k48v.mp4"
-        ></video>
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320339/Changelog/YAML_for_all_tests_x0k48v.mp4"
+></video>
 
-        </div>
-    </div>
-</div>
+## Column anomalies by dimensions
 
-### Column anomalies by dimensions
+<Tags 
+  date="May 2024"
+  tags={["Anomaly detection monitors"]}
+/>
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Anomaly detection monitors</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        You can now add a new parameter to your column anomaly tests -  `dimensions`.
+You can now add a new parameter to your column anomaly tests - `dimensions`.
 
-        This will calculate the column metrics for every time bucket and table dimension values, allowing you to detect anomalies in specific segments of your data.
+This will calculate the column metrics for every time bucket and table dimension values, allowing you to detect anomalies in specific segments of your data.
 
-        For example, if you want to detect anomalies in a revenue column and you have multiple apps in different countries - now you can detect anomalies in revenue in a specific country.
+For example, if you want to detect anomalies in a revenue column and you have multiple apps in different countries - now you can detect anomalies in revenue in a specific country.
 
-        Here is an example of how this can be configured -
+Here is an example of how this can be configured -
 
-        ```yaml
-            columns:
-            - name: in_app_purchase_revenue
-                tests:
-                - elementary.column_anomalies:
-                    column_anomalies:
-                        - sum
-                    dimensions:
-                        - app_name
-                        - country
-        ```
-        </div>
-    </div>
+```yaml
+    columns:
+    - name: in_app_purchase_revenue
+        tests:
+        - elementary.column_anomalies:
+            column_anomalies:
+                - sum
+            dimensions:
+                - app_name
+                - country
+```
 
-</div>
+## Column level test results in lineage
 
-### Column level test results in lineage
+<Tags 
+  date="May 2024"
+  tags={["Data lineage"]}
+/>
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Data lineage</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        You can now investigate test results right on top of your column level lineage graph. 
-        With this new release you can filter the lineage graph on a specific column that has an issue, and see if upstream or downstream columns 
-        have similar test failures to understand the root cause fast. 
+You can now investigate test results right on top of your column level lineage graph.
+With this new release you can filter the lineage graph on a specific column that has an issue, and see if upstream or downstream columns
+have similar test failures to understand the root cause fast.
 
-        <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320341/Changelog/Test_results_in_lineage_p6wy8y.mp4"
-        ></video>
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320341/Changelog/Test_results_in_lineage_p6wy8y.mp4"
+></video>
 
-        </div>
-    </div>
+## Monitor test durations
 
-</div>
+<Tags 
+  date="May 2024"
+  tags={["Performance monitoring", "Data tests"]}
+/>
 
-### Monitor test durations
-
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginLeft: "5px",
-                marginRight: "5px",
-                }}
-            >Performance monitoring</span>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                marginLeft: "5px",
-                marginRight: "5px",
-                }}
-            >Data tests</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
         We added test durations to the Test Execution History (the command and control center for your tests). You can now monitor your tests performance and see which tests are taking the longest or if there was any degradation in performance of specific tests.
 
         Easily sort your tests by execution duration and see which ones are taking the longest and choose the most promising candidates for optimization. This can also be used for cost analysis as slow tests tend to be more expensive.
@@ -314,255 +418,93 @@ Our new [Incident Management Page](https://docs.elementary-data.com/features/ale
         src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320330/Changelog/Test_duration_waxg1j.mp4"
         ></video>
 
-        </div>
-    </div>
+## Sync now
 
-</div>
+<Tags 
+  date="May 2024"
+  tags={["Environments"]}
+/>
 
-### Sync now
+We are excited to launch a new `Sync Now` button right in your environments page. You can think of is as a "refresh now" button for your environment.
+If you introduced a change in your environment and you want to see it in Elementary immediately - just click ‘sync now’.
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Environments</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        We are excited to launch a new `Sync Now` button right in your environments page. You can think of is as a "refresh now" button for your environment.
-        If you introduced a change in your environment and you want to see it in Elementary immediately - just click ‘sync now’.
+Here is what it looks like -
 
-        Here is what it looks like -
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320332/Changelog/sync_now2_qbb6n3.mp4"
+></video>
 
-        <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="w-full aspect-video"
-        src="https://res.cloudinary.com/diuctyblm/video/upload/v1719320332/Changelog/sync_now2_qbb6n3.mp4"
-        ></video>
+## Status and assignee for alerts
 
-        </div>
-    </div>
+<Tags 
+  date="April 2024"
+  tags={["Alerts"]}
+/>
 
-</div>
+An alert is just the start of a triage and response process. We have big plans for making this process much more effective.
+The first step was alert rules, and now we are introducing status and assignee selection in our alerts.
 
-## April 2024
+This should help you manage incidents and collaborate more effectively with your team.
 
-### Status and assignee for alerts
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/status-and-assignee-for-alerts_mj0evg.png" />
+</Frame>
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Alerts</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        An alert is just the start of a triage and response process. We have big plans for making this process much more effective. 
-        The first step was alert rules, and now we are introducing status and assignee selection in our alerts.
+## Custom SQL tests in UI
 
-        This should help you manage incidents and collaborate more effectively with your team.
+<Tags 
+  date="April 2024"
+  tags={["Test configuration"]}
+/>
 
-        <Frame>
-          <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/status-and-assignee-for-alerts_mj0evg.png" />
-        </Frame>
+Custom query testing is a must-have to validate business logic specific to your data team. You can now create custom SQL tests with Elementary, which will be translated into singular tests in your dbt project.
 
-    </div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/custom-sql-tests-in-ui_xepafv.gif" />
+</Frame>
 
-</div>
-</div>
+## Model runs in dashboard
 
-### Custom SQL tests in UI
+<Tags 
+  date="April 2024"
+  tags={["Dashboard"]}
+/>
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Test configuration</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        Custom query testing is a must-have to validate business logic specific to your data team. You can now create custom SQL tests with Elementary, which will be translated into singular tests in your dbt project.
+The results of your jobs are critical to the data health. These are now included in the Elementary dashboard, for you to get a complete overview of the status of your pipelines. We added a breakdown of the latest result of each model, and the aggregated failures over time.
 
-        <Frame>
-         <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/custom-sql-tests-in-ui_xepafv.gif" />
-        </Frame>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/model-runs-in-dashboard_uvl8tn.gif" />
+</Frame>
 
-        </div>
-    </div>
+## DAG subset in Lineage
 
-</div>
+<Tags 
+  date="April 2024"
+  tags={["Data lineage"]}
+/>
 
-### Model runs in dashboard
+To improve UX and performance, we changed the default behavior in the lineage.
+When a node or group of nodes is chosen, only the first hop in both directions is loaded. To see the rest of the hops you can use the +/- buttons (see video).
 
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Dashboard</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        The results of your jobs are critical to the data health. These are now included in the Elementary dashboard, for you to get a complete overview of the status of your pipelines. We added a breakdown of the latest result of each model, and the aggregated failures over time.
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/lineage-load-dag-subset_dcxgo9.gif" />
+</Frame>
 
-        <Frame>
-            <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008669/model-runs-in-dashboard_uvl8tn.gif" />
-        </Frame>
+## Role-based access control
 
-        </div>
-    </div>
+<Tags 
+  date="April 2024"
+  tags={["Security and permissions"]}
+/>
 
-</div>
+Elementary now allows creating users with different roles.
+This will allow you to add more users from your team to Elementary, allowing them to view results without giving them the ability to change environment settings.
 
-### DAG subset in Lineage
-
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Data lineage</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        To improve UX and performance, we changed the default behavior in the lineage. 
-        When a node or group of nodes is chosen, only the first hop in both directions is loaded. To see the rest of the hops you can use the +/- buttons (see video).
-
-        <Frame>
-            <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008668/lineage-load-dag-subset_dcxgo9.gif" />
-        </Frame>
-
-        </div>
-    </div>
-
-</div>
-
-### Role-based access control
-
-<div style={{ display: "table", width: "auto" }}>
-    <div style={{ display: "table-row", width: "auto" }}>
-        <div style={{ float: "left", display: "table-column", width: "100%", marginBottom: "20px" }}>
-            <span
-                style={{ 
-                background: "#FECDD8",
-                color: "#BD134F",
-                borderRadius: "8px",
-                fontSize: ".8em",
-                padding: "2px 10px",
-                display: "inline-block",
-                fontWeight: "500",
-                letterSpacing: ".5px",
-                whiteSpace: "nowrap",
-                }}
-            >Security and permissions</span>
-        </div>
-        <div
-            style={{
-            float: "left",
-            display: "table-column",
-            paddingLeft: "0px",
-            width: "100%",
-            marginTop: "-20px",
-            }}
-        >
-        Elementary now allows creating users with different roles. 
-        This will allow you to add more users from your team to Elementary, allowing them to view results without giving them the ability to change environment settings.
-        <Frame>
-            <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008670/role-based-access-control_kze9a7.gif" />
-        </Frame>
-
-        </div>
-    </div>
-
-</div>
+<Frame>
+  <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1720008670/role-based-access-control_kze9a7.gif" />
+</Frame>
