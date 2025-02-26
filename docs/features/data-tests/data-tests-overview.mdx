@@ -16,9 +16,9 @@ The combination of dbt tests, Elementary monitors, custom SQL tests and the rich
 
 <Snippet file="cloud/features/data-tests/data-tests-cards.mdx" />
 
-### Test configuration
+## Test configuration
 
-One of the design principals in Elementary is that users should manage configuration in their code.
+One of the design principals in Elementary is that users should manage configuration in code.
 This enables to maintain the same workflow for building the pipeline and configuring coverage, it makes observability and governance part of the development cycle, 
 and provides control in review process and version management.
 
@@ -29,6 +29,8 @@ In Elementary, we designed a flow to incorporate the good of both worlds:
 - **Configuration in code or in UI** - The UI test configuration flow opens pull requests to the code base through the [code repository](/cloud/integrations/code-repo/connect-code-repo) integration.
 - **The code is the single source of truth** - As configuration from UI goes to code, the code remains the place where configuration is managed and maintained.
 
+### Create new tests from the UI
+
 <iframe
 width="700"
 height="400"
@@ -38,6 +40,16 @@ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; pic
 allowfullscreen
 ></iframe>
 
+### Edit existing tests from the UI
+Tests can be edited from the UI, and the changes will create a pull request in the code repository.
+The pull request will be reviewed and merged by the team, and the changes will be applied to the tests after dbt pipeline is run and Elementary is synced.
+Simply open the test side panel from the test results / incidents page, and navigate to the Configuration tab.
+Then Click "Edit test" and make the necessary changes.
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740598580/Test_overview_side_panel-_anomaly_kojxui.png" />
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740598586/wizard_flow_-_anomaly_v_fcjbji.png" />
+
+A pull request will be opened in the code repository, and a link to the PR will be provided in the UI.
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740598594/Test_overview_side_panel_-_V_picgcp.png" />
 ### Benefits of leveraging dbt tests
 
 <Snippet file="cloud/features/data-tests/benefits-dbt-tests.mdx" />
