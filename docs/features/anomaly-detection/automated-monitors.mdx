@@ -15,7 +15,7 @@ Monitors are automatically created according to your preferences, and their resu
 #### Benefits of automated monitors
 
 1. **Zero configuration** - Our machine learning models learn data behavior, eliminating the need for manual configuration.
-2. **Out-of-the-box coverage** - Rather than manually configuring a test for each model, Elementary automatically creates monitors for every model and source in your dbt project once you set up your environment.
+2. **Out-of-the-box coverage** - Rather than manually configuring a test for each model, Elementary automatically creates monitors for every source in your dbt project once you set up your environment.
 3. **Metadata only, minimal cost** - The monitors rely on data warehouse metadata, and don't consume compute resources. 
 
 
@@ -26,7 +26,8 @@ The monitors collect metadata, and the [anomaly detection model](/features/anoma
 As soon as you connect Elementary Cloud Platform to your data warehouse, a backfill process will begin to collect historical metadata. 
 Within an average of a few hours, your automated monitors will be operational.
 By default, Elementary collects at least 21 days of historical metadata.
-The automated freshness monitors are created for all the sources in your dbt project, and the volume monitors are created for all the tables.
+
+The automated monitors are created for all the sources in your dbt project.
 If you would like a different configuration of which tables to create the monitors on, you can reach out to us.
 
 You can fine tune the [configuration](/features/anomaly-detection/monitors-configuration) and [provide feedback](/features/anomaly-detection/monitors-feedback) to adjust the detection to your needs. 
