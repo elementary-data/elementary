@@ -15,6 +15,9 @@ from elementary.messages.messaging_integrations.slack_webhook import (
 from elementary.messages.messaging_integrations.teams_webhook import (
     TeamsWebhookMessagingIntegration,
 )
+from elementary.monitor.data_monitoring.alerts.integrations.webhook.webhook import (
+    WebhookIntegration,
+)
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
 
@@ -49,6 +52,12 @@ class Integrations:
                 raise UnsupportedAlertIntegrationError
         elif config.has_teams:
             return TeamsWebhookMessagingIntegration(config.teams_webhook)
+        elif config.has_webhook:
+            return WebhookIntegration(
+                config=config,
+                tracking=tracking,
+                override_config_defaults=override_config_defaults,
+            )
         else:
             raise UnsupportedAlertIntegrationError
 
