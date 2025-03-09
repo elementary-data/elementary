@@ -73,12 +73,6 @@ class TestsAPI(APIClient):
         dbt_invocation: Optional[DbtInvocationSchema] = None,
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = self.test_results_db_rows
-        if dbt_invocation and dbt_invocation.invocation_id:
-            filtered_test_results_db_rows = [
-                test_result
-                for test_result in filtered_test_results_db_rows
-                if test_result.invocation_id == dbt_invocation.invocation_id
-            ]
         if filter.tag:
             filtered_test_results_db_rows = [
                 test_result
@@ -101,11 +95,19 @@ class TestsAPI(APIClient):
                 )
             ]
 
-        filtered_test_results_db_rows = [
-            test_result
-            for test_result in filtered_test_results_db_rows
-            if test_result.invocations_rank_index == 1
-        ]
+        if dbt_invocation and dbt_invocation.invocation_id:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if test_result.invocation_id == dbt_invocation.invocation_id
+            ]
+        else:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if test_result.invocations_rank_index == 1
+            ]
+
         return [
             TestResultSummarySchema(
                 test_unique_id=test_result.test_unique_id,
