@@ -5,11 +5,17 @@ title: "Thoughtspot"
 After you connect Thoughtspot, Elementary will automatically and continuously extend the lineage to the liveboard and answer level.
 This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
 
-### Create API Client Credentials
 
-Elementary needs authorized client credentials in your account in order to access Thoughtspot's API on your behalf. <br/>
-To create those, Please follow the [official Thoughtspot documentation](https://developers.thoughtspot.com/docs/trusted-auth-secret-key).
-Make sure you enable 'REST API' privileges for that client.
+### Enable Trusted Authentication on a priviliged user
+
+For Elementary to access your Thoughtspot instance's API on your behalf of your user, your user should have Trusted Authentication enabled. <br/>
+To enable Trusted Authentication on a user, please follow the [official Thoughtspot documentation](https://developers.thoughtspot.com/docs/trusted-auth-secret-key).<br/>
+Make sure you copy the generated token (`Secret Key`) as you will need it to connect Thoughtspot to Elementary.
+
+### User Privileges
+
+For an easy integration, it's recommended for the connected user to be an administrator (`ADMINISTRATION` privilege), this will ensure Elementary can access all of your Liveboards and Answers.<br/>
+It is also possible though to integrate with a regular user, just make sure it can download data (has `DATADOWNLOADING` privilege) for all the relvant ThoughtSpot entities you want Elementary to discover and show lineage for.
 
 ### Connecting Thoughtspot to Elementary
 
@@ -17,8 +23,8 @@ Navigate to the **Account settings > Environments** and choose the environment t
 Choose the Thoughtspot connection and provide the following details to validate and complete the integration.
 
 - **User Name:** The username of the user you want to use to connect to Thoughtspot.
-- **Secret Key:** The secret key of the user you want to use to connect to Thoughtspot.
-- **Base URL:** The URL of your Thoughtspot instance. For example, `https://team1.thoughtspot.cloud`.
+- **Secret Key:** The token generated for the user you want to use to connect to Thoughtspot (from the previous step).
+- **Base URL:** The URL of your Thoughtspot instance. This would be `'https://<cluster-name>.thoughtspot.cloud'` by default, or your custom domain if [you've configured one](https://docs.thoughtspot.com/cloud/10.1.0.cl/custom-domains#_domain_url_customization). If you're unsure, just check the URL you use to access your Thoughtspot instance in the browser.
 
 
 ### Limitations
