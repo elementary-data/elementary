@@ -206,8 +206,8 @@
         "cloud/guides/sync-scheduling",
         "cloud/guides/collect-job-data",
         "cloud/guides/collect-source-freshness",
-        "cloud/guides/troubleshoot",
-        "cloud/guides/okta-guide"
+        "cloud/guides/setup-okta",
+        "cloud/guides/troubleshoot"
       ]
     },
     {
