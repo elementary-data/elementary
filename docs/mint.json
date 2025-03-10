@@ -370,6 +370,14 @@
       ]
     },
     {
+      "group": "Unstructured Data Tests",
+      "pages": [
+        "data-tests/unstructured-data-tests/quickstart",
+        "data-tests/unstructured-data-tests/snowflake-setup",
+        "data-tests/unstructured-data-tests/databricks-setup"
+      ]
+    },
+    {
       "group": "Other Tests",
       "pages": [
         "data-tests/python-tests"
