@@ -15,6 +15,9 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
     BaseMessagingIntegration,
     MessageSendResult,
 )
+from elementary.messages.messaging_integrations.empty_message_context import (
+    EmptyMessageContext,
+)
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
@@ -23,7 +26,9 @@ from elementary.tracking.tracking_interface import Tracking
 ONE_SECOND = 1
 
 
-class SlackWebhookMessagingIntegration(BaseMessagingIntegration[None, None]):
+class SlackWebhookMessagingIntegration(
+    BaseMessagingIntegration[None, EmptyMessageContext]
+):
     def __init__(
         self, client: WebhookClient, tracking: Optional[Tracking] = None
     ) -> None:
@@ -52,12 +57,13 @@ class SlackWebhookMessagingIntegration(BaseMessagingIntegration[None, None]):
 
     def send_message(
         self, destination: None, body: MessageBody
-    ) -> MessageSendResult[None]:
+    ) -> MessageSendResult[EmptyMessageContext]:
         formatted_message = format_block_kit(body)
         self._send_message(formatted_message)
         return MessageSendResult(
-            message_context=destination,
+            message_context=EmptyMessageContext(),
             timestamp=datetime.utcnow(),
+            message_format="block_kit",
         )
 
     def supports_reply(self) -> bool:

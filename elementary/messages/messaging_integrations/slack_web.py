@@ -100,6 +100,7 @@ class SlackWebMessagingIntegration(
                 id=response["ts"], channel=response["channel"]
             ),
             timestamp=response["ts"],
+            message_format="block_kit",
         )
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str):
