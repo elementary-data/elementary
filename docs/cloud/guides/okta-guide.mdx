@@ -1,0 +1,77 @@
+
+
+## Authentication & SSO Integration
+
+### Supported Authentication Protocols
+
+Elementary Cloud supports **Okta Single Sign-On (SSO)** via multiple authentication protocols:
+
+- **SAML 2.0** (Security Assertion Markup Language)
+- **OIDC (OpenID Connect)**
+
+These protocols enable seamless authentication, reducing the need for manual credential management.
+
+### SCIM for Automated Provisioning
+
+Elementary Cloud supports **SCIM (System for Cross-domain Identity Management)** for automated user provisioning and deprovisioning:
+
+- **Automated User Creation**: Users added in Okta can be provisioned automatically in Elementary Cloud.
+- **Deprovisioning Support**: When a user is removed from Okta, their access to Elementary Cloud is revoked automatically.
+- **Group-Based Provisioning**: Okta groups can be mapped to roles in Elementary Cloud by the Elementary team.
+
+For more details on SCIM setup, refer to Okta’s SCIM integration guide: [Okta SCIM Guide](https://help.okta.com/en-us/content/topics/apps/apps_app_integration_wizard_scim.htm).
+
+## Security & Access Control
+
+### Multi-Factor Authentication (MFA)
+
+Elementary Cloud does not enforce MFA directly, but any MFA policies configured through Okta will automatically apply once Okta SSO is enabled.
+
+### Role-Based Access Control (RBAC) and Group Sync
+
+- Supports **RBAC with predefined roles** (**Admin, Can Write, Can Read**).
+- **Role mappings for group names** can be pre-defined if sent in advance.
+- **Role Assignment**:
+  - The account creator will have a default **Admin** role.
+  - For provisioned users, If no configuration is made, the **default role will be Can Read**.
+  - Manually invited users will have the role defined during the invite process.
+  - **Custom roles** are currently not supported.
+
+
+
+## How to Set Up Okta SSO for Elementary Cloud
+
+### Step 1: Create a Custom App in Okta
+
+1. Navigate to **Okta Admin Dashboard** > **Applications**.
+2. Click **Create App Integration** and select **SAML 2.0**.
+3. Configure the following settings:
+    - **Single Sign-On URL**: `https://elementary-data.frontegg.com/auth/saml/callback`
+    - **Audience URI (SP Entity ID)**: `elementary`
+4. Obtain the **Okta IdP Metadata and SAML Signing Certificates** as an **XML file**.
+5. Share the **XML file** with Elementary Cloud Support to complete the integration.
+
+### Step 2: Verify Integration with Elementary Cloud
+
+- Once the XML file is shared, Elementary Cloud will complete the integration setup.
+- We recommend scheduling a **real-time verification call** to ensure everything is working before making the setting permanent.
+
+
+
+## How to Set Up SCIM for Automated Provisioning
+
+### Step 1: Configure SCIM in Okta
+
+1. Go to **Okta Admin Dashboard** > **Applications**.
+2. Locate the **Elementary Cloud app** and open it.
+3. Navigate to the **Provisioning tab** and enable **SCIM provisioning**.
+4. Enter the following details:
+    - **SCIM Provisioning URL**: *(See internal 1Password for details)*
+    - **Authorization Token**: *(See internal 1Password for details)*
+5. Save the settings and test provisioning by adding a test user.
+
+### Step 2: Define Role Mapping
+
+- By default, users are assigned the **Can Read** role.
+- The default role can be changed to **Can Write** or **Admin**.
+- Okta group names can be mapped to specific roles upon request.
