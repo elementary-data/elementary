@@ -374,7 +374,8 @@
       "pages": [
         "data-tests/unstructured-data-tests/quickstart",
         "data-tests/unstructured-data-tests/snowflake-setup",
-        "data-tests/unstructured-data-tests/databricks-setup"
+        "data-tests/unstructured-data-tests/databricks-setup",
+        "data-tests/unstructured-data-tests/bigquery-setup"
       ]
     },
     {
