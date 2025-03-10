@@ -1,0 +1,70 @@
+---
+title: "BigQuery setup"
+---
+
+
+Step 1 - enable Vertex AI API
+In your Google cloud console go to `APIs & Services` \ `API Library` \ Browse and search for `Vertex AI API`. Click on it and enable this API.
+
+Step 2 - creating a remote connection to a Vertex AI model
+Elementary unstructured data validation tests perform AI tasks in BigQuery ML by using pre-trained Vertex AI models. 
+To access these models we need to create a remote model in BigQuery ML that represents the Vertex AI model's endpoint. 
+
+To do that we need to start by creating a remote connection in BigQuery. Go to the Google cloud console \ BigQuery. 
+Then in the explorer click '+' (TODO: add screenshot in cloudinary). 
+Then click on `connections to external data sources` (TODO: add screenshot in cloudinary). 
+Change connection type to be `Vertex AI remote models, remote functions and BigLake (Cloud Resource)`. 
+If your model and dataset are in the same region, select that region and otherwise select multi-region (TODO: add screenshot in cloudinary).
+
+In your BigQuery explorer, open external connection, find your newly created remote connection and click on it.
+Copy the service account ID (TODO: add screenshot in cloudinary or a loom video).
+
+Step 3 - Giving the remote connection service account permissions to access Vertex AI
+In your Google cloud console go now to IAM and click on '+Grant Access'. 
+Under new principales paste the previously copied remote connection service account ID and select a role of `Vertex AI User`. Now save it (TODO: add screenshot in cloudinary).
+
+Step 4 - creating an LLM model interface in your dataset using the remote connection  
+Click again on the previously created remote connection (in your BigQuery explorer go to `External connections` and find your remote connection) and copy the connection ID.
+It should be a string that looks like - projects/<your project name>/locations/<your region>/connections/<your connection name>
+
+Run the following SQL - 
+
+```sql
+ CREATE OR REPLACE MODEL
+  `<your-project>.<your-dataset>.<choose-a-name-for-your-model>`
+REMOTE WITH CONNECTION
+  `<remote-connection-id>` 
+OPTIONS (
+  endpoint = '<your-model-endpoint>'
+);
+```
+
+Here's an example - 
+```sql
+ CREATE OR REPLACE MODEL
+  `my-project.my-dataset.test_model`
+REMOTE WITH CONNECTION
+  `projects/my-project/locations/us/connections/test_con_model` 
+OPTIONS (
+  endpoint = 'gemini-1.5-pro-002'
+);
+```
+
+Step 5 - running an unstructured data test
+```yml
+models:
+  - name: table_with_unstructured_data
+    description: "A table containing unstructured text data."
+    columns:
+      - name: text_data
+        description: "Unstructured text data stored as a string."
+        tests:
+          - elementary.validate_unstructured_data:
+              expectation_prompt: "The text data should represent an example of unstructured data."
+              llm_model_name: "test_model"
+```
+
+Link to get more details - 
+https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create-remote-model
+
+TODO: find a link with supported models and their endpoints
