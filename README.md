@@ -67,8 +67,6 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
 
-**Unstructured Data Validations & LLM-Powered Tests** - Validate and monitor unstructured data using LLM-powered tests directly in your data warehouse.
-
 ## Support
 
 For additional information and help, you can use one of these channels:
