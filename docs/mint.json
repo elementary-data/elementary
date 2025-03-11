@@ -462,6 +462,8 @@
         {
           "group": "Releases",
           "pages": [
+            "oss/release-notes/releases/0.17.0",
+            "oss/release-notes/releases/0.16.2",
             "oss/release-notes/releases/0.11.2",
             "oss/release-notes/releases/0.10.0",
             "oss/release-notes/releases/0.9.1",
