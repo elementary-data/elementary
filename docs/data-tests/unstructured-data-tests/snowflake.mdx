@@ -1,15 +1,15 @@
 ---
-title: "Snowflake setup"
+title: "Snowflake Cortex AI"
 ---
 
-# Setting Up Snowflake Cortex AI LLM Functions
+# Snowflake Cortex AI LLM Functions
 
 This guide provides instructions on how to enable Snowflake Cortex AI LLM functions, which is a prerequisite for running Elementary unstructured data validation tests on Snowflake.
 
 ## What is Snowflake Cortex?
 
 Snowflake Cortex is a fully managed service that brings cutting-edge AI and ML solutions directly into your Snowflake environment. It allows you to leverage the power of large language models (LLMs) without any complex setup or external dependencies.
-Snowflake provides LLMs that are fully hosted and managed by Snowflake, using them requires no setup and your data stays within Snowflake.
+Snowflake provides LLMs that are fully hosted and managed by Snowflake, using them requires no setup and your data stays within Snowflake. 
 
 
 ## Cross-Region Model Usage
@@ -67,4 +67,4 @@ GRANT ROLE cortex_user_role TO USER <username>;
 
 -- Optionally, grant warehouse access to the role
 GRANT USAGE ON WAREHOUSE <warehouse_name> TO ROLE cortex_user_role;
-```
+``` 
