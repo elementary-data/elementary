@@ -2,18 +2,57 @@
 title: "Quickstart"
 ---
 
-`elementary.validate_unstructured_data`
+# Validating Unstructured Data with Elementary
 
-Executes validation on unstructured data using LLM capabilities. This test allows you to validate unstructured data against specific expectations by leveraging language models to analyze the content.
+## What is Unstructured Data Validation?
 
-The test requires:
-- `expectation_prompt`: A prompt that describes your expectation on the unstructured data.
-- `llm_model_name`: The name of the language model to use for validation. This parameter depends on your data warehouse type:
-  - For Snowflake: Use the model name configured in your Snowflake account (see [Snowflake Setup](/data-tests/unstructured-data-tests/snowflake-setup.mdx))
-  - For other warehouses: Refer to your specific warehouse's LLM integration documentation
+Elementary's `elementary.validate_unstructured_data` test allows you to validate unstructured data using AI and LLM language models. Instead of writing complex code, you can simply describe what you expect from your data in plain English, and Elementary will check if your data meets those expectations.
+
+For example, you can verify that customer feedback comments are in English, product descriptions contain required information, or support tickets follow a specific format or a sentiment.
+
+## How It Works
+
+Elementary leverages the AI and LLM capabilities built directly into your data warehouse. When you run a validation test:
+
+1. Your unstructured data stays within your data warehouse
+2. The warehouse's built-in AI and LLM functions analyze the data
+3. Elementary reports whether each text value meets your expectations
+
+## Required Setup for Each Data Warehouse
+
+Before you can use Elementary's unstructured data validations, you need to set up AI and LLM capabilities in your data warehouse:
+
+### Snowflake
+- **Prerequisite**: Enable Snowflake Cortex AI LLM functions
+- **Recommended Model**: `claude-3-5-sonnet`
+- [View Detailed Snowflake Setup Guide](/data-tests/unstructured-data-tests/snowflake-setup.mdx)
+
+### Databricks
+- **Prerequisite**: Ensure Databricks AI Functions are available
+- **Recommended Model**: `databricks-meta-llama-3-3-70b-instruct`
+- [View Detailed Databricks Setup Guide](/data-tests/unstructured-data-tests/databricks-setup.mdx)
+
+### BigQuery
+- **Prerequisite**: Configure BigQuery to use Vertex AI models
+- **Recommended Model**: `gemini-1.5-pro`
+- [View Detailed BigQuery Setup Guide](/data-tests/unstructured-data-tests/bigquery-setup.mdx)
+
+### Redshift
+- Support coming soon
+
+### Data Lakes
+- Currently supported through Snowflake, Databricks, or BigQuery external object tables
+- [View Data Lakes Information](/data-tests/unstructured-data-tests/data-lakes-setup.mdx)
+
+
+## Using the Validation Test
+
+The test requires two main parameters:
+- `expectation_prompt`: Describe what you expect from the text in plain English
+- `llm_model_name`: Specify which AI model to use (see recommendations above for each warehouse)
 
 <Info>
-  This test is designed for columns containing unstructured text data such as descriptions, comments, or other free-form text fields. It can also be applied to any structured column that can be converted to a string. This enables writing data validations in native language. 
+  This test works with any column containing unstructured text data such as descriptions, comments, or other free-form text fields. It can also be applied to structured columns that can be converted to strings, enabling natural language data validations.
 </Info>
 
 <RequestExample>
@@ -31,7 +70,7 @@ models:
               llm_model_name: "model_name"
 ```
 
-```yml Models example
+```yml Example
 version: 2
 
 models:
@@ -46,7 +85,7 @@ models:
               llm_model_name: "test_model"
 ```
 
-```yml Snowflake example
+```yml Example - Validating Customer Feedback
 version: 2
 
 models:
@@ -57,10 +96,11 @@ models:
         description: "Customer feedback in free text format."
         tests:
           - elementary.validate_unstructured_data:
-              expectation_prompt: "The text should be a customer feedback comment in English, containing sentiment about a product or service."
-              llm_model_name: "snowflake.models.llama2_70b_chat"
+              expectation_prompt: "The text should be a customer feedback comment in English, it should describe only a bug or a feature request."
+              llm_model_name: "claude-3-5-sonnet"
               config:
                 severity: warn
 ```
+
 
 </RequestExample>
