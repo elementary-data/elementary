@@ -372,12 +372,12 @@
     {
       "group": "AI Data Tests (Beta)",
       "pages": [
-        "data-tests/unstructured-data-tests/quickstart",
-        "data-tests/unstructured-data-tests/snowflake",
-        "data-tests/unstructured-data-tests/databricks",
-        "data-tests/unstructured-data-tests/bigquery",
-        "data-tests/unstructured-data-tests/redshift",
-        "data-tests/unstructured-data-tests/data-lakes"
+        "data-tests/ai-data-tests/quickstart",
+        "data-tests/ai-data-tests/snowflake",
+        "data-tests/ai-data-tests/databricks",
+        "data-tests/ai-data-tests/bigquery",
+        "data-tests/ai-data-tests/redshift",
+        "data-tests/ai-data-tests/data-lakes"
       ]
     },
     {
