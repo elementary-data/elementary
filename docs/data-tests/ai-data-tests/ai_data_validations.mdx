@@ -4,6 +4,8 @@ title: "AI Data Validations"
 
 <Note type="warning">
   **Beta Feature**: AI data validation tests is currently in beta. The functionality and interface may change in future releases.
+  
+  **Version Requirement**: This feature requires Elementary dbt package version 0.18.0 or above.
 </Note>
 
 # AI Data Validation with Elementary
@@ -29,24 +31,24 @@ Before you can use Elementary's AI data validations, you need to set up AI and L
 ### Snowflake
 - **Prerequisite**: Enable Snowflake Cortex AI LLM functions
 - **Recommended Model**: `claude-3-5-sonnet`
-- [View Snowflake's Guide](/data-tests/unstructured-data-tests/snowflake)
+- [View Snowflake's Guide](/data-tests/ai-data-tests/supported-platforms/snowflake)
 
 ### Databricks
 - **Prerequisite**: Ensure Databricks AI Functions are available
 - **Recommended Model**: `databricks-meta-llama-3-3-70b-instruct`
-- [View Databrick's Setup Guide](/data-tests/unstructured-data-tests/databricks)
+- [View Databrick's Setup Guide](/data-tests/ai-data-tests/supported-platforms/databricks)
 
 ### BigQuery
 - **Prerequisite**: Configure BigQuery to use Vertex AI models
 - **Recommended Model**: `gemini-1.5-pro`
-- [View BigQuery's Setup Guide](/data-tests/unstructured-data-tests/bigquery)
+- [View BigQuery's Setup Guide](/data-tests/ai-data-tests/supported-platforms/bigquery)
 
 ### Redshift
 - Support coming soon
 
 ### Data Lakes
 - Currently supported through Snowflake, Databricks, or BigQuery external object tables
-- [View Data Lakes Information](/data-tests/unstructured-data-tests/data-lakes)
+- [View Data Lakes Information](/data-tests/ai-data-tests/supported-platforms/data-lakes)
 
 ## Using the AI Data Validation Test
 
