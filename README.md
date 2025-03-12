@@ -69,7 +69,6 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 **AI-Powered Data Tests & Unstructured Data Validations** - Validate and monitor data using AI powered tests to validate both structured and unstructured data
 
-
 ## Support
 
 For additional information and help, you can use one of these channels:
