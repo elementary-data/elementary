@@ -370,7 +370,7 @@
       ]
     },
     {
-      "group": "Unstructured Data Tests (Beta)",
+      "group": "AI Data Tests (Beta)",
       "pages": [
         "data-tests/unstructured-data-tests/quickstart",
         "data-tests/unstructured-data-tests/snowflake",
