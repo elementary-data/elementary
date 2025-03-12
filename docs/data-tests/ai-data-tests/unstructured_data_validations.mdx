@@ -1,0 +1,247 @@
+---
+title: "Unstructured Data Validations"
+---
+
+<Note type="warning">
+  **Beta Feature**: Unstructured data validation tests is currently in beta. The functionality and interface may change in future releases.
+</Note>
+
+# Validating Unstructured Data with Elementary
+
+## What is Unstructured Data Validation?
+
+Elementary's `elementary.unstructured_data_validation` test allows you to validate unstructured data using AI and LLM language models. Instead of writing complex code, you can simply describe what you expect from your data in plain English, and Elementary will check if your data meets those expectations.
+
+For example, you can verify that customer feedback comments are in English, product descriptions contain required information, or support tickets follow a specific format or a sentiment.
+
+## How It Works
+
+Elementary leverages the AI and LLM capabilities built directly into your data warehouse. When you run a validation test:
+
+1. Your unstructured data stays within your data warehouse
+2. The warehouse's built-in AI and LLM functions analyze the data
+3. Elementary reports whether each text value meets your expectations
+
+## Required Setup for Each Data Warehouse
+
+Before you can use Elementary's unstructured data validations, you need to set up AI and LLM capabilities in your data warehouse:
+
+### Snowflake
+- **Prerequisite**: Enable Snowflake Cortex AI LLM functions
+- **Recommended Model**: `claude-3-5-sonnet`
+- [View Snowflake's Guide](/data-tests/unstructured-data-tests/snowflake)
+
+### Databricks
+- **Prerequisite**: Ensure Databricks AI Functions are available
+- **Recommended Model**: `databricks-meta-llama-3-3-70b-instruct`
+- [View Databrick's Setup Guide](/data-tests/unstructured-data-tests/databricks)
+
+### BigQuery
+- **Prerequisite**: Configure BigQuery to use Vertex AI models
+- **Recommended Model**: `gemini-1.5-pro`
+- [View BigQuery's Setup Guide](/data-tests/unstructured-data-tests/bigquery)
+
+### Redshift
+- Support coming soon
+
+### Data Lakes
+- Currently supported through Snowflake, Databricks, or BigQuery external object tables
+- [View Data Lakes Information](/data-tests/unstructured-data-tests/data-lakes)
+
+
+## Using the Validation Test
+
+The test requires two main parameters:
+- `expectation_prompt`: Describe what you expect from the text in plain English
+- `llm_model_name`: Specify which AI model to use (see recommendations above for each warehouse)
+
+<Info>
+  This test works with any column containing unstructured text data such as descriptions, comments, or other free-form text fields. It can also be applied to structured columns that can be converted to strings, enabling natural language data validations.
+</Info>
+
+<RequestExample>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "Description of what the text should contain or represent"
+              llm_model_name: "model_name"
+```
+
+```yml Example
+version: 2
+
+models:
+  - name: table_with_unstructured_data
+    description: "A table containing unstructured text data."
+    columns:
+      - name: text_data
+        description: "Unstructured text data stored as a string."
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "The text data should represent an example of unstructured data."
+              llm_model_name: "test_model"
+```
+
+```yml Example - Validating Customer Feedback
+version: 2
+
+models:
+  - name: customer_feedback
+    description: "A table containing customer feedback comments."
+    columns:
+      - name: feedback_text
+        description: "Customer feedback in free text format."
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "The text should be a customer feedback comment in English, it should describe only a bug or a feature request."
+              llm_model_name: "claude-3-5-sonnet"
+              config:
+                severity: warn
+```
+
+
+</RequestExample> 
+
+## Usage Examples
+
+Here are some powerful ways you can apply unstructured data validations:
+
+### Validating Structure
+
+```yml
+models:
+  - name: medicine_prescriptions
+    description: "A table containing medicine prescriptions."
+    columns:
+      - name: doctor_notes
+        description: "A column containing the doctor notes on the prescription"
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "The prescription has to include a limited time period and recommendations to the patient"
+              llm_model_name: "claude-3-5-sonnet"
+```
+
+Test fails if: A doctor's note does not specify a time period or lacks recommendations for the patient.
+
+### Validating Sentiment
+
+```yml
+models:
+  - name: customer_feedback
+    description: "A table containing customer feedback."
+    columns:
+      - name: negative_feedbacks
+        description: "A column containing negative feedbacks about our product."
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "The customer feedback's sentiment has to be negative"
+              llm_model_name: "claude-3-5-sonnet"
+```
+
+Test fails if: Any feedback in `negative_feedbacks` is not actually negative.
+
+### Validating Similarities <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: summerized_pdfs
+    description: "A table containing a summary of our ingested PDFs."
+    columns:
+      - name: pdf_summary
+        description: "A column containing the main PDF's content summary."
+        tests:
+          - elementary.validate_similarity:
+              to: ref('pdf_source_table')
+              column: pdf_content
+              match_by: pdf_name
+```
+
+Test fails if: A PDF summary does not accurately represent the original PDF's content. The validation will use the pdf name as the key to match a summary from the pdf_summary table to the pdf_content in the pdf_source_table.
+
+```yml
+models:
+  - name: jobs
+    columns:
+      - name: job_title
+        tests:
+          - elementary.validate_similarity:
+              column: job_description
+```
+
+Test fails if: The job title does not align with the job description.
+
+### Accepted Categories <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: support_tickets
+    description: "A table containing customer support tickets."
+    columns:
+      - name: issue_description
+        description: "A column containing customer-reported issues."
+        tests:
+          - elementary.accepted_categories:
+              categories: ['billing', 'technical_support', 'account_access', 'other']
+```
+
+Test fails if: A support ticket does not fall within the predefined categories.
+
+### Accepted Entities <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: news_articles
+    description: "A table containing news articles."
+    columns:
+      - name: article_text
+        description: "A column containing full article text."
+        tests:
+          - elementary.extract_and_validate_entities:
+              entities:
+                organization: 
+                  required: true
+                  accepted_values: ['Google', 'Amazon', 'Microsoft', 'Apple']
+                location:
+                  required: false
+                  accepted_values: {{ run_query('select zip_code from locations') }}
+```
+
+Test fails if:
+- The required entity (e.g., `organization`) is missing.
+- Extracted entities do not match the expected values.
+
+### Compare Numeric Values <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: board_meeting_summaries
+    description: "A table containing board meeting summary texts."
+    columns:
+      - name: meeting_notes
+        description: "A column containing the full summary of the board meeting."
+        tests:
+          - elementary.extract_and_validate_numbers:
+              entities:
+                revenue:
+                  compare_with: ref('crm_financials')
+                  column: sum(revenue)
+                  required: true
+                net_profit:
+                  compare_with: ref('crm_financials')
+                  column: sum(net_profit)
+                customer_count:
+                  compare_with: ref('crm_customers')
+                  column: count(customers)
+                  required: true
+```
+
+Test fails if:
+- Required entities are missing
+- The numerical entities do not match the structured CRM data 

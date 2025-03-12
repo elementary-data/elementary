@@ -370,6 +370,18 @@
       ]
     },
     {
+      "group": "AI Data Tests (Beta)",
+      "pages": [
+        "data-tests/ai-data-tests/ai_data_validations",
+        "data-tests/ai-data-tests/unstructured_data_validations",
+        "data-tests/ai-data-tests/snowflake",
+        "data-tests/ai-data-tests/databricks",
+        "data-tests/ai-data-tests/bigquery",
+        "data-tests/ai-data-tests/redshift",
+        "data-tests/ai-data-tests/data-lakes"
+      ]
+    },
+    {
       "group": "Other Tests",
       "pages": [
         "data-tests/python-tests"

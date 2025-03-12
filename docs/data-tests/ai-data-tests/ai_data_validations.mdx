@@ -1,0 +1,125 @@
+---
+title: "AI Data Validations"
+---
+
+<Note type="warning">
+  **Beta Feature**: AI data validation tests is currently in beta. The functionality and interface may change in future releases.
+</Note>
+
+# AI Data Validation with Elementary
+
+## What is AI Data Validation?
+
+Elementary's `elementary.ai_data_validation` test allows you to validate any data column using AI and LLM language models. This test is more flexible than traditional tests as it can be applied to any column type and uses natural language to define validation rules.
+
+With `ai_data_validation`, you can simply describe what you expect from your data in plain English, and Elementary will check if your data meets those expectations. This is particularly useful for complex validation rules that would be difficult to express with traditional SQL or dbt tests.
+
+## How It Works
+
+Elementary leverages the AI and LLM capabilities built directly into your data warehouse. When you run a validation test:
+
+1. Your data stays within your data warehouse
+2. The warehouse's built-in AI and LLM functions analyze the data
+3. Elementary reports whether each value meets your expectations based on the prompt
+
+## Required Setup for Each Data Warehouse
+
+Before you can use Elementary's AI data validations, you need to set up AI and LLM capabilities in your data warehouse:
+
+### Snowflake
+- **Prerequisite**: Enable Snowflake Cortex AI LLM functions
+- **Recommended Model**: `claude-3-5-sonnet`
+- [View Snowflake's Guide](/data-tests/unstructured-data-tests/snowflake)
+
+### Databricks
+- **Prerequisite**: Ensure Databricks AI Functions are available
+- **Recommended Model**: `databricks-meta-llama-3-3-70b-instruct`
+- [View Databrick's Setup Guide](/data-tests/unstructured-data-tests/databricks)
+
+### BigQuery
+- **Prerequisite**: Configure BigQuery to use Vertex AI models
+- **Recommended Model**: `gemini-1.5-pro`
+- [View BigQuery's Setup Guide](/data-tests/unstructured-data-tests/bigquery)
+
+### Redshift
+- Support coming soon
+
+### Data Lakes
+- Currently supported through Snowflake, Databricks, or BigQuery external object tables
+- [View Data Lakes Information](/data-tests/unstructured-data-tests/data-lakes)
+
+## Using the AI Data Validation Test
+
+The test requires one main parameter:
+- `expectation_prompt`: Describe what you expect from the data in plain English
+
+Optionally, you can also specify:
+- `llm_model_name`: Specify which AI model to use (see recommendations above for each warehouse)
+
+<Info>
+  This test works with any column type, as the data will be converted to a string format for validation. This enables natural language data validations for dates, numbers, and other structured data types.
+</Info>
+
+<RequestExample>
+
+```yml Models
+version: 2
+
+models:
+  - name: < model name >
+    columns:
+      - name: < column name >
+        tests:
+          - elementary.ai_data_validation:
+              expectation_prompt: "Description of what the data should satisfy"
+              llm_model_name: "model_name"  # Optional
+```
+
+```yml Example - Date Validation
+version: 2
+
+models:
+  - name: crm
+    description: "A table containing contract details."
+    columns:
+      - name: contract_date
+        description: "The date when the contract was signed."
+        tests:
+          - elementary.ai_data_validation:
+              expectation_prompt: "There should be no contract date in the future"
+```
+
+```yml Example - Numeric Validation
+version: 2
+
+models:
+  - name: sales
+    description: "A table containing sales data."
+    columns:
+      - name: discount_percentage
+        description: "The discount percentage applied to the sale."
+        tests:
+          - elementary.ai_data_validation:
+              expectation_prompt: "The discount percentage should be between 0 and 50, and should only be a whole number."
+              llm_model_name: "claude-3-5-sonnet"
+              config:
+                severity: warn
+```
+
+```yml Example - Complex Validation
+version: 2
+
+models:
+  - name: customer_accounts
+    description: "A table containing customer account information."
+    columns:
+      - name: account_status
+        description: "The current status of the customer account."
+        tests:
+          - elementary.ai_data_validation:
+              expectation_prompt: "The account status should be one of: 'active', 'inactive', 'suspended', or 'pending'. If the account is 'suspended', there should be a reason code in the suspension_reason column."
+              llm_model_name: "gemini-1.5-pro"
+```
+
+</RequestExample>
+

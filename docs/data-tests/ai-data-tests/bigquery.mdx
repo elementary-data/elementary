@@ -1,0 +1,106 @@
+---
+title: "BigQuery Vertex AI"
+description: "Learn how to configure BigQuery to use Vertex AI models for unstructured data validation tests"
+---
+
+# BigQuery Setup for Unstructured Data Tests
+
+Elementary's unstructured data validation tests leverage BigQuery ML and Vertex AI models to perform advanced AI-powered validations. This guide will walk you through the setup process.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+- A Google Cloud account with appropriate permissions
+- Access to BigQuery and Vertex AI services
+- A BigQuery dataset where you'll create your model, that will be used by Elementary's data validation tests. This is the dataset where you have unstructured data stored and that you want to apply validations on.
+
+## Step 1: Enable the Vertex AI API
+
+1. Navigate to the Google Cloud Console
+2. Go to **APIs & Services** > **API Library**
+3. Search for "Vertex AI API"
+4. Click on the API and select **Enable**
+
+## Step 2: Create a Remote Connection to Vertex AI
+
+Elementary's unstructured data validation tests use BigQuery ML to access pre-trained Vertex AI models. To establish this connection:
+
+1. Navigate to the Google Cloud Console > **BigQuery**
+2. In the Explorer panel, click the **+** button
+3. Select **Connections to external data sources**
+4. Change the connection type to **Vertex AI remote models, remote functions and BigLake (Cloud Resource)**
+5. Select the appropriate region:
+   - If your model and dataset are in the same region, select that specific region
+   - Otherwise, select multi-region
+
+After creating the connection:
+1. In the BigQuery Explorer, navigate to **External Connections**
+2. Find and click on your newly created connection
+3. Copy the **Service Account ID** for the next step
+
+## Step 3: Grant Vertex AI Access Permissions
+
+Now you need to give the connection's service account permission to access Vertex AI:
+
+1. In the Google Cloud Console, go to **IAM & Admin**
+2. Click **+ Grant Access**
+3. Under "New principals", paste the service account ID you copied
+4. Assign the **Vertex AI User** role
+5. Click **Save**
+
+## Step 4: Create an LLM Model Interface in BigQuery
+
+1. In the BigQuery Explorer, navigate to **External Connections**
+2. Find again your newly created connection from previous step and clikc on it
+3. Copy the **Connection ID** (format: `projects/<project-name>/locations/<region>/connections/<connection-name>`)
+4. [Select a model endpoint](https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create-remote-model#gemini-api-multimodal-models). You can use `gemini-1.5-pro-002` as a default endpoint.
+5. Run the following SQL query to create a model in your dataset:
+
+```sql
+CREATE OR REPLACE MODEL
+  `<your-project>.<your-dataset>.<name-your-model>`
+REMOTE WITH CONNECTION
+  `<paste-here-your-connection-id>` 
+OPTIONS (
+  endpoint = '<model-endpoint>'
+);
+```
+
+### Example
+
+```sql
+CREATE OR REPLACE MODEL
+  `my-project.my-dataset.gemini-1.5-pro`
+REMOTE WITH CONNECTION
+  `projects/my-project/locations/us/connections/my-remote-connection-model-name` 
+OPTIONS (
+  endpoint = 'gemini-1.5-pro-002'
+);
+```
+
+> **Note:** During development, we used `gemini-1.5-pro` and recommend it as the default model for unstructured data tests in BigQuery.
+
+### Additional Resources
+
+- [Available models and endpoints](https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create-remote-model#gemini-api-multimodal-models)
+- [Documentation on creating remote models](https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create-remote-model)
+
+## Step 5: Running an Unstructured Data Test
+
+Once your model is set up, you can reference it in your Elementary tests:
+
+```yaml
+models:
+  - name: table_with_unstructured_data
+    description: "A table containing unstructured text data."
+    columns:
+      - name: text_data
+        description: "Unstructured text data stored as a string."
+        tests:
+          - elementary.validate_unstructured_data:
+              expectation_prompt: "The text data should represent an example of unstructured data."
+              llm_model_name: "gemini-1.5-pro"
+```
+
+
+

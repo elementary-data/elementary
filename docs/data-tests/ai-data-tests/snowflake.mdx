@@ -1,0 +1,70 @@
+---
+title: "Snowflake Cortex AI"
+---
+
+# Snowflake Cortex AI LLM Functions
+
+This guide provides instructions on how to enable Snowflake Cortex AI LLM functions, which is a prerequisite for running Elementary unstructured data validation tests on Snowflake.
+
+## What is Snowflake Cortex?
+
+Snowflake Cortex is a fully managed service that brings cutting-edge AI and ML solutions directly into your Snowflake environment. It allows you to leverage the power of large language models (LLMs) without any complex setup or external dependencies.
+Snowflake provides LLMs that are fully hosted and managed by Snowflake, using them requires no setup and your data stays within Snowflake. 
+
+
+## Cross-Region Model Usage
+
+> **Important**: It is always better to use models in the same region as your dataset to avoid errors and optimize performance.
+
+To learn where each model is located we recommend checking this [models list](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#availability).
+If you encounter a "model not found" error, it may be because the model you're trying to use is not available in your current region. In such cases, you can enable cross-region model access with the following command (requires ACCOUNTADMIN privileges):
+
+```sql
+-- Enable access to models in any region
+ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
+```
+
+This setting allows your account to use models from any region, which can be helpful when the model you need is not available in your current region. However, be aware that cross-region access may impact performance and could have additional cost implications.
+
+
+## Supported LLM Models
+
+Snowflake Cortex provides access to various industry-leading LLM models with different capabilities and context lengths. Here are the key models available:
+
+### Native Snowflake Models
+
+* **Snowflake Arctic**: An open enterprise-grade model developed by Snowflake, optimized for business use cases.
+
+### External Models (Hosted within Snowflake)
+
+* **Claude Models (Anthropic)**: High-capability models for complex reasoning tasks.
+* **Mistral Models**: Including mistral-large, mixtral-8x7b, and mistral-7b for various use cases.
+* **Llama Models (Meta)**: Including llama3.2-1b, llama3.2-3b, llama3.1-8b, and llama2-70b-chat.
+* **Gemma Models (Google)**: Including gemma-7b for code and text completion tasks.
+
+> **Note**: While developing the tests we worked with `claude-3-5-sonnet` so we recommend using this model as a default when running unstructured data tests in Snowflake.
+
+## Permissions
+
+> **Note**: By default, all users in your Snowflake account already have access to Cortex AI LLM functions through the PUBLIC role. In most cases, you don't need to do anything to enable access.
+
+The `CORTEX_USER` database role in the SNOWFLAKE database includes all the privileges needed to call Snowflake Cortex LLM functions. This role is automatically granted to the PUBLIC role, which all users have by default.
+
+The following commands are **only needed if** your administrator has revoked the default access from the PUBLIC role or if you need to set up specific access controls. If you can already use Cortex functions, you can skip this section.
+
+```sql
+-- Run as ACCOUNTADMIN
+USE ROLE ACCOUNTADMIN;
+
+-- Create a dedicated role for Cortex users
+CREATE ROLE cortex_user_role;
+
+-- Grant the database role to the custom role
+GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE cortex_user_role;
+
+-- Grant the role to specific users
+GRANT ROLE cortex_user_role TO USER <username>;
+
+-- Optionally, grant warehouse access to the role
+GRANT USAGE ON WAREHOUSE <warehouse_name> TO ROLE cortex_user_role;
+``` 
