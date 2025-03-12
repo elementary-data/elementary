@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Generic, Mapping
 
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
@@ -11,9 +11,12 @@ from elementary.messages.messaging_integrations.exceptions import (
 )
 
 
-class MappedMessagingIntegration(BaseMessagingIntegration[str, MessageContextType]):
+class MappedMessagingIntegration(
+    Generic[MessageContextType],
+    BaseMessagingIntegration[str, MessageContextType],
+):
     def __init__(
-        self, mapping: Dict[str, BaseMessagingIntegration[None, MessageContextType]]
+        self, mapping: Mapping[str, BaseMessagingIntegration[None, MessageContextType]]
     ):
         self._mapping = mapping
 
