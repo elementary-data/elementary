@@ -108,3 +108,140 @@ models:
 
 
 </RequestExample> 
+
+## Usage Examples
+
+Here are some powerful ways you can apply unstructured data validations:
+
+### Validating Structure
+
+```yml
+models:
+  - name: medicine_prescriptions
+    description: "A table containing medicine prescriptions."
+    columns:
+      - name: doctor_notes
+        description: "A column containing the doctor notes on the prescription"
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "The prescription has to include a limited time period and recommendations to the patient"
+              llm_model_name: "claude-3-5-sonnet"
+```
+
+Test fails if: A doctor's note does not specify a time period or lacks recommendations for the patient.
+
+### Validating Sentiment
+
+```yml
+models:
+  - name: customer_feedback
+    description: "A table containing customer feedback."
+    columns:
+      - name: negative_feedbacks
+        description: "A column containing negative feedbacks about our product."
+        tests:
+          - elementary.unstructured_data_validation:
+              expectation_prompt: "The customer feedback's sentiment has to be negative"
+              llm_model_name: "claude-3-5-sonnet"
+```
+
+Test fails if: Any feedback in `negative_feedbacks` is not actually negative.
+
+### Validating Similarities <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: summerized_pdfs
+    description: "A table containing a summary of our ingested PDFs."
+    columns:
+      - name: pdf_summary
+        description: "A column containing the main PDF's content summary."
+        tests:
+          - elementary.validate_similarity:
+              to: ref('pdf_source_table')
+              column: pdf_content
+              match_by: pdf_name
+```
+
+Test fails if: A PDF summary does not accurately represent the original PDF's content. The validation will use the pdf name as the key to match a summary from the pdf_summary table to the pdf_content in the pdf_source_table.
+
+```yml
+models:
+  - name: jobs
+    columns:
+      - name: job_title
+        tests:
+          - elementary.validate_similarity:
+              column: job_description
+```
+
+Test fails if: The job title does not align with the job description.
+
+### Accepted Categories <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: support_tickets
+    description: "A table containing customer support tickets."
+    columns:
+      - name: issue_description
+        description: "A column containing customer-reported issues."
+        tests:
+          - elementary.accepted_categories:
+              categories: ['billing', 'technical_support', 'account_access', 'other']
+```
+
+Test fails if: A support ticket does not fall within the predefined categories.
+
+### Accepted Entities <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: news_articles
+    description: "A table containing news articles."
+    columns:
+      - name: article_text
+        description: "A column containing full article text."
+        tests:
+          - elementary.extract_and_validate_entities:
+              entities:
+                organization: 
+                  required: true
+                  accepted_values: ['Google', 'Amazon', 'Microsoft', 'Apple']
+                location:
+                  required: false
+                  accepted_values: {{ run_query('select zip_code from locations') }}
+```
+
+Test fails if:
+- The required entity (e.g., `organization`) is missing.
+- Extracted entities do not match the expected values.
+
+### Compare Numeric Values <Note type="info">Coming Soon</Note>
+
+```yml
+models:
+  - name: board_meeting_summaries
+    description: "A table containing board meeting summary texts."
+    columns:
+      - name: meeting_notes
+        description: "A column containing the full summary of the board meeting."
+        tests:
+          - elementary.extract_and_validate_numbers:
+              entities:
+                revenue:
+                  compare_with: ref('crm_financials')
+                  column: sum(revenue)
+                  required: true
+                net_profit:
+                  compare_with: ref('crm_financials')
+                  column: sum(net_profit)
+                customer_count:
+                  compare_with: ref('crm_customers')
+                  column: count(customers)
+                  required: true
+```
+
+Test fails if:
+- Required entities are missing
+- The numerical entities do not match the structured CRM data 
