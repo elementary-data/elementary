@@ -372,7 +372,8 @@
     {
       "group": "AI Data Tests (Beta)",
       "pages": [
-        "data-tests/ai-data-tests/quickstart",
+        "data-tests/ai-data-tests/ai_data_validations",
+        "data-tests/ai-data-tests/unstructured_data_validations",
         "data-tests/ai-data-tests/snowflake",
         "data-tests/ai-data-tests/databricks",
         "data-tests/ai-data-tests/bigquery",

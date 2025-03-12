@@ -1,5 +1,5 @@
 ---
-title: "Quickstart"
+title: "Unstructured Data Validations"
 ---
 
 <Note type="warning">
@@ -10,7 +10,7 @@ title: "Quickstart"
 
 ## What is Unstructured Data Validation?
 
-Elementary's `elementary.validate_unstructured_data` test allows you to validate unstructured data using AI and LLM language models. Instead of writing complex code, you can simply describe what you expect from your data in plain English, and Elementary will check if your data meets those expectations.
+Elementary's `elementary.unstructured_data_validation` test allows you to validate unstructured data using AI and LLM language models. Instead of writing complex code, you can simply describe what you expect from your data in plain English, and Elementary will check if your data meets those expectations.
 
 For example, you can verify that customer feedback comments are in English, product descriptions contain required information, or support tickets follow a specific format or a sentiment.
 
@@ -69,7 +69,7 @@ models:
     columns:
       - name: < column name >
         tests:
-          - elementary.validate_unstructured_data:
+          - elementary.unstructured_data_validation:
               expectation_prompt: "Description of what the text should contain or represent"
               llm_model_name: "model_name"
 ```
@@ -84,7 +84,7 @@ models:
       - name: text_data
         description: "Unstructured text data stored as a string."
         tests:
-          - elementary.validate_unstructured_data:
+          - elementary.unstructured_data_validation:
               expectation_prompt: "The text data should represent an example of unstructured data."
               llm_model_name: "test_model"
 ```
@@ -99,7 +99,7 @@ models:
       - name: feedback_text
         description: "Customer feedback in free text format."
         tests:
-          - elementary.validate_unstructured_data:
+          - elementary.unstructured_data_validation:
               expectation_prompt: "The text should be a customer feedback comment in English, it should describe only a bug or a feature request."
               llm_model_name: "claude-3-5-sonnet"
               config:
@@ -107,4 +107,4 @@ models:
 ```
 
 
-</RequestExample>
+</RequestExample> 
