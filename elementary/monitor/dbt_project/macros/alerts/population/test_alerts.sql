@@ -25,6 +25,7 @@
             'column_name': raw_test_alert.column_name,
             'test_type': test_type,
             'test_sub_type': raw_test_alert.sub_type,
+            'test_description': raw_test_alert.test_description,
             'test_results_description': raw_test_alert.alert_description,
             'owners': raw_test_alert.owners,
             'tags': raw_test_alert.tags,
@@ -143,6 +144,7 @@
         failed_tests.status,
         failed_tests.result_rows,
         tests.meta as test_meta,
+        tests.description as test_description,
         artifacts_meta.meta as model_meta
     from failed_tests
     left join tests on failed_tests.test_unique_id = tests.unique_id
