@@ -152,7 +152,8 @@
     {
       "group": "Performance & Cost",
       "pages": [
-        "features/performance-monitoring/performance-monitoring"
+        "features/performance-monitoring/performance-monitoring",
+        "features/performance-monitoring/performance-alerts"
       ]
     },
     {
