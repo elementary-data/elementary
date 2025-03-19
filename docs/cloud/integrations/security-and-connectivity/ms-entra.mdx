@@ -1,0 +1,45 @@
+---
+title: "Microsoft Entra ID"
+sidebarTitle: "Microsoft Entra ID"
+---
+
+In order to enable SAML using Microsoft Entra ID (Previously Azure AD SSO), we need the following steps to be taken:
+
+- Go to the [Microsoft Entra portal](https://entra.microsoft.com/)
+- On the left, choose Applications → Enterprise Applications
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384397/sso1.webp" />
+
+- Click on “New Application”
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384486/sso2.webp" />
+
+- Click on “Create your own application”
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384522/sso3.webp" />
+
+- Choose the last option in the side-window that opens and click “Create”
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384523/sso4.webp" />
+
+- In the App window that opens, click on “Single Sign-On”
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384527/sso5.webp" />
+
+- Choose SAML
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384529/sso6.webp" />
+
+- Click on Edit on the “Basic SAML Configuration” section
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384532/sso7.webp" />
+
+- Fill the following entries:
+    - Identifier (Entity ID) - `elementary`
+    - Reply URL - [`https://elementary-data.frontegg.com/auth/saml/callback`](https://elementary-data.frontegg.com/auth/saml/callback)
+- Download the Federation Metadata XML and send it to the Elementary team.
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384534/sso8.webp" />
+
+- We recommend setting up a short call where we’ll validate together that the new configuration works.
+- After that, if you wish, we can disable until you update your team internally about the new configuration and update when you give us the OK!

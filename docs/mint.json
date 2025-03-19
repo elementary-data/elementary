@@ -290,7 +290,8 @@
           "group": "Security and Connectivity",
           "pages": [
             "cloud/integrations/security-and-connectivity/aws-privatelink-integration",
-            "cloud/integrations/security-and-connectivity/setup-Okta"
+            "cloud/integrations/security-and-connectivity/setup-Okta",
+            "cloud/integrations/security-and-connectivity/ms-entra"
           ]
         }
       ]
