@@ -207,7 +207,6 @@
         "cloud/guides/sync-scheduling",
         "cloud/guides/collect-job-data",
         "cloud/guides/collect-source-freshness",
-        "cloud/guides/setup-okta",
         "cloud/guides/troubleshoot"
       ]
     },
@@ -285,6 +284,13 @@
           "group": "Data Catalog",
           "pages": [
             "cloud/integrations/catalog/atlan"
+          ]
+        },
+        {
+          "group": "Security and Connectivity",
+          "pages": [
+            "cloud/integrations/aws-privatelink-integration",
+            "cloud/guides/setup-okta"
           ]
         }
       ]

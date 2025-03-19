@@ -1,0 +1,60 @@
+---
+title: "AWS PrivateLink Integration"
+sidebarTitle: "AWS PrivateLink integration"
+---
+
+# What is AWS PrivateLink?
+
+**AWS PrivateLink** is a secure and scalable networking technology that enables private connectivity between Virtual Private Clouds (VPCs), AWS services, and on-premises applications—without exposing traffic to the public internet. By leveraging PrivateLink, organizations can simplify their network architecture, reduce data exposure risks, and ensure secure communication between services.
+
+With PrivateLink, services are exposed as **private endpoints** within a VPC, allowing consumers to connect to them using private IP addresses. This minimizes the need for complex networking configurations like VPC peering or VPNs, and reduces the risk of data leakage by keeping traffic within the AWS network.
+
+In the context of our integration, AWS PrivateLink enables Elementary Cloud to securely and privately communicate with supported services, ensuring data privacy, compliance, and a streamlined user experience. We support cross-region PrivateLink and can connect to any region where your cloud is hosted, using VPC peering to link different regions to our production environment securely. Elementary Data maintains a global network of regional VPCs designed for PrivateLink, with strict security controls.
+
+# Architecture overview
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742380845/nyskzwnjnco2z1l7luyh.png" />
+
+Elementary’s PrivateLink setup consists generally from two parts:
+
+1. **AWS PrivateLink connection** - 
+    1. Provider side (Customer / 3rd party) - **A VPC endpoint service** is set up at the customer’s AWS account (or a 3rd party AWS account in the case of Snowflake). This provides access to a particular service in that account.
+    2. Consumer side (Elementary) - Elementary sets up a dedicated VPC interface that will connect to the integrated service, in the same AWS region as the service.
+    This is done through a dedicated regional VPC created for this purpose. 
+2. **AWS VPC Peering:**
+    1. Elementary’s production servers are located in the **eu-central-1** (Frankfurt) region. For us to be able to access the service exposed through PrivateLink, we connect our main production VPC with the regional VPC mentioned above.
+
+# Supported integrations
+
+## Snowflake
+
+Snowflake has support for connecting to AWS-hosted Snowflake accounts via PrivateLink. This setup is entirely managed by Snowflake, so Elementary connects with an endpoint service hosted on Snowflake’s AWS account for this purpose.
+
+In order to set up a PrivateLink connection with Snowflake, please follow the steps below:
+
+1. **Open a support case to Snowflake Support**
+    1. Ask to authorize Elementary’s AWS account for PrivateLink access.
+    2. Provide Elementary’s account ID in the request - `743289191656` 
+2. **Obtain the PrivateLink configuration**
+    1. Once Snowflake’s support team approves the request, obtain the PrivateLink configuration by invoking the following commands (admin access is required):
+        
+        ```sql
+        USE ROLE ACCOUNTADMIN;
+        SELECT SYSTEM$GET_PRIVATELINK_CONFIG();
+        ```
+        
+3. **Provide Elementary with the configuration obtained in the previous step.**
+    1. Elementary will then setup the required infrastructure to connect to Snowflake via PrivateLink.
+4. **Add a Snowflake environment in Elementary**
+    1. Follow the instructions [here](https://docs.elementary-data.com/cloud/onboarding/connect-data-warehouse) to set up a Snowflake environment in Elementary.
+        1. When supplying the account, use `<account_identifier>.privatelink` , where the account identifier is the result of the following query:
+            
+            ```sql
+            SELECT CURRENT_ORGANIZATION_NAME() || '-' || CURRENT_ACCOUNT_NAME();
+            ```
+            
+        2. In the Snowflake instructions, skip the *Add the Elementary IP to allowlist* section (since the connection is done through PrivateLink, no allowlist is required).
+
+## Github Enterprise Server
+
+Coming soon!
