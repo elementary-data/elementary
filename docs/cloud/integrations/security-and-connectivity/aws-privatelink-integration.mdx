@@ -3,7 +3,7 @@ title: "AWS PrivateLink Integration"
 sidebarTitle: "AWS PrivateLink integration"
 ---
 
-# What is AWS PrivateLink?
+## What is AWS PrivateLink?
 
 **AWS PrivateLink** is a secure and scalable networking technology that enables private connectivity between Virtual Private Clouds (VPCs), AWS services, and on-premises applications—without exposing traffic to the public internet. By leveraging PrivateLink, organizations can simplify their network architecture, reduce data exposure risks, and ensure secure communication between services.
 
@@ -11,7 +11,7 @@ With PrivateLink, services are exposed as **private endpoints** within a VPC, al
 
 In the context of our integration, AWS PrivateLink enables Elementary Cloud to securely and privately communicate with supported services, ensuring data privacy, compliance, and a streamlined user experience. We support cross-region PrivateLink and can connect to any region where your cloud is hosted, using VPC peering to link different regions to our production environment securely. Elementary Data maintains a global network of regional VPCs designed for PrivateLink, with strict security controls.
 
-# Architecture overview
+## Architecture overview
 
 <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742380845/nyskzwnjnco2z1l7luyh.png" />
 
@@ -24,9 +24,9 @@ Elementary’s PrivateLink setup consists generally from two parts:
 2. **AWS VPC Peering:**
     1. Elementary’s production servers are located in the **eu-central-1** (Frankfurt) region. For us to be able to access the service exposed through PrivateLink, we connect our main production VPC with the regional VPC mentioned above.
 
-# Supported integrations
+## Supported integrations
 
-## Snowflake
+### Snowflake
 
 Snowflake has support for connecting to AWS-hosted Snowflake accounts via PrivateLink. This setup is entirely managed by Snowflake, so Elementary connects with an endpoint service hosted on Snowflake’s AWS account for this purpose.
 
