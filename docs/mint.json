@@ -289,7 +289,7 @@
         {
           "group": "Security and Connectivity",
           "pages": [
-            "_snippets/cloud/integrations/aws-privatelink-integration.mdx",
+            "_snippets/cloud/integrations/aws-privatelink-integration",
             "cloud/guides/setup-okta"
           ]
         }
