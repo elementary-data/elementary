@@ -289,8 +289,8 @@
         {
           "group": "Security and Connectivity",
           "pages": [
-            "_snippets/cloud/integrations/aws-privatelink-integration",
-            "cloud/guides/setup-okta"
+            "cloud/integrations/security-and-connectivity/aws-privatelink-integration",
+            "cloud/integrations/security-and-connectivity/setup-Okta"
           ]
         }
       ]
