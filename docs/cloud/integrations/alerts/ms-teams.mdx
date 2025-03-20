@@ -10,7 +10,7 @@ The alerts include rich context, and you can create [alert rules](/features/aler
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1719739150/MS_teams_alert_screenshot_lakytr.png"
+      src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742478911/teamsalert.png"
       alt="MS teams alert screenshot"
     />
   </div>
@@ -31,10 +31,7 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook. There are two ways to create a webhook:
-
-<Accordion title="Option 1: Using Microsoft Teams Connectors (Legacy)">
-1. Go to a channel in your Team and choose `Manage channel`
+3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook Using Microsoft Teams Connectors. Go to a channel in your Team and choose `Manage channel`.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -46,7 +43,7 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-2. Click on `Edit` connectors.
+3. Click on `Edit` connectors.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -58,7 +55,7 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-3. Search for `Incoming webhook` and choose `Add`.
+4. Search for `Incoming webhook` and choose `Add`.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -70,7 +67,7 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-4. Choose `Add` again and add a name to your webhook, then click on `Create`.
+5. Choose `Add` again and add a name to your webhook, then click on `Create`.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -82,7 +79,7 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-5. Copy the URL of the webhook.
+6. Copy the URL of the webhook.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -94,36 +91,8 @@ The alerts include rich context, and you can create [alert rules](/features/aler
   </div>
 </Frame>
 
-**Note:** Microsoft 365 Connectors (previously called Office 365 Connectors) are nearing deprecation, and the creation of new Microsoft 365 Connectors will soon be blocked. Consider using Power Automate Workflows instead.
 
-</Accordion>
-
-<Accordion title="Option 2: Using Power Automate Workflows">
-
-You can create a webhook using Power Automate in two ways:
-
-### Method 1: Directly from Teams
-
-1. Go to your Teams channel
-2. Click the three dots (...) next to the channel name
-3. Select `Workflows`
-4. Choose the template "Post to channel when a webhook request is received"
-5. Copy the webhook URL
-
-### Method 2: From Power Automate Website
-
-1. Go to [Power Automate](https://flow.microsoft.com)
-2. Create a new instant cloud flow
-3. Search for "When a HTTP request is received" as your trigger
-4. In the flow, add a "Post adaptive card in a chat or channel" action
-5. Configure the team and channel where you want to post
-6. Save the flow and copy the HTTP POST URL
-
-**Important Note:** When using Power Automate Workflows, Elementary CLI cannot directly verify if messages were successfully delivered. You'll need to monitor your workflow runs in Power Automate to check for any errors.
-
-  </Accordion>
-
-4. Configure your Microsoft Teams webhooks, and give each one a name indicating it's connected channel:
+7. Configure your Microsoft Teams webhooks, and give each one a name indicating it's connected channel:
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -135,7 +104,7 @@ You can create a webhook using Power Automate in two ways:
   </div>
 </Frame>
 
-5. Select a default channel for alerts, and set the suppression interval.
+8. Select a default channel for alerts, and set the suppression interval.
 
 <Note>
   The default channel you select will automatically add a default [alert
