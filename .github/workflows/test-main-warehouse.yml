@@ -13,5 +13,5 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: postgres
-      elementary-ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
+      elementary-ref: ${{ (github.event_name == 'pull_request_target' && github.event.pull_request.head.sha) || '' }}
     secrets: inherit
