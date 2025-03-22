@@ -3,16 +3,13 @@ name: Create Pylon Issue
 on:
   issues:
     types: [opened]
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 jobs:
   create_pylon_issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
       - name: Install jq
         run: sudo apt-get install -y jq
 

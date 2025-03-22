@@ -3,16 +3,13 @@ name: Close Pylon Ticket on Issue or Pull Request Closure
 on:
   issues:
     types: [closed]
-  pull_request:
+  pull_request_target:
     types: [closed]
 
 jobs:
   close_pylon_ticket:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
       - name: Extract Pylon Ticket ID
         id: extract_ticket_id
         run: |

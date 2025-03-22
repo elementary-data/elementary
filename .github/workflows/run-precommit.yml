@@ -1,11 +1,12 @@
 name: Run pre-commit hooks
 on:
   workflow_dispatch:
-  pull_request:
+  pull_request_target:
 
 jobs:
   code-quality:
     runs-on: ubuntu-latest
+    environment: elementary_test_env
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v4
