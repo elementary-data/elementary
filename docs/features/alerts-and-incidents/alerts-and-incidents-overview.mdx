@@ -8,7 +8,9 @@ sidebarTitle: Alerts & incidents overview
 Alerts and incidents in Elementary are designed to shorten your time to response and time to resolution when data issues occur.
 
 - **Alert -** Notification about an event that indicates a data issue.
-- **[Incident](/features/alerts-and-incidents/incidents) -** A data issue that starts with an event, but can include several events grouped to an incident. An incident has a start time, status, severity, assignee and end time. 
+- **[Incident](/features/alerts-and-incidents/incidents) -** A data issue that starts with a single event but can include multiple events grouped together. An incident includes a start time, status, severity, assignee, and end time. Incident alerts are sent when the incident is opened and when it is resolved.
+
+
 
 Alerts provide information and context for recipients to quickly triage, prioritize and resolve issues. 
 For collaboration and promoting ownership, alerts include owners and tags. 
@@ -20,10 +22,10 @@ you will be able to track all open and historical incidents, and get metrics on 
 
 ## Alerts & incidents core functionality 
 
-- **Alerts customization** - Alerts should include relevant context for quick triage such as **owner**, **tags**, **description*. In Elementary, alerts can be customized to include this information.
+- **Alerts customization** - Alerts should include relevant context for quick triage such as **owner**, **tags**, **description**. In Elementary, alerts can be customized to include this information.
 - **Alert distribution rules** - Alerts should be sent to relevant recipients. By creating [Alert Rules](/features/alerts-and-incidents/alert-rules), alerts can be distributed to different channels and systems.
 - **Incidents management** - When alerts are distributed to different channels, it can become hard to track what is open. Elementary offers a centralized Incidents page to monitor what is open, and manage incident properties: **assignee**, **status** and **severity**.  
-- **Grouping alerts to incidents** - New failures related to already open incidents will not trigger new alerts, and will be automatically added to the opgoing incident. This reduces noise and alerts fatigue.  
+- **Grouping alerts to incidents** - New failures related to already open incidents will not trigger new alerts, and will be automatically added to the ongoing incident. This reduces noise and alert fatigue.  
 - **Automated resolution** - When there is a successful run that means an open incident is resolved, Elementary will automatically resolve the incident. This will help you manage the state of incidents and communicate it to stake holders in real time. 
 - **Mute test alerts** – Mute your test from the test configuration tab to run tests without triggering alerts, giving you more control over notifications while still monitoring data quality. This is useful when testing new data sets, refining thresholds, or adjusting test logic without unnecessary noise.
 
