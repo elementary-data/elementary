@@ -43,7 +43,7 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
 
       - name: Create Pylon Issue for Pull Request
-        if: github.event_name == 'pull_request'
+        if: contains(github.event_name, 'pull_request')
         run: |
           response=$(curl --request POST \
             --url https://api.usepylon.com/issues \
