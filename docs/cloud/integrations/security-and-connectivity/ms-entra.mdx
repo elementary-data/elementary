@@ -3,43 +3,58 @@ title: "Microsoft Entra ID"
 sidebarTitle: "Microsoft Entra ID"
 ---
 
+## Enabling SAML
+
 In order to enable SAML using Microsoft Entra ID (Previously Azure AD SSO), we need the following steps to be taken:
 
 - Go to the [Microsoft Entra portal](https://entra.microsoft.com/)
 - On the left, choose Applications → Enterprise Applications
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384397/sso1.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384397/sso1.webp" />
 
 - Click on “New Application”
-
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384486/sso2.webp" />
+ 
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384486/sso2.webp" />
 
 - Click on “Create your own application”
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384522/sso3.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384522/sso3.webp" />
 
 - Choose the last option in the side-window that opens and click “Create”
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384523/sso4.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384523/sso4.webp" />
 
 - In the App window that opens, click on “Single Sign-On”
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384527/sso5.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384527/sso5.webp" />
 
 - Choose SAML
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384529/sso6.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384529/sso6.webp" />
 
 - Click on Edit on the “Basic SAML Configuration” section
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384532/sso7.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384532/sso7.webp" />
 
 - Fill the following entries:
     - Identifier (Entity ID) - `elementary`
     - Reply URL - [`https://elementary-data.frontegg.com/auth/saml/callback`](https://elementary-data.frontegg.com/auth/saml/callback)
 - Download the Federation Metadata XML and send it to the Elementary team.
 
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384534/sso8.webp" />
+<img height="200" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384534/sso8.webp" />
 
 - We recommend setting up a short call where we’ll validate together that the new configuration works.
 - After that, if you wish, we can disable until you update your team internally about the new configuration and update when you give us the OK!
+
+
+## Provisioning
+
+Elementary supports user provisioning via SCIM to automate user management. If you want to enable automatic provisioning, follow these steps:
+- In the **Microsoft Entra portal**, go to **Enterprise Applications** and select the newly created SAML application.
+- Navigate to **Provisioning** and click **Get Started**.
+- Set the **Provisioning Mode** to **Automatic**.
+- Configure the **Tenant URL** and **Secret Token** (email the Elementary team for a 1password vault with the configuration).
+- Click **Test Connection** to validate the setup.
+- Enable provisioning and save changes.
+
+This setup ensures that users are automatically created, updated, and deactivated in Elementary based on their status in Microsoft Entra ID. You can always reach out if you need any help.
