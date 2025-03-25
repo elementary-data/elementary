@@ -11,6 +11,7 @@ from elementary.monitor.data_monitoring.report.data_monitoring_report import (
 )
 from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
+from elementary.monitor.dbt_init import DBTInit
 from elementary.monitor.debug import Debug
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
@@ -24,6 +25,7 @@ class Command:
     REPORT = "monitor-report"
     SEND_REPORT = "monitor-send-report"
     DEBUG = "debug"
+    DBT_INIT = "dbt-init"
 
 
 # Displayed in reverse order in --help.
@@ -378,7 +380,8 @@ def monitor(
         if not success:
             sys.exit(1)
     except Exception as exc:
-        anonymous_tracking.track_cli_exception(Command.MONITOR, exc, ctx.command.name)
+        anonymous_tracking.track_cli_exception(
+            Command.MONITOR, exc, ctx.command.name)
         raise
 
 
@@ -475,7 +478,8 @@ def report(
         if not generated_report_successfully:
             sys.exit(1)
     except Exception as exc:
-        anonymous_tracking.track_cli_exception(Command.REPORT, exc, ctx.command.name)
+        anonymous_tracking.track_cli_exception(
+            Command.REPORT, exc, ctx.command.name)
         raise
 
 
@@ -763,6 +767,28 @@ def debug(ctx, profiles_dir):
     if not success:
         sys.exit(1)
 
+    anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
+
+
+@monitor.command()
+@click.pass_context
+def dbt_init(ctx):
+    """
+    Initializes the Elementary internal dbt project by installing its dbt deps. 
+    Run this command after installing EDR as part of builds or CI/CD pipelines when the target
+    environment does not have write permissions on disk or does not have internet connection.
+    This command is not needed in most cases as the dbt deps are installed automatically when running `edr monitor`.
+    """
+    config = Config()
+    anonymous_tracking = AnonymousCommandLineTracking(config)
+    anonymous_tracking.track_cli_start(Command.DEBUG, None, ctx.command.name)
+    dbtinit = DBTInit()
+    success = dbtinit.setup_internal_dbt_packages()
+    if not success:
+        sys.exit(1)
+    click.echo(
+        "Elementary internal dbt project has been initialized successfully. "
+    )
     anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
 
 
