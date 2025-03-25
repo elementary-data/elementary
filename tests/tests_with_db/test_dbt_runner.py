@@ -51,12 +51,14 @@ class BaseDbtRunnerTest:
         assert invocation["command"] == "test"
         assert invocation["selected"] == json.dumps(["one"])
 
-    def _get_invocations_by_marker(self, custom_dbt_runner: BaseDbtRunner, test_marker: str):
+    def _get_invocations_by_marker(
+        self, custom_dbt_runner: BaseDbtRunner, test_marker: str
+    ):
         return self._run_query(
             custom_dbt_runner,
             f"""select * from {{{{ ref("dbt_invocations") }}}} where LOWER(vars) LIKE LOWER('%{test_marker}%')""",
         )
-    
+
     @staticmethod
     def _run_query(dbt_runner: SubprocessDbtRunner, query: str):
         return json.loads(
