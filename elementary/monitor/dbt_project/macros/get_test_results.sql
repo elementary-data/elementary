@@ -72,6 +72,9 @@
 
     {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
     {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
+    {% if not elementary.has_temp_table_support() %}
+        {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
+    {% endif %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
     {% set filtered_tests = [] %}
