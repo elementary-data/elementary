@@ -516,14 +516,11 @@
     "slack": "https://elementary-data.com/community"
   },
   "analytics": {
-    "ga4": {
-      "measurementId": "G-4DQN8YR4NH"
-    },
     "posthog": {
       "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
     },
     "gtm": {
-      "tagId": "GTM-TKR4HS3Q"
+      "tagId": "GTM-WCKCG3D4"
     }
   },
   "redirects": [
