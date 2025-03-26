@@ -29,10 +29,7 @@ class BaseDbtRunnerTest:
         result = custom_dbt_runner.run(select="one", vars={"test_marker": test_marker})
         assert result is True
 
-        invocations = self._run_query(
-            custom_dbt_runner,
-            f"""select * from {{{{ ref("dbt_invocations") }}}} where vars ilike '%{test_marker}%'""",
-        )
+        invocations = self._get_invocations_by_marker(custom_dbt_runner, test_marker)
         assert len(invocations) == 1
 
         invocation = invocations[0]
@@ -47,15 +44,20 @@ class BaseDbtRunnerTest:
         result = custom_dbt_runner.test(select="one", vars={"test_marker": test_marker})
         assert result is True
 
-        invocations = self._run_query(
-            custom_dbt_runner,
-            f"""select * from {{{{ ref("dbt_invocations") }}}} where vars ilike '%{test_marker}%'""",
-        )
+        invocations = self._get_invocations_by_marker(custom_dbt_runner, test_marker)
         assert len(invocations) == 1
 
         invocation = invocations[0]
         assert invocation["command"] == "test"
         assert invocation["selected"] == json.dumps(["one"])
+
+    def _get_invocations_by_marker(
+        self, custom_dbt_runner: BaseDbtRunner, test_marker: str
+    ):
+        return self._run_query(
+            custom_dbt_runner,
+            f"""select * from {{{{ ref("dbt_invocations") }}}} where LOWER(vars) LIKE LOWER('%{test_marker}%')""",
+        )
 
     @staticmethod
     def _run_query(dbt_runner: SubprocessDbtRunner, query: str):
