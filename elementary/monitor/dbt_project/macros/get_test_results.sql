@@ -58,7 +58,7 @@
     {% set test_results = [] %}
 
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
-    {% set ordered_test_results_relation = elementary_cli.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
+    {% set ordered_test_results_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
 
     {% set test_results_agate_sql %}
         select * from {{ ordered_test_results_relation }}
