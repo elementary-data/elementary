@@ -1,11 +1,5 @@
----
-title: "Elementary in production"
----
-
 <Card
-  title="Try Elementary cloud">
-  href="https://app.elementary-data.com/"
-  </Card>
+  title="Try Elementary cloud with a free 30 day trial!"> href="https://app.elementary-data.com/"</Card>
 
 Running Elementary OSS in production means to include the dbt package in your production dbt project,
 and setting up an automated manner to run the Elementary CLI.
@@ -41,7 +35,7 @@ On an orchestration system of your choice, run the CLI to:
 1. **Send Slack alerts** - Use the `edr monitor --env prod` command and Slack integration.
 2. **Generate a report** - Use the `edr report --env prod` or `edr send-report --env prod` that has built in support for sending the report to Slack / GCS / S3.
 
-## What permissions Elementary requires?
+## What permissions does Elementary require?
 
 The CLI needs to have permissions to access the `profiles.yml` file with the relevant profile,
 and network access to the data warehouse.
