@@ -4,18 +4,10 @@ sidebarTitle: "Add Elementary tests"
 icon: "square-3"
 ---
 
-**Once you've set up the basic Elementary components — the dbt package and CLI — you can start adding Elementary tests to your data. You can add Elementary tests after completing the initial setup or later as you identify critical tables and metrics.** Many teams start with a few volume or freshness tests, then expand coverage as needed.
+**Once you've set up the basic Elementary components — the dbt package and CLI — you can start adding Elementary tests to your data. You can add Elementary tests once completing the initial setup or later as you identify critical tables and metrics.** Many teams start with a few volume or freshness tests, then expand coverage as needed.
 
-The Elementary dbt package provides anomaly tests for detection of data quality issues.Elementary data tests are configured and executed like native tests in your dbt project. 
-Elementary tests can be used in addition to dbt tests, packages tests (such as dbt-expectations), and custom tests.
-**All of these test results will be presented in the Elementary UI and alerts.**
+Elementary data tests include flexible anomaly detection tests, schema changes and Python tests, configured and executed like native tests in your dbt project. Elementary tests can be used in addition to dbt tests, packages tests (such as dbt-expectations), and custom tests. All of these test results will be presented in the Elementary UI and alerts.
 
-The Elementary dbt package offers two test types:
-
-- **Pipeline tests:** Monitor the health of data pipelines, ensuring timely and smooth data ingestion, transformation, and loading.
-- **Data quality tests:** Validate data accuracy, completeness, and correctness, detect anomalies and schema changes, and ensure the data meets predefined business rules.
-
-Together, these tests ensure reliable pipelines and trusted data.
 
 <Snippet file="data-tests/tests-cards.mdx" />
 
