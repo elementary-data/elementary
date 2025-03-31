@@ -9,7 +9,37 @@ icon: "square-3"
 Elementary data tests include flexible anomaly detection tests, schema changes and Python tests, configured and executed like native tests in your dbt project. Elementary tests can be used in addition to dbt tests, packages tests (such as dbt-expectations), and custom tests. All of these test results will be presented in the Elementary UI and alerts.
 
 
-<Snippet file="data-tests/tests-cards.mdx" />
+<CardGroup cols={3}>
+  <Card
+    title="Anomaly detection"
+    icon="chart-line"
+    icontype="solid"
+    href="/oss/quickstart/quickstart-tests#anomaly-detection-tests"
+  >
+    - Volume 
+    - Freshness 
+    - Event freshness 
+    - Column anomalies 
+    - Dimensions
+  </Card>
+  <Card
+    title="Schema tests"
+    icon="table"
+    href="/oss/quickstart/quickstart-tests#schema-tests"
+  >
+    - Schema changes 
+    - Baseline schema 
+    - JSON schema 
+    - Exposure schema
+  </Card>
+  <Card
+    title="Other tests"
+    icon="python"
+    href="/oss/quickstart/quickstart-tests#other-tests"
+  >
+    - Python tests
+  </Card>
+</CardGroup>
 
 ## Anomaly detection tests
 
