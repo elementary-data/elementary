@@ -60,7 +60,7 @@ sidebarTitle: "All configuration params"
 
 <CodeGroup>
 
-```yml properties.yml
+```yml Models
 version: 2
 
 models:
@@ -75,7 +75,7 @@ models:
     tests: <here you will add elementary monitors as tests>
 ```
 
-```yml Example
+```yml Models example
 version: 2
 
 models:
@@ -96,7 +96,9 @@ models:
           tags: ["elementary"]
 ```
 
-```yml sources_properties.yml
+```yml Sources
+version: 2
+
 sources:
   - name: < some name >
     database: < database >
@@ -110,7 +112,9 @@ sources:
         tests: <here you will add elementary monitors as tests>
 ```
 
-```yml Example
+```yml Sources example
+version: 2
+
 sources:
   - name: "my_non_dbt_table"
     database: "raw_events"
