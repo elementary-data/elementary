@@ -26,6 +26,7 @@ from elementary.monitor.api.tests.utils import (
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import (
     NormalizedTestSchema,
     TestDBRowSchema,
@@ -69,6 +70,7 @@ class TestsAPI(APIClient):
     def get_test_results_summary(
         self,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
+        dbt_invocation: Optional[DbtInvocationSchema] = None,
     ) -> List[TestResultSummarySchema]:
         filtered_test_results_db_rows = self.test_results_db_rows
         if filter.tag:
@@ -93,11 +95,19 @@ class TestsAPI(APIClient):
                 )
             ]
 
-        filtered_test_results_db_rows = [
-            test_result
-            for test_result in filtered_test_results_db_rows
-            if test_result.invocations_rank_index == 1
-        ]
+        if dbt_invocation and dbt_invocation.invocation_id:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if test_result.invocation_id == dbt_invocation.invocation_id
+            ]
+        else:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if test_result.invocations_rank_index == 1
+            ]
+
         return [
             TestResultSummarySchema(
                 test_unique_id=test_result.test_unique_id,

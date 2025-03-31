@@ -71,3 +71,26 @@ def test_filter_schema_apply_filter_on_values_contains_operator():
 
     # Should not match when no values contain any filter values
     assert filter_schema.apply_filter_on_values(["abc", "xyz"]) is False
+
+
+def test_get_matching_values() -> None:
+    filter_schema = FilterSchema(values=["test1", "test2"], type=FilterType.IS)
+    values = ["test1", "test3", "test4"]
+    assert filter_schema.get_matching_values(values) == {"test1"}
+
+    filter_schema = FilterSchema(values=["test"], type=FilterType.CONTAINS)
+    values = ["test1", "testing", "other"]
+    assert filter_schema.get_matching_values(values) == {"test1", "testing"}
+
+    filter_schema = FilterSchema(values=["test1"], type=FilterType.IS_NOT)
+    values = ["test2", "test3"]
+    assert filter_schema.get_matching_values(values) == {"test2", "test3"}
+
+    filter_schema = FilterSchema(values=["test1"], type=FilterType.IS_NOT)
+    values = ["test1", "test2", "test3"]
+    assert filter_schema.get_matching_values(values) == set()
+
+    filter_schema = FilterSchema(values=["test"], type=FilterType.IS)
+    filter_schema.type = "unsupported"  # type: ignore
+    with pytest.raises(ValueError, match="Unsupported filter type: unsupported"):
+        filter_schema.get_matching_values(values)

@@ -49,6 +49,7 @@ If your platform's message format is not yet supported:
    - ExpandableBlock: Collapsible sections
    - MentionBlock: Mention a user
    - TableBlock: Table of data
+   - WhitespaceBlock: Whitespace for indentation
    ```
 3. Add tests in `tests/unit/messages/formats/`
 

@@ -18,11 +18,12 @@ T = TypeVar("T")
 
 class MessageSendResult(BaseModel, Generic[T]):
     timestamp: datetime
+    message_format: str
     message_context: Optional[T] = None
 
 
 DestinationType = TypeVar("DestinationType")
-MessageContextType = TypeVar("MessageContextType")
+MessageContextType = TypeVar("MessageContextType", bound=BaseModel)
 
 
 class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]):
@@ -37,6 +38,9 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
     @abstractmethod
     def supports_reply(self) -> bool:
         raise NotImplementedError
+
+    def supports_actions(self) -> bool:
+        return False
 
     def reply_to_message(
         self,

@@ -10,6 +10,9 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
     BaseMessagingIntegration,
     MessageSendResult,
 )
+from elementary.messages.messaging_integrations.empty_message_context import (
+    EmptyMessageContext,
+)
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
@@ -44,21 +47,24 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     return response
 
 
-class TeamsWebhookMessagingIntegration(BaseMessagingIntegration[Channel, Channel]):
+class TeamsWebhookMessagingIntegration(
+    BaseMessagingIntegration[None, EmptyMessageContext]
+):
     def __init__(self, url: str) -> None:
         self.url = url
 
     def send_message(
         self,
-        destination: Channel,
+        destination: None,
         body: MessageBody,
-    ) -> MessageSendResult[Channel]:
+    ) -> MessageSendResult[EmptyMessageContext]:
         card = format_adaptive_card(body)
         try:
             send_adaptive_card(self.url, card)
             return MessageSendResult(
-                message_context=destination,
+                message_context=EmptyMessageContext(),
                 timestamp=datetime.utcnow(),
+                message_format="adaptive_cards",
             )
         except requests.RequestException as e:
             raise MessagingIntegrationError(

@@ -67,6 +67,8 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
 
+**AI-Powered Data Tests & Unstructured Data Validations** - Validate and monitor data using AI powered tests to validate both structured and unstructured data
+
 ## Support
 
 For additional information and help, you can use one of these channels:
@@ -182,6 +184,16 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/bebbo203"><img src="https://avatars.githubusercontent.com/u/5352494?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/geo909"><img src="https://avatars.githubusercontent.com/u/7989227?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dmitrii-khr"><img src="https://avatars.githubusercontent.com/u/20114683?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/amishas157"><img src="https://avatars.githubusercontent.com/u/4952872?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/3dbrows"><img src="https://avatars.githubusercontent.com/u/5956299?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/AlexBoutou"><img src="https://avatars.githubusercontent.com/u/43123975?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/okabak123"><img src="https://avatars.githubusercontent.com/u/44201872?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/willbowditch"><img src="https://avatars.githubusercontent.com/u/14288042?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/jcarpenter12"><img src="https://avatars.githubusercontent.com/u/22575153?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/JanDintel"><img src="https://avatars.githubusercontent.com/u/3646888?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/kokorin"><img src="https://avatars.githubusercontent.com/u/1089148?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/slaupster"><img src="https://avatars.githubusercontent.com/u/9283885?v=4" width="50" height="50" alt=""/></a>
+
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->

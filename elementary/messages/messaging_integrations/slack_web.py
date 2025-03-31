@@ -56,6 +56,9 @@ class SlackWebMessagingIntegration(
     def supports_reply(self) -> bool:
         return True
 
+    def supports_actions(self) -> bool:
+        return True
+
     def send_message(
         self, destination: Channel, body: MessageBody
     ) -> MessageSendResult[SlackWebMessageContext]:
@@ -97,6 +100,7 @@ class SlackWebMessagingIntegration(
                 id=response["ts"], channel=response["channel"]
             ),
             timestamp=response["ts"],
+            message_format="block_kit",
         )
 
     def _handle_send_err(self, err: SlackApiError, channel_name: str):

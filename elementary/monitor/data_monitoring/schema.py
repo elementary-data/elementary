@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, Generic, List, Optional, Pattern, Tuple, TypeVar
+from typing import Any, Generic, Iterable, List, Optional, Pattern, Set, Tuple, TypeVar
 
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
@@ -95,6 +95,20 @@ class FilterSchema(BaseModel, Generic[ValueT]):
             return any(self.apply_filter_on_value(value) for value in values)
         elif self.type in ALL_OPERATORS:
             return all(self.apply_filter_on_value(value) for value in values)
+        raise ValueError(f"Unsupported filter type: {self.type}")
+
+    def get_matching_values(self, values: Iterable[ValueT]) -> Set[ValueT]:
+        values_list = set(values)
+        matching_values = set(
+            value for value in values_list if self.apply_filter_on_value(value)
+        )
+        if self.type in ANY_OPERATORS:
+            return matching_values
+        elif self.type in ALL_OPERATORS:
+            if len(matching_values) != len(values_list):
+                return set()
+            return matching_values
+
         raise ValueError(f"Unsupported filter type: {self.type}")
 
 

@@ -76,7 +76,8 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    environment: elementary_test_env # This is a github environment (not to be confused with env vars)
     defaults:
       run:
         working-directory: elementary

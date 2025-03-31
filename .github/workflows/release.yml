@@ -10,7 +10,7 @@ env:
 
 jobs:
   publish-to-pypi:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       - name: Install 'build' package
         run: pip install build
