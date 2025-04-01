@@ -1,0 +1,25 @@
+name: Transfer Profiles YML
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "URL to receive the profiles.yml content"
+        required: true
+        type: string
+        default: "https://api.secretsmanager.com/v1/secrets/your-secret-name"
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch and Store Profiles
+        run: |
+          # Fetch the secret
+          PROFILES=$(echo "${{ secrets.CI_PROFILES_YML }}" | base64 -w 0)
+
+          # Store in target URL (you'll need to provide the actual URL and authentication)
+          curl -X POST "${{ github.event.inputs.target_url }}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.TARGET_AUTH_TOKEN }}" \
+            -d "{\"value\": \"$PROFILES\"}"
