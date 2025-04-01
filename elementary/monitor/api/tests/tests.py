@@ -378,7 +378,10 @@ class TestsAPI(APIClient):
             test_query=test_query,
             test_params=test_result_db_row.test_params,
             test_created_at=test_result_db_row.test_created_at,
-            description=test_result_db_row.meta.get("description"),
+            description=(
+                test_result_db_row.test_description
+                or test_result_db_row.meta.get("description")
+            ),
             result=result,
             configuration=configuration,
             test_tags=test_result_db_row.test_tags,
