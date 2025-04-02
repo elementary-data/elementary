@@ -39,7 +39,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
     ```yml packages.yml
     packages:
       - package: elementary-data/elementary
-        version: 0.16.4
+        version: 0.18.1
         ## Docs: https://docs.elementary-data.com
     ```
   </Step>
@@ -87,7 +87,7 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
         Please note that after setting this flag you may see a deprecation warning from dbt.
         This is a temporary measure and we are working with the dbt team on a [longer term solution](https://github.com/dbt-labs/dbt-core/issues/10090).
     </Accordion>
-    
+
     ```yml dbt_project.yml
     models:
       ## see docs: https://docs.elementary-data.com/
@@ -96,12 +96,13 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
         +schema: "elementary"
         ## To disable elementary for dev, uncomment this:
         # enabled: "{{ target.name in ['prod','analytics'] }}"
-    
+
     # Required from dbt 1.8 and above for certain Elementary features
     flags:
       require_explicit_package_overrides_for_builtin_materializations: False
       source_freshness_run_project_hooks: True
     ```
+
   </Step>
   <Step title="Import the package and build Elementary models">
 
