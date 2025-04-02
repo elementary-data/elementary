@@ -1,4 +1,4 @@
-from typing import Any, Optional, cast
+from typing import Any, Optional, Union, cast
 
 from elementary.config.config import Config
 from elementary.exceptions.exceptions import Error
@@ -14,6 +14,12 @@ from elementary.messages.messaging_integrations.slack_webhook import (
 )
 from elementary.messages.messaging_integrations.teams_webhook import (
     TeamsWebhookMessagingIntegration,
+)
+from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
+    BaseIntegration,
+)
+from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
+    SlackIntegration,
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
@@ -35,8 +41,13 @@ class Integrations:
     def get_integration(
         config: Config,
         tracking: Optional[Tracking] = None,
-    ) -> BaseMessagingIntegration:
+    ) -> Union[BaseMessagingIntegration, BaseIntegration]:
         if config.has_slack:
+            if config.is_slack_workflow:
+                return SlackIntegration(
+                    config=config,
+                    tracking=tracking,
+                )
             if config.slack_token:
                 return SlackWebMessagingIntegration.from_token(
                     config.slack_token, tracking
