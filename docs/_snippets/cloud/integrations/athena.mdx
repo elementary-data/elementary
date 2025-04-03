@@ -7,7 +7,12 @@ You will connect Elementary Cloud to Athena for syncing the Elementary schema (c
 ### 1. Create Required IAM Policy
 
 First, you'll need to create an IAM policy with the following permissions:
+- **AthenaPermissions**: Allows executing and retrieving query results from Athena
+- **GluePermissions**: Enables reading metadata about databases and tables
+- **S3AccessForStagingBuckets**: Provides full access to store Athena query results
+- **S3AccessForElementarySchema**: Grants read-only access to your elementary schema
 
+Here is an example of a JSON policy:
 ```json
 {
   "Version": "2012-10-17",
@@ -66,12 +71,6 @@ First, you'll need to create an IAM policy with the following permissions:
   ]
 }
 ```
-
-Each permission set serves a specific purpose:
-- **AthenaPermissions**: Allows executing and retrieving query results from Athena
-- **GluePermissions**: Enables reading metadata about databases and tables
-- **S3AccessForStagingBuckets**: Provides full access to store Athena query results
-- **S3AccessForElementarySchema**: Grants read-only access to your data schema
 
 ### 2. Choose Authentication Method
 
