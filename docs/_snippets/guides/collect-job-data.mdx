@@ -34,7 +34,7 @@ Elementary also supports passing job metadata as dbt vars. If `env_var` and `var
 To pass job data to Elementary using `var`, use the `--vars` flag in your invocations:
 
 ```shell
-dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_load"}'
+dbt run --vars '{"orchestrator": "airflow", "job_name": "dbt_marketing_night_load"}'
 ```
 
 #### Variables supported format
@@ -63,7 +63,7 @@ By default, Elementary will collect the dbt cloud jobs info.
 If you wish to override that, change your dbt cloud invocations to pass the orchestrator job info using `--vars`:
 
 ```shell
-dbt run --vars '{"orchestrator": "Airflow", "job_name": "dbt_marketing_night_load"}'
+dbt run --vars '{"orchestrator": "airflow", "job_name": "dbt_marketing_night_load"}'
 ```
 
 ## Where can I see my job info?
