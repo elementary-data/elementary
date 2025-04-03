@@ -32,6 +32,7 @@ class FilterType(str, Enum):
     IS = "is"
     IS_NOT = "is_not"
     CONTAINS = "contains"
+    NOT_CONTAINS = "not_contains"
 
 
 class FilterFields(BaseModel):
@@ -55,6 +56,8 @@ def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool
         return value != filter_value
     elif filter_type == FilterType.CONTAINS:
         return str(filter_value).lower() in str(value).lower()
+    elif filter_type == FilterType.NOT_CONTAINS:
+        return str(filter_value).lower() not in str(value).lower()
     raise ValueError(f"Unsupported filter type: {filter_type}")
 
 
@@ -62,7 +65,7 @@ ValueT = TypeVar("ValueT")
 
 
 ANY_OPERATORS = [FilterType.IS, FilterType.CONTAINS]
-ALL_OPERATORS = [FilterType.IS_NOT]
+ALL_OPERATORS = [FilterType.IS_NOT, FilterType.NOT_CONTAINS]
 
 
 class FilterSchema(BaseModel, Generic[ValueT]):

@@ -30,6 +30,7 @@
             test_results.test_type,
             test_results.test_sub_type,
             test_results.test_results_description,
+            test_results.test_description,
             test_results.original_path,
             test_results.package_name,
             test_results.owners,
