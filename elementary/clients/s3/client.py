@@ -41,11 +41,15 @@ class S3Client:
         bucket_report_path = remote_bucket_file_path or report_filename
         bucket_website_url = None
         logger.info(f'Uploading to S3 bucket "{self.config.s3_bucket_name}"')
+
+        extra_args = {"ContentType": "text/html"}
+        if self.config.s3_acl is not None:
+            extra_args["ACL"] = self.config.s3_acl
         self.client.upload_file(
             local_html_file_path,
             self.config.s3_bucket_name,
             bucket_report_path,
-            ExtraArgs={"ContentType": "text/html"},
+            ExtraArgs=extra_args,
         )
         logger.info("Uploaded report to S3.")
         if self.config.update_bucket_website:
