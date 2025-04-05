@@ -34,6 +34,7 @@ jobs:
             redshift,
             databricks,
             databricks_catalog,
+            athena,
           ]
     uses: ./.github/workflows/test-warehouse.yml
     with:

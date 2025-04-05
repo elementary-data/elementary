@@ -14,6 +14,7 @@ on:
           - databricks
           - databricks_catalog
           - spark
+          - athena
       elementary-ref:
         type: string
         required: false
@@ -77,6 +78,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: elementary_test_env # This is a github environment (not to be confused with env vars)
     defaults:
       run:
         working-directory: elementary
