@@ -403,9 +403,11 @@
     {
       "group": "Elementary OSS",
       "pages": [
-        "oss/oss-introduction",
-        {
-          "group": "Quickstart",
+        "oss/oss-introduction"
+      ]
+    },
+    {
+    "group": "Quickstart",
           "icon": "circle-play",
           "pages": [
             "oss/quickstart/quickstart-cli-package",
@@ -415,8 +417,6 @@
             "oss/quickstart/quickstart-alerts",
             "oss/quickstart/quickstart-prod"
           ]
-        }
-      ]
     },
     {
       "group": "Guides",
