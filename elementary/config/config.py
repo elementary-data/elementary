@@ -73,6 +73,7 @@ class Config:
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
+        use_system_ca_files: bool = True,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -203,6 +204,8 @@ class Config:
         self.disable_elementary_version_check = config.get(
             "disable_elementary_version_check", False
         )
+
+        self.use_system_ca_files = use_system_ca_files
 
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
