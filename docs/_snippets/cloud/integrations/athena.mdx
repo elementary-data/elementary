@@ -1,1 +1,133 @@
-Coming soon!
+You will connect Elementary Cloud to Athena for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
+
+<Snippet file="cloud/integrations/create-user-operation.mdx" />
+
+## AWS Setup
+
+### 1. Create Required IAM Policy
+
+First, you'll need to create an IAM policy with the following permissions:
+- **AthenaPermissions**: Allows executing and retrieving query results from Athena
+- **GluePermissions**: Enables reading metadata about databases and tables
+- **S3AccessForStagingBuckets**: Provides full access to store Athena query results
+- **S3AccessForElementarySchema**: Grants read-only access to your elementary schema
+
+Here is an example of a JSON policy:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AthenaPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "GluePermissions",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetTableVersions",
+        "glue:GetPartition",
+        "glue:GetPartitions"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "S3AccessForStagingBuckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::your-query-results-bucket",
+        "arn:aws:s3:::your-query-results-bucket/*"
+      ]
+    },
+    {
+      "Sid": "S3AccessForElementarySchema",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::your-elementary-schema-bucket",
+        "arn:aws:s3:::your-elementary-schema-bucket/*"
+      ]
+    }
+  ]
+}
+```
+
+### 2. Choose Authentication Method
+
+Elementary supports two authentication methods for connecting to Athena:
+
+#### Option 1: AWS Role Authentication (Recommended)
+
+This is the recommended approach as it provides better security and follows AWS best practices. [Learn more about AWS IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html).
+
+1. **Create an IAM Role**:
+   - Go to AWS IAM Console
+   - Create a new role
+   - Select "Another AWS account" as the trusted entity
+   - Enter Elementary's AWS account ID: `743289191656`
+   - (Optional but recommended) Enable "Require external ID" and set a value
+   - Attach the policy created in step 1
+
+2. **Note down the following information**:
+   - Role ARN
+   - External ID (if you enabled it) [Learn more about external IDs](https://aws.amazon.com/blogs/security/how-to-use-external-id-when-granting-access-to-your-aws-resources/).
+
+#### Option 2: Access Key Authentication
+
+This method is less secure as it requires permanent credentials. We recommend using AWS Role authentication instead.
+
+1. **Create an IAM User**:
+   - Go to AWS IAM Console
+   - Create a new user, that will be used by elementary to query athena
+   - Enable programmatic access
+   - Attach the policy created in step 1
+
+2. **Note down the following information**:
+   - AWS Access Key ID of the new elementary athena user
+   - AWS Secret Access Key of the new elementary athena user
+
+## Elementary Configuration
+
+### Connection Settings
+
+Regardless of the authentication method you choose, you'll need to provide:
+
+- **Region**: The AWS region where your Athena instance is located
+- **Database**: The name of the database where your Elementary schema exist.
+- **Schema**: The name of your Elementary schema. Usually [schema name]_elementary
+- **S3 Staging Directory**: The S3 path where Athena query results will be stored
+- **Workgroup**: (Optional) Your Athena workgroup name
+
+### Authentication Details
+
+Based on your chosen authentication method:
+
+#### If using AWS Role Authentication:
+- Select "AWS Role" as the authentication method
+- Enter your role ARN
+- Enter your external ID (if you enabled it)
+
+#### If using Access Key Authentication:
+- Select "Access Key" as the authentication method
+- Enter your AWS Access Key ID
+- Enter your AWS Secret Access Key
