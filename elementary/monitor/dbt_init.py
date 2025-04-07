@@ -1,5 +1,4 @@
 from elementary.clients.dbt.factory import create_dbt_runner
-from elementary.config.config import Config
 from elementary.monitor import dbt_project_utils
 
 
@@ -16,7 +15,5 @@ class DBTInit:
         It intentionally does not use self.config.run_dbt_deps_if_needed parameter in create_dbt_runner to ensure
         that dbt deps is always run when setting up the internal dbt packages.
         """
-        dbt_runner = create_dbt_runner(
-            dbt_project_utils.CLI_DBT_PROJECT_PATH
-        )
+        dbt_runner = create_dbt_runner(dbt_project_utils.CLI_DBT_PROJECT_PATH)
         return dbt_runner.deps()
