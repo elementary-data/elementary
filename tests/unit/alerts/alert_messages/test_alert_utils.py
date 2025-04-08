@@ -154,7 +154,7 @@ def _get_owners_by_mod(i: int) -> List[str]:
 
 
 def _get_subscribers_by_mod(i: int) -> List[str]:
-    mod_value = i % 3
+    mod_value = i % 4
     if mod_value == 0:
         return []
     elif mod_value == 1:

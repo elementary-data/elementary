@@ -427,9 +427,12 @@ class AlertMessageBuilder:
             inlines.append(TextBlock(text="Owners:"))
             inlines.append(MentionLineBlock(*owners))
 
-        if subscribers := list(set(alert.subscribers)):
-            if self.config.alert_groups_subscribers:
-                inlines.append(TextBlock(text="-"))
+        if self.config.alert_groups_subscribers:
+            if subscribers := list(set(alert.subscribers)):
+                if owners:
+                    inlines.append(TextBlock(text="|"))
+                else:
+                    inlines.append(TextBlock(text="-"))
                 subscribers.sort()
                 inlines.append(TextBlock(text="Subscribers:"))
                 inlines.append(MentionLineBlock(*subscribers))
