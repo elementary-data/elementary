@@ -28,7 +28,6 @@ from elementary.messages.blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
-    MentionBlock,
     TableBlock,
     TextBlock,
     TextStyle,
@@ -424,24 +423,16 @@ class AlertMessageBuilder:
         ]
         if owners := list(set(alert.owners)):
             inlines.append(TextBlock(text="-"))
-            if len(owners) == 1:
-                inlines.append(TextBlock(text="Owner:"))
-                inlines.append(MentionBlock(user=owners.pop()))
-            else:
-                owners.sort()
-                inlines.append(TextBlock(text="Owners:"))
-                inlines.append(MentionLineBlock(*owners))
+            owners.sort()
+            inlines.append(TextBlock(text="Owners:"))
+            inlines.append(MentionLineBlock(*owners))
 
         if subscribers := list(set(alert.subscribers)):
             if self.config.alert_groups_subscribers:
                 inlines.append(TextBlock(text="-"))
-                if len(subscribers) == 1:
-                    inlines.append(TextBlock(text="Subscriber:"))
-                    inlines.append(MentionBlock(user=subscribers.pop()))
-                else:
-                    subscribers.sort()
-                    inlines.append(TextBlock(text="Subscribers:"))
-                    inlines.append(MentionLineBlock(*subscribers))
+                subscribers.sort()
+                inlines.append(TextBlock(text="Subscribers:"))
+                inlines.append(MentionLineBlock(*subscribers))
 
         if report_link := alert.get_report_link():
             inlines.append(TextBlock(text="-"))

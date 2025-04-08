@@ -41,7 +41,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_2** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_2** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -56,7 +56,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_5** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_5** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -71,7 +71,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_8** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_8** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -102,7 +102,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_2** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_2** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -117,7 +117,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_5** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_5** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -132,7 +132,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_8** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_8** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -163,7 +163,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_2** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_2** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -178,7 +178,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_5** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_5** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
@@ -193,7 +193,7 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_8** - Owner: owner1 - [View Report](http://test.com)",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_8** - Owners: owner1 - [View Report](http://test.com)",
           "wrap": true
         },
         {
