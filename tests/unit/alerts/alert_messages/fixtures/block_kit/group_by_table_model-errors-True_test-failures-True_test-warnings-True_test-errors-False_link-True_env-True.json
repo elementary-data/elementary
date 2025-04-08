@@ -46,7 +46,7 @@
           "fields": [
             {
               "type": "mrkdwn",
-              "text": "*Subscribers*\n_No subscribers_"
+              "text": "*Subscribers*\n<@resolved_subscriber1>, <@resolved_subscriber2>"
             }
           ]
         },

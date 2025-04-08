@@ -41,27 +41,12 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owner: owner1",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owner: owner1 - Subscriber: subscriber1",
           "wrap": true
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"**",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owner: owner1",
-          "wrap": true
-        },
-        {
-          "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - Subscribers: subscriber1, subscriber2",
           "wrap": true
         },
         {
@@ -71,12 +56,27 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owner: owner1",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owner: owner1 - Subscriber: subscriber1",
           "wrap": true
         },
         {
           "type": "TextBlock",
-          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - Subscribers: subscriber1, subscriber2",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owner: owner1 - Subscriber: subscriber1",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - Subscribers: subscriber1, subscriber2",
           "wrap": true
         },
         {
@@ -102,12 +102,12 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_2** - Owner: owner1",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_2** - Owner: owner1 - Subscriber: subscriber1",
           "wrap": true
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2 - Subscribers: subscriber1, subscriber2",
           "wrap": true
         },
         {
@@ -117,12 +117,12 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_5** - Owner: owner1",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_5** - Owner: owner1 - Subscriber: subscriber1",
           "wrap": true
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2 - Subscribers: subscriber1, subscriber2",
           "wrap": true
         },
         {
@@ -132,12 +132,12 @@
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_8** - Owner: owner1",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_8** - Owner: owner1 - Subscriber: subscriber1",
           "wrap": true
         },
         {
           "type": "TextBlock",
-          "text": "\u2757 **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2 - Subscribers: subscriber1, subscriber2",
           "wrap": true
         },
         {

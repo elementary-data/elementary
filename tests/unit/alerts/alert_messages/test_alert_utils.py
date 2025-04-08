@@ -9,7 +9,10 @@ from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.slack_web import (
     SlackWebMessagingIntegration,
 )
-from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
+from elementary.monitor.alerts.alert_messages.builder import (
+    AlertMessageBuilder,
+    MessageBuilderConfig,
+)
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
     GroupedByTableAlerts,
@@ -30,6 +33,7 @@ def build_base_test_alert_model(
     table_name: Optional[str],
     tags: Optional[List[str]],
     owners: Optional[List[str]],
+    subscribers: Optional[List[str]],
     test_description: Optional[str],
     error_message: Optional[str],
     test_rows_sample: Optional[List[Dict[str, Any]]],
@@ -67,7 +71,7 @@ def build_base_test_alert_model(
         schema_name=None,
         owners=owners,
         tags=tags,
-        subscribers=None,
+        subscribers=subscribers,
         status=status,
         model_meta={},
         timezone="UTC",
@@ -90,6 +94,7 @@ def build_base_model_alert_model(
     message: Optional[str] = None,
     suppression_interval: Optional[int] = None,
     env: Optional[str] = None,
+    subscribers: Optional[List[str]] = None,
 ) -> ModelAlertModel:
     return ModelAlertModel(
         id="test_id",
@@ -110,6 +115,7 @@ def build_base_model_alert_model(
         schema_name=None,
         owners=owners,
         tags=tags,
+        subscribers=subscribers,
         test_meta=None,
         test_results_query=None,
         test_rows_sample=None,
@@ -147,6 +153,16 @@ def _get_owners_by_mod(i: int) -> List[str]:
         return ["owner1", "owner2"]
 
 
+def _get_subscribers_by_mod(i: int) -> List[str]:
+    mod_value = i % 3
+    if mod_value == 0:
+        return []
+    elif mod_value == 1:
+        return ["subscriber1"]
+    else:  # mod_value == 2
+        return ["subscriber1", "subscriber2"]
+
+
 def create_test_alerts(
     has_model_errors: bool,
     has_test_failures: bool,
@@ -161,10 +177,12 @@ def create_test_alerts(
     if has_model_errors:
         for i in range(count):
             owners = _get_owners_by_mod(i)
+            subscribers = _get_subscribers_by_mod(i)
             model_alert = build_base_model_alert_model(
                 status="error",
                 tags=["tag1"],
                 owners=owners,
+                subscribers=subscribers,
                 path="models/test_model.sql",
                 materialization="table",
                 full_refresh=True,
@@ -179,11 +197,13 @@ def create_test_alerts(
     if has_test_failures:
         for i in range(count):
             owners = _get_owners_by_mod(i)
+            subscribers = _get_subscribers_by_mod(i)
             test_alert = build_base_test_alert_model(
                 status="fail",
                 table_name=f"test_table_{i + 1}",
                 tags=["tag1"],
                 owners=owners,
+                subscribers=subscribers,
                 test_description="Test failure description",
                 error_message="Test failure message",
                 test_rows_sample=None,
@@ -196,11 +216,13 @@ def create_test_alerts(
     if has_test_warnings:
         for i in range(count):
             owners = _get_owners_by_mod(i)
+            subscribers = _get_subscribers_by_mod(i)
             test_alert = build_base_test_alert_model(
                 status="warn",
                 table_name=f"test_table_{i + 1}",
                 tags=["tag1"],
                 owners=owners,
+                subscribers=subscribers,
                 test_description=f"Test warning description {i + 1}",
                 error_message=f"Test warning message {i + 1}",
                 test_rows_sample=None,
@@ -213,11 +235,13 @@ def create_test_alerts(
     if has_test_errors:
         for i in range(count):
             owners = _get_owners_by_mod(i)
+            subscribers = _get_subscribers_by_mod(i)
             test_alert = build_base_test_alert_model(
                 status="error",
                 table_name=f"test_table_{i + 1}",
                 tags=["tag1"],
                 owners=owners,
+                subscribers=subscribers,
                 test_description=f"Test error description {i + 1}",
                 error_message="Test error message",
                 test_rows_sample=None,
@@ -234,6 +258,7 @@ def build_base_source_freshness_alert_model(
     status: str,
     tags: Optional[List[str]],
     owners: Optional[List[str]],
+    subscribers: Optional[List[str]],
     path: str,
     has_error: bool,
     has_message: bool,
@@ -262,8 +287,8 @@ def build_base_source_freshness_alert_model(
         freshness_description="Test freshness description" if has_message else None,
         detected_at=detected_at,
         owners=owners,
+        subscribers=subscribers,
         tags=tags,
-        subscribers=None,
         status=status,
         model_meta={},
         suppression_interval=suppression_interval,
@@ -283,8 +308,9 @@ def get_alert_message_body(
         GroupedByTableAlerts,
         AlertsGroup,
     ],
+    config: Optional[MessageBuilderConfig] = None,
 ) -> MessageBody:
-    alert_message_builder = AlertMessageBuilder()
+    alert_message_builder = AlertMessageBuilder(config=config)
     return alert_message_builder.build(alert)
 
 
