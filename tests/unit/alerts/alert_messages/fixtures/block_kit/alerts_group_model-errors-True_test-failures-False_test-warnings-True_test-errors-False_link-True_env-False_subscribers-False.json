@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Error: test_model_unique_id: 20 issues detected"
+        "text": "Error: 20 issues detected"
       }
     },
     {
@@ -21,38 +21,6 @@
   "attachments": [
     {
       "blocks": [
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "\u2139\ufe0f *Details*"
-          }
-        },
-        {
-          "type": "section",
-          "fields": [
-            {
-              "type": "mrkdwn",
-              "text": "*Tags*\ntag1"
-            },
-            {
-              "type": "mrkdwn",
-              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "fields": [
-            {
-              "type": "mrkdwn",
-              "text": "*Subscribers*\n<@resolved_subscriber1>, <@resolved_subscriber2>"
-            }
-          ]
-        },
-        {
-          "type": "divider"
-        },
         {
           "type": "section",
           "text": {

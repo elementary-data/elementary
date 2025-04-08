@@ -53,6 +53,7 @@ def test_get_source_freshness_alert_message_body(
         status=status,
         tags=["tag1", "tag2"] if has_tags else None,
         owners=["owner1", "owner2"] if has_owners else None,
+        subscribers=None,
         path=path,
         has_error=has_error,
         has_message=has_message,

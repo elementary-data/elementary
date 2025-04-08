@@ -1,0 +1,41 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Failure: 10 issues detected"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "\ud83d\udd3a *Test Failures:* 10"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Failures*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\ud83d\udd3a *\"test_short_name\" test failed on test_table_1*\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_2* - Owners: <@resolved_owner1> | Subscribers: <@resolved_subscriber1>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_3* - Owners: <@resolved_owner1>, <@resolved_owner2> | Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_4* - Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_5* - Owners: <@resolved_owner1>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_6* - Owners: <@resolved_owner1>, <@resolved_owner2> | Subscribers: <@resolved_subscriber1>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_7* - Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_8* - Owners: <@resolved_owner1> | Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_9* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\ud83d\udd3a *\"test_short_name\" test failed on test_table_10* - Subscribers: <@resolved_subscriber1>"
+          }
+        }
+      ]
+    }
+  ]
+}
