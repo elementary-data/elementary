@@ -35,6 +35,7 @@ jobs:
             databricks,
             databricks_catalog,
             athena,
+            clickhouse,
           ]
     uses: ./.github/workflows/test-warehouse.yml
     with:

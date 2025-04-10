@@ -63,22 +63,22 @@
             )
 
             select
-                tests.unique_id,
+                tests.unique_id as unique_id,
                 tests.parent_model_unique_id as model_unique_id,
                 tests.database_name,
                 tests.schema_name,
                 nodes.name as model_name,
                 tests.test_column_name as column_name,
-                tests.name,
+                tests.name as name,
                 tests.description,
                 tests.package_name,
                 tests.original_path,
                 tests.test_params,
-                tests.meta,
+                tests.meta as meta,
                 nodes.meta as model_meta,
                 tests.tags,
                 nodes.tags as model_tags,
-                tests.type,
+                tests.type as type,
                 last_test_results.test_type,
                 last_test_results.test_sub_type,
                 test_results_times.first_detected_at as created_at,
@@ -89,7 +89,6 @@
             left join last_test_results on tests.unique_id = last_test_results.test_unique_id
             left join nodes on tests.parent_model_unique_id = nodes.unique_id
         {% endset %}
-        
         {% set tests_agate = run_query(get_tests_query) %}
         {% do return(elementary.agate_to_dicts(tests_agate)) %}
     {%- endif -%}
