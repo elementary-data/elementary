@@ -23,21 +23,22 @@ tests:
     Verify data collection:
     
     ```sql
-    -- Check if metrics are being collected in time buckets
-    SELECT
-        metric_timestamp,
-        metric_value,
-        COUNT(*) as metrics_per_bucket
-    FROM your_schema.data_monitoring_metrics
-    WHERE table_name = 'your_table'
-    GROUP BY metric_timestamp, metric_value
-    ORDER BY metric_timestamp DESC;
+-- Check if metrics are being collected in time buckets
+SELECT
+    bucket_end,
+    metric_value,
+    COUNT(*) as metrics_per_bucket
+FROM your_schema.data_monitoring_metrics
+WHERE full_table_name = 'your_table'
+GROUP BY bucket_end, metric_value
+ORDER BY bucket_end DESC;
     
     ```
     
     - Each bucket should represent one time bucket (e.g., daily metrics)
     - Gaps in `metric_timestamp` might indicate data collection issues
     - Training uses historical buckets for anomaly detection
+    - The format for full_table_name is DATABASE.SCHEMA.TABLE_NAME
     
     **Common collection issues:**
     
@@ -56,18 +57,20 @@ tests:
     Check metric collection across test runs:
     
     ```sql
-    -- Check metrics from different test runsSELECT
-        updated_at,
-        metric_value
-    FROM your_schema.data_monitoring_metrics
-    WHERE table_name = 'your_table'
-    ORDER BY updated_at DESC;
-    
+-- Check metrics from different test runs
+SELECT
+    updated_at,
+    metric_value
+FROM your_schema.data_monitoring_metrics
+WHERE full_table_name = 'your_table'
+ORDER BY updated_at DESC;
     ```
     
     - Should see one metric per test run and per dimension
     - Training requires multiple test runs over time
     - Each new test run creates the training point for a time bucket. A second test run within the same bucket will override the first one.
+    - The format for full_table_name is DATABASE.SCHEMA.TABLE_NAME
+
     
     **Common collection issues:**
     
@@ -90,17 +93,20 @@ Anomaly detection is influenced by:
 Check calculations in `metrics_anomaly_score`:
 
 ```sql
--- Check how anomalies are being calculatedSELECT
+-- Check how anomalies are being calculated
+SELECT
     metric_name,
-    metric_value,
+    latest_metric_value,
     training_avg,
     training_stddev,
-    zscore,
-    severity
+    anomaly_score,
+    is_anomaly
 FROM your_schema.metrics_anomaly_score
-WHERE table_name = 'your_table'
-ORDER BY detected_at DESC;
+WHERE full_table_name = 'your_table'
+ORDER BY bucket_end DESC;
 ```
+- `anomaly_score`: The standardized score that measures how many standard deviations a data point is from the mean
+- `is_anomaly`: A boolean field that indicates whether the anomaly score exceeds the configured threshold
 
 </Accordion>
 
