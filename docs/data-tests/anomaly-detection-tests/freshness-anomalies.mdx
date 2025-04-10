@@ -8,7 +8,7 @@ sidebarTitle: "Freshness anomalies"
 Monitors the freshness of your table over time, as the expected time between data updates.
 
 Upon running the test, your data is split into time buckets (daily by default, configurable with the `time bucket` field),
-and then we compute the maximum freshness value per bucket for the last `training_period` (by default 14 days).
+and then we compute the maximum time without updates (in seconds) as the freshness value per bucket for the last `training_period` (by default 14 days).
 
 The test then compares the freshness of each bucket within the detection period (last 2 days by default, controlled by the
 `detection_period` var), and compares it to the freshness of the previous time buckets.
