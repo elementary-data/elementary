@@ -11,7 +11,7 @@
                 *,
                 {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} as days_diff,
                 {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank. #}
-                rank() over (partition by elementary_unique_id order by detected_at desc) as invocations_rank_index
+                rank() over (partition by elementary_unique_id order by {{elementary.edr_cast_as_timestamp('detected_at')}} desc) as invocations_rank_index
             from test_results
         )
 
@@ -22,7 +22,7 @@
             test_results.model_unique_id,
             test_results.test_unique_id,
             test_results.elementary_unique_id,
-            test_results.detected_at,
+            {{elementary.edr_cast_as_timestamp('test_results.detected_at')}} as detected_at,
             test_results.database_name,
             test_results.schema_name,
             test_results.table_name,
@@ -59,7 +59,7 @@
     {% set test_results = [] %}
 
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
-    {% set ordered_test_results_relation = elementary_cli.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
+    {% set ordered_test_results_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
 
     {% set test_results_agate_sql %}
         select * from {{ ordered_test_results_relation }}
@@ -73,6 +73,9 @@
 
     {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
     {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
+    {% if not elementary.has_temp_table_support() %}
+        {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
+    {% endif %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
     {% set filtered_tests = [] %}

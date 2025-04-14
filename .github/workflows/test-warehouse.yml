@@ -14,6 +14,7 @@ on:
           - databricks
           - databricks_catalog
           - spark
+          - athena
       elementary-ref:
         type: string
         required: false
