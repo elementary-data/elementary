@@ -1,5 +1,5 @@
 {% macro prepare_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) %}
-    {% do return(adapter.dispatch('prepare_test_results')(days_back, invocations_per_test, disable_passed_test_metrics)) %}
+    {% do return(adapter.dispatch('prepare_test_results', 'elementary_cli')(days_back, invocations_per_test, disable_passed_test_metrics)) %}
 {% endmacro %}
 
 {% macro default__prepare_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) %}
@@ -182,7 +182,7 @@
 {% endmacro %}
 
 {%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
-    {% set ordered_test_results_relation = elementary.prepare_test_results(days_back, invocations_per_test, disable_passed_test_metrics) %}
+    {% set ordered_test_results_relation = elementary_cli.prepare_test_results(days_back, invocations_per_test, disable_passed_test_metrics) %}
 
     {% set test_results_agate_sql %}
         select * from {{ ordered_test_results_relation }}
