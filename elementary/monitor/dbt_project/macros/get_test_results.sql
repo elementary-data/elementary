@@ -1,4 +1,8 @@
 {% macro prepare_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) %}
+    {% do return(adapter.dispatch('prepare_test_results')(days_back, invocations_per_test, disable_passed_test_metrics)) %}
+{% endmacro %}
+
+{% macro default__prepare_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) %}
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
     
     {% set select_test_results %}
@@ -57,10 +61,6 @@
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
     {% set ordered_test_results_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
     {% do return(ordered_test_results_relation) %}
-{% endmacro %}
-
-{% macro default__prepare_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) %}
-    {{ prepare_test_results(days_back, invocations_per_test, disable_passed_test_metrics) }}
 {% endmacro %}
 
 {% macro clickhouse__prepare_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) %}
@@ -182,7 +182,8 @@
 {% endmacro %}
 
 {%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
-    {% set ordered_test_results_relation = adapter.dispatch('prepare_test_results')(days_back, invocations_per_test, disable_passed_test_metrics) %}
+{% do debug() %}
+    {% set ordered_test_results_relation = elementary.prepare_test_results(days_back, invocations_per_test, disable_passed_test_metrics) %}
 
     {% set test_results_agate_sql %}
         select * from {{ ordered_test_results_relation }}
