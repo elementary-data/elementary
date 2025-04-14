@@ -182,7 +182,6 @@
 {% endmacro %}
 
 {%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
-{% do debug() %}
     {% set ordered_test_results_relation = elementary.prepare_test_results(days_back, invocations_per_test, disable_passed_test_metrics) %}
 
     {% set test_results_agate_sql %}
