@@ -15,6 +15,7 @@ on:
           - databricks_catalog
           - spark
           - athena
+          - clickhouse
       elementary-ref:
         type: string
         required: false
