@@ -207,6 +207,20 @@ dbt run --select elementary --vars '{"enable_elementary_models": true}'
 </Accordion>
 
 
+<Accordion title="Elementary on-run-end hooks are taking a long time">
+
+The `dbt_columns` table in the Elementary schema can take a while to update, especially for large projects. This table is only used by Elementary Cloud, so if you're not relying on it (or want to speed up your runs), you can disable it safely without affecting any other functionality.
+
+To skip updating this table, add the following to your dbt_project.yml: 
+
+```
+vars:
+  columns_upload_strategy: none
+
+```
+
+</Accordion>
+
 <Accordion title="My problem is not listed here">
 
 If you're experiencing issues of any kind, reach out on the [#community-support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel. Elementary AI and the team will be happy to help.
