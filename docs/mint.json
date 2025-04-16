@@ -139,7 +139,6 @@
         {
           "group": "Setup & configure alerts",
           "pages": [
-            "features/alerts-and-incidents/effective-alerts-setup",
             "features/alerts-and-incidents/alert-rules",
             "features/alerts-and-incidents/owners-and-subscribers",
             "features/alerts-and-incidents/alert-configuration"
