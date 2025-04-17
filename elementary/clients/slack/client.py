@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from ratelimit import limits, sleep_and_retry
@@ -246,7 +246,7 @@ class SlackWebhookClient(SlackClient):
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
-        response: requests.Response | WebhookResponse
+        response: Union[requests.Response, WebhookResponse]
         if self.is_workflow:
             # For slack workflows, we need to send the message raw to the webhook
             response = self.client.post(self.webhook, data=message.text)
