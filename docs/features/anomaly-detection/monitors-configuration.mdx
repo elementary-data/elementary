@@ -3,7 +3,7 @@ title: Monitors Configuration
 sidebarTitle: "Monitors configuration"
 ---
 
-Automated anomaly detection monitors are configured on all of your sources by default. Elementary test configuration page also allows you to add aditional monitors, and to edit or remove existing ones.
+Automated anomaly detection monitors are configured on all of your sources by default. Elementary also allows you to add aditional monitors, and to edit or remove existing ones.
 
 ## Adding anomaly detection monitors
 
@@ -11,9 +11,9 @@ Automated anomaly detection monitors (Cloud tests) can be [added directly throug
 Unlike dbt-based tests, these monitors are not part of your dbt project code, so they’re added immediately — with no need to create or approve a pull request.
 
 To easily add a new automated monitor, follow these steps:
-- Navigate to the Test Configuration page
+- Navigate to the Test Configuration page, or select your relevant assets in the Catalog
 - Click 'Add Test', and choose a 'Table Test'
-- Choose one or more tables you would like to test
+- If not selected earlier, choose one or more tables you would like to test
 - Filter on Elementary Cloud, and choose your preferred test - [Volume](/features/anomaly-detection/automated-volume) or [freshness](/features/anomaly-detection/automated-freshness).
 - Set up the test configurations, and add metadata if needed. Learn more about all supported settings [here](/features/anomaly-detection/monitors-configuration#supported-settings).
 - Review and submit your test. No PR needed - the test is set up. 
