@@ -3,12 +3,29 @@ title: Monitors Configuration
 sidebarTitle: "Monitors configuration"
 ---
 
+Automated anomaly detection monitors are configured on all of your sources by default. Elementary test configuration page also allows you to add aditional monitors, and to edit or remove existing ones.
+
+## Adding automated anomaly detection monitors
+
+Automated anomaly detection monitors (Cloud tests) can be [added directly through the UI](/features/data-tests/data-tests-overview), just like other data tests.
+Unlike dbt-based tests, these monitors are not part of your dbt project code, so they’re added immediately — with no need to create or approve a pull request.
+
+To easily add a new automated monitor, follow these steps:
+- Navigate to the Test Configuration page
+- Click "Add Test", and choose a 'Table Test'
+- Choose one or more tables you would like to test
+- Filter on Elementary Cloud, and choose your preferred test - [Volume](/features/anomaly-detection/automated-volume) or [freshness](/features/anomaly-detection/automated-freshness).
+- Set up the test configurations, and add metadata if needed.
+- Review and submit your test. No PR needed - the test is set up. 
+
+## Editing automated anomaly detection monitors
+
 You can change the default settings and finetune the monitors to your needs using the `Anomaly settings` on each test. 
 
 In general, users will rely on the automated machine learning model anomaly settings.
 However, in some cases, an anomaly in the data is not relevant to your business. For this cases, the custom settings are useful.
 
-## Settings simulator
+### Settings simulator
 
 For some supported settings, Elementary offers a simulation of the change impact on latest results. 
 You can use the `Simulate Configuration` button after the change and before saving.
@@ -38,10 +55,11 @@ alt="Anomaly settings simulator"
 <Snippet file="cloud/features/anomaly-detection/freshness-configuration.mdx" />
 
 
-## Disable monitor
+## Deleting monitors
 
-To disable a monitor from running, press the `...` button on the top right of the test result and then `Delete test`. 
-This will disable the monitor. To re-activate deleted monitors, reach out to support.
+There are two ways to delete monitors from the UI. 
+- Test configuration page - Choose one or more tests, and an option to delete them will be available at the bottom of the page.
+- Test results page - Press the `...` button on the top right of the test result and then `Delete test`. 
 
 <iframe
 width="600"
