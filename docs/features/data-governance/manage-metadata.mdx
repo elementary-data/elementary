@@ -1,0 +1,64 @@
+---
+title: "Manage metdata"
+---
+
+Manage your metadata directly from the [Elementary Catalog](/features/collaboration-and-communication/catalog), with no need to update code manually. This streamlines governance workflows, reduces manual effort, and improves visibility and consistency across your assets.
+
+From a single interface, you can view and filter assets, edit metadata fields individually or in bulk, and even use AI to generate high-quality descriptions—saving time and enhancing data discoverability. All changes are version-controlled via pull requests to keep your dbt project in sync.
+
+To get the most out of this feature, check out our [Data Governance Best Practices](https://docs.elementary-data.com/best-practices/governance-for-observability) guide.
+
+## Overview
+
+Managing metadata such as owners, tags, descriptions, and critical asset status is essential for effective data governance. With Elementary you can:
+
+- View all your assets and their metadata in a centralized table
+- Identify governance gaps and inconsistencies
+- Edit metadata fields individually or in bulk
+- Generate high-quality asset descriptions using AI
+- Create pull requests for metadata changes directly from the UI
+- Track pending changes awaiting approval
+
+### Supported Metadata Fields
+
+Elementary supports editing the following metadata fields:
+
+- **Tags** - Categorize and organize assets
+- **Owners** - Assign responsibility for assets
+- **Descriptions** - Provide context about asset purpose and usage
+- **Critical Assets** - Mark high-priority assets
+
+Coming soon:
+
+- **Subscribers** - Add users who should be notified about changes
+- **Custom Metadata Fields** - Edit organization-specific metadata
+
+## Editing Metadata
+
+Elementary allows you to edit metadata for individual assets or in bulk, with changes reflected in your dbt project through pull requests.
+
+### How to Edit Metadata
+
+To edit metadata:
+
+1. In the Catalog page select any folder for getting into the assets Table
+2. Select the assets you want to modify
+3. Choose which metadata field to edit and click on the right field (Tags, Owners, Description, etc.)
+4. Make your changes in the editing wizard
+5. Review the changes summary
+6. Click "Submit Pull Request" to submit your changes
+
+
+## Governance Dashboard (Coming soon)
+
+The Governance Dashboard provides insights into your data governance structure, helping you identify gaps and inconsistencies at a glance.
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1744879410/gov-dashboard.png"/>
+
+### Dashboard Features
+
+- **Tag Distribution Analysis** - Visualize tag coverage across assets and identify areas needing better categorization
+- **Ownership Coverage** - Track asset ownership distribution and highlight resources requiring owner assignment
+- **Description Status** - Monitor assets with missing or incomplete descriptions to improve documentation
+- **Critical Asset Tracking** - Get an overview of your business-critical data assets and their governance status
+- **Dynamic Filtering** - Filter the Assets Table in real-time based on dashboard selections and metrics

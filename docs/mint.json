@@ -159,7 +159,8 @@
       "group": "Data Governance",
       "pages": [
         "best-practices/governance-for-observability",
-        "features/data-governance/critical_assets"
+        "features/data-governance/critical_assets",
+        "features/data-governance/manage-metadata"
       ]
     },
     {
