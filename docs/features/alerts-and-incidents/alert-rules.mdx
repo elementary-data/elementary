@@ -4,17 +4,30 @@ title: "Alert Rules"
 
 <Snippet file="/_snippets/cloud/cloud-feature-tag.mdx" />
 
-Elementary Cloud allows you to create alert routing rules, which define where alerts go and under what conditions. Each rule is a combination of filters and destinations.
+**Alert Rules** help you control where alerts are sent and when they are triggered, so you can stay focused on the incidents that matter most. In Elementary Cloud, each rule combines **filters** (what to alert on) and **destinations** (where to send the alert).
 
-### Destinations
-A destination can be a messaging app (like ([Slack](/cloud/integrations/alerts/slack) or [Microsoft Teams](/cloud/integrations/alerts/ms-teams)) or an incident management tool (like [PagerDuty](/cloud/integrations/alerts/pagerduty) or [Opsgenie](/cloud/integrations/alerts/opsgenie)). For [supported tools](/features/alerts-and-incidents/alerts-and-incidents-overview#supported-alert-integrations), you can also specify the exact channel or team the alert should be sent to.
-You can route each alert to one or multiple destinations, whether they’re in the same app or spread across different tools.
+### Destinations: Where Alerts Are Sent
 
-### Filters
-Filters define what kinds of alerts should be routed through a rule. You can filter by:
-- Assets — model name, owner, tag, or status
-- Test types — for example, volume anomalies, freshness anomalies, model errors, dbt tests etc.
-This allows you to control exactly which alerts are sent to which destination.
+A destination defines where an alert notification will be delivered. You can route alerts to messaging apps (like [Slack](/cloud/integrations/alerts/slack) or [Microsoft Teams](/cloud/integrations/alerts/ms-teams)) or incident management tools (like [PagerDuty](/cloud/integrations/alerts/pagerduty) or [Opsgenie](/cloud/integrations/alerts/opsgenie)). For all [supported tools](/features/alerts-and-incidents/alerts-and-incidents-overview#supported-alert-integrations), you can also specify the exact channel, team, or escalation path for the alert. Each alert can be routed to one or multiple destinations — within the same tool or across different tools.
+
+## Filters: What Triggers an Alert
+
+Filters define which alerts are routed through a rule. They help you fine-tune alerting, reduce noise, and focus on critical issues.
+
+You can filter by:
+
+- **Assets** — Filter alerts based on model name, owner, tag, or status.
+- **Test Types** — Filter by the type of test that triggered the alert, such as volume anomalies, freshness anomalies, model errors, or dbt tests.
+- **Downstream Impacted Assets** — Filter alerts based on the downstream impact of an incident.
+    Trigger alerts only when specific downstream assets are affected. You can filter impacted assets by:
+    - **Criticality** — Only alert if critical assets are impacted.
+    - **Tags** — Filter assets by tag.
+    - **Owners** — Filter assets by owner.
+    - **Asset Type** — Model, source, seed, snapshot, or exposure.
+
+This helps ensure that alerts are only triggered when truly important assets are impacted, reducing alert fatigue and keeping your team focused.
+
+<Note>In the current version, downstream impact is determined based on table-level lineage.</Note>
 
 ### Rule order matters
 The order of your rules is important. Here’s how it works:
