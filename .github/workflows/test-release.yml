@@ -54,6 +54,8 @@ jobs:
             redshift,
             databricks,
             databricks_catalog,
+            athena,
+            clickhouse,
           ]
     needs: get-latest-release-tags
     uses: ./.github/workflows/test-warehouse.yml

@@ -1,6 +1,8 @@
 from datetime import timedelta
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
+from pydantic import BaseModel
+
 from elementary.messages.block_builders import (
     BoldTextLineBlock,
     BulletListBlock,
@@ -26,7 +28,6 @@ from elementary.messages.blocks import (
     LineBlock,
     LinesBlock,
     LinkBlock,
-    MentionBlock,
     TableBlock,
     TextBlock,
     TextStyle,
@@ -53,7 +54,14 @@ AlertType = Union[
 ]
 
 
+class MessageBuilderConfig(BaseModel):
+    alert_groups_subscribers: bool = False
+
+
 class AlertMessageBuilder:
+    def __init__(self, config: Optional[MessageBuilderConfig] = None):
+        self.config = config or MessageBuilderConfig()
+
     STATUS_DISPLAYS: Dict[str, str] = {
         "fail": "Failure",
         "warn": "Warning",
@@ -415,13 +423,19 @@ class AlertMessageBuilder:
         ]
         if owners := list(set(alert.owners)):
             inlines.append(TextBlock(text="-"))
-            if len(owners) == 1:
-                inlines.append(TextBlock(text="Owner:"))
-                inlines.append(MentionBlock(user=owners.pop()))
-            else:
-                owners.sort()
-                inlines.append(TextBlock(text="Owners:"))
-                inlines.append(MentionLineBlock(*owners))
+            owners.sort()
+            inlines.append(TextBlock(text="Owners:"))
+            inlines.append(MentionLineBlock(*owners))
+
+        if self.config.alert_groups_subscribers:
+            if subscribers := list(set(alert.subscribers)):
+                if owners:
+                    inlines.append(TextBlock(text="|"))
+                else:
+                    inlines.append(TextBlock(text="-"))
+                subscribers.sort()
+                inlines.append(TextBlock(text="Subscribers:"))
+                inlines.append(MentionLineBlock(*subscribers))
 
         if report_link := alert.get_report_link():
             inlines.append(TextBlock(text="-"))

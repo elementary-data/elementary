@@ -95,6 +95,8 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/noaKurman"><img src="https://avatars.githubusercontent.com/u/16741969?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/NoyaArie"><img src="https://avatars.githubusercontent.com/u/31591071?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/ellakz"><img src="https://avatars.githubusercontent.com/u/18530437?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/NoyaOffer"><img src="https://avatars.githubusercontent.com/u/192613179?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/elazarlachkar"><img src="https://avatars.githubusercontent.com/u/62235929?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/ofek1weiss"><img src="https://avatars.githubusercontent.com/u/55920061?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/erikzaadi"><img src="https://avatars.githubusercontent.com/u/77775?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dapollak"><img src="https://avatars.githubusercontent.com/u/13542197?v=4" width="50" height="50" alt=""/></a>
@@ -193,6 +195,10 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/JanDintel"><img src="https://avatars.githubusercontent.com/u/3646888?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/kokorin"><img src="https://avatars.githubusercontent.com/u/1089148?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/slaupster"><img src="https://avatars.githubusercontent.com/u/9283885?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/talperetz1"><img src="https://avatars.githubusercontent.com/u/82938736?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/nkmr-jp"><img src="https://avatars.githubusercontent.com/u/8490118?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/dbt-markwan"><img src="https://avatars.githubusercontent.com/u/114556261?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/pedro-klein-ext-bayer"><img src="https://avatars.githubusercontent.com/u/181362556?v=4" width="50" height="50" alt=""/></a>
 
 
 <!-- markdownlint-restore -->

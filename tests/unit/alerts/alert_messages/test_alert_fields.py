@@ -31,6 +31,7 @@ def test_get_dbt_test_alert_message_body(
         column_name="test_column",
         tags=["tag1", "tag2"],
         owners=["owner1", "owner2"],
+        subscribers=None,
         test_description="Test description",
         error_message="Test error message",
         test_rows_sample=({"column1": "value1", "column2": "value2"}),

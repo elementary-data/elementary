@@ -158,4 +158,23 @@ elementary:
       # session_properties: [optional, sets Trino session properties used in the connection]
 ```
 
+```yml ClickHouse
+## CLICKHOUSE ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: clickhouse
+      host: [hostname]
+      port: [port]
+      user: [username]
+      password: [password]
+      secure: [True/False]
+      verify: [True/False]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+```
+
 </CodeGroup>

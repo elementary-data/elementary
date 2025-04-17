@@ -3,16 +3,13 @@ name: Close Pylon Ticket on Issue or Pull Request Closure
 on:
   issues:
     types: [closed]
-  pull_request:
+  pull_request_target:
     types: [closed]
 
 jobs:
   close_pylon_ticket:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
       - name: Extract Pylon Ticket ID
         id: extract_ticket_id
         run: |
@@ -20,12 +17,12 @@ jobs:
             ISSUE_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" | jq -r '.body')
             pylon_ticket_id=$(echo "$ISSUE_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b(?= -->)')
-          elif [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+          elif [[ "${{ github.event_name }}" =~ ^pull_request ]]; then
             PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                      "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.body')
             pylon_ticket_id=$(echo "$PR_BODY" | grep -oP '(?<=<!-- pylon-ticket-id: )\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b(?= -->)')
           fi
-          echo "::set-output name=pylon_ticket_id::$pylon_ticket_id"
+          echo "pylon_ticket_id=$pylon_ticket_id" >> "$GITHUB_OUTPUT"
 
       - name: Close Pylon Ticket
         if: steps.extract_ticket_id.outputs.pylon_ticket_id != ''
