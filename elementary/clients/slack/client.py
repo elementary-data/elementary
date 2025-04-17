@@ -246,23 +246,26 @@ class SlackWebhookClient(SlackClient):
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
+        response: requests.Response | WebhookResponse
         if self.is_workflow:
             # For slack workflows, we need to send the message raw to the webhook
-            response: requests.Response = self.client.post(
-                self.webhook, data=message.text
-            )
+            response = self.client.post(self.webhook, data=message.text)
         else:
-            response: WebhookResponse = self.client.send(
+            response = self.client.send(
                 text=message.text,
                 blocks=message.blocks,
                 attachments=message.attachments,
             )
         if response.status_code == OK_STATUS_CODE:
             return True
-
         else:
+            response_body = (
+                response.text
+                if isinstance(response, requests.Response)
+                else response.body
+            )
             logger.error(
-                f"Could not post message to slack via webhook - {self.webhook}. Status code: {response.status_code}, Error: {response.body}"
+                f"Could not post message to slack via webhook - {self.webhook}. Status code: {response.status_code}, Error: {response_body}"
             )
             return False
 
