@@ -10,12 +10,10 @@ title: "Alert Rules"
 
 A destination defines where an alert notification will be delivered. You can route alerts to messaging apps (like [Slack](/cloud/integrations/alerts/slack) or [Microsoft Teams](/cloud/integrations/alerts/ms-teams)) or incident management tools (like [PagerDuty](/cloud/integrations/alerts/pagerduty) or [Opsgenie](/cloud/integrations/alerts/opsgenie)). For all [supported tools](/features/alerts-and-incidents/alerts-and-incidents-overview#supported-alert-integrations), you can also specify the exact channel, team, or escalation path for the alert. Each alert can be routed to one or multiple destinations — within the same tool or across different tools.
 
-## Filters: What Triggers an Alert
+### Filters: What Triggers an Alert
 
 Filters define which alerts are routed through a rule. They help you fine-tune alerting, reduce noise, and focus on critical issues.
-
 You can filter by:
-
 - **Assets** — Filter alerts based on model name, owner, tag, or status.
 - **Test Types** — Filter by the type of test that triggered the alert, such as volume anomalies, freshness anomalies, model errors, or dbt tests.
 - **Downstream Impacted Assets** — Filter alerts based on the downstream impact of an incident.
@@ -27,7 +25,7 @@ You can filter by:
 
 This helps ensure that alerts are only triggered when truly important assets are impacted, reducing alert fatigue and keeping your team focused.
 
-<Note>In the current version, downstream impact is determined based on table-level lineage.</Note>
+<Note>Downstream impact is currently determined based on table-level lineage.</Note>
 
 ### Rule order matters
 The order of your rules is important. Here’s how it works:
