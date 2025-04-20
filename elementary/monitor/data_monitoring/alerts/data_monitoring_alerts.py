@@ -25,6 +25,9 @@ from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAler
 from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.api.alerts.alert_filters import filter_alerts
 from elementary.monitor.api.alerts.alerts import AlertsAPI
+from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
+    BaseIntegration,
+)
 from elementary.monitor.data_monitoring.alerts.integrations.integrations import (
     Integrations,
 )
@@ -55,7 +58,7 @@ def get_health_check_message() -> MessageBody:
 
 
 class DataMonitoringAlerts(DataMonitoring):
-    alerts_integration: BaseMessagingIntegration
+    alerts_integration: Union[BaseMessagingIntegration, BaseIntegration]
 
     def __init__(
         self,
@@ -87,7 +90,7 @@ class DataMonitoringAlerts(DataMonitoring):
 
     def _get_integration_client(
         self,
-    ) -> BaseMessagingIntegration:
+    ) -> Union[BaseMessagingIntegration, BaseIntegration]:
         return Integrations.get_integration(
             config=self.config,
             tracking=self.tracking,
@@ -284,6 +287,11 @@ class DataMonitoringAlerts(DataMonitoring):
         return integration.send_message(destination=destination, body=body)
 
     def _send_test_message(self) -> MessageSendResult:
+        if isinstance(self.alerts_integration, BaseIntegration):
+            raise ValueError(
+                "Cannot send test message with a BaseIntegration of type "
+                f"{type(self.alerts_integration)}"
+            )
         test_message = get_health_check_message()
         return self._send_message(
             integration=self.alerts_integration, body=test_message, metadata={}
@@ -298,7 +306,9 @@ class DataMonitoringAlerts(DataMonitoring):
             GroupedByTableAlerts,
             AlertsGroup,
         ],
-    ):
+    ) -> bool:
+        if isinstance(self.alerts_integration, BaseIntegration):
+            return self.alerts_integration.send_alert(alert)
         alert_message_builder = AlertMessageBuilder()
         alert_message_body = alert_message_builder.build(
             alert=alert,
