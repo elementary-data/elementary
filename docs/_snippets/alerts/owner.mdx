@@ -30,7 +30,7 @@ tests:
 ```
 
 ```yml dbt_project.yml
-models:
+models/sources:
   path:
     subfolder:
       +meta:
@@ -41,6 +41,19 @@ tests:
     subfolder:
       +meta:
         owner: "@jessica.jones"
+
+# table level:
+
+sources:
+  - name: source_name
+    database: db
+    schema: schema
+    tables:
+      - name: orders
+        meta:
+          owner: "@jessica.jones"
+
+
 ```
 
 </CodeGroup>
