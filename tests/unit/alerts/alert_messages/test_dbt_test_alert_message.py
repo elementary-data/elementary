@@ -73,6 +73,7 @@ def test_get_dbt_test_alert_message_body(
         table_name=None if not has_table else "test_table",
         tags=["tag1", "tag2"] if has_tags else None,
         owners=["owner1", "owner2"] if has_owners else None,
+        subscribers=None,
         test_description="Test description" if has_description else None,
         error_message="Test error message" if has_error else None,
         test_rows_sample=(

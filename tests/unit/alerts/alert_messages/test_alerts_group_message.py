@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
+from elementary.monitor.alerts.alert_messages.builder import MessageBuilderConfig
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from tests.unit.alerts.alert_messages.test_alert_utils import (
     assert_expected_json_on_all_formats,
@@ -16,18 +17,18 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
 @pytest.mark.parametrize(
-    "has_model_errors,has_test_failures,has_test_warnings,has_test_errors,has_link,has_env",
+    "has_model_errors,has_test_failures,has_test_warnings,has_test_errors,has_link,has_env,add_subscribers",
     [
-        (True, True, True, True, True, True),
-        (True, True, True, False, True, True),
-        (True, True, False, True, True, True),
-        (True, False, True, True, True, True),
-        (False, True, True, True, True, True),
-        (False, True, False, True, False, False),
-        (True, False, True, False, True, False),
-        (False, False, True, True, False, False),
-        (True, False, False, True, False, False),
-        (False, True, False, False, False, False),
+        (True, True, True, True, True, True, False),
+        (True, True, True, False, True, True, True),
+        (True, True, False, True, True, True, False),
+        (True, False, True, True, True, True, True),
+        (False, True, True, True, True, True, False),
+        (False, True, False, True, False, False, True),
+        (True, False, True, False, True, False, False),
+        (False, False, True, True, False, False, True),
+        (True, False, False, True, False, False, True),
+        (False, True, False, False, False, False, True),
     ],
 )
 def test_get_alerts_group_message_body(
@@ -37,6 +38,7 @@ def test_get_alerts_group_message_body(
     has_test_errors: bool,
     has_link: bool,
     has_env: bool,
+    add_subscribers: bool,
 ):
 
     detected_at = datetime(2025, 2, 3, 13, 21, 7, tzinfo=timezone.utc)
@@ -64,7 +66,10 @@ def test_get_alerts_group_message_body(
 
     alerts_group = AlertsGroup(alerts=alerts, env=env)
 
-    message_body = get_alert_message_body(alerts_group)
+    message_body = get_alert_message_body(
+        alerts_group,
+        config=MessageBuilderConfig(alert_groups_subscribers=add_subscribers),
+    )
     adaptive_card_filename = (
         "alerts_group"
         f"_model-errors-{has_model_errors}"
@@ -73,6 +78,7 @@ def test_get_alerts_group_message_body(
         f"_test-errors-{has_test_errors}"
         f"_link-{has_link}"
         f"_env-{has_env}"
+        f"_subscribers-{add_subscribers}"
     )
     assert_expected_json_on_all_formats(adaptive_card_filename, message_body)
 
