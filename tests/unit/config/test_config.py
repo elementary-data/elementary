@@ -16,6 +16,7 @@ CONFIG = {
         "workflows": False,
     },
     "disable_elementary_version_check": True,
+    "disable_elementary_logo_print": True,
 }
 
 WORKFLOWS_CONFIG = {
@@ -60,6 +61,13 @@ def test_disable_elementary_version_check(config: Config):
     assert (
         config.disable_elementary_version_check
         == CONFIG["disable_elementary_version_check"]
+    )
+
+@pytest.mark.parametrize("config", [CONFIG], indirect=["config"])
+def test_disable_elementary_logo_print(config: Config):
+    assert (
+        config.disable_elementary_logo_print
+        == CONFIG["disable_elementary_logo_print"]
     )
 
 
