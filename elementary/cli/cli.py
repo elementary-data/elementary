@@ -4,6 +4,7 @@ from typing import Any
 import click
 
 import elementary.cli.upgrade
+import elementary.cli.logo
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
@@ -11,15 +12,7 @@ from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import package
 from elementary.utils.log import get_logger, set_root_logger_handlers
 
-ELEMENTARY_LOGO = r"""
-    ________                          __
-   / ____/ /__  ____ ___  ___  ____  / /_____ ________  __
-  / __/ / / _ \/ __ `__ \/ _ \/ __ \/ __/ __ `/ ___/ / / /
- / /___/ /  __/ / / / / /  __/ / / / /_/ /_/ / /  / /_/ /
-/_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/\__,_/_/   \__, /
-                                                 /____/
-"""
-click.echo(f"{ELEMENTARY_LOGO}\n")
+elementary.cli.logo.print_elementary_logo()
 elementary.cli.upgrade.recommend_version_upgrade()
 
 logger = get_logger(__name__)
