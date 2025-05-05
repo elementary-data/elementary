@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -54,7 +55,8 @@ class FileSystemMessagingIntegration(
         file_path = channel_dir / filename
 
         try:
-            file_path.write_text(body.json(), encoding="utf-8")
+            json_str = json.dumps(body.dict(), indent=2)
+            file_path.write_text(json_str, encoding="utf-8")
         except Exception as exc:
             logger.error(
                 f"Failed to write alert message to file {file_path}: {exc}",
