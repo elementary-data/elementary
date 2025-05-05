@@ -19,38 +19,36 @@ def _build_body() -> MessageBody:
     )
 
 
-def test_send_message_creates_file_and_appends(tmp_path: Path) -> None:
-    directory = tmp_path / "alerts"
-    integ = FileSystemMessagingIntegration(directory=str(directory))
+def test_send_message_creates_file_in_channel_dir(tmp_path: Path) -> None:
+    root_dir = tmp_path / "alerts"
+    integ = FileSystemMessagingIntegration(directory=str(root_dir))
     body = _build_body()
 
-    integ.send_message("channel.json", body)
+    integ.send_message("channel", body)
 
-    target_file = directory / "channel.json"
-    assert target_file.exists()
+    channel_dir = root_dir / "channel"
+    files = list(channel_dir.glob("*.json"))
+    assert len(files) == 1, "Expected exactly one file in the channel directory"
 
-    with target_file.open() as fp:
-        lines = fp.readlines()
-    assert len(lines) == 1
-    assert json.loads(lines[0]) == json.loads(body.json())
+    message_json = files[0].read_text()
+    assert json.loads(message_json) == json.loads(body.json())
 
 
-def test_send_multiple_messages(tmp_path: Path) -> None:
-    directory = tmp_path / "alerts"
-    integ = FileSystemMessagingIntegration(directory=str(directory))
+def test_send_multiple_messages_creates_multiple_files(tmp_path: Path) -> None:
+    root_dir = tmp_path / "alerts"
+    integ = FileSystemMessagingIntegration(directory=str(root_dir))
     body1 = _build_body()
     body2 = _build_body()
 
-    integ.send_message("channel.json", body1)
-    integ.send_message("channel.json", body2)
+    integ.send_message("channel", body1)
+    integ.send_message("channel", body2)
 
-    target_file = directory / "channel.json"
-    with target_file.open() as fp:
-        lines = fp.readlines()
+    channel_dir = root_dir / "channel"
+    files = sorted(channel_dir.glob("*.json"))
 
-    assert len(lines) == 2
-    assert json.loads(lines[0]) == json.loads(body1.json())
-    assert json.loads(lines[1]) == json.loads(body2.json())
+    assert len(files) == 2
+    assert json.loads(files[0].read_text()) == json.loads(body1.json())
+    assert json.loads(files[1].read_text()) == json.loads(body2.json())
 
 
 def test_send_message_no_create_flag(tmp_path: Path) -> None:

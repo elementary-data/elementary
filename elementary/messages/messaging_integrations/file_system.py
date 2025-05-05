@@ -1,5 +1,5 @@
-import os
 from datetime import datetime
+from pathlib import Path
 
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
@@ -21,16 +21,15 @@ class FileSystemMessagingIntegration(
     BaseMessagingIntegration[str, EmptyMessageContext]
 ):
     def __init__(self, directory: str, create_if_missing: bool = True) -> None:
-        self.directory = os.path.abspath(directory)
+        self.directory = Path(directory).expanduser().resolve()
         self._create_if_missing = create_if_missing
 
-        if not os.path.exists(self.directory):
+        if not self.directory.exists():
             if self._create_if_missing:
                 logger.info(
-                    "Creating directory for FileSystemMessagingIntegration: %s",
-                    self.directory,
+                    f"Creating directory for FileSystemMessagingIntegration: {self.directory}"
                 )
-                os.makedirs(self.directory, exist_ok=True)
+                self.directory.mkdir(parents=True, exist_ok=True)
             else:
                 raise MessagingIntegrationError(
                     f"Directory {self.directory} does not exist and create_if_missing is False"
@@ -42,23 +41,23 @@ class FileSystemMessagingIntegration(
     def send_message(
         self, destination: str, body: MessageBody
     ) -> MessageSendResult[EmptyMessageContext]:
-        file_path = os.path.join(self.directory, destination)
+        channel_dir = self.directory / destination
+        if not channel_dir.exists():
+            if self._create_if_missing:
+                channel_dir.mkdir(parents=True, exist_ok=True)
+            else:
+                raise MessagingIntegrationError(
+                    f"Channel directory {channel_dir} does not exist and create_if_missing is False"
+                )
 
-        if not os.path.exists(file_path) and not self._create_if_missing:
-            raise MessagingIntegrationError(
-                f"File {file_path} does not exist and create_if_missing is False"
-            )
+        filename = datetime.utcnow().strftime("%Y%m%dT%H%M%S_%fZ.json")
+        file_path = channel_dir / filename
 
         try:
-            logger.info("Writing alert message to file %s", file_path)
-            with open(file_path, "a", encoding="utf-8") as fp:
-                fp.write(body.json())
-                fp.write("\n")
+            file_path.write_text(body.json(), encoding="utf-8")
         except Exception as exc:
             logger.error(
-                "Failed to write alert message to file %s: %s",
-                file_path,
-                exc,
+                f"Failed to write alert message to file {file_path}: {exc}",
                 exc_info=True,
             )
             raise MessagingIntegrationError(
