@@ -2,6 +2,7 @@
 title: "seasonality"
 sidebarTitle: "seasonality"
 ---
+<Snippet file="ai-generate-test.mdx" />
 
 `seasonality: day_of_week | hour_of_day | hour_of_week`
 
@@ -33,7 +34,7 @@ The expected range for Monday will be based on a training set of previous Monday
 #### How it works?
 
 - The test will compare the value of a bucket to previous bucket with the same seasonality attribute, and not to the adjacent previous data points.
-- The `training_period` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `training_period` is by default multiplied by 7.
+- **The `training_period` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `training_period` is by default multiplied by 7.**
 
 
 <Frame caption="seasonality change impact">
