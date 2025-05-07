@@ -3,8 +3,8 @@ from typing import Any
 
 import click
 
-import elementary.cli.upgrade
 import elementary.cli.logo
+import elementary.cli.upgrade
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation

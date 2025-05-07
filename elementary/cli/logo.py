@@ -1,4 +1,5 @@
 import click
+
 from elementary.config.config import Config
 
 ELEMENTARY_LOGO = r"""
@@ -9,6 +10,7 @@ ELEMENTARY_LOGO = r"""
 /_____/_/\___/_/ /_/ /_/\___/_/ /_/\__/\__,_/_/   \__, /
                                                  /____/
 """
+
 
 def print_elementary_logo():
     config = Config()

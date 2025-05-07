@@ -63,11 +63,11 @@ def test_disable_elementary_version_check(config: Config):
         == CONFIG["disable_elementary_version_check"]
     )
 
+
 @pytest.mark.parametrize("config", [CONFIG], indirect=["config"])
 def test_disable_elementary_logo_print(config: Config):
     assert (
-        config.disable_elementary_logo_print
-        == CONFIG["disable_elementary_logo_print"]
+        config.disable_elementary_logo_print == CONFIG["disable_elementary_logo_print"]
     )
 
 
