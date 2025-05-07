@@ -529,6 +529,12 @@ def report(
     help="The name of the S3 bucket to upload the report to.",
 )
 @click.option(
+    "--s3-acl",
+    type=str,
+    default=None,
+    help="S3 Canned ACL value used to modify report permissions, for example set to 'public-read' to make the report publicly accessible.",
+)
+@click.option(
     "--google-service-account-path",
     type=str,
     default=None,
@@ -640,6 +646,7 @@ def send_report(
     aws_session_token,
     s3_endpoint_url,
     s3_bucket_name,
+    s3_acl,
     azure_connection_string,
     azure_container_name,
     google_service_account_path,
@@ -688,6 +695,7 @@ def send_report(
         azure_container_name=azure_container_name,
         s3_endpoint_url=s3_endpoint_url,
         s3_bucket_name=s3_bucket_name,
+        s3_acl=s3_acl,
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
