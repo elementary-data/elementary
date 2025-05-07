@@ -67,6 +67,8 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
 
+**AI-Powered Data Tests & Unstructured Data Validations** - Validate and monitor data using AI powered tests to validate both structured and unstructured data
+
 ## Support
 
 For additional information and help, you can use one of these channels:
@@ -93,6 +95,8 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/noaKurman"><img src="https://avatars.githubusercontent.com/u/16741969?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/NoyaArie"><img src="https://avatars.githubusercontent.com/u/31591071?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/ellakz"><img src="https://avatars.githubusercontent.com/u/18530437?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/NoyaOffer"><img src="https://avatars.githubusercontent.com/u/192613179?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/elazarlachkar"><img src="https://avatars.githubusercontent.com/u/62235929?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/ofek1weiss"><img src="https://avatars.githubusercontent.com/u/55920061?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/erikzaadi"><img src="https://avatars.githubusercontent.com/u/77775?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dapollak"><img src="https://avatars.githubusercontent.com/u/13542197?v=4" width="50" height="50" alt=""/></a>
@@ -182,6 +186,20 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/bebbo203"><img src="https://avatars.githubusercontent.com/u/5352494?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/geo909"><img src="https://avatars.githubusercontent.com/u/7989227?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dmitrii-khr"><img src="https://avatars.githubusercontent.com/u/20114683?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/amishas157"><img src="https://avatars.githubusercontent.com/u/4952872?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/3dbrows"><img src="https://avatars.githubusercontent.com/u/5956299?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/AlexBoutou"><img src="https://avatars.githubusercontent.com/u/43123975?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/okabak123"><img src="https://avatars.githubusercontent.com/u/44201872?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/willbowditch"><img src="https://avatars.githubusercontent.com/u/14288042?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/jcarpenter12"><img src="https://avatars.githubusercontent.com/u/22575153?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/JanDintel"><img src="https://avatars.githubusercontent.com/u/3646888?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/kokorin"><img src="https://avatars.githubusercontent.com/u/1089148?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/slaupster"><img src="https://avatars.githubusercontent.com/u/9283885?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/talperetz1"><img src="https://avatars.githubusercontent.com/u/82938736?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/nkmr-jp"><img src="https://avatars.githubusercontent.com/u/8490118?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/dbt-markwan"><img src="https://avatars.githubusercontent.com/u/114556261?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/pedro-klein-ext-bayer"><img src="https://avatars.githubusercontent.com/u/181362556?v=4" width="50" height="50" alt=""/></a>
+
 
  Installation
 

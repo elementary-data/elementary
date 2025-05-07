@@ -1,0 +1,21 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Status",
+              "value": "Passed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "version": "1.5"
+}

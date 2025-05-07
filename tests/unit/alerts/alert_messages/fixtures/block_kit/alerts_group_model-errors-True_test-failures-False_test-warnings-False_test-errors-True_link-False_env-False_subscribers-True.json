@@ -1,0 +1,59 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Error: 20 issues detected"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "\u274c *Model Errors:* 10 | \u2757 *Test Errors:* 10"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Model Errors*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u274c *dbt failed to build table \"test_model\"*\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1> | Subscribers: <@resolved_subscriber1>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2> | Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u274c *dbt failed to build table \"test_model\"* - Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2> | Subscribers: <@resolved_subscriber1>\n\u274c *dbt failed to build table \"test_model\"* - Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1> | Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u274c *dbt failed to build table \"test_model\"* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u274c *dbt failed to build table \"test_model\"* - Subscribers: <@resolved_subscriber1>"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test Errors*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2757 *\"test_short_name\" test failed on test_table_1*\n\u2757 *\"test_short_name\" test failed on test_table_2* - Owners: <@resolved_owner1> | Subscribers: <@resolved_subscriber1>\n\u2757 *\"test_short_name\" test failed on test_table_3* - Owners: <@resolved_owner1>, <@resolved_owner2> | Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u2757 *\"test_short_name\" test failed on test_table_4* - Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u2757 *\"test_short_name\" test failed on test_table_5* - Owners: <@resolved_owner1>\n\u2757 *\"test_short_name\" test failed on test_table_6* - Owners: <@resolved_owner1>, <@resolved_owner2> | Subscribers: <@resolved_subscriber1>\n\u2757 *\"test_short_name\" test failed on test_table_7* - Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u2757 *\"test_short_name\" test failed on test_table_8* - Owners: <@resolved_owner1> | Subscribers: <@resolved_subscriber1>, <@resolved_subscriber2>\n\u2757 *\"test_short_name\" test failed on test_table_9* - Owners: <@resolved_owner1>, <@resolved_owner2>\n\u2757 *\"test_short_name\" test failed on test_table_10* - Subscribers: <@resolved_subscriber1>"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

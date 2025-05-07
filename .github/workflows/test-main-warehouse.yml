@@ -1,9 +1,10 @@
 name: Test main warehouse platform
 on:
-  pull_request:
+  pull_request_target:
     branches: ["master"]
     paths:
       - elementary/**
+      - .github/**
       - pyproject.toml
   workflow_dispatch:
 
@@ -12,4 +13,5 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: postgres
+      elementary-ref: ${{ (github.event_name == 'pull_request_target' && github.event.pull_request.head.sha) || '' }}
     secrets: inherit

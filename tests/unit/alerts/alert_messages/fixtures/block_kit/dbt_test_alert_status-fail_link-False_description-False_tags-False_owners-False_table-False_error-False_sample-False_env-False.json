@@ -1,0 +1,24 @@
+{
+  "blocks": [],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Failure: \"test_short_name\" test failed"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Test:* test_short_name | *Status:* fail | *Time:* N/A"
+          }
+        }
+      ],
+      "color": "#ff0000"
+    }
+  ]
+}

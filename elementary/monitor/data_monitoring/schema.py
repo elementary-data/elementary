@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional, Pattern, Tuple
+from typing import Any, Generic, Iterable, List, Optional, Pattern, Set, Tuple, TypeVar
 
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
@@ -14,7 +14,7 @@ class InvalidSelectorError(Exception):
     pass
 
 
-class Status(Enum):
+class Status(str, Enum):
     WARN = "warn"
     FAIL = "fail"
     SKIPPED = "skipped"
@@ -22,38 +22,111 @@ class Status(Enum):
     RUNTIME_ERROR = "runtime error"
 
 
-class ResourceType(Enum):
+class ResourceType(str, Enum):
     TEST = "test"
     MODEL = "model"
     SOURCE_FRESHNESS = "source_freshness"
 
 
-class SupportedFilterTypes(Enum):
+class FilterType(str, Enum):
     IS = "is"
+    IS_NOT = "is_not"
+    CONTAINS = "contains"
+    NOT_CONTAINS = "not_contains"
 
 
-class FilterSchema(BaseModel):
+class FilterFields(BaseModel):
+    tags: List[str] = []
+    models: List[str] = []
+    owners: List[str] = []
+    statuses: List[str] = []
+    resource_types: List[ResourceType] = []
+    node_names: List[str] = []
+    test_ids: List[str] = []
+
+    @property
+    def normalized_status(self) -> List[Status]:
+        return [Status(status) for status in self.statuses if status in list(Status)]
+
+
+def apply_filter(filter_type: FilterType, value: Any, filter_value: Any) -> bool:
+    if filter_type == FilterType.IS:
+        return value == filter_value
+    elif filter_type == FilterType.IS_NOT:
+        return value != filter_value
+    elif filter_type == FilterType.CONTAINS:
+        return str(filter_value).lower() in str(value).lower()
+    elif filter_type == FilterType.NOT_CONTAINS:
+        return str(filter_value).lower() not in str(value).lower()
+    raise ValueError(f"Unsupported filter type: {filter_type}")
+
+
+ValueT = TypeVar("ValueT")
+
+
+ANY_OPERATORS = [FilterType.IS, FilterType.CONTAINS]
+ALL_OPERATORS = [FilterType.IS_NOT, FilterType.NOT_CONTAINS]
+
+
+class FilterSchema(BaseModel, Generic[ValueT]):
     # The relation between values is OR.
-    values: List[Any]
-    type: SupportedFilterTypes = SupportedFilterTypes.IS
+    values: List[ValueT]
+    type: FilterType = FilterType.IS
 
     class Config:
         # Make sure that serializing Enum return values
         use_enum_values = True
 
+    def _apply_filter_type(self, value: ValueT, filter_value: ValueT) -> bool:
+        return apply_filter(self.type, value, filter_value)
 
-class StatusFilterSchema(FilterSchema):
+    def apply_filter_on_value(self, value: ValueT) -> bool:
+        if self.type in ANY_OPERATORS:
+            return any(
+                self._apply_filter_type(value, filter_value)
+                for filter_value in self.values
+            )
+        elif self.type in ALL_OPERATORS:
+            return all(
+                self._apply_filter_type(value, filter_value)
+                for filter_value in self.values
+            )
+        raise ValueError(f"Unsupported filter type: {self.type}")
+
+    def apply_filter_on_values(self, values: List[ValueT]) -> bool:
+        if self.type in ANY_OPERATORS:
+            return any(self.apply_filter_on_value(value) for value in values)
+        elif self.type in ALL_OPERATORS:
+            return all(self.apply_filter_on_value(value) for value in values)
+        raise ValueError(f"Unsupported filter type: {self.type}")
+
+    def get_matching_values(self, values: Iterable[ValueT]) -> Set[ValueT]:
+        values_list = set(values)
+        matching_values = set(
+            value for value in values_list if self.apply_filter_on_value(value)
+        )
+        if self.type in ANY_OPERATORS:
+            return matching_values
+        elif self.type in ALL_OPERATORS:
+            if len(matching_values) != len(values_list):
+                return set()
+            return matching_values
+
+        raise ValueError(f"Unsupported filter type: {self.type}")
+
+
+class StatusFilterSchema(FilterSchema[Status]):
     values: List[Status]
 
 
-class ResourceTypeFilterSchema(FilterSchema):
+class ResourceTypeFilterSchema(FilterSchema[ResourceType]):
     values: List[ResourceType]
 
 
 def _get_default_statuses_filter() -> List[StatusFilterSchema]:
     return [
         StatusFilterSchema(
-            type=SupportedFilterTypes.IS,
+            type=FilterType.IS,
             values=[Status.FAIL, Status.ERROR, Status.RUNTIME_ERROR, Status.WARN],
         )
     ]
@@ -71,9 +144,10 @@ class FiltersSchema(BaseModel):
     models: List[FilterSchema] = Field(default_factory=list)
     statuses: List[StatusFilterSchema] = Field(default=_get_default_statuses_filter())
     resource_types: List[ResourceTypeFilterSchema] = Field(default_factory=list)
+    test_ids: List[FilterSchema[str]] = Field(default_factory=list)
 
     @validator("invocation_time", pre=True)
-    def format_invocation_time(cls, invocation_time):
+    def format_invocation_time(cls, invocation_time) -> Optional[str]:
         if invocation_time:
             try:
                 invocation_datetime = convert_local_time_to_timezone(
@@ -87,7 +161,7 @@ class FiltersSchema(BaseModel):
                 raise
         return None
 
-    def validate_report_selector(self):
+    def validate_report_selector(self) -> None:
         # If we start supporting multiple selectors we need to change this logic
         if not self.selector:
             return
@@ -203,6 +277,44 @@ class FiltersSchema(BaseModel):
             model=models,
             statuses=statuses,
             resource_types=resource_types,
+        )
+
+    def apply(
+        self,
+        filter_fields: FilterFields,
+    ) -> bool:
+        return (
+            all(
+                filter_schema.apply_filter_on_values(filter_fields.tags)
+                for filter_schema in self.tags
+            )
+            and all(
+                filter_schema.apply_filter_on_values(filter_fields.models)
+                for filter_schema in self.models
+            )
+            and all(
+                filter_schema.apply_filter_on_values(filter_fields.owners)
+                for filter_schema in self.owners
+            )
+            and all(
+                filter_schema.apply_filter_on_values(filter_fields.normalized_status)
+                for filter_schema in self.statuses
+            )
+            and all(
+                filter_schema.apply_filter_on_values(filter_fields.resource_types)
+                for filter_schema in self.resource_types
+            )
+            and (
+                FilterSchema(
+                    values=self.node_names, type=FilterType.IS
+                ).apply_filter_on_values(filter_fields.node_names)
+                if self.node_names
+                else True
+            )
+            and all(
+                filter_schema.apply_filter_on_values(filter_fields.test_ids)
+                for filter_schema in self.test_ids
+            )
         )
 
 

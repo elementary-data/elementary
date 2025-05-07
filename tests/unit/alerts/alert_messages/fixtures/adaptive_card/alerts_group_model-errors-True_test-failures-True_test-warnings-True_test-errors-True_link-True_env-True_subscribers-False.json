@@ -1,0 +1,274 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Error: 40 issues detected",
+              "weight": "bolder",
+              "size": "large",
+              "wrap": true
+            }
+          ],
+          "style": "Attention"
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **Model Errors:** 10 | \ud83d\udd3a **Test Failures:** 10 | \u26a0\ufe0f **Test Warnings:** 10 | \u2757 **Test Errors:** 10 | **Env:** Test Env",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "**Model Errors**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u274c **dbt failed to build table \"test_model\"** - [View Report](http://test.com)",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "**Test Failures**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_1** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_2** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_4** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_5** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_7** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_8** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\ud83d\udd3a **\"test_short_name\" test failed on test_table_10** - [View Report](http://test.com)",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "**Test Warnings**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_1** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_2** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_4** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_5** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_7** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_8** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u26a0\ufe0f **\"test_short_name\" test failed on test_table_10** - [View Report](http://test.com)",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "**Test Errors**",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_1** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_2** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_3** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_4** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_5** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_6** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_7** - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_8** - Owners: owner1 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_9** - Owners: owner1, owner2 - [View Report](http://test.com)",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "\u2757 **\"test_short_name\" test failed on test_table_10** - [View Report](http://test.com)",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.5"
+}

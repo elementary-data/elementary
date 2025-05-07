@@ -1,11 +1,13 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
+import requests
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+from slack_sdk.webhook.webhook_response import WebhookResponse
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
@@ -40,7 +42,11 @@ class SlackClient(ABC):
             return SlackWebClient(token=config.slack_token, tracking=tracking)
         elif config.slack_webhook:
             logger.debug("Creating Slack client with webhook.")
-            return SlackWebhookClient(webhook=config.slack_webhook, tracking=tracking)
+            return SlackWebhookClient(
+                webhook=config.slack_webhook,
+                is_workflow=config.is_slack_workflow,
+                tracking=tracking,
+            )
         return None
 
     @abstractmethod
@@ -48,8 +54,9 @@ class SlackClient(ABC):
         raise NotImplementedError
 
     def _initial_retry_handlers(self):
-        rate_limit_handler = RateLimitErrorRetryHandler(max_retry_count=5)
-        self.client.retry_handlers.append(rate_limit_handler)
+        if isinstance(self.client, WebClient):
+            rate_limit_handler = RateLimitErrorRetryHandler(max_retry_count=5)
+            self.client.retry_handlers.append(rate_limit_handler)
 
     @abstractmethod
     def send_message(self, **kwargs):
@@ -95,9 +102,9 @@ class SlackWebClient(SlackClient):
                 channel=channel_name,
                 text=message.text,
                 blocks=json.dumps(message.blocks) if message.blocks else None,
-                attachments=json.dumps(message.attachments)
-                if message.attachments
-                else None,
+                attachments=(
+                    json.dumps(message.attachments) if message.attachments else None
+                ),
             )
             return True
         except SlackApiError as err:
@@ -222,12 +229,16 @@ class SlackWebhookClient(SlackClient):
     def __init__(
         self,
         webhook: str,
+        is_workflow: bool,
         tracking: Optional[Tracking] = None,
     ):
         self.webhook = webhook
+        self.is_workflow = is_workflow
         super().__init__(tracking)
 
     def _initial_client(self):
+        if self.is_workflow:
+            return requests.Session()
         return WebhookClient(
             url=self.webhook, default_headers={"Content-type": "application/json"}
         )
@@ -235,15 +246,26 @@ class SlackWebhookClient(SlackClient):
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def send_message(self, message: SlackMessageSchema, **kwargs) -> bool:
-        response = self.client.send(
-            text=message.text, blocks=message.blocks, attachments=message.attachments
-        )
+        response: Union[requests.Response, WebhookResponse]
+        if self.is_workflow:
+            # For slack workflows, we need to send the message raw to the webhook
+            response = self.client.post(self.webhook, data=message.text)
+        else:
+            response = self.client.send(
+                text=message.text,
+                blocks=message.blocks,
+                attachments=message.attachments,
+            )
         if response.status_code == OK_STATUS_CODE:
             return True
-
         else:
+            response_body = (
+                response.text
+                if isinstance(response, requests.Response)
+                else response.body
+            )
             logger.error(
-                f"Could not post message to slack via webhook - {self.webhook}. Error: {response.body}"
+                f"Could not post message to slack via webhook - {self.webhook}. Status code: {response.status_code}, Error: {response_body}"
             )
             return False
 

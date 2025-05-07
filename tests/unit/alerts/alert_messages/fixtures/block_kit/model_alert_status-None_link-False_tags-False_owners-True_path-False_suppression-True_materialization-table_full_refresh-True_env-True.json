@@ -1,0 +1,93 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "dbt failed to build table \"test_model\""
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Model:* test_model | *Env:* Test Env | *Status:* Unknown | *Time:* 2025-02-03 13:21:07 UTC | *Suppression interval:* 24"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ],
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2139\ufe0f *Details*"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\n_No tags_"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Owners*\n<@resolved_owner1>, <@resolved_owner2>"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Subscribers*\n_No subscribers_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Path*\n`unknown_path`"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Result Message*"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```Database Error in table my_failed_dbt_model\n(models/example/my_failed_dbt_model.sql)\n syntax error at or near \")\"\n LINE 19: \t); \n\t\t^```"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Materialization*\ntable"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Full Refresh*\nYes"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

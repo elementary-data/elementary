@@ -105,6 +105,7 @@ class BaseAlertDataSchema(BaseModel):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         *args,
         **kwargs
     ):
@@ -129,6 +130,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
     column_name: Optional[str] = None
     test_type: str
     test_sub_type: str
+    test_description: Optional[str] = None
     test_results_description: Optional[str] = None
     test_results_query: Optional[str] = None
     test_rows_sample: Optional[List[Dict]] = None
@@ -185,6 +187,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         disable_samples: bool = False,
         *args,
         **kwargs
@@ -201,7 +204,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
             test_results_description=self.test_results_description,
             test_results_query=self.test_results_query,
             test_short_name=self.test_short_name,
-            test_description=self.description,
+            test_description=self.description or self.test_description,
             other=self.other,
             test_params=self.test_params,
             test_rows_sample=self.test_rows_sample if not disable_samples else None,
@@ -224,6 +227,7 @@ class TestAlertDataSchema(BaseAlertDataSchema):
             report_url=report_url,
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
+            env=env,
         )
 
 
@@ -243,6 +247,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         *args,
         **kwargs
     ) -> ModelAlertModel:
@@ -271,6 +276,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
             report_url=report_url,
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
+            env=env,
         )
 
     @validator("full_refresh", pre=True, always=True)
@@ -303,6 +309,7 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
         elementary_database_and_schema: Optional[str] = None,
         global_suppression_interval: int = 0,
         override_config: bool = False,
+        env: Optional[str] = None,
         *args,
         **kwargs
     ) -> SourceFreshnessAlertModel:
@@ -338,4 +345,5 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
             report_url=report_url,
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
+            env=env,
         )

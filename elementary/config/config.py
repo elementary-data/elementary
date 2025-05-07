@@ -10,6 +10,8 @@ from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor.alerts.grouping_type import GroupingType
 from elementary.utils.ordered_yaml import OrderedYaml
 
+DEFAULT_ENV = "dev"
+
 
 class Config:
     _SLACK = "slack"
@@ -60,6 +62,7 @@ class Config:
         aws_session_token: Optional[str] = None,
         s3_endpoint_url: Optional[str] = None,
         s3_bucket_name: Optional[str] = None,
+        s3_acl: Optional[str] = None,
         google_project_name: Optional[str] = None,
         google_service_account_path: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
@@ -68,7 +71,7 @@ class Config:
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
         teams_webhook: Optional[str] = None,
-        env: str = "dev",
+        env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
     ):
@@ -157,6 +160,7 @@ class Config:
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.aws_session_token = aws_session_token
+        self.s3_acl = s3_acl
 
         google_config = config.get(self._GOOGLE, {})
         self.google_project_name = self._first_not_none(
@@ -248,6 +252,10 @@ class Config:
     @property
     def has_gcs(self):
         return self.gcs_bucket_name and self.has_gcloud
+
+    @property
+    def specified_env(self) -> Optional[str]:
+        return self.env if self.env != DEFAULT_ENV else None
 
     def validate_monitor(self):
         provided_integrations = list(

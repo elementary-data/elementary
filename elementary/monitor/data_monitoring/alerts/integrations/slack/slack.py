@@ -1124,6 +1124,25 @@ class SlackIntegration(BaseIntegration):
             )
             sent_successfully = False
 
+        if (
+            not sent_successfully
+            and self.config.slack_channel_name
+            and channel_name != self.config.slack_channel_name
+        ):
+            try:
+                logger.debug(
+                    f"Sending alert to default Slack channel: {self.config.slack_channel_name}"
+                )
+                channel_name = self.config.slack_channel_name
+                sent_successfully = self.client.send_message(
+                    channel_name=channel_name, message=template
+                )
+            except Exception as err:
+                logger.error(
+                    f"Unable to send alert via Slack to default channel: {err}"
+                )
+                sent_successfully = False
+
         if not sent_successfully:
             try:
                 fallback_template = self._get_fallback_template(alert)

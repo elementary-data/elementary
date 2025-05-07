@@ -56,6 +56,12 @@ class SlackReportSummaryMessageBuilder(SlackMessageBuilder):
             selector_text = f"model: {filter.model}"
         elif filter.owner:
             selector_text = f"owner: {filter.owner}"
+        elif filter.invocation_id:
+            selector_text = f"invocation_id: {filter.invocation_id}"
+        elif filter.invocation_time:
+            selector_text = f"invocation_time: {filter.invocation_time}"
+        elif filter.last_invocation:
+            selector_text = "last_invocation"
         days_back_text = (
             f"timeframe: {days_back} day{'s' if days_back > 1 else ''} back"
         )

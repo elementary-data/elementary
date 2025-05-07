@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       # mainly needed so mypy will have the dependencies it needs
       - name: Install elementary

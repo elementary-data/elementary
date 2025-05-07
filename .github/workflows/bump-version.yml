@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create release branch
         run: git checkout -b release/v${{ inputs.cli-version }}
       - name: Initial config
@@ -80,7 +80,7 @@ jobs:
     needs: bump-version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: create pull request
         uses: repo-sync/pull-request@v2
         with:

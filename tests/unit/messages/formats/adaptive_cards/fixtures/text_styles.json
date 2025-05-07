@@ -1,0 +1,17 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Normal text **Bold text** _Italic text_",
+          "wrap": true
+        }
+      ]
+    }
+  ],
+  "version": "1.5"
+}

@@ -10,6 +10,7 @@ from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
 from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
+from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
 from elementary.monitor.api.tests.tests import TestsAPI
@@ -285,8 +286,15 @@ class DataMonitoringReport(DataMonitoring):
             invocations_per_test=test_runs_amount,
             disable_passed_test_metrics=disable_passed_test_metrics,
         )
+        invocations_api = InvocationsAPI(
+            dbt_runner=self.internal_dbt_runner,
+        )
+        invocation = invocations_api.get_test_invocation_from_filter(
+            self.selector_filter.to_selector_filter_schema()
+        )
         summary_test_results = tests_api.get_test_results_summary(
             filter=self.selector_filter.to_selector_filter_schema(),
+            dbt_invocation=invocation,
         )
         if self.slack_client:
             send_succeeded = self.slack_client.send_message(

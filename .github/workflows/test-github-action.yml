@@ -22,19 +22,19 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: elementary
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
 
       - name: Install dbt
         run: pip install --pre
@@ -90,14 +90,14 @@ jobs:
             --file-path "report.html"
 
       - name: Upload report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: report.html
           path: edr_target/report.html
 
       - name: Upload log
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: edr.log
           path: edr_target/edr.log
