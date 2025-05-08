@@ -11,6 +11,7 @@ from elementary.monitor.data_monitoring.report.data_monitoring_report import (
 )
 from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
+from elementary.monitor.dbt_init import DBTInit
 from elementary.monitor.debug import Debug
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import bucket_path
@@ -24,6 +25,7 @@ class Command:
     REPORT = "monitor-report"
     SEND_REPORT = "monitor-send-report"
     DEBUG = "debug"
+    DBT_INIT = "dbt-init"
 
 
 # Displayed in reverse order in --help.
@@ -527,6 +529,12 @@ def report(
     help="The name of the S3 bucket to upload the report to.",
 )
 @click.option(
+    "--s3-acl",
+    type=str,
+    default=None,
+    help="S3 Canned ACL value used to modify report permissions, for example set to 'public-read' to make the report publicly accessible.",
+)
+@click.option(
     "--google-service-account-path",
     type=str,
     default=None,
@@ -638,6 +646,7 @@ def send_report(
     aws_session_token,
     s3_endpoint_url,
     s3_bucket_name,
+    s3_acl,
     azure_connection_string,
     azure_container_name,
     google_service_account_path,
@@ -686,6 +695,7 @@ def send_report(
         azure_container_name=azure_container_name,
         s3_endpoint_url=s3_endpoint_url,
         s3_bucket_name=s3_bucket_name,
+        s3_acl=s3_acl,
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
@@ -763,6 +773,26 @@ def debug(ctx, profiles_dir):
     if not success:
         sys.exit(1)
 
+    anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
+
+
+@monitor.command()
+@click.pass_context
+def dbt_init(ctx):
+    """
+    Initializes the Elementary internal dbt project by installing its dbt deps.
+    Run this command after installing EDR as part of builds or CI/CD pipelines when the target
+    environment does not have write permissions on disk or does not have internet connection.
+    This command is not needed in most cases as the dbt deps are installed automatically when running `edr monitor`.
+    """
+    config = Config()
+    anonymous_tracking = AnonymousCommandLineTracking(config)
+    anonymous_tracking.track_cli_start(Command.DEBUG, None, ctx.command.name)
+    dbtinit = DBTInit()
+    success = dbtinit.setup_internal_dbt_packages()
+    if not success:
+        sys.exit(1)
+    click.echo("Elementary internal dbt project has been initialized successfully. ")
     anonymous_tracking.track_cli_end(Command.DEBUG, None, ctx.command.name)
 
 
