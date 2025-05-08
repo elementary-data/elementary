@@ -206,6 +206,10 @@ class Config:
             "disable_elementary_version_check", False
         )
 
+        self.disable_elementary_logo_print = config.get(
+            "disable_elementary_logo_print", False
+        )
+
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
             os.makedirs(self.config_dir)
