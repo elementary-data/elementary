@@ -11,6 +11,11 @@ Filter the tested data using a valid sql expression.
 - _Default: None_
 - _Relevant tests: All anomaly detection tests_
 
+The `where_expression` is used to filter out the data that you want to test. For example, to only test weekdays for anomalies, you can filter on the day of the week - 
+```
+where_expression: EXTRACT(DOW FROM timestamp_column) BETWEEN 2 AND 6 --Monday through Friday
+```
+
 <RequestExample>
 
 ```yml test
