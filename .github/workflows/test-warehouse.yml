@@ -156,7 +156,7 @@ jobs:
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
       - name: Run dbt package integration tests
-        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests && inputs.warehouse-type != 'clickhouse'
+        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
