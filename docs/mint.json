@@ -29,7 +29,7 @@
   },
   "tabs": [
     {
-      "name": "Elementary dbt Package and Tests",
+      "name": "dbt Package and Tests",
       "url": "data-tests"
     },
     {
@@ -310,7 +310,7 @@
     {
       "group": "Elementary dbt package",
       "pages": [
-        "guides/modules-overview/dbt-package",
+        "/data-tests/dbt/dbt-package",
         "data-tests/dbt/dbt-artifacts",
         "data-tests/dbt/on-run-end_hooks",
         "data-tests/dbt/package-models"
