@@ -295,8 +295,7 @@
     {
       "group": "Resources",
       "pages": [
-        "resources/business-case-data-observability-platform",
-        "overview/cloud-vs-oss",
+        "cloud/cloud-vs-oss",
         {
           "group": "Best Practices Guide",
           "icon": "check",
