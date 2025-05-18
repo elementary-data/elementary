@@ -30,7 +30,7 @@
   "tabs": [
     {
       "name": "Elementary dbt Package and Tests",
-      "url": "docs"
+      "url": "data-tests"
     },
     {
       "name": "Elementary OSS",
