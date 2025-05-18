@@ -75,7 +75,7 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart"
+        "cloud/quickstart"
       ]
     },
     {
