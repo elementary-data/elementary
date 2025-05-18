@@ -301,10 +301,10 @@
           "group": "Best Practices Guide",
           "icon": "check",
           "pages": [
-            "best-practices/introduction",
-            "best-practices/governance-for-observability",
-            "best-practices/detection-and-coverage",
-            "best-practices/triage-and-response"
+            "cloud/best-practices/introduction",
+            "cloud/best-practices/governance-for-observability",
+            "cloud/best-practices/detection-and-coverage",
+            "cloud/best-practices/triage-and-response"
           ]
         },
         "resources/pricing",
