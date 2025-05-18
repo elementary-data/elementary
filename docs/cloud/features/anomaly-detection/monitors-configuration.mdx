@@ -7,15 +7,15 @@ Automated anomaly detection monitors are configured on all of your sources by de
 
 ## Adding anomaly detection monitors
 
-Automated anomaly detection monitors (Cloud tests) can be [added directly through the UI](/features/data-tests/data-tests-overview), just like other data tests.
+Automated anomaly detection monitors (Cloud tests) can be [added directly through the UI](cloud/features/data-tests/data-tests-overview), just like other data tests.
 Unlike dbt-based tests, these monitors are not part of your dbt project code, so they’re added immediately — with no need to create or approve a pull request.
 
 To easily add a new automated monitor, follow these steps:
 - Navigate to the Test Configuration page, or select your relevant assets in the Catalog
 - Click 'Add Test', and choose a 'Table Test'
 - If not selected earlier, choose one or more tables you would like to test
-- Filter on Elementary Cloud, and choose your preferred test - [Volume](/features/anomaly-detection/automated-volume) or [freshness](/features/anomaly-detection/automated-freshness).
-- Set up the test configurations, and add metadata if needed. Learn more about all supported settings [here](/features/anomaly-detection/monitors-configuration#supported-settings).
+- Filter on Elementary Cloud, and choose your preferred test - [Volume](cloud/features/anomaly-detection/automated-volume) or [freshness](cloud/features/anomaly-detection/automated-freshness).
+- Set up the test configurations, and add metadata if needed. Learn more about all supported settings [here](cloud/features/anomaly-detection/monitors-configuration#supported-settings).
 - Review and submit your test. No PR needed - the test is set up. 
 
 ## Editing anomaly detection monitors

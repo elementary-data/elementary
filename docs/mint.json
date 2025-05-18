@@ -29,6 +29,10 @@
   },
   "tabs": [
     {
+      "name": "Elementary Cloud",
+      "url": "cloud"
+    },
+    {
       "name": "dbt Package and Tests",
       "url": "data-tests"
     },
