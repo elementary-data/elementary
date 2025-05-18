@@ -29,7 +29,7 @@
   },
   "tabs": [
     {
-      "name": "Elementary Tests",
+      "name": "Elementary dbt Package and Tests",
       "url": "data-tests"
     },
     {
@@ -315,6 +315,15 @@
         },
         "resources/pricing",
         "resources/community"
+      ]
+    },
+    {
+      "group": "Elementary dbt package",
+      "pages": [
+        "guides/modules-overview/dbt-package",
+        "dbt/dbt-artifacts",
+        "dbt/on-run-end_hooks",
+        "dbt/package-models"
       ]
     },
     {
