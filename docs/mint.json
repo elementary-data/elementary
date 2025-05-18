@@ -83,28 +83,28 @@
       "pages": [
         "cloud/introduction",
         "cloud/features",
-        "features/integrations",
+        "cloud/features/integrations",
         "cloud/general/security-and-privacy"
       ]
     },
     {
       "group": "Anomaly Detection Monitors",
       "pages": [
-        "features/anomaly-detection/monitors-overview",
+        "cloud/features/anomaly-detection/monitors-overview",
         {
           "group": "Automated monitors",
           "pages": [
-            "features/anomaly-detection/automated-monitors",
-            "features/anomaly-detection/automated-freshness",
-            "features/anomaly-detection/automated-volume"
+            "cloud/features/anomaly-detection/automated-monitors",
+            "cloud/features/anomaly-detection/automated-freshness",
+            "cloud/features/anomaly-detection/automated-volume"
           ]
         },
-        "features/anomaly-detection/metrics",
+        "cloud/features/anomaly-detection/metrics",
         {
         "group": "Configuration and Feedback",
         "pages": [
-          "features/anomaly-detection/monitors-configuration",
-          "features/anomaly-detection/monitors-feedback"
+          "cloud/features/anomaly-detection/monitors-configuration",
+          "cloud/features/anomaly-detection/monitors-feedback"
         ]
         }
       ]
@@ -112,72 +112,72 @@
     {
       "group": "Data Tests",
       "pages": [
-        "features/data-tests/data-tests-overview",
-        "features/data-tests/dbt-tests",
-        "features/data-tests/custom-sql-tests",
-        "features/data-tests/schema-validation-test"
+        "cloud/features/data-tests/data-tests-overview",
+        "cloud/features/data-tests/dbt-tests",
+        "cloud/features/data-tests/custom-sql-tests",
+        "cloud/features/data-tests/schema-validation-test"
       ]
     },
     {
       "group": "Data Lineage",
       "pages": [
-        "features/data-lineage/lineage",
-        "features/data-lineage/column-level-lineage",
-        "features/data-lineage/exposures-lineage"
+        "cloud/features/data-lineage/lineage",
+        "cloud/features/data-lineage/column-level-lineage",
+        "cloud/features/data-lineage/exposures-lineage"
       ]
     },
     {
       "group": "Alerts and Incidents",
       "pages": [
-        "features/alerts-and-incidents/alerts-and-incidents-overview",
+        "cloud/features/alerts-and-incidents/alerts-and-incidents-overview",
         {
           "group": "Setup & configure alerts",
           "pages": [
-            "features/alerts-and-incidents/alert-rules",
-            "features/alerts-and-incidents/owners-and-subscribers",
-            "features/alerts-and-incidents/alert-configuration"
+            "cloud/features/alerts-and-incidents/alert-rules",
+            "cloud/features/alerts-and-incidents/owners-and-subscribers",
+            "cloud/features/alerts-and-incidents/alert-configuration"
           ]
         },
-        "features/alerts-and-incidents/incidents",
-        "features/alerts-and-incidents/incident-management"
+        "cloud/features/alerts-and-incidents/incidents",
+        "cloud/features/alerts-and-incidents/incident-management"
       ]
     },
     {
       "group": "Performance & Cost",
       "pages": [
-        "features/performance-monitoring/performance-monitoring",
-        "features/performance-monitoring/performance-alerts"
+        "cloud/features/performance-monitoring/performance-monitoring",
+        "cloud/features/performance-monitoring/performance-alerts"
       ]
     },
     {
       "group": "Data Governance",
       "pages": [
-        "best-practices/governance-for-observability",
-        "features/data-governance/critical_assets",
-        "features/data-governance/manage-metadata",
-        "features/data-governance/ai-descriptions"
+        "cloud/best-practices/governance-for-observability",
+        "cloud/features/data-governance/critical_assets",
+        "cloud/features/data-governance/manage-metadata",
+        "cloud/features/data-governance/ai-descriptions"
       ]
     },
     {
       "group": "Collaboration & Communication",
       "pages": [
-        "features/collaboration-and-communication/data-observability-dashboard",
+        "cloud/features/collaboration-and-communication/data-observability-dashboard",
         {
           "group": "Data Health Scores",
           "pages": [
-            "features/collaboration-and-communication/data-quality-dimensions",
-            "features/collaboration-and-communication/data-health"
+            "cloud/features/collaboration-and-communication/data-quality-dimensions",
+            "cloud/features/collaboration-and-communication/data-health"
           ]
         },
-        "features/collaboration-and-communication/catalog"
+        "cloud/features/collaboration-and-communication/catalog"
       ]
     },
     {
       "group": "Additional features",
       "pages": [
-        "features/config-as-code",
-        "features/multi-env",
-        "features/ci"
+        "cloud/features/config-as-code",
+        "cloud/features/multi-env",
+        "cloud/features/ci"
       ]
     },
     {
@@ -307,8 +307,8 @@
             "cloud/best-practices/triage-and-response"
           ]
         },
-        "resources/pricing",
-        "resources/community"
+        "cloud/resources/pricing",
+        "cloud/resources/community"
       ]
     },
     {
