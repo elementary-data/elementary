@@ -71,17 +71,7 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart",
-        {
-          "group": "dbt package",
-          "icon": "cube",
-          "pages": [
-            "guides/modules-overview/dbt-package",
-            "dbt/dbt-artifacts",
-            "dbt/on-run-end_hooks",
-            "dbt/package-models"
-          ]
-        }
+        "quickstart"
       ]
     },
     {
