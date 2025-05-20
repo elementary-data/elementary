@@ -1,0 +1,64 @@
+**Elementary is the data quality platform for modern data teams.**
+
+Built to integrate natively with dbt, it brings everything you need to manage and scale data quality—from detection to resolution—in one place.
+
+Whether you're dealing with unexpected changes, missing tests, or broken dashboards, Elementary helps you catch issues early, understand their impact, and fix them fast. It combines deep visibility with smart automation to cover the full data quality lifecycle:
+
+- **Detection & Coverage:** Instantly identify broken models, missing tests, and anomalous behavior with custom tests and built-in monitors.
+- **Triage & Response:** Group failures into incidents, trace lineage, and surface root causes so your team can act quickly and efficiently.
+- **Governance:** Apply metadata, tags, owners, and policies across your dbt projects—helping teams stay aligned, compliant, and in control.
+- **Enablement:** With a built-in **data catalog**, Elementary makes it easy for analysts, product managers, and other consumers to search for data, see validation status, and understand asset health.
+
+Elementary is designed with security in mind, requiring only access to logs, test results, and metadata—never raw data.
+
+Elementary is available as both an open-source dbt package and CLI tool, or as a fully managed Cloud Platform. Each version supports different needs—read on to learn more about what they offer.
+
+## Elementary’s Products
+
+Elementary offers a modular observability stack built for dbt-based data workflows. At the foundation is an open-source dbt package that captures key metadata and test results from your dbt project. This package powers both the self-hosted CLI and the fully managed Cloud Platform, which build on top of it to provide deeper visibility, automation, and collaboration features.
+
+Whether you're starting small or scaling observability across your organization, you can choose the setup that fits your team—while unlocking more value as your needs evolve.
+
+**Elementary dbt package (OSS)**
+
+A lightweight and configurable dbt package that lets you add a wide range of anomaly detection tests to your dbt project. It integrates naturally into your dbt workflows and helps monitor models using familiar dbt logic. The package also parses and stores rich metadata—including dbt artifacts (like models, tests, sources, snapshots, and exposures), run results, and test results—within an Elementary schema in your data warehouse. This creates a solid foundation for observability by making key information easily queryable and available for reporting, alerting, and further analysis.
+
+The package is the starting point for both the CLI and the Cloud platform, powering them with the metadata needed to gain visibility into your data stack, uncover issues, and take action. 
+
+**Elementary CLI (OSS)**
+
+A self-hosted command-line tool that works alongside the Elementary dbt package to generate data observability reports, send alerts, and orchestrate workflows. The CLI runs in your environment and gives you access to a visual report that includes test results, data lineage, and dbt run history—all powered by the metadata stored in the Elementary schema. It’s ideal for teams that want to keep everything local while adding visibility and alerting to their dbt project with minimal setup.
+
+Setup Elementary OSS [here](https://docs.elementary-data.com/oss/quickstart/quickstart-cli-package). 
+
+**Elementary Cloud Platform**
+
+A fully managed platform built on top of the dbt package, designed to help teams improve data quality with minimal setup and operational overhead. It brings everything together in one place: an intuitive UI, column-level lineage from source to BI, incident management tools, alerting, AI automations and a searchable data catalog. This makes it easier to explore issues, understand their impact, and collaborate across teams.
+
+In addition to the tests defined in your dbt project, the Cloud Platform includes automated, ML-powered monitors that detect anomalies in freshness and volume—surfacing problems early without manual configuration.
+
+Designed to integrate with your entire data stack, it helps teams understand, triage, and act on data quality issues while fostering shared visibility and ownership.
+
+Learn more about Elementary Cloud’s features and integrations [here](https://docs.elementary-data.com/cloud/introduction), and get started with a 30-day free trial [here](https://docs.elementary-data.com/quickstart).
+
+To further understand the differences, check out the full **OSS vs. Cloud comparison**.
+
+## **Security and Privacy**
+
+Elementary is designed with security and privacy in mind.
+
+- Elementary Cloud does not have read access to raw data in your data warehouse.
+- Elementary Cloud only extracts and stores metadata, logs and aggregated metrics.
+- All data is encrypted at rest and in transit using industry standard protocols.
+- Elementary uses service accounts or authentication tokens with granular and minimal permissions.
+- Elementary offers deployment options with no direct access from Elementary Cloud to your data warehouse and third-party tools.
+- Advanced authentication such as MFA, Okta SSO, Microsoft AD are available upon request.
+
+**SOC 2 certification:** Elementary Cloud is SOC2 type II certified!
+
+Learn more about how Elementary ensures security and privacy [here](https://docs.elementary-data.com/cloud/general/security-and-privacy).
+
+**Want to know more?**
+
+- Book a call with our team
+- Reach out on Slack
