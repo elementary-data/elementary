@@ -152,7 +152,6 @@
 
 {%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
     {% do elementary.run_query('drop table if exists ordered_test_results') %}
-    {% do debug() %}
     {% set create_table_query %}
     CREATE TABLE ordered_test_results (
         id String,
