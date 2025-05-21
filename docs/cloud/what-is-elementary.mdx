@@ -15,8 +15,6 @@ Whether you're dealing with unexpected changes, missing tests, or broken dashboa
 - **Governance:** Apply metadata, tags, owners, and policies across your dbt projects—helping teams stay aligned, compliant, and in control.
 - **Enablement:** With a built-in [**data catalog**](/cloud/features/collaboration-and-communication/catalog), Elementary makes it easy for analysts, product managers, and other consumers to search for data, see validation status, and understand asset health.
 
-Elementary is designed with security in mind, requiring only access to logs, test results, and metadata—never raw data.
-
 Elementary is available as both an open-source dbt package and CLI tool, or as a fully managed Cloud Platform with advanced data observability tools. Each version supports different needs, read on to learn more about what they offer.
 
 ## How it works
@@ -29,19 +27,19 @@ Elementary offers a modular observability stack built for dbt-based data workflo
 
 Whether you're starting small or scaling observability across your organization, you can choose the setup that fits your team—while unlocking more value as your needs evolve.
 
-[**Elementary dbt package (OSS)**](/data-tests/dbt/dbt-package)
+### [**Elementary dbt package (OSS)**](/data-tests/dbt/dbt-package)
 
 A lightweight and configurable dbt package that lets you add a wide range of anomaly detection tests to your dbt project. It integrates naturally into your dbt workflows and helps monitor models using familiar dbt logic. The package also parses and stores rich metadata—including dbt artifacts (like models, tests, sources, snapshots, and exposures), run results, and test results—within an Elementary schema in your data warehouse. This creates a solid foundation for observability by making key information easily queryable and available for reporting, alerting, and further analysis.
 
 The package is the starting point for both the CLI and the Cloud platform, powering them with the metadata needed to gain visibility into your data stack, uncover issues, and take action. 
 
-## [Elementary CLI (OSS)](/oss/oss-introduction)
+### [Elementary CLI (OSS)](/oss/oss-introduction)
 
 A self-hosted command-line tool that works alongside the Elementary dbt package to generate data observability reports, send alerts, and orchestrate workflows. The CLI runs in your environment and gives you access to a visual report that includes test results, data lineage, and dbt run history—all powered by the metadata stored in the Elementary schema. It’s ideal for teams that want to keep everything local while adding visibility and alerting to their dbt project with minimal setup.
 
 Setup Elementary OSS [here](https://docs.elementary-data.com/oss/quickstart/quickstart-cli-package). 
 
-[**Elementary Cloud Platform**](/cloud/introduction)
+### [**Elementary Cloud Platform**](/cloud/introduction)
 
 A fully managed platform built on top of the dbt package, designed to help teams improve data quality with minimal setup and operational overhead. It brings everything together in one place: an intuitive UI, column-level lineage from source to BI, incident management tools, alerting, AI automations and a searchable data catalog. This makes it easier to explore issues, understand their impact, and collaborate across teams.
 
@@ -64,7 +62,7 @@ Elementary is designed with security and privacy in mind.
 - Elementary offers deployment options with no direct access from Elementary Cloud to your data warehouse and third-party tools.
 - Advanced authentication such as MFA, Okta SSO, Microsoft AD are available upon request.
 
-**SOC 2 certification:** Elementary Cloud is SOC2 type II certified!
+<Tip>**SOC 2 certification:** Elementary Cloud is SOC2 type II certified!</Tip>
 
 Learn more about how Elementary ensures security and privacy [here](https://docs.elementary-data.com/cloud/general/security-and-privacy).
 
