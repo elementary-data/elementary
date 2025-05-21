@@ -1,5 +1,5 @@
 {%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
-    {{ return(adapter.dispatch('get_test_results', 'elementary')(days_back, invocations_per_test, disable_passed_test_metrics)) }}
+    {{ return(adapter.dispatch('get_test_results', 'elementary_cli')(days_back, invocations_per_test, disable_passed_test_metrics)) }}
 {%- endmacro -%}
 
 {%- macro default__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
