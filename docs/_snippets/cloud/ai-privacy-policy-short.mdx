@@ -1,0 +1,20 @@
+
+### Privacy & Data Use
+
+Elementary’s AI agents are designed for secure, transparent operation, with full user control at every step. All processing runs through self-hosted models on **Amazon Bedrock**, ensuring that **no data is shared with external services**, and nothing is stored or used for model training.
+
+Everything is **opt-in** and **disabled by default**. You control which AI features are enabled, and every action an agent takes—such as opening a pull request—**requires your explicit approval**.
+
+Each agent may use the following data to provide recommendations:
+
+- **Metadata** – asset names, folders, column names, types, tags, descriptions, owners, and custom fields
+- **SQL queries** – to analyze logic, infer lineage, or suggest optimizations
+- **Test results and incidents** – including failed assertions and alert metadata
+- **Historical execution data** – query runtimes, update frequency, freshness, and resource usage
+- **User-defined policies** *(if configured)* – for testing, governance, or asset configuration
+- **Commit and pull request history** *(when applicable)* – to connect changes with incidents
+- **Chat input** *(if applicable)* – prompts used during the session only, not stored or logged
+
+Elementary does **not collect or share any sensitive data**, and you can review and align our AI use with your organization’s governance policies at any time.
+
+For full details, see our [AI Privacy Policy](/cloud/ai-privacy).
