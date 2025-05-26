@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel
 
@@ -27,6 +27,10 @@ MessageContextType = TypeVar("MessageContextType", bound=BaseModel)
 
 
 class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]):
+    @abstractmethod
+    def parse_message_context(self, context: dict[str, Any]) -> MessageContextType:
+        raise NotImplementedError
+
     @abstractmethod
     def send_message(
         self,
