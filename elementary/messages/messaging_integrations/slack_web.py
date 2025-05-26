@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from pydantic import BaseModel
 from ratelimit import limits, sleep_and_retry
@@ -52,6 +52,9 @@ class SlackWebMessagingIntegration(
         client = WebClient(token=token)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
         return cls(client, tracking)
+
+    def parse_message_context(self, context: dict[str, Any]) -> SlackWebMessageContext:
+        return SlackWebMessageContext(**context)
 
     def supports_reply(self) -> bool:
         return True
