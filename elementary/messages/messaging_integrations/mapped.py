@@ -1,4 +1,4 @@
-from typing import Generic, Mapping
+from typing import Any, Generic, Mapping
 
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
@@ -18,7 +18,13 @@ class MappedMessagingIntegration(
     def __init__(
         self, mapping: Mapping[str, BaseMessagingIntegration[None, MessageContextType]]
     ):
+        if len(mapping) == 0:
+            raise MessagingIntegrationError("Mapping cannot be empty")
         self._mapping = mapping
+
+    def parse_message_context(self, context: dict[str, Any]) -> MessageContextType:
+        sample_integration = next(iter(self._mapping.values()))
+        return sample_integration.parse_message_context(context)
 
     def send_message(
         self, destination: str, body: MessageBody
