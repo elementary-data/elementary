@@ -164,6 +164,16 @@
       ]
     },
     {
+      "group": "Ella: AI Agents",
+      "pages": [
+        "/cloud/ai-agents/governance-agent",
+        "/cloud/ai-agents/triage-resolution-agent",
+        "/cloud/ai-agents/test-recommendation-agent",
+        "/cloud/ai-agents/catalog-agent",
+        "/cloud/ai-agents/performance-cost-agent",
+      ]
+    },
+    {
       "group": "Additional features",
       "pages": [
         "cloud/features/config-as-code",
