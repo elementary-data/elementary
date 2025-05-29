@@ -79,6 +79,16 @@
       ]
     },
     {
+      "group": "Ella: AI Agents",
+      "pages": [
+        "/cloud/ai-agents/governance-agent",
+        "/cloud/ai-agents/triage-resolution-agent",
+        "/cloud/ai-agents/test-recommendation-agent",
+        "/cloud/ai-agents/catalog-agent",
+        "/cloud/ai-agents/performance-cost-agent"
+      ]
+    },
+    {
       "group": "Anomaly Detection Monitors",
       "pages": [
         "cloud/features/anomaly-detection/monitors-overview",
@@ -161,16 +171,6 @@
           ]
         },
         "cloud/features/collaboration-and-communication/catalog"
-      ]
-    },
-    {
-      "group": "Ella: AI Agents",
-      "pages": [
-        "/cloud/ai-agents/governance-agent",
-        "/cloud/ai-agents/triage-resolution-agent",
-        "/cloud/ai-agents/test-recommendation-agent",
-        "/cloud/ai-agents/catalog-agent",
-        "/cloud/ai-agents/performance-cost-agent"
       ]
     },
     {
