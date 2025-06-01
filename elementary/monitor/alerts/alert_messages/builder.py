@@ -125,6 +125,15 @@ class AlertMessageBuilder:
             )
         return LinesBlock(lines=subtitle_lines)
 
+    def _get_run_alert_subtitle_links(
+        self,
+        alert: Union[TestAlertModel, SourceFreshnessAlertModel, ModelAlertModel],
+    ) -> List[ReportLinkData]:
+        report_link = alert.get_report_link()
+        if report_link:
+            return [report_link]
+        return []
+
     def _get_run_alert_subtitle_blocks(
         self,
         alert: Union[TestAlertModel, SourceFreshnessAlertModel, ModelAlertModel],
@@ -140,7 +149,7 @@ class AlertMessageBuilder:
         elif isinstance(alert, ModelAlertModel):
             asset_type = "snapshot" if alert.materialization == "snapshot" else "model"
             asset_name = alert.alias
-        report_link = alert.get_report_link()
+        links = self._get_run_alert_subtitle_links(alert)
         return [
             self._get_run_alert_subtitle_block(
                 type=asset_type,
@@ -149,7 +158,7 @@ class AlertMessageBuilder:
                 detected_at_str=alert.detected_at_str,
                 suppression_interval=alert.suppression_interval,
                 env=alert.env,
-                links=[report_link] if report_link else [],
+                links=links,
             )
         ]
 
