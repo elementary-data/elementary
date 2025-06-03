@@ -98,13 +98,11 @@ def LinkLineBlock(*, text: str, url: str) -> LineBlock:
 
 def LinksLineBlock(*, links: list[tuple[str, str, Optional[Icon]]]) -> LineBlock:
     return LineBlock(
-        inlines=sum(
-            [
-                LinkInlineBlocks(text=text, url=url, icon=icon)
-                for text, url, icon in links
-            ],
-            [],
-        )
+        inlines=[
+            inline
+            for text, url, icon in links
+            for inline in LinkInlineBlocks(text=text, url=url, icon=icon)
+        ]
     )
 
 
