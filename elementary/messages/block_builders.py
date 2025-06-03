@@ -82,8 +82,28 @@ def ItalicTextLineBlock(*, text: SimpleLineBlock) -> LineBlock:
     return TextLineBlock(text=text, style=TextStyle.ITALIC)
 
 
+def LinkInlineBlocks(
+    *, text: str, url: str, icon: Optional[Icon] = None
+) -> list[InlineBlock]:
+    inlines: list[InlineBlock] = []
+    if icon:
+        inlines.append(IconBlock(icon=icon))
+    inlines.append(LinkBlock(text=text, url=url))
+    return inlines
+
+
 def LinkLineBlock(*, text: str, url: str) -> LineBlock:
-    return LineBlock(inlines=[LinkBlock(text=text, url=url)])
+    return LineBlock(inlines=LinkInlineBlocks(text=text, url=url))
+
+
+def LinksLineBlock(*, links: list[tuple[str, str, Optional[Icon]]]) -> LineBlock:
+    return LineBlock(
+        inlines=[
+            inline
+            for text, url, icon in links
+            for inline in LinkInlineBlocks(text=text, url=url, icon=icon)
+        ]
+    )
 
 
 def SummaryLineBlock(
