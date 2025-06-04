@@ -43,38 +43,79 @@ Elementary Cloud does not enforce MFA directly, but any MFA policies configured 
 
 
 ## How to Set Up Okta SSO for Elementary Cloud
+Please follow the steps below to configure an SSO connection in Elementary.
 
-### Step 1: Create a Custom App in Okta
-
-1. Navigate to **Okta Admin Dashboard** > **Applications**.
-2. Click **Create App Integration** and select **SAML 2.0**.
-3. Configure the following settings:
-    - **Single Sign-On URL**: `https://elementary-data.frontegg.com/auth/saml/callback`
-    - **Audience URI (SP Entity ID)**: `elementary`
-4. Obtain the **Okta IdP Metadata and SAML Signing Certificates** as an **XML file**.
-5. Share the **XML file** with Elementary Cloud Support to complete the integration.
-
-### Step 2: Verify Integration with Elementary Cloud
-
-- Once the XML file is shared, Elementary Cloud will complete the integration setup.
-- We recommend scheduling a **real-time verification call** to ensure everything is working before making the setting permanent.
-
-
+- Go to Applications → Applications, and click on **Create App Integration**
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta1_ol0ewc.png" />
+Choose SAML 2.0 as the sign-in method:
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta2_pgsp4o.png" />
+- Name the app “Elementary Data” and click “Next”
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030736/okta3_p8rzbr.png" />
+- Under **SAML Settings**, please enter the following details:
+    - Single sign-on URL: **https://elementary-data.frontegg.com/auth/saml/callback**
+    - Audience URI (SP Entity ID): elementary
+    - Name ID Format: EmailAddress
+    - Application Username: Email
+    - Update application username on: Create and update
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta4_pfqkxu.png" />
+- Click “Finish” on the next screen, and the app will be created!
+- Now, let’s configure users / groups that have access to the app. To do so, please go to the “Assignments” tab and add relevant groups / users.
+    - Note -
+        - It is recommended to set up an “Elementary Users” group dedicated for this purpose, though you can also add access for individual users.
+        - The setting below is for **assignment** of users to your app, e.g. users that are permitted to login to Elementary via Okta. This does not cover actually provisioning the user in Elementary (this is covered in the next section).
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta5_bhu0nz.png" />
+Finally, go to the “Sign On” tab, and provide Elementary with the value under Metadata URL:
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta6_bmva9i.png" />
+We will then configure the integration on our end, and then enable it live in a call with you (to ensure you are able to login without issues).
 
 ## How to Set Up SCIM for Automated Provisioning
+<Note> This section covers how to automatically provision users and groups from Okta in Elementary. If you prefer, it is also possible to set up the SSO part without provisioning. In that case, users can be invited to the platform via the Team page in Elementary.</Note>
 
-### Step 1: Configure SCIM in Okta
+Please follow the steps below to configure SCIM provisioning within Elementary:
 
-1. Go to **Okta Admin Dashboard** > **Applications**.
-2. Locate the **Elementary Cloud app** and open it.
-3. Navigate to the **Provisioning tab** and enable **SCIM provisioning**.
-4. Enter the following details:
-    - **SCIM Provisioning URL**: *(See internal 1Password for details)*
-    - **Authorization Token**: *(See internal 1Password for details)*
-5. Save the settings and test provisioning by adding a test user.
+- First, you should receive a 1Password link from the Elementary team - this contain the SCIM endpoint and access token that should be configured in Okta.
+- Under the **Elementary Data** app, go to the **General** tab, and click **Edit**. Then modify the **Provisioning** setting to **SCIM** and click **Save**.
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta7_qukvm9.png" />
+A new Provisioning tab should appear, click it and then click Edit.
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta8_hg0vhe.png" />
+- Please fill the following details:
+    - **SCIM connector base URL** - <value from 1password link above>
+    - **Unique identifier field for users** - email
+    - **Supported provisioning actions**  - mark all the “Push” settings (New users, Profile updates and Groups).
+    - **Authentication Mode -** HTTP Header
+        - **Authorization** - <access token from 1password link above>
+    
+    When you are done, click on **Test Connector Configuration**
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta9_nooz3a.png" />
+Ensure that all the marked provisioning actions were successful:
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta10_ouhvea.png" />
+- Click **Save** to update the provisioning configuration.
+- Click the **To App** section on the left and click **Edit**:
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta11_xgcyvi.png" />
+- Please enable the settings:
+    - Create Users
+    - Update User Attributes
+    - Deactivate Users
+    
+    And click **Save.**
 
-### Step 2: Define Role Mapping
+<Info>If you already created an “Elementary Users” group under the Assignments tab in the previous section, you may want to remove and re-add it to ensure all the users there are created successfully in Elementary. </Info>
 
-- By default, users are assigned the **Can Read** role.
-- The default role can be changed to **Can Write** or **Admin**.
-- Okta group names can be mapped to specific roles upon request.
+## **Pushing groups to Elementary**
+
+As a part of the provisioning setup for Elementary, you can also choose to provision **user groups** to control permissions within Okta. 
+
+These can be mapped to roles within Elementary (such as **Can Edit** or **Admin**).
+
+To do so, under the Elementary Data app, do the following
+
+- Click on **Push Groups**
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta12_hcghby.png" />
+- Add the groups you would like to push:
+<img src="hhttps://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta13_oepqwr.png" />
+- If the **Push Status** appears as **Active** - it means the groups were successfully pushed to Elementary.
+- Please ask the Elementary team to map the groups you pushed to roles within Elementary. In this case the mapping is clear:
+    - **Elementary Admins** - Admin.
+    - **Elementary Editors** - Can Edit.
+- Once this is done, you should be able to see in the **Team** page in Elementary all the users and their correct roles.
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030736/okta14_rwqu2t.png" />
