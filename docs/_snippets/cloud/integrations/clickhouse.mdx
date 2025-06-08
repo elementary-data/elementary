@@ -1,0 +1,19 @@
+You will connect Elementary Cloud to ClickHouse for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
+
+<Snippet file="cloud/integrations/create-user-operation.mdx" />
+
+### Fill the connection form
+
+Provide the following fields:
+
+- **Host**: The hostname of your ClickHouse server to connect to. This can either be a hostname or an IP address.
+- **Port**: The port of your ClickHouse server to connect to. This is usually `8123` for HTTP or `9000` for native protocol.
+- **User**: The name of the Elementary user.
+- **Password**: The password associated with the provided user.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+
+<Snippet file="cloud/integrations/ip-allowlist.mdx" />
+
+### Connect via SSH tunnel
+
+Elementary supports connecting via SSH or reverse SSH tunnel. Reach out to our team for details and support in this deployment.

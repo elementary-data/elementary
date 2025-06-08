@@ -137,6 +137,24 @@ elementary:
       threads: [number of threads like 8]
 ```
 
+```yml Clickhouse
+## Clickhouse ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: clickhouse
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      host: [hostname]
+      port: [port]
+      user: [username]
+      password: [password]
+      threads: [number of threads like 8]
+```
+
 ```yml Trino
 ## Trino ##
 ## By default, edr expects the profile name 'elementary'.      ##
