@@ -8,8 +8,6 @@ dbt run-operation elementary.generate_elementary_cli_profile
 ```
 
 The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
-[Fill in the missing authentication fields](https://docs.getdbt.com/reference/warehouse-setups/postgres-setup#profile-configuration)
-in the output and copy it to `~/.dbt/profiles.yml`.
 
 ```yml Clickhouse
 ## CLICKHOUSE ##
@@ -31,5 +29,5 @@ elementary:
 ```
 
 We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
-dbt's documentation of [Postgres profile](https://docs.getdbt.com/reference/warehouse-setups/postgres-setup) for
+dbt's documentation of [Clickhouse profile](https://docs.getdbt.com/reference/warehouse-setups/clickhouse-setup) for
 further details.
