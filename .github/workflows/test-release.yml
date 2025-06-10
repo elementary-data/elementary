@@ -52,7 +52,6 @@ jobs:
             snowflake,
             bigquery,
             redshift,
-            databricks,
             databricks_catalog,
             athena,
             clickhouse,
