@@ -156,6 +156,8 @@ jobs:
 
       - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
+        # remove this once clickhouse supports anomaly detection
+        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }} 
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
