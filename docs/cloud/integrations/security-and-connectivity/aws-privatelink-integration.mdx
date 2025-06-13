@@ -53,7 +53,10 @@ In order to set up a PrivateLink connection with Snowflake, please follow the st
             SELECT CURRENT_ORGANIZATION_NAME() || '-' || CURRENT_ACCOUNT_NAME();
             ```
             
-        2. In the Snowflake instructions, skip the *Add the Elementary IP to allowlist* section (since the connection is done through PrivateLink, no allowlist is required).
+        2. In the Snowflake instructions, under the *Add the Elementary IP to allowlist* section, please add the following private subnets *instead* of the IP mentioned there:
+            * 10.0.1.x
+            * 10.0.2.x
+            * 10.0.3.x
 
 ## Github Enterprise Server
 
