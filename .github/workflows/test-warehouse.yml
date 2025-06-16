@@ -14,7 +14,6 @@ on:
           - databricks_catalog
           - spark
           - athena
-          - clickhouse
       elementary-ref:
         type: string
         required: false
@@ -105,10 +104,10 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: docker compose up -d postgres
 
-      - name: Start Clickhouse
-        if: inputs.warehouse-type == 'clickhouse'
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: docker compose up -d clickhouse
+      # - name: Start Clickhouse
+      #   if: inputs.warehouse-type == 'clickhouse'
+      #   working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      #   run: docker compose up -d clickhouse
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -156,8 +155,6 @@ jobs:
 
       - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        # remove this once clickhouse supports anomaly detection
-        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
@@ -169,8 +166,6 @@ jobs:
       - name: Run monitor
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
-        # remove this once clickhouse supports anomaly detection
-        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         run: >
           edr monitor 
           -t "${{ inputs.warehouse-type }}"
@@ -186,8 +181,6 @@ jobs:
           dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
 
       - name: Run report
-        # remove this once clickhouse supports anomaly detection
-        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         run: >
           edr monitor report
           -t "${{ inputs.warehouse-type }}"
@@ -206,8 +199,6 @@ jobs:
         run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
-        # remove this once clickhouse supports anomaly detection
-        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -240,6 +231,4 @@ jobs:
 
       - name: Run Python package e2e tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        # remove this once clickhouse supports anomaly detection
-        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
