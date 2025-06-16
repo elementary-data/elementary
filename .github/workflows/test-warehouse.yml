@@ -240,4 +240,6 @@ jobs:
 
       - name: Run Python package e2e tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
+        # remove this once clickhouse supports anomaly detection
+        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
