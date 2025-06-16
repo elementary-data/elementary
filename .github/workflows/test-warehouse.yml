@@ -169,6 +169,8 @@ jobs:
       - name: Run monitor
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
+        # remove this once clickhouse supports anomaly detection
+        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         run: >
           edr monitor 
           -t "${{ inputs.warehouse-type }}"
