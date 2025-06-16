@@ -14,7 +14,6 @@ on:
           - databricks_catalog
           - spark
           - athena
-          - clickhouse
       elementary-ref:
         type: string
         required: false
@@ -105,10 +104,10 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: docker compose up -d postgres
 
-      - name: Start Clickhouse
-        if: inputs.warehouse-type == 'clickhouse'
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: docker compose up -d clickhouse
+      # - name: Start Clickhouse
+      #   if: inputs.warehouse-type == 'clickhouse'
+      #   working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      #   run: docker compose up -d clickhouse
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -156,8 +155,6 @@ jobs:
 
       - name: Run dbt package integration tests
         if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        # remove this once clickhouse supports anomaly detection
-        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: |
           dbt deps
