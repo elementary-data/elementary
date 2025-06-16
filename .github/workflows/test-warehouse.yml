@@ -186,6 +186,8 @@ jobs:
           dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
 
       - name: Run report
+        # remove this once clickhouse supports anomaly detection
+        continue-on-error: ${{ inputs.warehouse-type == 'clickhouse' }}
         run: >
           edr monitor report
           -t "${{ inputs.warehouse-type }}"
