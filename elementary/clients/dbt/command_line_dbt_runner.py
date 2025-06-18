@@ -2,7 +2,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
@@ -399,8 +399,8 @@ class CommandLineDbtRunner(BaseDbtRunner):
                     return None
 
             def safe_get(
-                model: Any, setting: str, case_sensitive: bool | None = False
-            ) -> str | None:
+                model: Any, setting: str, case_sensitive: Union[bool, None] = False
+            ) -> Union[str, None]:
                 try:
                     if is_unsupported_object(model):
                         return None
