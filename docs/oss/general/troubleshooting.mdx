@@ -195,8 +195,8 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 
 When writing to the `dbt_artifacts` tables in the Elementary schema, data is deleted and reinserted. Running parallel jobs through an orchestrator can lead to errors, as multiple jobs may attempt to modify the same tables simultaneously. 
 To prevent this, you should:
-1. [Disable the on-run-end hooks](https://docs.elementary-data.com/oss/general/faq#can-i-disable-the-on-run-end-hooks-or-results-uploading)
-2. [Exclude the Elementary models](https://docs.elementary-data.com/oss/general/faq#can-i-disable-exclude-the-elementary-models)
+1. [Disable the on-run-end hooks](/oss/general/faq#can-i-disable-the-on-run-end-hooks-or-results-uploading)
+2. [Exclude the Elementary models](/oss/general/faq#can-i-disable-exclude-the-elementary-models)
 
 For scheduled updates to `dbt_artifacts` (e.g., a daily job), run:
 
