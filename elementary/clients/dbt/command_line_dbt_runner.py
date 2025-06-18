@@ -28,6 +28,8 @@ class DbtCommandResult:
 
 
 class CommandLineDbtRunner(BaseDbtRunner):
+    _dbx_patch_applied = False
+
     def __init__(
         self,
         project_dir: str,
@@ -52,8 +54,10 @@ class CommandLineDbtRunner(BaseDbtRunner):
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
 
-        # Apply databricks compatibility patch for version 1.10.2
-        self._apply_databricks_compatibility_patch()
+        # Apply databricks compatibility patch for version 1.10.2 only once
+        if not CommandLineDbtRunner._dbx_patch_applied:
+            self._apply_databricks_compatibility_patch()
+            CommandLineDbtRunner._dbx_patch_applied = True
 
         if force_dbt_deps:
             self.deps()
