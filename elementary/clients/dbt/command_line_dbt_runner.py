@@ -51,6 +51,10 @@ class CommandLineDbtRunner(BaseDbtRunner):
         )
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
+        
+        # Apply databricks compatibility patch for version 1.10.2
+        self._apply_databricks_compatibility_patch()
+        
         if force_dbt_deps:
             self.deps()
         elif run_deps_if_needed:
@@ -318,3 +322,104 @@ class CommandLineDbtRunner(BaseDbtRunner):
 
         if should_run_deps:
             self.deps()
+    
+    def _apply_databricks_compatibility_patch(self):
+        """Apply monkey patch to fix dbt-databricks 1.10.2 compatibility issues"""
+        try:
+            from dbt.adapters.databricks import parse_model
+            import logging
+            
+            # Define safe wrapper functions
+            def is_unsupported_object(model):
+                """Check if the object is a Macro or other unsupported type"""
+                return hasattr(model, '__class__') and 'Macro' in str(model.__class__)
+            
+            def safe_catalog_name(model):
+                try:
+                    if is_unsupported_object(model):
+                        logger.debug(f"Received unsupported object type for catalog_name, using unity as default")
+                        return 'unity'
+                    # Handle RelationConfig objects
+                    if hasattr(model, 'config') and model.config and hasattr(model.config, 'get'):
+                        catalog = model.config.get('catalog')
+                        if catalog:
+                            return catalog
+                    # Fallback to unity catalog
+                    return 'unity'
+                except Exception as e:
+                    logger.debug(f"Failed to parse catalog name from model: {e}. Using unity as default.")
+                    return 'unity'
+            
+            def safe_file_format(model):
+                try:
+                    if is_unsupported_object(model):
+                        return None
+                    return safe_get(model, 'file_format')
+                except Exception as e:
+                    logger.debug(f"Failed to get file_format from model: {e}")
+                    return None
+            
+            def safe_location_path(model):
+                try:
+                    if is_unsupported_object(model):
+                        return None
+                    if not hasattr(model, 'config') or not model.config:
+                        return None
+                    if model.config.get('include_full_name_in_path'):
+                        return f"{model.database}/{model.schema}/{model.identifier}"
+                    return model.identifier if hasattr(model, 'identifier') else None
+                except Exception as e:
+                    logger.debug(f"Failed to get location_path from model: {e}")
+                    return None
+            
+            def safe_location_root(model):
+                try:
+                    if is_unsupported_object(model):
+                        return None
+                    return safe_get(model, 'location_root')
+                except Exception as e:
+                    logger.debug(f"Failed to get location_root from model: {e}")
+                    return None
+            
+            def safe_table_format(model):
+                try:
+                    if is_unsupported_object(model):
+                        return None
+                    return safe_get(model, 'table_format')
+                except Exception as e:
+                    logger.debug(f"Failed to get table_format from model: {e}")
+                    return None
+            
+            def safe_get(model, setting: str, case_sensitive=False):
+                try:
+                    if is_unsupported_object(model):
+                        return None
+                    # Check if model has config attribute
+                    if not hasattr(model, 'config') or not model.config:
+                        return None
+                    # Check if config has get method
+                    if not hasattr(model.config, 'get'):
+                        return None
+                    value = model.config.get(setting)
+                    if value:
+                        return value if case_sensitive else value.lower()
+                    return None
+                except Exception as e:
+                    logger.debug(f"Failed to get {setting} from model config: {e}")
+                    return None
+            
+            # Replace problematic functions with safe versions
+            parse_model.catalog_name = safe_catalog_name
+            parse_model.file_format = safe_file_format
+            parse_model.location_path = safe_location_path
+            parse_model.location_root = safe_location_root
+            parse_model.table_format = safe_table_format
+            parse_model._get = safe_get
+                
+            logger.debug("Applied dbt-databricks 1.10.2 compatibility patch")
+            
+        except ImportError:
+            # parse_model module doesn't exist in older versions
+            pass
+        except Exception as e:
+            logger.debug(f"Failed to apply dbt-databricks compatibility patch: {e}")
