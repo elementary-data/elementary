@@ -125,6 +125,10 @@ jobs:
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
 
+      - name: Downgrade dbt-databricks for dbt 1.9+
+        if: inputs.warehouse-type == 'databricks_catalog' && (inputs.dbt-version == '' || inputs.dbt-version >= '1.9.0')
+        run: pip install "dbt-databricks==1.10.1"
+
       - name: Install Elementary
         run: |
           pip install -r dev-requirements.txt
