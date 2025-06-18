@@ -75,7 +75,7 @@ For additional information and help, you can use one of these channels:
 
 - [Slack community](https://www.elementary-data.com/community) \(Release announcements, community support, discussions, etc.\)
 - [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
-- Check out the [contributions guide](https://docs.elementary-data.com/general/contributions) and [open issues](https://github.com/elementary-data/elementary/issues).
+- Check out the [contributions guide](./CONTRIBUTING.md) and [open issues](https://github.com/elementary-data/elementary/issues).
 
 ##
 
