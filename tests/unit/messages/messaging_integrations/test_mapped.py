@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Any, Dict, List
 from unittest.mock import MagicMock
 
 import pytest
@@ -37,6 +37,9 @@ class MockMessagingIntegration(BaseMessagingIntegration[None, MockMessageContext
             message_format="test_format",
             message_context=MockMessageContext(id="test_id"),
         )
+
+    def parse_message_context(self, context: dict[str, Any]) -> MockMessageContext:
+        return MockMessageContext(**context)
 
     def send_message(
         self, destination: None, body: MessageBody

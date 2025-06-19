@@ -9,7 +9,7 @@ from elementary.messages.block_builders import (
     FactsBlock,
     ItalicTextLineBlock,
     JsonCodeBlock,
-    LinkLineBlock,
+    LinksLineBlock,
     MentionLineBlock,
     NonPrimaryFactBlock,
     PrimaryFactBlock,
@@ -104,7 +104,7 @@ class AlertMessageBuilder:
         detected_at_str: Optional[str] = None,
         suppression_interval: Optional[int] = None,
         env: Optional[str] = None,
-        report_link: Optional[ReportLinkData] = None,
+        links: list[ReportLinkData] = [],
     ) -> LinesBlock:
         summary = []
         summary.append((type.capitalize() + ":", name))
@@ -117,11 +117,22 @@ class AlertMessageBuilder:
             summary.append(("Suppression interval:", str(suppression_interval)))
         subtitle_lines = [SummaryLineBlock(summary=summary)]
 
-        if report_link:
+        if links:
             subtitle_lines.append(
-                LinkLineBlock(text="View in Elementary", url=report_link.url)
+                LinksLineBlock(
+                    links=[(link.text, link.url, link.icon) for link in links]
+                )
             )
         return LinesBlock(lines=subtitle_lines)
+
+    def _get_run_alert_subtitle_links(
+        self,
+        alert: Union[TestAlertModel, SourceFreshnessAlertModel, ModelAlertModel],
+    ) -> List[ReportLinkData]:
+        report_link = alert.get_report_link()
+        if report_link:
+            return [report_link]
+        return []
 
     def _get_run_alert_subtitle_blocks(
         self,
@@ -138,6 +149,7 @@ class AlertMessageBuilder:
         elif isinstance(alert, ModelAlertModel):
             asset_type = "snapshot" if alert.materialization == "snapshot" else "model"
             asset_name = alert.alias
+        links = self._get_run_alert_subtitle_links(alert)
         return [
             self._get_run_alert_subtitle_block(
                 type=asset_type,
@@ -146,7 +158,7 @@ class AlertMessageBuilder:
                 detected_at_str=alert.detected_at_str,
                 suppression_interval=alert.suppression_interval,
                 env=alert.env,
-                report_link=alert.get_report_link(),
+                links=links,
             )
         ]
 

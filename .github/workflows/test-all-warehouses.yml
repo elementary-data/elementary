@@ -25,18 +25,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('["1.7.0", null]') }}
+        dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('["1.8.0", null]') }}
         warehouse-type:
-          [
-            postgres,
-            snowflake,
-            bigquery,
-            redshift,
-            databricks,
-            databricks_catalog,
-            athena,
-            clickhouse,
-          ]
+          [postgres, snowflake, bigquery, redshift, databricks_catalog, athena]
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}

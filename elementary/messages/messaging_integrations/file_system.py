@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
@@ -35,6 +36,9 @@ class FileSystemMessagingIntegration(
                 raise MessagingIntegrationError(
                     f"Directory {self.directory} does not exist and create_if_missing is False"
                 )
+
+    def parse_message_context(self, context: dict[str, Any]) -> EmptyMessageContext:
+        return EmptyMessageContext(**context)
 
     def supports_reply(self) -> bool:
         return False

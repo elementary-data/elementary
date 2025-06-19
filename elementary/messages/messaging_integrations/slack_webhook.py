@@ -1,6 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
-from typing import Optional
+from typing import Any, Optional
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebhookClient
@@ -42,6 +42,9 @@ class SlackWebhookMessagingIntegration(
         client = WebhookClient(url)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
         return cls(client, tracking)
+
+    def parse_message_context(self, context: dict[str, Any]) -> EmptyMessageContext:
+        return EmptyMessageContext(**context)
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)

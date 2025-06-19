@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import requests
 from typing_extensions import TypeAlias
@@ -52,6 +52,9 @@ class TeamsWebhookMessagingIntegration(
 ):
     def __init__(self, url: str) -> None:
         self.url = url
+
+    def parse_message_context(self, context: dict[str, Any]) -> EmptyMessageContext:
+        return EmptyMessageContext(**context)
 
     def send_message(
         self,

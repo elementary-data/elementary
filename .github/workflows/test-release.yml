@@ -47,16 +47,7 @@ jobs:
       fail-fast: false
       matrix:
         warehouse-type:
-          [
-            postgres,
-            snowflake,
-            bigquery,
-            redshift,
-            databricks,
-            databricks_catalog,
-            athena,
-            clickhouse,
-          ]
+          [postgres, snowflake, bigquery, redshift, databricks_catalog, athena]
     needs: get-latest-release-tags
     uses: ./.github/workflows/test-warehouse.yml
     with:

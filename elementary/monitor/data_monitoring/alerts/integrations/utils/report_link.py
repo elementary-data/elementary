@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional
 
+from elementary.messages.blocks import Icon
 from elementary.utils.pydantic_shim import BaseModel
 
 TEST_RUNS_LINK_TEXT = "View test runs"
@@ -10,6 +11,7 @@ MODEL_RUNS_LINK_TEXT = "View model runs"
 class ReportLinkData(BaseModel):
     url: str
     text: str
+    icon: Optional[Icon] = None
 
 
 class ReportPath(Enum):
@@ -31,9 +33,11 @@ def _get_run_history_report_link(
         url = f"{formatted_report_url}/report/{path.value}/{unique_id}/"
         report_link = ReportLinkData(
             url=url,
-            text=TEST_RUNS_LINK_TEXT
-            if path == ReportPath.TEST_RUNS
-            else MODEL_RUNS_LINK_TEXT,
+            text=(
+                TEST_RUNS_LINK_TEXT
+                if path == ReportPath.TEST_RUNS
+                else MODEL_RUNS_LINK_TEXT
+            ),
         )
 
     return report_link
@@ -62,7 +66,7 @@ def get_model_test_runs_link(
 
     if model_unique_id and report_url:
         formatted_report_url = _get_formatted_report_url(report_url)
-        url = f'{formatted_report_url}/report/{ReportPath.TEST_RUNS.value}/?treeNode={{"id":"{model_unique_id}"}}'
+        url = f'{formatted_report_url}/report/{ReportPath.TEST_RUNS.value}/?treeNode={{"id":"{model_unique_id}"}}'  # noqa: E231
         report_link = ReportLinkData(url=url, text=TEST_RUNS_LINK_TEXT)
 
     return report_link
