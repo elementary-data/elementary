@@ -2,6 +2,10 @@
 /*               LAYOUT
 /* ==================================== */
 
+html {
+  scroll-padding-top: 150px;
+}
+
 .home__container {
   max-width: 1366px;
   padding-inline: 4rem;
