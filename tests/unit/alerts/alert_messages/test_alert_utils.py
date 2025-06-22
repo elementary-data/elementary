@@ -139,7 +139,7 @@ def build_base_model_alert_model(
 
 def get_mock_report_link(has_link: bool) -> Optional[ReportLink]:
     if has_link:
-        return ReportLink(url="http://test.com", text="View Report")
+        return ReportLink(url="http://test.com", text="View in Elementary")
     return None
 
 

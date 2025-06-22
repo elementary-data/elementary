@@ -19,6 +19,7 @@ class Icon(Enum):
     GEAR = "gear"
     BELL = "bell"
     GEM = "gem"
+    SPARKLES = "sparkles"
 
 
 class TextStyle(Enum):

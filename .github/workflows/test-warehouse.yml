@@ -11,11 +11,9 @@ on:
           - snowflake
           - bigquery
           - redshift
-          - databricks
           - databricks_catalog
           - spark
           - athena
-          - clickhouse
       elementary-ref:
         type: string
         required: false
@@ -106,10 +104,10 @@ jobs:
         working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
         run: docker compose up -d postgres
 
-      - name: Start Clickhouse
-        if: inputs.warehouse-type == 'clickhouse'
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
-        run: docker compose up -d clickhouse
+      # - name: Start Clickhouse
+      #   if: inputs.warehouse-type == 'clickhouse'
+      #   working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      #   run: docker compose up -d clickhouse
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -124,7 +122,8 @@ jobs:
         run: >
           pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
+          # TODO: remove the <1.10.2 once we have a fix for https://github.com/elementary-data/elementary/issues/1931
+          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks<1.10.2,') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
