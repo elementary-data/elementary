@@ -733,8 +733,8 @@ export const FeatureCard = ({
   description = "Your description here",
   icon = "flag",
   link = "#",
-  showCloudFeature = true, // Optionally control display
-  comingSoon = false, // New prop for coming soon state
+  showCloudFeature = true,
+  comingSoon = false,
 }) => {
   const CardContent = () => (
     <div className="home__feature-card__container">
@@ -745,7 +745,6 @@ export const FeatureCard = ({
           </div>
           <h3 className="home__feature-card__heading">{heading}</h3>
         </div>
-        {/* Cloud Feature Tag */}
         {showCloudFeature && (
           <div className="home__feature-card__cloud-feature-tag" tabIndex={0} style={{ position: "absolute", top: 0, right: 0, transform: "none" }}>
             <span className="cloud-feature-icon">
@@ -785,7 +784,6 @@ export const FeatureCard = ({
       <div className="home__feature-card__description-block">
         <p className="home__feature-card__description">{description}</p>
       </div>
-      {/* Coming Soon Overlay */}
       {comingSoon && (
         <div className="home__feature-card__coming-soon-overlay">
           <div className="home__feature-card__coming-soon-message">
@@ -880,11 +878,11 @@ export const Integration = ({ image, label, invertOnDark = false, link, comingSo
 
 export const InfoCard = ({
   label = "Recommended",
-  labelColor = "pink", // 'pink' or 'gray'
+  labelColor = "pink",
   title = "What is Elementary?",
   description,
   link = "#",
-  layout = "vertical", // 'vertical' (default) or 'horizontal'
+  layout = "vertical",
 }) => {
   const labelClass =
     labelColor === "gray"
