@@ -275,7 +275,7 @@ def get_cli_properties() -> dict:
     type=str,
     default=None,
     multiple=True,
-    help="Exclude the alerts by tags:<tags separated by commas> / owners:<owners separated by commas> / models:<models separated by commas> / "
+    help="Exclude alerts by tags:<tags separated by commas> / owners:<owners separated by commas> / models:<models separated by commas> / "
     "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
 )
 @click.option(
