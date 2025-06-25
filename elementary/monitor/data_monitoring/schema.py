@@ -178,8 +178,16 @@ class FiltersSchema(BaseModel):
             )
 
     @staticmethod
-    def from_cli_params(cli_filters: Tuple[str]) -> "FiltersSchema":
-        if not cli_filters:
+    def from_cli_params(
+        cli_filters: Tuple[str], cli_excludes: Tuple[str]
+    ) -> "FiltersSchema":
+        all_filters: list[tuple[str, FilterType]] = []
+        for cli_filter in cli_filters:
+            all_filters.append((cli_filter, FilterType.IS))
+        for cli_exclude in cli_excludes:
+            all_filters.append((cli_exclude, FilterType.IS_NOT))
+
+        if not all_filters:
             return FiltersSchema()
 
         tags = []
@@ -188,26 +196,26 @@ class FiltersSchema(BaseModel):
         statuses = []
         resource_types = []
 
-        for cli_filter in cli_filters:
+        for cli_filter, filter_type in all_filters:
             tags_match = FiltersSchema._match_filter_regex(
                 filter_string=cli_filter, regex=re.compile(r"tags:(.*)")
             )
             if tags_match:
-                tags.append(FilterSchema(values=tags_match))
+                tags.append(FilterSchema(values=tags_match, type=filter_type))
                 continue
 
             owners_match = FiltersSchema._match_filter_regex(
                 filter_string=cli_filter, regex=re.compile(r"owners:(.*)")
             )
             if owners_match:
-                owners.append(FilterSchema(values=owners_match))
+                owners.append(FilterSchema(values=owners_match, type=filter_type))
                 continue
 
             models_match = FiltersSchema._match_filter_regex(
                 filter_string=cli_filter, regex=re.compile(r"models:(.*)")
             )
             if models_match:
-                models.append(FilterSchema(values=models_match))
+                models.append(FilterSchema(values=models_match, type=filter_type))
                 continue
 
             statuses_match = FiltersSchema._match_filter_regex(
@@ -216,7 +224,8 @@ class FiltersSchema(BaseModel):
             if statuses_match:
                 statuses.append(
                     StatusFilterSchema(
-                        values=[Status(status) for status in statuses_match]
+                        values=[Status(status) for status in statuses_match],
+                        type=filter_type,
                     )
                 )
                 continue
@@ -230,7 +239,8 @@ class FiltersSchema(BaseModel):
                         values=[
                             ResourceType(resource_type)
                             for resource_type in resource_types_match
-                        ]
+                        ],
+                        type=filter_type,
                     )
                 )
                 continue
@@ -239,11 +249,14 @@ class FiltersSchema(BaseModel):
                 f'Filter "{cli_filter.split(":")[0]}" is not supported - Skipping this filter ("{cli_filter}").'
             )
 
+        if not any(status_filter.type == FilterType.IS for status_filter in statuses):
+            statuses.extend(_get_default_statuses_filter())
+
         return FiltersSchema(
             tags=tags,
             owners=owners,
             models=models,
-            statuses=statuses if statuses else _get_default_statuses_filter(),
+            statuses=statuses,
             resource_types=resource_types,
         )
 
