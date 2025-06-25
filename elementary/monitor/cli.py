@@ -270,6 +270,15 @@ def get_cli_properties() -> dict:
     "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
 )
 @click.option(
+    "--excludes",
+    "-ex",
+    type=str,
+    default=None,
+    multiple=True,
+    help="Exclude the alerts by tags:<tags separated by commas> / owners:<owners separated by commas> / models:<models separated by commas> / "
+    "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
+)
+@click.option(
     "--teams-webhook",
     "-tw",
     type=str,
@@ -305,6 +314,7 @@ def monitor(
     override_dbt_project_config,
     report_url,
     filters,
+    excludes,
     teams_webhook,
 ):
     """
@@ -344,8 +354,8 @@ def monitor(
         config.validate_monitor()
 
         alert_filters = FiltersSchema()
-        if bool(filters):
-            alert_filters = FiltersSchema.from_cli_params(filters)
+        if bool(filters) or bool(excludes):
+            alert_filters = FiltersSchema.from_cli_params(filters, excludes)
         elif select is not None:
             click.secho(
                 '\n"--select" is deprecated and won\'t be supported in the near future.\n'
