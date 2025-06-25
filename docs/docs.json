@@ -536,39 +536,96 @@
       {
         "header": "Product",
         "items": [
-          { "label": "Detection & Coverage", "href": "https://www.elementary-data.com/detection-and-coverage" },
-          { "label": "Triage and response", "href": "https://www.elementary-data.com/triage-and-resolution" },
-          { "label": "Governance", "href": "https://www.elementary-data.com/governance-and-discovery" },
-          { "label": "Enabling business users", "href": "https://www.elementary-data.com/business-users" },
-          { "label": "Integrations", "href": "https://www.elementary-data.com/integrations" },
-          { "label": "Cloud vs OSS", "href": "https://docs.elementary-data.com/overview/cloud-vs-oss" }
+          {
+            "label": "Detection & Coverage",
+            "href": "https://www.elementary-data.com/detection-and-coverage"
+          },
+          {
+            "label": "Triage and response",
+            "href": "https://www.elementary-data.com/triage-and-resolution"
+          },
+          {
+            "label": "Governance",
+            "href": "https://www.elementary-data.com/governance-and-discovery"
+          },
+          {
+            "label": "Enabling business users",
+            "href": "https://www.elementary-data.com/business-users"
+          },
+          {
+            "label": "Integrations",
+            "href": "https://www.elementary-data.com/integrations"
+          },
+          {
+            "label": "Cloud vs OSS",
+            "href": "https://docs.elementary-data.com/overview/cloud-vs-oss"
+          }
         ]
       },
       {
         "header": "Resources",
         "items": [
-          { "label": "Blog", "href": "https://www.elementary-data.com/blog" },
-          { "label": "Webinars", "href": "https://www.elementary-data.com/webinars" },
-          { "label": "dbt Tests Hub", "href": "https://www.elementary-data.com/dbt-test-hub" },
-          { "label": "Cloud demo videos", "href": "https://www.elementary-data.com/elementary-cloud-demo-videos" },
-          { "label": "Customer Stories", "href": "https://www.elementary-data.com/customer-stories" },
-          { "label": "Documentation", "href": "https://docs.elementary-data.com/introduction" },
-          { "label": "The Elementary Community", "href": "https://www.elementary-data.com/community" }
+          {
+            "label": "Blog",
+            "href": "https://www.elementary-data.com/blog"
+          },
+          {
+            "label": "Webinars",
+            "href": "https://www.elementary-data.com/webinars"
+          },
+          {
+            "label": "dbt Tests Hub",
+            "href": "https://www.elementary-data.com/dbt-test-hub"
+          },
+          {
+            "label": "Cloud demo videos",
+            "href": "https://www.elementary-data.com/elementary-cloud-demo-videos"
+          },
+          {
+            "label": "Customer Stories",
+            "href": "https://www.elementary-data.com/customer-stories"
+          },
+          {
+            "label": "Documentation",
+            "href": "https://docs.elementary-data.com/introduction"
+          },
+          {
+            "label": "The Elementary Community",
+            "href": "https://www.elementary-data.com/community"
+          }
         ]
       },
       {
         "header": "Company",
         "items": [
-          { "label": "About Us", "href": "https://www.elementary-data.com/company" },
-          { "label": "Careers", "href": "https://www.elementary-data.com/careers" },
-          { "label": "Contact Us", "href": "mailto:founders@elementary-data.com" },
-          { "label": "Terms of Services", "href": "https://www.elementary-data.com/terms-of-service" },
-          { "label": "Privacy Policy", "href": "https://www.elementary-data.com/privacy" }
+          {
+            "label": "About Us",
+            "href": "https://www.elementary-data.com/company"
+          },
+          {
+            "label": "Careers",
+            "href": "https://www.elementary-data.com/careers"
+          },
+          {
+            "label": "Contact Us",
+            "href": "mailto:founders@elementary-data.com"
+          },
+          {
+            "label": "Terms of Services",
+            "href": "https://www.elementary-data.com/terms-of-service"
+          },
+          {
+            "label": "Privacy Policy",
+            "href": "https://www.elementary-data.com/privacy"
+          }
         ]
       }
     ]
   },
   "integrations": {
+    "ga4": {
+      "measurementId": "G-4DQN8YR4NH"
+    },
     "gtm": {
       "tagId": "GTM-WCKCG3D4"
     },
@@ -608,6 +665,10 @@
     {
       "source": "/features/data-observability-dashboard",
       "destination": "/features/collaboration-and-communication/data-observability-dashboard"
+    },
+    {
+      "source": "/cloud/guides/alert-rules",
+      "destination": "/features/alerts-and-incidents/alert-rules"
     }
   ]
 }
