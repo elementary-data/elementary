@@ -134,9 +134,10 @@
         {
           "group": "Setup & configure alerts",
           "pages": [
-            "cloud/features/alerts-and-incidents/alert-rules",
+            "cloud/features/alerts-and-incidents/alert-configuration",
+            "cloud/guides/alerts-configuration",
             "cloud/features/alerts-and-incidents/owners-and-subscribers",
-            "cloud/features/alerts-and-incidents/alert-configuration"
+            "cloud/features/alerts-and-incidents/alert-rules"
           ]
         },
         "cloud/features/alerts-and-incidents/incidents",
@@ -191,13 +192,6 @@
             "cloud/onboarding/quickstart-dbt-package",
             "cloud/onboarding/connect-data-warehouse",
             "cloud/manage-team"
-          ]
-        },
-        {
-          "group": "Send alerts",
-          "pages": [
-            "cloud/guides/enable-slack-alerts",
-            "cloud/guides/alerts-configuration"
           ]
         },
         "cloud/guides/sync-scheduling",
