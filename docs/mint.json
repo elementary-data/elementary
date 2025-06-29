@@ -138,7 +138,7 @@
             "cloud/features/alerts-and-incidents/alert-rules",
             "cloud/guides/alerts-configuration",
             "cloud/features/alerts-and-incidents/owners-and-subscribers",
-            "docs/cloud/features/alerts-and-incidents/alert-destinations"
+            "cloud/features/alerts-and-incidents/alert-destinations"
           ]
         },
         "cloud/features/alerts-and-incidents/incidents",
