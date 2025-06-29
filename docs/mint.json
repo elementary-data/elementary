@@ -181,7 +181,8 @@
       "pages": [
         "cloud/features/config-as-code",
         "cloud/features/multi-env",
-        "cloud/features/ci"
+        "cloud/features/ci",
+        "cloud/features/collaboration-and-communication/user-activity-logs"
       ]
     },
     {
