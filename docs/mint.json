@@ -116,7 +116,8 @@
         "cloud/features/data-tests/data-tests-overview",
         "cloud/features/data-tests/dbt-tests",
         "cloud/features/data-tests/custom-sql-tests",
-        "cloud/features/data-tests/schema-validation-test"
+        "cloud/features/data-tests/schema-validation-test",
+        "cloud/features/data-tests/test-coverage-screen"
       ]
     },
     {
