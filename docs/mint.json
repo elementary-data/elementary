@@ -65,12 +65,7 @@
       "group": "Getting Started",
       "pages": [
         "cloud/main_introduction",
-        "cloud/quickstart"
-      ]
-    },
-    {
-      "group": "Cloud Platform",
-      "pages": [
+        "cloud/quickstart",
         "cloud/introduction",
         "cloud/features",
         "cloud/features/integrations",
@@ -100,23 +95,28 @@
             "cloud/features/anomaly-detection/automated-volume"
           ]
         },
-        "cloud/features/anomaly-detection/metrics",
         {
         "group": "Configuration and Feedback",
         "pages": [
           "cloud/features/anomaly-detection/monitors-configuration",
           "cloud/features/anomaly-detection/monitors-feedback"
         ]
-        }
+        },
+        "cloud/features/anomaly-detection/metrics"
       ]
     },
     {
-      "group": "Data Tests",
+      "group": "Data Testing",
       "pages": [
-        "cloud/features/data-tests/data-tests-overview",
-        "cloud/features/data-tests/dbt-tests",
-        "cloud/features/data-tests/custom-sql-tests",
-        "cloud/features/data-tests/schema-validation-test",
+        {
+          "group": "Data Tests",
+          "pages": [
+            "cloud/features/data-tests/data-tests-overview",
+            "cloud/features/data-tests/dbt-tests",
+            "cloud/features/data-tests/custom-sql-tests",
+            "cloud/features/data-tests/schema-validation-test"
+          ]
+        },
         "cloud/features/data-tests/test-coverage-screen"
       ]
     },
