@@ -18,7 +18,10 @@ def get_expected_file_path(fixture_dir: Path, filename: str) -> Path:
     path = fixture_dir / filename
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({}))
+        if filename.endswith(".json"):
+            path.write_text(json.dumps({}))
+        else:
+            path.write_text("")
     return path
 
 

@@ -43,7 +43,7 @@ class TestAdaptiveCards(BaseTestFormat[dict]):
     def format(self, message_body: MessageBody) -> dict:
         return format_adaptive_card(message_body)
 
-    def get_expected_file_path(self, name: str) -> str:
+    def get_expected_file_path(self, name: str) -> Path:
         return get_expected_file_path(FIXTURES_DIR, f"{name}.json")
 
     def assert_expected_value(self, result: dict, expected_file_path: Path) -> None:
