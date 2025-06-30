@@ -24,7 +24,7 @@ from elementary.messages.blocks import (
     TextStyle,
     WhitespaceBlock,
 )
-from elementary.messages.formats.html import ICON_TO_HTML
+from elementary.messages.formats.unicode import ICON_TO_UNICODE
 from elementary.messages.message_body import MessageBlock, MessageBody
 
 
@@ -38,7 +38,7 @@ class MarkdownFormatter:
         self._table_style = table_style
 
     def format_icon(self, icon: Icon) -> str:
-        return ICON_TO_HTML[icon]
+        return ICON_TO_UNICODE[icon]
 
     def format_text_block(self, block: TextBlock) -> str:
         if block.style == TextStyle.BOLD:

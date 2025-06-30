@@ -23,7 +23,7 @@ from elementary.messages.blocks import (
     TextBlock,
     WhitespaceBlock,
 )
-from elementary.messages.formats.html import ICON_TO_HTML
+from elementary.messages.formats.unicode import ICON_TO_UNICODE
 from elementary.messages.message_body import MessageBlock, MessageBody
 
 
@@ -47,7 +47,7 @@ class TextFormatter:
         if self._icon_style == IconStyle.OMIT:
             return ""
         elif self._icon_style == IconStyle.UNICODE:
-            return ICON_TO_HTML[icon]
+            return ICON_TO_UNICODE[icon]
         elif self._icon_style == IconStyle.NAME:
             return f":{icon.value}:"
         else:

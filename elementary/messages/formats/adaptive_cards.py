@@ -21,7 +21,7 @@ from elementary.messages.blocks import (
     TextStyle,
     WhitespaceBlock,
 )
-from elementary.messages.formats.html import ICON_TO_HTML
+from elementary.messages.formats.unicode import ICON_TO_UNICODE
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
 
 COLOR_TO_STYLE = {
@@ -32,7 +32,7 @@ COLOR_TO_STYLE = {
 
 
 def format_icon(icon: Icon) -> str:
-    return ICON_TO_HTML[icon]
+    return ICON_TO_UNICODE[icon]
 
 
 def format_text_block(block: TextBlock) -> str:

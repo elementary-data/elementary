@@ -29,7 +29,7 @@ from elementary.messages.blocks import (
     UserSelectActionBlock,
     WhitespaceBlock,
 )
-from elementary.messages.formats.html import ICON_TO_HTML
+from elementary.messages.formats.unicode import ICON_TO_UNICODE
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
 
 COLOR_MAP = {
@@ -61,7 +61,7 @@ class BlockKitBuilder:
         self._resolve_mention = resolve_mention or (lambda x: None)
 
     def _format_icon(self, icon: Icon) -> str:
-        return ICON_TO_HTML[icon]
+        return ICON_TO_UNICODE[icon]
 
     def _format_text_block(self, block: TextBlock) -> str:
         if block.style == TextStyle.BOLD:
