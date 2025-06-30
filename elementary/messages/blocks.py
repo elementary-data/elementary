@@ -113,7 +113,7 @@ InlineBlock = Union[
     "LineBlock",
 ]
 
-LineBlock.update_forward_refs()
+LineBlock.model_rebuild()
 
 
 class HeaderBlock(BaseBlock):
@@ -184,4 +184,4 @@ InExpandableBlock = Union[
 ]
 
 # Update forward references for recursive types
-ExpandableBlock.update_forward_refs()
+ExpandableBlock.model_rebuild()

@@ -44,6 +44,9 @@ def assert_expected_text(result: str, expected_file_path: Path) -> None:
     expected = expected_file_path.read_text()
     if OVERRIDE:
         logger.warning(f"Overriding expected text file: {expected_file_path}")
+        if not result.endswith("\n"):
+            # for code quality, we want to ensure that all files end with a newline
+            result += "\n"
         expected_file_path.write_text(result)
     else:
-        assert result == expected
+        assert result.strip() == expected.strip()
