@@ -107,7 +107,9 @@ class MarkdownFormatter:
             raise ValueError(f"Invalid table style: {self._table_style}")
 
     def format_expandable_block(self, block: ExpandableBlock) -> str:
-        return f"**{block.title}**\\\n{self.format_message_blocks(block.body)}"
+        body = self.format_message_blocks(block.body)
+        quoted_body = "\n> ".join(body.split("\n"))
+        return f"> **{block.title}**\\\n> {quoted_body}"
 
     def format_message_block(self, block: MessageBlock) -> str:
         if isinstance(block, HeaderBlock):

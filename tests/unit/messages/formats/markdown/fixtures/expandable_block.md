@@ -1,2 +1,2 @@
-**Show More**\
-Hidden content
+> **Show More**\
+> Hidden content
