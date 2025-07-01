@@ -23,7 +23,7 @@ from elementary.monitor.alerts.test_alert import TestAlertModel
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData as ReportLink,
 )
-from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
+from tests.unit.messages.utils import assert_expected_json, get_expected_file_path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -320,7 +320,7 @@ def assert_expected_json_adaptive_card(
 ):
     adaptive_card_filename = f"{filename}.json"
     adaptive_card_json = format_adaptive_card(message_body)
-    expected_adaptive_card_json_path = get_expected_json_path(
+    expected_adaptive_card_json_path = get_expected_file_path(
         FIXTURES_DIR / "adaptive_card", adaptive_card_filename
     )
     assert_expected_json(adaptive_card_json, expected_adaptive_card_json_path)
@@ -345,7 +345,7 @@ def assert_expected_json_block_kit(
             os.environ["TEST_SLACK_CHANNEL"],
             formatted_block_kit_message,
         )
-    expected_block_kit_json_path = get_expected_json_path(
+    expected_block_kit_json_path = get_expected_file_path(
         FIXTURES_DIR / "block_kit", block_kit_filename
     )
     assert_expected_json(

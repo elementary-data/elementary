@@ -10,7 +10,7 @@ from elementary.messages.messaging_integrations.slack_web import (
     SlackWebMessagingIntegration,
 )
 from tests.unit.messages.formats.base_test_format import BaseTestFormat
-from tests.unit.messages.utils import assert_expected_json, get_expected_json_path
+from tests.unit.messages.utils import assert_expected_json, get_expected_file_path
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -20,7 +20,7 @@ class TestBlockKit(BaseTestFormat[FormattedBlockKitMessage]):
         return format_block_kit(message_body, resolve_mention=lambda x: "resolved_" + x)
 
     def get_expected_file_path(self, name: str) -> Path:
-        return get_expected_json_path(FIXTURES_DIR, f"{name}.json")
+        return get_expected_file_path(FIXTURES_DIR, f"{name}.json")
 
     def assert_expected_value(
         self, result: FormattedBlockKitMessage, expected_file_path: Path
