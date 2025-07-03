@@ -39,4 +39,4 @@ class MessageBody(BaseModel):
     id: Optional[str] = None
 
 
-MessageBody.model_rebuild()
+MessageBody.update_forward_refs()
