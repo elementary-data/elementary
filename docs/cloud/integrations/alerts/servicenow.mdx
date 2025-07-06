@@ -16,23 +16,6 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
 ## Create a ServiceNow app (Admin required)
 1. Connect to your ServiceNow instance
 2. Navigate to the `System OAuth` -> `Application Registry` page
-3. Create a new application by clicking `New` -> `Create an OAuth API endpoint for external clients`
-4. Set the following fields:
-    - Name: `Elementary` (Reccomended)
-    - Redirect URL: `https://prod.nango.elementary-data.com/oauth/callback`
-    - Logo URL: `https://cdn.prod.website-files.com/65ec9eebc532cfda4df5fcd7/6781525ba8657fba8fa35446_Vector.svg` (Optional)
-5. Save the application
-6. Go to the created application and copy the `Client ID` and `Client Secret`
-7. Recommended: add "Elementary Link" to the incidents table:
-    - Navigate to `System Definitions` -> `Table`
-    - Select the `Incident` table
-    - Under `Columns`, click `New`
-    - Set the following fields:
-        - Type: `URL`
-        - Column Label: `Elementary Link`
-        - Column Name: `u_elementary_incident_url`
-    - Click `Submit`
-
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -42,6 +25,7 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+3. Create a new application by clicking `New` -> `Create an OAuth API endpoint for external clients`
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -51,6 +35,10 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+4. Set the following fields:
+    - Name: `Elementary` (Reccomended)
+    - Redirect URL: `https://prod.nango.elementary-data.com/oauth/callback`
+    - Logo URL: `https://cdn.prod.website-files.com/65ec9eebc532cfda4df5fcd7/6781525ba8657fba8fa35446_Vector.svg` (Optional)
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -60,6 +48,13 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+5. Save the application
+6. Go to the created application and copy the `Client ID` and `Client Secret`
+
+
+
+## Add Elementary Link to the incidents table (Recommended)
+1. Navigate to `System Definitions` -> `Table`
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -69,6 +64,7 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+2. Select the `Incident` table
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -78,6 +74,11 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+3. Under `Columns`, click `New`
+4. Set the following fields:
+    - Type: `URL`
+    - Column Label: `Elementary Link`
+    - Column Name: `u_elementary_incident_url`
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -87,19 +88,20 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+5. Click `Submit`
+
+
 ## How to connect your ServiceNow app
 1. Go to the `Environments` page on the sidebar.
 2. Select an environment and click connect on the `Connect ticketing system` card, and select `ServiceNow`.
-3. Fill in the app details:
-    - Client ID: Client ID from the app you created in the previous step
-    - Client Secret: Client Secret from the app you created in the previous step
-    - Subdomain: The subdomain of your ServiceNow instance (e.g. for `https://my-company.service-now.com`, the subdomain is `my-company`)
-4. Click `Connect`
-5. Allow the app to access your ServiceNow instance. **This step may require admin approval.**
-6. Choose a group to assign the incidents to
-7. Click `Save`
-
-<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1739794590/connect_zqg0vr.png" />
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1739794590/connect_zqg0vr.png"
+      width="500"
+    />
+  </div>
+</Frame>
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -110,6 +112,10 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
   </div>
 </Frame>
 
+3. Fill in the app details:
+    - Client ID: Client ID from the app you created in the previous step
+    - Client Secret: Client Secret from the app you created in the previous step
+    - Subdomain: The subdomain of your ServiceNow instance (e.g. for `https://my-company.service-now.com`, the subdomain is `my-company`)
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -118,6 +124,9 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
     />
   </div>
 </Frame>
+
+4. Click `Connect`
+5. Allow the app to access your ServiceNow instance. **This step may require admin approval.**
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -126,6 +135,8 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
     />
   </div>
 </Frame>
+
+6. Choose a group to assign the incidents to
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -134,6 +145,8 @@ Elementary's ServiceNow integration enables creating ServiceNow incidents from i
     />
   </div>
 </Frame>
+
+7. Click `Save`
 
 
 ## Creating ServiceNow incident from incidents
