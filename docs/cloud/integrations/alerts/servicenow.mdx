@@ -1,0 +1,65 @@
+---
+title: "ServiceNow"
+---
+
+Elementary's ServiceNow integration enables creating ServiceNow incidents from incidents.
+
+// servicenow_create_ticket.png
+
+## Create a ServiceNow app (Admin required)
+1. Connect to your ServiceNow instance
+2. Navigate to the `System OAuth` -> `Application Registry` page
+3. Create a new application by clicking `New` -> `Create an OAuth API endpoint for external clients`
+4. Set the following fields:
+    - Name: `Elementary` (Reccomended)
+    - Redirect URL: `https://prod.nango.elementary-data.com/oauth/callback`
+    - Logo URL: `https://cdn.prod.website-files.com/65ec9eebc532cfda4df5fcd7/6781525ba8657fba8fa35446_Vector.svg` (Optional)
+5. Save the application
+6. Go to the created application and copy the `Client ID` and `Client Secret`
+7. Recommended: add "Elementary Link" to the incidents table:
+    - Navigate to `System Definitions` -> `Table`
+    - Select the `Incident` table
+    - Under `Columns`, click `New`
+    - Set the following fields:
+        - Type: `URL`
+        - Column Label: `Elementary Link`
+        - Column Name: `u_elementary_incident_url`
+    - Click `Submit`
+
+// servicenow_app_registry.png
+// servicenow_oauth_application.png
+// servicenow_oauth_app.png
+// servicenow_tables.png
+// servicenow_incident_table.png
+// servicenow_elementary_link.png
+
+
+## How to connect your ServiceNow app
+1. Go to the `Environments` page on the sidebar.
+2. Select an environment and click connect on the `Connect ticketing system` card, and select `ServiceNow`.
+3. Fill in the app details:
+    - Client ID: Client ID from the app you created in the previous step
+    - Client Secret: Client Secret from the app you created in the previous step
+    - Subdomain: The subdomain of your ServiceNow instance (e.g. for `https://my-company.service-now.com`, the subdomain is `my-company`)
+4. Click `Connect`
+5. Allow the app to access your ServiceNow instance. **This step may require admin approval.**
+6. Choose a group to assign the incidents to
+7. Click `Save`
+
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1739794590/connect_zqg0vr.png" />
+// choose_ticketing_tool.png
+// servicenow_app_connect.png
+// servicenow_oauth.png
+// servicenow_select_group.png
+
+
+## Creating ServiceNow incident from incidents
+When an incident is created, you can create a ServiceNow incident from the incident page by simply clicking on "Create ticket".
+The incident will automatically be created in ServiceNow, in the group you chose upon connecting ServiceNow.
+
+After the ticket is created you can see the ServiceNow incident link in the incident page.
+The incident will also contain a link to the incident in Elementary.
+
+<Note>Note: Elementary will not update the incident in ServiceNow when the incident is resolved or changed in any way</Note>
+
+// servicenow_ticket.png
