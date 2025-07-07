@@ -65,12 +65,7 @@
   ],
 
   "navigation": [
-    {
-      "group": "Welcome",
-      "pages": [
-        "home/homepage"
-      ]
-    },
+
     {
       "group": "Getting Started",
       "pages": [
