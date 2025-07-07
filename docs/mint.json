@@ -68,7 +68,7 @@
     {
       "group": "Welcome",
       "pages": [
-        "home/home"
+        "home/homepage"
       ]
     },
     {
