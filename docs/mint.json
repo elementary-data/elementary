@@ -29,6 +29,10 @@
   },
   "tabs": [
     {
+      "name": "Home",
+      "url": "home"
+    },
+    {
       "name": "Elementary Cloud",
       "url": "cloud"
     },
@@ -61,6 +65,12 @@
   ],
 
   "navigation": [
+    {
+      "group": "Welcome",
+      "pages": [
+        "home/home"
+      ]
+    },
     {
       "group": "Getting Started",
       "pages": [
