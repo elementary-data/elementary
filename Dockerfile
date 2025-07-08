@@ -22,3 +22,9 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir "/app[all]"
 
 ENTRYPOINT ["edr"]
+Those features will allow Elementary to get all required info for computing the data lineage graph.
+
+### Connecting Looker to Elementary
+
+Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect Elementary.
+Choose the Power BI connection and provide the following details to validate and complete the integration.
