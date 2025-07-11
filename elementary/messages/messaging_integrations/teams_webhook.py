@@ -1,4 +1,5 @@
 from datetime import datetime
+from http import HTTPStatus
 from typing import Any, Optional
 
 import requests
@@ -62,17 +63,20 @@ class TeamsWebhookMessagingIntegration(
         body: MessageBody,
     ) -> MessageSendResult[EmptyMessageContext]:
         card = format_adaptive_card(body)
-        try:
-            send_adaptive_card(self.url, card)
-            return MessageSendResult(
-                message_context=EmptyMessageContext(),
-                timestamp=datetime.utcnow(),
-                message_format="adaptive_cards",
-            )
-        except requests.RequestException as e:
+        response = send_adaptive_card(self.url, card)
+        # The status code is always 200, but the response returns 1 for success and otherwise sometext
+        if (
+            response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+            or len(response.text) > 1
+        ):
             raise MessagingIntegrationError(
-                "Failed to send message to Teams webhook"
-            ) from e
+                f"Could not post message to Teams via webhook - {self.url}. Status code: {response.status_code}, Error: {response.text}"
+            )
+        return MessageSendResult(
+            message_context=EmptyMessageContext(),
+            timestamp=datetime.utcnow(),
+            message_format="adaptive_cards",
+        )
 
     def supports_reply(self) -> bool:
         return False

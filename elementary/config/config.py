@@ -71,6 +71,7 @@ class Config:
         azure_container_name: Optional[str] = None,
         report_url: Optional[str] = None,
         teams_webhook: Optional[str] = None,
+        maximum_columns_in_alert_samples: Optional[int] = None,
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
@@ -101,6 +102,12 @@ class Config:
             update_bucket_website,
             config.get("update_bucket_website"),
             False,
+        )
+
+        self.maximum_columns_in_alert_samples = self._first_not_none(
+            maximum_columns_in_alert_samples,
+            config.get("maximum_columns_in_alert_samples"),
+            4,
         )
 
         self.timezone = self._first_not_none(
