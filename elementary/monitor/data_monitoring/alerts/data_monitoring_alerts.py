@@ -309,7 +309,7 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> bool:
         if isinstance(self.alerts_integration, BaseIntegration):
             return self.alerts_integration.send_alert(alert)
-        alert_message_builder = AlertMessageBuilder()
+        alert_message_builder = AlertMessageBuilder(self.config)
         alert_message_body = alert_message_builder.build(
             alert=alert,
         )
