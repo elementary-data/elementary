@@ -278,25 +278,12 @@ icon: "house"
               link="/cloud/features/data-governance/critical_assets"
             />
             <FeatureCard
-              heading="Assets tags"
-              description="Visualize and edit your assets' tags to ensure structure and the right work distribution"
+              heading="Efficiently add tags, owners and subscribers'"
+              description="Visualize and edit your assets' tags, owners and subscibers to ensure structure and the right work distribution"
               icon="tags"
               showCloudFeature={true}
-              comingSoon={true}
-            />
-            <FeatureCard
-              heading="Ownership"
-              description="Define clear ownership of data assets and enable owners to be informed and accountable for the health and status of their data."
-              icon="users"
-              showCloudFeature={false}
-              comingSoon={true}
-            />
-            <FeatureCard
-              heading="Governance AI Agent"
-              description="Let the AI agent keep your catalog complete and compliant by filling metadata gaps, enforcing policies, and flagging sensitive data issues."
-              icon="robot"
-              showCloudFeature={true}
-              link="/cloud/ai-agents/governance-agent"
+              comingSoon={false}
+              link="/cloud/best-practices/governance-for-observability"
             />
             <FeatureCard
               heading="Metadata management"
@@ -311,6 +298,13 @@ icon: "house"
               icon="sparkles"
               showCloudFeature={true}
               link="/cloud/features/data-governance/ai-descriptions"
+            />
+            <FeatureCard
+              heading="Governance AI Agent"
+              description="Let the AI agent keep your catalog complete and compliant by filling metadata gaps, enforcing policies, and flagging sensitive data issues."
+              icon="robot"
+              showCloudFeature={true}
+              link="/cloud/ai-agents/governance-agent"
             />
           </div>
         </div>
@@ -330,7 +324,7 @@ icon: "house"
             </a>
           </div>
           <div class="">
-            <h3 class="home__integrations-heading">OSS + Cloud integrations</h3>
+            <h3 class="home__integrations-heading">OSS integrations</h3>
             <div class="home__integrations-grid">
               {integrations
                 .filter((integration) => integration.oss === true)

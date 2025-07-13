@@ -20,9 +20,8 @@
           {
             "group": "Getting Started",
             "pages": [
-              "cloud/main_introduction",
-              "cloud/quickstart",
               "cloud/introduction",
+              "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
