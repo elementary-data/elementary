@@ -1,0 +1,1051 @@
+---
+title: "Home"
+mode: "custom"
+icon: "house"
+---
+
+<div class="home__page">
+  <section className="home__hero-section">
+    <div class="home__container">
+      <div class="home__hero-layout">
+        <div className="home__hero-content">
+          <div className="home__hero-text-block">
+            <h1 className="home__hero-title">
+              Dev-First <br />
+              AI-Powered <br />
+              Data Observability
+            </h1>
+            <p className="home__hero-subtitle">
+              Elementary is built for and trusted by <br />
+              1000+ analytics and data teams.
+            </p>
+            <a href="/cloud/what-is-elementary" className="home__hero-link">
+              What is Elementary?
+            </a>
+            <div className="home__hero-buttons">
+              <a
+                href="/oss/quickstart/quickstart-cli-package"
+                className="home__hero-btn home__hero-btn--primary"
+              >
+                Setup OSS
+              </a>
+              <a href="/cloud/quickstart" className="home__hero-btn home__hero-btn--secondary">
+                Start Free with Cloud
+              </a>
+            </div>
+          </div>
+          <div className="home__hero-image-block">
+            <img
+              className="home__hero-image"
+              src="https://res.cloudinary.com/diuctyblm/image/upload/v1749564684/Docs/Hero_Image_yvczgg.png"
+              alt="Hero Image"
+              noZoom={true}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+<section>
+  <div class="home__container padding-bottom-none">
+    <div className="home__jump-navigation">
+      <div className="home__jump-navigation-content">
+        <h2 className="home__jump-navigation-heading">
+          Discover what you can do <br />
+          with Elementary
+        </h2>
+        <div className="home__jump-navigation-links">
+          <span className="home__jump-navigation-label">Jump to:</span>
+          <a href="#detect-issues" className="home__jump-navigation-link">
+            Detect issues
+          </a>
+          <a href="#triage-response" className="home__jump-navigation-link">
+            Triage and Response
+          </a>
+          <a href="#business-users" className="home__jump-navigation-link">
+            Business users
+          </a>
+          <a href="#governance" className="home__jump-navigation-link">
+            Governance
+          </a>
+          <a href="#integrations" className="home__jump-navigation-link">
+            Integrations
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <section>
+      <div class="home__container padding-bottom-none">
+        <div id="detect-issues" class="home__features__section">
+          <FeatureHeader link="/cloud/best-practices/detection-and-coverage">
+            <span>Detect issues</span> before they reach consumers
+          </FeatureHeader>
+          <div className="home__features-grid">
+            <FeatureCard
+              heading="Detect anomalies"
+              description="Detect anomalies in your dbt models with tests for freshness, volume, and your customizable data metrics."
+              icon="monitor-waveform"
+              showCloudFeature={false}
+              link="/cloud/features/anomaly-detection/monitors-overview"
+            />
+            <FeatureCard
+              heading="ML-powered pipeline monitoring"
+              description="ML-powered monitors automatically detect data quality issues. Out-of-the-box for volume and freshness, and opt-in for data quality metrics."
+              icon="sparkles"
+              showCloudFeature={true}
+              link="/cloud/features/anomaly-detection/monitors-overview"
+            />
+            <FeatureCard
+              heading="Validate and track dbt test results"
+              description="Validate data and track the results of dbt tests, dbt packages tests (dbt-utils, dbt-expectations, elementary) and custom SQL tests."
+              icon="table-tree"
+              showCloudFeature={false}
+              link="/cloud/features/data-tests/data-tests-overview"
+            />
+            <FeatureCard
+              heading="Validate schema and downstream exposure"
+              description="Validate there are no breaking changes in tables schema, JSON schema, and downstream exposures such as dashboards."
+              icon="brackets-curly"
+              showCloudFeature={false}
+              link="/cloud/features/data-tests/schema-validation-test"
+            />
+            <FeatureCard
+              heading="Configure in code or UI, bulk add tests"
+              description="Configure Elementary in code, or via the UI for non-technical users or for adding tests in bulk. The platform opens PRs to your repo, saving hours of tedious YAML edits."
+              icon="cloud-arrow-up"
+              showCloudFeature={true}
+              link="/cloud/features/data-tests/data-tests-overview#test-configuration"
+            />
+              <FeatureCard
+              heading="Manage test coverage"
+              description="See the full picture of your test coverage across assets and dimensions. Easily identify gaps and prioritize coverage for critical assets."
+              icon="flask-vial"
+              showCloudFeature={true}
+              link="/cloud/features/data-tests/test-coverage-screen"
+            />
+            <FeatureCard
+              heading="Test recommendation AI agent"
+              description="Analyzes your data asset, metadata, lineage, and existing test suite to suggest high-impact tests that match your team’s style and priorities."
+              icon="wand-magic-sparkles"
+              showCloudFeature={true}
+              link="/cloud/ai-agents/test-recommendation-agent"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="home__container">
+        <div id="triage-response" class="home__features__section">
+          <FeatureHeader link="/cloud/best-practices/triage-and-response">
+            Take action with <span>triage and response</span>
+          </FeatureHeader>
+          <div className="home__features-grid">
+            <FeatureCard
+              heading="Send alerts, analyze lineage"
+              description="Send alerts for data quality issues and understand their impact."
+              icon="rotate-exclamation"
+              showCloudFeature={false}
+              link="/cloud/features/data-lineage/lineage"
+            />
+            <FeatureCard
+              heading="Column-level lineage and impact analysis"
+              description="Column-level lineage from source to BI. Enables granular root cause and impact analysis."
+              icon="arrow-progress"
+              showCloudFeature={true}
+              link="/cloud/features/data-lineage/lineage"
+            />
+            <FeatureCard
+              heading="Highly configurable alerts and integrations"
+              description="Distribute highly configurable alerts to different channels and integrations. Automatically tag owners, and enable setting status and assignees at the alert level."
+              icon="bell-exclamation"
+              showCloudFeature={true}
+              link="/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
+            />
+            <FeatureCard
+              heading="Incident management system"
+              description="Manage all open quality incidents in a single interface, with a clear view of status and assignees."
+              icon="list-check"
+              showCloudFeature={true}
+              link="/cloud/features/alerts-and-incidents/incident-management"
+            />
+            <FeatureCard
+              heading="Triage & resolution AI agent"
+              description="Automates root cause analysis, clarifies the impact, and suggests actionable fixes."
+              icon="wand-magic-sparkles"
+              showCloudFeature={true}
+              link="/cloud/ai-agents/triage-resolution-agent"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <div class="home__theme-gray">
+      <div class="home__container">
+        <div class="home__2col is-uneven">
+          <div class="home__2col-content">
+            <h2 class="home__heading-lg">Learn more about Elementary</h2>
+          </div>
+          <div class="home__2col">
+            <InfoCard
+              label="Recommended"
+              labelColor="pink"
+              title="What is Elementary?"
+              description="Elementary is the dev-first data reliability platform, built for the entire organization."
+              link="/cloud/what-is-elementary"
+            />
+            <div class="flex flex-col gap-4">
+              <InfoCard
+                label="Article"
+                labelColor="gray"
+                title="Integrations"
+                link="/cloud/features/integrations"
+                layout="horizontal"
+              />
+              <InfoCard
+                label="Article"
+                labelColor="gray"
+                title="OSS vs Cloud"
+                link="/cloud/cloud-vs-oss"
+                layout="horizontal"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="home__page">
+    
+    <section>
+      <div class="home__container padding-bottom-none">
+        <div id="business-users" class="home__features__section">
+          <FeatureHeader>
+            Allow <span>business users</span> to monitor and maintain their data
+          </FeatureHeader>
+          <div className="home__features-grid">
+            <FeatureCard
+              heading="Overview dashboard"
+              description="Up to date dashboard with current status and trends of data issues. Share the dashboard with others, enable them to slice results and stay informed."
+              icon="chart-line"
+              showCloudFeature={false}
+              link="/cloud/features/collaboration-and-communication/data-observability-dashboard"
+            />
+            <FeatureCard
+              heading="Data catalog"
+              description="Curate a collaborative, AI-enriched catalog with smart metadata editing, critical asset tagging, and analyst-first discovery tools."
+              icon="book-open"
+              showCloudFeature={true}
+              link="/cloud/features/collaboration-and-communication/catalog"
+            />
+            <FeatureCard
+              heading="Data health scores"
+              description="See the Data Health scores of all your datasets by domain and share with stakeholders."
+              icon="heart-pulse"
+              showCloudFeature={true}
+              comingSoon={false}
+            />
+            <FeatureCard
+              heading="Catalog AI agent"
+              description="Helps data analysts, business users, and AI tools find the right data on their own so engineers don’t have to be the bottleneck."
+              icon="robot"
+              showCloudFeature={false}
+              link="/cloud/ai-agents/catalog-agent"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section>
+      <div class="home__container">
+        <div id="governance" class="home__features__section">
+        
+          <FeatureHeader link="/cloud/best-practices/governance-for-observability">
+            Easily apply <span>governance</span>
+          </FeatureHeader>
+          <div className="home__features-grid">
+            <FeatureCard
+              heading="Marking critical assets"
+              description="Easily mark your company's crucial assets as critical, and give higher priority in monitoring and alerting to any issue that might impact them."
+              icon="star"
+              showCloudFeature={false}
+              link="/cloud/features/data-governance/critical_assets"
+            />
+            <FeatureCard
+              heading="Efficiently add tags, owners and subscribers"
+              description="Visualize and edit your assets' tags, owners and subscibers to ensure structure and the right work distribution"
+              icon="tags"
+              showCloudFeature={true}
+              comingSoon={false}
+              link="/cloud/best-practices/governance-for-observability"
+            />
+            <FeatureCard
+              heading="Metadata management"
+              description="Manage your metadata efficiently, directly from the Elementary Catalog"
+              icon="database"
+              showCloudFeature={true}
+              link="/cloud/features/data-governance/manage-metadata"
+            />
+            <FeatureCard
+              heading="AI Descriptions"
+              description="Let the AI agent generate high-quality asset descriptions that align with your existing documentation and company policies."
+              icon="sparkles"
+              showCloudFeature={true}
+              link="/cloud/features/data-governance/ai-descriptions"
+            />
+            <FeatureCard
+              heading="Governance AI Agent"
+              description="Let the AI agent keep your catalog complete and compliant by filling metadata gaps, enforcing policies, and flagging sensitive data issues."
+              icon="robot"
+              showCloudFeature={true}
+              link="/cloud/ai-agents/governance-agent"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div id="integrations" class="home__theme-gray">
+      <div class="home__container">
+        <div class="home__2col">
+          <div class="home__2col-content">
+            <h2 class="home__heading-lg">Integrations</h2>
+            <p>
+              Connect Elementary to every part of your data stack—from your warehouse to BI,
+              incident management and messaging tools.
+            </p> <a href="/cloud/features/integrations" class="home__button---tertiary">
+              Check out the integrations <Icon icon={"arrow-right"} size={16} />
+            </a>
+          </div>
+          <div class="">
+            <h3 class="home__integrations-heading">OSS integrations</h3>
+            <div class="home__integrations-grid">
+              {integrations
+                .filter((integration) => integration.oss === true)
+                .map((integration, index) => (
+                  <Integration
+                    key={index}
+                    image={integration.image}
+                    label={integration.label}
+                    invertOnDark={integration.invertOnDark}
+                    link={integration.link}
+                    comingSoon={integration.comingSoon}
+                  />
+                ))}
+            </div>
+            <h3 class="home__integrations-heading">Cloud-only integrations</h3>
+            <div class="home__integrations-grid">
+              {integrations
+                .filter((integration) => integration.cloud === true)
+                .map((integration, index) => (
+                  <Integration
+                    key={index}
+                    image={integration.image}
+                    label={integration.label}
+                    invertOnDark={integration.invertOnDark}
+                    link={integration.link}
+                    comingSoon={integration.comingSoon}
+                  />
+                ))}
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="home__theme-purple">
+      <div class="home__container">
+        <div class="home__guides-layout">
+          <div class="home__guides">
+            <div class="home__guides-header">
+              <h2 class="home__heading-lg">Get started now</h2>
+              <p class="home__paragraph-lg">
+                Whether you need a lightweight start or an enterprise-ready platform, Elementary has a solution for you.
+              </p>
+            </div>
+            <div class="home__3col">
+              <InfoCard
+                label="Popular"
+                labelColor="pink"
+                title="Elementary Cloud Platform Quickstart"
+                description="Start a 30-day free trial with the fully hosted platform. Unlock deeper observability, advanced governance control, AI-powered features and rich integrations."
+                link="/cloud/quickstart"
+                layout="vertical"
+              /> <InfoCard label="Guide" labelColor="gray" title="Elementary OSS Setup Guide" description="Step-by-step guide to self-managed observability, with our OSS dbt package and CLI. Run tests, detect anomalies and send alerts." link="/oss/quickstart/quickstart-cli-package" layout="vertical" />
+            </div>
+          </div>
+          <div class="home__guides">
+            <div class="home__guides-header">
+              <h2 class="home__heading-lg">Featured guides</h2>
+              <p class="home__paragraph-lg">
+                Learn from the Elementary team and thousands of users from our community how to set up
+                effective, scalable data observability.
+              </p>
+            </div>
+            <div class="home__3col">
+              <InfoCard
+                label="Best practices"
+                labelColor="gray"
+                title="Detection and coverage"
+                description="Learn how to build effective, efficient test coverage to catch real issues."
+                link="/cloud/best-practices/detection-and-coverage"
+                layout="vertical"
+              />
+              <InfoCard
+                label="Best practices"
+                labelColor="gray"
+                title="Triage and response"
+                description="Learn how to triage data issues with context, ownership, and clear next steps."
+                link="/cloud/best-practices/triage-and-response"
+                layout="vertical"
+              />
+              <InfoCard
+                label="Best practices"
+                labelColor="gray"
+                title="Governance"
+                description="Learn how to assign ownership and define expectations to make observability actionable."
+                link="/cloud/best-practices/governance-for-observability"
+                layout="vertical"
+              />
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  <div class="home__theme-pink">
+      <div class="home__container">
+        <div class="home__cta">
+          <h2 class="home__heading-lg">Join the community</h2>
+          <p class="home__paragraph-lg">
+            Join the Elementary Community to get support, explore best practices, and stay up to
+            date on OSS and Cloud. Connect with other data professionals and help shape what's next.
+          </p> <a
+            href="https://elementary-data.com/community"
+            class="home__button home__button--white"
+          >
+          <Icon icon="slack" size={16} />
+            Join now
+          </a>
+        </div>
+      </div>
+  </div>
+</div>
+
+<HomeFooter />
+
+export const cloudinaryBase = "https://res.cloudinary.com/diuctyblm/image/upload/v1749636234";
+export const cloudinaryIntegrationsBase = `${cloudinaryBase}/Integrations`;
+export const integrations = [{
+  image: `${cloudinaryIntegrationsBase}/Webhooks_h6dxdn.png`,
+  label: "Webhooks",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/webhooks",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/ThoughtSpot_bugqhl.png`,
+  label: "ThoughtSpot",
+  cloud: true,
+  oss: false,
+  invertOnDark: true,
+  link: "/cloud/integrations/bi/thoughtspot",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Snowflake_hhsqbs.png`,
+  label: "Snowflake",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/dwh/snowflake",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Tableau_tezzpt.png`,
+  label: "Tableau",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/bi/tableau",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Slack_qrfsfy.png`,
+  label: "Slack",
+  cloud: true,
+  oss: true,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/slack",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Sigma_oku5lp.png`,
+  label: "Sigma",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/bi/sigma",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Redshift_tetdk7.png`,
+  label: "Redshift",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/dwh/redshift",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/PowerBI_sxxgbr.png`,
+  label: "PowerBI",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/bi/power-bi",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Postgres_eqy6fb.png`,
+  label: "Postgres",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/dwh/postgres",
+  comingSoon: false,
+},  {
+  image: `${cloudinaryIntegrationsBase}/Pagerduty_wv0mmz.png`,
+  label: "Pagerduty",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/pagerduty",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Opsgenie_yjoubp.png`,
+  label: "Opsgenie",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/opsgenie",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Mode_xbydj4.png`,
+  label: "Mode",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "https://tally.so/r/3N6DlW?integration=Mode",
+  comingSoon: true,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Microsoft_Teams_ibh1cm.png`,
+  label: "Microsoft Teams",
+  cloud: true,
+  oss: true,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/ms-teams",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Metabase_zfrsgu.png`,
+  label: "Metabase",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "https://tally.so/r/3N6DlW?integration=Metabase",
+  comingSoon: true,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Looker_rih3v5.png`,
+  label: "Looker",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/bi/looker",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Linear_qsjld8.png`,
+  label: "Linear",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/linear",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Jira_m7le7c.png`,
+  label: "Jira",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/alerts/jira",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Hightouch_oaqpiy.png`,
+  label: "Hightouch",
+  cloud: true,
+  oss: false,
+  invertOnDark: true,
+  link: "https://tally.so/r/3N6DlW?integration=Hightouch",
+  comingSoon: true,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Hex_ylmow7.png`,
+  label: "Hex",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "https://tally.so/r/3N6DlW?integration=Hex",
+  comingSoon: true,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Gitlab_lwgplm.png`,
+  label: "Gitlab",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/code-repo/gitlab",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Github_jrhh77.png`,
+  label: "Github",
+  cloud: true,
+  oss: false,
+  invertOnDark: true,
+  link: "/cloud/integrations/code-repo/github",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Explo_mngybv.png`,
+  label: "Explo",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "https://tally.so/r/3N6DlW?integration=Explo",
+  comingSoon: true,
+}, {
+  image: `${cloudinaryIntegrationsBase}/dbt_zqc8rn.png`,
+  label: "dbt",
+  cloud: true,
+  oss: true,
+  invertOnDark: false,
+  link: "/cloud/integrations/transformation-and-orchestration/dbt-core",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Databricks_bes8vc.png`,
+  label: "Databricks",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/dwh/databricks",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/ClickHouse_czq5cy.png`,
+  label: "ClickHouse",
+  cloud: true,
+  oss: false,
+  invertOnDark: true,
+  link: "/cloud/integrations/dwh/clickhouse",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Athena_geo100.png`,
+  label: "Athena",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/dwh/athena",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Census_bksxka.png`,
+  label: "Census",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "https://tally.so/r/3N6DlW?integration=Census",
+  comingSoon: true,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Bitbucket_gdaafw.png`,
+  label: "Bitbucket",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/code-repo/bitbucket",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Bigquery_wdpiph.png`,
+  label: "Bigquery",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/dwh/bigquery",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Airflow_ld1jiz.png`,
+  label: "Airflow",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "/cloud/integrations/transformation-and-orchestration/airflow",
+  comingSoon: false,
+}, {
+  image: `${cloudinaryIntegrationsBase}/Plus_r7mzun.png`,
+  label: "Suggest an integration",
+  cloud: true,
+  oss: false,
+  invertOnDark: false,
+  link: "https://t2taztilhde.typeform.com/to/mdJoO9lA",
+  comingSoon: false,
+}, 
+];
+export const footerLinks = [
+  {
+    header: "Product",
+    items: [
+      {
+        label: "Detection & Coverage",
+        href: "https://www.elementary-data.com/detection-and-coverage",
+      },
+      {
+        label: "Triage and response",
+        href: "https://www.elementary-data.com/triage-and-resolution",
+      },
+      { label: "Governance", href: "https://www.elementary-data.com/governance-and-discovery" },
+      { label: "Enabling business users", href: "https://www.elementary-data.com/business-users" },
+      { label: "Integrations", href: "https://www.elementary-data.com/integrations" },
+      { label: "Cloud vs OSS", href: "/overview/cloud-vs-oss" },
+    ],
+  },
+  {
+    header: "Resources",
+    items: [
+      { label: "Blog", href: "https://www.elementary-data.com/blog" },
+      { label: "Webinars", href: "https://www.elementary-data.com/webinars" },
+      { label: "dbt Tests Hub", href: "https://www.elementary-data.com/dbt-test-hub" },
+      {
+        label: "Cloud demo videos",
+        href: "https://www.elementary-data.com/elementary-cloud-demo-videos",
+      },
+      { label: "Customer Stories", href: "https://www.elementary-data.com/customer-stories" },
+      { label: "Documentation", href: "/introduction" },
+      { label: "The Elementary Community", href: "https://www.elementary-data.com/community" },
+    ],
+  },
+  {
+    header: "Company",
+    items: [
+      { label: "About Us", href: "https://www.elementary-data.com/company" },
+      { label: "Careers", href: "https://www.elementary-data.com/careers" },
+      { label: "Contact Us", href: "mailto:founders@elementary-data.com" },
+      { label: "Terms of Services", href: "https://www.elementary-data.com/terms-of-service" },
+      { label: "Privacy Policy", href: "https://www.elementary-data.com/privacy" },
+    ],
+  },
+];
+
+export const FeatureCard = ({
+  heading = "Your Title",
+  description = "Your description here",
+  icon = "flag",
+  link = "#",
+  showCloudFeature = true,
+  comingSoon = false,
+}) => {
+  const CardContent = () => (
+    <div className="home__feature-card__container">
+      <div className="home__feature-card__header" style={{ position: "relative", paddingRight: showCloudFeature ? 60 : 0 }}>
+        <div className="home__feature-card__header-content">
+          <div className="home__feature-card__icon">
+            <Icon icon={icon} size={24} color="#7e7e7e" />
+          </div>
+          <h3 className="home__feature-card__heading">{heading}</h3>
+        </div>
+        {showCloudFeature && (
+          <div className="home__feature-card__cloud-feature-tag" tabIndex={0} style={{ position: "absolute", top: 0, right: 0, transform: "none" }}>
+            <span className="cloud-feature-icon">
+              <svg
+                width="18"
+                height="12"
+                viewBox="0 0 18 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g>
+                  <path
+                    d="M14.5125 4.53C14.2606 3.25329 13.5732 2.10364 12.5678 1.27743C11.5624 0.451225 10.3013 -0.000294182 9 1.43803e-07C6.8325 1.43803e-07 4.95 1.23 4.0125 3.03C2.91018 3.14912 1.89075 3.67141 1.15012 4.49649C0.409478 5.32158 -0.000128776 6.39126 3.03696e-08 7.5C3.03696e-08 9.9825 2.0175 12 4.5 12H14.25C16.32 12 18 10.32 18 8.25C18 6.27 16.4625 4.665 14.5125 4.53Z"
+                    fill="#F2386C"
+                  />
+                  <g>
+                    <path
+                      d="M8.62497 6.0357H5.23658C4.82978 6.0357 4.5 6.3555 4.5 6.74999C4.5 7.14448 4.82978 7.46428 5.23658 7.46428H8.62497C9.03177 7.46428 9.36155 7.14448 9.36155 6.74999C9.36155 6.3555 9.03177 6.0357 8.62497 6.0357Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M11.2634 3.75H7.87503C7.46823 3.75 7.13845 4.0698 7.13845 4.46429C7.13845 4.85878 7.46823 5.17857 7.87503 5.17857H11.2634C11.6702 5.17857 12 4.85878 12 4.46429C12 4.0698 11.6702 3.75 11.2634 3.75Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M10.3947 8.32143H7.00627C6.59947 8.32143 6.26969 8.64122 6.26969 9.03571C6.26969 9.4302 6.59947 9.75 7.00627 9.75H10.3947C10.8015 9.75 11.1312 9.4302 11.1312 9.03571C11.1312 8.64122 10.8015 8.32143 10.3947 8.32143Z"
+                      fill="white"
+                    />
+                  </g>
+                </g>
+              </svg>
+            </span>
+            <span className="cloud-feature-text">Cloud Feature</span>
+          </div>
+        )}
+      </div>
+      <div className="home__feature-card__description-block">
+        <p className="home__feature-card__description">{description}</p>
+      </div>
+      {comingSoon && (
+        <div className="home__feature-card__coming-soon-overlay">
+          <div className="home__feature-card__coming-soon-message">
+            Coming Soon
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+if (comingSoon) {
+return (
+
+<div className={`home__feature-card ${comingSoon ? "home__feature-card--coming-soon" : ""}`}>
+  <CardContent />
+</div>
+); }
+
+return (
+
+<a href={link} className="home__feature-card" target="_self">
+  <CardContent />
+</a>
+); };
+
+export const FeatureHeader = ({ children, label = "Read the guide", link }) => (
+  <div className="home__feature-header__container">
+    <div className="home__feature-header__heading-block">
+      <h2 className="home__feature-header__heading">{children}</h2>
+    </div>
+    {link && (
+      <a
+        className="home__feature-header__button"
+        href={link}
+        target="_self"
+      >
+        <span className="home__feature-header__button-label">{label}</span>
+        <span className="home__feature-header__button-icon">
+          <Icon icon="arrow-right" size={18} />
+        </span>
+      </a>
+    )}
+  </div>
+);
+
+export const Integration = ({ image, label, invertOnDark = false, link, comingSoon = false }) => {
+  const content = (
+    <div className="home__integration" style={{ position: "relative" }}>
+      {comingSoon && (
+        <div 
+          className="home__integration__coming-soon" 
+          style={{
+            position: "absolute",
+            top: "-8px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "#460362",
+            color: "white",
+            padding: "2px 8px",
+            borderRadius: "4px",
+            fontSize: "10px",
+            fontWeight: "600",
+            opacity: "0",
+            transition: "opacity 0.2s ease-in-out",
+            pointerEvents: "none",
+            zIndex: "10",
+            whiteSpace: "nowrap"
+          }}
+        >
+          Coming Soon
+        </div>
+      )}
+      <img
+        src={image}
+        alt={label}
+        className="home__integration__image"
+        noZoom={true}
+        data-invert-on-dark={invertOnDark}
+      />
+      <div className="home__integration__label">{label}</div>
+      <style jsx>{`
+        .home__integration:hover .home__integration__coming-soon {
+          opacity: 1 !important;
+        }
+      `}</style>
+    </div>
+  );
+  return link ? (
+    <a href={link} className="home__integration-link" target="_blank" rel="noopener noreferrer">{content}</a>
+  ) : content;
+};
+
+export const InfoCard = ({
+  label = "Recommended",
+  labelColor = "pink",
+  title = "What is Elementary?",
+  description,
+  link = "#",
+  layout = "vertical",
+}) => {
+  const labelClass =
+    labelColor === "gray"
+      ? "home__info-card__label home__info-card__label--gray"
+      : "home__info-card__label home__info-card__label--pink";
+  const containerClass =
+    layout === "horizontal"
+      ? "home__info-card__container home__info-card__container--horizontal"
+      : "home__info-card__container";
+  const headerClass =
+    layout === "horizontal"
+      ? "home__info-card__header home__info-card__header--horizontal"
+      : "home__info-card__header";
+  return (
+    <a className="home__info-card" href={link}>
+      <div className={containerClass}>
+        <div className={headerClass}>
+          {layout === "horizontal" ? (
+            <div className="home__info-card__header-main">
+              <span className={labelClass} style={{ marginRight: 12 }}>
+                {label}
+              </span>
+              <span className="home__info-card__title">{title}</span>
+            </div>
+          ) : (
+            <span className={labelClass}>{label}</span>
+          )}
+          <span className="home__info-card__arrow">
+            <svg width="18" height="18" viewBox="0 0 14 12" fill="none">
+              <path
+                d="M13.3355 6.02328L8.27297 11.0858C8.16742 11.1913 8.02427 11.2506 7.875 11.2506C7.72573 11.2506 7.58258 11.1913 7.47703 11.0858C7.37148 10.9802 7.31219 10.8371 7.31219 10.6878C7.31219 10.5385 7.37148 10.3954 7.47703 10.2898L11.5798 6.18781H0.5625C0.413316 6.18781 0.270242 6.12855 0.164753 6.02306C0.0592633 5.91757 0 5.7745 0 5.62531C0 5.47613 0.0592633 5.33305 0.164753 5.22756C0.270242 5.12208 0.413316 5.06281 0.5625 5.06281H11.5798L7.47703 0.960781C7.37148 0.855234 7.31219 0.71208 7.31219 0.562813C7.31219 0.413545 7.37148 0.270392 7.47703 0.164844C7.58258 0.0592961 7.72573 0 7.875 0C8.02427 0 8.16742 0.0592961 8.27297 0.164844L13.3355 5.22734C13.3878 5.27958 13.4293 5.34162 13.4576 5.40991C13.4859 5.47819 13.5004 5.55139 13.5004 5.62531C13.5004 5.69923 13.4859 5.77243 13.4576 5.84072C13.4293 5.909 13.3878 5.97104 13.3355 6.02328Z"
+                fill="#7E7E7E"
+              />
+            </svg>
+          </span>
+        </div>
+        {layout !== "horizontal" && <div className="home__info-card__title">{title}</div>}
+        <div className="home__info-card__description">{description}</div>
+      </div>
+    </a>
+  );
+};
+
+export const HomeFooter = () => (
+  <footer
+    id="footer"
+    className="flex flex-col items-center mx-auto border-t border-gray-100 dark:border-gray-800/50"
+  >
+    <div className="flex w-full flex-col gap-12 justify-between px-8 py-16 md:py-20 lg:py-28 max-w-[984px] z-0">
+      <div className="flex flex-col md:flex-row gap-8 justify-between min-h-[76px]">
+        <div className="flex md:flex-col justify-between items-center md:items-start min-w-16 md:min-w-20 lg:min-w-48 md:gap-y-24">
+          <a href="/">
+            <span className="sr-only">Elementary home page</span>
+            <img
+              className="w-auto relative object-contain block dark:hidden max-w-48 h-[26px]"
+              src="/logo/light.svg"
+              alt="light logo"
+            />
+            <img
+              className="w-auto relative object-contain hidden dark:block max-w-48 h-[26px]"
+              src="/logo/dark.svg"
+              alt="dark logo"
+            />
+          </a>
+          <div className="flex gap-3 min-w-[140px] max-w-[492px] flex-wrap h-fit md:hidden justify-end">
+            <a href="https://www.elementary-data.com">
+              <span className="sr-only">website</span>
+              <svg
+                className="w-5 h-5 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500"
+                style={{
+                  WebkitMaskImage:
+                    "url(https://mintlify.b-cdn.net/v6.6.0/solid/earth-americas.svg)",
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskImage: "url(https://mintlify.b-cdn.net/v6.6.0/solid/earth-americas.svg)",
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                }}
+              />
+            </a>
+            <a
+              href="https://elementary-data.com/community"
+            >
+              <span className="sr-only">slack</span>
+              <svg
+                className="w-5 h-5 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500"
+                style={{
+                  WebkitMaskImage: "url(https://mintlify.b-cdn.net/v6.6.0/brands/slack.svg)",
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskImage: "url(https://mintlify.b-cdn.net/v6.6.0/brands/slack.svg)",
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                }}
+              />
+            </a>
+          </div>
+        </div>
+        <div
+          className="flex flex-col sm:grid max-md:!grid-cols-2 gap-8 flex-1"
+          style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
+        >
+          {footerLinks.map((col) => (
+            <div
+              className="flex flex-col gap-4 flex-1 whitespace-nowrap w-full md:items-center"
+              key={col.header}
+            >
+              <div className="flex gap-4 flex-col">
+                <p className="text-sm font-semibold text-gray-950 dark:text-white mb-1">
+                  {col.header}
+                </p>
+                {col.items.map((item) => (
+                  <a
+                    key={item.label}
+                    className="text-sm max-w-36 whitespace-normal md:truncate text-gray-950/50 dark:text-white/50 hover:text-gray-950/70 dark:hover:text-white/70"
+                    href={item.href}
+                    rel="noreferrer"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="gap-3 min-w-[140px] max-w-[492px] flex-wrap hidden md:flex justify-end">
+          <a href="https://www.elementary-data.com">
+            <span className="sr-only">website</span>
+            <svg
+              className="w-5 h-5 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500"
+              style={{
+                WebkitMaskImage: "url(https://mintlify.b-cdn.net/v6.6.0/solid/earth-americas.svg)",
+                WebkitMaskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskImage: "url(https://mintlify.b-cdn.net/v6.6.0/solid/earth-americas.svg)",
+                maskRepeat: "no-repeat",
+                maskPosition: "center",
+              }}
+            />
+          </a>
+          <a href="https://elementary-data.com/community">
+            <span className="sr-only">slack</span>
+            <svg
+              className="w-5 h-5 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500"
+              style={{
+                WebkitMaskImage: "url(https://mintlify.b-cdn.net/v6.6.0/brands/slack.svg)",
+                WebkitMaskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskImage: "url(https://mintlify.b-cdn.net/v6.6.0/brands/slack.svg)",
+                maskRepeat: "no-repeat",
+                maskPosition: "center",
+              }}
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+);

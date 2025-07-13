@@ -12,7 +12,7 @@
     "tabs": [
       {
         "tab": "Home",
-        "pages": ["home/homepage"]
+        "pages": ["home"]
       },
       {
         "tab": "Elementary Cloud",
