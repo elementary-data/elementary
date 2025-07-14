@@ -131,7 +131,7 @@ def format_fact_list_block(block: FactListBlock) -> Dict[str, Any]:
     }
 
 
-def format_small_table_block(block: TableBlock) -> dict:
+def format_table_block(block: TableBlock) -> dict:
     return {
         "type": "Table",
         "columns": [{"width": 1} for _ in block.headers],
@@ -144,7 +144,8 @@ def format_small_table_block(block: TableBlock) -> dict:
                         "items": [
                             {
                                 "type": "TextBlock",
-                                "text": str(cell),
+                                "text": str(cell) if cell is not None else "",
+                                "wrap": True,
                             }
                         ],
                     }
@@ -154,49 +155,6 @@ def format_small_table_block(block: TableBlock) -> dict:
             for row in [block.headers, *block.rows]
         ],
     }
-
-def format_large_table_block_row(row: list[str], is_header: bool = False) -> dict:
-    row_container = {
-        "type": "Container",
-        "items": [
-            {
-                "type": "ColumnSet",
-                "columns": [
-                    {
-                        "type": "Column",
-                        "width": "stretch",
-                        "items": [
-                            {
-                                "type": "TextBlock",
-                                "text": str(cell) if cell is not None else "",
-                                "weight": "bolder" if is_header else "default",
-                                "wrap": True,
-                            }
-                        ],
-                        "verticalContentAlignment": "Center",
-                    }
-                    for cell in row
-                ],
-                "separator": not is_header,
-            }
-        ],
-    }
-    return row_container
-
-def format_large_table_block(block: TableBlock) -> dict:
-    rows = [format_large_table_block_row(block.headers, is_header=True)]
-    rows += [format_large_table_block_row(row) for row in block.rows]
-
-    return {
-        "type": "Container",
-        "items": rows,
-    }
-
-def format_table_block(block: TableBlock) -> dict:
-    if len(block.headers) <= 6:
-        return format_small_table_block(block)
-    else:
-        return format_large_table_block(block)
 
 
 def format_message_block(
