@@ -24,8 +24,8 @@ RAW_EDR_LOGS_PATTERN = re.compile("Elementary: (.*)")
 @dataclass
 class DbtCommandResult:
     success: bool
-    output: Optional[str] = None
-    stderr: Optional[str] = None
+    output: Optional[str]
+    stderr: Optional[str]
 
 
 class CommandLineDbtRunner(BaseDbtRunner):
