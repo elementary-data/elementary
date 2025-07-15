@@ -183,9 +183,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
             log_output=log_output,
         )
         if log_errors and not result.success:
-            import IPython
-
-            IPython.embed()
             logger.error(
                 f'Failed to run macro: "{macro_name}"\nRun output: {result.output}'
             )
