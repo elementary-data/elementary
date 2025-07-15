@@ -25,6 +25,7 @@ RAW_EDR_LOGS_PATTERN = re.compile("Elementary: (.*)")
 class DbtCommandResult:
     success: bool
     output: Optional[str]
+    stderr: Optional[str]
 
 
 class CommandLineDbtRunner(BaseDbtRunner):
@@ -182,6 +183,9 @@ class CommandLineDbtRunner(BaseDbtRunner):
             log_output=log_output,
         )
         if log_errors and not result.success:
+            import IPython
+
+            IPython.embed()
             logger.error(
                 f'Failed to run macro: "{macro_name}"\nRun output: {result.output}'
             )
@@ -190,16 +194,23 @@ class CommandLineDbtRunner(BaseDbtRunner):
         log_pattern = (
             RAW_EDR_LOGS_PATTERN if return_raw_edr_logs else MACRO_RESULT_PATTERN
         )
-        if capture_output and result.output is not None:
-            for log in parse_dbt_output(result.output):
-                if log_errors and log.level == "error":
-                    logger.error(log.msg)
-                    continue
+        if capture_output:
+            if result.output is not None:
+                for log in parse_dbt_output(result.output):
+                    if log_errors and log.level == "error":
+                        logger.error(log.msg)
+                        continue
 
-                if log.msg:
-                    match = log_pattern.match(log.msg)
-                    if match:
-                        run_operation_results.append(match.group(1))
+                    if log.msg:
+                        match = log_pattern.match(log.msg)
+                        if match:
+                            run_operation_results.append(match.group(1))
+
+            if result.stderr is not None and log_errors:
+                for log in parse_dbt_output(result.stderr):
+                    if log.level == "error":
+                        logger.error(log.msg)
+                        continue
 
         return run_operation_results
 
