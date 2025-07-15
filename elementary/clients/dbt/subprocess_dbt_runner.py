@@ -25,8 +25,9 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
         log_format: str,
     ) -> DbtCommandResult:
         try:
+            print([self._get_dbt_command_name()] + dbt_command_args)
             result = subprocess.run(
-                ["dbt"] + dbt_command_args,
+                [self._get_dbt_command_name()] + dbt_command_args,
                 check=self.raise_on_failure,
                 capture_output=capture_output or quiet,
                 env=self._get_command_env(),
@@ -34,8 +35,9 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
             )
             success = result.returncode == 0
             output = result.stdout.decode() if result.stdout else None
+            stderr = result.stderr.decode() if result.stderr else None
 
-            return DbtCommandResult(success=success, output=output)
+            return DbtCommandResult(success=success, output=output, stderr=stderr)
         except subprocess.CalledProcessError as err:
             logs = (
                 list(parse_dbt_output(err.output.decode(), log_format))
@@ -48,6 +50,9 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
             raise DbtCommandError(
                 base_command_args=dbt_command_args, logs=logs, err=err
             )
+
+    def _get_dbt_command_name(self) -> str:
+        return "dbt"
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
