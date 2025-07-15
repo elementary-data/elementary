@@ -25,7 +25,6 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
         log_format: str,
     ) -> DbtCommandResult:
         try:
-            print([self._get_dbt_command_name()] + dbt_command_args)
             result = subprocess.run(
                 [self._get_dbt_command_name()] + dbt_command_args,
                 check=self.raise_on_failure,
