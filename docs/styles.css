@@ -39,6 +39,11 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
 }
 
+.dark .home__theme-purple {
+  background-color: #2d113e;
+  color: white;
+}
+
 .home__theme-pink {
   background-color: #f1386e;
   color: white;
