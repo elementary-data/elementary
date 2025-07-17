@@ -613,7 +613,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 14px;
   font-weight: 700;
   border-radius: 999px;
-  padding: 10px 32px;
+  padding: 14px 32px;
   text-decoration: none;
   display: inline-block;
   transition: background 0.2s, color 0.2s, border 0.2s;
