@@ -80,15 +80,18 @@ def append_prefix_if_missing(string: str, prefix: str) -> str:
     return f"{prefix}{string}"
 
 
-def nan_or_infinity_to_str(value: Any) -> str:
-    """Turns `float("inf")` and `float("nan")` to `"Infinity"` and `"NaN"`, respectively.
-
-    This function will be used as default JSON serialization function for non-trivial types.
-    """
-    if isinstance(value, float):
-        if np.isinf(value):
-            return "Infinity"
-        elif np.isnan(value):
+def inf_and_nan_to_str(obj) -> Any:
+    """Replaces occurrences of float("nan") for float("infinity") in the given dict object."""
+    if isinstance(obj, float):
+        if np.isinf(obj):
+            return "Infinity" if obj > 0 else "-Infinity"
+        elif np.isnan(obj):
             return "NaN"
-
-    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable.")
+        else:
+            return obj
+    elif isinstance(obj, dict):
+        return {k: inf_and_nan_to_str(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [inf_and_nan_to_str(i) for i in obj]
+    else:
+        return obj

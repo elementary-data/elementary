@@ -75,9 +75,7 @@ class DataMonitoringReport(DataMonitoring):
         with open(template_html_path, "r", encoding="utf-8") as template_html_file:
             template_html_code = template_html_file.read()
 
-        dumped_output_data = json.dumps(
-            output_data, default=json_utils.nan_or_infinity_to_str
-        )
+        dumped_output_data = json.dumps(json_utils.inf_and_nan_to_str(output_data))
         encoded_output_data = base64.b64encode(dumped_output_data.encode("utf-8"))
         compiled_output_html = (
             f"<script>"
