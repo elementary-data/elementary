@@ -1,5 +1,7 @@
 import json
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
+
+import numpy as np
 
 
 def try_load_json(value: Optional[Union[str, dict, list]]):
@@ -76,3 +78,17 @@ def append_prefix_if_missing(string: str, prefix: str) -> str:
     if string.startswith(prefix):
         return string
     return f"{prefix}{string}"
+
+
+def nan_or_infinity_to_str(value: Any) -> str:
+    """Turns `float("inf")` and `float("nan")` to `"Infinity"` and `"NaN"`, respectively.
+
+    This function will be used as default JSON serialization function for non-trivial types.
+    """
+    if isinstance(value, float):
+        if np.isinf(value):
+            return "Infinity"
+        elif np.isnan(value):
+            return "NaN"
+
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable.")
