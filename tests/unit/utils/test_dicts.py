@@ -34,7 +34,8 @@ def test_merge_dicts_attribute():
 
 def test_replace_inf_and_nan():
     data = {"values": [1.0, float("inf"), float("-inf"), float("nan")]}
+    data = dict(a=1.0, b=float("inf"), c=float("-inf"), d=float("nan"))
 
     processed_data = json_utils.inf_and_nan_to_str(data)
-    json_str = json.dumps(processed_data)
-    print(json_str)
+    json_str = json.dumps(processed_data, sort_keys=True)
+    assert json_str == '{"a": 1.0, "b": "Infinity", "c": "-Infinity", "d": "NaN"}'
