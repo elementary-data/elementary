@@ -355,16 +355,29 @@ icon: "house"
             </div>
             <h3 class="home__integrations-heading">Cloud integrations</h3>
             <div class="home__integrations-grid">
-              {integrations
+                {integrations
                 .filter((integration) => integration.cloud === true)
+                .sort((a, b) => {
+                  // "Suggest an integration" always last
+                  if (a.label === "Suggest an integration") return 1;
+                  if (b.label === "Suggest an integration") return -1;
+                  
+                  // Available now before coming soon
+                  if (a.comingSoon !== b.comingSoon) {
+                  return a.comingSoon ? 1 : -1;
+                  }
+                  
+                  // Alphabetical order
+                  return a.label.localeCompare(b.label);
+                })
                 .map((integration, index) => (
                   <Integration
-                    key={index}
-                    image={integration.image}
-                    label={integration.label}
-                    invertOnDark={integration.invertOnDark}
-                    link={integration.link}
-                    comingSoon={integration.comingSoon}
+                  key={index}
+                  image={integration.image}
+                  label={integration.label}
+                  invertOnDark={integration.invertOnDark}
+                  link={integration.link}
+                  comingSoon={integration.comingSoon}
                   />
                 ))}
             </div>
@@ -852,41 +865,18 @@ export const FeatureHeader = ({ children, label = "Read the guide", link }) => (
 
 export const Integration = ({ image, label, invertOnDark = false, link, comingSoon = false }) => {
   const content = (
-    <div className="home__integration" style={{ position: "relative" }}>
-      {comingSoon && (
-        <div 
-          className="home__integration__coming-soon" 
-          style={{
-            position: "absolute",
-            top: "-8px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "#460362",
-            color: "white",
-            padding: "2px 8px",
-            borderRadius: "4px",
-            fontSize: "10px",
-            fontWeight: "600",
-            opacity: "0",
-            transition: "opacity 0.2s ease-in-out",
-            pointerEvents: "none",
-            zIndex: "10",
-            whiteSpace: "nowrap"
-          }}
-        >
-          Coming Soon
-        </div>
-      )}
+    <div className="home__integration" style={{ position: "relative"}}>
       <img
         src={image}
         alt={label}
         className="home__integration__image"
         noZoom={true}
         data-invert-on-dark={invertOnDark}
+        style={{ position: "relative", opacity: comingSoon ? "0.5" : "1" }}
       />
-      <div className="home__integration__label">{label}</div>
+      <div className="home__integration__label">{label}{comingSoon && <span style={{ fontSize: "12px", color: "#999" }}> (Coming Soon)</span>}</div>
       <style jsx>{`
-        .home__integration:hover .home__integration__coming-soon {
+        .home__integration .home__integration__coming-soon {
           opacity: 1 !important;
         }
       `}</style>

@@ -857,6 +857,25 @@ h1, h2, h3, h4, h5, h6 {
   /* add stacking context */
 }
 
+.home__integration__coming-soon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  color: rgb(119, 119, 119);
+  padding: 0px 4px;
+  border-radius: 4px;
+  font-size: 8px;
+  text-align: center;
+  font-weight: 500;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+}
+
 .home__integration:hover {
   transform: translateY(-2px);
   z-index: 20;
@@ -874,6 +893,7 @@ h1, h2, h3, h4, h5, h6 {
   bottom: -35px;
   left: 50%;
   transform: translateX(-50%);
+  text-align: center;
   background: #000;
   color: #fff;
   padding: 6px 10px;
