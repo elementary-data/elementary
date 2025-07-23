@@ -21,6 +21,7 @@ from elementary.monitor.data_monitoring.report.slack_report_summary_message_buil
 from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
+from elementary.utils import json_utils
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -74,7 +75,7 @@ class DataMonitoringReport(DataMonitoring):
         with open(template_html_path, "r", encoding="utf-8") as template_html_file:
             template_html_code = template_html_file.read()
 
-        dumped_output_data = json.dumps(output_data)
+        dumped_output_data = json.dumps(json_utils.inf_and_nan_to_str(output_data))
         encoded_output_data = base64.b64encode(dumped_output_data.encode("utf-8"))
         compiled_output_html = (
             f"<script>"
