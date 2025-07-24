@@ -271,6 +271,7 @@
           {
             "group": "Elementary dbt package",
             "pages": [
+              "data-tests/dbt/quickstart-package",
               "data-tests/dbt/dbt-package",
               "data-tests/dbt/dbt-artifacts",
               "data-tests/dbt/on-run-end_hooks",
