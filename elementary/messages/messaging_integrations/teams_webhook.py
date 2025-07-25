@@ -1,7 +1,9 @@
 from datetime import datetime
+from http import HTTPStatus
 from typing import Any, Optional
 
 import requests
+from ratelimit import limits, sleep_and_retry
 from typing_extensions import TypeAlias
 
 from elementary.messages.formats.adaptive_cards import format_adaptive_card
@@ -22,6 +24,7 @@ logger = get_logger(__name__)
 
 
 Channel: TypeAlias = Optional[str]
+ONE_SECOND = 1
 
 
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
@@ -42,8 +45,10 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
         headers={"Content-Type": "application/json"},
     )
     response.raise_for_status()
-    if response.status_code == 202:
-        logger.debug("Got 202 response from Teams webhook, assuming success")
+    if response.status_code == HTTPStatus.ACCEPTED:
+        logger.debug(
+            "Got %s response from Teams webhook, assuming success", HTTPStatus.ACCEPTED
+        )
     return response
 
 
@@ -56,23 +61,31 @@ class TeamsWebhookMessagingIntegration(
     def parse_message_context(self, context: dict[str, Any]) -> EmptyMessageContext:
         return EmptyMessageContext(**context)
 
+    @sleep_and_retry
+    @limits(calls=1, period=ONE_SECOND)
     def send_message(
         self,
         destination: None,
         body: MessageBody,
     ) -> MessageSendResult[EmptyMessageContext]:
         card = format_adaptive_card(body)
-        try:
-            send_adaptive_card(self.url, card)
-            return MessageSendResult(
-                message_context=EmptyMessageContext(),
-                timestamp=datetime.utcnow(),
-                message_format="adaptive_cards",
-            )
-        except requests.RequestException as e:
+        response = send_adaptive_card(self.url, card)
+        # The status code is not reliable for the older version and 202 for the newer version
+        # The response returns 1 in the body for the old version for success and otherwise sometext
+        # The new version is not reliable to do a check and in the response there is nothing that can be used
+        # to determine if the message was sent successfully.
+        if (
+            response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+            or len(response.text) > 1
+        ):
             raise MessagingIntegrationError(
-                "Failed to send message to Teams webhook"
-            ) from e
+                f"Could not post message to Teams via webhook - {self.url}. Status code: {response.status_code}, Error: {response.text}"
+            )
+        return MessageSendResult(
+            message_context=EmptyMessageContext(),
+            timestamp=datetime.utcnow(),
+            message_format="adaptive_cards",
+        )
 
     def supports_reply(self) -> bool:
         return False
