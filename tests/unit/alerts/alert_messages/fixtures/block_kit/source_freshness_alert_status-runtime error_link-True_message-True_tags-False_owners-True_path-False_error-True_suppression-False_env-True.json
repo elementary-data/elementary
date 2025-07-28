@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Runtime Error: Failed to calculate the source freshness of \"test_source.test_identifier\""
+        "text": "Runtime Error: Failed to calculate the source freshness of \"test_db.test_schema.test_identifier\""
       }
     },
     {

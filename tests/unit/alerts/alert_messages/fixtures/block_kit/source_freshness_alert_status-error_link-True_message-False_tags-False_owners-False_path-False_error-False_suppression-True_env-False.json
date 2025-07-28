@@ -4,7 +4,7 @@
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Error: Freshness exceeded the acceptable times on source \"test_source.test_identifier\""
+        "text": "Error: Freshness exceeded the acceptable times on source \"test_db.test_schema.test_identifier\""
       }
     },
     {
