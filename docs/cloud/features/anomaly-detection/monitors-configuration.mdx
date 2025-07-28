@@ -40,6 +40,28 @@ allowfullscreen
 alt="Anomaly settings simulator"
 ></iframe>
 
+## Excluding time ranges from training period
+
+Training periods for volume tests sometimes include one-time anomalies. For example, when one of the engineers executes a manual script, or during an incident.
+These anomalies might prevent our learning models from detecting a pattern in the data, resulting in `NO_DATA` status.
+
+This can be overcome by excluding specific sections of the training period from the monitor.
+With the one-time anomaly excluded, the regular data pattern will be detected, resulting in a meaningful anomaly detection.
+
+How to Exclude?
+
+- Click on the `EXCLUDE` button on the top-right of the chat, or go to the `Test Configurations` tab.
+    
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1753705599/exclude_1_gam8oa.png" />
+    
+
+- Go down the chart, click `EXCLUDE`, and mark the section you want to exclude.
+    - A confirmation dialog will appear, showing the exact samples which will be excluded.
+- On confirmation, the new excluded time range will appear under **`Excluded time ranges`.** You can modify or remove it, and you can also add new ranges using the + sign if you prefer.
+- To test the configuration, click “Simulate configuration”.
+    
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1753705600/exclude_2_d1evvg.png" />
+
 ## Remove anomaly detection monitors
 
 There are two ways to delete monitors from the UI. 
