@@ -1,0 +1,152 @@
+---
+title: "PII Protection"
+---
+
+Elementary provides built-in protection for Personally Identifiable Information (PII) by automatically disabling test sample collection for tables and columns that contain sensitive data. This ensures that PII data is not stored in Elementary's test results tables.
+
+## How PII Protection Works
+
+When PII protection is enabled, Elementary will:
+- Skip collecting test sample rows for PII-tagged tables
+- Set the sample limit to 0 for affected tests
+- Continue running the actual tests (only sample collection is disabled)
+- Store test results without exposing sensitive data
+
+The protection works at two levels:
+1. **Table-level protection** - Protects entire tables based on tags
+2. **Individual test protection** - Protects specific tests using meta configuration
+
+## Table-Level PII Protection
+
+### Configuration
+
+Enable table-level PII protection by setting these variables in your `dbt_project.yml`:
+
+```yaml
+vars:
+  disable_samples_on_pii_tags: true  # Enable PII protection (default: false)
+  pii_tags: ['pii', 'sensitive']     # Tags that identify PII tables (default: ['pii'])
+```
+
+### Usage Examples
+
+**Tag a model as PII:**
+
+```yaml
+# models/schema.yml
+version: 2
+
+models:
+  - name: customer_data
+    config:
+      tags: ['pii']
+    tests:
+      - elementary.volume_anomalies
+```
+
+**Tag multiple models:**
+
+```yaml
+# dbt_project.yml
+models:
+  my_project:
+    sensitive_data:
+      +tags: ['pii']
+```
+
+### Case-Insensitive Matching
+
+PII tag matching is case-insensitive. These configurations are equivalent:
+
+```yaml
+# All of these will match
+config:
+  tags: ['PII']
+  # or
+  tags: ['pii']
+  # or  
+  tags: ['Pii']
+```
+
+## Individual Test Protection
+
+For more granular control, disable sample collection for specific tests using the `disable_test_samples` meta configuration:
+
+```yaml
+# models/schema.yml
+version: 2
+
+models:
+  - name: user_profiles
+    tests:
+      - elementary.volume_anomalies:
+          config:
+            meta:
+              disable_test_samples: true
+```
+
+## Configuration Precedence
+
+Elementary follows this precedence order when determining whether to collect samples:
+
+1. **`disable_test_samples` meta configuration** (highest priority)
+2. **PII tag detection** (when `disable_samples_on_pii_tags: true`)
+3. **Normal sample collection** (default behavior)
+
+### Example: Override PII Protection
+
+You can override PII protection for specific tests:
+
+```yaml
+# models/schema.yml
+version: 2
+
+models:
+  - name: customer_data
+    config:
+      tags: ['pii']  # Table is tagged as PII
+    tests:
+      - elementary.volume_anomalies:
+          config:
+            meta:
+              disable_test_samples: false  # Override: allow samples for this test
+      - elementary.freshness_anomalies:
+          # This test will have samples disabled due to PII tag
+```
+
+## Global Configuration
+
+Set default behavior across your entire project:
+
+```yaml
+# dbt_project.yml
+vars:
+  # Enable PII protection globally
+  disable_samples_on_pii_tags: true
+  
+  # Define which tags indicate PII data
+  pii_tags: ['pii', 'sensitive', 'confidential']
+  
+  # Control sample collection globally
+  test_sample_row_count: 100  # Default sample size when enabled
+```
+
+## Verification
+
+To verify PII protection is working:
+
+1. **Check test results:** PII-protected tests should show 0 sample rows in Elementary's test results
+2. **Review logs:** Elementary logs will indicate when sample collection is skipped
+3. **Inspect tables:** The `elementary_test_results` table should contain empty `result_rows` for protected tests
+
+## Important Notes
+
+- PII protection only affects **sample collection**, not test execution
+- Tests will continue to run and detect anomalies normally
+- Sample collection is disabled entirely (set to 0) for protected tests
+- Protection applies to all Elementary tests on tagged tables/columns
+- Configuration changes require a `dbt run` to take effect
+
+## Future Enhancements
+
+Column-level PII protection is planned for a future release, which will allow protecting specific columns within a table while still collecting samples from non-sensitive columns.
