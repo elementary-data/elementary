@@ -1,0 +1,29 @@
+---
+title: "MCP Tools"
+sidebarTitle: "MCP tools"
+---
+
+
+| **Category** | **Tool Name** | **Purpose** | **Output** |
+| --- | --- | --- | --- |
+| **Discovery & Lineage** | `get_asset` | When you need info about any asset type, from source to BI (table assets, BI assets) | Complete asset details with general information |
+|  | `get_upstream_assets` | When investigating data lineage or debugging issues upstream | Asset dependencies with metadata (id, name, type, criticality, tags, owners, description, path) |
+|  | `get_downstream_assets` | When assessing impact of changes or understanding data consumers | Asset dependencies with metadata (id, name, type, criticality, tags, owners, description, path) |
+|  | `get_column_upstream_columns` | When tracing column-level lineage for specific data fields | Column dependencies with their metadata (id, name, type, table info) |
+|  | `get_column_downstream_columns` | When understanding column usage and impact analysis | Column dependencies with their metadata (id, name, type, table info) |
+|  | `get_table_asset` | When you need table-specific details like schema, columns, and tests | Table asset with columns, materialization, execution status, and associated tests |
+|  | `get_table_assets` | When searching for tables by name, tags, owners, or other criteria | List of table assets matching filter criteria |
+|  | `get_table_asset_compiled_query` | When you need to see the actual SQL code being executed | Compiled SQL query from the latest execution |
+|  | `get_table_asset_execution_history` | When investigating table execution patterns or failures over time | Historical execution records with timestamps and status |
+|  | `get_table_asset_execution` | When debugging a specific table execution failure | Detailed execution logs, timing, and error information |
+| **Test & Coverage** | `get_assets_sorted_by_coverage` | When prioritizing which assets need more test coverage | Assets ranked by test coverage percentage |
+|  | `get_test` | When investigating test configuration or recent test results | Test details including config, execution status, and quality dimensions |
+|  | `get_tests` | When searching for tests by name, type, or asset association | List of tests matching filter criteria |
+|  | `get_test_execution_metrics` | When analyzing specific test failure metrics that caused anomaly | Test execution results, numerical metrics, and anomaly details |
+|  | `get_test_execution_history` | When reviewing test performance patterns over time | Historical test execution records and results |
+|  | `get_test_execution` | When debugging a specific test execution failure | Detailed test execution logs, results, and error information |
+|  | `get_tests_catalog` | When helping users add tests to their dbt project | Available test types that can be defined in the dbt project |
+| **Incidents** | `get_incidents` | When searching for incidents by time range, status, severity, or assignee | List of incidents with timing, assignee, status, severity, tags, and ticket information |
+|  | `get_incident` | When investigating details of a specific incident | Complete incident details including source asset/test information and execution context |
+|  | `get_asset_incidents_history` | When reviewing past incident patterns for a specific asset | Historical incident records for an asset with status and timing |
+| **Environment Management** | `get_environments` | When starting a session to discover available data environments | Dictionary mapping environment IDs to environment names |

@@ -1,0 +1,56 @@
+---
+title: "Elementary MCP Server"
+sidebarTitle: "MCP overview"
+---
+
+The Elementary MCP Server allows you to connect your Elementary environment to any client that supports MCP (Model Context Protocol). This lets AI agents, copilots, or natural language interfaces query and act on your data stack using live context.
+
+## What is MCP?
+
+MCP (Model Context Protocol) is an open protocol introduced by Anthropic. It defines a way for AI systems to retrieve context and trigger actions from external tools in a structured way.
+
+The Elementary MCP Server exposes an interface to query key parts of your data environment — including:
+
+- Models
+- Tests
+- Incidents
+- Test coverage
+- Lineage (dbt + BI), including column-level
+- Incidents
+
+This enables workflows like:
+
+- Asking “What’s the status of the model feeding the revenue dashboard?”
+- Automatically creating a freshness test for a column
+- Browsing lineage to find upstream causes of issues
+- Triggering updates or syncs without opening a UI
+
+## How it works
+
+The MCP Server runs as a remote service and is exposed via a single authenticated endpoint. It is compatible with any MCP-enabled client.
+
+**Client examples:**
+
+- Claude Desktop
+- Cursor IDE
+- Custom agents and LLM copilots
+
+## Supported operations
+
+You can use the Elementary MCP Server for:
+
+- **Full asset details - M**etadata, column definitions, and test coverage
+- **Lineage** - Explore table + column-level lineage across dbt and BI tools
+- **Incidents -** View open incidents and their context
+- **Tests -** Browse and add tests using the test catalog
+- **Models -** Inspect model metadata and status
+- **Execution History -** View historical runs and performance details
+
+## Coming soon
+
+We're expanding support to include:
+
+- Data health summaries
+- Volume and freshness metrics
+- Sync triggers
+- Cloud test config updates

@@ -1,0 +1,92 @@
+---
+title: "MCP Setup Guide"
+sidebarTitle: "MCP Setup Guide"
+---
+
+This document walks you through connecting any MCP‑compatible client (Cursor, Claude Desktop, VS Code, and others) to **Elementary’s production remote MCP server**. It covers prerequisites, installation of the `mcp-remote` helper, authentication, and per‑client configuration steps.
+---
+## Prerequisites
+| Requirement | Why it’s needed |
+|-------------|-----------------|
+| **Node.js 18 LTS or newer** | `mcp-remote` (and many editors) run via `npx`, which depends on Node. Verify with `node --version`. |
+| **npm / npx** | Bundled with Node; `npx` fetches `mcp-remote` on demand. |
+---
+## 1 – Install `mcp-remote`
+For one‑off use, you can rely on `npx` to auto‑download the package each time:
+```bash
+npx -y mcp-remote --help
+```
+To avoid first‑run latency (or to pin a version) install globally:
+```bash
+npm install -g mcp-remote@latest
+```
+---
+## 2 – Generate a personal access token
+**Design Partner Stage:** Personal access tokens are currently available to design partners only. To obtain a token, please reach out to the Elementary team and we'll provide you with one manually.
+**Coming soon:** Self-service token management will be available directly from the Elementary UI for all users.
+Elementary issues **user‑scoped bearer tokens**.  
+These tokens inherit **your** workspace permissions:
+* Treat them like passwords – **do not share or commit** them.  
+* Rotate regularly.  
+* Revoke immediately if compromised.
+---
+## 3 – Universal configuration JSON
+Insert the block below into your client’s MCP configuration file, replacing `...` with your token:
+```jsonc
+{
+  "mcpServers": {
+    "elementary-remote": {
+      "command": "npx",
+      "args": [
+        "-y",                              // auto‑install if missing
+        "mcp-remote",
+        "https://prod.api.elementary-data.com/mcp/",
+        "--header",
+        "Authorization: Bearer ${AUTH_TOKEN}"
+      ],
+      "env": {
+        "AUTH_TOKEN": "..."
+      }
+    }
+  }
+}
+```
+**Why the `-y` flag?**  
+It makes `npx` skip the interactive “install this package?” prompt.
+---
+## 4 – Client‑specific steps
+### 4.1 Cursor IDE
+1. **Settings → Model Context Protocol → Add Custom Server**  
+   or edit `~/.cursor/mcp.json` (global) / `<project>/.cursor/mcp.json` (workspace).
+2. Paste the JSON above.
+3. Save – Cursor auto‑restarts its MCP agent.
+### 4.2 Claude Desktop
+1. In the menu bar choose **Claude → Developer Settings** to enable advanced configuration.
+2. Edit `claude_desktop_config.json`  
+   * macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+   * Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+3. Paste the JSON block and **restart Claude**. A hammer icon confirms the server is active.
+### 4.3 Visual Studio Code (GitHub Copilot Chat ≥ v1.102)
+1. **Command Palette → MCP: Open User Configuration**  
+   _or_ create `.vscode/mcp.json` inside your workspace.
+2. Paste the JSON block.
+3. Reload the window; run **MCP: Show Installed Servers** to verify.
+---
+## 5 – Verify connectivity
+```bash
+npx mcp-remote https://prod.api.elementary-data.com/mcp/ \
+  --header "Authorization: Bearer $AUTH_TOKEN" --health
+```
+`200 OK` confirms the endpoint and token are valid.
+---
+## 6 – Troubleshooting
+| Symptom | Remedy |
+|---------|--------|
+| `node: command not found` | Install Node ≥ 18 and ensure it’s on `PATH`. |
+| `401 Unauthorized` | Token expired or pasted incorrectly → regenerate. |
+---
+### Security reminders
+* Tokens confer **all** your Elementary permissions.  
+* Keep them secret and scoped; rotate when in doubt.  
+* Revoke compromised tokens immediately.
+---

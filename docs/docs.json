@@ -132,6 +132,14 @@
             ]
           },
           {
+            "group": "MCP Server",
+            "pages": [
+              "cloud/mcp/overview",
+              "cloud/mcp/setup-guide",
+              "cloud/mcp/mcp-tools"
+            ]
+          },
+          {
             "group": "Additional features",
             "pages": [
               "cloud/features/config-as-code",
