@@ -3,14 +3,16 @@ title: "MCP Setup Guide"
 sidebarTitle: "MCP Setup Guide"
 ---
 
+
 This document walks you through connecting any MCP‑compatible client (Cursor, Claude Desktop, VS Code, and others) to **Elementary’s production remote MCP server**. It covers prerequisites, installation of the `mcp-remote` helper, authentication, and per‑client configuration steps.
----
+
 ## Prerequisites
 | Requirement | Why it’s needed |
 |-------------|-----------------|
 | **Node.js 18 LTS or newer** | `mcp-remote` (and many editors) run via `npx`, which depends on Node. Verify with `node --version`. |
 | **npm / npx** | Bundled with Node; `npx` fetches `mcp-remote` on demand. |
 ---
+
 ## 1 – Install `mcp-remote`
 For one‑off use, you can rely on `npx` to auto‑download the package each time:
 ```bash
@@ -53,7 +55,7 @@ Insert the block below into your client’s MCP configuration file, replacing `.
 ```
 **Why the `-y` flag?**  
 It makes `npx` skip the interactive “install this package?” prompt.
----
+
 ## 4 – Client‑specific steps
 ### 4.1 Cursor IDE
 1. **Settings → Model Context Protocol → Add Custom Server**  
