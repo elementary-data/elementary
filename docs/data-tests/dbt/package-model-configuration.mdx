@@ -1,0 +1,430 @@
+# Elementary dbt Package Model Configuration
+
+This document provides a comprehensive list of all configuration options available for the Elementary dbt package via models/dbt elements other than the `vars` section in your `dbt_project.yml`.
+
+## Overview
+
+The Elementary dbt package supports extensive configuration through various dbt elements beyond the `vars` section. These configuration methods provide fine-grained control over Elementary's behavior at different levels of your dbt project.
+
+## 1. Model-Level Configuration
+
+### Model Config Block
+Models can be configured using the `config()` block in SQL files:
+
+```sql
+{{
+  config(
+    materialized='incremental',
+    transient=False,
+    post_hook='{{ elementary.upload_dbt_models() }}',
+    unique_key='unique_id',
+    on_schema_change='sync_all_columns',
+    full_refresh=elementary.get_config_var('elementary_full_refresh'),
+    table_type=elementary.get_default_table_type(),
+    incremental_strategy=elementary.get_default_incremental_strategy()
+  )
+}}
+```
+
+### Model Schema Configuration
+In `schema.yml` files, models can be configured with:
+
+```yaml
+models:
+  - name: my_model
+    config:
+      tags: ["production", "monitoring"]
+      materialized: table
+      elementary:
+        timestamp_column: updated_at
+        backfill_days: 7
+        anomaly_direction: "spike"
+        anomaly_sensitivity: 4
+        where_expression: "status = 'active'"
+        time_bucket:
+          period: hour
+          count: 4
+        min_training_set_size: 10
+        days_back: 30
+        seasonality: "day_of_week"
+    meta:
+      owner: ["@data_team", "analytics@company.com"]
+      subscribers: ["@alerts"]
+      description: "Model description"
+    description: "Detailed model description"
+```
+
+## 2. Column-Level Configuration
+
+### Column Config in Schema Files
+```yaml
+models:
+  - name: my_model
+    columns:
+      - name: sensitive_column
+        config:
+          disable_test_samples: true  # Prevents sampling for this column
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - null_count
+                - min_length
+```
+
+### Column Meta Configuration
+```yaml
+models:
+  - name: my_model
+    columns:
+      - name: user_id
+        meta:
+          owner: "@privacy_team"
+          tags: ["pii", "sensitive"]
+        description: "Unique user identifier"
+```
+
+## 3. Source Configuration
+
+### Source Freshness Configuration
+```yaml
+sources:
+  - name: raw_data
+    schema: staging
+    tables:
+      - name: users
+        meta:
+          owner: ["@data_team"]
+          elementary:
+            timestamp_column: updated_at
+        freshness:
+          error_after:
+            count: 1
+            period: hour
+          warn_after:
+            count: 30
+            period: minute
+        loaded_at_field: updated_at
+        description: "Raw user data from source system"
+```
+
+### Source Meta Configuration
+```yaml
+sources:
+  - name: raw_data
+    schema: staging
+    tables:
+      - name: users
+        meta:
+          owner: "data@company.com"
+          subscribers: ["alerts@company.com"]
+          tags: ["critical", "pii"]
+```
+
+## 4. Exposure Configuration
+
+### Exposure Meta and Owner Configuration
+```yaml
+exposures:
+  - name: customer_dashboard
+    label: Customer Analytics
+    type: dashboard
+    maturity: high
+    url: https://bi.tool/dashboards/1
+    description: "Customer analytics dashboard"
+    depends_on:
+      - ref('customers')
+      - ref('orders')
+    owner:
+      name: "Data Team"
+      email: "data@company.com"
+    meta:
+      platform: "Tableau"
+      workbook: "Customer Analytics"
+      path: "Dashboards/Customers"
+      referenced_columns:
+        - column_name: customer_id
+          data_type: numeric
+          node: ref('customers')
+    tags:
+      - marketing
+      - critical
+```
+
+## 5. Test Configuration
+
+### Test-Level Configuration
+```yaml
+models:
+  - name: my_model
+    tests:
+      - elementary.volume_anomalies:
+          alias: "custom_volume_test"
+          timestamp_column: "created_at"
+          time_bucket:
+            period: hour
+            count: 1
+          seasonality: "hour_of_day"
+          sensitivity: 2
+          anomaly_direction: "spike"
+          where: "status = 'active'"
+          tags: ["critical", "monitoring"]
+          config:
+            severity: warn
+          meta:
+            description: "Custom volume anomaly detection"
+            owner: "@data_team"
+```
+
+### Test Configuration Hierarchy
+Tests can be configured at multiple levels with the following precedence (highest to lowest):
+1. **Test level** - Direct test configuration
+2. **Model level** - Model's `elementary` config
+3. **Project level** - `vars` in `dbt_project.yml`
+
+## 6. Project-Level Model Configuration
+
+### dbt_project.yml Model Configuration
+```yaml
+models:
+  elementary:
+    +schema: elementary
+    +enabled: "{{ var('elementary_enabled', True) }}"
+  
+  my_project:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts
+```
+
+## 7. Selectors Configuration
+
+### selectors.yml for Model Selection
+```yaml
+selectors:
+  - name: elementary_models
+    definition:
+      method: tag
+      value: elementary
+  
+  - name: critical_models
+    definition:
+      method: tag
+      value: critical
+  
+  - name: staging_models
+    definition:
+      method: path
+      value: models/staging
+```
+
+## 8. Key Configuration Options by Element
+
+### Model Configuration Options
+- `timestamp_column`: Column to use for time-based analysis
+- `backfill_days`: Days to backfill metrics
+- `anomaly_direction`: 'spike', 'drop', or 'both'
+- `anomaly_sensitivity`: 1-5 scale for sensitivity
+- `where_expression`: Filter condition for analysis
+- `time_bucket`: Time aggregation settings
+- `seasonality`: Seasonality pattern to apply
+- `min_training_set_size`: Minimum data points for training
+
+### Column Configuration Options
+- `disable_test_samples`: Prevent sampling for sensitive columns
+- `meta.owner`: Column owner for alerts
+- `meta.tags`: Column tags for categorization
+
+### Source Configuration Options
+- `freshness`: Data freshness thresholds
+- `loaded_at_field`: Field indicating when data was loaded
+- `meta.owner`: Source owner for alerts
+- `meta.tags`: Source tags for categorization
+
+### Exposure Configuration Options
+- `owner`: Exposure owner information
+- `meta`: Custom metadata for the exposure
+- `tags`: Exposure tags for categorization
+- `depends_on`: Dependencies for lineage tracking
+
+## 9. Configuration Precedence
+
+The configuration follows this precedence order (highest to lowest priority):
+
+1. **Test-level configuration** (in test definition)
+2. **Model-level configuration** (in model's `elementary` config)
+3. **Project-level configuration** (in `vars` section)
+4. **Package defaults**
+
+## 10. Advanced Configuration Examples
+
+### Complex Model Configuration
+```yaml
+models:
+  - name: complex_analytics_model
+    config:
+      materialized: incremental
+      unique_key: id
+      elementary:
+        timestamp_column: event_timestamp
+        backfill_days: 14
+        anomaly_direction: "both"
+        anomaly_sensitivity: 3
+        where_expression: "is_active = true and event_type in ('purchase', 'view')"
+        time_bucket:
+          period: day
+          count: 1
+        seasonality: "day_of_week"
+        min_training_set_size: 21
+        days_back: 60
+    meta:
+      owner: ["@analytics_team", "product@company.com"]
+      subscribers: ["@alerts", "oncall@company.com"]
+      tags: ["critical", "revenue", "analytics"]
+    description: "Complex analytics model with comprehensive monitoring"
+    columns:
+      - name: user_id
+        config:
+          disable_test_samples: true
+        meta:
+          owner: "@privacy_team"
+          tags: ["pii"]
+        description: "User identifier (PII)"
+      - name: revenue_amount
+        meta:
+          owner: "@finance_team"
+          tags: ["financial", "critical"]
+        description: "Revenue amount in USD"
+        tests:
+          - elementary.column_anomalies:
+              column_anomalies:
+                - min
+                - max
+                - average
+                - standard_deviation
+              anomaly_direction: "spike"
+              sensitivity: 2
+              tags: ["revenue_monitoring"]
+```
+
+### Comprehensive Source Configuration
+```yaml
+sources:
+  - name: external_systems
+    schema: raw
+    tables:
+      - name: customer_data
+        meta:
+          owner: ["@data_engineering", "vendor@external.com"]
+          elementary:
+            timestamp_column: last_updated
+            min_training_set_size: 30
+            anomaly_sensitivity: 4
+        freshness:
+          error_after:
+            count: 2
+            period: hour
+          warn_after:
+            count: 1
+            period: hour
+          filter: "status = 'active'"
+        loaded_at_field: last_updated
+        description: "Customer data from external CRM system"
+        columns:
+          - name: customer_id
+            meta:
+              owner: "@privacy_team"
+              tags: ["pii", "primary_key"]
+            description: "Unique customer identifier"
+          - name: email
+            config:
+              disable_test_samples: true
+            meta:
+              owner: "@privacy_team"
+              tags: ["pii", "sensitive"]
+            description: "Customer email address"
+```
+
+### Advanced Exposure Configuration
+```yaml
+exposures:
+  - name: executive_dashboard
+    label: Executive KPI Dashboard
+    type: dashboard
+    maturity: high
+    url: https://bi.company.com/executive-dashboard
+    description: >
+      Executive dashboard showing key business metrics
+      including revenue, customer acquisition, and churn rates.
+    depends_on:
+      - ref('daily_revenue')
+      - ref('customer_metrics')
+      - ref('churn_analysis')
+    owner:
+      name: "Executive Team"
+      email: "exec@company.com"
+    meta:
+      platform: "Looker"
+      workbook: "Executive Metrics"
+      path: "Dashboards/Executive"
+      refresh_schedule: "hourly"
+      data_sources:
+        - "daily_revenue"
+        - "customer_metrics"
+        - "churn_analysis"
+      referenced_columns:
+        - column_name: revenue_amount
+          data_type: numeric
+          node: ref('daily_revenue')
+        - column_name: customer_count
+          data_type: numeric
+          node: ref('customer_metrics')
+    tags:
+      - executive
+      - critical
+      - kpi
+```
+
+## 11. Best Practices
+
+### Model Configuration Best Practices
+1. **Use descriptive names** for models, columns, and tests
+2. **Set appropriate owners** for all models and columns
+3. **Use tags consistently** for categorization and filtering
+4. **Configure timestamp columns** for time-based analysis
+5. **Set appropriate sensitivity levels** based on business impact
+
+### Security Best Practices
+1. **Disable sampling** for PII columns using `disable_test_samples: true`
+2. **Use PII tags** for sensitive data identification
+3. **Set appropriate owners** for sensitive data
+4. **Configure alerts** for critical models and sources
+
+### Performance Best Practices
+1. **Use appropriate materializations** (view vs table vs incremental)
+2. **Configure time buckets** based on data volume and update frequency
+3. **Set reasonable training periods** for anomaly detection
+4. **Use filters** to focus on relevant data subsets
+
+## 12. Troubleshooting
+
+### Common Configuration Issues
+1. **Missing timestamp columns** - Ensure timestamp columns are properly configured
+2. **Incorrect owner format** - Use consistent owner naming conventions
+3. **Tag conflicts** - Avoid conflicting tag definitions
+4. **Configuration precedence** - Understand the hierarchy of configuration options
+
+### Debugging Configuration
+1. **Check dbt logs** for configuration errors
+2. **Verify schema files** for syntax errors
+3. **Test configurations** in development environment
+4. **Use Elementary CLI** for configuration validation
+
+## References
+
+- [Elementary Documentation](https://docs.elementary-data.com/)
+- [dbt Configuration Documentation](https://docs.getdbt.com/reference/dbt-jinja-functions/var)
+- [Elementary GitHub Repository](https://github.com/elementary-data/elementary)
+- [Elementary Configuration Variables](./elementary_configuration_variables.md) 
