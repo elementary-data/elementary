@@ -1,0 +1,222 @@
+# Elementary dbt Package Configuration Variables
+
+This document provides a comprehensive list of all configuration variables available for the Elementary dbt package via `vars` in your `dbt_project.yml`.
+
+## Overview
+
+The Elementary dbt package provides extensive configuration options that can be set via the `vars` section in your `dbt_project.yml` file. These variables control various aspects of the package including anomaly detection, alerts, data uploads, testing, and performance.
+
+## Core Configuration Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `days_back` | `14` | Number of days to look back for anomaly detection training data |
+| `anomaly_sensitivity` | `3` | Sensitivity level for anomaly detection (1-5, higher = more sensitive) |
+| `backfill_days` | `2` | Number of days to backfill metrics |
+| `tests_schema_name` | `''` | Custom schema name for Elementary tests |
+| `debug_logs` | `false` | Enable debug logging |
+| `project_name` | `none` | Custom project name |
+| `elementary_full_refresh` | `false` | Force full refresh of Elementary models |
+| `min_training_set_size` | `7` | Minimum number of data points required for anomaly detection training |
+| `anomaly_direction` | `'both'` | Anomaly detection direction: 'spike', 'drop', or 'both' |
+| `anomaly_exclude_metrics` | `none` | Metrics to exclude from anomaly detection |
+| `fail_on_zero` | `false` | Whether to fail tests when metric value is zero |
+
+## Alert Configuration Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `disable_warn_alerts` | `false` | Disable warning alerts |
+| `disable_model_alerts` | `false` | Disable model run alerts |
+| `disable_test_alerts` | `false` | Disable test result alerts |
+| `disable_source_freshness_alerts` | `false` | Disable source freshness alerts |
+| `disable_skipped_model_alerts` | `true` | Disable alerts for skipped models |
+| `disable_skipped_test_alerts` | `true` | Disable alerts for skipped tests |
+
+## Data Upload Configuration Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `disable_run_results` | `false` | Disable uploading run results |
+| `disable_freshness_results` | `false` | Disable uploading freshness results |
+| `disable_tests_results` | `false` | Disable uploading test results |
+| `disable_dbt_artifacts_autoupload` | `false` | Disable automatic dbt artifacts upload |
+| `disable_dbt_invocation_autoupload` | `false` | Disable automatic dbt invocation upload |
+| `columns_upload_strategy` | `'enriched_only'` | Strategy for uploading columns: 'enriched_only', 'all', or 'none' |
+| `upload_artifacts_method` | `'diff'` | Method for uploading artifacts: 'diff' or 'full' |
+| `cache_artifacts` | `true` | Cache artifacts for performance |
+| `dbt_artifacts_chunk_size` | `5000` | Chunk size for uploading dbt artifacts |
+| `include_other_warehouse_specific_columns` | `false` | Include warehouse-specific columns |
+
+## Test Configuration Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `test_sample_row_count` | `5` | Number of sample rows to collect for failed tests |
+| `tests_use_temp_tables` | `false` | Use temporary tables for tests |
+| `calculate_failed_count` | `true` | Calculate failed row count in tests |
+| `store_result_rows_in_own_table` | `true` | Store test result rows in separate table |
+| `clean_elementary_temp_tables` | `true` | Clean up temporary tables after tests |
+
+## Performance and System Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `query_max_size` | `1000000` | Maximum query size (250000 for BigQuery/ClickHouse/Athena/Trino) |
+| `max_int` | `2147483647` | Maximum integer value for metrics |
+| `long_string_size` | `65535` | Maximum size for long string columns |
+| `collect_model_sql` | `true` | Collect model SQL for artifacts |
+| `force_metrics_backfill` | `false` | Force backfill of metrics |
+
+## PII and Sampling Configuration Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `disable_samples_on_pii_tags` | `false` | Disable sampling for PII-tagged tables |
+| `pii_tags` | `['pii']` | Tags that identify PII data |
+
+## Advanced Configuration Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `edr_cli_run` | `false` | Whether running via Elementary CLI |
+| `custom_run_started_at` | `none` | Custom run start timestamp |
+| `mute_dbt_upgrade_recommendation` | `false` | Mute dbt upgrade recommendations |
+| `mute_ensure_materialization_override` | `false` | Mute materialization override warnings |
+
+## Complex Configuration Objects
+
+### ignore_small_changes
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `ignore_small_changes` | `{'spike_failure_percent_threshold': none, 'drop_failure_percent_threshold': none}` | Thresholds for ignoring small changes in anomaly detection |
+
+### edr_monitors
+
+The `edr_monitors` variable controls which monitors are enabled for different data types. Default configuration:
+
+```yaml
+edr_monitors:
+  table: ['row_count', 'freshness']
+  column_any_type: ['null_count', 'null_percent']
+  column_string: ['min_length', 'max_length', 'average_length', 'missing_count', 'missing_percent']
+  column_numeric: ['min', 'max', 'zero_count', 'zero_percent', 'average', 'standard_deviation', 'variance']
+  column_boolean: ['count_true', 'count_false']
+```
+
+#### Available Monitors by Type
+
+**Table Monitors:**
+- `row_count` - Monitor row count over time
+- `freshness` - Monitor data freshness
+- `event_freshness` - Monitor event-based freshness
+
+**Column Any Type Monitors:**
+- `null_count` - Count of null values
+- `null_percent` - Percentage of null values
+- `not_null_percent` - Percentage of non-null values
+
+**Column String Monitors:**
+- `min_length` - Minimum string length
+- `max_length` - Maximum string length
+- `average_length` - Average string length
+- `missing_count` - Count of missing values
+- `missing_percent` - Percentage of missing values
+- `not_missing_percent` - Percentage of non-missing values
+
+**Column Numeric Monitors:**
+- `min` - Minimum value
+- `max` - Maximum value
+- `zero_count` - Count of zero values
+- `zero_percent` - Percentage of zero values
+- `not_zero_percent` - Percentage of non-zero values
+- `average` - Average value
+- `standard_deviation` - Standard deviation
+- `variance` - Variance
+- `sum` - Sum of values
+
+**Column Boolean Monitors:**
+- `count_true` - Count of true values
+- `count_false` - Count of false values
+
+## Usage Examples
+
+### Basic Configuration
+
+```yaml
+# dbt_project.yml
+vars:
+  debug_logs: true
+  anomaly_sensitivity: 2
+  days_back: 30
+  disable_model_alerts: false
+  disable_test_alerts: false
+```
+
+### Advanced Configuration
+
+```yaml
+# dbt_project.yml
+vars:
+  # Core settings
+  debug_logs: true
+  anomaly_sensitivity: 2
+  days_back: 30
+  min_training_set_size: 10
+  
+  # Alert settings
+  disable_model_alerts: false
+  disable_test_alerts: false
+  disable_warn_alerts: true
+  
+  # PII settings
+  pii_tags: ['pii', 'sensitive', 'personal']
+  disable_samples_on_pii_tags: true
+  
+  # Performance settings
+  query_max_size: 500000
+  dbt_artifacts_chunk_size: 10000
+  
+  # Custom monitors
+  edr_monitors:
+    table: ['row_count', 'freshness']
+    column_any_type: ['null_count', 'null_percent']
+    column_string: ['min_length', 'max_length', 'average_length']
+    column_numeric: ['min', 'max', 'average', 'standard_deviation']
+    column_boolean: ['count_true', 'count_false']
+  
+  # Ignore small changes
+  ignore_small_changes:
+    spike_failure_percent_threshold: 5
+    drop_failure_percent_threshold: 10
+```
+
+### Environment-Specific Configuration
+
+```yaml
+# dbt_project.yml
+vars:
+  debug_logs: "{{ env_var('DBT_EDR_DEBUG', False) }}"
+  project_name: "{{ env_var('DBT_PROJECT_NAME', 'my_project') }}"
+  anomaly_sensitivity: "{{ env_var('DBT_ANOMALY_SENSITIVITY', 3) }}"
+```
+
+## Warehouse-Specific Defaults
+
+Some variables have different default values depending on your data warehouse:
+
+- **BigQuery, ClickHouse, Athena, Trino**: `query_max_size` defaults to `250000` instead of `1000000`
+
+## Notes
+
+- All boolean variables can be set as strings (`"true"`/`"false"`) or booleans (`true`/`false`)
+- The `edr_monitors` configuration is quite flexible and allows you to customize which monitors are active for different data types
+- Environment variables can be used in conjunction with these vars for dynamic configuration
+- Some variables are primarily used internally by the package and may not need customization in most cases
+
+## References
+
+- [Elementary Documentation](https://docs.elementary-data.com/)
+- [dbt Variables Documentation](https://docs.getdbt.com/reference/dbt-jinja-functions/var)
+- [Elementary GitHub Repository](https://github.com/elementary-data/elementary) 
