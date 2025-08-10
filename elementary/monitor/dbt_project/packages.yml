@@ -2,7 +2,7 @@ packages:
   - package: dbt-labs/dbt_utils
     version: [">=0.8.0", "<0.9.0"]
   - git: https://github.com/elementary-data/dbt-data-reliability.git
-    revision: c82596613505715cacb6813e5a8ea05deb9b295d
+    revision: 4c537c38a0dc8c42a8f5fcc3aa64ad4870988a0e
 
   #  NOTE - for unreleased CLI versions we often need to update the package version to a commit hash (please leave this
   #  commented, so it will be easy to access)
