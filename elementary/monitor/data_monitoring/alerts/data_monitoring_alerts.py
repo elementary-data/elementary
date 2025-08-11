@@ -90,6 +90,11 @@ class DataMonitoringAlerts(DataMonitoring):
         self.send_test_message_on_success = send_test_message_on_success
         self.override_config_defaults = override_config
         self.alerts_integration = self._get_integration_client()
+        self.alert_message_builder = AlertMessageBuilder(
+            MessageBuilderConfig(
+                maximum_columns_in_alert_samples=self.config.maximum_columns_in_alert_samples
+            )
+        )
 
     def _get_integration_client(
         self,
@@ -312,11 +317,7 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> bool:
         if isinstance(self.alerts_integration, BaseIntegration):
             return self.alerts_integration.send_alert(alert)
-        message_config = MessageBuilderConfig(
-            maximum_columns_in_alert_samples=self.config.maximum_columns_in_alert_samples
-        )
-        alert_message_builder = AlertMessageBuilder(message_config)
-        alert_message_body = alert_message_builder.build(
+        alert_message_body = self.alert_message_builder.build(
             alert=alert,
         )
         try:
