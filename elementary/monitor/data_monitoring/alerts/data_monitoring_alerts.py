@@ -16,7 +16,10 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
-from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
+from elementary.monitor.alerts.alert_messages.builder import (
+    AlertMessageBuilder,
+    MessageBuilderConfig,
+)
 from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.grouping_type import GroupingType
@@ -309,7 +312,10 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> bool:
         if isinstance(self.alerts_integration, BaseIntegration):
             return self.alerts_integration.send_alert(alert)
-        alert_message_builder = AlertMessageBuilder(self.config)
+        message_config = MessageBuilderConfig(
+            maximum_columns_in_alert_samples=self.config.maximum_columns_in_alert_samples
+        )
+        alert_message_builder = AlertMessageBuilder(message_config)
         alert_message_body = alert_message_builder.build(
             alert=alert,
         )
