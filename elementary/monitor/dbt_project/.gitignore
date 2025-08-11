@@ -3,3 +3,4 @@ target/
 dbt_modules/
 dbt_packages*/
 logs/
+dbt_internal_packages/
