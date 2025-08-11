@@ -179,8 +179,9 @@
                   "cloud/integrations/dwh/databricks",
                   "cloud/integrations/dwh/postgres",
                   "cloud/integrations/dwh/athena",
-                  "cloud/integrations/dwh/trino",
-                  "cloud/integrations/dwh/clickhouse"
+                  "cloud/integrations/dwh/dremio",
+                  "cloud/integrations/dwh/clickhouse",
+                  "cloud/integrations/dwh/trino"
                 ]
               },
               {

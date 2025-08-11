@@ -1,0 +1,64 @@
+**Note:** We currently support **Dremio Cloud only**. If you are using Dremio Software, please contact us for assistance.
+
+### Create a user for Elementary cloud
+
+Create an email account for the Elementary user. 
+Example: **elementary@your-organization.com**
+
+On your dbt project, run:
+
+```bash
+## Print the query you should run to generate a user.
+dbt run-operation create_elementary_user --args '{user: the_mail_of_the_elementary_user}'
+```
+
+This command will generate a query to create a user with the necessary permissions. Run this query on your data warehouse with admin permissions to create the user. It will send an email invitation, you need to accept that invitation.  
+
+After the invitation was accepted, you need to sign in to Dremio as the Elementary user, and open the Account Settings (bottom-left corner in the Dremio UI):
+
+<img
+  src="/pics/cloud/dremio/account-settings.png"
+  alt="Dremio Account Settings"
+/>
+
+Click **Generate Token**:
+
+<img
+  src="/pics/cloud/dremio/generate-token.png"
+  alt="Generate Token in Dremio"
+/>
+
+Set the **maximum lifetime** allowed by Dremio (currently **180 days**).
+
+⚠️ Put a reminder to renew the token before it expires.
+
+You can update the token in Elementary's UI at any time.
+
+### Permissions and security
+
+Elementary cloud doesn't require read permissions to your tables and schemas, but only the following:
+
+- Read-only access to the elementary schema.
+- Access to read metadata in information schema and query history, related to the tables in your dbt project.
+
+It is recommended to create a user using the instructions specified above to avoid granting excess privileges. For more details, refer to
+
+[**security and privacy**](https://docs.elementary-data.com/cloud/general/security-and-privacy)
+
+### Fill the connection form
+
+Provide the following fields:
+
+- **Host:**
+    - US: `api.dremio.cloud`
+    - EU: `api.eu.dremio.cloud`
+- **Object Storage:** Name of the object storage where the Elementary schema is stored.
+- **Object Storage Path:** Path inside the object storage where the Elementary schema is stored.
+- **Project ID:** Your Dremio Cloud project ID.
+- **User:** The email address of the Elementary user.
+- **Token:** The token you generated for the Elementary user.
+ 
+ <img
+  src="/pics/cloud/dremio/dremio-form.png"
+  alt="Dremio connection form"
+/>
