@@ -111,7 +111,7 @@ Tests to detect anomalies in data quality metrics such as volume, freshness, nul
   Write your own custom tests using Python scripts.
 </Card>
 
-## Understanding Errors, Failures, and Warnings in dbt Tests
+## dbt tests outcomes
 
 In dbt, there are three possible outcomes when running models or tests: errors, failures, and warnings.
 - An **error** means dbt could not run the SQL at all (e.g., syntax mistake, missing table, broken macro). This stops execution (on `dbt build`).
