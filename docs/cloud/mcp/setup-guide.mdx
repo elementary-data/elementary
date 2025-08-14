@@ -37,32 +37,15 @@ These tokens inherit **your** workspace permissions:
 * Rotate regularly.  
 * Revoke immediately if compromised.
 
+### Security reminders
+* Tokens confer **all** your Elementary permissions.  
+* Keep them secret and scoped; rotate when in doubt.  
+* Revoke compromised tokens immediately.
+
+
 ---
 
-## 3 - Validate the connection
-This confirms you can reach the Elementary MCP server.
-> Note: Replace `<AUTH_TOKEN>` with your actual token.
-
-```bash
-npx -y mcp-remote@latest https://prod.api.elementary-data.com/mcp/ \
-  --header "Authorization: Bearer <AUTH_TOKEN>" \
-  --health --debug
-```
-
-Optional deeper check (list tools/resources):
-```bash
-npx -y mcp-remote@latest mcp-remote-client https://prod.api.elementary-data.com/mcp/ \
-  --header "Authorization: Bearer <AUTH_TOKEN>" \
-  --list-tools --debug
-```
-
-**Troubleshooting**
-| Symptom | Remedy |
-|---------|--------|
-| `node: command not found` | Install Node ≥ 18 and ensure it’s on `PATH`. |
-| `401 Unauthorized` | Token expired or pasted incorrectly → regenerate. |
-
-## 4 – Configure your client
+## 3 – Configure your client
 Most MCP‑compatible clients read a JSON config that defines mcpServers. Use one of the following patterns.
 ```jsonc
 {
@@ -88,22 +71,16 @@ It makes `npx` skip the interactive “install this package?” prompt.
 
 ### Client‑specific steps
 
-#### 4.1 Cursor IDE
+#### 3.1 Cursor IDE
 1. **Settings → Model Context Protocol → Add Custom Server**  
    or edit `~/.cursor/mcp.json` (global) / `<project>/.cursor/mcp.json` (workspace).
 2. Paste the JSON above.
 3. Save – Cursor auto‑restarts its MCP agent.
 
-#### 4.2 Claude Desktop
+#### 3.2 Claude Desktop
 1. In the menu bar choose **Claude → Settings -> Developer**.
 2. Under **Local MCP Servers**, click **Edit**.
 3. Paste the JSON block
 4. Restart Claude
 
----
-
-### Security reminders
-* Tokens confer **all** your Elementary permissions.  
-* Keep them secret and scoped; rotate when in doubt.  
-* Revoke compromised tokens immediately.
 
