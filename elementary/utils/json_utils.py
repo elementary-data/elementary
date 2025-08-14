@@ -1,5 +1,7 @@
 import json
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
+
+import numpy as np
 
 
 def try_load_json(value: Optional[Union[str, dict, list]]):
@@ -76,3 +78,20 @@ def append_prefix_if_missing(string: str, prefix: str) -> str:
     if string.startswith(prefix):
         return string
     return f"{prefix}{string}"
+
+
+def inf_and_nan_to_str(obj) -> Any:
+    """Replaces occurrences of float("nan") for float("infinity") in the given dict object."""
+    if isinstance(obj, float):
+        if np.isinf(obj):
+            return "Infinity" if obj > 0 else "-Infinity"
+        elif np.isnan(obj):
+            return "NaN"
+        else:
+            return obj
+    elif isinstance(obj, dict):
+        return {k: inf_and_nan_to_str(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [inf_and_nan_to_str(i) for i in obj]
+    else:
+        return obj

@@ -272,6 +272,8 @@ def build_base_source_freshness_alert_model(
     return SourceFreshnessAlertModel(
         id="test_id",
         source_name="test_source",
+        database_name="test_db",
+        schema_name="test_schema",
         identifier="test_identifier",
         original_status=status,
         path=path,
