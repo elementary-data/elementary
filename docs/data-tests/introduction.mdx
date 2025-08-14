@@ -110,3 +110,10 @@ Tests to detect anomalies in data quality metrics such as volume, freshness, nul
 <Card title="Python tests" href="/data-tests/python-tests">
   Write your own custom tests using Python scripts.
 </Card>
+
+## Understanding Errors, Failures, and Warnings in dbt Tests
+
+In dbt, there are three possible outcomes when running models or tests: errors, failures, and warnings.
+- An **error** means dbt could not run the SQL at all (e.g., syntax mistake, missing table, broken macro). This stops execution (on `dbt build`).
+- A **failure** happens when a test runs successfully but its condition isn’t met, and if the test’s severity is set to error, it will fail the pipeline.
+- A **warning** is the same as a failure in terms of data quality, but with severity: warn, dbt exits successfully and does not break pipelines.
