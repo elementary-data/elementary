@@ -114,7 +114,7 @@ class SlackWebMessagingIntegration(
             logger.info(
                 f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
             )
-            channel_id = self._get_channel_id(channel_name)
+            channel_id = self._get_channel_id(channel_name, only_public=True)
             self._join_channel(channel_id=channel_id)
             logger.info(f"Joined channel {channel_name}")
         elif err_type == "channel_not_found":
@@ -127,10 +127,12 @@ class SlackWebMessagingIntegration(
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
-    def _iter_channels(self, cursor: Optional[str] = None) -> Iterator[dict]:
+    def _iter_channels(
+        self, cursor: Optional[str] = None, only_public: bool = False
+    ) -> Iterator[dict]:
         response = self.client.conversations_list(
             cursor=cursor,
-            types="public_channel,private_channel",
+            types="public_channel" if only_public else "public_channel,private_channel",
             exclude_archived=True,
             limit=1000,
         )
@@ -141,10 +143,10 @@ class SlackWebMessagingIntegration(
         if next_cursor:
             if not isinstance(next_cursor, str):
                 raise ValueError("Next cursor is not a string")
-            yield from self._iter_channels(next_cursor)
+            yield from self._iter_channels(next_cursor, only_public)
 
-    def _get_channel_id(self, channel_name: str) -> str:
-        for channel in self._iter_channels():
+    def _get_channel_id(self, channel_name: str, only_public: bool = False) -> str:
+        for channel in self._iter_channels(only_public=only_public):
             if channel["name"] == channel_name:
                 return channel["id"]
         raise MessagingIntegrationError(f"Channel {channel_name} not found")
