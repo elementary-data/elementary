@@ -1,0 +1,7 @@
+packages:
+  - local: ../../../elementary/monitor/dbt_project
+  - package: dbt-labs/dbt_utils
+    version: 0.8.6
+  - package: elementary-data/elementary
+    version: 0.19.1
+sha1_hash: 9d71a1a328acdc2d583ae6180e9f5304ae79acc2
