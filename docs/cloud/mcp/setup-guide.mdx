@@ -13,22 +13,20 @@ It covers prerequisites, installation of the `mcp-remote` helper, authentication
 | **Node.js 18 LTS or newer** | `mcp-remote` (and many editors) run on Node. Verify wit `node --version`. |
 | **npm / npx** | `npx` fetches `mcp-remote` on demand. Bundled with Node. |
 
-> Tip: If you use `nvm`, run `nvm install --lts` and `nvm use --lts`.
+> **Recommended:** If you don't have Node.js installed, we recommend using `nvm` (Node Version Manager) for easy installation and management:
+> ```bash
+> # Install nvm (if not already installed)
+> curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+> # Restart your terminal or run: source ~/.bashrc
+> 
+> # Install and use the latest LTS version
+> nvm install --lts
+> nvm use --lts
+> ```
 
 ---
 
-## 1 – Install `mcp-remote` (optional)
-You don’t have to install anything globally—our configs use npx to fetch the latest version automatically. If you do prefer a global install, use:
-```bash
-# Optional: global install
-npm install -g mcp-remote@latest
-```
-
-> **Important:** `mcp-remote` expects the **server URL as the first argument** (flags come **after** the URL). It does **not** implement `--help`; running `mcp-remote --help` will error because `--help` is treated as a URL.
-
----
-
-## 2 – Generate a personal access token
+## 1 – Generate a personal access token
 You can now generate tokens directly from the Elementary UI: go to [User → Personal Tokens](https://app.elementary-data.com/settings/tokens).
 
 Quick steps:
@@ -39,6 +37,17 @@ Quick steps:
 ### Security
 Tokens are **user‑scoped bearer tokens** and inherit your workspace permissions. Treat them like passwords — do not share or commit them. Keep them secret, rotate regularly, and revoke immediately if compromised.
 
+
+---
+
+## 2 – Install `mcp-remote` (optional)
+You don't have to install anything globally—our configs use npx to fetch the latest version automatically. If you do prefer a global install, use:
+```bash
+# Optional: global install
+npm install -g mcp-remote@latest
+```
+
+> **Important:** `mcp-remote` expects the **server URL as the first argument** (flags come **after** the URL). It does **not** implement `--help`; running `mcp-remote --help` will error because `--help` is treated as a URL.
 
 ---
 
