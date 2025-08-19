@@ -79,8 +79,8 @@ class DataMonitoring:
             relation = self.internal_dbt_runner.run_operation(
                 "elementary_cli.get_elementary_database_and_schema", quiet=True
             )[0]
-            # Replace double quotes with single quotes for proper SQL compatibility
-            relation = relation.replace('"', "'") if relation else relation
+            # Replace double quotes with backticks for proper SQL compatibility
+            relation = relation.replace('"', "`") if relation else relation
             logger.info(f"Elementary's database and schema: '{relation}'")
             return relation
         except Exception as ex:
