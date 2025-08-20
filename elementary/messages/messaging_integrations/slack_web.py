@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Any, Dict, Iterator, Optional
 
 from pydantic import BaseModel
@@ -128,14 +129,23 @@ class SlackWebMessagingIntegration(
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
     def _iter_channels(
-        self, cursor: Optional[str] = None, only_public: bool = False
+        self,
+        cursor: Optional[str] = None,
+        only_public: bool = False,
+        timeout: float = 300.0,
     ) -> Iterator[dict]:
+        if timeout <= 0:
+            raise MessagingIntegrationError("Channel iteration timed out")
+
+        call_start = time.time()
         response = self.client.conversations_list(
             cursor=cursor,
             types="public_channel" if only_public else "public_channel,private_channel",
             exclude_archived=True,
             limit=1000,
         )
+        call_duration = time.time() - call_start
+
         channels = response["channels"]
         yield from channels
         response_metadata = response.get("response_metadata") or {}
@@ -143,7 +153,8 @@ class SlackWebMessagingIntegration(
         if next_cursor:
             if not isinstance(next_cursor, str):
                 raise ValueError("Next cursor is not a string")
-            yield from self._iter_channels(next_cursor, only_public)
+            timeout_left = timeout - call_duration
+            yield from self._iter_channels(next_cursor, only_public, timeout_left)
 
     def _get_channel_id(self, channel_name: str, only_public: bool = False) -> str:
         for channel in self._iter_channels(only_public=only_public):
