@@ -4,7 +4,6 @@
 
 {%- macro default__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
-    
     {% set select_test_results %}
         with test_results as (
             {{ elementary_cli.current_tests_run_results_query(days_back=days_back) }}
@@ -19,7 +18,7 @@
             from test_results
         )
 
-        select 
+        select
             test_results.id,
             test_results.invocation_id,
             test_results.test_execution_id,
@@ -70,7 +69,7 @@
     {% endset %}
 
     {% set valid_ids_query %}
-        select distinct id 
+        select distinct id
         from {{ ordered_test_results_relation }}
         where invocations_rank_index = 1
     {% endset %}
@@ -200,7 +199,7 @@
     FROM {{ ref('elementary', 'elementary_test_results') }} etr
     JOIN {{ ref('elementary', 'dbt_tests') }} dt ON etr.test_unique_id = dt.unique_id
     LEFT JOIN (
-        SELECT 
+        SELECT
             min(detected_at) AS first_time_occurred,
             test_unique_id
         FROM {{ ref('elementary', 'elementary_test_results') }}
@@ -230,7 +229,7 @@
     {% endset %}
 
     {% set valid_ids_query %}
-        select distinct id 
+        select distinct id
         from {{ ordered_test_results_relation }}
         where invocations_rank_index = 1
     {% endset %}
