@@ -31,9 +31,7 @@
         CURRENT_TIME() as time_col,
         CURRENT_TIMESTAMP() as timestamp_col,
     {% endset %}
-    {% set create_table_query = dbt.create_table_as(false, relation, sql_query) %}
-    {% do elementary.edr_log(create_table_query) %}
-    {% do elementary.run_query(create_table_query) %}
+    {% do elementary.edr_create_table_as(false, relation, sql_query) %}
 {% endmacro %}
 
 {% macro snowflake__create_all_types_table() %}
@@ -81,9 +79,7 @@
         [1,2,3] as array_col,
         TO_GEOGRAPHY('POINT(-122.35 37.55)') as geography_col
     {% endset %}
-    {% set create_table_query = dbt.create_table_as(false, relation, sql_query) %}
-    {% do elementary.edr_log(create_table_query) %}
-    {% do elementary.run_query(create_table_query) %}
+    {% do elementary.edr_create_table_as(false, relation, sql_query) %}
 {% endmacro %}
 
 {% macro redshift__create_all_types_table() %}
@@ -123,10 +119,7 @@
         ST_GeogFromText('SRID=4324;POLYGON((0 0,0 1,1 1,10 10,1 0,0 0))') as geography_col,
         JSON_PARSE('{"data_type": "super"}') as super_col
     {% endset %}
-    {% set create_table_query = dbt.create_table_as(false, relation, sql_query) %}
-    {% do elementary.edr_log(create_table_query) %}
-    {% do elementary.run_query(create_table_query) %}
-  
+    {% do elementary.edr_create_table_as(false, relation, sql_query) %}
 {% endmacro %}
 
 {% macro postgres__create_all_types_table() %}
@@ -184,9 +177,7 @@
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid as uuid_col,
         xmlcomment('text') as xml_col
     {% endset %}
-    {% set create_table_query = dbt.create_table_as(false, relation, sql_query) %}
-    {% do elementary.edr_log(create_table_query) %}
-    {% do elementary.run_query(create_table_query) %}
+    {% do elementary.edr_create_table_as(false, relation, sql_query) %}
 {% endmacro %}
 
 {% macro default__create_all_types_table() %}

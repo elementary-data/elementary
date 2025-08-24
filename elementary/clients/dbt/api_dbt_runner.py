@@ -57,7 +57,9 @@ class APIDbtRunner(CommandLineDbtRunner):
                 logs=[DbtLog.from_log_line(log) for log in dbt_logs],
             )
 
-        return APIDbtCommandResult(success=res.success, output=output, result_obj=res)
+        return APIDbtCommandResult(
+            success=res.success, output=output, stderr=None, result_obj=res
+        )
 
     def _parse_ls_command_result(
         self, select: Optional[str], result: DbtCommandResult
