@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from functools import cached_property
 from typing import (
+    Any,
     Generic,
     Iterable,
     List,
@@ -76,27 +77,32 @@ class FilterSchema(BaseModel, Generic[ValueT]):
         # Make sure that serializing Enum return values
         use_enum_values = True
 
-    @cached_property
-    def _normalized_values(self) -> list[str]:
-        return [str(value).lower() for value in self.values]
+    @staticmethod
+    def normalize_value(value: Any) -> str:
+        if isinstance(value, Enum):
+            return str(value.value).lower()
+        return str(value).lower()
+
+    @staticmethod
+    def normalize_values(values: Iterable[ValueT]) -> Set[str]:
+        return {FilterSchema.normalize_value(value) for value in values}
 
     @cached_property
-    def _values_set(self) -> Set[ValueT]:
-        return set(self.values)
+    def _normalized_values(self) -> Set[str]:
+        return FilterSchema.normalize_values(self.values)
 
-    def get_matching_values(self, values: Iterable[ValueT]) -> Set[ValueT]:
-        values_set = set(values)
+    def get_matching_normalized_values(self, values: Set[str]) -> Set[str]:
         if self.type == FilterType.IS:
-            return values_set.intersection(self._values_set)
+            return values.intersection(self._normalized_values)
         elif self.type == FilterType.IS_NOT:
-            matching_values = values_set.difference(self._values_set)
-            if len(matching_values) != len(values_set):
+            matching_values = values.difference(self._normalized_values)
+            if len(matching_values) != len(values):
                 return set()
             return matching_values
         if self.type == FilterType.CONTAINS:
             return set(
                 value
-                for value in values_set
+                for value in values
                 if any(
                     filter_value in str(value).lower()
                     for filter_value in self._normalized_values
@@ -105,16 +111,20 @@ class FilterSchema(BaseModel, Generic[ValueT]):
         if self.type == FilterType.NOT_CONTAINS:
             matching_values = set(
                 value
-                for value in values_set
+                for value in values
                 if not any(
                     filter_value in str(value).lower()
                     for filter_value in self._normalized_values
                 )
             )
-            if len(matching_values) != len(values_set):
+            if len(matching_values) != len(values):
                 return set()
             return matching_values
         raise ValueError(f"Unsupported filter type: {self.type}")
+
+    def get_matching_values(self, values: Iterable[ValueT]) -> Set[str]:
+        values_set = FilterSchema.normalize_values(values)
+        return self.get_matching_normalized_values(values_set)
 
     def apply_filter_on_values(self, values: List[ValueT]) -> bool:
         if self.type in NEGATIVE_OPERATORS and not values:
