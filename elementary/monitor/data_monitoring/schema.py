@@ -2,17 +2,7 @@ import re
 from datetime import datetime
 from enum import Enum
 from functools import cached_property
-from typing import (
-    Any,
-    Generic,
-    Iterable,
-    List,
-    Optional,
-    Pattern,
-    Set,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Generic, Iterable, List, Optional, Pattern, Set, Tuple, TypeVar
 
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel, Field, validator
