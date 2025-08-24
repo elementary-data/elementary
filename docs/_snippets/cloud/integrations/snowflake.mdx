@@ -1,6 +1,6 @@
 You will connect Elementary Cloud to Snowflake for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-<Snippet file="cloud/integrations/create-user-operation.mdx" />
+<Snippet file="cloud/integrations/create-user-operation-snowflake.mdx" />
 
 ### Fill the connection form
 
@@ -12,15 +12,23 @@ Provide the following fields:
 - **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
 - **Role (optional)**: e.g. `ELEMENTARY_ROLE`.
 
-Elementary Cloud supports the user password and key pair authentication connection methods.
+Elementary Cloud supports the following authentication methods:
 
-- **User password**:
-  - User: The user created for Elementary.
-  - Password: The password you set when creating your Snowflake account.
-- **Key pair**:
+- **Key pair** (Recommended):
   - User: The user created for Elementary.
   - Private key: The private key you generated for Elementary. For more information, see [Generate Private Key](https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-authentication) in the Snowflake docs.
   - Private key passphrase (optional)
+- **User password** (Deprecated, not recommended):
+  - User: The user created for Elementary.
+  - Password: The password you set when creating your Snowflake account.
+
+<Warning>
+  Snowflake are in the process of deprecating single-factor username & password authentication for all human users. As a result, while still supported,
+  we recommend configuring the user in advance using key-pair authentication rather than username & password, and configuring the user as TYPE=SERVICE 
+  (this is automatically handled in the user creation macro above).
+ 
+  See [here](https://docs.snowflake.com/en/user-guide/security-mfa-rollout) for more information regarding this change.
+</Warning>
 
 ### Add the Elementary IP to allowlist
 
