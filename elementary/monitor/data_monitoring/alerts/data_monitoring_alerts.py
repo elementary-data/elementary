@@ -284,7 +284,28 @@ class DataMonitoringAlerts(DataMonitoring):
             metadata=metadata,
             override_config_defaults=self.override_config_defaults,
         )
-        return integration.send_message(destination=destination, body=body)
+        # Append footer link as the last line in the alert
+        try:
+            from elementary.messages.block_builders import LinkLineBlock
+
+            footer_block = LinesBlock(
+                lines=[
+                    LinkLineBlock(
+                        text="powered by elementary",
+                        url="https://www.elementary-data.com/",
+                    )
+                ]
+            )
+            body_with_footer = MessageBody(
+                blocks=[*body.blocks, footer_block],
+                color=body.color,
+                id=body.id,
+            )
+        except Exception:
+            # If any unexpected issue occurs while adding the footer, fallback to original body
+            body_with_footer = body
+
+        return integration.send_message(destination=destination, body=body_with_footer)
 
     def _send_test_message(self) -> MessageSendResult:
         if isinstance(self.alerts_integration, BaseIntegration):
