@@ -25,7 +25,8 @@
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
-              "cloud/ai-agents/overview"
+              "cloud/ai-agents/overview",
+              "cloud/mcp/intro"
             ]
           },
           {
