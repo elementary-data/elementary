@@ -39,7 +39,13 @@
             'test_meta': raw_test_alert.test_meta,
             'model_meta': raw_test_alert.model_meta,
             'status': status,
-            'elementary_unique_id': raw_test_alert.elementary_unique_id
+            'elementary_unique_id': raw_test_alert.elementary_unique_id,
+            'job_id': raw_test_alert.job_id,
+            'job_name': raw_test_alert.job_name,
+            'job_run_id': raw_test_alert.job_run_id,
+            'job_url': raw_test_alert.job_url,
+            'job_run_url': raw_test_alert.job_run_url,
+            'orchestrator': raw_test_alert.orchestrator
         } 
         %}
 
@@ -74,6 +80,14 @@
         select * from {{ ref('elementary', 'dbt_tests') }}
     ),
 
+    dbt_invocations as (
+        select * from {{ ref('elementary', 'dbt_invocations') }}
+    ),
+
+    dbt_run_results as (
+        select * from {{ ref('elementary', 'dbt_run_results') }}
+    ),
+
     artifacts_meta as (
         select unique_id, meta from models
         union all
@@ -106,7 +120,7 @@
             status,
             result_rows
         from elementary_test_results
-        where lower(status) != 'pass'
+        where lower(elementary_test_results.status) != 'pass'
         and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 
@@ -145,10 +159,18 @@
         failed_tests.result_rows,
         tests.meta as test_meta,
         tests.description as test_description,
-        artifacts_meta.meta as model_meta
+        artifacts_meta.meta as model_meta,
+        invocations.job_id,
+        invocations.job_name,
+        invocations.job_run_id,
+        invocations.job_url,
+        invocations.job_run_url,
+        invocations.orchestrator
     from failed_tests
     left join tests on failed_tests.test_unique_id = tests.unique_id
     left join artifacts_meta on failed_tests.model_unique_id = artifacts_meta.unique_id
+    left join dbt_run_results on failed_tests.test_execution_id = dbt_run_results.model_execution_id
+    left join dbt_invocations as invocations on dbt_run_results.invocation_id = invocations.invocation_id
     where failed_tests.alert_id not in (
         {# "this" is referring to "alerts_v2" - we are executing it using a post_hook over "alerts_v2" #}
         select alert_id from {{ this }}
