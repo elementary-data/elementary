@@ -32,6 +32,12 @@ class AlertModel:
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
         env: Optional[str] = None,
+        job_id: Optional[str] = None,
+        job_name: Optional[str] = None,
+        job_run_id: Optional[str] = None,
+        job_url: Optional[str] = None,
+        job_run_url: Optional[str] = None,
+        orchestrator: Optional[str] = None,
         **kwargs,
     ):
         self.id = id
@@ -65,6 +71,12 @@ class AlertModel:
         self.alert_fields = alert_fields
         self.elementary_database_and_schema = elementary_database_and_schema
         self.env = env
+        self.job_id = job_id
+        self.job_name = job_name
+        self.job_run_id = job_run_id
+        self.job_url = job_url
+        self.job_run_url = job_run_url
+        self.orchestrator = orchestrator
 
     @property
     def unified_meta(self) -> Dict:
@@ -84,3 +96,23 @@ class AlertModel:
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         raise NotImplementedError
+
+    @property
+    def orchestrator_info(self) -> Optional[Dict[str, str]]:
+        """Returns structured orchestrator metadata if available."""
+        if not any([self.job_name, self.job_run_id, self.orchestrator]):
+            return None
+
+        info = {}
+        if self.job_name:
+            info["job_name"] = self.job_name
+        if self.job_run_id:
+            info["run_id"] = self.job_run_id
+        if self.orchestrator:
+            info["orchestrator"] = self.orchestrator
+        if self.job_url:
+            info["job_url"] = self.job_url
+        if self.job_run_url:
+            info["run_url"] = self.job_run_url
+
+        return info
