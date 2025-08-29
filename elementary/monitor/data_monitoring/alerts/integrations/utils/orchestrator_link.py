@@ -20,14 +20,11 @@ def create_orchestrator_link(
 
     orchestrator = orchestrator_info.get("orchestrator", "orchestrator")
 
-    # Capitalize orchestrator name for display
-    display_name = orchestrator.replace("_", " ").title()
-
     return OrchestratorLinkData(
         url=orchestrator_info["run_url"],
-        text=f"View in {display_name}",
+        text=f"View in {orchestrator}",
         orchestrator=orchestrator,
-        icon=Icon.INFO,
+        icon=Icon.LINK,
     )
 
 
