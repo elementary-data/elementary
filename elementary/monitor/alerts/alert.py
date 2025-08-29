@@ -100,10 +100,20 @@ class AlertModel:
     @property
     def orchestrator_info(self) -> Optional[Dict[str, str]]:
         """Returns structured orchestrator metadata if available."""
-        if not any([self.job_name, self.job_run_id, self.orchestrator]):
+        if not any(
+            [
+                self.job_name,
+                self.job_run_id,
+                self.orchestrator,
+                self.job_url,
+                self.job_run_url,
+            ]
+        ):
             return None
 
         info = {}
+        if self.job_id:
+            info["job_id"] = self.job_id
         if self.job_name:
             info["job_name"] = self.job_name
         if self.job_run_id:

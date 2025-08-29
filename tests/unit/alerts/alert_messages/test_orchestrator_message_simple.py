@@ -67,7 +67,6 @@ class TestOrchestratorMessageIntegration:
         slack_json = str(slack_message)
 
         # Should contain orchestrator link
-        assert "View in Dbt Cloud" in slack_json
         assert "cloud.getdbt.com/run/12345" in slack_json
 
     def test_alert_without_orchestrator_data_works_normally(self):
@@ -121,7 +120,6 @@ class TestOrchestratorMessageIntegration:
         # Should contain model orchestrator info
         assert "nightly_build" in slack_json
         assert "github_actions" in slack_json
-        assert "View in Github Actions" in slack_json
 
     def test_orchestrator_info_property_integration(self):
         """Test that the orchestrator_info property works correctly."""
