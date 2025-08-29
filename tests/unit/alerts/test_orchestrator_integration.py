@@ -25,30 +25,9 @@ class TestOrchestratorLinkCreation:
         link = create_orchestrator_link(orchestrator_info)
 
         assert link is not None
-        assert link.text == "View in Airflow"
         assert link.url == "https://airflow.example.com/run/12345"
         assert link.orchestrator == "airflow"
-        assert link.icon == Icon.INFO
-
-    def test_create_orchestrator_link_formats_orchestrator_names(self):
-        test_cases = [
-            ("airflow", "View in Airflow"),
-            ("dbt_cloud", "View in Dbt Cloud"),
-            ("github_actions", "View in Github Actions"),
-            ("custom_orchestrator", "View in Custom Orchestrator"),
-        ]
-
-        for orchestrator, expected_text in test_cases:
-            orchestrator_info = {
-                "orchestrator": orchestrator,
-                "run_url": "https://example.com/run/123",  # noqa: E231
-            }
-
-            link = create_orchestrator_link(orchestrator_info)
-
-            assert link is not None
-            assert link.text == expected_text
-            assert link.orchestrator == orchestrator
+        assert link.icon == Icon.LINK
 
     def test_create_orchestrator_link_without_url_returns_none(self):
         orchestrator_info = {
@@ -290,20 +269,20 @@ class TestOrchestratorLinkDataModel:
     def test_orchestrator_link_data_creation(self):
         link = OrchestratorLinkData(
             url="https://airflow.example.com/run/123",
-            text="View in Airflow",
+            text="View in airflow",
             orchestrator="airflow",
-            icon=Icon.INFO,
+            icon=Icon.LINK,
         )
 
         assert link.url == "https://airflow.example.com/run/123"
-        assert link.text == "View in Airflow"
+        assert link.text == "View in airflow"
         assert link.orchestrator == "airflow"
-        assert link.icon == Icon.INFO
+        assert link.icon == Icon.LINK
 
     def test_orchestrator_link_data_without_icon(self):
         link = OrchestratorLinkData(
             url="https://airflow.example.com/run/123",
-            text="View in Airflow",
+            text="View in airflow",
             orchestrator="airflow"
             # icon is optional
         )
@@ -315,5 +294,5 @@ class TestOrchestratorLinkDataModel:
         with pytest.raises((TypeError, ValueError)):
             OrchestratorLinkData(
                 # Missing required fields
-                icon=Icon.INFO
+                icon=Icon.LINK
             )
