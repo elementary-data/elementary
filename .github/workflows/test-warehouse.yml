@@ -136,7 +136,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           DBT_VERSION=$(pip show dbt-core | grep -i version | awk '{print $2}' | sed 's/\.//g')
-          UNDERSCORED_REF_NAME=$(echo "dbt_${DBT_VERSION}_${BRANCH_NAME}" | head -c 32 | sed "s/-/_/g")
+          UNDERSCORED_REF_NAME=$(echo "${{ inputs.warehouse-type }}_dbt_${DBT_VERSION}_${BRANCH_NAME}" | awk '{print tolower($0)}' | head -c 40 | sed "s/[-\/]/_/g")
           echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
 
       - name: Run Python package unit tests
@@ -168,7 +168,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
         run: >
-          edr monitor 
+          edr monitor
           -t "${{ inputs.warehouse-type }}"
           --group-by table
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
@@ -206,7 +206,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AZURE_CONNECTION_STRING: ${{ secrets.AZURE_CONNECTION_STRING }}
         run: >
-          edr monitor send-report 
+          edr monitor send-report
           -t "${{ inputs.warehouse-type }}"
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
