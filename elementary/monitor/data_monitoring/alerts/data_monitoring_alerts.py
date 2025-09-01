@@ -107,7 +107,7 @@ class DataMonitoringAlerts(DataMonitoring):
         if days_back:
             vars.update(days_back=days_back)
         success = self.internal_dbt_runner.run(
-            models="elementary_cli.alerts.alerts_v2",
+            select="elementary_cli.alerts.alerts_v2",
             full_refresh=dbt_full_refresh,
             vars=vars,
         )
