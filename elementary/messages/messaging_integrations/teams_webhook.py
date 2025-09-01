@@ -47,7 +47,7 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     response.raise_for_status()
     if response.status_code == HTTPStatus.ACCEPTED:
         logger.debug(
-            "Got %s response from Teams webhook, assuming success", HTTPStatus.ACCEPTED
+            f"Got {HTTPStatus.ACCEPTED} response from Teams webhook, assuming success"
         )
     return response
 
@@ -71,13 +71,14 @@ class TeamsWebhookMessagingIntegration(
         card = format_adaptive_card(body)
         try:
             response = send_adaptive_card(self.url, card)
-            # The status code is not reliable for the older version and 202 for the newer version
-            # The response returns 1 in the body for the old version for success and otherwise some text
-            # The new version is not reliable to do a check and in the response there is nothing that can be used
-            # to determine if the message was sent successfully.
-            if (
-                response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
-                or len(response.text) > 1
+            # For the old teams webhook version of Teams simply returning status code 200
+            # is not indicating that it was successful.
+            # In that version they return some text if it was NOT successful, otherwise
+            # they return the number 1 in the text. For the new teams webhook version they always
+            # return a 202 and nothing else can be used to determine if the message was
+            # sent successfully.
+            if response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED) or (
+                response.status_code == HTTPStatus.OK and len(response.text) > 1
             ):
                 raise MessagingIntegrationError(
                     f"Could not post message to Teams via webhook. Status code: {response.status_code}, Error: {response.text}"
@@ -89,7 +90,7 @@ class TeamsWebhookMessagingIntegration(
             )
         except requests.RequestException as e:
             raise MessagingIntegrationError(
-                f"Network error while posting message to Teams webhook: {str(e)}"
+                f"An error occurred while posting message to Teams webhook: {str(e)}"
             ) from e
 
     def supports_reply(self) -> bool:

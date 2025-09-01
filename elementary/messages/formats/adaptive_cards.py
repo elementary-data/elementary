@@ -131,7 +131,7 @@ def format_fact_list_block(block: FactListBlock) -> Dict[str, Any]:
     }
 
 
-def format_table_block(block: TableBlock) -> dict:
+def format_table_block(block: TableBlock) -> Dict[str, Any]:
     return {
         "type": "Table",
         "columns": [{"width": 1} for _ in block.headers],
