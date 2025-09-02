@@ -17,6 +17,18 @@ It is recommended to create [alert rules](cloud/features/alerts-and-incidents/al
 
 ## Enabling PagerDuty alerts
 
+
+
+
+<Warning>
+Important: The user connecting PagerDuty must have at least a "User" role (not "Limited User") in PagerDuty, as this role is required to:
+- Create incidents in PagerDuty services
+- Add Events API v2 integrations to services
+- Complete the OAuth authentication process when prompted
+- Verify the connection by using the test connection feature
+</Warning>
+
+
 1. Go to the `Environments` page on the sidebar.
 
 2. Select an environment and click connect on the `Connect incident management tool` card (second card), and select `PagerDuty`.
@@ -43,3 +55,4 @@ It is recommended to create [alert rules](cloud/features/alerts-and-incidents/al
 </Frame> 
 
 4. `PagerDuty` will now be available as a destination on the [`alert rules`](cloud/features/alerts-and-incidents/alert-rules) page. You can add rules to create PagerDuty incidents out of alerts who match your rule.
+
