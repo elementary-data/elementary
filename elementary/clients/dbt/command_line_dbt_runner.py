@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
+from elementary.clients.dbt.databricks_patch import apply_databricks_patch
 from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.monitor.dbt_project_utils import is_dbt_package_up_to_date
@@ -28,6 +29,8 @@ class DbtCommandResult:
 
 
 class CommandLineDbtRunner(BaseDbtRunner):
+    _dbx_patch_applied = False
+
     def __init__(
         self,
         project_dir: str,
@@ -51,6 +54,11 @@ class CommandLineDbtRunner(BaseDbtRunner):
         )
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
+
+        # Apply databricks compatibility patch for version 1.10.2 only once
+        if not CommandLineDbtRunner._dbx_patch_applied:
+            CommandLineDbtRunner._dbx_patch_applied = apply_databricks_patch()
+
         if force_dbt_deps:
             self.deps()
         elif run_deps_if_needed:
