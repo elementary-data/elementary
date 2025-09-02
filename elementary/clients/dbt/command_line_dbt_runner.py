@@ -205,7 +205,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
 
     def run(
         self,
-        models: Optional[str] = None,
         select: Optional[str] = None,
         selector: Optional[str] = None,
         full_refresh: bool = False,
@@ -216,8 +215,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
         command_args = ["run"]
         if full_refresh:
             command_args.append("--full-refresh")
-        if models:
-            command_args.extend(["-m", models])
         if select:
             command_args.extend(["-s", select])
         if selector:
