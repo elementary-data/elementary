@@ -21,7 +21,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 0"
+                      "text": "Column 0",
+                      "wrap": true
                     }
                   ]
                 }
@@ -35,7 +36,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ip"
+                      "text": "Lorem ip",
+                      "wrap": true
                     }
                   ]
                 }
@@ -49,7 +51,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ip"
+                      "text": "Lorem ip",
+                      "wrap": true
                     }
                   ]
                 }
@@ -63,7 +66,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ip"
+                      "text": "Lorem ip",
+                      "wrap": true
                     }
                   ]
                 }
@@ -77,7 +81,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ip"
+                      "text": "Lorem ip",
+                      "wrap": true
                     }
                   ]
                 }
@@ -91,7 +96,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ip"
+                      "text": "Lorem ip",
+                      "wrap": true
                     }
                   ]
                 }
