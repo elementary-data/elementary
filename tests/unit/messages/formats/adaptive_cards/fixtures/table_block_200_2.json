@@ -24,7 +24,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 0"
+                      "text": "Column 0",
+                      "wrap": true
                     }
                   ]
                 },
@@ -33,7 +34,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 1"
+                      "text": "Column 1",
+                      "wrap": true
                     }
                   ]
                 }
@@ -47,7 +49,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 },
@@ -56,7 +59,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 }
@@ -70,7 +74,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 },
@@ -79,7 +84,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 }
@@ -93,7 +99,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 },
@@ -102,7 +109,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 }
@@ -116,7 +124,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 },
@@ -125,7 +134,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 }
@@ -139,7 +149,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 },
@@ -148,7 +159,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+                      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c",
+                      "wrap": true
                     }
                   ]
                 }
