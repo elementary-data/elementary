@@ -188,10 +188,16 @@ jobs:
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
 
+      - name: Set report artifact name
+        id: set_report_artifact_name
+        run: |
+          ARTIFACT_NAME=$(echo "report_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.html" | awk '{print tolower($0)}' | sed 's/[":/<>|*?\r\n\\/-]/_/g')
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
         with:
-          name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}_dbt_${{ inputs.dbt-version }}.html
+          name: ${{ steps.set_report_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/elementary_report.html
 
       - name: Write GCS keyfile
@@ -223,11 +229,17 @@ jobs:
           --azure-container-name reports
           --update-bucket-website true
 
+      - name: Set artifact name
+        id: set_artifact_name
+        run: |
+          ARTIFACT_NAME=$(echo "edr_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.log" | awk '{print tolower($0)}' | sed 's/[":/<>|*?\r\n\\/-]/_/g')
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
       - name: Upload edr log
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: edr_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}_dbt_${{ inputs.dbt-version }}.log
+          name: ${{ steps.set_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests
