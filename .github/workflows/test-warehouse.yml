@@ -75,12 +75,13 @@ env:
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
 
 jobs:
-  detect-fork:
+  # PRs from forks require approval, specifically with the "pull_request_target" event as it contains repo secrets.
+  check-if-requires-approval:
     runs-on: ubuntu-latest
     outputs:
       requires_approval: ${{ steps.set-output.outputs.requires_approval }}
     steps:
-      - name: Set fork output
+      - name: Set requires approval output
         id: set-output
         run: |
           if [[ "${{ github.event_name }}" == "pull_request_target" && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
@@ -91,9 +92,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: [detect-fork]
-    # PRs from forks require approval - so we use an environment that requires an approver from the team.
-    environment: ${{ (needs.detect-fork.outputs.requires_approval == 'true' && 'elementary_test_env') || '' }}
+    needs: [check-if-requires-approval]
+    environment: ${{ (needs.check-if-requires-approval.outputs.requires_approval == 'true' && 'elementary_test_env') || '' }}
     defaults:
       run:
         working-directory: elementary
