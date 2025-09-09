@@ -191,7 +191,7 @@ jobs:
       - name: Set report artifact name
         id: set_report_artifact_name
         run: |
-          ARTIFACT_NAME=$(echo "report_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.html" | awk '{print tolower($0)}' | sed 's/[":/<>|*?\r\n\\/-]/_/g')
+          ARTIFACT_NAME=$(echo "report_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.html" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload report artifact
@@ -232,7 +232,7 @@ jobs:
       - name: Set artifact name
         id: set_artifact_name
         run: |
-          ARTIFACT_NAME=$(echo "edr_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.log" | awk '{print tolower($0)}' | sed 's/[":/<>|*?\r\n\\/-]/_/g')
+          ARTIFACT_NAME=$(echo "edr_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.log" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload edr log
