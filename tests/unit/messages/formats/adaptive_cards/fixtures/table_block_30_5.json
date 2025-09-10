@@ -33,7 +33,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 0"
+                      "text": "Column 0",
+                      "wrap": true
                     }
                   ]
                 },
@@ -42,7 +43,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 1"
+                      "text": "Column 1",
+                      "wrap": true
                     }
                   ]
                 },
@@ -51,7 +53,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 2"
+                      "text": "Column 2",
+                      "wrap": true
                     }
                   ]
                 },
@@ -60,7 +63,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 3"
+                      "text": "Column 3",
+                      "wrap": true
                     }
                   ]
                 },
@@ -69,7 +73,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Column 4"
+                      "text": "Column 4",
+                      "wrap": true
                     }
                   ]
                 }
@@ -83,7 +88,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -92,7 +98,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -101,7 +108,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -110,7 +118,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -119,7 +128,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 }
@@ -133,7 +143,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -142,7 +153,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -151,7 +163,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -160,7 +173,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -169,7 +183,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 }
@@ -183,7 +198,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -192,7 +208,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -201,7 +218,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -210,7 +228,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -219,7 +238,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 }
@@ -233,7 +253,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -242,7 +263,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -251,7 +273,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -260,7 +283,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -269,7 +293,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 }
@@ -283,7 +308,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -292,7 +318,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -301,7 +328,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -310,7 +338,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 },
@@ -319,7 +348,8 @@
                   "items": [
                     {
                       "type": "TextBlock",
-                      "text": "Lorem ipsum dolor sit amet, co"
+                      "text": "Lorem ipsum dolor sit amet, co",
+                      "wrap": true
                     }
                   ]
                 }
@@ -330,5 +360,8 @@
       ]
     }
   ],
-  "version": "1.5"
+  "version": "1.5",
+  "msteams": {
+    "width": "Full"
+  }
 }
