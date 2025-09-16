@@ -101,6 +101,10 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/erikzaadi"><img src="https://avatars.githubusercontent.com/u/77775?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dapollak"><img src="https://avatars.githubusercontent.com/u/13542197?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/Adamgo23"><img src="https://avatars.githubusercontent.com/u/125807478?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/MikaKerman"><img src="https://avatars.githubusercontent.com/u/24632225?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/GuyEshdat"><img src="https://avatars.githubusercontent.com/u/81393741?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/michael-myaskovsky"><img src="https://avatars.githubusercontent.com/u/203525071?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/arbiv"><img src="https://avatars.githubusercontent.com/u/12132333?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/RoiTabach"><img src="https://avatars.githubusercontent.com/u/25003091?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/hahnbeelee"><img src="https://avatars.githubusercontent.com/u/55263191?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/seanglynn-thrive"><img src="https://avatars.githubusercontent.com/u/93200565?v=4" width="50" height="50" alt=""/></a>
@@ -199,6 +203,12 @@ For additional information and help, you can use one of these channels:
 <a href="https://github.com/nkmr-jp"><img src="https://avatars.githubusercontent.com/u/8490118?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/dbt-markwan"><img src="https://avatars.githubusercontent.com/u/114556261?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/pedro-klein-ext-bayer"><img src="https://avatars.githubusercontent.com/u/181362556?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/ClementSicard"><img src="https://avatars.githubusercontent.com/u/33360172?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/nickozilla"><img src="https://avatars.githubusercontent.com/u/14976256?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/Lawiss"><img src="https://avatars.githubusercontent.com/u/30115537?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/abhipalsingh"><img src="https://avatars.githubusercontent.com/u/57302403?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/pushrbx"><img src="https://avatars.githubusercontent.com/u/6832715?v=4" width="50" height="50" alt=""/></a>
+
 
 
 <!-- markdownlint-restore -->

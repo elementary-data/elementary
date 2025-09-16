@@ -75,9 +75,25 @@ env:
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
 
 jobs:
+  # PRs from forks require approval, specifically with the "pull_request_target" event as it contains repo secrets.
+  check-if-requires-approval:
+    runs-on: ubuntu-latest
+    outputs:
+      requires_approval: ${{ steps.set-output.outputs.requires_approval }}
+    steps:
+      - name: Set requires approval output
+        id: set-output
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request_target" && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            echo "requires_approval=true" >> $GITHUB_OUTPUT
+          else
+            echo "requires_approval=false" >> $GITHUB_OUTPUT
+          fi
+
   test:
     runs-on: ubuntu-latest
-    environment: elementary_test_env # This is a github environment (not to be confused with env vars)
+    needs: [check-if-requires-approval]
+    environment: ${{ (needs.check-if-requires-approval.outputs.requires_approval == 'true' && 'elementary_test_env') || '' }}
     defaults:
       run:
         working-directory: elementary
@@ -188,10 +204,16 @@ jobs:
           --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
 
+      - name: Set report artifact name
+        id: set_report_artifact_name
+        run: |
+          ARTIFACT_NAME=$(echo "report_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.html" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
         with:
-          name: report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}_dbt_${{ inputs.dbt-version }}.html
+          name: ${{ steps.set_report_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/elementary_report.html
 
       - name: Write GCS keyfile
@@ -223,11 +245,17 @@ jobs:
           --azure-container-name reports
           --update-bucket-website true
 
+      - name: Set artifact name
+        id: set_artifact_name
+        run: |
+          ARTIFACT_NAME=$(echo "edr_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.log" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
       - name: Upload edr log
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: edr_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}_dbt_${{ inputs.dbt-version }}.log
+          name: ${{ steps.set_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests
