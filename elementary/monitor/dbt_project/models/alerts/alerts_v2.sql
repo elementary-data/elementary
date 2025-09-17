@@ -24,6 +24,9 @@
 
 -- depends_on: {{ ref('dbt_seeds') }}
 
+-- depends_on: {{ ref('elementary', 'dbt_invocations') }}
+-- depends_on: {{ ref('elementary', 'dbt_run_results') }}
+
 -- backwards compatibility
 -- depends_on: {{ ref('elementary_cli', 'alerts') }}
 -- depends_on: {{ ref('elementary_cli', 'alerts_models') }}
