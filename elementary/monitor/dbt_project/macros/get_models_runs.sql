@@ -1,14 +1,14 @@
 {%- macro get_models_runs(days_back = 7, exclude_elementary=false) -%}
     {% set models_runs_query %}
         with model_runs as (
-            select 
+            select
                 *,
-                rank() over (partition by unique_id order by generated_at desc) as invocations_rank_index
+                row_number() over (partition by unique_id order by generated_at desc) as invocations_rank_index
             from {{ ref('elementary', 'model_run_results') }}
         )
 
         select
-            unique_id, 
+            unique_id,
             invocation_id,
             name,
             schema_name as schema,
