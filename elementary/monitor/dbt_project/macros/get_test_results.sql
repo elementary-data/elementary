@@ -14,7 +14,7 @@
                 *,
                 {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} as days_diff,
                 {# When we split test into multiple test results, we want to have the same invocation order for the test results from the same run so we use rank. #}
-                rank() over (partition by elementary_unique_id order by {{elementary.edr_cast_as_timestamp('detected_at')}} desc) as invocations_rank_index
+                row_number() over (partition by elementary_unique_id order by {{elementary.edr_cast_as_timestamp('detected_at')}} desc) as invocations_rank_index
             from test_results
         )
 
@@ -193,7 +193,7 @@
         etr.status,
         drr.execution_time,
         {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('etr.detected_at'), elementary.edr_current_timestamp(), 'day') }} AS days_diff,
-        RANK() OVER (PARTITION BY elementary_unique_id ORDER BY etr.detected_at DESC) AS invocations_rank_index,
+        ROW_NUMBER() OVER (PARTITION BY elementary_unique_id ORDER BY etr.detected_at DESC) AS invocations_rank_index,
         etr.failures,
         etr.result_rows
     FROM {{ ref('elementary', 'elementary_test_results') }} etr
