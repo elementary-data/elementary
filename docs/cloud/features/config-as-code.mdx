@@ -6,6 +6,15 @@ At Elementary, we believe that **code should be the single source of truth.** Th
 
 Elementary has access to your [code repository](https://docs.elementary-data.com/cloud/integrations/code-repo/connect-code-repo), so every configuration lives in version control. Changes are always tracked, reviewed, and deployed through your existing CI/CD processes—no new workflow required. 
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/do5hrgokq/video/upload/v1759056955/config_as_code_wtt7oi.mp4"
+></video>
+
 ### One Experience, Two Interfaces  
 Every action in Elementary is both:  
 - **Simple, structured, and clear through the UI** – allowing users to create, edit, or bulk-change tests and metadata with higher efficiency and comfort.  
@@ -16,7 +25,7 @@ This keeps your CI process natural, while adding an extra layer of protection: e
 
 ### How Branches & PRs Work
 When you make changes through the Elementary UI (such as adding tests, editing assets, or managing configurations), Elementary will:
-1. Open a **new feature branch** with the prefix `elementary/` in your connected repository.
+1. Open a **new feature branch** with the prefix `elementary-` in your connected repository.
 2. Commit the changes (e.g., new tests, metadata updates, asset modifications).
 3. Automatically create a **pull request** for review with the title format: `{Your Name} via Elementary: {Change Description}`.
 From there, your team can review, approve, and merge using the exact same process you already follow for any code change. The system supports various types of changes including test management, asset management, and dbt package upgrades.
