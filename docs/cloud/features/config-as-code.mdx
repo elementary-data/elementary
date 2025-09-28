@@ -1,10 +1,40 @@
 ---
-title: "Configuration-as-Code"
+title: "Configuration as Code"
 ---
 
-All Elementary configurations are managed in your dbt code. 
+At Elementary, we believe that **code should be the single source of truth.** This is the only way to scale data reliability while keeping everyone aligned: engineers, analysts, and business stakeholders all see the exact same information, directly in their natural workflows.  
 
-Configuring observability becomes a part of the development process that includes version control, continuous integration, and a review process.
+Elementary has access to your [code repository](https://docs.elementary-data.com/cloud/integrations/code-repo/connect-code-repo), so every configuration lives in version control. Changes are always tracked, reviewed, and deployed through your existing CI/CD processes—no new workflow required. 
 
-In Elementary Cloud, you can save time by adding tests in bulk from the UI that will be added to your code. Additionally, you can allow data analysts to create quality tests without writing any code. Elementary will take care of it for them and open pull requests on their behalf.
+### One Experience, Two Interfaces  
+Every action in Elementary is both:  
+- **Simple, structured, and clear through the UI** – allowing users to create, edit, or bulk-change tests and metadata with higher efficiency and comfort.  
+- **Backed by code** – so every change is versioned, reviewed, and integrated seamlessly into your pipeline.  
 
+This keeps your CI process natural, while adding an extra layer of protection: every change can be peer-reviewed through a PR before it goes live.  
+
+
+### How Branches & PRs Work
+When you make changes through the Elementary UI (such as adding tests, editing assets, or managing configurations), Elementary will:
+1. Open a **new feature branch** with the prefix `elementary/` in your connected repository.
+2. Commit the changes (e.g., new tests, metadata updates, asset modifications).
+3. Automatically create a **pull request** for review with the title format: `{Your Name} via Elementary: {Change Description}`.
+From there, your team can review, approve, and merge using the exact same process you already follow for any code change. The system supports various types of changes including test management, asset management, and dbt package upgrades.
+
+
+### Built for All Users  
+- **Non-technical users** can define rules for business metrics (e.g., *Revenue is never negative*) without writing SQL or relying on engineering help.  
+- **Technical users** can manage advanced data tests, metadata, and structure at scale, with full transparency and control.  
+
+
+### AI-Powered Configurations  
+Elementary’s [AI Agents](https://docs.elementary-data.com/cloud/features/ai-agents) work the same way:  
+- You can ask them to recommend tests, optimize queries, or update metadata.  
+- Once you’re satisfied with the iteration, the agent will automatically open a PR on your behalf—integrating seamlessly into your workflow.  
+
+### Works with MCP  
+Our [MCP server](https://docs.elementary-data.com/cloud/features/mcp-server) makes working in code even more powerful, bridging between your local dev setup, IDE, and collaborative workflows.  
+
+
+### Repo Integrations  
+Elementary supports native [repository integrations](https://docs.elementary-data.com/cloud/features/integrations) with GitHub, GitLab, and others, so your workflows stay consistent and secure.  
