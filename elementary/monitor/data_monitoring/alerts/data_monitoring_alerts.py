@@ -7,14 +7,8 @@ from alive_progress import alive_bar
 
 from elementary.config.config import Config
 from elementary.messages.block_builders import TextLineBlock
-from elementary.messages.blocks import (
-    HeaderBlock,
-    LineBlock,
-    LinesBlock,
-    LinkBlock,
-    TextBlock,
-)
-from elementary.messages.message_body import MessageBlock, MessageBody
+from elementary.messages.blocks import HeaderBlock, LinesBlock
+from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageSendResult,
@@ -61,37 +55,6 @@ def get_health_check_message() -> MessageBody:
             ),
         ]
     )
-
-
-def _add_elementary_attribution(body: MessageBody) -> MessageBody:
-    lines = [
-        LineBlock(
-            inlines=[
-                TextBlock(text="Powered by"),
-                LinkBlock(
-                    text="Elementary",
-                    url="https://www.elementary-data.com/",
-                ),
-            ]
-        )
-    ]
-    attribution_block = LinesBlock(
-        lines=lines,
-    )
-
-    new_blocks: List[MessageBlock] = []
-    first_block_is_header = body.blocks and isinstance(body.blocks[0], HeaderBlock)
-    if first_block_is_header:
-        new_blocks = [body.blocks[0], attribution_block, *body.blocks[1:]]
-    else:
-        new_blocks = [*body.blocks, attribution_block]
-
-    body_with_attribution = MessageBody(
-        blocks=new_blocks,
-        color=body.color,
-        id=body.id,
-    )
-    return body_with_attribution
 
 
 class DataMonitoringAlerts(DataMonitoring):
@@ -350,7 +313,6 @@ class DataMonitoringAlerts(DataMonitoring):
         alert_message_body = alert_message_builder.build(
             alert=alert,
         )
-        alert_message_body = _add_elementary_attribution(alert_message_body)
         try:
             self._send_message(
                 integration=self.alerts_integration,
