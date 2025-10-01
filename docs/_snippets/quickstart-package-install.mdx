@@ -77,18 +77,25 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
     </Accordion>
     <Accordion title="Important: Allowing Elementary to override dbt's default test materializations (relevant from dbt 1.8)">
 
-        In order for these features to work, it is required to add an sql file inside the `macros` folder of your dbt project with the following content:
-        
-        ```-- Use this snippet if you use any DWH other than Snowflake
-{% materialization test, default %}
-  {{ return(elementary.materialization_test_default()) }}
-{% endmaterialization %}
+        In order for these features to work, add the following file: elementary_materialization.sql  to your macros folder so it will look like this:
+        `macros/elementary_materialization.sql`
 
--- Use this snippet if you use Snowflake
-{% materialization test, adapter='snowflake' %}
-  {{ return(elementary.materialization_test_snowflake()) }}
-{% endmaterialization %}
+        In the file copy and paste the following code:
+
+        If you use Snowflake:
         ```
+        {% materialization test, adapter='snowflake' %}
+          {{ return(elementary.materialization_test_snowflake()) }}
+        {% endmaterialization %}
+                ```
+        
+        If you use any other DWH:
+                ```
+        {% materialization test, default %}
+          {{ return(elementary.materialization_test_default()) }}
+        {% endmaterialization %}
+        ```
+
 
          </Accordion>
 
