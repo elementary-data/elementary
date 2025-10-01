@@ -110,7 +110,8 @@
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "column1"
+                              "text": "column1",
+                              "wrap": true
                             }
                           ]
                         },
@@ -119,7 +120,8 @@
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "column2"
+                              "text": "column2",
+                              "wrap": true
                             }
                           ]
                         }
@@ -133,7 +135,8 @@
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "value1"
+                              "text": "value1",
+                              "wrap": true
                             }
                           ]
                         },
@@ -142,7 +145,8 @@
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "value2"
+                              "text": "value2",
+                              "wrap": true
                             }
                           ]
                         }
@@ -158,5 +162,8 @@
       ]
     }
   ],
-  "version": "1.5"
+  "version": "1.5",
+  "msteams": {
+    "width": "Full"
+  }
 }

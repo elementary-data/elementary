@@ -144,7 +144,8 @@ def format_table_block(block: TableBlock) -> Dict[str, Any]:
                         "items": [
                             {
                                 "type": "TextBlock",
-                                "text": str(cell),
+                                "text": str(cell) if cell is not None else "",
+                                "wrap": True,
                             }
                         ],
                     }
@@ -256,4 +257,5 @@ def format_adaptive_card(message: MessageBody, version: str = "1.5") -> Dict[str
         "type": "AdaptiveCard",
         "body": format_adaptive_card_body(message),
         "version": version,
+        "msteams": {"width": "Full"},
     }
