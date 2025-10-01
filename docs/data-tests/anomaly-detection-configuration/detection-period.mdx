@@ -28,11 +28,12 @@ This configuration should be changed according to your data delays.
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          detection_period:
-            period: day
-            count: 30
+          arguments:
+            detection_period:
+              period: day
+              count: 30
 ```
 
 ```yml model

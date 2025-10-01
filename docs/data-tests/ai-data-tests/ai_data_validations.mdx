@@ -71,10 +71,11 @@ models:
   - name: < model name >
     columns:
       - name: < column name >
-        tests:
+        data_tests:
           - elementary.ai_data_validation:
-              expectation_prompt: "Description of what the data should satisfy"
-              llm_model_name: "model_name"  # Optional
+              arguments:
+                expectation_prompt: "Description of what the data should satisfy"
+                llm_model_name: "model_name"  # Optional
 ```
 
 ```yml Example - Date Validation
@@ -86,9 +87,10 @@ models:
     columns:
       - name: contract_date
         description: "The date when the contract was signed."
-        tests:
+        data_tests:
           - elementary.ai_data_validation:
-              expectation_prompt: "There should be no contract date in the future"
+              arguments:
+                expectation_prompt: "There should be no contract date in the future"
 ```
 
 ```yml Example - Numeric Validation
@@ -100,10 +102,11 @@ models:
     columns:
       - name: discount_percentage
         description: "The discount percentage applied to the sale."
-        tests:
+        data_tests:
           - elementary.ai_data_validation:
-              expectation_prompt: "The discount percentage should be between 0 and 50, and should only be a whole number."
-              llm_model_name: "claude-3-5-sonnet"
+              arguments:
+                expectation_prompt: "The discount percentage should be between 0 and 50, and should only be a whole number."
+                llm_model_name: "claude-3-5-sonnet"
               config:
                 severity: warn
 ```
@@ -117,10 +120,11 @@ models:
     columns:
       - name: account_status
         description: "The current status of the customer account."
-        tests:
+        data_tests:
           - elementary.ai_data_validation:
-              expectation_prompt: "The account status should be one of: 'active', 'inactive', 'suspended', or 'pending'. If the account is 'suspended', there should be a reason code in the suspension_reason column."
-              llm_model_name: "gemini-1.5-pro"
+              arguments:
+                expectation_prompt: "The account status should be one of: 'active', 'inactive', 'suspended', or 'pending'. If the account is 'suspended', there should be a reason code in the suspension_reason column."
+                llm_model_name: "gemini-1.5-pro"
 ```
 
 </RequestExample>

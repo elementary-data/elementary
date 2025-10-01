@@ -57,18 +57,19 @@ sources:
       - name: model_run_results
         columns:
           - name: execution_time    
-            tests:
+            data_tests:
               - elementary.column_anomalies:
                   config:
                     severity: warn
-                  tags: ["model_performance"]
-                  column_anomalies:
-                    - max
-                  dimensions: ["package_name", "name"]
-                  timestamp_column: generated_at
-                  anomaly_direction: spike
-                  ignore_small_changes:
-                    spike_failure_percent_threshold: 10
+                    tags: ["model_performance"]
+                  arguments:
+                    column_anomalies:
+                      - max
+                    dimensions: ["package_name", "name"]
+                    timestamp_column: generated_at
+                    anomaly_direction: spike
+                    ignore_small_changes:
+                      spike_failure_percent_threshold: 10
 ```
 
 In this configuration:
@@ -78,7 +79,7 @@ In this configuration:
 - Small changes under 10% are ignored (`spike_failure_percent_threshold: 10`)
 - The severity is set to "warn" but can be adjusted as needed
 
-This test will detect when a model's execution time increases significantly compared to its historical performance, triggering an alert when the increase exceeds the normal basline.
+This test will detect when a model's execution time increases significantly compared to its historical performance, triggering an alert when the increase exceeds the normal baseline.
 
 ## Choosing the Right Approach
 

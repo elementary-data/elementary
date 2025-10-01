@@ -28,11 +28,12 @@ models:
     config:
       elementary:
         timestamp_column: updated_at
-    tests:
+    data_tests:
       - elementary.dimension_anomalies:
-          dimensions:
-            - device_os
-            - device_browser
+          arguments:
+            dimensions:
+              - device_os
+              - device_browser
 ```
 
 </RequestExample>
