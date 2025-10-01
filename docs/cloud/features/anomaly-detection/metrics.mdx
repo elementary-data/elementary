@@ -27,18 +27,19 @@ No mandatory configuration, however it is highly recommended to configure a `tim
 {/* prettier-ignore */}
 <pre>
  <code>
-  tests:
+  data_tests:
     &nbsp;&nbsp;-- elementary.collect_metrics:
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/dimensions"><font color="#CD7D55">dimensions: sql expression</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">metrics: monitors list</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">name: string</font>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">type: monitor type</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">columns: list</font>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;arguments:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/dimensions"><font color="#CD7D55">dimensions: sql expression</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">metrics: monitors list</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">name: string</font>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/column-anomalies"><font color="#CD7D55">type: monitor type</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">columns: list</font>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
  </code>
 </pre>
 
@@ -47,45 +48,46 @@ No mandatory configuration, however it is highly recommended to configure a `tim
 ```yml Models
 models:
   - name: < model name >
-    tests:
+    data_tests:
       - elementary.collect_metrics:
-        timestamp_column: < timestamp column >
-        time_bucket: # Daily by default
-          period: < time period >
-          count: < number of periods >
-        dimensions: < list of dimensions to group by >
-        metrics: < list of metrics >
-          - name: < user defined name for metric >
-            type: < which metric to calculate >
-            columns: < which columns to calculate the metric on- for column metrics >
-        where_expression: < sql expression >
-        cloud_monitored: < boolean, should Elementary automatically create anomaly tests for the collected metrics? >
+        arguments:
+          timestamp_column: < timestamp column >
+          time_bucket: # Daily by default
+            period: < time period >
+            count: < number of periods >
+          dimensions: < list of dimensions to group by >
+          metrics: < list of metrics >
+            - name: < user defined name for metric >
+              type: < which metric to calculate >
+              columns: < which columns to calculate the metric on- for column metrics >
+          where_expression: < sql expression >
+          cloud_monitored: < boolean, should Elementary automatically create anomaly tests for the collected metrics? >
 ```
 
 ```yml Models example
 
 models:
   - name: login_events
-    tests:
+    data_tests:
       - elementary.collect_metrics:
-        timestamp_column: 'loaded_at'
-        time_bucket:
-          period: hour
-          count: 1
-        dimensions:
-          - country_id
-          - platform_id
-        metrics:
-          - name: row_count
-            type: row_count
-          - name: filtered_row_count
-            type: row_count
-          - name: null_count
-            type: null_count
-            columns: ["hello", "world"]
-        where_expression: "country = 'USA'"
-        cloud_monitored: true
-
+        arguments:
+          timestamp_column: 'loaded_at'
+          time_bucket:
+            period: hour
+            count: 1
+          dimensions:
+            - country_id
+            - platform_id
+          metrics:
+            - name: row_count
+              type: row_count
+            - name: filtered_row_count
+              type: row_count
+            - name: null_count
+              type: null_count
+              columns: ["hello", "world"]
+          where_expression: "country = 'USA'"
+          cloud_monitored: true
 ```
 
 </RequestExample>

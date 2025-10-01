@@ -96,10 +96,11 @@ models:
     columns:
       - name: text_data
         description: "Unstructured text data stored as a string."
-        tests:
+        data_tests:
           - elementary.validate_unstructured_data:
-              expectation_prompt: "The text data should represent an example of unstructured data."
-              llm_model_name: "gemini-1.5-pro"
+              arguments:
+                expectation_prompt: "The text data should represent an example of unstructured data."
+                llm_model_name: "gemini-1.5-pro"
 ```
 
 

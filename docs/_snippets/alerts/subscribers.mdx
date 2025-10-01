@@ -8,15 +8,17 @@ If you want additional users besides the owner to be tagged on an alert, add the
 ```yml model
 models:
   - name: my_model_name
-    meta:
-      subscribers: "@jessica.jones"
+    config:
+      meta:
+        subscribers: "@jessica.jones"
 ```
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      subscribers: ["@jessica.jones", "@joe.joseph"]
+    config:
+      meta:
+        subscribers: ["@jessica.jones", "@joe.joseph"]
 ```
 
 ```yml test/model config block
@@ -34,7 +36,7 @@ models:
       +meta:
         subscribers: "@jessica.jones"
 
-tests:
+data_tests:
   path:
     subfolder:
       +meta:

@@ -43,14 +43,15 @@ A data asset or test should have only one owner, but other people might want to 
 ```yaml
 models:
   - name: return_on_ad_spend
-    tags:
-	    - marketing-public
-	    - marketing
-    meta:
-	    owner: :"@analytics.engineer"
-      subscribers:
-      - "@marketing.data.analyst"
-      - "@another.marketing.data.analyst"
+    config:
+      tags:
+        - marketing-public
+        - marketing
+      meta:
+        owner: :"@analytics.engineer"
+        subscribers:
+        - "@marketing.data.analyst"
+        - "@another.marketing.data.analyst"
 ```
 
 ## Business domains & Data products
@@ -108,12 +109,13 @@ Ownership and subscribers:
 ```yaml
 sources:
   - name: fivetran_salesforce_sync
-    tags:
-     - fivetran
-     - salesforce
-    meta:
-	    owner: :"@data.engineer"
-      subscribers: "@analytics.engineer"
+    config:
+      tags:
+      - fivetran
+      - salesforce
+      meta:
+        owner: :"@data.engineer"
+        subscribers: "@analytics.engineer"
 ```
 
 <Check>

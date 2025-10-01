@@ -70,11 +70,11 @@ models:
     config:
       elementary:
         timestamp_column: < model timestamp column >
-    tests: < here you will add elementary monitors as tests >
+    data_tests: < here you will add elementary monitors as tests >
 
   - name: <your model with no timestamp>
     ## if no timestamp is configured, elementary will monitor without time filtering
-    tests: <here you will add elementary monitors as tests>
+    data_tests: <here you will add elementary monitors as tests>
 ```
 
 ```yml Models example
@@ -85,17 +85,20 @@ models:
     config:
       elementary:
         timestamp_column: updated_at
-    tests:
+    data_tests:
       - elementary.freshness_anomalies:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
       - elementary.all_columns_anomalies:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
 
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
 ```
 
 ```yml Sources
@@ -107,11 +110,10 @@ sources:
     schema: < schema >
     tables:
       - name: < table_name >
-        ## sources don't have config, so elementary config is placed under 'meta'
-        meta:
+        config:
           elementary:
             timestamp_column: < source timestamp column >
-        tests: <here you will add elementary monitors as tests>
+        data_tests: <here you will add elementary monitors as tests>
 ```
 
 ```yml Sources example
@@ -123,20 +125,20 @@ sources:
     schema: "product"
     tables:
       - name: "raw_product_login_events"
-        ## sources don't have config, so elementary config is placed under 'meta'
-        meta:
+        config:
           elementary:
             timestamp_column: "loaded_at"
-        tests:
+        data_tests:
           - elementary.volume_anomalies
           - elementary.all_columns_anomalies:
-              column_anomalies:
-                - null_count
-                - missing_count
-                - zero_count
+              arguments:
+                column_anomalies:
+                  - null_count
+                  - missing_count
+                  - zero_count
         columns:
           - name: user_id
-            tests:
+            data_tests:
               - elementary.column_anomalies
 ```
 

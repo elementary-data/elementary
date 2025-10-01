@@ -49,9 +49,10 @@ The expected range for Monday will be based on a training set of previous Monday
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          seasonality: day_of_week
+          arguments:
+            seasonality: day_of_week
 ```
 
 ```yml model

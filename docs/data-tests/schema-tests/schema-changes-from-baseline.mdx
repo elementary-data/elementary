@@ -61,7 +61,7 @@ dbt run-operation elementary.generate_schema_baseline_test --args '{"fail_on_add
 #>   - name: <name>
 #>     columns:
 #>       ...
-#>     tests:
+#>     data_tests:
 #>       - elementary.schema_changes_from_baseline:
 #>           ...
 ```
@@ -84,7 +84,7 @@ sources:
             data_type: < data type 1 >
           - name: < column 2 >
             data_type: < data type 2 >
-        tests:
+        data_tests:
           - elementary.schema_changes_from_baseline
 ```
 
@@ -102,9 +102,10 @@ sources:
             data_type: text
           - name: event_id
             data_type: integer
-        tests:
+        data_tests:
           - elementary.schema_changes_from_baseline
-              tags: ["elementary"]
+              config:
+                tags: ["elementary"]
 ```
 
 ```yml Models
@@ -117,7 +118,7 @@ models:
         data_type: < data type 1 >
       - name: < column 2 >
         data_type: < data type 1 >
-    tests:
+    data_tests:
       - elementary.schema_changes_from_baseline
 ```
 
@@ -131,9 +132,10 @@ models:
         data_type: text
       - name: event_id
         data_type: integer
-    tests:
+    data_tests:
       - elementary.schema_changes_from_baseline:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
 ```
 
 </RequestExample>

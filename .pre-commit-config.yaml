@@ -44,8 +44,10 @@ repos:
         language: system
         files: ^elementary/.*\.py$
 
-  - repo: https://github.com/CoderJoshDK/precommit-mintlify-validate/
-    rev: v0.2.0
-    hooks:
-      - id: mintlify-validate
-        args: [docs]
+  # Commented this out because docs changes are often not done by developers and therefore
+  # the pre-commit doesn't routinely run on the docs.
+  # - repo: https://github.com/CoderJoshDK/precommit-mintlify-validate/
+  #   rev: v0.2.0
+  #   hooks:
+  #     - id: mintlify-validate
+  #       args: [docs]

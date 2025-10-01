@@ -24,12 +24,13 @@ models:
     config:
       elementary:
         timestamp_column: updated_at
-    tests:
+    data_tests:
       - elementary.dimension_anomalies:
-          dimensions:
-            - device_os
-            - device_browser
-          exclude_final_results: 'value > 1000 or average > 10'
+          arguments:
+            dimensions:
+              - device_os
+              - device_browser
+            exclude_final_results: 'value > 1000 or average > 10'
 ```
 
 </RequestExample>

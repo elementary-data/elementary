@@ -34,21 +34,22 @@ Please add the following test to your model configuration:
 
 columns:
   - name: raw_event_data
-    tests:
+    data_tests:
       - elementary.json_schema:
-          type: object
-          properties:
-            event_id:
-              type: integer
-            event_name:
-              type: string
-            event_args:
-              type: array
-              items:
+          arguments:
+            type: object
+            properties:
+              event_id:
+                type: integer
+              event_name:
                 type: string
-          required:
-            - event_id
-            - event_name
+              event_args:
+                type: array
+                items:
+                  type: string
+            required:
+              - event_id
+              - event_name
 ```
 
 _Note: The `generate_json_schema_test` macro relies on a 3rd-party python library called `genson`. If you are using
@@ -64,8 +65,10 @@ models:
   - name: < model name >
     columns:
       - name: < column name >
-        tests:
-          - elementary.json_schema: <json schema parameters>
+        data_tests:
+          - elementary.json_schema: 
+              arguments:
+                <json schema parameters>
 ```
 
 ```yml Models example
@@ -75,21 +78,22 @@ models:
   - name: login_events
     columns:
       - name: raw_event_data
-        tests:
+        data_tests:
           - elementary.json_schema:
-              type: object
-              properties:
-                event_id:
-                  type: integer
-                event_name:
-                  type: string
-                event_args:
-                  type: array
-                  items:
+              arguments:
+                type: object
+                properties:
+                  event_id:
+                    type: integer
+                  event_name:
                     type: string
-              required:
-                - event_id
-                - event_name
+                  event_args:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - event_id
+                  - event_name
 ```
 
 </RequestExample>

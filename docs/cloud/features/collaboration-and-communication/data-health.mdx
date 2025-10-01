@@ -48,10 +48,11 @@ The way to do so is to add `quality_dimension` to the test definition in your db
 <CodeGroup>
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      quality_dimension: completeness
+    config:
+      meta:
+        quality_dimension: completeness
 ```
 
 ```yml test/model config block
