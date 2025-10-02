@@ -23,11 +23,12 @@ That's useful in cases which the latest data should be excluded from the test. F
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          detection_delay:
-            period: day
-            count: 1
+          arguments:
+            detection_delay:
+              period: day
+              count: 1
 ```
 
 ```yml model

@@ -23,11 +23,12 @@ This timeframe includes the training period and detection period. If a detection
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          training_period:
-            period: day
-            count: 30
+          arguments:
+            training_period:
+              period: day
+              count: 30
 ```
 
 ```yml model

@@ -28,16 +28,18 @@ The anomaly_direction configuration is used to configure the direction of the ex
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          anomaly_direction: drop
+          arguments:
+            anomaly_direction: drop
 
       - elementary.all_columns_anomalies:
-          column_anomalies:
-            - null_count
-            - missing_count
-            - zero_count
-          anomaly_direction: spike
+          arguments:
+            column_anomalies:
+              - null_count
+              - missing_count
+              - zero_count
+            anomaly_direction: spike
 ```
 
 ```yml model

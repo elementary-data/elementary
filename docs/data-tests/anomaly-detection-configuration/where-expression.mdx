@@ -22,9 +22,10 @@ where_expression: EXTRACT(DOW FROM timestamp_column) BETWEEN 2 AND 6
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          where_expression: "user_name != 'test'"
+          arguments:
+            where_expression: "user_name != 'test'"
 ```
 
 ```yml model

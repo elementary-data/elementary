@@ -29,7 +29,7 @@ models:
     description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
     config:
       tags: ["PII"]
-    tests:
+    data_tests:
       - elementary.volume_anomalies
 ```
 
@@ -43,7 +43,7 @@ models:
       tags: ["PII"]
       elementary:
         timestamp_column: "signup_date"
-    tests:
+    data_tests:
       - elementary.volume_anomalies
 ```
 
@@ -59,10 +59,12 @@ Similar to Test 1, we will use the **volume_anomalies** test to detect an anomal
     config:
       tags: ["finance"]
 
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          tags: ["table_anomalies"]
-          timestamp_column: "order_date"
+          config:
+            tags: ["table_anomalies"]
+          arguments:
+            timestamp_column: "order_date"
 
 ````
 </Accordion>
@@ -75,10 +77,11 @@ The **elementary.dimension_anomalies** tests can be used to check for anomalies 
     config:
       tags: ["finance"]
 
-    tests:
+    data_tests:
       - elementary.dimension_anomalies:
-          dimensions:
-            - status
+          arguments:
+            dimensions:
+              - status
 ````
 
 Next, we will define a timestamp column for determining time buckets:
@@ -91,10 +94,11 @@ Next, we will define a timestamp column for determining time buckets:
     elementary:
       timestamp_column: "order_date"
 
-  tests:
+  data_tests:
     - elementary.dimension_anomalies:
-        dimensions:
-          - status
+        arguments:
+          dimensions:
+            - status
 ```
 
 This test will gather row count metrics for each value in the **status** column and will fail if the distribution deviates substantially from the mean.
@@ -106,14 +110,15 @@ We will use the **elementary.column_anomalies** test to monitor the count of cus
 ```yaml
       - name: number_of_orders
         description: Count of the number of orders a customer has placed
-        tests:
+        data_tests:
           - elementary.column_anomalies:
               config:
                 severity: warn
-              tags: ["column_anomalies"]
-              column_anomalies:
-                - zero_count
-              timestamp_column: "signup_date"
+                tags: ["column_anomalies"]
+              arguments:
+                column_anomalies:
+                  - zero_count
+                timestamp_column: "signup_date"
 ```
 <Info>
 Notice that we already defined the **timestamp_column** at the model level, so we don't have to define it in the test. [This page](/data-tests/elementary-tests-configuration) has in-depth details on test priorities.
@@ -133,7 +138,7 @@ models:
       tags: ["PII"]
       elementary:
         timestamp_column: "signup_date"
-    tests:
+    data_tests:
       - elementary.volume_anomalies
 
     columns:
@@ -154,14 +159,15 @@ models:
 
       - name: number_of_orders
         description: Count of the number of orders a customer has placed
-        tests:
+        data_tests:
           - elementary.column_anomalies:
               config:
                 severity: warn
-              tags: ["column_anomalies"]
-              column_anomalies:
-                - zero_count
-              timestamp_column: "signup_date"
+                tags: ["column_anomalies"]
+              arguments:
+                column_anomalies:
+                  - zero_count
+                timestamp_column: "signup_date"
 
       - name: customer_lifetime_value
         description: Total value (AUD) of a customer's orders
@@ -179,10 +185,11 @@ models:
       elementary:
         timestamp_column: "order_date"
 
-    tests:
+    data_tests:
       - elementary.dimension_anomalies:
-          dimensions:
-            - status
+          arguments:
+            dimensions:
+              - status
     columns:
       - name: order_id
         description: This is a unique identifier for an order
@@ -216,10 +223,12 @@ models:
     config:
       tags: ["finance"]
 
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          tags: ["table_anomalies"]
-          timestamp_column: "order_date"
+          config:
+            tags: ["table_anomalies"]
+          arguments:
+            timestamp_column: "order_date"
 
     columns:
       - name: order_id

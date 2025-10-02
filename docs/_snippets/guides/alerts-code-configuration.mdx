@@ -76,15 +76,17 @@ the CLI or the `config.yml` file.
 ```yml model
 models:
   - name: my_model_name
-    meta:
-      channel: data_ops
+    config:
+      meta:
+        channel: data_ops
 ```
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      channel: data_ops
+    config:
+      meta:
+        channel: data_ops
 ```
 
 ```yml test/model config block
@@ -102,7 +104,7 @@ models:
       +meta:
         channel: data_ops
 
-tests:
+data_tests:
   path:
     subfolder:
       +meta:
@@ -126,15 +128,17 @@ Note: if you configure a suppression interval using this method, it will overrid
 ```yml model
 models:
   - name: my_model_name
-    meta:
-      alert_suppression_interval: 24
+    config:
+      meta:
+        alert_suppression_interval: 24
 ```
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      alert_suppression_interval: 12
+    config:
+      meta:
+        alert_suppression_interval: 12
 ```
 
 ```yml test/model config block
@@ -152,7 +156,7 @@ models:
       +meta:
         alert_suppression_interval: 24
 
-tests:
+data_tests:
   path:
     subfolder:
       +meta:
@@ -176,15 +180,17 @@ Due to their nature, grouped alerts will contain less information on each issue.
 ```yml model
 models:
   - name: my_model_name
-    meta:
-      slack_group_alerts_by: table
+    config:
+      meta:
+        slack_group_alerts_by: table
 ```
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      slack_group_alerts_by: table
+    config:
+      meta:
+        slack_group_alerts_by: table
 ```
 
 ```yml test/model config block
@@ -202,7 +208,7 @@ models:
       +meta:
         slack_group_alerts_by: table
 
-tests:
+data_tests:
   path:
     subfolder:
       +meta:
@@ -236,15 +242,17 @@ Supported alert fields:
 ```yml model
 models:
   - name: my_model_name
-    meta:
-      alert_fields: ["description", "owners", "tags", "subscribers"]
+    config:
+      meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
 ```
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      alert_fields: ["description", "owners", "tags", "subscribers"]
+    config:
+      meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
 ```
 
 ```yml test/model config block
@@ -262,7 +270,7 @@ models:
       +meta:
         alert_fields: ["description", "owners", "tags", "subscribers"]
 
-tests:
+data_tests:
   path:
     subfolder:
       +meta:
