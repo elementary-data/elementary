@@ -166,12 +166,27 @@ python3 -m pip install elementary-data[<adapter>]
 <Accordion title="WARNING - Installed package 'elementary' is overriding the built-in materialization 'XXX'">
   <Snippet file="dbt-18-materializations-common.mdx" />
 
-  The warning above may appear in one of the following two cases: 
-  * If you are using the most recent version of dbt 1.6 or 1.7 - this warning will appear by default, since it indicates the aforementioned behavior change in dbt 1.8.
-  * If you are using dbt 1.8 and above, this warning will NOT appear by default, however it will start appearing once you set the flag `require_explicit_package_overrides_for_builtin_materializations` to `false` 
-  as required in the [dbt package installation guide](/oss/quickstart/quickstart-cli-package#step-by-step-install-elementary-dbt-package).
+  If you are encountering the warning above though, it means that you have previously added the flag 
+  `require_explicit_package_overrides_for_builtin_materializations=False` to `dbt-project.yml`.
+  This is no longer required!.
 
-  In either case, please ignore it for now. This is a temporary measure and we are working with the dbt team on a [longer term solution](https://github.com/dbt-labs/dbt-core/issues/10090).
+  Instead, please add a file named `elementary_materialization.sql` to your macros folder, with the following contents -
+
+  If you use Snowflake:
+  ```
+  {% materialization test, adapter='snowflake' %}
+    {{ return(elementary.materialization_test_snowflake()) }}
+  {% endmaterialization %}
+          ```
+  
+  If you use any other DWH:
+          ```
+  {% materialization test, default %}
+    {{ return(elementary.materialization_test_default()) }}
+  {% endmaterialization %}
+  ```
+
+  This will ensure Elementary's test materialization is run but will avoid the warning.   
 </Accordion>
 
 <Accordion title="I changed the training period but the results are the same">
@@ -218,6 +233,15 @@ vars:
   columns_upload_strategy: none
 
 ```
+
+</Accordion>
+
+<Accordion title="I'm trying to run Elementary with dbt-fusion but encountering issues">
+
+dbt-fusion support in Elementary is still in beta. 
+
+While most of the core features should work, some features may not work as expected.
+For more details, please click [here](/oss/integrations/dbt-fusion)
 
 </Accordion>
 
