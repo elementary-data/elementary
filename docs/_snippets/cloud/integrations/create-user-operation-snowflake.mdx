@@ -1,0 +1,17 @@
+### Create a user for Elementary cloud
+
+* Please create a Snowflake key-pair (private and public key) using [this](https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-authentication) guide.
+
+* Using the public key generated in the previous step, please run the following in your dbt project folder:
+
+```bash
+## Store the public key in an environment variable
+export SNOWFLAKE_PUBLIC_KEY="<public key>"
+
+## Print the query you should run to generate a user
+dbt run-operation create_elementary_user --args "{'public_key': '$SNOWFLAKE_PUBLIC_KEY'}"
+```
+
+This command will generate a query to create a user with the necessary permissions. Run this query on your data warehouse with **admin permissions** to create the user.
+
+<Snippet file="cloud/integrations/permissions-and-security.mdx" />
