@@ -47,6 +47,16 @@ Elementary's GPG commit signing feature allows you to:
 
 Once generated, you can **view the public key** - useful for adding to GitHub or other Git hosting services.
 
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/do5hrgokq/image/upload/v1759655166/gpg-key_askmeq.png"
+      alt="View keys in Elementary UI"
+    />
+  </div>
+</Frame>
+
+
 ### Revoke a GPG key
 
 If you need to revoke your current GPG key:
@@ -65,9 +75,9 @@ If you need to revoke your current GPG key:
 
 When GPG commit signing is enabled, Elementary will:
 
-1. **Automatically detect** if you have an active GPG key
-2. **Use your key** to sign commits when creating pull requests or making changes
-3. **Fall back gracefully** to unsigned commits if signing fails
+1. Automatically detect if you have an active GPG key
+2. Use your key to sign commits when creating pull requests or making changes
+3. Fall back gracefully to unsigned commits if signing fails
 
 ### Commit signature verification
 
@@ -81,14 +91,14 @@ Signed commits will show a "Verified" badge in GitHub and other Git hosting serv
 
 ### Key management
 
-- **Use strong key lengths** (4096 bits recommended)
-- **Set expiration dates** (90 days recommended)
-- **Revoke compromised keys** immediately
+- Use strong key lengths (4096 bits recommended)
+- Set expiration dates (90 days recommended)
+- Revoke compromised keys immediately
 
 ### Troubleshooting
 
 If commits aren't being signed:
 
-1. **Check you have an active GPG key** in your Elementary settings
-2. **Verify the key hasn't expired**
-3. **Make sure you added the public key to GitHub** 
+1. Check you have an active GPG key in your Elementary settings
+2. Verify the key hasn't expired
+3. Make sure you added the public key to GitHub
