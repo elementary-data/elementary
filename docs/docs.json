@@ -143,7 +143,13 @@
           {
             "group": "Additional features",
             "pages": [
-              "cloud/features/config-as-code",
+              {
+                "group": "Config-as-Code",
+                "pages": [
+                  "cloud/features/config-as-code",
+                  "cloud/features/gpg-signed-commits"
+                ]
+              }
               "cloud/features/multi-env",
               "cloud/features/ci",
               "cloud/features/collaboration-and-communication/user-activity-logs"
