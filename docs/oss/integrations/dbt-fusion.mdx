@@ -7,7 +7,79 @@ title: "dbt fusion (Beta)"
 Elemmentary OSS integrates with dbt-fusion, starting with version 0.20.
 Fusion is a complete rewrite of the dbt engine, and provides many benefits, including enhanced performance and static analysis. 
 
-For more details about dbt-fusion capabilities, installation guidelines and migration best practices, please consult the [dbt-fusion docs](https://docs.getdbt.com/docs/fusion/about-fusion).
+For more details about dbt-fusion capabilities please consult the [dbt-fusion docs](https://docs.getdbt.com/docs/fusion/about-fusion).
+
+### Upgrading to dbt-fusion
+
+As a part of the migration to dbt-fusion, it is required to remove deprecated syntax from various areas of the dbt project, and YAMLs in particular.
+Specifically for tests the following are important:
+
+1. Test arguments must be encapsulated under an `arguments` field.
+2. Configuration fields such as `meta`, `tags` or `severity` must be encapsulated under a `config` field.
+3. Recommended (but not a must) - change the `tests` field to `data_tests` to conform with the current dbt guidelines.
+
+Here's an example of an Elementary anomaly test with the old and new syntax:
+
+<CodeGroup>
+
+```yml Old syntax
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: "loaded_at"
+    tests:
+      - elementary.volume_anomalies:
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+          time_bucket:
+            period: day
+            count: 1
+          tags: ["elementary"]
+          severity: warn
+          meta:
+            owner: "@jessica.jones"
+
+  - name: users
+    tests:
+      - elementary.volume_anomalies:
+          tags: ["elementary"]
+```
+
+```yml New syntax
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: "loaded_at"
+    data_tests:
+      - elementary.volume_anomalies:
+          arguments:
+            where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+            time_bucket:
+              period: day
+              count: 1
+          config:
+            tags: ["elementary"]
+            severity: warn
+            meta:
+              owner: "@jessica.jones"
+
+  - name: users
+    data_tests:
+      - elementary.volume_anomalies:
+          config:
+            tags: ["elementary"]
+```
+
+</CodeGroup>
+
+To facilitate the process of making these changes within your project, dbt introduced a tool called [dbt-autofix](https://github.com/dbt-labs/dbt-autofix) that 
+can be used to automatically migrate your project to the new syntax.
+
+Before running this tool, **please upgrade** to the most recent dbt-core version - as some of the syntax changes are not supported on older versions.
+
+For full information on upgrading from dbt-core to dbt-fusion, please check [dbt-fusion's official upgrade guide](https://docs.getdbt.com/docs/dbt-versions/core-upgrade/upgrading-to-fusion).)
+
 
 ### Supported Elementary capabilities
 
