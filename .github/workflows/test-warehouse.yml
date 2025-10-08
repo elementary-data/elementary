@@ -26,16 +26,6 @@ on:
         type: string
         required: false
         description: dbt's version to test with
-      should-run-tests:
-        type: boolean
-        required: false
-        default: true
-        description: Whether to run E2E tests
-      clear-tests:
-        type: boolean
-        required: false
-        default: true
-        description: Whether to clean test environment
       generate-data:
         type: boolean
         required: false
@@ -47,10 +37,6 @@ on:
       warehouse-type:
         type: string
         required: true
-      should-run-tests:
-        type: boolean
-        required: false
-        default: true
       elementary-ref:
         type: string
         required: false
@@ -60,10 +46,6 @@ on:
       dbt-version:
         type: string
         required: false
-      clear-tests:
-        type: boolean
-        required: false
-        default: true
       generate-data:
         type: boolean
         required: false
@@ -71,7 +53,6 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
 
 jobs:
@@ -170,12 +151,38 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
-      - name: Run dbt package integration tests
-        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      - name: Seed e2e dbt project
+        working-directory: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+        if: inputs.warehouse-type == 'postgres' || inputs.generate-data
         run: |
-          dbt deps
-          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.warehouse-type == 'postgres' || inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
+          dbt seed --target "${{ inputs.warehouse-type }}"
+
+      - name: Run e2e dbt project
+        working-directory: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+        run: |
+          dbt run --target "${{ inputs.warehouse-type }}" || true
+
+          # Validate run_results.json: only error_model should be non-success
+          jq -e '
+            [.results[] | select(.status != "success") | .unique_id]
+            | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
+          ' target/run_results.json > /dev/null
+          jq_exit=$?
+
+          if [ $jq_exit -eq 0 ]; then
+            echo "✅ Validation passed: only error_model failed."
+          else
+            echo "❌ Validation failed. Unexpected failures:"
+            jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
+          fi
+
+          exit $jq_exit
+
+      - name: Test e2e dbt project
+        working-directory: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+        continue-on-error: true
+        run: |
+          dbt test --target "${{ inputs.warehouse-type }}"
 
       - name: Run help
         run: edr --help
@@ -259,5 +266,4 @@ jobs:
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests
-        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
