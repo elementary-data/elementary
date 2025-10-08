@@ -2,21 +2,15 @@ with training as (
     select * from {{ ref('any_type_column_anomalies_training') }}
 ),
 
-{% if var("stage") == "validation" %}
- validation as (
-     select * from {{ ref('any_type_column_anomalies_validation') }}
- ),
+validation as (
+    select * from {{ ref('any_type_column_anomalies_validation') }}
+),
 
- source as (
-     select * from training
-     union all
-     select * from validation
- ),
-{% else %}
- source as (
-     select * from training
- ),
-{% endif %}
+source as (
+    select * from training
+    union all
+    select * from validation
+),
 
  final as (
      select
