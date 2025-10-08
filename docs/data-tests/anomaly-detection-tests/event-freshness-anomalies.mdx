@@ -27,29 +27,30 @@ _Default configuration: `anomaly_direction: spike` to alert only on delays._
 {/* prettier-ignore */}
 <pre>
  <code>
-  tests:
+  data_tests:
     &nbsp;&nbsp;-- elementary.event_freshness_anomalies:
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/event_timestamp_column"><font color="#CD7D55">event_timestamp_column: column name</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">detection_period:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">count: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">training_period:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">count: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">detection_delay:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">count: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">ignore_small_changes:</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">spike_failure_percent_threshold: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">drop_failure_percent_threshold: int</font></a>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-exclude-metrics"><font color="#CD7D55">anomaly_exclude_metrics: [SQL expression]</font></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;arguments:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/event_timestamp_column"><font color="#CD7D55">event_timestamp_column: column name</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/update_timestamp_column"><font color="#CD7D55">update_timestamp_column: column name</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">detection_period:</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">count: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">training_period:</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">count: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">detection_delay:</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">count: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">ignore_small_changes:</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">spike_failure_percent_threshold: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/ignore_small_changes"><font color="#CD7D55">drop_failure_percent_threshold: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-exclude-metrics"><font color="#CD7D55">anomaly_exclude_metrics: [SQL expression]</font></a>
  </code>
 </pre>
 
@@ -58,26 +59,28 @@ _Default configuration: `anomaly_direction: spike` to alert only on delays._
 ```yml Models
 models:
   - name: < model name >
-    tests:
+    data_tests:
       - elementary.event_freshness_anomalies:
-          event_timestamp_column: < timestamp column > # Mandatory
-          update_timestamp_column: < timestamp column > # Optional
-          where_expression: < sql expression >
-          time_bucket: # Daily by default
-            period: < time period >
-            count: < number of periods >
+          arguments:
+            event_timestamp_column: < timestamp column > # Mandatory
+            update_timestamp_column: < timestamp column > # Optional
+            where_expression: < sql expression >
+            time_bucket: # Daily by default
+              period: < time period >
+              count: < number of periods >
 ```
 
 ```yml Models example
 models:
   - name: login_events
-    tests:
+    data_tests:
       - elementary.event_freshness_anomalies:
-          event_timestamp_column: "occurred_at"
-          update_timestamp_column: "updated_at"
-          # optional - use tags to run elementary tests on a dedicated run
-          tags: ["elementary"]
+          arguments:
+            event_timestamp_column: "occurred_at"
+            update_timestamp_column: "updated_at"
           config:
+            # optional - use tags to run elementary tests on a dedicated run
+            tags: ["elementary"]
             # optional - change severity
             severity: warn
 ```

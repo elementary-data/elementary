@@ -17,9 +17,10 @@ If undefined, default is false.
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          fail_on_zero: true
+          arguments:
+            fail_on_zero: true
 ```
 
 ```yml model

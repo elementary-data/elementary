@@ -454,6 +454,7 @@
             "group": "Integrations",
             "pages": [
               "oss/integrations/dbt",
+              "oss/integrations/dbt-fusion",
               "oss/deployment-and-configuration/slack",
               "oss/deployment-and-configuration/teams"
             ]

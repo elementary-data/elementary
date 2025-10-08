@@ -8,15 +8,17 @@ Elementary enriches alerts with [owners for models or tests](https://docs.getdbt
 ```yml model
 models:
   - name: my_model_name
-    meta:
-      owner: "@jessica.jones"
+    config:
+      meta:
+        owner: "@jessica.jones"
 ```
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      owner: ["@jessica.jones", "@joe.joseph"]
+    config:
+      meta:
+        owner: ["@jessica.jones", "@joe.joseph"]
 ```
 
 ```yml test/model config block
@@ -36,7 +38,7 @@ models/sources:
       +meta:
         owner: "@jessica.jones"
 
-tests:
+data_tests:
   path:
     subfolder:
       +meta:

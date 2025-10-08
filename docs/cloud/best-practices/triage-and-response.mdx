@@ -38,14 +38,14 @@ According to these answers, you should add configuration that will impact the al
 </Check>
 
 ```yaml
-tests:
+data_tests:
   - unique:
 		  config:
 		    error_if: ">10"
-      meta:
-        description: "More than 10 duplicate records arriving from the source, as this is a staging table"
-        owner: "@data.provider"
-        tags: "critical", "mongo-db", "raw-production-replica"
+        meta:
+          description: "More than 10 duplicate records arriving from the source, as this is a staging table"
+          owner: "@data.provider"
+          tags: "critical", "mongo-db", "raw-production-replica"
 ```
 
 ## Alert distribution
@@ -129,7 +129,7 @@ These are the questions that should be asked, and product tips on how to answer 
 - Does the incident break the pipeline / create delay?
 
   - Is the failure is a model failure, or a freshness issue?
-  - Do we run `dbt build` and this failure stoped the pipeline?
+  - Do we run `dbt build` and this failure stopped the pipeline?
 
     - Check the **Model runs** section of the dashboard to see if there are skipped models, as failures in build cause the downstream models to be skipped.
 

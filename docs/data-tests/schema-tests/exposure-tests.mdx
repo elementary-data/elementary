@@ -130,12 +130,15 @@ For each module schema you wish to verify the exposure dependencies, add the ele
     config:
       tags: ["finance"]
 
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          tags: ["table_anomalies"]
-          timestamp_column: "order_date"
+          config:
+            tags: ["table_anomalies"]
+          arguments:
+            timestamp_column: "order_date"
       - elementary.exposure_schema_validity:
-          tags: [elementary]
+          config:
+            tags: [elementary]
 
 ```
 

@@ -4,10 +4,11 @@ It's recommended to add an explanation of what does it mean if this test fails, 
 <CodeGroup>
 
 ```yml test
-tests:
+data_tests:
   - not_null:
-    meta:
-      description: "This is the test description"
+    config:
+      meta:
+        description: "This is the test description"
 ```
 
 ```yml test config block
@@ -20,7 +21,7 @@ tests:
 ```
 
 ```yml dbt_project.yml
-tests:
+data_tests:
   path:
     subfolder:
       +meta:

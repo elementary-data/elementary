@@ -70,10 +70,11 @@ models:
   - name: < model name >
     columns:
       - name: < column name >
-        tests:
+        data_tests:
           - elementary.unstructured_data_validation:
-              expectation_prompt: "Description of what the text should contain or represent"
-              llm_model_name: "model_name"
+              arguments:
+                expectation_prompt: "Description of what the text should contain or represent"
+                llm_model_name: "model_name"
 ```
 
 ```yml Example
@@ -85,10 +86,11 @@ models:
     columns:
       - name: text_data
         description: "Unstructured text data stored as a string."
-        tests:
+        data_tests:
           - elementary.unstructured_data_validation:
-              expectation_prompt: "The text data should represent an example of unstructured data."
-              llm_model_name: "test_model"
+              arguments:
+                expectation_prompt: "The text data should represent an example of unstructured data."
+                llm_model_name: "test_model"
 ```
 
 ```yml Example - Validating Customer Feedback
@@ -100,10 +102,11 @@ models:
     columns:
       - name: feedback_text
         description: "Customer feedback in free text format."
-        tests:
+        data_tests:
           - elementary.unstructured_data_validation:
-              expectation_prompt: "The text should be a customer feedback comment in English, it should describe only a bug or a feature request."
-              llm_model_name: "claude-3-5-sonnet"
+              arguments:
+                expectation_prompt: "The text should be a customer feedback comment in English, it should describe only a bug or a feature request."
+                llm_model_name: "claude-3-5-sonnet"
               config:
                 severity: warn
 ```
@@ -124,10 +127,11 @@ models:
     columns:
       - name: doctor_notes
         description: "A column containing the doctor notes on the prescription"
-        tests:
+        data_tests:
           - elementary.unstructured_data_validation:
-              expectation_prompt: "The prescription has to include a limited time period and recommendations to the patient"
-              llm_model_name: "claude-3-5-sonnet"
+              arguments:
+                expectation_prompt: "The prescription has to include a limited time period and recommendations to the patient"
+                llm_model_name: "claude-3-5-sonnet"
 ```
 
 Test fails if: A doctor's note does not specify a time period or lacks recommendations for the patient.
@@ -141,10 +145,11 @@ models:
     columns:
       - name: negative_feedbacks
         description: "A column containing negative feedbacks about our product."
-        tests:
+        data_tests:
           - elementary.unstructured_data_validation:
-              expectation_prompt: "The customer feedback's sentiment has to be negative"
-              llm_model_name: "claude-3-5-sonnet"
+              arguments:
+                expectation_prompt: "The customer feedback's sentiment has to be negative"
+                llm_model_name: "claude-3-5-sonnet"
 ```
 
 Test fails if: Any feedback in `negative_feedbacks` is not actually negative.
@@ -153,16 +158,17 @@ Test fails if: Any feedback in `negative_feedbacks` is not actually negative.
 
 ```yml
 models:
-  - name: summerized_pdfs
+  - name: summarized_pdfs
     description: "A table containing a summary of our ingested PDFs."
     columns:
       - name: pdf_summary
         description: "A column containing the main PDF's content summary."
-        tests:
+        data_tests:
           - elementary.validate_similarity:
-              to: ref('pdf_source_table')
-              column: pdf_content
-              match_by: pdf_name
+              arguments:
+                to: ref('pdf_source_table')
+                column: pdf_content
+                match_by: pdf_name
 ```
 
 Test fails if: A PDF summary does not accurately represent the original PDF's content. The validation will use the pdf name as the key to match a summary from the pdf_summary table to the pdf_content in the pdf_source_table.
@@ -172,9 +178,10 @@ models:
   - name: jobs
     columns:
       - name: job_title
-        tests:
+        data_tests:
           - elementary.validate_similarity:
-              column: job_description
+              arguments:
+                column: job_description
 ```
 
 Test fails if: The job title does not align with the job description.
@@ -188,9 +195,10 @@ models:
     columns:
       - name: issue_description
         description: "A column containing customer-reported issues."
-        tests:
+        data_tests:
           - elementary.accepted_categories:
-              categories: ['billing', 'technical_support', 'account_access', 'other']
+              arguments:
+                categories: ['billing', 'technical_support', 'account_access', 'other']
 ```
 
 Test fails if: A support ticket does not fall within the predefined categories.
@@ -204,15 +212,16 @@ models:
     columns:
       - name: article_text
         description: "A column containing full article text."
-        tests:
+        data_tests:
           - elementary.extract_and_validate_entities:
-              entities:
-                organization: 
-                  required: true
-                  accepted_values: ['Google', 'Amazon', 'Microsoft', 'Apple']
-                location:
-                  required: false
-                  accepted_values: {{ run_query('select zip_code from locations') }}
+              arguments:
+                entities:
+                  organization: 
+                    required: true
+                    accepted_values: ['Google', 'Amazon', 'Microsoft', 'Apple']
+                  location:
+                    required: false
+                    accepted_values: {{ run_query('select zip_code from locations') }}
 ```
 
 Test fails if:
@@ -228,20 +237,21 @@ models:
     columns:
       - name: meeting_notes
         description: "A column containing the full summary of the board meeting."
-        tests:
+        data_tests:
           - elementary.extract_and_validate_numbers:
-              entities:
-                revenue:
-                  compare_with: ref('crm_financials')
-                  column: sum(revenue)
-                  required: true
-                net_profit:
-                  compare_with: ref('crm_financials')
-                  column: sum(net_profit)
-                customer_count:
-                  compare_with: ref('crm_customers')
-                  column: count(customers)
-                  required: true
+              arguments:
+                entities:
+                  revenue:
+                    compare_with: ref('crm_financials')
+                    column: sum(revenue)
+                    required: true
+                  net_profit:
+                    compare_with: ref('crm_financials')
+                    column: sum(net_profit)
+                  customer_count:
+                    compare_with: ref('crm_customers')
+                    column: count(customers)
+                    required: true
 ```
 
 Test fails if:

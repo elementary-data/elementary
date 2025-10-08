@@ -10,9 +10,10 @@ First, check if your test uses a timestamp column:
 
 ```yaml
 # In your YAML configuration
-tests:
+data_tests:
   - elementary.volume_anomalies:
-      timestamp_column: created_at# If this is configured, you have a timestamp-based test
+      arguments:
+        timestamp_column: created_at# If this is configured, you have a timestamp-based test
 ```
 
 <Accordion title="If you have a timestamp-based test (recommended)">
@@ -135,9 +136,10 @@ If your test isn't appearing in `data_monitoring_metrics`:
 Verify test configuration:
 
 ```yaml
-tests:
+data_tests:
   - elementary.volume_anomalies:
-      timestamp_column: created_at# Check if specified correctly
+      arguments:
+        timestamp_column: created_at# Check if specified correctly
 ```
 
 ### Common causes:

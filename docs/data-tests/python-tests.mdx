@@ -40,9 +40,10 @@ A Python test is defined like any other dbt test.
 
 ```yaml models/schema.yml
 - name: orders
-  tests:
+  data_tests:
     - elementary.python:
-        code_macro: check_undelivered_orders
+        arguments:
+          code_macro: check_undelivered_orders
 ```
 
 Then, we need to define a macro under `macros/<macro>.sql` that contains the Python code the test will execute.
@@ -86,11 +87,12 @@ Let's compare two different tables, or views, within our warehouse.
 
 ```yaml models/schema.yml
 - name: orders
-  tests:
+  data_tests:
     - elementary.python:
-        code_macro: compare_tables
-        macro_args:
-          other_table: raw_orders
+        arguments:
+          code_macro: compare_tables
+          macro_args:
+            other_table: raw_orders
 ```
 
 We're passing an additional argument to the test called `macro_args`.
@@ -122,13 +124,14 @@ In this example we'll validate a JSON column according to a pre-defined schema.
 
 ```yaml models/schema.yml
 - name: login_events
-  tests:
+  data_tests:
     - elementary.python:
-        code_macro: validate_json
-        macro_args:
-          schema: "{'type': 'object', 'properties': {'country': {'type': 'string'}}}"
-          column: geolocation_json
-        packages: ["jsonschema"]
+        arguments:
+          code_macro: validate_json
+          macro_args:
+            schema: "{'type': 'object', 'properties': {'country': {'type': 'string'}}}"
+            column: geolocation_json
+          packages: ["jsonschema"]
 ```
 
 Here we'll be testing that the `country` that is provided in the `geolocation_json` column in the `login_events`

@@ -44,8 +44,11 @@ repos:
         language: system
         files: ^elementary/.*\.py$
 
-  - repo: https://github.com/CoderJoshDK/precommit-mintlify-validate/
-    rev: v0.2.0
+  - repo: local
     hooks:
       - id: mintlify-validate
-        args: [docs]
+        name: Mintlify validate
+        entry: bash -c "cd docs && mintlify broken-links | tee /dev/stderr | grep -q 'no broken links found'"
+        language: system
+        require_serial: true
+        pass_filenames: false

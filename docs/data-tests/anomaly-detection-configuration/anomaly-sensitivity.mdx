@@ -26,16 +26,18 @@ Larger values will have the opposite effect and will reduce the number of anomal
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          anomaly_sensitivity: 2.5
+          arguments:
+            anomaly_sensitivity: 2.5
 
       - elementary.all_columns_anomalies:
-          column_anomalies:
-            - null_count
-            - missing_count
-            - zero_count
-          anomaly_sensitivity: 4
+          arguments:
+            column_anomalies:
+              - null_count
+              - missing_count
+              - zero_count
+            anomaly_sensitivity: 4
 ```
 
 ```yml model
