@@ -164,6 +164,7 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: inputs.warehouse-type == 'postgres' || inputs.generate-data
         run: |
+          python generate_data.py
           dbt seed --target "${{ inputs.warehouse-type }}"
 
       - name: Run e2e dbt project
