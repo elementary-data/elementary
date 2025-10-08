@@ -53,7 +53,8 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
+  ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
+  CLI_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
   E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
 
 jobs:
@@ -154,6 +155,8 @@ jobs:
 
       - name: Run deps for E2E dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        env:
+          ELEMENTARY_DBT_PACKAGE_PATH: ${{ env.ELEMENTARY_DBT_PACKAGE_PATH }}
         run: |
           dbt deps
 
@@ -205,7 +208,7 @@ jobs:
           --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Validate alerts statuses were updated
-        working-directory: ${{ env.ELMENTARY_INTERNAL_DBT_PKG_DIR }}
+        working-directory: ${{ env.CLI_INTERNAL_DBT_PKG_DIR }}
         run: |
           dbt deps
           dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
