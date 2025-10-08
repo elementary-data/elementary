@@ -54,7 +54,7 @@ on:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
-  E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+  E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
 
 jobs:
   # PRs from forks require approval, specifically with the "pull_request_target" event as it contains repo secrets.
