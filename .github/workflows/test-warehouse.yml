@@ -152,6 +152,11 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
+      - name: Run deps for E2E dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          dbt deps
+
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: inputs.warehouse-type == 'postgres' || inputs.generate-data
