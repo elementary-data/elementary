@@ -54,6 +54,7 @@ on:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
+  E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
 
 jobs:
   # PRs from forks require approval, specifically with the "pull_request_target" event as it contains repo secrets.
@@ -98,12 +99,12 @@ jobs:
 
       - name: Start Postgres
         if: inputs.warehouse-type == 'postgres'
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: docker compose up -d postgres
 
       # - name: Start Clickhouse
       #   if: inputs.warehouse-type == 'clickhouse'
-      #   working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      #   working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
       #   run: docker compose up -d clickhouse
 
       - name: Setup Python
@@ -152,13 +153,13 @@ jobs:
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
       - name: Seed e2e dbt project
-        working-directory: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: inputs.warehouse-type == 'postgres' || inputs.generate-data
         run: |
           dbt seed --target "${{ inputs.warehouse-type }}"
 
       - name: Run e2e dbt project
-        working-directory: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           dbt run --target "${{ inputs.warehouse-type }}" || true
 
@@ -179,7 +180,7 @@ jobs:
           exit $jq_exit
 
       - name: Test e2e dbt project
-        working-directory: ${{ github.workspace }}/elementary-cli/tests/e2e_dbt_project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         continue-on-error: true
         run: |
           dbt test --target "${{ inputs.warehouse-type }}"
@@ -194,7 +195,7 @@ jobs:
           edr monitor
           -t "${{ inputs.warehouse-type }}"
           --group-by table
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-webhook "$SLACK_WEBHOOK"
 
@@ -208,7 +209,7 @@ jobs:
         run: >
           edr monitor report
           -t "${{ inputs.warehouse-type }}"
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
 
       - name: Set report artifact name
@@ -237,7 +238,7 @@ jobs:
         run: >
           edr monitor send-report
           -t "${{ inputs.warehouse-type }}"
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
           --slack-token "$SLACK_TOKEN"
