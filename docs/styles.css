@@ -44,6 +44,16 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
 }
 
+.home__theme-purple-dark {
+  background-color: #32113d;
+  color: white;
+}
+
+.dark .home__theme-purple-dark {
+  background-color: #32113d;
+  color: white;
+}
+
 .home__theme-pink {
   background-color: #f1386e;
   color: white;
@@ -1006,6 +1016,9 @@ h1, h2, h3, h4, h5, h6 {
   gap: 24px;
   max-width: 500px;
 }
+.home__2col-content.is-centered {
+  align-self: center;
+}
 
 .home__guides-layout{
   display: flex;
@@ -1118,4 +1131,13 @@ h1, h2, h3, h4, h5, h6 {
   background: #ff6b9d;
   color: #000;
   box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+}
+
+/* ================================= */
+/* MCP */
+/* ================================= */
+.home__mcp-image {
+  border: 1px solid #7D4590;
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
