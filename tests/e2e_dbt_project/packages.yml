@@ -1,0 +1,10 @@
+packages:
+  - local: ../../
+  - package: dbt-labs/dbt_utils
+    version: |
+      {%- set minor_to_utils_range_map = {
+        "0": [">=0.8.0", "<0.9.0"],
+        "1": [">=0.8.0", "<0.9.0"],
+        "2": [">=0.8.0", "<1.0.0"],
+      } -%}
+      {{- minor_to_utils_range_map.get(dbt_version.split('.')[1], [">=0.8.0", "<2.0.0"]) -}}
