@@ -3,6 +3,10 @@ title: "Troubleshooting"
 description: "This section is aimed at collecting common issues users have to provide quick debug solutions."
 ---
 
+import Dbt18MaterializationsCommon from '/snippets/dbt-18-materializations-common.mdx';
+
+
+
 <Accordion title="I run `edr report` and get an empty report">
   
 If you get an empty report, there are several steps to understand what went wrong and try and fix it.
@@ -164,7 +168,7 @@ python3 -m pip install elementary-data[<adapter>]
 </Accordion>
 
 <Accordion title="WARNING - Installed package 'elementary' is overriding the built-in materialization 'XXX'">
-  <Snippet file="dbt-18-materializations-common.mdx" />
+  <Dbt18MaterializationsCommon />
 
   If you are encountering the warning above though, it means that you have previously added the flag 
   `require_explicit_package_overrides_for_builtin_materializations=False` to `dbt-project.yml`.

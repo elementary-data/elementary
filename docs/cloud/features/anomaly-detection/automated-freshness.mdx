@@ -3,6 +3,11 @@ title: Automated Freshness Monitor
 sidebarTitle: "Automated freshness"
 ---
 
+import FreshnessConfiguration from '/snippets/cloud/features/anomaly-detection/freshness-configuration.mdx';
+import AllAnomaliesConfiguration from '/snippets/cloud/features/anomaly-detection/all-anomalies-configuration.mdx';
+
+
+
 The purpose of the Freshness monitor is to alert when a data asset hasn't been updated in a period of time that exceeds the update SLA of that table.
 Freshness monitors are by default created for all sources in your dbt project. They can be created for additional tables upon request.
 
@@ -59,5 +64,5 @@ Use the `Anomaly settings` and `result feedback` buttons to impact the monitor.
 
 ### Anomaly settings
 
-<Snippet file="cloud/features/anomaly-detection/freshness-configuration.mdx" />
-<Snippet file="cloud/features/anomaly-detection/all-anomalies-configuration.mdx" />
+<FreshnessConfiguration />
+<AllAnomaliesConfiguration />

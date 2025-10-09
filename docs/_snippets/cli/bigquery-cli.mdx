@@ -1,3 +1,5 @@
+import CliServiceAccount from '/snippets/dwh/bigquery/cli_service_account.mdx';
+
 ### BigQuery connection profile
 
 After installing Elementary's dbt package upon running `dbt deps`,
@@ -38,7 +40,7 @@ elementary:
 We support the same format and connection methods as dbt. Please refer to dbt's documentation
 of [BigQuery](https://docs.getdbt.com/reference/warehouse-setups/bigquery-setup) for further details.
 
-<Snippet file="dwh/bigquery/cli_service_account.mdx" />
+<CliServiceAccount />
 
 Add the full path of this JSON file to your connection profile under 'keyfile'.
 

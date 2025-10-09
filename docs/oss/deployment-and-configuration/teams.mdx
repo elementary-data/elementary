@@ -3,6 +3,10 @@ title: "Teams setup for Elementary CLI"
 sidebarTitle: "Teams"
 ---
 
+import SetupTeamsIntegration from '/snippets/setup-teams-integration.mdx';
+
+
+
 Elementary Teams integration includes sending [Teams alerts](/oss/guides/alerts/send-teams-alerts) on failures in dbt tests and models. The alerts are sent using Microsoft Teams Adaptive Cards format, which provides rich formatting and interactive capabilities.
 
 MS Teams supports Elementary Alerts, but unlike Slack, it does not support the Elementary report or multiple channels.
@@ -20,4 +24,4 @@ There are two ways to create a webhook for Microsoft Teams:
 
 ## Teams integration setup
 
-<Snippet file="setup-teams-integration.mdx" />
+<SetupTeamsIntegration />

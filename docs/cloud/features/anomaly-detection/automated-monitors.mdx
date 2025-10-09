@@ -3,9 +3,15 @@ title: Automated Freshness & Volume Monitors
 sidebarTitle: "Introduction"
 ---
 
-<Snippet file="cloud/cloud-feature-tag.mdx" />
+import CloudFeatureTag from '/snippets/cloud/cloud-feature-tag.mdx';
+import AutomatedMonitorsIntro from '/snippets/cloud/features/anomaly-detection/automated-monitors-intro.mdx';
+import AutomatedMonitorsCards from '/snippets/cloud/features/anomaly-detection/automated-monitors-cards.mdx';
 
-<Snippet file="cloud/features/anomaly-detection/automated-monitors-intro.mdx" />
+
+
+<CloudFeatureTag />
+
+<AutomatedMonitorsIntro />
 
 Once your environment is set up, we automatically collect metadata from your warehouse, which our ML models run on.
 The models are operational when the initial backfill is completed, there is no "loading / training period" - Elementary will collect enough historical data after setup to train the models.
@@ -36,7 +42,7 @@ You can fine tune the [configuration](/cloud/features/anomaly-detection/monitors
 
 ## Automated Monitors
 
-<Snippet file="cloud/features/anomaly-detection/automated-monitors-cards.mdx" />
+<AutomatedMonitorsCards />
 
 ## Alerts on Failures
 

@@ -2,7 +2,12 @@
 sidebarTitle: "All columns anomalies"
 title: "all_columns_anomalies"
 ---
-<Snippet file="ai-generate-test.mdx" />
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+import ColumnMetrics from '/snippets/column-metrics.mdx';
+
+
+<AiGenerateTest />
 
 
 `elementary.all_columns_anomalies`
@@ -13,7 +18,7 @@ Specific monitors are detailed in the table below and can be configured using th
 The test checks the data type of each column and only executes monitors that are relevant to it.
 You can use `column_anomalies` param to override the default monitors, and `exclude_prefix` / `exclude_regexp` to exclude columns from the test.
 
-<Snippet file="column-metrics.mdx" />
+<ColumnMetrics />
 
 ### Test configuration
 
