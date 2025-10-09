@@ -196,6 +196,7 @@
                 "pages": [
                   "cloud/integrations/transformation-and-orchestration/dbt-core",
                   "cloud/integrations/transformation-and-orchestration/dbt-cloud",
+                  "cloud/integrations/transformation-and-orchestration/dbt-fusion",
                   "cloud/integrations/transformation-and-orchestration/airflow",
                   "cloud/integrations/transformation-and-orchestration/orchestration-tools"
                 ]
