@@ -1,8 +1,12 @@
+import CreateServicePrincipal from '/snippets/dwh/databricks/create_service_principal.mdx';
+import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+
 You will connect Elementary Cloud to Databricks for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-<Snippet file="dwh/databricks/create_service_principal.mdx" />
+<CreateServicePrincipal />
 
-<Snippet file="cloud/integrations/permissions-and-security.mdx" />
+<PermissionsAndSecurity />
 
 ### Fill the connection form
 
@@ -14,4 +18,4 @@ Provide the following fields:
 - **Catalog (optional)**: The name of the Databricks Catalog.
 - **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
 
-<Snippet file="cloud/integrations/ip-allowlist.mdx" />
+<IpAllowlist />

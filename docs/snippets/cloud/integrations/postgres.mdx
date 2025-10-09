@@ -1,6 +1,9 @@
+import CreateUserOperation from '/snippets/cloud/integrations/create-user-operation.mdx';
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+
 You will connect Elementary Cloud to Postgres for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-<Snippet file="cloud/integrations/create-user-operation.mdx" />
+<CreateUserOperation />
 
 ### Fill the connection form
 
@@ -13,7 +16,7 @@ Provide the following fields:
 - **User**: The name of the for Elementary user.
 - **Password**: The password associated with the provided user.
 
-<Snippet file="cloud/integrations/ip-allowlist.mdx" />
+<IpAllowlist />
 
 
 ### Connect via SSH tunnel

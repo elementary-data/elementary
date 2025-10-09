@@ -1,8 +1,12 @@
+import CloudServiceAccount from '/snippets/dwh/bigquery/cloud_service_account.mdx';
+import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+
 You will connect Elementary Cloud to Bigquery for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
-<Snippet file="dwh/bigquery/cloud_service_account.mdx" />
+<CloudServiceAccount />
 
-<Snippet file="cloud/integrations/permissions-and-security.mdx" />
+<PermissionsAndSecurity />
 
 ### Fill the connection form
 
@@ -13,4 +17,4 @@ Provide the following fields:
 - **Elementary dataset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
 - **Location**: Use this field to configure the location of BigQuery datasets as per [the BigQuery documentation](https://cloud.google.com/bigquery/docs/locations).
 
-<Snippet file="cloud/integrations/ip-allowlist.mdx" />
+<IpAllowlist />

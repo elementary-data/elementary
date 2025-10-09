@@ -3,6 +3,11 @@ title: Automated Volume Monitor
 sidebarTitle: "Automated volume"
 ---
 
+import VolumeConfiguration from '/snippets/cloud/features/anomaly-detection/volume-configuration.mdx';
+import AllAnomaliesConfiguration from '/snippets/cloud/features/anomaly-detection/all-anomalies-configuration.mdx';
+
+
+
 The volume monitor tracks the **total row count** of a table over time, rather than individual table updates. 
 This means that Elementary will not consider a single update as anomalous, but rather a continuous anomalous trend occurring over a period of time.
 
@@ -31,8 +36,8 @@ Use the `Anomaly settings` and `result feedback` buttons to impact the monitor.
 
 ### Anonmaly settings
 
-<Snippet file="cloud/features/anomaly-detection/volume-configuration.mdx" />
-<Snippet file="cloud/features/anomaly-detection/all-anomalies-configuration.mdx" />
+<VolumeConfiguration />
+<AllAnomaliesConfiguration />
 
 <iframe
 width="700"
