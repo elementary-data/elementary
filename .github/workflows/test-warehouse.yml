@@ -121,8 +121,7 @@ jobs:
         run: >
           pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          # TODO: remove the <1.10.2 once we have a fix for https://github.com/elementary-data/elementary/issues/1931
-          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks<1.10.2,') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
+          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
