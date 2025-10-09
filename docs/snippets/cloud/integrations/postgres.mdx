@@ -1,7 +1,7 @@
-import CreateUserOperation from '/_snippets/cloud/integrations/create-user-operation.mdx';
-import IpAllowlist from '/_snippets/cloud/integrations/ip-allowlist.mdx';
+import CreateUserOperation from '/snippets/cloud/integrations/create-user-operation.mdx';
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
 
-You will connect Elementary Cloud to Redshift for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
+You will connect Elementary Cloud to Postgres for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
 
 <CreateUserOperation />
 
@@ -9,8 +9,8 @@ You will connect Elementary Cloud to Redshift for syncing the Elementary schema 
 
 Provide the following fields:
 
-- **Host**: The hostname of your Redshift account to connect to. This can either be a hostname or an IP address.
-- **Port**: The port of your Redshift account to connect to. This is usually `5439`.
+- **Host**: The hostname of your Postgres account to connect to. This can either be a hostname or an IP address.
+- **Port**: The port of your Postgres account to connect to. This is usually `5432`.
 - **Database name**: The name of the database where your Elementary schema exist. e.g. `analytics`.
 - **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
 - **User**: The name of the for Elementary user.
