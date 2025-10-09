@@ -1,5 +1,5 @@
 ---
-title: "dbt fusion (Beta)"
+title: "dbt Fusion (Beta)"
 ---
 
 <Note>Note: dbt-fusion support in Elementary is still in beta, as is dbt-fusion itself. Please see below a [list of features that are not yet implemented](/oss/integrations/dbt-fusion#missing-features-in-dbt-fusion).</Note>
@@ -102,7 +102,7 @@ For each one of the issues below, we've included a link to the dbt-fusion github
 1. [Tests with error status are not being reported](https://github.com/dbt-labs/dbt-fusion/issues/686) - If a test fails "normally" (e.g. not_null fails on rows with null values), Elementary will report it as expected with a "fail" status. 
 However, if there is a compilation error / any error that comes before the actual test query ("error" status in dbt-core), it will currently be missing.
 2. [Source freshness results are not reported](https://github.com/dbt-labs/dbt-fusion/issues/720)
-3. [Exposure artiracts are not reported](https://github.com/dbt-labs/dbt-fusion/issues/859)
+3. [Exposure artifacts are not reported](https://github.com/dbt-labs/dbt-fusion/issues/859)
 4. [Group artifacts are not reported](https://github.com/dbt-labs/dbt-fusion/issues/25)
 5. [Compiled code is missing from dbt artifact tables](https://github.com/dbt-labs/dbt-fusion/issues/723)
 6. [Failed row count is missing from dbt artifact tables](https://github.com/dbt-labs/dbt-fusion/issues/724)
