@@ -27,6 +27,15 @@ Channel: TypeAlias = Optional[str]
 ONE_SECOND = 1
 
 
+class TeamsWebhookHttpError(MessagingIntegrationError):
+    def __init__(self, response: requests.Response):
+        self.status_code = response.status_code
+        self.response = response
+        super().__init__(
+            f"Failed to send message to Teams webhook: {response.status_code}"
+        )
+
+
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     payload = {
         "type": "message",
@@ -88,6 +97,8 @@ class TeamsWebhookMessagingIntegration(
                 timestamp=datetime.utcnow(),
                 message_format="adaptive_cards",
             )
+        except requests.HTTPError as e:
+            raise TeamsWebhookHttpError(e.response) from e
         except requests.RequestException as e:
             raise MessagingIntegrationError(
                 f"An error occurred while posting message to Teams webhook: {str(e)}"
