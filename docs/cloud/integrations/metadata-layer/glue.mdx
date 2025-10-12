@@ -1,0 +1,107 @@
+---
+title: "Glue"
+---
+
+The AWS Glue integration in Elementary will allow you to automatically monitor our Iceberg tables in Glue, by continouously syncing metadata about Iceberg snapshots.
+
+<Note>
+  If you connected Amazon Athena as your DWH integration - there's no need to add a Glue integration, as the Athena integration already 
+  contains all the required access for Glue.
+</Note>
+
+## AWS Setup
+
+### 1. Create Required IAM Policy
+
+First, you'll need to create an IAM policy with the following permissions:
+- **GluePermissions**: Enables reading metadata about tables in your Glue catalog.
+- **S3IcebergMetadataReadAccess**: Grants access metadata-only access to files of your Iceberg tables. These metadata files contain statistics about Iceberg snapshots, 
+such as update cadence and row count changes.
+
+Here is an example of a JSON policy:
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "GluePermissions",
+			"Effect": "Allow",
+			"Action": [
+				"glue:GetTable",
+				"glue:GetTables"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "S3IcebergMetadataReadAccess",
+			"Effect": "Allow",
+			"Action": [
+				"s3:GetObject"
+			],
+			"Resource": [
+				"arn:aws:s3:::your-iceberg-tables-bucket/*metadata.json"
+			]
+		}
+	]
+}
+```
+
+### 2. Choose Authentication Method
+
+Elementary supports two authentication methods for connecting to Glue:
+
+#### Option 1: AWS Role Authentication (Recommended)
+
+This is the recommended approach as it provides better security and follows AWS best practices. [Learn more about AWS IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html).
+
+1. **Create an IAM Role**:
+   - Go to AWS IAM Console
+   - Create a new role
+   - Select "Another AWS account" as the trusted entity
+   - Enter Elementary's AWS account ID: `743289191656`
+   - (Optional but recommended) Enable "Require external ID" and set a value
+   - Attach the policy created in step 1
+
+2. **Note down the following information**:
+   - Role ARN
+   - External ID (if you enabled it) [Learn more about external IDs](https://aws.amazon.com/blogs/security/how-to-use-external-id-when-granting-access-to-your-aws-resources/).
+
+#### Option 2: Access Key Authentication
+
+This method is less secure as it requires permanent credentials. We recommend using AWS Role authentication instead.
+
+1. **Create an IAM User**:
+   - Go to AWS IAM Console
+   - Create a new user, that will be used by elementary to connect to Glue
+   - Enable programmatic access
+   - Attach the policy created in step 1
+
+2. **Note down the following information**:
+   - AWS Access Key ID of the new elementary glue user
+   - AWS Secret Access Key of the new elementary glue user
+
+## Elementary Configuration
+
+Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect AWS Glue.
+Under the "Metadata Layer" section, please choose Glue.
+
+### Connection Settings
+
+Regardless of the authentication method you choose, you'll need to provide:
+
+- **Connection Name**: A descriptive name for your connection (e.g. "Datalake"). Needs to be unique if you're adding more than one metadata integration.
+- **Region**: The AWS region where your Glue catalog is located
+
+### Authentication Details
+
+Based on your chosen authentication method:
+
+#### If using AWS Role Authentication:
+- Select "AWS Role" as the authentication method
+- Enter your role ARN
+- Enter your external ID (if you enabled it)
+
+#### If using Access Key Authentication:
+- Select "Access Key" as the authentication method
+- Enter your AWS Access Key ID
+- Enter your AWS Secret Access Key

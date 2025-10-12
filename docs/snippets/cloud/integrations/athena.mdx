@@ -13,6 +13,9 @@ First, you'll need to create an IAM policy with the following permissions:
 - **GluePermissions**: Enables reading metadata about databases and tables
 - **S3AccessForStagingBuckets**: Provides full access to store Athena query results
 - **S3AccessForElementarySchema**: Grants read-only access to your elementary schema
+- **S3IcebergMetadataReadAccess**: Grants access metadata-only access to files of your Iceberg tables. This allows Elementary to 
+provide automated volume and freshness updates on your Iceberg tables (even if ingested outside of Athena). If you are not using Iceberg today, you may 
+skip this permission.
 
 Here is an example of a JSON policy:
 ```json
@@ -69,7 +72,17 @@ Here is an example of a JSON policy:
         "arn:aws:s3:::your-elementary-schema-bucket",
         "arn:aws:s3:::your-elementary-schema-bucket/*"
       ]
-    }
+    },
+    {
+			"Sid": "S3IcebergMetadataReadAccess",
+			"Effect": "Allow",
+			"Action": [
+				"s3:GetObject"
+			],
+			"Resource": [
+				"arn:aws:s3:::your-iceberg-tables-bucket/*metadata.json"
+			]
+		}
   ]
 }
 ```

@@ -253,6 +253,12 @@
                 ]
               },
               {
+                "group": "Metadata Layer",
+                "pages": [
+                  "cloud/integrations/metadata-layer/glue"
+                ]
+              },
+              {
                 "group": "Security and Connectivity",
                 "pages": [
                   "cloud/integrations/security-and-connectivity/aws-privatelink-integration",
