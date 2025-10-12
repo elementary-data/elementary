@@ -68,5 +68,11 @@ Provide the following fields:
 - **User:** The email address of the Elementary user.
 - **Token:** The token you generated for the Elementary user.
 
+### Connect your metadata store (optional)
+
+If your Dremio sources contains Iceberg tables, you can connect your metadata store (Iceberg catalog) to your environment. This will allow automatically monitoring volume
+and freshness of your Iceberg tables (even if they are ingested outside of Dremio).
+
+Currently only [AWS Glue](/cloud/integrations/metadata-layer/glue) is supported, though more metadata integrations are planned.
 
 <OnboardingHelp />

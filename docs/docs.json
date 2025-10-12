@@ -247,9 +247,15 @@
                 ]
               },
               {
-                "group": "Data Catalog",
+                "group": "Governance",
                 "pages": [
-                  "cloud/integrations/catalog/atlan"
+                  "cloud/integrations/governance/atlan"
+                ]
+              },
+              {
+                "group": "Metadata Layer",
+                "pages": [
+                  "cloud/integrations/metadata-layer/glue"
                 ]
               },
               {
