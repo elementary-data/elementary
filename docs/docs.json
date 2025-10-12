@@ -247,9 +247,9 @@
                 ]
               },
               {
-                "group": "Data Catalog",
+                "group": "Governance",
                 "pages": [
-                  "cloud/integrations/catalog/atlan"
+                  "cloud/integrations/governance/atlan"
                 ]
               },
               {
