@@ -88,6 +88,13 @@ class AnonymousTracking(Tracking):
             props.update(exc.anonymous_tracking_context)
         return props
 
+    def register_group(
+        self, group_type: str, group_identifier: str, group_props: Optional[dict] = None
+    ) -> None:
+        if self._do_not_track:
+            return
+        return super().register_group(group_type, group_identifier, group_props)
+
 
 class AnonymousCommandLineTracking(AnonymousTracking):
     def track_cli_start(

@@ -7,8 +7,14 @@ from alive_progress import alive_bar
 
 from elementary.config.config import Config
 from elementary.messages.block_builders import TextLineBlock
-from elementary.messages.blocks import HeaderBlock, LinesBlock
-from elementary.messages.message_body import MessageBody
+from elementary.messages.blocks import (
+    HeaderBlock,
+    LineBlock,
+    LinesBlock,
+    LinkBlock,
+    TextBlock,
+)
+from elementary.messages.message_body import MessageBlock, MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageSendResult,
@@ -16,7 +22,10 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
-from elementary.monitor.alerts.alert_messages.builder import AlertMessageBuilder
+from elementary.monitor.alerts.alert_messages.builder import (
+    AlertMessageBuilder,
+    MessageBuilderConfig,
+)
 from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.grouping_type import GroupingType
@@ -57,6 +66,37 @@ def get_health_check_message() -> MessageBody:
     )
 
 
+def _add_elementary_attribution(body: MessageBody) -> MessageBody:
+    lines = [
+        LineBlock(
+            inlines=[
+                TextBlock(text="Powered by"),
+                LinkBlock(
+                    text="Elementary",
+                    url="https://www.elementary-data.com/",
+                ),
+            ]
+        )
+    ]
+    attribution_block = LinesBlock(
+        lines=lines,
+    )
+
+    new_blocks: List[MessageBlock] = []
+    first_block_is_header = body.blocks and isinstance(body.blocks[0], HeaderBlock)
+    if first_block_is_header:
+        new_blocks = [body.blocks[0], attribution_block, *body.blocks[1:]]
+    else:
+        new_blocks = [*body.blocks, attribution_block]
+
+    body_with_attribution = MessageBody(
+        blocks=new_blocks,
+        color=body.color,
+        id=body.id,
+    )
+    return body_with_attribution
+
+
 class DataMonitoringAlerts(DataMonitoring):
     alerts_integration: Union[BaseMessagingIntegration, BaseIntegration]
 
@@ -87,6 +127,11 @@ class DataMonitoringAlerts(DataMonitoring):
         self.send_test_message_on_success = send_test_message_on_success
         self.override_config_defaults = override_config
         self.alerts_integration = self._get_integration_client()
+        self.alert_message_builder = AlertMessageBuilder(
+            MessageBuilderConfig(
+                maximum_columns_in_alert_samples=self.config.maximum_columns_in_alert_samples
+            )
+        )
 
     def _get_integration_client(
         self,
@@ -107,7 +152,7 @@ class DataMonitoringAlerts(DataMonitoring):
         if days_back:
             vars.update(days_back=days_back)
         success = self.internal_dbt_runner.run(
-            models="elementary_cli.alerts.alerts_v2",
+            select="elementary_cli.alerts.alerts_v2",
             full_refresh=dbt_full_refresh,
             vars=vars,
         )
@@ -309,10 +354,10 @@ class DataMonitoringAlerts(DataMonitoring):
     ) -> bool:
         if isinstance(self.alerts_integration, BaseIntegration):
             return self.alerts_integration.send_alert(alert)
-        alert_message_builder = AlertMessageBuilder()
-        alert_message_body = alert_message_builder.build(
+        alert_message_body = self.alert_message_builder.build(
             alert=alert,
         )
+        alert_message_body = _add_elementary_attribution(alert_message_body)
         try:
             self._send_message(
                 integration=self.alerts_integration,

@@ -1,5 +1,6 @@
 import json
 
+from elementary.utils import json_utils
 from elementary.utils.dicts import flatten_dict_by_key, merge_dicts_attribute
 
 
@@ -29,3 +30,12 @@ def test_merge_dicts_attribute():
     assert sorted(
         merge_dicts_attribute(dicts=[dict_1, dict_2, dict_3], attribute_key="attr")
     ) == sorted([1, 2, 2, 3])
+
+
+def test_replace_inf_and_nan():
+    data = {"values": [1.0, float("inf"), float("-inf"), float("nan")]}
+    data = dict(a=1.0, b=float("inf"), c=float("-inf"), d=float("nan"))
+
+    processed_data = json_utils.inf_and_nan_to_str(data)
+    json_str = json.dumps(processed_data, sort_keys=True)
+    assert json_str == '{"a": 1.0, "b": "Infinity", "c": "-Infinity", "d": "NaN"}'
