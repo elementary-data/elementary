@@ -1,6 +1,8 @@
 packages:
-  - package: dbt-labs/dbt_utils
+  - name: dbt_utils
+    package: dbt-labs/dbt_utils
     version: 0.8.6
   - git: https://github.com/elementary-data/dbt-data-reliability.git
-    revision: 20b76374f7c1b6cc280af7652c720e6069499a19
-sha1_hash: 78546c8dc4ab641d9a66ebe04f4cd5818e4c0c37
+    name: elementary
+    revision: d257bdda1793ecff1f65ba9684a0e962d3a77114
+sha1_hash: ae65942cf811d727a965b933552ce536a796f293
