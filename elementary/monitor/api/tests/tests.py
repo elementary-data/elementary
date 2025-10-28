@@ -445,7 +445,7 @@ class TestsAPI(APIClient):
         test_results: Optional[Union[DbtTestResultSchema, ElementaryTestResultSchema]]
 
         if test_result_db_row.test_type == "dbt_test":
-            # Test result rows are always a list for non-elementary tests
+            # Sample data is always a list for non-elementary tests
             sample_data = cast(Optional[list], test_result_db_row.sample_data)
             if disable_samples:
                 sample_data = []
