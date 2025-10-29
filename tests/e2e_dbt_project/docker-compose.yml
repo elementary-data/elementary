@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres
+    image: postgres:15
     ports:
       - "127.0.0.1:5432:5432"
     command: postgres -c max_connections=500
