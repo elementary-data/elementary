@@ -448,7 +448,7 @@ class TestsAPI(APIClient):
             # Sample data is always a list for non-elementary tests
             sample_data = cast(Optional[list], test_result_db_row.sample_data)
             if disable_samples:
-                sample_data = []
+                sample_data = None
 
             test_results = DbtTestResultSchema(
                 display_name=test_result_db_row.test_name,
