@@ -232,6 +232,33 @@ def initial_alerts():
                 resource_type=ResourceType.MODEL,
             ),
         ),
+        PendingAlertSchema(
+            id="model_alert_4",
+            alert_class_id="elementary.model_id_3",
+            type=AlertTypes.MODEL,
+            detected_at=datetime(2022, 10, 10, 7, 0, 0),
+            created_at=datetime(2022, 10, 10, 7, 0, 0),
+            updated_at=datetime(2022, 10, 10, 7, 0, 0),
+            status=AlertStatus.PENDING,
+            data=ModelAlertDataSchema(
+                id="4",
+                alert_class_id="elementary.model_id_3",
+                model_unique_id="elementary.model_id_3",
+                alias="model3",
+                path="my/path3",
+                original_path="",
+                materialization="incremental",
+                message="",
+                full_refresh=False,
+                detected_at=datetime(2022, 10, 10, 7, 0, 0),
+                tags=["five", "six"],
+                model_meta=dict(owner='["alice"]'),
+                status="partial success",
+                database_name="test_db",
+                schema_name="test_schema",
+                resource_type=ResourceType.MODEL,
+            ),
+        ),
     ]
     source_freshness_alerts = [
         PendingAlertSchema(
@@ -901,3 +928,12 @@ def test_multi_filters():
         "test_alert_1",
         "test_alert_2",
     ]
+
+    # Test that filtering alerts wors for microbatch partial success
+    filter = FiltersSchema(
+        tags=[FilterSchema(values=["five", "three"], type=FilterType.IS)],
+        owners=[FilterSchema(values=["alice"], type=FilterType.IS)]
+    )
+    filter_test_alerts = filter_alerts(test_alerts, filter)
+    assert len(filter_test_alerts) == 1
+    assert filter_test_alerts[0].id == "model_alert_3"
