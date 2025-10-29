@@ -251,7 +251,7 @@ def initial_alerts():
                 message="",
                 full_refresh=False,
                 detected_at=datetime(2022, 10, 10, 7, 0, 0),
-                tags=["five", "six"],
+                tags=["microbatch"],
                 model_meta=dict(owner='["alice"]'),
                 status="partial success",
                 database_name="test_db",
@@ -929,11 +929,10 @@ def test_multi_filters():
         "test_alert_2",
     ]
 
-    # Test that filtering alerts wors for microbatch partial success
+    # Test that filtering alerts works for microbatch partial success
     filter = FiltersSchema(
-        tags=[FilterSchema(values=["five", "three"], type=FilterType.IS)],
-        owners=[FilterSchema(values=["alice"], type=FilterType.IS)]
+        tags=[FilterSchema(values=["microbatch"], type=FilterType.IS)],
     )
-    filter_test_alerts = filter_alerts(test_alerts, filter)
-    assert len(filter_test_alerts) == 1
-    assert filter_test_alerts[0].id == "model_alert_3"
+    filter_microbatch_alerts = filter_alerts(test_alerts, filter)
+    assert len(filter_microbatch_alerts) == 1
+    assert filter_microbatch_alerts[0].id == "model_alert_3"
