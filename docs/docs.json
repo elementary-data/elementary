@@ -253,7 +253,7 @@
                 ]
               },
               {
-                "group": "Metadata Layer",
+                "group": "Iceberg catalog",
                 "pages": [
                   "cloud/integrations/metadata-layer/glue"
                 ]
