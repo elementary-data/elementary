@@ -1,5 +1,3 @@
-import json
-
 from elementary.utils.models import get_shortened_model_name
 
 
