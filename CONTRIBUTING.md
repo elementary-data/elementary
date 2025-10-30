@@ -94,7 +94,6 @@ pip install -r dev-requirements.txt
 cd tests
 py.test -vvv --target <your_target>
 ```
-
 ## Pre-commit hooks
 
 We use several pre-commit hooks in order to ensure code quality. These will also
@@ -104,4 +103,5 @@ installing the dev-requirements as shown in the previous section):
 ```bash
 # Run in the root directory of the repository
 pre-commit install
-```
+
+
