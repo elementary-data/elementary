@@ -16,6 +16,6 @@ def test_shorten_3_parts():
     assert shortened == "bar"
 
 
-def test_shorten_1_part():
+def test_shorten_4_parts():
     shortened = get_shortened_model_name("models.foo.bar.v2")
     assert shortened == "bar.v2"
