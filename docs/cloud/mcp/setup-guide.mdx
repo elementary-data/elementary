@@ -26,16 +26,18 @@ It covers prerequisites, installation of the `mcp-remote` helper, authentication
 
 ---
 
-## 1 – Generate a personal access token
-You can now generate tokens directly from the Elementary UI: go to [User → Personal Tokens](https://app.elementary-data.com/settings/tokens).
+## 1 – Generate an access token
+You can now generate tokens directly from the Elementary UI: go to [User → Personal Tokens](https://app.elementary-data.com/settings/user-tokens) or [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens).
 
 Quick steps:
-1. Open the **User → Personal Tokens** page and click **Generate token**.
+1. Open the **User → Personal Tokens** or **Account → Account Tokens** page and click **Generate token**.
 2. (Optional) Add a name/description.
 3. Copy the token and store it securely — it is shown once. Manage (revoke/rotate) anytime from the same page.
 
 ### Security
-Tokens are **user‑scoped bearer tokens** and inherit your workspace permissions. Treat them like passwords — do not share or commit them. Keep them secret, rotate regularly, and revoke immediately if compromised.
+User tokens are **user‑scoped bearer tokens** and inherit your workspace permissions.
+Account tokens are **account‑scoped bearer tokens** and have "Can View" permissions.
+Treat them like passwords — do not share or commit them. Keep them secret, rotate regularly, and revoke immediately if compromised.
 
 
 ---
