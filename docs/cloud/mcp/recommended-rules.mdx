@@ -1,0 +1,134 @@
+---
+title: "Recommended Rules"
+sidebarTitle: "Recommended rules"
+---
+
+<Accordion title="Asset Discovery and Metadata">
+
+```mdc
+---
+description: "Use Elementary MCP for authoritative asset and metadata discovery."
+alwaysApply: true
+---
+
+## When to prefer MCP
+- You need to find or summarize assets (models, tables, columns) with owners, tags, subscribers, freshness, and incident history.
+- You're answering "What is this asset?", "Who owns it?", or "What depends on it?"
+- You want up-to-date, production metadata rather than local project assumptions.
+
+## Guidance
+- Query Elementary MCP for full metadata and lineage pointers instead of scanning project files.
+- Return a concise summary: asset name, type, owners, freshness, criticality, recent incidents, and related tests.
+- If nothing matches, say so clearly and suggest refining filters (name, owner, tag, time window).
+
+### Examples
+**Good** → "Fetching authoritative metadata for `customer_activity_daily` via observability service; summarizing owners, freshness, and downstream consumers."  
+**Avoid** → "Parsing local SQL files or repo comments to guess owners or status."
+```
+
+</Accordion>
+
+<Accordion title="Elementary Best Practices">
+
+```mdc
+---
+description: "General best practices when interacting with Elementary MCP."
+alwaysApply: true
+---
+
+## Guidance
+- Work in a context of a specific environment. If not provided in ad Ask the user for the environment they want to work in.
+- Apply filters (name, tag, owner, time range) to narrow scope.
+- Before applying any detailed filters, begin by retrieving a count of assets. This provides a sense of the dataset size, allowing you to iteratively apply filters (such as by name, tag, owner, or time window) to efficiently narrow your results.
+- Use lightweight mode or limit fields for large result sets.
+- Handle missing assets gracefully - return a clear message.
+
+### Examples
+**Good** → "Query MCP with owner='Data Platform', time window=7d, lightweight=true."  
+**Avoid** → "Fetching entire environment data without filters."
+```
+
+</Accordion>
+
+<Accordion title="Impact Analysis and Lineage">
+
+```mdc
+---
+description: "Leverage Elementary MCP to assess upstream and downstream impact — including cross-project dependencies, and to analyze column-level lineage for safe, comprehensive change management."
+alwaysApply: true
+---
+
+## When to prefer MCP
+- Before modifying, renaming, or removing a model/table/column.
+- When asked "What breaks if we change X?" or "Where does this column come from?"
+- When downstream consumers may exist **outside this repo** (e.g., dashboards, jobs in other projects).
+
+## Guidance
+- Use MCP to map:
+  - **Downstream consumers** (including dashboards/assets external to this project).
+  - **Upstream sources** and transformations.
+  - **Column-level lineage** to explain how columns are populated and which downstream columns depend on them.
+- Provide a **safe change plan**: sequence updates, notify owners, define rollback steps.
+
+### Examples
+**Good** → "End-to-end lineage: `finance_orders.net_revenue` feeds an external revenue dashboard. coordinate before renaming."  
+**Avoid** → "Grepping this repo and assuming there are no external consumers."
+```
+
+</Accordion>
+
+<Accordion title="Incidents and Data Health">
+
+```mdc
+---
+description: "Use Elementary MCP to investigate incidents, data-quality issues and assess asset health."
+alwaysApply: true
+---
+
+## When to prefer MCP
+- An incident or test failure is mentioned
+- You need to check the current health score for an asset.
+- You need **history** (when it started, status changes, recurrence) and **related context** (impacted assets/tests).
+- You're doing daily or post-deploy health checks.
+
+## Guidance
+- Use MCP to:
+  - List active or recent incidents (filter by severity, status, or time window).
+  - Retrieve details: affected downstream assets, related tests/monitors, incident timeline and status.
+- Prefer MCP summaries over reading raw logs/stdout directly.
+- If none found, state that and suggest adjusting filters/time window.
+
+### Examples
+**Good** → "Using MCP: show all incidents in the last 24h with affected assets, related tests, and current resolution status."  
+**Avoid** → "Inspecting raw process logs to infer which asset failed."
+```
+
+</Accordion>
+
+<Accordion title="Pre-Deploy Impact Guardrails">
+
+```mdc
+---
+description: "Before merge/deploy, use Elementary MCP to detect downstream breakage—including external dashboards."
+alwaysApply: true
+---
+
+## When to prefer MCP
+- During review or deployment to ensure changes won't break consumers.
+- When verifying dashboards, jobs, or models that rely on changed assets.
+- When downstream assets lie **outside this repo**.
+
+## Guidance
+- Run a **downstream impact check** via MCP:
+  - Identify all dependent assets (dashboards, other models).
+  - Highlight high-risk paths where changes alter downstream **columns** or semantics.
+- Use **column-level lineage** to describe how each change propagates.
+- If risk exists, recommend: coordination with owners, temporary compatibility (dual-writing/shim columns), or deferring merge until dependents update.
+
+### Examples
+**Good** → "Pre-deploy: MCP shows `orders_enriched.ltv` feeds 'Revenue Overview'—notify owners and add a temporary alias before merge."  
+**Avoid** → "Assuming safety because tests here pass; skipping checks for external dashboards."
+```
+
+</Accordion>
+
