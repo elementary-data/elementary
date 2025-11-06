@@ -137,7 +137,8 @@
             "pages": [
               "cloud/mcp/overview",
               "cloud/mcp/setup-guide",
-              "cloud/mcp/mcp-tools"
+              "cloud/mcp/mcp-tools",
+              "cloud/mcp/recommended-rules"
             ]
           },
           {
