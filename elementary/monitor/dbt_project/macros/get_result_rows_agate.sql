@@ -13,7 +13,11 @@
     and elementary_test_results_id in ({{ valid_ids_query }})
   {% endif %}
   {% endset %}
-  {% do return(elementary.run_query(query).group_by("elementary_test_results_id")) %}
+  {% set res = elementary.run_query(query) %}
+  {% if not res %}
+    {% do return({}) %}
+  {% endif %}
+  {% do return(res.group_by("elementary_test_results_id")) %}
 {% endmacro %}
 
 {% macro bigquery__get_result_rows_agate(days_back, valid_ids_query = none) %}

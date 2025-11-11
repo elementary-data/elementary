@@ -1,6 +1,6 @@
 from elementary.messages.blocks import Icon
 
-ICON_TO_HTML = {
+ICON_TO_UNICODE = {
     Icon.RED_TRIANGLE: "🔺",
     Icon.X: "❌",
     Icon.WARNING: "⚠️",
@@ -18,5 +18,5 @@ ICON_TO_HTML = {
 }
 
 for icon in Icon:
-    if icon not in ICON_TO_HTML:
-        raise RuntimeError(f"No HTML representation for icon {icon}")
+    if icon not in ICON_TO_UNICODE:
+        raise RuntimeError(f"No unicode representation for icon {icon}")

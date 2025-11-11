@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Runtime Error: Failed to calculate the source freshness of \"test_source\"",
+              "text": "Runtime Error: Failed to calculate the source freshness of \"test_db.test_schema.test_identifier\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -174,5 +174,8 @@
       ]
     }
   ],
-  "version": "1.5"
+  "version": "1.5",
+  "msteams": {
+    "width": "Full"
+  }
 }

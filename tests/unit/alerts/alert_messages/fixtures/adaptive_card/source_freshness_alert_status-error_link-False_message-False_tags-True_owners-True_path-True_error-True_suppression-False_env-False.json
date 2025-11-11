@@ -10,7 +10,7 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "Error: Freshness exceeded the acceptable times on source \"test_source\"",
+              "text": "Error: Freshness exceeded the acceptable times on source \"test_db.test_schema.test_identifier\"",
               "weight": "bolder",
               "size": "large",
               "wrap": true
@@ -123,5 +123,8 @@
       ]
     }
   ],
-  "version": "1.5"
+  "version": "1.5",
+  "msteams": {
+    "width": "Full"
+  }
 }
