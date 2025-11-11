@@ -444,10 +444,11 @@ class TestsAPI(APIClient):
     ) -> Optional[Union[DbtTestResultSchema, ElementaryTestResultSchema]]:
         test_results: Optional[Union[DbtTestResultSchema, ElementaryTestResultSchema]]
 
-        sample_data = test_result_db_row.sample_data if not disable_samples else None
         if test_result_db_row.test_type == "dbt_test":
             # Sample data is always a list for non-elementary tests
-            sample_data = cast(Optional[list], sample_data)
+            sample_data = cast(Optional[list], test_result_db_row.sample_data)
+            if disable_samples:
+                sample_data = None
 
             test_results = DbtTestResultSchema(
                 display_name=test_result_db_row.test_name,
@@ -460,14 +461,15 @@ class TestsAPI(APIClient):
                 "_", " "
             ).title()
             if test_result_db_row.test_type == "anomaly_detection":
+                metrics = test_result_db_row.sample_data
                 if (
-                    isinstance(sample_data, list)
+                    isinstance(metrics, list)
                     and test_result_db_row.test_sub_type != "dimension"
                 ):
-                    sample_data.sort(key=lambda metric: metric.get("end_time"))
+                    metrics.sort(key=lambda metric: metric.get("end_time"))
                 test_results = ElementaryTestResultSchema(
                     display_name=test_sub_type_display_name,
-                    metrics=sample_data,
+                    metrics=metrics,
                     result_description=test_result_db_row.test_results_description,
                 )
             elif test_result_db_row.test_type == "schema_change":
