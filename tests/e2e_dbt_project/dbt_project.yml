@@ -1,0 +1,29 @@
+name: "elementary_integration_tests"
+version: "1.0.0"
+config-version: 2
+profile: "elementary_tests"
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target" # directory which will store compiled SQL files
+clean-targets: # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+  - "dbt_modules"
+
+vars:
+  days_back: 30
+  debug_logs: "{{ env_var('DBT_EDR_DEBUG', False) }}"
+  custom_run_started_at: "{{ modules.datetime.datetime.utcfromtimestamp(0) }}"
+
+seeds:
+  +schema: test_seeds
+
+models:
+  elementary:
+    +schema: elementary

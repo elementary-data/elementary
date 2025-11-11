@@ -11,7 +11,7 @@
             select
                 *,
                 {{ elementary_cli.normalized_source_freshness_status()}},
-                rank() over (partition by unique_id order by generated_at desc) as invocations_rank_index
+                row_number() over (partition by unique_id order by generated_at desc) as invocations_rank_index
             from {{ ref('elementary', 'dbt_source_freshness_results') }}
             {% if days_back %}
                 where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
