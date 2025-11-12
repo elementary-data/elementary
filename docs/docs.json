@@ -169,6 +169,7 @@
                 ]
               },
               "cloud/guides/sync-scheduling",
+              "cloud/guides/dwh-artifacts-sync",
               "cloud/guides/collect-job-data",
               "cloud/guides/collect-source-freshness",
               "cloud/guides/troubleshoot"
@@ -483,9 +484,21 @@
               {
                 "group": "Releases",
                 "pages": [
+                  "oss/release-notes/releases/0.20.0",
+                  "oss/release-notes/releases/0.19.5",
+                  "oss/release-notes/releases/0.19.4",
+                  "oss/release-notes/releases/0.19.3",
+                  "oss/release-notes/releases/0.19.2",
+                  "oss/release-notes/releases/0.19.1",
+                  "oss/release-notes/releases/0.19.0",
+                  "oss/release-notes/releases/0.18.3",
+                  "oss/release-notes/releases/0.18.2",
+                  "oss/release-notes/releases/0.18.1",
                   "oss/release-notes/releases/0.18.0",
                   "oss/release-notes/releases/0.17.0",
                   "oss/release-notes/releases/0.16.2",
+                  "oss/release-notes/releases/0.16.1",
+                  "oss/release-notes/releases/0.16.0",
                   "oss/release-notes/releases/0.11.2",
                   "oss/release-notes/releases/0.10.0",
                   "oss/release-notes/releases/0.9.1",
