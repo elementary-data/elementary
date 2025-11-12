@@ -61,6 +61,7 @@ AlertType = Union[
 
 class MessageBuilderConfig(BaseModel):
     alert_groups_subscribers: bool = False
+    maximum_columns_in_alert_samples: int = 4
 
 
 class AlertMessageBuilder:
@@ -397,7 +398,8 @@ class AlertMessageBuilder:
             elif result_sample:
                 if (
                     isinstance(result_sample, list)
-                    and len(result_sample[0].keys()) <= 4
+                    and len(result_sample[0].keys())
+                    <= self.config.maximum_columns_in_alert_samples
                 ):
                     result_blocks.append(
                         TableBlock.from_dicts(result_sample),

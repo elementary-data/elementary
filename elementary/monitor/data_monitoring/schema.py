@@ -21,6 +21,7 @@ class Status(str, Enum):
     SKIPPED = "skipped"
     ERROR = "error"
     RUNTIME_ERROR = "runtime error"
+    PARTIAL_SUCCESS = "partial success"
 
 
 class ResourceType(str, Enum):

@@ -1,25 +1,21 @@
 import os
+from enum import Enum
 from typing import Any, Dict, Optional, Type
 
 from dbt.version import __version__ as dbt_version_string
 from packaging import version
 
 from elementary.clients.dbt.command_line_dbt_runner import CommandLineDbtRunner
+from elementary.clients.dbt.dbt_fusion_runner import DbtFusionRunner
+from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 DBT_VERSION = version.Version(dbt_version_string)
 
-RUNNER_CLASS: Type[CommandLineDbtRunner]
-if (
-    DBT_VERSION >= version.Version("1.5.0")
-    and os.getenv("DBT_RUNNER_METHOD") != "subprocess"
-):
-    from elementary.clients.dbt.api_dbt_runner import APIDbtRunner
 
-    RUNNER_CLASS = APIDbtRunner
-else:
-    from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
-
-    RUNNER_CLASS = SubprocessDbtRunner
+class RunnerMethod(Enum):
+    SUBPROCESS = "subprocess"
+    API = "api"
+    FUSION = "fusion"
 
 
 def create_dbt_runner(
@@ -33,8 +29,11 @@ def create_dbt_runner(
     allow_macros_without_package_prefix: bool = False,
     run_deps_if_needed: bool = True,
     force_dbt_deps: bool = False,
+    runner_method: Optional[RunnerMethod] = None,
 ) -> CommandLineDbtRunner:
-    return RUNNER_CLASS(
+    runner_method = runner_method or get_dbt_runner_method()
+    runner_class = get_dbt_runner_class(runner_method)
+    return runner_class(
         project_dir=project_dir,
         profiles_dir=profiles_dir,
         target=target,
@@ -46,3 +45,27 @@ def create_dbt_runner(
         run_deps_if_needed=run_deps_if_needed,
         force_dbt_deps=force_dbt_deps,
     )
+
+
+def get_dbt_runner_method() -> RunnerMethod:
+    runner_method = os.getenv("DBT_RUNNER_METHOD")
+    if runner_method:
+        return RunnerMethod(runner_method)
+
+    if DBT_VERSION >= version.Version("1.5.0"):
+        return RunnerMethod.API
+    return RunnerMethod.SUBPROCESS
+
+
+def get_dbt_runner_class(runner_method: RunnerMethod) -> Type[CommandLineDbtRunner]:
+    if runner_method == RunnerMethod.API:
+        # Import it internally since it will fail if the dbt version is below 1.5.0
+        from elementary.clients.dbt.api_dbt_runner import APIDbtRunner
+
+        return APIDbtRunner
+    elif runner_method == RunnerMethod.SUBPROCESS:
+        return SubprocessDbtRunner
+    elif runner_method == RunnerMethod.FUSION:
+        return DbtFusionRunner
+    else:
+        raise ValueError(f"Invalid runner method: {runner_method}")
