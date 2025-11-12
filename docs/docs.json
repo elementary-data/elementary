@@ -304,6 +304,21 @@
             ]
           },
           {
+            "group": "dbt Package Release Notes",
+            "pages": [
+              "data-tests/dbt/release-notes/releases/0.20.1",
+              "data-tests/dbt/release-notes/releases/0.20.0",
+              "data-tests/dbt/release-notes/releases/0.19.4",
+              "data-tests/dbt/release-notes/releases/0.19.3",
+              "data-tests/dbt/release-notes/releases/0.19.2",
+              "data-tests/dbt/release-notes/releases/0.19.1",
+              "data-tests/dbt/release-notes/releases/0.19.0",
+              "data-tests/dbt/release-notes/releases/0.18.3",
+              "data-tests/dbt/release-notes/releases/0.18.2",
+              "data-tests/dbt/release-notes/releases/0.18.1"
+            ]
+          },
+          {
             "group": "Elementary Data tests",
             "pages": [
               "data-tests/introduction",
