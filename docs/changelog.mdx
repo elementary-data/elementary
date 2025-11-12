@@ -145,6 +145,198 @@ Learn more about connecting Elementary to [Jira](https://docs.elementary-data.co
 ![](https://res.cloudinary.com/diuctyblm/image/upload/v1740079094/Changelog/image_51_r2pbsr.png)
 
 
+## Release v0.20.0
+
+<Tags 
+  date="October 2025"
+/>
+
+**What's Changed:**
+
+* Fix test dwh write dbt profiles
+* Removed usage of deprecated `-m` flag in dbt
+* Disable group registration when tracking is disabled
+* Update dbt package revision
+* Handle empty result in ClickHouse
+* Handle invalid characters when uploading CI artifact
+* Use row number instead of rank
+* Add attribution block to alert messages in data monitoring
+* dbt Fusion support
+* CLI stop using deprecated tests
+* Update the CLI to use the new package version
+* Attempt to remove dbt-databricks restriction
+* Update report version
+* Feature: make the number of columns that are formatted as a table in Teams alerts a CLI flag so that users have more control over the formatting in Teams
+
+**Full Changelog**: [v0.19.5...v0.20.0](https://github.com/elementary-data/elementary/compare/v0.19.5...v0.20.0)
+
+## Release v0.19.5
+
+<Tags 
+  date="August 2025"
+/>
+
+**What's Changed:**
+
+* Slack join channel recursion fix
+* Changed dbt package version to a commit with Dremio types mapping
+* Enhance SlackWebMessagingIntegration to include a timeout feature
+* Use sets for alert filters
+* Dimension anomalies visualization
+
+**Full Changelog**: [v0.19.4...v0.19.5](https://github.com/elementary-data/elementary/compare/v0.19.4...v0.19.5)
+
+## Release v0.19.4
+
+<Tags 
+  date="August 2025"
+/>
+
+**What's Changed:**
+
+* Use full source name in freshness alerts
+* Upgrade the elementary dbt package to v0.19.2
+
+**Full Changelog**: [v0.19.3...v0.19.4](https://github.com/elementary-data/elementary/compare/v0.19.3...v0.19.4)
+
+## Release v0.19.3
+
+<Tags 
+  date="July 2025"
+/>
+
+**What's Changed:**
+
+* Fixed package version
+
+**Full Changelog**: [v0.19.2...v0.19.3](https://github.com/elementary-data/elementary/compare/v0.19.2...v0.19.3)
+
+## Release v0.19.2
+
+<Tags 
+  date="July 2025"
+/>
+
+**What's Changed:**
+
+* Fixed backwards compatibility issue with pydantic
+
+**Full Changelog**: [v0.19.1...v0.19.2](https://github.com/elementary-data/elementary/compare/v0.19.1...v0.19.2)
+
+## Release v0.19.1
+
+<Tags 
+  date="July 2025"
+/>
+
+**What's Changed:**
+
+* Added excludes option to edr monitor
+* Text and markdown formats
+
+**Full Changelog**: [v0.19.0...v0.19.1](https://github.com/elementary-data/elementary/compare/v0.19.0...v0.19.1)
+
+## Release v0.19.0
+
+<Tags 
+  date="June 2025"
+/>
+
+**What's Changed:**
+
+* Enable support for multiple links and icons in alert messages
+* Using elementary 0.19.0
+
+**Known Issues:**
+
+* dbt-databricks must be <1.10.2 (See issue 1931 for more details)
+
+**Full Changelog**: [v0.18.3...v0.19.0](https://github.com/elementary-data/elementary/compare/v0.18.3...v0.19.0)
+
+## Release v0.18.3
+
+<Tags 
+  date="May 2025"
+/>
+
+**What's Changed:**
+
+* Fixed missing metrics in CLI
+
+**Full Changelog**: [v0.18.2...v0.18.3](https://github.com/elementary-data/elementary/compare/v0.18.2...v0.18.3)
+
+## Release v0.18.2
+
+<Tags 
+  date="May 2025"
+/>
+
+**What's Changed:**
+
+* Subscribers in the grouped alerts
+* ClickHouse CLI integration
+* Add FileSystemMessagingIntegration and related tests
+* Adds --s3-acl option to the CLI to be able to set S3 report permissions
+* Fixed setup of internal dbt project used by Elementary
+* Add function for `disable_elementary_logo_print`
+* Update report to 1.0.26
+
+**Full Changelog**: [v0.18.1...v0.18.2](https://github.com/elementary-data/elementary/compare/v0.18.1...v0.18.2)
+
+## Release v0.18.1
+
+<Tags 
+  date="April 2025"
+/>
+
+**What's Changed:**
+
+* Athena now works in the CLI
+* Allow contributor PRs to run tests
+* Add NOT_CONTAINS filter type
+
+**Full Changelog**: [v0.18.0...v0.18.1](https://github.com/elementary-data/elementary/compare/v0.18.0...v0.18.1)
+
+## Release v0.18.0
+
+<Tags 
+  date="March 2025"
+/>
+
+**What's Changed:**
+
+* Invocation Filter Fix: Invocation filters now apply to both reports and their summaries, ensuring consistent filtering
+* Python Version Support: Official support for Python 3.8 has been discontinued to align with dbt's supported versions
+* Test Description Bug: Fixed an issue where test descriptions were missing in alerts when using dbt version 1.9
+
+Note: We've bumped the minor version to align with the recent minor version update in the dbt package.
+
+**Full Changelog**: [v0.17.0...v0.18.0](https://github.com/elementary-data/elementary/compare/v0.17.0...v0.18.0)
+
+## Release v0.17.0
+
+<Tags 
+  date="March 2025"
+/>
+
+_Release notes coming soon._
+
+## Release v0.16.1
+
+<Tags 
+  date="August 2024"
+/>
+
+_Release notes coming soon._
+
+## Release v0.16.0
+
+<Tags 
+  date="August 2024"
+/>
+
+_Release notes coming soon._
+
 ## Compact navbar
 
 <Tags 
