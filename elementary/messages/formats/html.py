@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from html import escape
-from typing import Iterable, Sequence
+from typing import Sequence
 
 from elementary.messages.blocks import (
     ActionBlock,
@@ -56,15 +56,13 @@ class HTMLFormatter:
         container_style = self._build_container_style(message.color)
         return f'<div style="{container_style}">{body_html}</div>'
 
-    def format_message_blocks(
-        self, blocks: Sequence[MessageBlock | ExpandableBlock]
-    ) -> str:
-        formatted_blocks = [
-            self.format_message_block(block)
-            for block in blocks
-            if (formatted := self.format_message_block(block))
-        ]
-        return "".join(formatted_blocks)
+    def format_message_blocks(self, blocks: Sequence[MessageBlock]) -> str:
+        rendered: list[str] = []
+        for block in blocks:
+            formatted = self.format_message_block(block)
+            if formatted:
+                rendered.append(formatted)
+        return "".join(rendered)
 
     def format_message_block(self, block: MessageBlock | ExpandableBlock) -> str:
         if isinstance(block, HeaderBlock):
@@ -129,7 +127,7 @@ class HTMLFormatter:
                 f"{escape(block.code)}</code>"
             )
         elif isinstance(block, MentionBlock):
-            return f'<span style="color:#0ea5e9;">@{escape(block.user)}</span>'
+            return f'<span style="color:#0ea5e9;">{escape(block.user)}</span>'
         elif isinstance(block, LineBlock):
             return self._format_line_block(block)
         elif isinstance(block, WhitespaceBlock):
@@ -143,13 +141,13 @@ class HTMLFormatter:
         return separator.join(inlines)
 
     def _format_lines_block(self, block: LinesBlock) -> str:
-        lines = [
+        lines_html = [
             f'<div style="margin:0;">{self._format_line_block(line_block)}</div>'
             for line_block in block.lines
         ]
-        if not lines:
+        if not lines_html:
             return ""
-        return f'<div style="{self._SECTION_MARGIN}{";".join([])}">' + "".join(lines) + "</div>"
+        return self._wrap_section("".join(lines_html))
 
     def _format_fact_list_block(self, block: FactListBlock) -> str:
         if not block.facts:
