@@ -43,4 +43,4 @@ Then add the service principal there.
 7. Create a personal access token for your service principal. For more details, please click [here](https://docs.databricks.com/aws/en/dev-tools/auth/pat#databricks-personal-access-tokens-for-service-principals)
 
 8. Finally, in order to enable Elementary's automated monitors feature, please ensure [predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization#enable-or-disable-predictive-optimization-for-your-account) is enabled in your account.
-This is required for table statistics to be updated (specifically Elementary needs row count)
+This is required for table statistics to be updated (Elementary relies on this to obtain up-to-date row counts)
