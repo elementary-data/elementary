@@ -8,7 +8,7 @@ Elementary cloud requires the following permissions:
 This permission does not give access to your data.
 
 - **Information schema metadata access** - Elementary needs access to the `system.information_schema.tables` and `system.information_schema.columns` system tables, to get metadata
-about existing tables and columns in your data warehouse.
+about existing tables and columns in your data warehouse. This is used to power features such as column-level lineage and automated volume & freshness monitors.
 
 - **Read access needed for some metadata operations (optional)** - In order to enable Elementary's automated volume & freshness monitors, Elementary needs access to query history, as well 
 as Databricks APIs to obtain table statistics. 
