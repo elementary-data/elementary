@@ -4,11 +4,9 @@ from html import escape
 from typing import Sequence
 
 from elementary.messages.blocks import (
-    ActionBlock,
     ActionsBlock,
     CodeBlock,
     DividerBlock,
-    DropdownActionBlock,
     ExpandableBlock,
     FactBlock,
     FactListBlock,
@@ -24,7 +22,6 @@ from elementary.messages.blocks import (
     TableBlock,
     TextBlock,
     TextStyle,
-    UserSelectActionBlock,
     WhitespaceBlock,
 )
 from elementary.messages.formats.unicode import ICON_TO_UNICODE
@@ -72,10 +69,10 @@ class HTMLFormatter:
         elif isinstance(block, CodeBlock):
             code_html = escape(block.text)
             return self._wrap_section(
-                "<pre style=\"margin:0;padding:12px;"
+                '<pre style="margin:0;padding:12px;'
                 "background-color:#f8fafc;border-radius:4px;"
                 "font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;"
-                "font-size:13px;line-height:1.5;white-space:pre-wrap;\">"
+                'font-size:13px;line-height:1.5;white-space:pre-wrap;">'
                 f"{code_html}</pre>"
             )
         elif isinstance(block, LinesBlock):
@@ -87,9 +84,12 @@ class HTMLFormatter:
         elif isinstance(block, ExpandableBlock):
             return self._format_expandable_block(block)
         elif isinstance(block, DividerBlock):
-            return '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />'
+            return (
+                '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />'
+            )
         elif isinstance(block, ActionsBlock):
-            return self._format_actions_block(block)
+            # Not supported in HTML emails (no interactivity without JavaScript)
+            return ""
         else:
             raise ValueError(f"Unsupported message block type: {type(block)}")
 
@@ -123,7 +123,7 @@ class HTMLFormatter:
         elif isinstance(block, InlineCodeBlock):
             return (
                 "<code style=\"font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;"
-                "background-color:#eef2ff;border-radius:3px;padding:1px 4px;font-size:12px;\">"
+                'background-color:#eef2ff;border-radius:3px;padding:1px 4px;font-size:12px;">'
                 f"{escape(block.code)}</code>"
             )
         elif isinstance(block, MentionBlock):
@@ -141,20 +141,101 @@ class HTMLFormatter:
         return separator.join(inlines)
 
     def _format_lines_block(self, block: LinesBlock) -> str:
+        if not block.lines:
+            return ""
+
+        # Check if this is a bullet list (all lines start with icon/bullet + space)
+        is_bullet_list = self._is_bullet_list(block)
+
+        if is_bullet_list:
+            return self._format_as_bullet_list(block)
+
         lines_html = [
             f'<div style="margin:0;">{self._format_line_block(line_block)}</div>'
             for line_block in block.lines
         ]
-        if not lines_html:
-            return ""
         return self._wrap_section("".join(lines_html))
+
+    def _is_bullet_list(self, block: LinesBlock) -> bool:
+        """Check if a LinesBlock is a bullet list pattern."""
+        if not block.lines:
+            return False
+
+        for line in block.lines:
+            if len(line.inlines) < 3:
+                return False
+            # Check pattern: [optional whitespaces...] + (icon or bullet text) + space + content
+            # Skip leading whitespaces
+            idx = 0
+            while idx < len(line.inlines) and isinstance(
+                line.inlines[idx], WhitespaceBlock
+            ):
+                idx += 1
+
+            if idx >= len(line.inlines):
+                return False
+
+            # Next should be IconBlock or short TextBlock (bullet marker)
+            bullet = line.inlines[idx]
+            if isinstance(bullet, IconBlock):
+                continue
+            elif isinstance(bullet, TextBlock) and len(bullet.text) <= 2:
+                continue
+            else:
+                return False
+
+        return True
+
+    def _format_as_bullet_list(self, block: LinesBlock) -> str:
+        """Format a LinesBlock as HTML <ul> list."""
+        list_items = []
+        for line in block.lines:
+            # Extract bullet marker and content
+            idx = 0
+            # Skip leading whitespaces
+            while idx < len(line.inlines) and isinstance(
+                line.inlines[idx], WhitespaceBlock
+            ):
+                idx += 1
+
+            # Get the bullet icon/text
+            bullet_inline = line.inlines[idx]
+            idx += 1
+
+            # Skip the space after bullet
+            if (
+                idx < len(line.inlines)
+                and isinstance(line.inlines[idx], TextBlock)
+                and line.inlines[idx].text == " "
+            ):
+                idx += 1
+
+            # Rest is the content
+            content_inlines = line.inlines[idx:]
+            content_html = "".join(
+                [self._format_inline_block(inline) for inline in content_inlines]
+            )
+
+            # Format the bullet marker
+            if isinstance(bullet_inline, IconBlock):
+                bullet_html = self._format_icon(bullet_inline.icon)
+                list_items.append(
+                    f'<li style="margin:0 0 4px;list-style:none;">'
+                    f'<span style="margin-right:6px;">{bullet_html}</span>{content_html}</li>'
+                )
+            else:
+                # Text bullet - use native list styling
+                list_items.append(f'<li style="margin:0 0 4px;">{content_html}</li>')
+
+        ul_style = "margin:0;padding-left:24px;list-style-position:outside;"
+        return self._wrap_section(f'<ul style="{ul_style}">{"".join(list_items)}</ul>')
 
     def _format_fact_list_block(self, block: FactListBlock) -> str:
         if not block.facts:
             return ""
         rows = [self._format_fact_row(fact) for fact in block.facts]
         table_html = (
-            '<table style="width:100%;border-collapse:separate;border-spacing:0 6px;">'
+            '<table style="width:100%;border-collapse:collapse;">'
             + "".join(rows)
             + "</table>"
         )
@@ -164,15 +245,11 @@ class HTMLFormatter:
         title_html = self._format_line_block(fact.title)
         value_html = self._format_line_block(fact.value)
         title_style = (
-            "padding:4px 12px;font-weight:600;color:#111827;"
-            "background-color:#f3f4f6;border-radius:4px 0 0 4px;"
-            "white-space:nowrap;"
+            "padding:4px 12px;font-weight:600;font-size:14px;color:#111827;"
+            "max-width:200px;white-space:nowrap;"
         )
         value_weight = "700" if fact.primary else "400"
-        value_style = (
-            "padding:4px 12px;border:1px solid #f3f4f6;border-left:none;"
-            "border-radius:0 4px 4px 0;font-weight:{weight};"
-        ).format(weight=value_weight)
+        value_style = f"padding:4px 12px;font-weight:{value_weight};font-size:14px;"
         return (
             "<tr>"
             f'<td style="{title_style}">{title_html}</td>'
@@ -185,14 +262,14 @@ class HTMLFormatter:
         if block.headers:
             header_cells = "".join(
                 f'<th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;'
-                f'font-weight:600;background-color:#f8fafc;">{escape(header)}</th>'
+                f'font-weight:600;font-size:14px;background-color:#f8fafc;">{escape(header)}</th>'
                 for header in block.headers
             )
             header_html = f"<thead><tr>{header_cells}</tr></thead>"
         body_rows = [
             "<tr>"
             + "".join(
-                f'<td style="padding:8px;border-bottom:1px solid #f3f4f6;vertical-align:top;">'
+                f'<td style="padding:8px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;">'
                 f"{escape(self._coerce_table_cell(cell))}</td>"
                 for cell in row
             )
@@ -209,45 +286,32 @@ class HTMLFormatter:
     def _format_expandable_block(self, block: ExpandableBlock) -> str:
         body_html = self.format_message_blocks(block.body)
         title_html = escape(block.title)
-        container_style = (
-            "border:1px solid #e5e7eb;border-radius:6px;margin:16px 0;overflow:hidden;"
+        container_style = "border:1px solid #e5e7eb;border-radius:6px;margin:16px 0;"
+        # Hide native disclosure triangle with list-style and webkit-details-marker
+        summary_style = (
+            "padding:12px 16px;font-weight:600;background-color:#f8fafc;"
+            "cursor:pointer;font-size:14px;user-select:none;-webkit-user-select:none;"
+            "list-style:none;"
         )
-        title_style = (
-            "margin:0;padding:12px 16px;font-weight:600;background-color:#f8fafc;"
+        # Show appropriate arrow based on expanded state
+        arrow = "▼" if block.expanded else "▶"
+        arrow_style = "margin-right:8px;color:#6b7280;font-size:10px;"
+        body_style = "padding:12px 16px;border-top:1px solid #e5e7eb;"
+        open_attr = " open" if block.expanded else ""
+        # Need inline style to hide webkit disclosure marker
+        summary_with_marker_hidden = (
+            f'<summary style="{summary_style}">'
+            f'<span style="{arrow_style}">{arrow}</span>'
+            f"{title_html}"
+            "</summary>"
+            "<style>summary::-webkit-details-marker{display:none;}</style>"
         )
-        body_style = "padding:12px 16px;"
         return (
-            f'<div style="{container_style}">'
-            f'<div style="{title_style}">{title_html}</div>'
+            f'<details style="{container_style}"{open_attr}>'
+            f"{summary_with_marker_hidden}"
             f'<div style="{body_style}">{body_html}</div>'
-            "</div>"
+            "</details>"
         )
-
-    def _format_actions_block(self, block: ActionsBlock) -> str:
-        if not block.actions:
-            return ""
-        rendered_actions = [self._format_action_item(action) for action in block.actions]
-        actions_html = "".join(rendered_actions)
-        return self._wrap_section(
-            f'<div style="display:flex;flex-wrap:wrap;gap:8px;">{actions_html}</div>'
-        )
-
-    def _format_action_item(self, block: ActionBlock) -> str:
-        if isinstance(block, DropdownActionBlock):
-            options = ", ".join(escape(option.text) for option in block.options)
-            placeholder = escape(block.placeholder or "Select an option")
-            return (
-                '<div style="padding:8px 12px;border:1px solid #d1d5db;border-radius:4px;'
-                f'background-color:#f9fafb;">{placeholder}: {options}</div>'
-            )
-        elif isinstance(block, UserSelectActionBlock):
-            placeholder = escape(block.placeholder or "Assign user")
-            return (
-                '<div style="padding:8px 12px;border:1px solid #d1d5db;border-radius:4px;'
-                f'background-color:#f9fafb;">{placeholder}</div>'
-            )
-        else:
-            raise ValueError(f"Unsupported action block type: {type(block)}")
 
     def _coerce_table_cell(self, cell: object) -> str:
         if cell is None:
