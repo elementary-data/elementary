@@ -1,37 +1,46 @@
 ### Create service principal
 
-1. In your Databrick console, go to the admin settings by clicking your username in the to right corner -> Admin settings (add photo)
+1. Open your Databricks console, and then open your relevant workspace.
+
+2. Click on your Profile icon on the right and choose Settings.
 
 <img
-  src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/databricks/admin_settings"
-  alt="Admin settings"
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763312536/databricks_01_choose_settings.png"
+  alt="Choose settings"
 />
 
-2. Go to the Service principals tab, then click Add service principal (add photo)
+3. On the sidebar, click on *Identity and access*, and then under the *Service Principals* row click on *Manage*.
 
 <img
-  src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/databricks/service_principals_settings"
-  alt="Service principal settings"
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763313131/databricks_02_manage_service_principal_b5gc72.png"
+  alt="Choose settings"
 />
 
-3. Give the service principal a good name (e.g elementary) and click Add (add photo)
+4. Click on the *Add service principal* button, choose "Add new" and give a name to the service principal. This will be used by Elementary Cloud 
+to access your Databricks instance.
 
 <img
-  src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/databricks/add_service_principal"
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763313361/databricks_04_add_service_principal_e54raz.png"
   alt="Add service principal"
 />
 
-4. Then, from the service principal configuration view, copy the Application Id (add photo)
+5. Click on your newly created service principal, add the "Databricks SQL access" entitlement, and click Update. Also, please copy the 
+"Application ID" field as it will be used later in the permissions section.
 
 <img
-  src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/databricks/service_principal_id"
-  alt="Service principal ID"
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763313542/databricks_05_add_databricks_sql_access_zzdcf7.png"
+  alt="Add databricks SQL access"
 />
 
-4. Finally, run the following query:
+6. Next, you may also need to allow Token Usage for this service principal (if it is not allowed for all users). To do so, under the settings menu choose Advanced -> Personal Access Tokens -> Permission Settings.
+Then add the service principal there.
 
-```
-GRANT SELECT ON SCHEMA <elementary_schema> TO `<service_principal_id>`;
-```
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763316575/databricks_06_token_usage_eufjwv.png"
+  alt="Add databricks SQL access"
+/>
 
-Make sure to replace the `<elementary_schema>` and `<service_principal_id>` placeholders with the correct values
+7. Create a personal access token for your service principal. For more details, please click [here](https://docs.databricks.com/aws/en/dev-tools/auth/pat#databricks-personal-access-tokens-for-service-principals)
+
+8. Finally, in order to enable Elementary's automated monitors feature, please ensure [predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization#enable-or-disable-predictive-optimization-for-your-account) is enabled in your account.
+This is required for table statistics to be updated (specifically Elementary needs row count)

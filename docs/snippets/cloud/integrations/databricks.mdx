@@ -1,5 +1,5 @@
 import CreateServicePrincipal from '/snippets/dwh/databricks/create_service_principal.mdx';
-import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
+import PermissionsAndSecurity from '/snippets/dwh/databricks/databricks_permissions_and_security.mdx';
 import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
 
 You will connect Elementary Cloud to Databricks for syncing the Elementary schema (created by the [Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)).
@@ -8,14 +8,17 @@ You will connect Elementary Cloud to Databricks for syncing the Elementary schem
 
 <PermissionsAndSecurity />
 
-### Fill the connection form
+### Add an environment in Elementary (requires an admin user)
 
-Provide the following fields:
+In the Elementary platform, go to Environments in the left menu, and click on the "Create Environment" button.
+Choose a name for your environment, and then choose Databricks as your data warehouse type.
 
-- **Host**: The hostname of your Databricks account to connect to.
+Provide the following fields in the form:
+
+- **Server Host**: The hostname of your Databricks account to connect to.
 - **Http path**: The path to the Databricks cluster or SQL warehouse.
-- **Token**: The token you generated for Elementary. For more information, see [Generate a token](https://docs.databricks.com/aws/en/dev-tools/auth/pat#databricks-personal-access-tokens-for-service-principals) in the Databricks docs.
+- **Access token**: The token you generated for the Elementary service principal (see step 7 under "Create service principal" above)
 - **Catalog (optional)**: The name of the Databricks Catalog.
-- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+- **Elementary schema**: The name of your Elementary schema. Usually `[your dbt target schema]_elementary`.
 
 <IpAllowlist />
