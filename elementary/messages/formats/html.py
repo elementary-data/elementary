@@ -64,7 +64,7 @@ class HTMLFormatter:
     def format_message_block(self, block: MessageBlock | ExpandableBlock) -> str:
         if isinstance(block, HeaderBlock):
             return self._wrap_section(
-                f'<h1 style="margin:0;font-size:18px;line-height:1.4;">{escape(block.text)}</h1>'
+                f'<h1 style="margin:0;font-size:18px;line-height:1.4;">{escape(block.text)}</h1>'  # noqa: E231,E702
             )
         elif isinstance(block, CodeBlock):
             code_html = escape(block.text)
@@ -97,7 +97,7 @@ class HTMLFormatter:
         return f'<div style="{self._SECTION_MARGIN}">{html}</div>'
 
     def _format_icon(self, icon: Icon) -> str:
-        return f'<span style="margin-right:4px;">{escape(ICON_TO_UNICODE[icon])}</span>'
+        return f'<span style="margin-right:4px;">{escape(ICON_TO_UNICODE[icon])}</span>'  # noqa: E231,E702
 
     def _format_text_block(self, block: TextBlock) -> str:
         text = escape(block.text)
@@ -127,7 +127,7 @@ class HTMLFormatter:
                 f"{escape(block.code)}</code>"
             )
         elif isinstance(block, MentionBlock):
-            return f'<span style="color:#0ea5e9;">{escape(block.user)}</span>'
+            return f'<span style="color:#0ea5e9;">{escape(block.user)}</span>'  # noqa: E231,E702
         elif isinstance(block, LineBlock):
             return self._format_line_block(block)
         elif isinstance(block, WhitespaceBlock):
@@ -151,7 +151,7 @@ class HTMLFormatter:
             return self._format_as_bullet_list(block)
 
         lines_html = [
-            f'<div style="margin:0;">{self._format_line_block(line_block)}</div>'
+            f'<div style="margin:0;">{self._format_line_block(line_block)}</div>'  # noqa: E231,E702
             for line_block in block.lines
         ]
         return self._wrap_section("".join(lines_html))
@@ -220,14 +220,18 @@ class HTMLFormatter:
             if isinstance(bullet_inline, IconBlock):
                 bullet_html = self._format_icon(bullet_inline.icon)
                 list_items.append(
-                    f'<li style="margin:0 0 4px;list-style:none;">'
-                    f'<span style="margin-right:6px;">{bullet_html}</span>{content_html}</li>'
+                    f'<li style="margin:0 0 4px;list-style:none;">'  # noqa: E231,E702
+                    f'<span style="margin-right:6px;">{bullet_html}</span>{content_html}</li>'  # noqa: E231,E702
                 )
             else:
                 # Text bullet - use native list styling
-                list_items.append(f'<li style="margin:0 0 4px;">{content_html}</li>')
+                list_items.append(
+                    f'<li style="margin:0 0 4px;">{content_html}</li>'  # noqa: E231,E702
+                )
 
-        ul_style = "margin:0;padding-left:24px;list-style-position:outside;"
+        ul_style = (
+            "margin:0;padding-left:24px;list-style-position:outside;"  # noqa: E231,E702
+        )
         return self._wrap_section(f'<ul style="{ul_style}">{"".join(list_items)}</ul>')
 
     def _format_fact_list_block(self, block: FactListBlock) -> str:
@@ -244,12 +248,12 @@ class HTMLFormatter:
     def _format_fact_row(self, fact: FactBlock) -> str:
         title_html = self._format_line_block(fact.title)
         value_html = self._format_line_block(fact.value)
-        title_style = (
+        title_style = (  # noqa: E231,E702
             "padding:4px 12px;font-weight:600;font-size:14px;color:#111827;"
             "max-width:200px;white-space:nowrap;"
         )
         value_weight = "700" if fact.primary else "400"
-        value_style = f"padding:4px 12px;font-weight:{value_weight};font-size:14px;"
+        value_style = f"padding:4px 12px;font-weight:{value_weight};font-size:14px;"  # noqa: E231,E702
         return (
             "<tr>"
             f'<td style="{title_style}">{title_html}</td>'
@@ -261,15 +265,15 @@ class HTMLFormatter:
         header_html = ""
         if block.headers:
             header_cells = "".join(
-                f'<th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;'
-                f'font-weight:600;font-size:14px;background-color:#f8fafc;">{escape(header)}</th>'
+                f'<th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;'  # noqa: E231,E702
+                f'font-weight:600;font-size:14px;background-color:#f8fafc;">{escape(header)}</th>'  # noqa: E231,E702
                 for header in block.headers
             )
             header_html = f"<thead><tr>{header_cells}</tr></thead>"
         body_rows = [
             "<tr>"
             + "".join(
-                f'<td style="padding:8px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;">'
+                f'<td style="padding:8px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;">'  # noqa: E231,E702
                 f"{escape(self._coerce_table_cell(cell))}</td>"
                 for cell in row
             )
@@ -277,7 +281,7 @@ class HTMLFormatter:
             for row in block.rows
         ]
         body_html = "<tbody>" + "".join(body_rows) + "</tbody>"
-        table_style = (
+        table_style = (  # noqa: E231,E702
             "width:100%;border-collapse:collapse;margin:0 0 12px;"
             "border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;"
         )
@@ -295,8 +299,12 @@ class HTMLFormatter:
         )
         # Show appropriate arrow based on expanded state
         arrow = "▼" if block.expanded else "▶"
-        arrow_style = "margin-right:8px;color:#6b7280;font-size:10px;"
-        body_style = "padding:12px 16px;border-top:1px solid #e5e7eb;"
+        arrow_style = (
+            "margin-right:8px;color:#6b7280;font-size:10px;"  # noqa: E231,E702
+        )
+        body_style = (
+            "padding:12px 16px;border-top:1px solid #e5e7eb;"  # noqa: E231,E702
+        )
         open_attr = " open" if block.expanded else ""
         # Need inline style to hide webkit disclosure marker
         summary_with_marker_hidden = (
@@ -321,8 +329,8 @@ class HTMLFormatter:
     def _build_container_style(self, color: Color | None) -> str:
         styles: list[str] = list(self._CONTAINER_STYLES)
         if color and color in COLOR_MAP:
-            styles.append(f"border-left:4px solid {COLOR_MAP[color]}")
-            styles.append("padding-left:12px")
+            styles.append(f"border-left:4px solid {COLOR_MAP[color]}")  # noqa: E231
+            styles.append("padding-left:12px")  # noqa: E231
         return ";".join(styles)
 
 
