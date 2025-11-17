@@ -43,7 +43,8 @@ class HTMLFormatter:
         "background-color:#ffffff",
         "border:1px solid #e5e7eb",
         "border-radius:6px",
-        "padding:16px",
+        "padding:24px 32px 32px 32px",
+        "max-width:800px",
     ]
 
     _SECTION_MARGIN = "margin:0 0 12px"
@@ -72,7 +73,8 @@ class HTMLFormatter:
                 '<pre style="margin:0;padding:12px;'
                 "background-color:#f8fafc;border-radius:4px;"
                 "font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;"
-                'font-size:13px;line-height:1.5;white-space:pre-wrap;">'
+                'font-size:13px;line-height:1.5;white-space:pre-wrap;'
+                'max-height:400px;overflow-y:auto;">'
                 f"{code_html}</pre>"
             )
         elif isinstance(block, LinesBlock):
@@ -243,14 +245,15 @@ class HTMLFormatter:
             + "".join(rows)
             + "</table>"
         )
-        return self._wrap_section(table_html)
+        # Use custom margin with +8px on top and bottom
+        return f'<div style="margin:8px 0 20px">{table_html}</div>'
 
     def _format_fact_row(self, fact: FactBlock) -> str:
         title_html = self._format_line_block(fact.title)
         value_html = self._format_line_block(fact.value)
         title_style = (  # noqa: E231,E702
             "padding:4px 12px;font-weight:600;font-size:14px;color:#111827;"
-            "max-width:200px;white-space:nowrap;"
+            "width:160px;white-space:nowrap;"
         )
         value_weight = "700" if fact.primary else "400"
         value_style = f"padding:4px 12px;font-weight:{value_weight};font-size:14px;"  # noqa: E231,E702
@@ -297,22 +300,29 @@ class HTMLFormatter:
             "cursor:pointer;font-size:14px;user-select:none;-webkit-user-select:none;"
             "list-style:none;"
         )
-        # Show appropriate arrow based on expanded state
-        arrow = "▼" if block.expanded else "▶"
+        # Always use right arrow - CSS will rotate it when opened
+        arrow = "▶"
         arrow_style = (
-            "margin-right:8px;color:#6b7280;font-size:10px;"  # noqa: E231,E702
+            "display:inline-block;margin-right:8px;color:#6b7280;font-size:10px;"
+            "transition:transform 0.2s ease;"  # noqa: E231,E702
         )
         body_style = (
             "padding:12px 16px;border-top:1px solid #e5e7eb;"  # noqa: E231,E702
         )
         open_attr = " open" if block.expanded else ""
-        # Need inline style to hide webkit disclosure marker
+        # Add CSS to rotate arrow when details is open and hide webkit disclosure marker
+        css_style = (
+            "<style>"
+            "summary::-webkit-details-marker{display:none;}"
+            "details[open] > summary > span{transform:rotate(90deg);}"
+            "</style>"
+        )
         summary_with_marker_hidden = (
             f'<summary style="{summary_style}">'
             f'<span style="{arrow_style}">{arrow}</span>'
             f"{title_html}"
             "</summary>"
-            "<style>summary::-webkit-details-marker{display:none;}</style>"
+            f"{css_style}"
         )
         return (
             f'<details style="{container_style}"{open_attr}>'
@@ -329,8 +339,13 @@ class HTMLFormatter:
     def _build_container_style(self, color: Color | None) -> str:
         styles: list[str] = list(self._CONTAINER_STYLES)
         if color and color in COLOR_MAP:
+            # Replace the default border color with the status color
+            styles = [
+                s if not s.startswith("border:") else f"border:1px solid {COLOR_MAP[color]}"
+                for s in styles
+            ]
             styles.append(f"border-left:4px solid {COLOR_MAP[color]}")  # noqa: E231
-            styles.append("padding-left:12px")  # noqa: E231
+            styles.append("padding-left:28px")  # noqa: E231
         return ";".join(styles)
 
 
