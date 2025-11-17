@@ -170,6 +170,7 @@
               },
               "cloud/guides/sync-scheduling",
               "cloud/guides/dwh-artifacts-sync",
+              "cloud/guides/dev-prod-configuration",
               "cloud/guides/collect-job-data",
               "cloud/guides/collect-source-freshness",
               "cloud/guides/troubleshoot"

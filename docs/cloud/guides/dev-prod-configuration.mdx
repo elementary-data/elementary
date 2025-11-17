@@ -1,0 +1,91 @@
+---
+title: "Configuring Elementary for Development and Production"
+sidebarTitle: "Dev/Prod configuration"
+---
+
+When working with Elementary Cloud, you'll want to configure Elementary differently based on your environment. This guide explains best practices for setting up Elementary across local development, dev/staging environments, and production.
+
+## Overview
+
+Elementary's `on-run-end` hooks collect test results and dbt artifacts, which are essential for monitoring but can slow down local development. Here's the recommended approach:
+
+- **Local development**: Disable hooks to speed up your workflow
+- **Dev/Staging environments**: Enable monitoring to catch issues early
+- **Production**: Always enabled for full observability
+
+## Disable Hooks in Local Development
+
+When developing locally, the `on-run-end` hooks that upload run results and dbt artifacts can slow down your dbt runs. It's recommended to disable these hooks in your local environment.
+
+You can disable specific hooks using variables in your `dbt_project.yml`:
+
+```yaml dbt_project.yml
+vars:
+  disable_run_results: "{{ target.name not in ['prod','staging','dev'] }}"
+  disable_tests_results: "{{ target.name not in ['prod','staging','dev'] }}"
+  disable_dbt_artifacts_autoupload: "{{ target.name not in ['prod','staging','dev'] }}"
+  disable_dbt_invocation_autoupload: "{{ target.name not in ['prod','staging','dev'] }}"
+```
+
+This configuration ensures that:
+- Hooks are **disabled** for local development (when `target.name` is not `prod`, `staging`, or `dev`)
+- Hooks are **enabled** for your dev, staging, and production environments
+
+## Monitor Dev and Staging Environments
+
+While you should disable hooks in local development, you should **enable monitoring** for any dev or staging environments where you run tests. This allows you to:
+
+- Catch data quality issues before they reach production
+- Validate test coverage and test results in non-production environments
+- Get early visibility into data problems
+
+To ensure monitoring is enabled for your dev/staging environments:
+
+1. **Configure your dbt targets** - Make sure your dev and staging targets are named consistently (e.g., `dev`, `staging`)
+2. **Update the disablement vars** - Include your dev/staging target names in the condition, as shown in the example above
+3. **Set up Elementary Cloud environments** - Create separate environments in Elementary Cloud for each of your dbt targets (dev, staging, prod)
+
+## Production Configuration
+
+In production, Elementary should always be enabled to provide full observability. The configuration above ensures hooks are enabled for production by including `prod` in the list of monitored environments.
+
+## Complete Example Configuration
+
+Here's a complete example that covers all scenarios:
+
+```yaml dbt_project.yml
+vars:
+  # Disable hooks for local development, enable for dev/staging/prod
+  disable_run_results: "{{ target.name not in ['prod','staging','dev'] }}"
+  disable_tests_results: "{{ target.name not in ['prod','staging','dev'] }}"
+  disable_dbt_artifacts_autoupload: "{{ target.name not in ['prod','staging','dev'] }}"
+  disable_dbt_invocation_autoupload: "{{ target.name not in ['prod','staging','dev'] }}"
+
+models:
+  elementary:
+    +schema: "elementary"
+```
+
+## Alternative: Disable Entire Package
+
+If you prefer to disable the entire Elementary package in local development (note: this will also disable Elementary tests), you can use:
+
+```yaml dbt_project.yml
+models:
+  elementary:
+    +schema: "elementary"
+    +enabled: "{{ target.name in ['prod','staging','dev'] }}"
+```
+
+<Warning>Disabling the entire package will prevent Elementary tests from running in local development. We recommend using the hook disablement vars instead, which allows Elementary tests to run while skipping the artifact collection.</Warning>
+
+## Next Steps
+
+After configuring your environments:
+
+1. **Set up Elementary Cloud environments** - Create environments in Elementary Cloud for each of your monitored targets (dev, staging, prod)
+2. **Configure sync scheduling** - Set up webhook-triggered syncs for real-time updates. See the [Sync Scheduling guide](/cloud/guides/sync-scheduling) for details
+3. **Configure alerts** - Set up alerts for your dev and production environments to get notified of data quality issues
+
+For more information about disabling hooks, see the [FAQ section on disabling hooks](/oss/general/faq#can-i-disable-the-on-run-end-hooks-or-results-uploading).
+
