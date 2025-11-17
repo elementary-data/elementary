@@ -54,11 +54,11 @@ class SlackWebMessagingIntegration(
 
     @classmethod
     def from_token(
-        cls, token: str, tracking: Optional[Tracking] = None
+        cls, token: str, tracking: Optional[Tracking] = None, **kwargs: Any
     ) -> "SlackWebMessagingIntegration":
         client = WebClient(token=token)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
-        return cls(client, tracking)
+        return cls(client, tracking, **kwargs)
 
     def parse_message_context(self, context: dict[str, Any]) -> SlackWebMessageContext:
         return SlackWebMessageContext(**context)
