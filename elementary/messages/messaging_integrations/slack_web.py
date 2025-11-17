@@ -41,10 +41,16 @@ class SlackWebMessageContext(BaseModel):
 class SlackWebMessagingIntegration(
     BaseMessagingIntegration[Channel, SlackWebMessageContext]
 ):
-    def __init__(self, client: WebClient, tracking: Optional[Tracking] = None) -> None:
+    def __init__(
+        self,
+        client: WebClient,
+        tracking: Optional[Tracking] = None,
+        reply_broadcast: bool = False,
+    ) -> None:
         self.client = client
         self.tracking = tracking
         self._email_to_user_id_cache: Dict[str, str] = {}
+        self.reply_broadcast = reply_broadcast
 
     @classmethod
     def from_token(
@@ -77,7 +83,10 @@ class SlackWebMessagingIntegration(
     ) -> MessageSendResult[SlackWebMessageContext]:
         formatted_message = format_block_kit(body, self.get_user_id_from_email)
         return self._send_message(
-            destination, formatted_message, thread_ts=message_context.id
+            destination,
+            formatted_message,
+            thread_ts=message_context.id,
+            reply_broadcast=self.reply_broadcast,
         )
 
     @sleep_and_retry
@@ -87,6 +96,7 @@ class SlackWebMessagingIntegration(
         destination: Channel,
         formatted_message: FormattedBlockKitMessage,
         thread_ts: Optional[str] = None,
+        reply_broadcast: bool = False,
     ) -> MessageSendResult[SlackWebMessageContext]:
         try:
             response = self.client.chat_postMessage(
@@ -94,6 +104,7 @@ class SlackWebMessagingIntegration(
                 blocks=json.dumps(formatted_message.blocks),
                 attachments=json.dumps(formatted_message.attachments),
                 thread_ts=thread_ts,
+                reply_broadcast=reply_broadcast,
             )
         except SlackApiError as e:
             self._handle_send_err(e, destination)
