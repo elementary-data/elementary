@@ -26,10 +26,14 @@
     elementary_test_results_id,
     result_row
   from {{ ref("elementary", "test_result_rows") }}
-  where detected_at >= {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
+  where detected_at > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
   {% if valid_ids_query %}
     and elementary_test_results_id in ({{ valid_ids_query }})
   {% endif %}
   {% endset %}
-  {% do return(elementary.run_query(query).group_by("elementary_test_results_id")) %}
+  {% set res = elementary.run_query(query) %}
+  {% if not res %}
+    {% do return({}) %}
+  {% endif %}
+  {% do return(res.group_by("elementary_test_results_id")) %}
 {% endmacro %}
