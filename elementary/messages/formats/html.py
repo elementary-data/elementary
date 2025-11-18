@@ -73,7 +73,7 @@ class HTMLFormatter:
                 '<pre style="margin:0;padding:12px;'
                 "background-color:#f8fafc;border-radius:4px;"
                 "font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;"
-                'font-size:13px;line-height:1.5;white-space:pre-wrap;'
+                "font-size:13px;line-height:1.5;white-space:pre-wrap;"
                 'max-height:400px;overflow-y:auto;">'
                 f"{code_html}</pre>"
             )
@@ -205,12 +205,10 @@ class HTMLFormatter:
             idx += 1
 
             # Skip the space after bullet
-            if (
-                idx < len(line.inlines)
-                and isinstance(line.inlines[idx], TextBlock)
-                and line.inlines[idx].text == " "
-            ):
-                idx += 1
+            if idx < len(line.inlines):
+                space_inline = line.inlines[idx]
+                if isinstance(space_inline, TextBlock) and space_inline.text == " ":
+                    idx += 1
 
             # Rest is the content
             content_inlines = line.inlines[idx:]
@@ -246,7 +244,7 @@ class HTMLFormatter:
             + "</table>"
         )
         # Use custom margin with +8px on top and bottom
-        return f'<div style="margin:8px 0 20px">{table_html}</div>'
+        return f'<div style="margin:8px 0 20px">{table_html}</div>'  # noqa: E231
 
     def _format_fact_row(self, fact: FactBlock) -> str:
         title_html = self._format_line_block(fact.title)
@@ -341,7 +339,11 @@ class HTMLFormatter:
         if color and color in COLOR_MAP:
             # Replace the default border color with the status color
             styles = [
-                s if not s.startswith("border:") else f"border:1px solid {COLOR_MAP[color]}"
+                (
+                    s
+                    if not s.startswith("border:")
+                    else f"border:1px solid {COLOR_MAP[color]}"
+                )
                 for s in styles
             ]
             styles.append(f"border-left:4px solid {COLOR_MAP[color]}")  # noqa: E231
