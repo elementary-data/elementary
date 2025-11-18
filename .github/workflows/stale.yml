@@ -11,9 +11,10 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v5
+      - uses: actions/stale@v10
         with:
-          days-before-stale: 180
+          days-before-stale: 60
+          days-before-close: 30
           stale-issue-message: |
             This issue is stale because it has been open for too long with no activity.
             If you would like the issue to remain open, please remove the stale label or leave a comment.
