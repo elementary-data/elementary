@@ -2,11 +2,10 @@
 title: "Troubleshooting"
 ---
 
-### I connected my data warehouse but I don't see any test results
+<Accordion title="I connected my data warehouse but I don't see any test results">
 
 If you already connected your data warehouse to Elementary but are not seeing anything in the Elementary UI, there could be several reasons.
 Try following these steps to troubleshoot:
-
 
 **1. Validate elementary dbt package is deployed, working, and using the latest version**
 
@@ -20,8 +19,9 @@ Try following these steps to troubleshoot:
 
 **4. Still no data in the table? Reach out to the Elementary team by starting an intercom chat from the Elementary UI.**
 
+</Accordion>
 
-### Column information cannot be retrieved
+<Accordion title="Column information cannot be retrieved">
 
 This error can happen because of a few reasons:
 
@@ -40,8 +40,9 @@ For more information on the permissions required by each data warehouse:
 
 [Postgres](/cloud/integrations/dwh/postgres#permissions-and-security)
 
+</Accordion>
 
-### How do I set up the table name of my Singular test?
+<Accordion title="How do I set up the table name of my Singular test?">
 
 Singular tests are sql queries that can reference more than one table, but are often intended to test a logic that is related to one table in particular.
 In order to have that table name appear in the UI in the test results, test execution and more screens, you can set it up by adding the following to the config block of your singular test file:
@@ -58,3 +59,5 @@ SELECT unique_id
 FROM <elementary-schema-name>.dbt_models
 WHERE name=<model-name>
 ```
+
+</Accordion>

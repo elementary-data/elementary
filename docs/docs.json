@@ -169,7 +169,6 @@
                 ]
               },
               "cloud/guides/sync-scheduling",
-              "cloud/guides/dwh-artifacts-sync",
               "cloud/guides/dev-prod-configuration",
               "cloud/guides/reduce-on-run-end-time",
               "cloud/guides/collect-job-data",
@@ -455,7 +454,8 @@
               },
               "oss/guides/collect-job-data",
               "oss/guides/collect-dbt-source-freshness",
-              "oss/guides/reduce-on-run-end-time"
+              "oss/guides/reduce-on-run-end-time",
+              "oss/guides/performance-alerts"
             ]
           },
           {
