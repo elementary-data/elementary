@@ -24,6 +24,28 @@
           "wrap": true
         },
         {
+          "type": "Container",
+          "style": "emphasis",
+          "items": [
+            {
+              "type": "RichTextBlock",
+              "inlines": [
+                {
+                  "type": "TextRun",
+                  "text": "def hello_world():\n    print('Hello, World!')",
+                  "fontType": "Monospace"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "separator": true,
+      "items": [
+        {
           "type": "TextBlock",
           "text": "- First bullet point",
           "wrap": true
@@ -48,6 +70,127 @@
             {
               "title": "Tags",
               "value": "test, example"
+            }
+          ]
+        },
+        {
+          "type": "Table",
+          "columns": [
+            {
+              "width": 1
+            },
+            {
+              "width": 1
+            },
+            {
+              "width": 1
+            }
+          ],
+          "rows": [
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Column 1",
+                      "wrap": true
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Column 2",
+                      "wrap": true
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Column 3",
+                      "wrap": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Row 1 Col 1",
+                      "wrap": true
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Row 1 Col 2",
+                      "wrap": true
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Row 1 Col 3",
+                      "wrap": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "TableRow",
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Row 2 Col 1",
+                      "wrap": true
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Row 2 Col 2",
+                      "wrap": true
+                    }
+                  ]
+                },
+                {
+                  "type": "TableCell",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Row 2 Col 3",
+                      "wrap": true
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
