@@ -46,7 +46,7 @@ In order to set up a PrivateLink connection with Snowflake, please follow the st
 3. **Provide Elementary with the configuration obtained in the previous step.**
     1. Elementary will then setup the required infrastructure to connect to Snowflake via PrivateLink.
 4. **Add a Snowflake environment in Elementary**
-    1. Follow the instructions [here](https://docs.elementary-data.com/cloud/onboarding/connect-data-warehouse) to set up a Snowflake environment in Elementary.
+    1. Follow the instructions [here](/cloud/integrations/dwh/snowflake) to set up a Snowflake environment in Elementary.
         1. When supplying the account, use `<account_identifier>.privatelink` , where the account identifier is the result of the following query:
             
             ```sql
@@ -57,6 +57,77 @@ In order to set up a PrivateLink connection with Snowflake, please follow the st
             * 10.0.1.x
             * 10.0.2.x
             * 10.0.3.x
+
+### Databricks
+
+Databricks has support for connecting to AWS-hosted Databricks workspaces via PrivateLink. This setup is entirely managed by Databricks, so Elementary connects with an endpoint service hosted on Databrick's AWS account for this purpose.
+
+**Note**: 
+1. You must be a Databricks account admin to perform this setup.
+2. Your databricks workspace must be deployed on a customer-managed VPC. PrivateLink is not supported with Databricks-managed VPCs.
+
+In order to set up a PrivateLink connection with Databricks, please follow the steps below:
+
+1. **Please provide Elementary with the following details:**
+   * Your databricks workspace URL.
+   * Your AWS account ID.
+   * Your AWS region.
+
+   Elementary will then provide you with a VPC Endpoint ID that will be used in the next step.
+
+2. **Register your VPC endpoint** 
+
+   In the account management portal (not your workspace), go to Security -> Networking -> VPC Endpoints, 
+then click on the "Register VPC Endpoint" button.
+
+   You should fill in:
+   1. A name for the VPC endpoint - e.g. "Elementary".
+   2. Your AWS region.
+   3. The VPC Endpoint ID provided to you by Elementary.
+
+   <img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763576281/databricks_privatelink_02_register_vpc_endpoint_tdzer3.png"
+   alt="Register VPC Endpoint"
+   />
+
+3. **Configure a private access setting**
+
+   Go to Security -> Private Access Settings. 
+
+   * If you've set up private link with your Databricks instance before, you should already have a private access setting configured.
+In that case, please ensure that the endpoint allows access to the VPC endpoint created in step (2).
+
+   * If this is the first time you are setting PrivateLink for your databricks workspace:
+     * Click on "Add private access config".
+     * Please fill in the following details:
+       * A name for your setting: e.g. "Privatelink settings"
+       * Your AWS region
+       * Whether or not to allow public access - only set this as False if all your systems and users access your Databricks workspace through privatelink.
+       * Private access level - either leave as "Account", or allow-list specific VPCs including the Elementary VPC created in the previous step.
+
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763579848/databricks_privatelink_03_add_private_access_setting_rgoisu.png"
+     alt="Configure Private Access"
+   />
+
+4. **Add the private access setting to your Databricks workspace**
+
+   __Note__: If you have already set up Privatelink with Databricks in the past, you can skip this step.
+
+   Under the Databricks account management portal, go to Workspaces, click on your workspace and then on "Update Workspace".
+Then go to "Advanced Configurations", and under "Private Link", please attach the setting created in the previous step.
+
+5. **Add a Databricks environment in Elementary**
+
+   After all the previous steps are completed, please reach out to the Elementary team to verify that your Databricks cluster is accessible via PrivateLink.
+   
+   Once verified, please add a Databricks environment to Elementary by following [this guide](/cloud/integrations/dwh/databricks).
+
+   Under the *Add the Elementary IP to allowlist* section, please add the following private subnets *instead* of the IP mentioned there:
+   * 10.0.1.x
+   * 10.0.2.x
+   * 10.0.3.x
+
 
 ### Github Enterprise Server
 
