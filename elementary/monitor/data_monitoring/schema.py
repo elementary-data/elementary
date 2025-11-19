@@ -237,10 +237,12 @@ class FiltersSchema(BaseModel):
                     if len(models_match) == 1
                     else ",".join(models_match)
                 )
-                if config and SelectorFilter._has_graph_operators(model_value):
-                    selector_filter = SelectorFilter(
-                        config, tracking, f"model:{model_value}"
-                    )
+                if (
+                    config
+                    and filter_type == FilterType.IS
+                    and SelectorFilter._has_graph_operators(model_value)
+                ):
+                    selector_filter = SelectorFilter(config, tracking, model_value)
                     filter_result = selector_filter.get_filter()
                     if filter_result.node_names:
                         node_names.extend(filter_result.node_names)
