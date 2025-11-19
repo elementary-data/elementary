@@ -171,6 +171,7 @@
               "cloud/guides/sync-scheduling",
               "cloud/guides/dwh-artifacts-sync",
               "cloud/guides/dev-prod-configuration",
+              "cloud/guides/reduce-on-run-end-time",
               "cloud/guides/collect-job-data",
               "cloud/guides/collect-source-freshness",
               "cloud/guides/troubleshoot"
