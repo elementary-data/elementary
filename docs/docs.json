@@ -454,7 +454,8 @@
                 ]
               },
               "oss/guides/collect-job-data",
-              "oss/guides/collect-dbt-source-freshness"
+              "oss/guides/collect-dbt-source-freshness",
+              "oss/guides/reduce-on-run-end-time"
             ]
           },
           {
