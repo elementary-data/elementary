@@ -285,6 +285,13 @@ def get_cli_properties() -> dict:
     default=None,
     help="A Microsoft Teams webhook URL for sending alerts to a specific channel in Teams.",
 )
+@click.option(
+    "--maximum-columns-in-alert-samples",
+    "-mc",
+    type=int,
+    default=4,
+    help="Maximum number of columns to display as a table in alert samples. Above this, the output is shown as raw JSON.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -316,6 +323,7 @@ def monitor(
     filters,
     excludes,
     teams_webhook,
+    maximum_columns_in_alert_samples,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -347,6 +355,7 @@ def monitor(
         slack_group_alerts_by=group_by,
         report_url=report_url,
         teams_webhook=teams_webhook,
+        maximum_columns_in_alert_samples=maximum_columns_in_alert_samples,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))

@@ -6,8 +6,11 @@ import pytest
 
 from elementary.messages.block_builders import BulletListBlock
 from elementary.messages.blocks import (
+    ActionsBlock,
     CodeBlock,
     DividerBlock,
+    DropdownActionBlock,
+    DropdownOptionBlock,
     ExpandableBlock,
     FactBlock,
     FactListBlock,
@@ -22,6 +25,7 @@ from elementary.messages.blocks import (
     TableBlock,
     TextBlock,
     TextStyle,
+    UserSelectActionBlock,
     WhitespaceBlock,
 )
 from elementary.messages.message_body import Color, MessageBody
@@ -233,6 +237,8 @@ class BaseTestFormat(Generic[T]):
                         )
                     ]
                 ),
+                CodeBlock(text="def hello_world():\n    print('Hello, World!')"),
+                DividerBlock(),
                 BulletListBlock(
                     icon="-",
                     lines=[
@@ -255,6 +261,13 @@ class BaseTestFormat(Generic[T]):
                             value=LineBlock(inlines=[TextBlock(text="test, example")]),
                         ),
                     ]
+                ),
+                TableBlock(
+                    headers=["Column 1", "Column 2", "Column 3"],
+                    rows=[
+                        ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+                        ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"],
+                    ],
                 ),
                 ExpandableBlock(
                     title="Show Details",
@@ -281,6 +294,23 @@ class BaseTestFormat(Generic[T]):
                         )
                     ],
                     expanded=False,
+                ),
+                ActionsBlock(
+                    actions=[
+                        DropdownActionBlock(
+                            action_id="priority_dropdown",
+                            placeholder="Select priority",
+                            options=[
+                                DropdownOptionBlock(text="High", value="high"),
+                                DropdownOptionBlock(text="Medium", value="medium"),
+                                DropdownOptionBlock(text="Low", value="low"),
+                            ],
+                        ),
+                        UserSelectActionBlock(
+                            action_id="assign_user",
+                            placeholder="Assign to user",
+                        ),
+                    ]
                 ),
                 LinesBlock(
                     lines=[

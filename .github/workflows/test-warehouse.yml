@@ -26,16 +26,6 @@ on:
         type: string
         required: false
         description: dbt's version to test with
-      should-run-tests:
-        type: boolean
-        required: false
-        default: true
-        description: Whether to run E2E tests
-      clear-tests:
-        type: boolean
-        required: false
-        default: true
-        description: Whether to clean test environment
       generate-data:
         type: boolean
         required: false
@@ -47,10 +37,6 @@ on:
       warehouse-type:
         type: string
         required: true
-      should-run-tests:
-        type: boolean
-        required: false
-        default: true
       elementary-ref:
         type: string
         required: false
@@ -60,10 +46,6 @@ on:
       dbt-version:
         type: string
         required: false
-      clear-tests:
-        type: boolean
-        required: false
-        default: true
       generate-data:
         type: boolean
         required: false
@@ -71,8 +53,9 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
-  ELMENTARY_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
+  ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
+  CLI_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
+  E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
 
 jobs:
   # PRs from forks require approval, specifically with the "pull_request_target" event as it contains repo secrets.
@@ -117,12 +100,12 @@ jobs:
 
       - name: Start Postgres
         if: inputs.warehouse-type == 'postgres'
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: docker compose up -d postgres
 
       # - name: Start Clickhouse
       #   if: inputs.warehouse-type == 'clickhouse'
-      #   working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      #   working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
       #   run: docker compose up -d clickhouse
 
       - name: Setup Python
@@ -138,8 +121,7 @@ jobs:
         run: >
           pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          # TODO: remove the <1.10.2 once we have a fix for https://github.com/elementary-data/elementary/issues/1931
-          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks<1.10.2,') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
+          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
@@ -170,12 +152,46 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
-      - name: Run dbt package integration tests
-        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      - name: Run deps for E2E dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        env:
+          ELEMENTARY_DBT_PACKAGE_PATH: ${{ env.ELEMENTARY_DBT_PACKAGE_PATH }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "${{ inputs.warehouse-type }}" -g "${{ inputs.warehouse-type == 'postgres' || inputs.generate-data }}" --clear-tests "${{ inputs.clear-tests }}"
+
+      - name: Seed e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        if: inputs.warehouse-type == 'postgres' || inputs.generate-data
+        run: |
+          python generate_data.py
+          dbt seed -f --target "${{ inputs.warehouse-type }}"
+
+      - name: Run e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          dbt run --target "${{ inputs.warehouse-type }}" || true
+
+          # Validate run_results.json: only error_model should be non-success
+          jq -e '
+            [.results[] | select(.status != "success") | .unique_id]
+            | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
+          ' target/run_results.json > /dev/null
+          jq_exit=$?
+
+          if [ $jq_exit -eq 0 ]; then
+            echo "✅ Validation passed: only error_model failed."
+          else
+            echo "❌ Validation failed. Unexpected failures:"
+            jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
+          fi
+
+          exit $jq_exit
+
+      - name: Test e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        continue-on-error: true
+        run: |
+          dbt test --target "${{ inputs.warehouse-type }}"
 
       - name: Run help
         run: edr --help
@@ -187,12 +203,12 @@ jobs:
           edr monitor
           -t "${{ inputs.warehouse-type }}"
           --group-by table
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Validate alerts statuses were updated
-        working-directory: ${{ env.ELMENTARY_INTERNAL_DBT_PKG_DIR }}
+        working-directory: ${{ env.CLI_INTERNAL_DBT_PKG_DIR }}
         run: |
           dbt deps
           dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
@@ -201,7 +217,7 @@ jobs:
         run: >
           edr monitor report
           -t "${{ inputs.warehouse-type }}"
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
 
       - name: Set report artifact name
@@ -230,7 +246,7 @@ jobs:
         run: >
           edr monitor send-report
           -t "${{ inputs.warehouse-type }}"
-          --project-dir "${{ env.DBT_PKG_INTEG_TESTS_DIR }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
           --slack-token "$SLACK_TOKEN"
@@ -259,5 +275,4 @@ jobs:
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests
-        if: github.event_name != 'workflow_dispatch' || inputs.should-run-tests
         run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}

@@ -4,4 +4,3 @@
 > 
 > > **Inner Block**\
 > > Inner content
-
