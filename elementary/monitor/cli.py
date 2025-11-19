@@ -144,10 +144,12 @@ def common_options(cmd: str):
             "--select",
             type=str,
             default=None,
-            help="Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
-            if cmd in (Command.REPORT, Command.SEND_REPORT)
-            else "DEPRECATED! Please use --filters instead! - Filter the alerts by tags:<TAGS> / owners:<OWNERS> / models:<MODELS> / "
-            "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
+            help=(
+                "Filter the report by last_invocation / invocation_id:<INVOCATION_ID> / invocation_time:<INVOCATION_TIME>."
+                if cmd in (Command.REPORT, Command.SEND_REPORT)
+                else "DEPRECATED! Please use --filters instead! - Filter the alerts by tags:<TAGS> / owners:<OWNERS> / models:<MODELS> / "
+                "statuses:<warn/fail/error/skipped> / resource_types:<model/test>."
+            ),
         )(func)
         return func
 
@@ -364,7 +366,9 @@ def monitor(
 
         alert_filters = FiltersSchema()
         if bool(filters) or bool(excludes):
-            alert_filters = FiltersSchema.from_cli_params(filters, excludes)
+            alert_filters = FiltersSchema.from_cli_params(
+                filters, excludes, config, anonymous_tracking
+            )
         elif select is not None:
             click.secho(
                 '\n"--select" is deprecated and won\'t be supported in the near future.\n'
