@@ -34,6 +34,13 @@ class BaseAlertDataSchema(BaseModel):
     owners: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
     status: str
+    # Orchestrator fields
+    job_id: Optional[str] = None
+    job_name: Optional[str] = None
+    job_run_id: Optional[str] = None
+    job_url: Optional[str] = None
+    job_run_url: Optional[str] = None
+    orchestrator: Optional[str] = None
 
     @property
     def unified_meta(self) -> Dict:
@@ -228,6 +235,13 @@ class TestAlertDataSchema(BaseAlertDataSchema):
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
             env=env,
+            # Orchestrator fields
+            job_id=self.job_id,
+            job_name=self.job_name,
+            job_run_id=self.job_run_id,
+            job_url=self.job_url,
+            job_run_url=self.job_run_url,
+            orchestrator=self.orchestrator,
         )
 
 
@@ -277,6 +291,13 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
             env=env,
+            # Orchestrator fields
+            job_id=self.job_id,
+            job_name=self.job_name,
+            job_run_id=self.job_run_id,
+            job_url=self.job_url,
+            job_run_url=self.job_run_url,
+            orchestrator=self.orchestrator,
         )
 
     @validator("full_refresh", pre=True, always=True)
@@ -346,4 +367,11 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
             alert_fields=self.alert_fields,
             elementary_database_and_schema=elementary_database_and_schema,
             env=env,
+            # Orchestrator fields
+            job_id=self.job_id,
+            job_name=self.job_name,
+            job_run_id=self.job_run_id,
+            job_url=self.job_url,
+            job_run_url=self.job_run_url,
+            orchestrator=self.orchestrator,
         )
