@@ -5,482 +5,438 @@ icon: "house"
 ---
 
 <div class="home__page">
-  <section className="home__hero-section">
-    <div class="home__container">
-      <div class="home__hero-layout">
-        <div className="home__hero-content">
-          <div className="home__hero-text-block">
-            <h1 className="home__hero-title">
-              Dev-First <br />
-              AI-Powered <br />
-              Data Observability
-            </h1>
-            <p className="home__hero-subtitle">
-              Elementary is built for and trusted by <br />
-              1000+ analytics and data teams.
-            </p>
-            <a href="/cloud/what-is-elementary" className="home__hero-link">
-              What is Elementary?
-            </a>
-            <div className="home__hero-buttons">
-              <a
-                href="/oss/quickstart/quickstart-cli-package"
-                className="home__hero-btn home__hero-btn--primary"
-              >
-                Setup OSS
-              </a>
-              <a href="/cloud/quickstart" className="home__hero-btn home__hero-btn--secondary">
-                Start Free with Cloud
-              </a>
-            </div>
-          </div>
-          <div className="home__hero-image-block">
-            <img
-              className="home__hero-image"
-              src="https://res.cloudinary.com/diuctyblm/image/upload/v1749564684/Docs/Hero_Image_yvczgg.png"
-              alt="Hero Image"
-              noZoom={true}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+<section className="home__hero-section">
+<div class="home__container">
+<div class="home__hero-layout">
+<div className="home__hero-content">
+<div className="home__hero-text-block">
+<h1 className="home__hero-title">
+The Data & AI Control Plane
 
+</h1>
 
-<section>
-  <div class="home__container padding-bottom-none">
-    <div className="home__jump-navigation">
-      <div className="home__jump-navigation-content">
-        <h2 className="home__jump-navigation-heading">
-          Discover what you can do  <br />
-          with Elementary
-        </h2>
-        <div className="home__jump-navigation-links">
-          <span className="home__jump-navigation-label">Jump to:</span>
-          <a href="#detect-issues" className="home__jump-navigation-link">
-            Detect issues
-          </a>
-          <a href="#triage-response" className="home__jump-navigation-link">
-            Triage and Response
-          </a>
-          <a href="#business-users" className="home__jump-navigation-link">
-            Business users
-          </a>
-          <a href="#governance" className="home__jump-navigation-link">
-            Governance
-          </a>
-          <a href="#integrations" className="home__jump-navigation-link">
-            Integrations
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+<p className="home__hero-subtitle">
+Elementary is built for and trusted by \
+ 1000+ analytics and data teams.
+
+</p>
+
+<a href="/cloud/what-is-elementary" className="home__hero-link">
+What is Elementary?
+
+</a>
+
+<div className="home__hero-buttons">
+<a href="/oss/quickstart/quickstart-cli-package" className="home__hero-btn home__hero-btn--primary">
+Setup OSS
+
+</a>
+
+<a href="/cloud/quickstart" className="home__hero-btn home__hero-btn--secondary">
+Start Free with Cloud
+
+</a>
+
+</div>
+
+</div>
+
+<div className="home__hero-image-block">
+<img
+  className="home__hero-image"
+  src="https://res.cloudinary.com/diuctyblm/image/upload/v1749564684/Docs/Hero_Image_yvczgg.png"
+  alt="Hero Image"
+  noZoom={true}
+/>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 </section>
 
-    <section>
-      <div class="home__container padding-bottom-none">
-        <div id="detect-issues" class="home__features__section">
-          <FeatureHeader link="/cloud/best-practices/detection-and-coverage">
-            <span>Detect issues</span> before they reach consumers
-          </FeatureHeader>
-          <div className="home__features-grid">
-            <FeatureCard
-              heading="Detect anomalies"
-              description="Detect anomalies in your dbt models with tests for freshness, volume, and your customizable data metrics."
-              icon="monitor-waveform"
-              showCloudFeature={false}
-              link="/cloud/features/anomaly-detection/monitors-overview"
-            />
-            <FeatureCard
-              heading="ML-powered pipeline monitoring"
-              description="ML-powered monitors automatically detect data quality issues. Out-of-the-box for volume and freshness, and opt-in for data quality metrics."
-              icon="sparkles"
-              showCloudFeature={true}
-              link="/cloud/features/anomaly-detection/monitors-overview"
-            />
-            <FeatureCard
-              heading="Validate and track dbt test results"
-              description="Validate data and track the results of dbt tests, dbt packages tests (dbt-utils, dbt-expectations, elementary) and custom SQL tests."
-              icon="table-tree"
-              showCloudFeature={false}
-              link="/cloud/features/data-tests/data-tests-overview"
-            />
-            <FeatureCard
-              heading="Validate schema and downstream exposure"
-              description="Validate there are no breaking changes in tables schema, JSON schema, and downstream exposures such as dashboards."
-              icon="brackets-curly"
-              showCloudFeature={false}
-              link="/cloud/features/data-tests/schema-validation-test"
-            />
-            <FeatureCard
-              heading="Configure in code or UI, bulk add tests"
-              description="Configure Elementary in code, or via the UI for non-technical users or for adding tests in bulk. The platform opens PRs to your repo, saving hours of tedious YAML edits."
-              icon="cloud-arrow-up"
-              showCloudFeature={true}
-              link="/cloud/features/data-tests/data-tests-overview#test-configuration"
-            />
-              <FeatureCard
-              heading="Manage test coverage"
-              description="See the full picture of your test coverage across assets and dimensions. Easily identify gaps and prioritize coverage for critical assets."
-              icon="flask-vial"
-              showCloudFeature={true}
-              link="/cloud/features/data-tests/test-coverage-screen"
-            />
-            <FeatureCard
-              heading="Test recommendation AI agent"
-              description="Analyzes your data asset, metadata, lineage, and existing test suite to suggest high-impact tests that match your team’s style and priorities."
-              icon="wand-magic-sparkles"
-              showCloudFeature={true}
-              link="/cloud/ai-agents/test-recommendation-agent"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-    <section>
-      <div class="home__container">
-        <div id="triage-response" class="home__features__section">
-          <FeatureHeader link="/cloud/best-practices/triage-and-response">
-            Take action with <span>triage and response</span>
-          </FeatureHeader>
-          <div className="home__features-grid">
-            <FeatureCard
-              heading="Send alerts, analyze lineage"
-              description="Send alerts for data quality issues and understand their impact."
-              icon="rotate-exclamation"
-              showCloudFeature={false}
-              link="/cloud/features/data-lineage/lineage"
-            />
-            <FeatureCard
-              heading="Column-level lineage and impact analysis"
-              description="Column-level lineage from source to BI. Enables granular root cause and impact analysis."
-              icon="arrow-progress"
-              showCloudFeature={true}
-              link="/cloud/features/data-lineage/lineage"
-            />
-            <FeatureCard
-              heading="Highly configurable alerts and integrations"
-              description="Distribute highly configurable alerts to different channels and integrations. Automatically tag owners, and enable setting status and assignees at the alert level."
-              icon="bell-exclamation"
-              showCloudFeature={true}
-              link="/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
-            />
-            <FeatureCard
-              heading="Incident management system"
-              description="Manage all open quality incidents in a single interface, with a clear view of status and assignees."
-              icon="list-check"
-              showCloudFeature={true}
-              link="/cloud/features/alerts-and-incidents/incident-management"
-            />
-            <FeatureCard
-              heading="Triage & resolution AI agent"
-              description="Automates root cause analysis, clarifies the impact, and suggests actionable fixes."
-              icon="wand-magic-sparkles"
-              showCloudFeature={true}
-              link="/cloud/ai-agents/triage-resolution-agent"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
+<section>
+<div class="home__container padding-bottom-none">
+<div className="home__jump-navigation">
+<div className="home__jump-navigation-content">
+<h2 className="home__jump-navigation-heading">
+Discover what you can do  \
+ with Elementary
 
-  <div class="home__theme-gray">
-      <div class="home__container">
-        <div class="home__2col is-uneven">
-          <div class="home__2col-content">
-            <h2 class="home__heading-lg">Learn more about Elementary</h2>
-          </div>
-          <div class="home__2col">
-            <InfoCard
-              label="Recommended"
-              labelColor="pink"
-              title="What is Elementary?"
-              description="Elementary is the dev-first data reliability platform, built for the entire organization."
-              link="/cloud/what-is-elementary"
-            />
-            <div class="flex flex-col gap-4">
-              <InfoCard
-                label="Article"
-                labelColor="gray"
-                title="Security and Privacy"
-                link="/cloud/general/security-and-privacy"
-                layout="horizontal"
-              />
-              <InfoCard
-                label="Article"
-                labelColor="gray"
-                title="OSS vs Cloud"
-                link="/cloud/cloud-vs-oss"
-                layout="horizontal"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-  </div>
-  <div class="home__theme-purple-dark">
-      <div class="home__container">
-        <div class="home__2col">
-          <div class="home__2col-content is-centered">
-            <h2 class="home__heading-lg">Elementary context <br/>in your tools</h2>
-            <p>The MCP Server brings models, lineage, and incidents into tools like Cursor and Claude—so you can act without leaving your workflow.</p>
-            <div><a
-            href="/cloud/mcp/intro"
-            class="home__button"
-          >
-            Start here
-          </a></div>
-          </div>
-          <div class="home__mcp-image">
-              <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1756374052/Docs_u3uaft.svg" noZoom/>
-          </div>
-        </div>
-    </div>
-  </div>
-  <div class="home__page">
-    
-    <section>
-      <div class="home__container padding-bottom-none">
-        <div id="business-users" class="home__features__section">
-          <FeatureHeader>
-            Allow <span>business users</span> to monitor and maintain their data
-          </FeatureHeader>
-          <div className="home__features-grid">
-            <FeatureCard
-              heading="Overview dashboard"
-              description="Up to date dashboard with current status and trends of data issues. Share the dashboard with others, enable them to slice results and stay informed."
-              icon="chart-line"
-              showCloudFeature={false}
-              link="/cloud/features/collaboration-and-communication/data-observability-dashboard"
-            />
-            <FeatureCard
-              heading="Data catalog"
-              description="Curate a collaborative, AI-enriched catalog with smart metadata editing, critical asset tagging, and analyst-first discovery tools."
-              icon="book-open"
-              showCloudFeature={true}
-              link="/cloud/features/collaboration-and-communication/catalog"
-            />
-            <FeatureCard
-              heading="Data health scores"
-              description="See the Data Health scores of all your datasets by domain and share with stakeholders."
-              icon="heart-pulse"
-              showCloudFeature={true}
-              comingSoon={false}
-            />
-            <FeatureCard
-              heading="Configure tests in the UI"
-              description="Allow business users to configure tests in the UI, without needing to write YAML or SQL."
-              icon="pencil"
-              showCloudFeature={true}
-              link="/cloud/features/data-tests/data-tests-overview#test-configuration"
-            />
-            <FeatureCard
-              heading="Catalog AI agent"
-              description="Helps data analysts, business users, and AI tools find the right data on their own so engineers don’t have to be the bottleneck."
-              icon="robot"
-              showCloudFeature={true}
-              link="/cloud/ai-agents/catalog-agent"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <section>
-      <div class="home__container">
-        <div id="governance" class="home__features__section">
-        
-          <FeatureHeader link="/cloud/best-practices/governance-for-observability">
-            Easily apply <span>governance</span>
-          </FeatureHeader>
-          <div className="home__features-grid">
-              <FeatureCard
-              heading="Display tags, owners and subscribers"
-              description="Visualize and edit your assets' tags, owners and subscribers, as they are in your code"
-              icon="hashtag"
-              showCloudFeature={false}
-              link="/cloud/features/data-governance/critical_assets"
-            />
-            <FeatureCard
-              heading="Marking critical assets"
-              description="Easily mark your company's crucial assets as critical, and give higher priority in monitoring and alerting to any issue that might impact them."
-              icon="star"
-              showCloudFeature={true}
-              link="/cloud/features/data-governance/critical_assets"
-            />
-            <FeatureCard
-              heading="Efficiently add tags, owners and subscribers"
-              description="Edit your assets' tags, owners and subscibers in a bulk to ensure structure and the right work distribution"
-              icon="tags"
-              showCloudFeature={true}
-              comingSoon={false}
-              link="/cloud/best-practices/governance-for-observability"
-            />
-            <FeatureCard
-              heading="Metadata management"
-              description="Manage your metadata efficiently, directly from the Elementary Catalog"
-              icon="database"
-              showCloudFeature={true}
-              link="/cloud/features/data-governance/manage-metadata"
-            />
-            <FeatureCard
-              heading="AI descriptions"
-              description="Let the AI agent generate high-quality asset descriptions that align with your existing documentation and company policies."
-              icon="sparkles"
-              showCloudFeature={true}
-              link="/cloud/features/data-governance/ai-descriptions"
-            />
-            <FeatureCard
-              heading="Governance AI Agent"
-              description="Let the AI agent keep your catalog complete and compliant by filling metadata gaps, enforcing policies, and flagging sensitive data issues."
-              icon="robot"
-              showCloudFeature={true}
-              link="/cloud/ai-agents/governance-agent"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-  <div id="integrations" class="home__theme-gray">
-      <div class="home__container">
-        <div class="home__2col">
-          <div class="home__2col-content">
-            <h2 class="home__heading-lg">Integrations</h2>
-            <p>
-              Connect Elementary to every part of your data stack—from your warehouse to BI,
-              incident management and messaging tools.
-            </p> <a href="/cloud/features/integrations" class="home__button---tertiary">
-              Check out the integrations <Icon icon={"arrow-right"} size={16} />
-            </a>
-          </div>
-          <div class="">
-            <h3 class="home__integrations-heading">OSS integrations</h3>
-            <div class="home__integrations-grid">
-              {integrations
-                .filter((integration) => integration.oss === true)
-                .map((integration, index) => (
-                  <Integration
-                    key={index}
-                    image={integration.image}
-                    label={integration.label}
-                    invertOnDark={integration.invertOnDark}
-                    link={integration.link}
-                    comingSoon={integration.comingSoon}
-                  />
-                ))}
-            </div>
-            <h3 class="home__integrations-heading">Cloud integrations</h3>
-            <div class="home__integrations-grid">
-                {integrations
-                .filter((integration) => integration.cloud === true)
-                .sort((a, b) => {
-                  // "Suggest an integration" always last
-                  if (a.label === "Suggest an integration") return 1;
-                  if (b.label === "Suggest an integration") return -1;
-                  
-                  // Available now before coming soon
-                  if (a.comingSoon !== b.comingSoon) {
-                  return a.comingSoon ? 1 : -1;
-                  }
-                  
-                  // Alphabetical order
-                  return a.label.localeCompare(b.label);
-                })
-                .map((integration, index) => (
-                  <Integration
+</h2>
+
+<div className="home__jump-navigation-links">
+<span className="home__jump-navigation-label">
+Jump to:</span>
+
+<a href="#detect-issues" className="home__jump-navigation-link">
+Detect issues
+
+</a>
+
+<a href="#triage-response" className="home__jump-navigation-link">
+Triage and Response
+
+</a>
+
+<a href="#business-users" className="home__jump-navigation-link">
+Business users
+
+</a>
+
+<a href="#governance" className="home__jump-navigation-link">
+Governance
+
+</a>
+
+<a href="#integrations" className="home__jump-navigation-link">
+Integrations
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section>
+<div class="home__container padding-bottom-none">
+<div id="detect-issues" class="home__features__section">
+<FeatureHeader link="/cloud/best-practices/detection-and-coverage">
+  <span>Detect issues</span> before they reach consumers
+</FeatureHeader>
+
+<div className="home__features-grid">
+<FeatureCard heading="Detect anomalies" description="Detect anomalies in your dbt models with tests for freshness, volume, and your customizable data metrics." icon="monitor-waveform" showCloudFeature={false} link="/cloud/features/anomaly-detection/monitors-overview" />
+
+<FeatureCard heading="ML-powered pipeline monitoring" description="ML-powered monitors automatically detect data quality issues. Out-of-the-box for volume and freshness, and opt-in for data quality metrics." icon="sparkles" showCloudFeature={true} link="/cloud/features/anomaly-detection/monitors-overview" />
+
+<FeatureCard heading="Validate and track dbt test results" description="Validate data and track the results of dbt tests, dbt packages tests (dbt-utils, dbt-expectations, elementary) and custom SQL tests." icon="table-tree" showCloudFeature={false} link="/cloud/features/data-tests/data-tests-overview" />
+
+<FeatureCard heading="Validate schema and downstream exposure" description="Validate there are no breaking changes in tables schema, JSON schema, and downstream exposures such as dashboards." icon="brackets-curly" showCloudFeature={false} link="/cloud/features/data-tests/schema-validation-test" />
+
+<FeatureCard heading="Configure in code or UI, bulk add tests" description="Configure Elementary in code, or via the UI for non-technical users or for adding tests in bulk. The platform opens PRs to your repo, saving hours of tedious YAML edits." icon="cloud-arrow-up" showCloudFeature={true} link="/cloud/features/data-tests/data-tests-overview#test-configuration" />
+
+<FeatureCard heading="Manage test coverage" description="See the full picture of your test coverage across assets and dimensions. Easily identify gaps and prioritize coverage for critical assets." icon="flask-vial" showCloudFeature={true} link="/cloud/features/data-tests/test-coverage-screen" />
+
+<FeatureCard heading="Test recommendation AI agent" description="Analyzes your data asset, metadata, lineage, and existing test suite to suggest high-impact tests that match your team’s style and priorities." icon="wand-magic-sparkles" showCloudFeature={true} link="/cloud/ai-agents/test-recommendation-agent" />
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section>
+<div class="home__container">
+<div id="triage-response" class="home__features__section">
+<FeatureHeader link="/cloud/best-practices/triage-and-response">
+  Take action with <span>triage and response</span>
+</FeatureHeader>
+
+<div className="home__features-grid">
+<FeatureCard heading="Send alerts, analyze lineage" description="Send alerts for data quality issues and understand their impact." icon="rotate-exclamation" showCloudFeature={false} link="/cloud/features/data-lineage/lineage" />
+
+<FeatureCard heading="Column-level lineage and impact analysis" description="Column-level lineage from source to BI. Enables granular root cause and impact analysis." icon="arrow-progress" showCloudFeature={true} link="/cloud/features/data-lineage/lineage" />
+
+<FeatureCard heading="Highly configurable alerts and integrations" description="Distribute highly configurable alerts to different channels and integrations. Automatically tag owners, and enable setting status and assignees at the alert level." icon="bell-exclamation" showCloudFeature={true} link="/cloud/features/alerts-and-incidents/alerts-and-incidents-overview" />
+
+<FeatureCard heading="Incident management system" description="Manage all open quality incidents in a single interface, with a clear view of status and assignees." icon="list-check" showCloudFeature={true} link="/cloud/features/alerts-and-incidents/incident-management" />
+
+<FeatureCard heading="Triage & resolution AI agent" description="Automates root cause analysis, clarifies the impact, and suggests actionable fixes." icon="wand-magic-sparkles" showCloudFeature={true} link="/cloud/ai-agents/triage-resolution-agent" />
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<div class="home__theme-gray">
+<div class="home__container">
+<div class="home__2col is-uneven">
+<div class="home__2col-content">
+<h2 class="home__heading-lg">
+Learn more about Elementary</h2>
+
+</div>
+
+<div class="home__2col">
+<InfoCard label="Recommended" labelColor="pink" title="What is Elementary?" description="Elementary is the dev-first data reliability platform, built for the entire organization." link="/cloud/what-is-elementary" />
+
+<div class="flex flex-col gap-4">
+<InfoCard label="Article" labelColor="gray" title="Security and Privacy" link="/cloud/general/security-and-privacy" layout="horizontal" />
+
+<InfoCard label="Article" labelColor="gray" title="OSS vs Cloud" link="/cloud/cloud-vs-oss" layout="horizontal" />
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="home__theme-purple-dark">
+<div class="home__container">
+<div class="home__2col">
+<div class="home__2col-content is-centered">
+<h2 class="home__heading-lg">
+Elementary context \
+in your tools</h2>
+
+ <p>
+The MCP Server brings models, lineage, and incidents into tools like Cursor and Claude—so you can act without leaving your workflow.</p>
+
+<div>
+<a href="/cloud/mcp/intro" class="home__button">
+Start here
+
+</a>
+
+</div>
+
+</div>
+
+<div class="home__mcp-image">
+<img
+  src="https://res.cloudinary.com/diuctyblm/image/upload/v1756374052/Docs_u3uaft.svg"
+  noZoom={true}
+/>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="home__page">
+<section>
+<div class="home__container padding-bottom-none">
+<div id="business-users" class="home__features__section">
+<FeatureHeader>
+  Allow <span>business users</span> to monitor and maintain their data
+</FeatureHeader>
+
+<div className="home__features-grid">
+<FeatureCard heading="Overview dashboard" description="Up to date dashboard with current status and trends of data issues. Share the dashboard with others, enable them to slice results and stay informed." icon="chart-line" showCloudFeature={false} link="/cloud/features/collaboration-and-communication/data-observability-dashboard" />
+
+<FeatureCard heading="Data catalog" description="Curate a collaborative, AI-enriched catalog with smart metadata editing, critical asset tagging, and analyst-first discovery tools." icon="book-open" showCloudFeature={true} link="/cloud/features/collaboration-and-communication/catalog" />
+
+<FeatureCard heading="Data health scores" description="See the Data Health scores of all your datasets by domain and share with stakeholders." icon="heart-pulse" showCloudFeature={true} comingSoon={false} />
+
+<FeatureCard heading="Configure tests in the UI" description="Allow business users to configure tests in the UI, without needing to write YAML or SQL." icon="pencil" showCloudFeature={true} link="/cloud/features/data-tests/data-tests-overview#test-configuration" />
+
+<FeatureCard heading="Catalog AI agent" description="Helps data analysts, business users, and AI tools find the right data on their own so engineers don’t have to be the bottleneck." icon="robot" showCloudFeature={true} link="/cloud/ai-agents/catalog-agent" />
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section>
+<div class="home__container">
+<div id="governance" class="home__features__section">
+<FeatureHeader link="/cloud/best-practices/governance-for-observability">
+  Easily apply <span>governance</span>
+</FeatureHeader>
+
+<div className="home__features-grid">
+<FeatureCard heading="Display tags, owners and subscribers" description="Visualize and edit your assets' tags, owners and subscribers, as they are in your code" icon="hashtag" showCloudFeature={false} link="/cloud/features/data-governance/critical_assets" />
+
+<FeatureCard heading="Marking critical assets" description="Easily mark your company's crucial assets as critical, and give higher priority in monitoring and alerting to any issue that might impact them." icon="star" showCloudFeature={true} link="/cloud/features/data-governance/critical_assets" />
+
+<FeatureCard heading="Efficiently add tags, owners and subscribers" description="Edit your assets' tags, owners and subscibers in a bulk to ensure structure and the right work distribution" icon="tags" showCloudFeature={true} comingSoon={false} link="/cloud/best-practices/governance-for-observability" />
+
+<FeatureCard heading="Metadata management" description="Manage your metadata efficiently, directly from the Elementary Catalog" icon="database" showCloudFeature={true} link="/cloud/features/data-governance/manage-metadata" />
+
+<FeatureCard heading="AI descriptions" description="Let the AI agent generate high-quality asset descriptions that align with your existing documentation and company policies." icon="sparkles" showCloudFeature={true} link="/cloud/features/data-governance/ai-descriptions" />
+
+<FeatureCard heading="Governance AI Agent" description="Let the AI agent keep your catalog complete and compliant by filling metadata gaps, enforcing policies, and flagging sensitive data issues." icon="robot" showCloudFeature={true} link="/cloud/ai-agents/governance-agent" />
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<div id="integrations" class="home__theme-gray">
+<div class="home__container">
+<div class="home__2col">
+<div class="home__2col-content">
+<h2 class="home__heading-lg">
+Integrations</h2>
+
+<p>
+Connect Elementary to every part of your data stack—from your warehouse to BI, incident management and messaging tools.
+
+</p>
+
+<a href="/cloud/features/integrations" class="home__button---tertiary">
+Check out the integrations <Icon icon='"arrow-right"' size={16} />
+
+</a>
+
+</div>
+
+<div class>
+<h3 class="home__integrations-heading">
+OSS integrations</h3>
+
+<div class="home__integrations-grid">
+{integrations
+              .filter((integration) => integration.oss === true)
+              .map((integration, index) => (
+                <Integration
                   key={index}
                   image={integration.image}
                   label={integration.label}
                   invertOnDark={integration.invertOnDark}
                   link={integration.link}
                   comingSoon={integration.comingSoon}
-                  />
-                ))}
-            </div>
-          </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="home__theme-purple">
-      <div class="home__container">
-        <div class="home__guides-layout">
-          <div class="home__guides">
-            <div class="home__guides-header">
-              <h2 class="home__heading-lg">Get started now</h2>
-              <p class="home__paragraph-lg">
-                Whether you need a lightweight start or an enterprise-ready platform, Elementary has a solution for you.
-              </p>
-            </div>
-            <div class="home__3col">
-              <InfoCard
-                label="Popular"
-                labelColor="pink"
-                title="Elementary Cloud Platform Quickstart"
-                description="Start a 30-day free trial with the fully hosted platform. Unlock deeper observability, advanced governance control, AI-powered features and rich integrations."
-                link="/cloud/quickstart"
-                layout="vertical"
-              /> <InfoCard label="Guide" labelColor="gray" title="Elementary OSS Setup Guide" description="Step-by-step guide to self-managed observability, with our OSS dbt package and CLI. Run tests, detect anomalies and send alerts." link="/oss/quickstart/quickstart-cli-package" layout="vertical" />
-            </div>
-          </div>
-          <div class="home__guides">
-            <div class="home__guides-header">
-              <h2 class="home__heading-lg">Featured guides</h2>
-              <p class="home__paragraph-lg">
-                Learn from the Elementary team and thousands of users from our community how to set up
-                effective, scalable data observability.
-              </p>
-            </div>
-            <div class="home__3col">
-              <InfoCard
-                label="Best practices"
-                labelColor="gray"
-                title="Detection and coverage"
-                description="Learn how to build effective, efficient test coverage to catch real issues."
-                link="/cloud/best-practices/detection-and-coverage"
-                layout="vertical"
-              />
-              <InfoCard
-                label="Best practices"
-                labelColor="gray"
-                title="Triage and response"
-                description="Learn how to triage data issues with context, ownership, and clear next steps."
-                link="/cloud/best-practices/triage-and-response"
-                layout="vertical"
-              />
-              <InfoCard
-                label="Best practices"
-                labelColor="gray"
-                title="Governance"
-                description="Learn how to assign ownership and define expectations to make observability actionable."
-                link="/cloud/best-practices/governance-for-observability"
-                layout="vertical"
-              />
-            </div>
-          </div>
-        </div>
-    </div>
-  </div>
-  <div class="home__theme-pink">
-      <div class="home__container">
-        <div class="home__cta">
-          <h2 class="home__heading-lg">Join the community</h2>
-          <p class="home__paragraph-lg">
-            Join the Elementary Community for AI and team support, explore best practices, and stay up to
-            date on OSS and Cloud. Connect with other data professionals and help shape what's next.
-          </p> <a
-            href="https://elementary-data.com/community"
-            class="home__button home__button--white"
-          >
-          <Icon icon="slack" size={16} />
-            Join now
-          </a>
-        </div>
-      </div>
-  </div>
+                />
+              ))}
+
+</div>
+
+<h3 class="home__integrations-heading">
+Cloud integrations</h3>
+
+<div class="home__integrations-grid">
+{integrations
+              .filter((integration) => integration.cloud === true)
+              .sort((a, b) => {
+                // "Suggest an integration" always last
+                if (a.label === "Suggest an integration") return 1;
+                if (b.label === "Suggest an integration") return -1;
+                
+                // Available now before coming soon
+                if (a.comingSoon !== b.comingSoon) {
+                return a.comingSoon ? 1 : -1;
+                }
+                
+                // Alphabetical order
+                return a.label.localeCompare(b.label);
+              })
+              .map((integration, index) => (
+                <Integration
+                key={index}
+                image={integration.image}
+                label={integration.label}
+                invertOnDark={integration.invertOnDark}
+                link={integration.link}
+                comingSoon={integration.comingSoon}
+                />
+              ))}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="home__theme-purple">
+<div class="home__container">
+<div class="home__guides-layout">
+<div class="home__guides">
+<div class="home__guides-header">
+<h2 class="home__heading-lg">
+Get started now</h2>
+
+<p class="home__paragraph-lg">
+Whether you need a lightweight start or an enterprise-ready platform, Elementary has a solution for you.
+
+</p>
+
+</div>
+
+<div class="home__3col">
+<InfoCard label="Popular" labelColor="pink" title="Elementary Cloud Platform Quickstart" description="Start a 30-day free trial with the fully hosted platform. Unlock deeper observability, advanced governance control, AI-powered features and rich integrations." link="/cloud/quickstart" layout="vertical" />
+
+<InfoCard label="Guide" labelColor="gray" title="Elementary OSS Setup Guide" description="Step-by-step guide to self-managed observability, with our OSS dbt package and CLI. Run tests, detect anomalies and send alerts." link="/oss/quickstart/quickstart-cli-package" layout="vertical" />
+
+</div>
+
+</div>
+
+<div class="home__guides">
+<div class="home__guides-header">
+<h2 class="home__heading-lg">
+Featured guides</h2>
+
+<p class="home__paragraph-lg">
+Learn from the Elementary team and thousands of users from our community how to set up effective, scalable data observability.
+
+</p>
+
+</div>
+
+<div class="home__3col">
+<InfoCard label="Best practices" labelColor="gray" title="Detection and coverage" description="Learn how to build effective, efficient test coverage to catch real issues." link="/cloud/best-practices/detection-and-coverage" layout="vertical" />
+
+<InfoCard label="Best practices" labelColor="gray" title="Triage and response" description="Learn how to triage data issues with context, ownership, and clear next steps." link="/cloud/best-practices/triage-and-response" layout="vertical" />
+
+<InfoCard label="Best practices" labelColor="gray" title="Governance" description="Learn how to assign ownership and define expectations to make observability actionable." link="/cloud/best-practices/governance-for-observability" layout="vertical" />
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="home__theme-pink">
+<div class="home__container">
+<div class="home__cta">
+<h2 class="home__heading-lg">
+Join the community</h2>
+
+<p class="home__paragraph-lg">
+Join the Elementary Community for AI and team support, explore best practices, and stay up to date on OSS and Cloud. Connect with other data professionals and help shape what's next.
+
+</p>
+
+<a href="https://elementary-data.com/community" class="home__button home__button--white">
+<Icon icon="slack" size={16} />Join now
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 <HomeFooter />
