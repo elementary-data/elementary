@@ -1,5 +1,5 @@
 {% macro get_result_rows_agate(days_back, valid_ids_query = none) %}
-  {% do return(adapter.dispatch('get_result_rows_agate', 'elementary')(days_back, valid_ids_query)) %}
+  {% do return(adapter.dispatch('get_result_rows_agate', 'elementary_cli')(days_back, valid_ids_query)) %}
 {% endmacro %}
 
 {% macro default__get_result_rows_agate(days_back, valid_ids_query = none) %}
