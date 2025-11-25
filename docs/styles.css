@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 /* ==================================== */
-/*          DARK MODE LINKS
+/*          DARK MODE LINKS & ORANGE OVERRIDES
 /* ==================================== */
 .dark a[style*="text-decoration"],
 .dark a[style*="underline"] {
@@ -10,6 +10,25 @@
 
 .dark a[href] {
   text-decoration-color: #FF20B8;
+}
+
+/* Override any orange colors in dark mode */
+.dark * {
+  --mint-light: #FF20B8 !important;
+}
+
+.dark [style*="#FE9356"],
+.dark [style*="#fe9356"],
+.dark [style*="rgb(254, 147, 86)"],
+.dark [style*="rgb(254,147,86)"] {
+  color: #FF20B8 !important;
+  border-color: #FF20B8 !important;
+  background-color: rgba(255, 32, 184, 0.1) !important;
+}
+
+.dark [style*="text-decoration-color"][style*="#FE9356"],
+.dark [style*="text-decoration-color"][style*="#fe9356"] {
+  text-decoration-color: #FF20B8 !important;
 }
 
 /* ==================================== */
@@ -630,7 +649,7 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: underline;
   text-underline-position: from-font;
   text-decoration-thickness: 2px;
-  text-decoration-color: #fe9356;
+  text-decoration-color: #FF20B8;
   margin-bottom: 8px;
   display: inline-block;
 }

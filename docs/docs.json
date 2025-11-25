@@ -4,7 +4,7 @@
   "name": "Elementary",
   "colors": {
     "primary": "#FF20B8",
-    "light": "#FE9356",
+    "light": "#FF20B8",
     "dark": "#FF20B8"
   },
   "favicon": "/elementary_orange_favicon.png",
