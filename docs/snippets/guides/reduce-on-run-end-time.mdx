@@ -37,7 +37,11 @@ Metadata artifacts only need to be uploaded when your project structure changes 
 
 ## Control Other Hooks Timing
 
-You can further control when different parts of the on-run-end logic run by setting additional variables. Adjust these based on what data you need Elementary to collect and when you need it.
+<Warning>
+**Important**: Disabling hooks (other than metadata artifacts) means you will lose this data for those runs. Only disable hooks for runs you don't want to monitor (e.g., local development).
+</Warning>
+
+You can further control when different parts of the on-run-end logic run by setting additional variables.
 
 ### Available Configuration Variables
 
@@ -53,7 +57,7 @@ vars:
 - **`disable_dbt_invocation_autoupload`**: Controls when dbt invocation metadata is uploaded
 
 <Warning>
-Controlling these hooks will reduce the amount of data processed and uploaded at the end of each run, but may impact the completeness of reports and monitoring. Only control hooks for data you don't need on every run.
+Disabling these hooks means you will lose this data for those runs. Only disable hooks for runs you don't want to monitor (e.g., local development). This will reduce the amount of data processed and uploaded at the end of each run, but will impact the completeness of reports and monitoring for those runs.
 </Warning>
 
 ## Limit Hooks to Production or Specific Targets
