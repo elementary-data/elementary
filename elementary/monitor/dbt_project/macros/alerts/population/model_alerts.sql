@@ -21,7 +21,13 @@
             'owners': elementary.insensitive_get_dict_value(raw_model_alert, 'owners'),
             'tags': elementary.insensitive_get_dict_value(raw_model_alert, 'tags'),
             'model_meta': elementary.insensitive_get_dict_value(raw_model_alert, 'model_meta'),
-            'status': status
+            'status': status,
+            'job_id': elementary.insensitive_get_dict_value(raw_model_alert, 'job_id'),
+            'job_name': elementary.insensitive_get_dict_value(raw_model_alert, 'job_name'),
+            'job_run_id': elementary.insensitive_get_dict_value(raw_model_alert, 'job_run_id'),
+            'job_url': elementary.insensitive_get_dict_value(raw_model_alert, 'job_url'),
+            'job_run_url': elementary.insensitive_get_dict_value(raw_model_alert, 'job_run_url'),
+            'orchestrator': elementary.insensitive_get_dict_value(raw_model_alert, 'orchestrator')
         } %}
 
         {% set model_alert = elementary_cli.generate_alert_object(
@@ -52,6 +58,14 @@
 
     seeds as (
         select * from {{ ref('elementary', 'dbt_seeds') }}
+    ),
+
+    dbt_invocations as (
+        select * from {{ ref('elementary', 'dbt_invocations') }}
+    ),
+
+    dbt_run_results as (
+        select * from {{ ref('elementary', 'dbt_run_results') }}
     ),
 
     artifacts_meta as (
@@ -106,8 +120,8 @@
     all_alerts as ( 
         select *
         from all_run_results
-        where lower(status) != 'success'
-        and {{ elementary.edr_cast_as_timestamp('generated_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
+        where lower(all_run_results.status) != 'success'
+        and {{ elementary.edr_cast_as_timestamp('all_run_results.generated_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 
     select 
@@ -115,7 +129,7 @@
         all_alerts.unique_id,
         {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
         all_alerts.unique_id as alert_class_id,
-        {{ elementary.edr_cast_as_timestamp("generated_at") }} as detected_at,
+        {{ elementary.edr_cast_as_timestamp("all_alerts.generated_at") }} as detected_at,
         {{ elementary.edr_current_timestamp() }} as created_at,
         all_alerts.database_name,
         all_alerts.materialization,
@@ -128,9 +142,17 @@
         all_alerts.alias,
         all_alerts.status,
         all_alerts.full_refresh,
-        artifacts_meta.meta as model_meta
+        artifacts_meta.meta as model_meta,
+        invocations.job_id,
+        invocations.job_name,
+        invocations.job_run_id,
+        invocations.job_url,
+        invocations.job_run_url,
+        invocations.orchestrator
     from all_alerts
     left join artifacts_meta on all_alerts.unique_id = artifacts_meta.unique_id
+    left join dbt_run_results on all_alerts.alert_id = dbt_run_results.model_execution_id
+    left join dbt_invocations as invocations on dbt_run_results.invocation_id = invocations.invocation_id
     where all_alerts.alert_id not in (
         {# "this" is referring to "alerts_v2" - we are executing it using a post_hook over "alerts_v2" #}
         select alert_id from {{ this }}
