@@ -131,7 +131,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
   font-size: 16px;
   color: #fff;
-  background: #f2386c;
+  background: #FF20B8;
   border: none;
   outline: none;
   cursor: pointer;
@@ -144,7 +144,7 @@ h1, h2, h3, h4, h5, h6 {
 .home__button--white {
   color: #460064;
   background: #fff;
-  border: 1px solid #f2386c;
+  border: 1px solid #FF20B8;
 }
 
 .home__button---tertiary {
@@ -498,7 +498,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .home__feature-header__heading span {
-  color: #f2386c;
+  color: #FF20B8;
 }
 
 .home__feature-header__button {
@@ -640,13 +640,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .home__hero-btn--primary {
-  background: #f2386c;
+  background: #FF20B8;
   color: #fff;
   border: none;
 }
 
 .home__hero-btn--primary:hover {
-  background: #d12a5c;
+  background: #E01DA5;
 }
 
 .home__hero-btn--secondary {
@@ -793,7 +793,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .home__info-card__label--pink {
-  background: #f2386c;
+  background: #FF20B8;
   color: #fff;
 }
 

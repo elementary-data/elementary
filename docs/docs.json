@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Elementary",
   "colors": {
-    "primary": "#F2386C",
+    "primary": "#FF20B8",
     "light": "#FE9356",
-    "dark": "#F2386C"
+    "dark": "#FF20B8"
   },
   "favicon": "/elementary_orange_favicon.png",
   "navigation": {
@@ -558,8 +558,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "https://res.cloudinary.com/do5hrgokq/image/upload/v1764079214/Elementary_2025_Full_Color_Logo_mtdixp.png",
+    "dark": "https://res.cloudinary.com/do5hrgokq/image/upload/v1764079353/Elementary_2025_White_Logo_Pink_Mark_l85bke.png"
   },
   "appearance": {
     "default": "dark"
