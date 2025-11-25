@@ -35,23 +35,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .home__theme-purple {
-  background-color: #460362;
+  background-color: #000000;
   color: white;
 }
 
 .dark .home__theme-purple {
-  background-color: #2d113e;
-  color: white;
+  background-color: #FFFFFF;
+  color: #000000;
 }
 
 .home__theme-purple-dark {
-  background-color: #32113d;
+  background-color: #000000;
   color: white;
 }
 
 .dark .home__theme-purple-dark {
-  background-color: #32113d;
-  color: white;
+  background-color: #FFFFFF;
+  color: #000000;
 }
 
 .home__theme-pink {
@@ -563,7 +563,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .home__hero-section {
   width: 100%;
-  background: #460064;
+  background: #000000;
 }
 .home__hero-layout {
   display: flex;
@@ -597,11 +597,19 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
+.dark .home__hero-title {
+  color: #000000;
+}
+
 .home__hero-subtitle {
   font-size: 18px;
   color: #fff;
   margin: 0;
   line-height: 1.5;
+}
+
+.dark .home__hero-subtitle {
+  color: #000000;
 }
 
 .home__hero-link {
@@ -613,6 +621,10 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration-color: #fe9356;
   margin-bottom: 8px;
   display: inline-block;
+}
+
+.dark .home__hero-link {
+  color: #000000;
 }
 
 .home__hero-buttons {
@@ -657,7 +669,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .home__hero-btn--secondary:hover {
   background: #fff;
-  color: #460064;
+  color: #000000;
 }
 
 .home__hero-image-block {
@@ -732,17 +744,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark .home__hero-section {
-  background: #2d1040;
+  background: #FFFFFF;
 }
 
 .dark .home__hero-btn--secondary {
-  border-color: #e0e0e0;
-  color: #e0e0e0;
+  border-color: #000000;
+  color: #000000;
 }
 
 .dark .home__hero-btn--secondary:hover {
-  background: #e0e0e0;
-  color: #2d1040;
+  background: #000000;
+  color: #FFFFFF;
 }
 
 /* ==================================== */
