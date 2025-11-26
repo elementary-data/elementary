@@ -71,7 +71,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark .home__theme-purple {
-  background-color: #FFFFFF;
+  background-color: #EBE5E6;
   color: #000000;
 }
 
@@ -81,7 +81,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark .home__theme-purple-dark {
-  background-color: #FFFFFF;
+  background-color: #EBE5E6;
   color: #000000;
 }
 
@@ -174,7 +174,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .home__button--white {
   color: #460064;
-  background: #fff;
+  background: #EBE5E6;
   border: 1px solid #FF20B8;
 }
 
@@ -237,7 +237,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 12px;
   width: 100%;
   height: 100%;
-  background: #fff;
+  background: #EBE5E6;
   padding: 20px;
   max-width: 480px;
   transition: box-shadow 0.2s, transform 0.2s, padding 0.2s;
@@ -385,8 +385,8 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0;
   padding: 4px 8px;
   border-radius: 8px;
-  background: #f6edef;
-  color: #f1386e;
+  background: rgba(255, 32, 184, 0.1);
+  color: #FF20B8;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -397,7 +397,7 @@ h1, h2, h3, h4, h5, h6 {
   min-width: 32px;
   width: 35px;
   height: 20px;
-  border: 1px solid #ffb6ca;
+  border: 1px solid rgba(255, 32, 184, 0.3);
   box-sizing: border-box;
 }
 
@@ -411,9 +411,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .home__feature-card__cloud-feature-tag:hover,
 .home__feature-card__cloud-feature-tag:focus {
-  background: #f6edef;
-  color: #f1386e;
-  border-color: #ffb6ca;
+  background: rgba(255, 32, 184, 0.1);
+  color: #FF20B8;
+  border-color: rgba(255, 32, 184, 0.3);
   width: 130px;
 }
 
@@ -700,7 +700,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .home__hero-btn--secondary:hover {
-  background: #fff;
+  background: #EBE5E6;
   color: #000000;
 }
 
@@ -775,7 +775,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark .home__hero-section {
-  background: #FFFFFF;
+  background: #EBE5E6;
 }
 
 .dark .home__hero-btn--secondary {
@@ -796,7 +796,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 12px;
   width: 100%;
   height: 100%;
-  background: #fff;
+  background: #EBE5E6;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(30, 41, 59, 0.06);
   display: block;
@@ -898,7 +898,7 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   width: 60px;
   height: 60px;
-  background: #fff;
+  background: #EBE5E6;
   border: 1px solid #E8E8E8;
   border-radius: 10px;
   display: flex;
