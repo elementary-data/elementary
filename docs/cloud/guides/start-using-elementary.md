@@ -1,6 +1,6 @@
 # Start Using Elementary
 
-With your environment connected, the next step is to see Elementary in action.
+With your environment connected (see [Set up Elementary](https://docs.elementary-data.com/cloud/guides/set-up-elementary) for technical onboarding), the next step is to see Elementary in action.
 
 We'll take a few of your key assets and run them through the core reliability steps: setting clear ownership, adding the right tests, configuring alerts, and understanding how issues are detected and resolved. This gives you a practical, hands-on view of how Elementary keeps your most important data reliable.
 
