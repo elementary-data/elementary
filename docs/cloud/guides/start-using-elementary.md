@@ -8,57 +8,57 @@ We'll take a few of your key assets and run them through the core reliability st
 
 *Goal: Identify business-critical assets in your pipeline and make sure their documentation and ownership are clear.*
 
-- [ ] In the [Catalog](https://docs.elementary-data.com/cloud/features/collaboration-and-communication/catalog), identify and mark three [critical assets](https://docs.elementary-data.com/cloud/features/data-governance/critical_assets)  
-- [ ] Add or update [descriptions, tags, and owners](https://docs.elementary-data.com/cloud/features/data-governance/manage-metadata) for these assets  
-- [ ] Leverage the [Governance AI agent](https://docs.elementary-data.com/cloud/ai-agents/governance-agent) - Complete missing metadata based on project context and according to your instructions.  
-- [ ] View [end-to-end, column-level lineage](https://docs.elementary-data.com/cloud/features/data-lineage/lineage) for each critical asset
+[ ] In the [Catalog](https://docs.elementary-data.com/cloud/features/collaboration-and-communication/catalog), identify and mark three [critical assets](https://docs.elementary-data.com/cloud/features/data-governance/critical_assets)  
+[ ] Add or update [descriptions, tags, and owners](https://docs.elementary-data.com/cloud/features/data-governance/manage-metadata) for these assets  
+[ ] Leverage the [Governance AI agent](https://docs.elementary-data.com/cloud/ai-agents/governance-agent) - Complete missing metadata based on project context and according to your instructions.  
+[ ] View [end-to-end, column-level lineage](https://docs.elementary-data.com/cloud/features/data-lineage/lineage) for each critical asset
 
 ## Setup monitoring on critical assets
 
 *Goal: Ensure critical assets are covered with the right tests so issues are detected before they affect consumers.*
 
-- [ ] Open the [Test Coverage](https://docs.elementary-data.com/cloud/features/data-tests/test-coverage-screen) view to understand existing coverage by dimension  
-- [ ] [Add missing tests](https://docs.elementary-data.com/cloud/features/data-tests/data-tests-overview#test-configuration) such as freshness, volume, uniqueness, [anomaly detection](https://docs.elementary-data.com/data-tests/how-anomaly-detection-works), [schema changes](https://docs.elementary-data.com/data-tests/schema-tests/schema-changes) or custom logic  
-- [ ] Leverage the [Test Recommendation AI agent](https://docs.elementary-data.com/cloud/ai-agents/test-recommendation-agent) for suggested tests based on patterns and lineage  
-- [ ] For source monitoring: Elementary automatically adds ML-based [freshness](https://docs.elementary-data.com/cloud/features/anomaly-detection/automated-freshness) and [volume](https://docs.elementary-data.com/cloud/features/anomaly-detection/automated-volume) tests to all sources to catch pipeline and ingestion issues early
+[ ] Open the [Test Coverage](https://docs.elementary-data.com/cloud/features/data-tests/test-coverage-screen) view to understand existing coverage by dimension  
+[ ] [Add missing tests](https://docs.elementary-data.com/cloud/features/data-tests/data-tests-overview#test-configuration) such as freshness, volume, uniqueness, [anomaly detection](https://docs.elementary-data.com/data-tests/how-anomaly-detection-works), [schema changes](https://docs.elementary-data.com/data-tests/schema-tests/schema-changes) or custom logic  
+[ ] Leverage the [Test Recommendation AI agent](https://docs.elementary-data.com/cloud/ai-agents/test-recommendation-agent) for suggested tests based on patterns and lineage  
+[ ] For source monitoring: Elementary automatically adds ML-based [freshness](https://docs.elementary-data.com/cloud/features/anomaly-detection/automated-freshness) and [volume](https://docs.elementary-data.com/cloud/features/anomaly-detection/automated-volume) tests to all sources to catch pipeline and ingestion issues early
 
 ## Setup Alerts
 
 *Goal: Create a routing process that gets the right alerts to the right people while avoiding alert fatigue.*
 
-- [ ] Use [tags, owners, and subscribers](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/owners-and-subscribers) to define who should be notified and who is responsible for action  
-- [ ] Build an internal alert response plan: who fixes the issue, who needs awareness, and what the SLA should be (see the full playbook [here](https://www.elementary-data.com/post/breaking-alert-fatigue-the-enterprise-playbook-for-data-alerts))  
-- [ ] Create [alert rules](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/alert-rules) that translate this plan into routing, using tags, owners, subscribers, and severity
+[ ] Use [tags, owners, and subscribers](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/owners-and-subscribers) to define who should be notified and who is responsible for action  
+[ ] Build an internal alert response plan: who fixes the issue, who needs awareness, and what the SLA should be (see the full playbook [here](https://www.elementary-data.com/post/breaking-alert-fatigue-the-enterprise-playbook-for-data-alerts))  
+[ ] Create [alert rules](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/alert-rules) that translate this plan into routing, using tags, owners, subscribers, and severity
 
 ## Triage & Resolution
 
 *Goal: Investigate and resolve issues quickly and confidently.*
 
-- [ ] Triage: Review lineage and upstream failures alongside recent commits and dbt run history to understand what changed and what the issue is impacting  
-- [ ] Use the [Triage & Resolution AI agent](https://docs.elementary-data.com/cloud/ai-agents/triage-resolution-agent) to run the investigation for you by analyzing lineage, failures, recent changes, and dependencies, and surfacing root causes  
-- [ ] Use the [Incidents](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/incident-management) screen to manage issues collaboratively and keep track of everything that's currently open
+[ ] Triage: Review lineage and upstream failures alongside recent commits and dbt run history to understand what changed and what the issue is impacting  
+[ ] Use the [Triage & Resolution AI agent](https://docs.elementary-data.com/cloud/ai-agents/triage-resolution-agent) to run the investigation for you by analyzing lineage, failures, recent changes, and dependencies, and surfacing root causes  
+[ ] Use the [Incidents](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/incident-management) screen to manage issues collaboratively and keep track of everything that's currently open
 
 ## Optimize Performance
 
 *Goal: Meet your SLAs, improve run times, and ensure your pipelines operate efficiently.*
 
-- [ ] Identify long-running tests and models using the [Performance pages](https://docs.elementary-data.com/cloud/features/performance-monitoring/performance-monitoring)  
-- [ ] Use the [Optimization AI agent](https://docs.elementary-data.com/cloud/ai-agents/performance-cost-agent) to optimize queries by surfacing inefficiencies, suggesting improved SQL patterns, and identifying opportunities to reduce data scans or simplify logic
+[ ] Identify long-running tests and models using the [Performance pages](https://docs.elementary-data.com/cloud/features/performance-monitoring/performance-monitoring)  
+[ ] Use the [Optimization AI agent](https://docs.elementary-data.com/cloud/ai-agents/performance-cost-agent) to optimize queries by surfacing inefficiencies, suggesting improved SQL patterns, and identifying opportunities to reduce data scans or simplify logic
 
 ## Measure Progress and Data Health
 
 *Goal: Track improvements in reliability and identify where further attention is needed.*
 
-- [ ] Use the [Data Health](https://docs.elementary-data.com/cloud/features/collaboration-and-communication/data-health) screen to monitor overall health scores for your assets  
-- [ ] Filter the screen by domain, owners, or critical assets to measure progress at a higher resolution and keep accountability clear
+[ ] Use the [Data Health](https://docs.elementary-data.com/cloud/features/collaboration-and-communication/data-health) screen to monitor overall health scores for your assets  
+[ ] Filter the screen by domain, owners, or critical assets to measure progress at a higher resolution and keep accountability clear
 
 ## Enable analysts and business users
 
 *Goal: Make it easy for anyone to discover assets, understand what they represent, see how they're built, and know whether they can be trusted.*
 
-- [ ] Use the [Catalog](https://docs.elementary-data.com/cloud/features/collaboration-and-communication/catalog) to explore assets, their definitions, ownership, and current health status  
-- [ ] Review [Lineage](https://docs.elementary-data.com/cloud/features/data-lineage/lineage) to see how the asset is built, what depends on it, and whether any upstream issues or test failures affect it  
-- [ ] Use the [Discovery AI agent](https://docs.elementary-data.com/cloud/ai-agents/catalog-agent) to get clear explanations of the asset, how it's calculated, and any current reliability concerns
+[ ] Use the [Catalog](https://docs.elementary-data.com/cloud/features/collaboration-and-communication/catalog) to explore assets, their definitions, ownership, and current health status  
+[ ] Review [Lineage](https://docs.elementary-data.com/cloud/features/data-lineage/lineage) to see how the asset is built, what depends on it, and whether any upstream issues or test failures affect it  
+[ ] Use the [Discovery AI agent](https://docs.elementary-data.com/cloud/ai-agents/catalog-agent) to get clear explanations of the asset, how it's calculated, and any current reliability concerns
 
 ## Advanced: Use MCP to Extend Elementary Everywhere
 
@@ -66,15 +66,15 @@ We'll take a few of your key assets and run them through the core reliability st
 
 *Goal: Make development safer and faster by bringing full pipeline context into your coding environment.*
 
-- [ ] [Enable Elementary MCP](https://docs.elementary-data.com/cloud/mcp/setup-guide) inside your IDE or coding assistant (Cursor, Claude Code, etc.)  
-- [ ] Add metadata or validations at scale without touching the UI or code manually  
-- [ ] Check lineage, coverage, and asset health while you code so you can spot issues early, understand downstream impact, and prevent problems from reaching production
+[ ] [Enable Elementary MCP](https://docs.elementary-data.com/cloud/mcp/setup-guide) inside your IDE or coding assistant (Cursor, Claude Code, etc.)  
+[ ] Add metadata or validations at scale without touching the UI or code manually  
+[ ] Check lineage, coverage, and asset health while you code so you can spot issues early, understand downstream impact, and prevent problems from reaching production
 
 ### For Analysts and Business Users
 
 *Goal: Bring Elementary's context into the tools people already use.*
 
-- [ ] [Connect Elementary MCP](https://docs.elementary-data.com/cloud/mcp/setup-guide) to any MCP-enabled client (Claude, ChatGPT, or internal AI agents)  
-- [ ] Allow users to ask about assets, see definitions and ownership, review lineage, and check health or incidents directly through their AI assistant  
-- [ ] (Optional) Connect additional MCPs such as dbt or Atlan so users can navigate across multiple systems from a single conversational interface
+[ ] [Connect Elementary MCP](https://docs.elementary-data.com/cloud/mcp/setup-guide) to any MCP-enabled client (Claude, ChatGPT, or internal AI agents)  
+[ ] Allow users to ask about assets, see definitions and ownership, review lineage, and check health or incidents directly through their AI assistant  
+[ ] (Optional) Connect additional MCPs such as dbt or Atlan so users can navigate across multiple systems from a single conversational interface
 
