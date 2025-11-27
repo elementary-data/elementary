@@ -160,9 +160,8 @@
             "group": "Guides",
             "pages": [
               {
-                "group": "Setup Elementary",
+                "group": "Onboarding guides",
                 "pages": [
-                  "cloud/onboarding/signup",
                   "cloud/onboarding/quickstart-dbt-package",
                   "cloud/onboarding/connect-data-warehouse",
                   "cloud/manage-team"
