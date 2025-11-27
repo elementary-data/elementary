@@ -1,0 +1,65 @@
+---
+title: "DWH Artifacts Sync"
+sidebarTitle: "DWH artifacts sync"
+---
+
+Elementary Cloud automatically syncs data warehouse (DWH) artifacts to provide comprehensive observability of your data infrastructure. This process collects metadata from your data warehouse, including information about tables, columns, query history, and other metadata that powers Elementary's monitoring and observability features.
+
+## What are DWH Artifacts?
+
+DWH artifacts are metadata collected from your data warehouse that Elementary uses to provide insights into your data infrastructure. These include:
+
+- **Metadata**: Baseline timestamps and synchronization information
+- **Relations**: Information about tables and views in your data warehouse
+- **Columns**: Column-level metadata including types, constraints, and descriptions
+- **Query History**: Historical query execution data used for performance monitoring and anomaly detection
+- **Relation Timeline**: Changes to tables and views over time
+- **View Definitions**: SQL definitions of views in your data warehouse
+- **Iceberg Snapshots**: For data lakes using Apache Iceberg format
+
+## How It Works
+
+The DWH artifacts sync process runs automatically as part of Elementary Cloud's data synchronization. The sync:
+
+1. **Connects to your data warehouse** using the credentials you've configured
+2. **Queries metadata** from information schemas and query history tables
+3. **Extracts and processes** the metadata artifacts
+4. **Loads the artifacts** into Elementary Cloud for analysis
+
+## Automatic Synchronization
+
+DWH artifacts are synced automatically based on your environment's sync schedule. The sync frequency depends on your [sync scheduling configuration](/cloud/guides/sync-scheduling):
+
+- **Hourly syncs**: DWH artifacts are collected during the hourly sync cycle
+- **Webhook-triggered syncs**: DWH artifacts are collected when a sync is triggered via webhook
+
+## What This Enables
+
+The DWH artifacts sync enables several key features in Elementary Cloud:
+
+- **Automated Monitors**: Volume and freshness monitors that analyze query history metadata without querying your actual data
+- **Performance Monitoring**: Insights into query performance and data warehouse usage
+- **Data Catalog**: Automatic discovery and cataloging of tables, columns, and their relationships
+- **Lineage**: Understanding data lineage and dependencies between tables
+- **Cost Optimization**: Analysis of query patterns to identify optimization opportunities
+
+## Permissions Required
+
+To sync DWH artifacts, Elementary needs appropriate permissions in your data warehouse:
+
+- **Read access to information schema**: To discover tables, columns, and metadata
+- **Read access to query history**: To analyze query patterns and performance (required for automated monitors)
+- **Read access to view definitions**: To understand view structures and dependencies
+
+For specific permission requirements for your data warehouse, see the [integration documentation](/cloud/integrations/elementary-integrations).
+
+## Troubleshooting
+
+If DWH artifacts are not syncing properly:
+
+1. **Check permissions**: Ensure Elementary has the required read permissions in your data warehouse
+2. **Verify sync schedule**: Confirm that your environment syncs are running successfully
+3. **Review logs**: Check your environment's sync logs for any errors related to metadata collection
+4. **Contact support**: If issues persist, reach out to Elementary support for assistance
+
+For more information about troubleshooting sync issues, see the [troubleshooting guide](/cloud/guides/troubleshoot).
