@@ -299,7 +299,13 @@
               "data-tests/dbt/dbt-package",
               "data-tests/dbt/quickstart-package",
               "data-tests/dbt/dbt-artifacts",
-              "data-tests/dbt/on-run-end_hooks",
+              {
+                "group": "on-run-end hooks",
+                "pages": [
+                  "data-tests/dbt/on-run-end_hooks",
+                  "data-tests/dbt/reduce-on-run-end-time"
+                ]
+              },
               "data-tests/dbt/package-models"
             ]
           },
