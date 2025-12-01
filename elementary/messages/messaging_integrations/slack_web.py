@@ -104,6 +104,7 @@ class SlackWebMessagingIntegration(
                 blocks=json.dumps(formatted_message.blocks),
                 attachments=json.dumps(formatted_message.attachments),
                 thread_ts=thread_ts,
+                unfurl_links=False,
                 reply_broadcast=reply_broadcast,
             )
         except SlackApiError as e:
