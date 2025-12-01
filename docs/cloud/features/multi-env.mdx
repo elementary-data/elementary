@@ -8,12 +8,14 @@ import CloudFeatureTag from '/snippets/cloud/cloud-feature-tag.mdx';
 
 <CloudFeatureTag />
 
+Elementary supports two approaches for managing multiple environments:
+
+## Separate Environments
+
 An environment in Elementary is a combination of a dbt project and a target. 
-For example: If you have a single dbt project with three targets, prod, staging and dev, you can create 3 environments in Elementary and monitor these environments. 
+For example: If you have a single dbt project with three targets, prod, staging and dev, you can create 3 environments in Elementary and monitor these environments separately. 
 
-If you have several dbt projects and even different data warehouses, Elementary enables monitoring the data quality of all these environments in a single interface. Simply click on "Create environment" and set up all integration connections.
-
-Elementary will soon enable multiple dbt projects in the same environment and lineage.
+If you have several dbt projects and even different data warehouses, Elementary enables monitoring the data quality of all these environments in a single interface. Simply click on "Create environment" and set up all integration connections. Each environment is managed independently with its own monitoring, alerts, and configuration.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
@@ -22,3 +24,43 @@ Elementary will soon enable multiple dbt projects in the same environment and li
     />
   </div>
 </Frame>
+
+## Multi-Environment Support
+
+Elementary now supports connecting multiple dbt projects to a single Elementary environment. This gives teams the flexibility to organize their dbt code by layers, domains, or separate repositories while still getting one unified view of data health, lineage, and reliability.
+
+### How it Works
+
+You can connect several dbt projects, each with its own Elementary schema and code repository, into the same Elementary environment. Once connected, Elementary combines lineage and context across all projects so you have a complete picture of how data flows through your entire stack.
+
+### Key capabilities
+
+• **Unified lineage across projects**
+Elementary identifies assets by their full relation name, so lineage can span multiple dbt projects with complete accuracy.
+
+• **No changes to your dbt structure**
+Each dbt project keeps its own models, sources, repository, and Elementary schema. Elementary handles the unification at the environment level.
+
+• **Automatic linking between sources and models**
+If the same relation appears as a model in one project and a source in another, Elementary displays two nodes in lineage with a clear link between them. This makes dependencies explicit and helps you trace issues further upstream.
+
+### When to Use Multi-Environment Support
+
+Multi-environment support is designed for teams that organize dbt work in multiple projects, such as:
+
+• Layered architectures (bronze, silver, gold)
+
+• Domain-based modeling (finance, marketing, operations and others)
+
+• Multiple dbt projects built on the same raw data
+
+• Pipelines stored in separate repositories
+
+This feature lets you maintain the separation between projects while still using Elementary as one consistent reliability control plane.
+
+### Setup and Configuration
+
+Multi-environment support is currently available through the Elementary team.
+If you want to enable it or learn more about recommended setups, reach out to the team.
+
+A self-serve configuration flow will be available soon.
