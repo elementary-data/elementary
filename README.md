@@ -8,40 +8,40 @@
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads/>
 </p>
 
+<h2 align="center">
+ dbt-native data observability for analytics & data engineers
+</h2>
+
 <div align="center">
 
 ⭐️ Star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="45"/></a> ⭐
 
-[Demo »](https://bit.ly/3IAp9wf) | [Docs »](https://docs.elementary-data.com/) | [Slack »](https://www.elementary-data.com/community)
+[Docs »](https://docs.elementary-data.com/) | [Join the Elementary Community »](https://www.elementary-data.com/community)
 
 </div>
+## What is Elementary OSS?
 
-## What is Elementary?
+Built by the [Elementary](https://www.elementary-data.com) team, helping you deliver trusted data in the AI era.
 
-Elementary is a dbt-native data observability solution for data and analytics engineers.
-Set up in minutes, gain immediate visibility, detect data issues, send actionable alerts, and understand impact and root cause.
-Elementary has two offerings: an open-source package and managed platform.
+Elementary OSS is the open-source CLI for dbt-native data observability. It works with the [Elementary dbt package](https://github.com/elementary-data/dbt-data-reliability) to generate the basic Elementary observability report and send alerts to Slack and Microsoft Teams.
 
-<kbd align="center">
-        <a href="https://storage.googleapis.com/elementary_static/elementary_demo.html"><img align="center" style="max-width:300px;" src="static/report_ui.gif"> </a>
-</kbd>
+For teams that need data reliability at scale, we offer **[Elementary Cloud](https://www.elementary-data.com/)**, a full Data & AI Control Plane with automated ML monitoring, column-level lineage from source to BI, a built-in catalog, and AI agents that scale reliability workflows for both engineers and business users.
 
-<br>
+## How It Works
 
-## Open-source Package vs. Cloud Platform
+Elementary OSS connects to your warehouse and reads the metadata, artifacts, and test results collected by the Elementary dbt package.  
+With this information, it can:
 
-### Elementary Cloud Platform
+- Generate a data observability report  
+- Surface anomalies and failed tests  
+- Send alerts to Slack and Teams  
+- Track data quality trends  
 
-Ideal for teams monitoring mission-critical data pipelines, requiring guaranteed uptime and reliability, short-time-to-value, advanced features, collaboration, and professional support.
-The solution is secure by design, and requires no access to your data from cloud.
+## Quickstart
 
-[Get started with Elementary Cloud](https://docs.elementary-data.com/quickstart)
+Follow the quickstart guide to install and configure the Elementary dbt package and CLI:
 
-### Open-source Package
-
-Elementary Community is an open-source CLI tool you can deploy and orchestrate to send Slack alerts and self-host the Elementary report. It is best for data and analytics engineers that require basic observability capabilities.
-
-[Get started with the Open-source Package](https://docs.elementary-data.com/oss/oss-introduction)
+👉 https://docs.elementary-data.com/oss/quickstart
 
 ## Features
 
@@ -67,10 +67,10 @@ Elementary Community is an open-source CLI tool you can deploy and orchestrate t
 
 ## Support
 
-For additional information and help, you can use one of these channels:
+For additional information and help:
 
-- [Slack community](https://www.elementary-data.com/community) \(Release announcements, community support, discussions, etc.\)
-- [GitHub issues](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
+- [Join the Slack community](https://www.elementary-data.com/community) \(Release announcements, community and AI support, discussions, etc.\)
+- [Open a GitHub issue](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
 - Check out the [contributions guide](./CONTRIBUTING.md) and [open issues](https://github.com/elementary-data/elementary/issues).
 
 ##
