@@ -18,47 +18,114 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "- First bullet point\n- Second bullet point"
+        "text": "```def hello_world():\n    print('Hello, World!')```"
       }
     },
     {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "\u2705 Check item"
-      }
-    },
-    {
-      "type": "section",
-      "fields": [
-        {
-          "type": "mrkdwn",
-          "text": "*Status*\nPassed"
-        },
-        {
-          "type": "mrkdwn",
-          "text": "*Tags*\ntest, example"
-        }
-      ]
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "\ud83d\udd0e *Details Section*\nHere's some content with a <https://example.com|link>"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "<@resolved_user1> `select 1`"
-      }
+      "type": "divider"
     }
   ],
   "attachments": [
     {
-      "blocks": []
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "- First bullet point\n- Second bullet point"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\u2705 Check item"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Status*\nPassed"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Tags*\ntest, example"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "```Column 1     Column 2     Column 3\n-----------  -----------  -----------\nRow 1 Col 1  Row 1 Col 2  Row 1 Col 3\nRow 2 Col 1  Row 2 Col 2  Row 2 Col 3```"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "\ud83d\udd0e *Details Section*\nHere's some content with a <https://example.com|link>"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "static_select",
+              "placeholder": {
+                "type": "plain_text",
+                "text": "Select priority",
+                "emoji": true
+              },
+              "options": [
+                {
+                  "text": {
+                    "type": "plain_text",
+                    "text": "High",
+                    "emoji": true
+                  },
+                  "value": "high"
+                },
+                {
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Medium",
+                    "emoji": true
+                  },
+                  "value": "medium"
+                },
+                {
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Low",
+                    "emoji": true
+                  },
+                  "value": "low"
+                }
+              ],
+              "action_id": "priority_dropdown"
+            },
+            {
+              "type": "users_select",
+              "placeholder": {
+                "type": "plain_text",
+                "text": "Assign to user",
+                "emoji": true
+              },
+              "action_id": "assign_user"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<@resolved_user1> `select 1`"
+          }
+        }
+      ]
     }
   ]
 }
