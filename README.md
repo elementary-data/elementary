@@ -21,6 +21,7 @@ Elementary OSS: dbt-native data observability
   ⭐️ Star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="45"/></a> 
 </div>
 </br>
+
 **Built by the [Elementary](https://www.elementary-data.com) team, helping you deliver trusted data in the AI era.**
 
 Elementary OSS is the open-source CLI for dbt-native data observability. It works with the [Elementary dbt package](https://github.com/elementary-data/dbt-data-reliability) to generate the basic Elementary observability report and send alerts to Slack and Microsoft Teams.
