@@ -79,8 +79,10 @@ class DataMonitoring:
             relation = self.internal_dbt_runner.run_operation(
                 "elementary_cli.get_elementary_database_and_schema", quiet=True
             )[0]
-            logger.info(f"Elementary's database and schema: '{relation}'")
-            return relation
+            # Strip quotes from relation to avoid case sensitivity issues and double-quoting
+            strip_relation = relation.strip('"')
+            logger.info(f"Elementary's database and schema: '{strip_relation}'")
+            return strip_relation
         except Exception as ex:
             logger.error("Failed to parse Elementary's database and schema.")
             if self.tracking:
