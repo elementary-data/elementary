@@ -14,9 +14,8 @@ Elementary OSS: dbt-native data observability
 
 <div align="center">
 
-⭐️ Star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="45"/></a> ⭐
-
 [Docs »](https://docs.elementary-data.com/) | [Join the Elementary Community »](https://www.elementary-data.com/community)
+⭐️ Star the repo <a href="https://github.com/elementary-data/elementary/stargazers"><img src="static/star_github.png" width="45"/></a> ⭐
 
 </div>
 
@@ -27,7 +26,7 @@ Elementary OSS is the open-source CLI for dbt-native data observability. It work
 For teams that need data reliability at scale, we offer **[Elementary Cloud](https://www.elementary-data.com/)**, a full Data & AI Control Plane with automated ML monitoring, column-level lineage from source to BI, a built-in catalog, and AI agents that scale reliability workflows for both engineers and business users.
 
 
-![Demo](static/demoreadme.gif)
+![Demo](static/newreadmedemo.gif)
 
 ## How It Works
 
