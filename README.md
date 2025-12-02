@@ -20,16 +20,14 @@ Elementary OSS: dbt-native data observability
 
 </div>
 
-Built by the [Elementary](https://www.elementary-data.com) team, helping you deliver trusted data in the AI era.
+**Built by the [Elementary](https://www.elementary-data.com) team, helping you deliver trusted data in the AI era.**
 
 Elementary OSS is the open-source CLI for dbt-native data observability. It works with the [Elementary dbt package](https://github.com/elementary-data/dbt-data-reliability) to generate the basic Elementary observability report and send alerts to Slack and Microsoft Teams.
 
 For teams that need data reliability at scale, we offer **[Elementary Cloud](https://www.elementary-data.com/)**, a full Data & AI Control Plane with automated ML monitoring, column-level lineage from source to BI, a built-in catalog, and AI agents that scale reliability workflows for both engineers and business users.
 
 
-<kbd align="center">
-        <a <img align="center" style="max-width:300px;" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1764696385/demoreadme_ptlpjv.gif"> </a>
-</kbd>
+![Demo](static/demoreadme.gif)
 
 ## How It Works
 
