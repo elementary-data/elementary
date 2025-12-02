@@ -9,7 +9,7 @@
 </p>
 
 <h2 align="center">
- dbt-native data observability for analytics & data engineers
+Elementary OSS: dbt-native data observability
 </h2>
 
 <div align="center">
@@ -19,6 +19,7 @@
 [Docs »](https://docs.elementary-data.com/) | [Join the Elementary Community »](https://www.elementary-data.com/community)
 
 </div>
+
 ## What is Elementary OSS?
 
 Built by the [Elementary](https://www.elementary-data.com) team, helping you deliver trusted data in the AI era.
@@ -35,7 +36,7 @@ With this information, it can:
 - Generate a data observability report  
 - Surface anomalies and failed tests  
 - Send alerts to Slack and Teams  
-- Track data quality trends  
+- Track model and test performance trends
 
 ## Quickstart
 
@@ -44,32 +45,22 @@ Follow the quickstart guide to install and configure the Elementary dbt package 
 👉 https://docs.elementary-data.com/oss/quickstart
 
 ## Features
-
-**Anomaly detection tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
-
-**Automated monitors** - Out-of-the-box cloud monitors to detect freshness, volume and schema issues.
-
-**End-to-End Data Lineage** - Enriched with the latest test results, for impact and root cause analysis of data issues. Elementary Cloud offers **Column Level Lineage** and **BI integrations**.
-
-**Data quality dashboard** - Single interface for all your data monitoring and test results.
-
-**Models performance** - Monitor models and jobs run results and performance over time.
-
-**Configuration-as-code** - Elementary configuration is managed in your dbt code.
-
-**Alerts** - Actionable alerts including custom channels and tagging of owners.
-
-**Data catalog** - Explore your datasets information - descriptions, columns, datasets health, etc.
-
-**dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
-
-**AI-Powered Data Tests & Unstructured Data Validations** - Validate and monitor data using AI powered tests to validate both structured and unstructured data
+- **Anomaly detection tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
+- **Automated monitors** - Out-of-the-box cloud monitors to detect freshness, volume and schema issues.
+- **End-to-End Data Lineage** - Enriched with the latest test results, for impact and root cause analysis of data issues. Elementary Cloud offers **Column-Level-Lineage from ingestion to BI**.
+- **Data quality dashboard** - Single interface for all your data monitoring and test results.
+- **Models performance** - Monitor models and jobs run results and performance over time.
+- **Configuration-as-code** - Elementary configuration is managed in your dbt code.
+- **Alerts** - Actionable alerts including custom channels and tagging of owners.
+- **Data catalog** - Explore your datasets information - descriptions, columns, datasets health, etc.
+- **dbt artifacts uploader** - Save metadata and run results as part of your dbt runs.
+- **AI-Powered Data Tests & Unstructured Data Validations** - Validate and monitor data using AI powered tests to validate both structured and unstructured data
 
 ## Support
 
 For additional information and help:
 
-- [Join the Slack community](https://www.elementary-data.com/community) \(Release announcements, community and AI support, discussions, etc.\)
+- [Join thousands of users in the Slack community](https://www.elementary-data.com/community) \(Release announcements, community and AI support, discussions, etc.\)
 - [Open a GitHub issue](https://github.com/elementary-data/elementary/issues) \(Bug reports, feature requests)
 - Check out the [contributions guide](./CONTRIBUTING.md) and [open issues](https://github.com/elementary-data/elementary/issues).
 
