@@ -3,7 +3,7 @@
 </p>
 <p align="center">
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
-<a href="https://docs.elementary-data.com/data-tests/dbt/quickstart-package"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
+<a href="https://docs.elementary-data.com/oss/quickstart/quickstart-cli-package"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
 <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads/>
 </p>
@@ -26,7 +26,7 @@ Elementary OSS is the open-source CLI for dbt-native data observability. It work
 
 For teams that need data reliability at scale, we offer **[Elementary Cloud](https://www.elementary-data.com/)**, a full Data & AI Control Plane with automated ML monitoring, column-level lineage from source to BI, a built-in catalog, and AI agents that scale reliability workflows for both engineers and business users.
 
-![Demo Animation]([https://res.cloudinary.com/do5hrgokq/image/upload/v1764696385/demoreadme_ptlpjv.gif)
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1764696385/demoreadme_ptlpjv.gif" width="400">
 
 ## How It Works
 
