@@ -15,6 +15,7 @@ ICON_TO_UNICODE = {
     Icon.BELL: "🔔",
     Icon.GEM: "💎",
     Icon.SPARKLES: "✨",
+    Icon.LINK: "🔗",
 }
 
 for icon in Icon:
