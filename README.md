@@ -28,7 +28,6 @@ Elementary OSS is the open-source CLI for dbt-native data observability. It work
 
 For teams that need data reliability at scale, we offer **[Elementary Cloud](https://www.elementary-data.com/)**, a full Data & AI Control Plane with automated ML monitoring, column-level lineage from source to BI, a built-in catalog, and AI agents that scale reliability workflows for both engineers and business users.
 
-
 ![Demo](static/newreadmedemo.gif)
 
 ## How It Works
@@ -36,9 +35,9 @@ For teams that need data reliability at scale, we offer **[Elementary Cloud](htt
 Elementary OSS connects to your warehouse and reads the metadata, artifacts, and test results collected by the Elementary dbt package.  
 With this information, it can:
 
-- Generate a data observability report  
-- Surface anomalies and failed tests  
-- Send alerts to Slack and Teams  
+- Generate a data observability report
+- Surface anomalies and failed tests
+- Send alerts to Slack and Teams
 - Track model and test performance trends
 
 ## Quickstart
@@ -48,6 +47,7 @@ Follow the quickstart guide to install and configure the Elementary dbt package 
 👉 https://docs.elementary-data.com/oss/quickstart
 
 ## Features
+
 - **Anomaly detection tests** - Collect data quality metrics and detect anomalies, as native dbt tests.
 - **Automated monitors** - Out-of-the-box cloud monitors to detect freshness, volume and schema issues.
 - **End-to-End Data Lineage** - Enriched with the latest test results, for impact and root cause analysis of data issues. Elementary Cloud offers **Column-Level-Lineage from ingestion to BI**.
