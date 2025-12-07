@@ -67,3 +67,7 @@ It works differently according to the table materialization:
 
 - **Regular tables and views** - `detection_period` defines the detection period.
 - **Incremental models and sources** - `detection_period` defines the detection period, and the period for which metrics will be re-calculated.
+
+**Overlap with training period:**
+
+When `detection_period` spans multiple time buckets (e.g., 7 days), it can overlap with the training period. By default, values in the detection period are included in the training calculation, which can lead to false negatives. To prevent this overlap, use [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) set to `true`.

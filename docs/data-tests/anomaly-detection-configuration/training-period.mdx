@@ -68,6 +68,10 @@ It works differently according to the table materialization:
 - **Full time buckets** - Elementary will increase the `training_period` automatically to insure full time buckets. For example if the `time_bucket` of the test is `period: week`, and 14 days `training_period` result in Tuesday, the test will collect 2 more days back to complete a week (starting on Sunday).
 - **Seasonality training set** - If seasonality is configured, Elementary will increase the `training_period` automatically to ensure there are enough training set values to calculate an anomaly. For example if the `seasonality` of the test is `day_of_week`, `training_period` will be increased to ensure enough Sundays, Mondays, Tuesdays, etc. to calculate an anomaly for each.
 
+**Overlap with detection period:**
+
+When the `detection_period` spans multiple time buckets, it can overlap with the training period. By default, values in the detection period are included in the training calculation, which can lead to false negatives because detection period values influence the expected range used to evaluate those same values. To prevent this overlap and improve anomaly detection accuracy, use [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) set to `true`.
+
 #### The impact of changing `training_period`
 
 If you **increase `training_period`** your test training set will be larger. This means a larger sample size for calculating the expected range, which should make the test less sensitive to outliers. This means less chance of false positive anomalies, but also less sensitivity so anomalies have a higher threshold.

@@ -1,0 +1,55 @@
+---
+title: "exclude_detection_period_from_training"
+sidebarTitle: "exclude_detection_period_from_training"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
+`exclude_detection_period_from_training: true | false`
+
+When the detection period spans multiple values, there can be overlap between the training period and the detection period. By default, values in the detection period are included in the training calculation, which can lead to false negatives because the detection period values influence the expected range used to evaluate those same values.
+
+Setting `exclude_detection_period_from_training: true` ensures that no values from the detection period are used in the training calculation, preventing this overlap and improving anomaly detection accuracy.
+
+**Example use case:**
+
+When `detection_period` is set to more than 1 time bucket (e.g., `detection_period: 7 days`), the detection period overlaps with the training period. Without excluding the detection period from training, values being evaluated for anomalies are also contributing to the expected range calculation, which can mask actual anomalies and result in false negatives.
+
+- _Default: false_
+- _Supported values: `true`, `false`_
+- _Relevant tests: Anomaly detection tests with `timestamp_column` and `detection_period` greater than 1 time bucket_
+
+#### How it works?
+
+- When `exclude_detection_period_from_training: false` (default), all values within both the training period and detection period are used to calculate the expected range.
+- When `exclude_detection_period_from_training: true`, values within the detection period are excluded from the training calculation, ensuring the expected range is based solely on historical data that is not being evaluated.
+
+<RequestExample>
+
+```yml test
+models:
+  - name: this_is_a_model
+    data_tests:
+      - elementary.volume_anomalies:
+          arguments:
+            exclude_detection_period_from_training: true
+```
+
+```yml model
+models:
+  - name: this_is_a_model
+    config:
+      elementary:
+        exclude_detection_period_from_training: true
+```
+
+```yml dbt_project.yml
+vars:
+  exclude_detection_period_from_training: true
+```
+
+</RequestExample>
+

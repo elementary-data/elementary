@@ -337,6 +337,7 @@
                   "data-tests/anomaly-detection-configuration/anomaly-direction",
                   "data-tests/anomaly-detection-configuration/training-period",
                   "data-tests/anomaly-detection-configuration/detection-period",
+                  "data-tests/anomaly-detection-configuration/exclude_detection_period_from_training",
                   "data-tests/anomaly-detection-configuration/time-bucket",
                   "data-tests/anomaly-detection-configuration/seasonality",
                   "data-tests/anomaly-detection-configuration/column-anomalies",
