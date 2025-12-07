@@ -153,7 +153,7 @@
               },
               "cloud/features/multi-env",
               "cloud/features/ci",
-              "cloud/features/collaboration-and-communication/user-activity-logs"
+              "cloud/features/collaboration-and-communication/logs"
             ]
           },
           {
