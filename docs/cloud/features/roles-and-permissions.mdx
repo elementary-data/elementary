@@ -1,0 +1,156 @@
+---
+title: "Roles & Permissions Management in Elementary"
+---
+
+Roles & Permissions management in Elementary lets you control **who can see or do what** inside your account.
+
+Instead of everyone having the same access, you can assign **roles** to users or groups so each person sees only what's relevant to them, and has only the permissions they need.
+
+## Why it matters
+
+- **Security & least privilege** — Users only get access to data and actions required for their role.
+- **Team/group separation** — You can separate responsibilities (e.g. analysts, data engineers, reviewers) without interference.
+- **Compliance readiness** — With clearly defined roles, you get better traceability for audits and compliance reviews.
+- **Flexibility** — permissions are configurable per account, environment, and even per asset/test grouping, so you can support complex org structures.
+
+## How it works in Elementary
+
+| Level | What it controls | Typical use cases |
+| --- | --- | --- |
+| **Account-level permissions** | **Global account configurations** (e.g. manage users, setup integrations, export audit logs) | Admins, Security / Compliance officers |
+| **Environment-level permissions** | - Access to **specific environments** (e.g. Prod, Staging)
+- Access to **environment pages and features** (catalog, lineage, PRs, etc.) | Data teams, Analytics engineers, Data governance |
+| **Resources - Asset/Test-level permissions** | Access to **specific group of assets or tests** (e.g. only Marketing datasets, or only domain specific DQ rules) | Scoped analysts / data stewards or domain-specific business users |
+
+A user's effective permissions are the sum (union) of all roles and permissions granted to them.
+
+## Types of Roles
+
+Roles in Elementary can be divided into two categories: built-in (Admin, editor, viewer) and custom. 
+
+![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1765210542/roles1_efmwo1.png)
+
+### **Built-in Roles**
+
+Elementary includes default roles most teams can use immediately - Admin, Editor, Viewer:
+
+| Permissions Level/ Roles | Admin | Editor | Viewer |
+| --- | --- | --- | --- |
+| **Account-level permissions** | **Full (Can edit) access for account configurations** (e.g. manage users, setup integrations, export audit logs) | No permissions for account configurations | No permissions for account configurations |
+| **Environment-level permissions** | **Full (can edit) access for all environments, pages and features:** 
+Can view and manage any configuration within the environments such as alert rules, manage incidents and PRs, etc. | **Full (can edit) access for all environments, pages and features:** Can view and manage any configuration within the environments such as alert rules, manage incidents and PRs, etc. | **Read only access for all environments:** can view all environments and pages. can't make any changes through the UI. |
+| **Resources- Asset/Test-level permissions** | **Full (can edit) access to all assets and tests:** can create/edit assets, run DQ (data-quality) rules, manage pipelines, etc **** | **Full (can edit) access to all assets and tests:** can create/edit assets, run DQ (data-quality) rules, manage pipelines, etc | **Read-only access across data assets and tests:** can browse data assets, lineage, assets' data health, etc. |
+
+These roles cover most organizations, but you can extend them with custom roles.
+
+**Custom Roles**
+
+For each custom rule you can set limited permissions to a subset of environments, pages, or assets/tests (e.g. only Marketing data, or only Prod environments). It's great for domain-specific teams and business users, ensuring each team only has access to the environments, pages, assets and tests relevant to them.
+For each role you need to define role Scope (account-level, environment-level, or asset-level) and permissions type (Read only, Can edit, No permissions).
+
+Each role may include permissions at one, two, or all three levels:
+
+1. **Account-Level**
+    
+    Decide whether the role can **view** and whether it can **edit** account-wide configurations such as user management, integrations, and global configurations.
+    
+    Without at least **view** permissions, account configurations won't appear for this role.
+    
+2. **Environment-Level**
+    
+    By default, any role has access to **all environments**, but you can restrict it to specific ones.
+    Choose which environments the role applies to, and what the user can do there.
+    
+    For each environment:
+    
+    - **Feature access** — Select which pages (Catalog, Lineage, Alerts, etc.) and features (View/create PRs, AI Agents etc.) are visible.
+    - **Permission type** — Set it to **read-only,** **edit** or **No permissions**
+3. **Resources filters - Assets & Tests (optional)**
+    
+    Use metadata filters to restrict the role to specific datasets or tests.
+    
+    - **Filters** — e.g., `Asset tag = #marketing`, `Test Owner = @data-team`.
+    - **Permission type** — Choose read-only or edit access (e.g., create tests, update metadata, modify configurations) for each filter group.
+
+**Custom role example: Marketing analysts**
+
+- Account level - No permissions to view/edit account configuration
+- Environment level -
+    - For 'Prod' environment
+        - Access to pages - Catalog, lineage, data health
+        - Permissions type - read only
+    - Other environments - No access
+- Assets/tests level -
+    - `Asset tag = #marketing`  - Can edit
+    - `Asset tag = #Sales` - Read only
+
+![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1765210540/roles2_r1pbqj.png)
+
+## Getting started: How to set up role management
+
+1. **Plan your organizational structure**
+    - List out personas in your org (e.g. "Data Engineer", "Analyst", "Marketing Analyst", "Business users", "DevOps")
+    - For each persona, decide:
+        - Whether they need access to **account-level configuration**
+        - **Which environments** they should be able to access (e.g., Dev, Staging, Prod)
+        - **Which pages, features, and capabilities** they should be able to use (Catalog, Lineage, Alerts, manage tests, update metadata, etc.)
+        - **Whether their access should be limited to specific assets or datasets**, using filters such as `Asset tag = #PII` or `Test Owner = @data-team`
+2. **Create Custom Roles in Elementary (optional)**
+    1. Go to *Settings → Roles,* Click **"Create New Role"**
+    2. Set the Role Details - Role name - Give it a clear, descriptive name, such as *Marketing Analyst,  Finance Viewer, Data Steward – Production*
+    3. Choose the Role Scope (account-level, environment-level, or asset-level) and permissions type (Read only, can edit)
+        
+        **Each role may include permissions at one, two, or all three levels.**
+
+3. **Assign Users or Groups to built in or custom Roles**
+    - Add individual users or entire groups/teams (via SSO/SCIM integration or manual).
+    - Users can have multiple roles, permissions are combined (union).
+4. **Adjust and Evolve Roles over time**
+    - As your org grows or changes, update role definitions or add new roles (e.g. "IT team", "Business viewer").
+    - Reassign or remove roles when people change responsibilities or leave.
+
+## Best Practices & Recommendations
+
+- **Start with broad roles, then narrow down**
+    
+    Begin with general roles (Admin, Data Engineer, Analyst), then create more scoped roles once patterns emerge (e.g. separate "Marketing Data Viewer," "Finance Data Viewer").
+    
+- **Use principle of least privilege**
+    
+    Assign only the minimal permissions required. For example, an analyst who only needs to view data should not have edit or delete permissions.
+    
+- **Leverage asset/tag-based filters**
+    
+    Use tags like `tag:#marketing`, `env:prod`, to automatically filter access. This lowers maintenance overhead as you add more assets.
+    
+- **Regularly review role assignments**
+    
+    Periodically (e.g. quarterly) run the access snapshot and verify that users still need their assigned roles.
+    
+- **Avoid giving "Admin" widely**
+    
+    Reserve account-level Admin or environment-wide write permissions for a small set of trusted users (e.g. data platform or security team).
+    
+
+## FAQ
+
+**Q: What happens if a user has two roles with conflicting permissions (e.g. one role gives "read-only", another gives "edit")?**
+
+A: Elementary uses a **union model** — the user gets the higher privilege. So in that case, they'd have "edit" access.
+
+**Q: Can I let someone see only a subset of datasets (e.g. only marketing data)?**
+
+A: Yes. When you create/edit a role, you can specify asset filters (e.g. by tag, owner, or dataset name). That way, scoped viewers or editors only see their allowed subset.
+
+**Q: What if I need a temporary elevated permission for a user (e.g. for a one-time task)?**
+
+A: You can assign a role temporarily (for example, a "Contractor – Write Access" role), and remove it once the task is done. We recommend logging the change and reviewing it later.
+
+**Q: Does using Roles & Permissions affect performance or data loading?**
+
+A: No — permissions are enforced efficiently at request time. There is no perceptible performance overhead under normal usage.
+
+**Q: Can I export or audit roles and permissions?**
+
+A: Yes — Elementary provides **Roles Audit Logs** that record all role changes and assignments. You can export to CSV or share with compliance teams.
+
