@@ -36,13 +36,50 @@ icon: "house"
           <div className="home__hero-image-block">
             <img
               className="home__hero-image"
-              src="https://res.cloudinary.com/diuctyblm/image/upload/v1749564684/Docs/Hero_Image_yvczgg.png"
+              src="https://res.cloudinary.com/diuctyblm/image/upload/v1765218083/Hero_Image_tx3zbs.png"
               alt="Hero Image"
               noZoom={true}
             />
           </div>
         </div>
       </div>
+    </div>
+    <div class="home__security">
+      <div class="home__security-info-wrap">
+        <div class="home__security-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M27 14V7C27 6.73478 26.8946 6.48043 26.7071 6.29289C26.5196 6.10536 26.2652 6 26 6H6C5.73478 6 5.48043 6.10536 5.29289 6.29289C5.10536 6.48043 5 6.73478 5 7V14C5 26 16 29 16 29C16 29 27 26 27 14Z" stroke="#575A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11 17L14 20L21 13" stroke="#575A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div className='home__security-content-wrap'>
+          <h2 className='home__security-heading'>SOC 2 & HIPAA Compliant</h2>
+          <p className='home__security-description'>Enterprise-grade security standards</p>
+        </div>
+      </div>
+      <div class="home__security-seperator"></div>
+      <div class="home__security-info-wrap">
+        <div class="home__security-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M26 11H6C5.44772 11 5 11.4477 5 12V26C5 26.5523 5.44772 27 6 27H26C26.5523 27 27 26.5523 27 26V12C27 11.4477 26.5523 11 26 11Z" stroke="#575A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 17.5625C16.7939 17.5625 17.4375 18.2061 17.4375 19C17.4375 19.7939 16.7939 20.4375 16 20.4375C15.2061 20.4375 14.5625 19.7939 14.5625 19C14.5625 18.2061 15.2061 17.5625 16 17.5625Z" fill="#575A74" stroke="#575A74" stroke-width="0.125"/>
+            <path d="M11 11V7C11 5.67392 11.5268 4.40215 12.4645 3.46447C13.4021 2.52678 14.6739 2 16 2C17.3261 2 18.5979 2.52678 19.5355 3.46447C20.4732 4.40215 21 5.67392 21 7V11" stroke="#575A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div className='home__security-content-wrap'>
+          <h2 className='home__security-heading'>Metadata-only Architecture</h2>
+          <p className='home__security-description'>We never access or process your raw data</p>
+        </div>
+      </div>
+      <div class="home__security-seperator"></div>
+      <a className='home__security-link' href='/cloud/general/security-and-privacy'>
+        <div>Security & Privacy</div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M6.75 3.375L12.375 9L6.75 14.625" stroke="#FF24B6" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -233,7 +270,7 @@ icon: "house"
           </a></div>
           </div>
           <div class="home__mcp-image">
-              <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1756374052/Docs_u3uaft.svg" noZoom/>
+              <img src="https://res.cloudinary.com/diuctyblm/image/upload/v1765219919/MCP_jlvhfu.png" noZoom/>
           </div>
         </div>
     </div>
@@ -404,7 +441,7 @@ icon: "house"
     </div>
   </div>
   
-  <div class="home__theme-purple">
+  <div class="home__theme-purple-dark">
       <div class="home__container">
         <div class="home__guides-layout">
           <div class="home__guides">
@@ -891,14 +928,9 @@ export const Integration = ({ image, label, invertOnDark = false, link, comingSo
         className="home__integration__image"
         noZoom={true}
         data-invert-on-dark={invertOnDark}
-        style={{ position: "relative", opacity: comingSoon ? "0.5" : "1" }}
+        style={{ opacity: comingSoon ? "0.5" : "1" }}
       />
-      <div className="home__integration__label">{label}{comingSoon && <span style={{ fontSize: "12px", color: "#999" }}> (Coming Soon)</span>}</div>
-      <style jsx>{`
-        .home__integration .home__integration__coming-soon {
-          opacity: 1 !important;
-        }
-      `}</style>
+      <div className="home__integration__label">{label}{comingSoon && <span style={{ color: "#999" }}> (Coming Soon)</span>}</div>
     </div>
   );
   return link ? (
