@@ -131,7 +131,8 @@
                   "cloud/features/collaboration-and-communication/data-health"
                 ]
               },
-              "cloud/features/collaboration-and-communication/catalog"
+              "cloud/features/collaboration-and-communication/catalog",
+              "cloud/features/collaboration-and-communication/saved-views"
             ]
           },
           {
