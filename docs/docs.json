@@ -77,11 +77,13 @@
             ]
           },
           {
-            "group": "Data Lineage",
+            "group": "End-to-End Lineage",
             "pages": [
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
-              "cloud/features/data-lineage/exposures-lineage"
+              "cloud/features/data-lineage/exposures-lineage",
+              "cloud/features/multi-env",
+              "cloud/features/anomaly-detection/monitor-dwh-assets"
             ]
           },
           {
@@ -151,11 +153,9 @@
                   "cloud/features/gpg-signed-commits"
                 ]
               },
-              "cloud/features/multi-env",
               "cloud/features/roles-and-permissions",
               "cloud/features/ci",
-              "cloud/features/collaboration-and-communication/logs",
-              "cloud/features/anomaly-detection/monitor-dwh-assets"
+              "cloud/features/collaboration-and-communication/logs"
             ]
           },
           {
