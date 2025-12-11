@@ -149,6 +149,12 @@ def common_options(cmd: str):
             else "DEPRECATED! Please use --filters instead! - Filter the alerts by tags:<TAGS> / owners:<OWNERS> / models:<MODELS> / "
             "statuses:<warn/fail/error/skipped> / resource_types:<model/test>.",
         )(func)
+        func = click.option(
+            "--quiet-logs",
+            type=bool,
+            default=False,
+            help="Minimize INFO level logs. Only WARNING and above will be shown.",
+        )(func)
         return func
 
     return decorator
@@ -324,12 +330,14 @@ def monitor(
     excludes,
     teams_webhook,
     maximum_columns_in_alert_samples,
+    quiet_logs,
 ):
     """
     Get alerts on failures in dbt jobs.
     """
     if ctx.invoked_subcommand is not None:
         return
+
     if deprecated_slack_webhook is not None:
         click.secho(
             '\n"-s" is deprecated and won\'t be supported in the near future.\n'
@@ -450,6 +458,7 @@ def report(
     env,
     select,
     target_path,
+    quiet_logs,
 ):
     """
     Generate a local observability report of your warehouse.
@@ -680,6 +689,7 @@ def send_report(
     disable,
     include,
     target_path,
+    quiet_logs,
 ):
     """
     Generate and send the report to an external platform.
