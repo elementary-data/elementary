@@ -156,7 +156,14 @@
               },
               "cloud/features/roles-and-permissions",
               "cloud/features/ci",
-              "cloud/features/collaboration-and-communication/audit_logs"
+              {
+                "group": "Audit Logs",
+                "pages": [
+                  "cloud/features/collaboration-and-communication/audit_logs/overview",
+                  "cloud/features/collaboration-and-communication/audit_logs/user-activity-logs",
+                  "cloud/features/collaboration-and-communication/audit_logs/system-logs"
+                ]
+              }
             ]
           },
           {
