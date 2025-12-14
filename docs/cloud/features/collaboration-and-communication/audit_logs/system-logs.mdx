@@ -1,0 +1,45 @@
+---
+title: System Logs
+sidebarTitle: System Logs
+---
+
+System logs track system-level events and operations, including data synchronization events and alert deliveries that help with monitoring system operations and troubleshooting.
+
+## What's Included
+
+The system logs capture system-level events and operations across your workspace, including:
+
+- **Data synchronization events**, including:
+    - Beginning and end of synchronization with dbt
+    - Beginning and end of data warehouse (DWH) synchronization
+    - Beginning and end of business intelligence (BI) synchronization
+- **Alert deliveries** - When alerts are sent to configured destinations
+
+## Fields
+
+The exported CSV file for system logs includes the following fields:
+
+- **Timestamp** - The date and time when the event occurred (in UTC, ISO 8601 format)
+  - *Example:* `"2024-01-15T14:30:45.123456+00:00"`
+
+- **Event Name** - The specific action that was performed
+  - *Examples:* `"dbt_data_sync_started"`, `"dbt_data_sync_completed"`, `"dwh_data_sync_started"`, `"dwh_data_sync_completed"`, `"bi_data_sync_started"`, `"bi_data_sync_completed"`, `"alerts_sent"`
+  - *Example:* `"dbt_data_sync_completed"` or `"alerts_sent"`
+
+- **Success** - Whether the action completed successfully
+  - *Values:* `"True"` or `"False"` (as strings in CSV)
+  - *Example:* `"True"` or `"False"`
+
+- **Event Content** - Additional context-specific information about the action (stored as a JSON string)
+  - The contents vary by action type. For example:
+    - For sync actions: `{"environment_id": "env_789", "environment_name": "Production"}`
+    - For alert delivery actions: `{"alert_count": 5, "destination": "slack"}`
+  - *Example:* `{"environment_id": "env_789", "environment_name": "Production"}`
+
+- **Env ID** - The environment identifier where the action occurred
+  - *Example:* `"env_7890123456abcdef"`
+
+- **Env Name** - The name of the environment where the action occurred
+  - *Example:* `"Production"` or `"Staging"`
+
+**Note:** System logs do not include user information fields since they represent automated system operations rather than user-initiated actions.

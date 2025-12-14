@@ -156,7 +156,7 @@
               },
               "cloud/features/roles-and-permissions",
               "cloud/features/ci",
-              "cloud/features/collaboration-and-communication/logs"
+              "cloud/features/collaboration-and-communication/audit_logs"
             ]
           },
           {
