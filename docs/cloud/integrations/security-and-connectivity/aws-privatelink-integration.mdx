@@ -131,4 +131,170 @@ Then go to "Advanced Configurations", and under "Private Link", please attach th
 
 ### Github Enterprise Server
 
-Coming soon!
+Github Enterprise Server can be connected to Elementary Cloud via AWS PrivateLink. This setup requires creating a VPC endpoint service in your AWS account that exposes your GitHub Enterprise Server instance.
+
+**Prerequisites:**
+- Your Github Enterprise Server instance must be accessible from within your AWS VPC
+- You must have administrative access to your AWS account
+- Ensure you are working in the correct AWS region where your Github Enterprise Server is deployed
+
+In order to set up a PrivateLink connection with Github Enterprise Server, please follow the steps below:
+
+1. **Create a VPC Endpoint Service**
+   - Follow the detailed instructions in the [Creating a VPC Endpoint Service](#creating-a-vpc-endpoint-service) section below to set up the endpoint service for your GitHub Enterprise Server instance.
+
+2. **Add a Github integration in Elementary** - Once the VPC endpoint service setup is completed, please proceed to adding a [GitHub integration](https://docs.elementary-data.com/cloud/integrations/code-repo/github). Note:
+   * OAuth is not currently supported for Github Enterprise Server, so you should generate a fine-grained token.
+   * You should use the same Github hostname as you would internally (Elementary will resolve that host to the privatelink endpoint)
+
+## Creating a VPC Endpoint Service
+
+<Note>
+  The setup below is only required for services that are hosted in your own VPC (e.g. Github Enterprise Server). It is not required for Snowflake or Databricks which manage themselves the server-side PrivateLink setup.
+
+  Each integration above explicitly states if it requires setting up a VPC endpoint service.
+</Note>
+
+In order to expose services that are hosted within your own VPC, it is required to create a VPC endpoint service. This is essentially the server-side component of PrivateLink, and the destination Elementary's VPC endpoint will connect to.
+
+> **Note:** You should create the VPC endpoint service in the same region your service is located in.
+
+You can follow the steps below to create an endpoint service via the AWS console.
+
+### Create a network load balancer to your service
+
+Before setting up the VPC endpoint service, it is required to set up an internal network load balancer pointing to the service you are exposing.
+Setting up a load balancer consists of the following sub-steps:
+
+**1. Create a target group**
+
+Under the EC2 page in AWS, navigate to the Target Groups menu and click "Create target group". Please follow the wizard and fill the following details:
+
+1. **Target type** - You should select this based on the method you used to deploy your service - e.g. based on Instance or IP address.
+2. **Target group name** - Choose a name for the target group
+3. **Protocol : Port** - Choose this based on the service you are exposing (normally should be HTTP / HTTPS)
+4. **IP address type** - IPv4.
+5. **VPC** - The VPC your service is deployed in.
+
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765798825/endpointservice_create_target_group_bbgbcx.png"
+   alt="Create target group"
+/>
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765799351/endpointservice_create_target_group_2_uybxlp.png"
+   alt="Create target group"
+/>
+
+**2. Create a Network Load Balancer (NLB)**
+
+Under the EC2 page in AWS, navigate to "Load Balancers" and click on "Create load balancer". Choose **Network Load Balancer** and proceed with the creation. Please follow the wizard and fill the following details:
+1. **Load balancer name** - Choose a name for the load balanver (e.g. "github-lb")
+2. **Scheme** - Internal.
+3. **Load balancer IP address type** - IPv4.
+4. **VPC** - Choose same VPC as the one you used for the target group above.
+5. **Mappings** - Select one or more private subnets.
+6. **Security groups** - Select a security group with access to your service. Please grant access to the relevant ports for your service, to the following IP ranges (these are the internal IPs Elementary may connect to your service from):
+   * 10.0.1.x
+   * 10.0.2.x
+   * 10.0.3.x
+7. **Listeners** - Select the target group, protocol, and port from Step 1.
+
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765799861/endpointservice_nlb_1_ljo7te.png"
+   alt="Create Network Load Balancer"
+/>
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765799861/endpointservice_nlb_2_t4yksc.png"
+   alt="Create Network Load Balancer"
+/>
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765799861/endpointservice_nlb_3_akprjk.png"
+   alt="Create Network Load Balancer"
+/>
+
+**3. Verify the Target Group is Healthy**
+
+Once the load balancer from the previous step is ready, please navigate to the target group you created above. It should be listed as "Healthy".
+
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765799075/endpointservice_target_group_healthy_pvzqcn.png"
+   alt="Ensure target group is healthy"
+/>
+
+If it appears as "Unhealthy" for some reason, please ensure the security group provides access to the service, that the health check is configured correctly, and of course that the service itself is available.
+
+**4. Enable Cross-Zone Load Balancing**
+
+If you selected more than one subnet for the load balancer above:
+* Navigate back to the "Load Balancer" screen
+* Choose the load balancer you created.
+* Click on Actions -> Edit load balancer attributes.
+* Enable the setting "Enable cross-zone load balancing".
+
+If you selected more than one subnet (availability zone) when creating the NLB in Step 2, navigate back to the Load Balancer, then select Actions → Edit load balancer attributes. From this page, select "Enable cross-zone load balancing" and save your changes.
+
+### Create a VPC Endpoint Service and approve access for Elementary
+
+**1. Create a VPC Endpoint Service**
+
+Navigate to the VPC page in AWS, go to "Endpoint services," and select "Create endpoint service." Please follow the wizard and fill in the following details:
+
+1. **Name** - Choose a name for your VPC endpoint service.
+2. **Load balancer type** - Network.
+3. **Available load balancers** - Select the network load balancer (NLB) created above.
+4. **Require acceptance for endpoint** - Yes (so new connections will require approval, see below)
+5. **Enable private DNS name** - No.
+6. **Supported IP address types** - IPv4.
+
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765802107/endpointservice_create_endpoint_service_1_a7aqjs.png"
+   alt="Create endpoint service"
+/>
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765802107/endpointservice_create_endpoint_service_2_hrefnp.png"
+   alt="Create endpoint service"
+/>
+
+Once the service is created, please go to the "Details" tab and save the "Service name" attribute, you will need later to provide it to the Elementary team.
+
+**2. Allow the Elementary Principal**
+
+Once the VPC endpoint service is successfully created, navigate to the "Allow principals tab" and click on "Allow Principals". Then add the following principal:
+```
+arn:aws:iam::743289191656:root
+```
+
+After the endpoint service finishes creating, navigate to the "Allow principals" section and select "Allow principals." Add Elementary's AWS account ID: `743289191656`.
+
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765802297/endpointservice_allow_principals_b4jtei.png"
+   alt="Allow elementary principal"
+/>
+
+**3. Contact the Elementary team to configure the PrivateLink connection**
+
+Please provide the Elementary team with the following details:
+1. Your AWS account ID.
+2. Your AWS region.
+3. The VPC endpoint service name (from step 1).
+4. The relevant service / integration (e.g. Github).
+5. The hostname you use internally to connect to your service.
+
+**4. Accept the endpoint connection request**
+
+Once you got confirmation from the Elementary team that the private link connection is set up, you need to approve 
+the VPC endpoint connection from Elementary. You can do so with the following steps:
+* In the VPC page in your AWS console, go to "Endpoint Services", and then choose the endpoint service that you created in step 1.
+* Under the "Endpoint Connections" tab, you should see a pending connection, select it.
+* Click on Actions->Accept endpoint connection request to accept the connection.
+
+After a couple of minutes the connection should change from "Pending" to "Available".
+
+<img
+   src="https://res.cloudinary.com/dgpojk42n/image/upload/v1765798824/endpointservice_approve_endpoint_mmtvro.png"
+   alt="Accept endpoint connection request"
+/>
+
+**5. Notify the elementary team**
+
+Once the endpoint connection is approved and shows as "Available", please reach out to the Elementary team, so we will ensure the connection is ready and working.
