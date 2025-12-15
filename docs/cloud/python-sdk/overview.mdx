@@ -1,0 +1,86 @@
+---
+title: "Python SDK Overview"
+sidebarTitle: "Python SDK"
+icon: "code"
+---
+
+<Callout icon="flask" color="#FFC107" iconType="regular">
+The Python SDK is currently in beta. If you want early access or want to see how it fits your implementation, [reach out to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs?uuid=17a4a61f-d0d3-4cbc-9362-56e37483f6f5).
+</Callout>
+
+## Your Python Pipeline Is Where Data Quality Actually Meets the Data
+
+More teams are shifting their data quality checks out of dashboards and into the transformation layer itself. It's obvious why: the transformation code is the first place that touches real data. If a check fails here, the pipeline stops before corrupted rows ever land downstream. No backfills, no detective work, no "how long has this been wrong?" scramble.
+
+And the value cuts both ways:
+
+- **You catch issues before they ever hit the data warehouse or lake**, right at the ingestion and preprocessing layers.
+- **You catch issues after the data warehouse too**, in the pipelines that stream data to downstream destinations, models, APIs, and operational systems.
+
+## Python: The Backbone of Modern Data Engineering
+
+Python has become the backbone of modern data engineering - especially in pipelines that go beyond SQL. It now drives:
+
+- Ingestion and storage of **unstructured data**
+- **Vectorization and embedding pipelines** for AI systems
+- **ML model training** and feature generation
+- Monitoring of **model inputs and outputs**
+- Hybrid pipelines that mix structured, semi-structured, and free-form data
+
+As these pipelines multiply, Python becomes the glue. It runs wherever data flows — before the DWH, inside the DWH, and after the DWH — making it the natural place for data quality and observability to live.
+
+## Wrapping Existing Tools Instead of Inventing New Ones
+
+Engineers already have strong opinions about how they want to write tests. Some rely on Great Expectations, others on DQX, pytest-based workflows, or homegrown frameworks. Reinventing a new test engine or DSL would just fragment the landscape.
+
+So we didn't.
+
+We focused on the simplest possible layer: **a lightweight Python SDK that captures any Python test result, from any framework**, and reports it to Elementary. You keep your code - we handle the metadata, structure, and visibility.
+
+This means full observability without dictating how you build.
+
+## Built for Teams That Treat Their Data Pipelines Like Software
+
+Elementary has always leaned into engineering-first workflows. Our deep integration with dbt set that foundation. Extending this into Python is the natural continuation of that approach.
+
+As more transformations shift into Python (Pyspark, SQL generation, AI/ML pipelines, unstructured data processing), teams want the same capabilities they rely on when using Elementary with dbt:
+
+- Understand what ran
+- Track when it ran
+- Measure how long it took
+- Identify which upstream assets fed it
+- Trace which downstream assets it produced
+- Run data quality checks on the product and see the results
+- Get alerts on data issues as soon as they happen
+
+The SDK provides exactly that by wrapping the transformation code itself. You get execution metadata, lineage, run context, and full test surface — directly from inside your existing codebase.
+
+This unifies **Analytics Engineering, Data Science, and AI/ML Operations** into a single observability platform. Python + dbt + cloud tests now all land in one place.
+
+## What You'll See in Elementary Once You Report Through the SDK
+
+When a Python pipeline reports assets, test results, and execution metadata, everything shows up in Elementary unified with your dbt and cloud tests:
+
+- **All test results appear together** — Python validations, dbt tests, cloud tests — in a single, consistent interface.
+- **Alerts fire through your existing channels** (Slack, PagerDuty, email), ensuring that pipeline-level issues trigger the same operational flow as warehouse-level ones.
+- **Incidents are created automatically** for detected issues, including opening Jira tickets. Elementary's agentic tools then investigate root cause, assess downstream impact, and guide resolution.
+- **Lineage becomes fully connected**, tying together Python assets, dbt models, warehouse tables, unstructured data, vectors, and ML outputs.
+- **Every table, view, file, or vector store entity produced by Python becomes discoverable** through the Elementary catalog, data discovery agent, and MCP server — giving analysts, DS, and AI teams a shared understanding of the entire data ecosystem.
+
+This closes the gap between ingestion pipelines, warehouse transformations, ML prep code, and AI workloads — all observed in one place.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Setup Guide" icon="gear" href="/cloud/python-sdk/setup-guide">
+    Learn how to install and configure the Python SDK
+  </Card>
+  <Card title="Usage Examples" icon="code" href="/cloud/python-sdk/usage-examples">
+    See how to report assets and test results from your Python pipelines
+  </Card>
+</CardGroup>
+
+## Get Started
+
+The SDK is now in beta and already surfacing surprisingly rich insights from Python-based workflows. If you want early access or want to see how it fits your implementation, [reach out to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs?uuid=17a4a61f-d0d3-4cbc-9362-56e37483f6f5) — we're shaping this with real teams using it at scale.
+
