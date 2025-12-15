@@ -8,8 +8,6 @@ icon: "code"
 The Python SDK is currently in beta. If you want early access or want to see how it fits your implementation, [reach out to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs?uuid=17a4a61f-d0d3-4cbc-9362-56e37483f6f5).
 </Callout>
 
-## Your Python Pipeline Is Where Data Quality Actually Meets the Data
-
 More teams are shifting their data quality checks out of dashboards and into the transformation layer itself. It's obvious why: the transformation code is the first place that touches real data. If a check fails here, the pipeline stops before corrupted rows ever land downstream. No backfills, no detective work, no "how long has this been wrong?" scramble.
 
 And the value cuts both ways:
@@ -31,9 +29,7 @@ As these pipelines multiply, Python becomes the glue. It runs wherever data flow
 
 ## Wrapping Existing Tools Instead of Inventing New Ones
 
-Engineers already have strong opinions about how they want to write tests. Some rely on Great Expectations, others on DQX, pytest-based workflows, or homegrown frameworks. Reinventing a new test engine or DSL would just fragment the landscape.
-
-So we didn't.
+Engineers already have strong opinions about how they want to write tests. Some rely on Great Expectations, others on DQX, pytest-based workflows, or homegrown frameworks. Reinventing a new test engine or DSL would just fragment the landscape - so we didn't.
 
 We focused on the simplest possible layer: **a lightweight Python SDK that captures any Python test result, from any framework**, and reports it to Elementary. You keep your code - we handle the metadata, structure, and visibility.
 
