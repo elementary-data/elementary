@@ -129,23 +129,23 @@ Then go to "Advanced Configurations", and under "Private Link", please attach th
    * 10.0.3.x
 
 
-### GitHub Enterprise Server
+### Github Enterprise Server
 
-GitHub Enterprise Server can be connected to Elementary Cloud via AWS PrivateLink. This setup requires creating a VPC endpoint service in your AWS account that exposes your GitHub Enterprise Server instance.
+Github Enterprise Server can be connected to Elementary Cloud via AWS PrivateLink. This setup requires creating a VPC endpoint service in your AWS account that exposes your GitHub Enterprise Server instance.
 
 **Prerequisites:**
-- Your GitHub Enterprise Server instance must be accessible from within your AWS VPC
+- Your Github Enterprise Server instance must be accessible from within your AWS VPC
 - You must have administrative access to your AWS account
-- Ensure you are working in the correct AWS region where your GitHub Enterprise Server is deployed
+- Ensure you are working in the correct AWS region where your Github Enterprise Server is deployed
 
-In order to set up a PrivateLink connection with GitHub Enterprise Server, please follow the steps below:
+In order to set up a PrivateLink connection with Github Enterprise Server, please follow the steps below:
 
 1. **Create a VPC Endpoint Service**
    - Follow the detailed instructions in the [Creating a VPC Endpoint Service](#creating-a-vpc-endpoint-service) section below to set up the endpoint service for your GitHub Enterprise Server instance.
 
-2. **Add a Github integration in Elementary** - Once the VPC endpoint service setup is completed, please proceed to adding a [Github integration](https://docs.elementary-data.com/cloud/integrations/code-repo/github). Note:
-   * OAuth is not currently supported for GitHub Enterprise Server, so you should generate a fine-grained token.
-   * You should use the same github hostname as you would internally (Elementary will resolve that host to the privatelink endpoint)
+2. **Add a Github integration in Elementary** - Once the VPC endpoint service setup is completed, please proceed to adding a [GitHub integration](https://docs.elementary-data.com/cloud/integrations/code-repo/github). Note:
+   * OAuth is not currently supported for Github Enterprise Server, so you should generate a fine-grained token.
+   * You should use the same Github hostname as you would internally (Elementary will resolve that host to the privatelink endpoint)
 
 ## Creating a VPC Endpoint Service
 
