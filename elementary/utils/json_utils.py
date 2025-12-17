@@ -3,8 +3,6 @@ import math
 from typing import Any, List, Optional, Union
 
 
-
-
 def try_load_json(value: Optional[Union[str, dict, list]]):
     if value is None:
         return None
