@@ -13,16 +13,15 @@ documentation = "https://docs.elementary-data.com"
 packages = [{include = "elementary"}]
 
 [tool.poetry.dependencies]
-# matches the versions supported by dbt as of v1.9, which are probably due to the limits of numpy 1.26.x(which was removed)
-python = ">=3.9,<3.13"
+python = ">=3.9,<3.14"
 click = ">=7.0,<9.0"
 dbt-core = ">=0.20,<2.0.0"
 requests = ">=2.28.1,<3.0.0"
 beautifulsoup4 = "<5.0.0"
 ratelimit = "*"
-posthog = "<3.0.0"
+posthog = "<8.0.0"
 boto3 = "<2.0.0"
-google-cloud-storage = "<3.0.0"
+google-cloud-storage = "<4.0.0"
 "ruamel.yaml" = "<1.0.0"
 alive-progress = "<=2.3.1"
 slack-sdk = ">=3.20.1,<4.0.0"
