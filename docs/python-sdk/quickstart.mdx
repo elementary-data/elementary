@@ -111,14 +111,12 @@ def main():
         test_unique_ids(users_df)
         
         # Send results to Elementary Cloud
-        client = ElementaryCloudClient(PROJECT_ID, TOKEN, URL)
+        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+        API_KEY = "your-api-key"
+        URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+        
+        client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
         client.send_to_cloud(ctx)
-```
-
-**Note:** The `URL` should be the full SDK ingest endpoint URL, typically in the format:
-```
-https://app.elementary-data.com/sdk-ingest/{env_id}/batch
-```
 
 if __name__ == "__main__":
     main()
@@ -187,14 +185,17 @@ def main():
         test_unique_ids(users_df)
         
         # Initialize client and send results
-        client = ElementaryCloudClient(PROJECT_ID, TOKEN, URL)
+        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+        API_KEY = "your-api-key"
+        URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+        
+        client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
         client.send_to_cloud(ctx)
 ```
 
-**Note:** Replace `PROJECT_ID`, `TOKEN`, and `URL` with your actual credentials. The `URL` should be the full SDK ingest endpoint:
-```
-https://app.elementary-data.com/sdk-ingest/{env_id}/batch
-```
+**Note:** 
+- Replace `API_KEY` and `URL` with your actual credentials. The `URL` should be the full SDK ingest endpoint including your environment ID.
+- `PROJECT_ID` is your Python project identifier - choose any string to identify your code project. This will appear in the metadata of assets you report and is used for deduplication.
 
 if __name__ == "__main__":
     main()

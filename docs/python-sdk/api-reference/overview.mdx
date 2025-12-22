@@ -17,10 +17,6 @@ You can generate tokens directly from the Elementary UI:
 3. (Optional) Add a name/description for the token
 4. Copy the token and store it securely — **it is shown only once**
 
-### Get Your Project ID
-
-Your Project ID can be found in your Elementary Cloud account settings or in the URL of your Elementary Cloud instance.
-
 ### Security
 
 - **User tokens** are user-scoped bearer tokens and inherit your workspace permissions
@@ -41,7 +37,7 @@ client = ElementaryCloudClient(project_id, api_key, url)
 ```
 
 Where:
-- `project_id` is your Elementary Cloud project identifier
+- `project_id` is your Python project identifier (chosen by you, used to deduplicate and identify reported assets)
 - `api_key` is your API token (generated from the steps above)
 - `url` is the full SDK ingest endpoint URL: `{base_url}/sdk-ingest/{env_id}/batch`
   - Example: `https://app.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`

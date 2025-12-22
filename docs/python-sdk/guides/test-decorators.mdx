@@ -160,7 +160,7 @@ with elementary_test_context(asset=asset) as ctx:
     test_average_age(users_df)
     
     # Send results to Elementary Cloud
-    PROJECT_ID = "your-project-id"
+    PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
     API_KEY = "your-api-key"
     URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
     

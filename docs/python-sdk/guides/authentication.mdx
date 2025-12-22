@@ -15,16 +15,12 @@ You can generate tokens directly from the Elementary UI:
 3. (Optional) Add a name/description for the token
 4. Copy the token and store it securely — **it is shown only once**
 
-### Get Your Project ID
-
-Your Project ID can be found in your Elementary Cloud account settings or in the URL of your Elementary Cloud instance.
-
 ### Required Credentials
 
 You'll need the following:
-- **Project ID** - Your Elementary Cloud project identifier
-- **Token** - Your API token (generated from the steps above)
-- **URL** - Your Elementary Cloud instance URL (typically `https://app.elementary-data.com`)
+- **Project ID** - Your Python project identifier (this will appear in the metadata of the assets you report)
+- **API Key** - Your API token (generated from the steps above)
+- **URL** - The full SDK ingest endpoint URL: `{base_url}/sdk-ingest/{env_id}/batch`
 
 <Tip>
 The same token generation process is used for other Elementary integrations. See the [MCP Setup Guide](/cloud/mcp/setup-guide#1--generate-an-access-token) for more details.
@@ -39,14 +35,16 @@ When initializing the `ElementaryCloudClient`, provide your credentials:
 ```python
 from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
 
-PROJECT_ID = "your-project-id"
+PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
 API_KEY = "your-api-token"
 URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
 
 client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
 ```
 
-**Note:** The `URL` parameter should be the full endpoint URL including the environment ID, not just the base URL. Replace `{env_id}` with your actual environment ID.
+**Note:** 
+- The `URL` parameter should be the full endpoint URL including the environment ID. Replace `{env_id}` with your actual environment ID.
+- `PROJECT_ID` is your Python project identifier (chosen by you, used to deduplicate and identify reported assets in Elementary Cloud).
 
 ### Using Environment Variables
 
@@ -96,7 +94,7 @@ Never commit API tokens to version control. Always use environment variables or 
 </Tip>
 
 1. **Use environment variables** - Store tokens in environment variables, not in code
-2. **Use secrets management** - For production, use services like AWS Secrets Manager, HashiCorp Vault, or similar
+2. **Use secrets management** - For production, use services like AWS Secrets Manager, HashCorp Vault, or similar
 3. **Rotate tokens regularly** - Periodically rotate your API tokens for better security
 4. **Limit token scope** - Create API tokens with minimal required permissions
 5. **Monitor usage** - Regularly check API token usage in your Elementary Cloud account
@@ -115,9 +113,9 @@ If you receive a 401 error:
 
 If you receive a 404 error:
 
-- Verify your Project ID is correct
-- Check that the project exists in your Elementary Cloud account
-- Ensure you have access to the project
+- Verify your URL is correct and includes the correct environment ID
+- Check that the environment exists in your Elementary Cloud account
+- Ensure you have access to the environment
 
 ## Related Documentation
 
