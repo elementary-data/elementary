@@ -1,0 +1,162 @@
+---
+title: "API Reference Overview"
+---
+
+The Elementary Python SDK provides a simple API for sending data quality information to Elementary Cloud. This page provides an overview of the API structure and endpoints.
+
+## Getting Your API Credentials
+
+Before initializing the client, you need to obtain your API credentials from Elementary Cloud.
+
+### Generate an Access Token
+
+You can generate tokens directly from the Elementary UI:
+
+1. Go to [User → Personal Tokens](https://app.elementary-data.com/settings/user-tokens) or [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens)
+2. Click **Generate token**
+3. (Optional) Add a name/description for the token
+4. Copy the token and store it securely — **it is shown only once**
+
+### Get Your Project ID
+
+Your Project ID can be found in your Elementary Cloud account settings or in the URL of your Elementary Cloud instance.
+
+### Security
+
+- **User tokens** are user-scoped bearer tokens and inherit your workspace permissions
+- **Account tokens** are account-scoped bearer tokens with "Can View" permissions
+- Treat tokens like passwords — do not share or commit them to version control
+- Keep them secret, rotate regularly, and revoke immediately if compromised
+
+For more details, see the [MCP Setup Guide](/cloud/mcp/setup-guide#1--generate-an-access-token) which uses the same token generation process.
+
+## Client Initialization
+
+The SDK uses `ElementaryCloudClient` to send data to Elementary Cloud:
+
+```python
+from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
+
+client = ElementaryCloudClient(project_id, api_key, url)
+```
+
+Where:
+- `project_id` is your Elementary Cloud project identifier
+- `api_key` is your API token (generated from the steps above)
+- `url` is the full SDK ingest endpoint URL: `{base_url}/sdk-ingest/{env_id}/batch`
+  - Example: `https://app.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
+
+## Test Context
+
+Tests are run within an `elementary_test_context` which automatically captures test results:
+
+```python
+from elementary_python_sdk.core.tests import elementary_test_context
+from elementary_python_sdk.core.types.asset import TableAsset
+
+asset = TableAsset(name="users", database_name="prod", schema_name="public", table_name="users")
+
+with elementary_test_context(asset=asset) as ctx:
+    # Run your tests here
+    # Results are automatically captured in ctx
+    client.send_to_cloud(ctx)
+```
+
+## Test Decorators
+
+The SDK provides decorators to define tests:
+
+- `@boolean_test` - For tests that return True/False (pass/fail)
+- `@expected_range` - For tests that return numeric values within a range
+- `@expected_values` - For tests that return values matching a list of expected values
+- `@row_count` - For tests that return a Sized object (DataFrame, list, etc.) to check row count
+
+## Context Manager Approach
+
+You can also use context managers for inline tests:
+
+```python
+with elementary_test_context(asset=asset) as ctx:
+    # Using context managers
+    with ctx.boolean_test(name="my_test", description="Inline test") as my_bool_test:
+        my_bool_test.assert_value(False)
+    
+    with ctx.expected_values_test(
+        name="country_count",
+        expected=[2, 3],
+        allow_none=True,
+        metadata={"my_metadata_field": "my_metadata_value"},
+    ) as my_expected_values_test:
+        my_expected_values_test.assert_value(5)
+        my_expected_values_test.assert_value(3)
+    
+    with ctx.expected_range_test(
+        name="age_range",
+        min=18,
+        max=50,
+    ) as my_range_test:
+        my_range_test.assert_value(25.5)
+    
+    with ctx.row_count_test(
+        name="row_count",
+        min=1,
+        max=1000,
+    ) as my_row_count_test:
+        my_row_count_test.assert_value(users_df)  # Passes DataFrame, list, etc.
+```
+
+## Supported Objects
+
+The SDK supports three types of objects:
+
+<CardGroup cols={3}>
+  <Card title="Table Assets" icon="table" href="/python-sdk/api-reference/table-assets" >
+    Register tables and views in your data warehouse
+  </Card>
+  <Card title="Tests" icon="flask" href="/python-sdk/api-reference/tests" >
+    Define data quality tests
+  </Card>
+  <Card title="Test Executions" icon="play" href="/python-sdk/api-reference/test-executions" >
+    Report test execution results
+  </Card>
+</CardGroup>
+
+## Sending Results
+
+After running tests in a context, send results to Elementary Cloud:
+
+```python
+client.send_to_cloud(ctx)
+```
+
+This automatically batches all test results from the context and sends them in a single request.
+
+## Error Handling
+
+The SDK handles errors automatically, but you can wrap calls in try-except blocks:
+
+```python
+try:
+    client.send_to_cloud(ctx)
+except Exception as e:
+    print(f"Error sending results: {e}")
+```
+
+## Best Practices
+
+- **Run multiple tests in one context** - All tests in a single `elementary_test_context` are automatically batched
+- **Use descriptive test names** - Clear names help identify tests in the Elementary UI
+- **Include asset metadata** - Add descriptions, owners, tags, and dependencies to assets
+- **Handle errors gracefully** - Wrap `send_to_cloud` calls in try-except blocks
+
+<Tip>
+All tests run within a single `elementary_test_context` are automatically batched and sent together.
+</Tip>
+
+## Next Steps
+
+- [Test Decorators](/python-sdk/api-reference/test-decorators) - Complete reference for all test decorators
+- [Table Assets](/python-sdk/api-reference/table-assets) - Learn about table asset structure
+- [Tests](/python-sdk/api-reference/tests) - Understand test definitions
+- [Test Executions](/python-sdk/api-reference/test-executions) - See how to report test results
+

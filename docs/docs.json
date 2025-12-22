@@ -304,6 +304,38 @@
         ]
       },
       {
+        "tab": "Python SDK",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "python-sdk/introduction",
+              "python-sdk/installation",
+              "python-sdk/quickstart"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "python-sdk/api-reference/overview",
+              "python-sdk/api-reference/test-decorators",
+              "python-sdk/api-reference/table-assets",
+              "python-sdk/api-reference/tests",
+              "python-sdk/api-reference/test-executions"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "python-sdk/guides/authentication",
+              "python-sdk/guides/test-decorators",
+              "python-sdk/guides/sending-data",
+              "python-sdk/guides/best-practices"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "dbt Package and Tests",
         "groups": [
           {

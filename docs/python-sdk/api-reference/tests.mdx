@@ -1,0 +1,113 @@
+---
+title: "Tests"
+---
+
+Tests define data quality checks for your table assets. Create tests to monitor data quality metrics and detect issues.
+
+## Test Object
+
+```python
+from elementary_python_sdk.core.types.test import Test, TestSeverity
+
+test = Test(
+    id="string",                    # Required: Unique identifier
+    name="string",                  # Required: Test name
+    test_type="string",            # Required: Type of test
+    asset_id="string",              # Required: ID of the table asset
+    severity=TestSeverity.ERROR,    # Required: Test severity
+    description="string",           # Optional: Test description
+    column_name="string",           # Optional: Column name (for column-level tests)
+    config={},                      # Optional: Test configuration
+    meta={}                         # Optional: Additional metadata
+)
+```
+
+## Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier for the test |
+| `name` | string | Display name for the test |
+| `test_type` | string | Type of test (e.g., `"custom"`, `"row_count"`, `"null_rate"`, `"uniqueness"`) |
+| `asset_id` | string | ID of the table asset this test is associated with (must match a TableAsset `id`) |
+| `severity` | TestSeverity | Severity level: `TestSeverity.ERROR` or `TestSeverity.WARNING` |
+
+## Optional Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `description` | string | Human-readable description of what the test checks |
+| `column_name` | string | Column name for column-level tests (leave `None` for table-level tests) |
+| `config` | dict | Test-specific configuration parameters |
+| `meta` | dict | Additional metadata for the test |
+
+## Test Severity
+
+Tests can have two severity levels:
+
+- `TestSeverity.ERROR` - Critical issues that should be addressed immediately
+- `TestSeverity.WARNING` - Non-critical issues that should be monitored
+
+## Test Types
+
+Common test types include:
+
+- `"custom"` - Custom test logic
+- `"row_count"` - Check row count
+- `"null_rate"` - Check null percentage
+- `"uniqueness"` - Check for duplicate values
+- `"freshness"` - Check data freshness
+- `"volume_anomaly"` - Detect volume anomalies
+- `"freshness_anomaly"` - Detect freshness anomalies
+
+## Example
+
+```python
+from elementary_python_sdk.core.types.test import Test, TestSeverity
+
+# Table-level test
+table_test = Test(
+    id="users_row_count_test",
+    name="Users table row count check",
+    test_type="row_count",
+    asset_id="analytics.public.users",
+    severity=TestSeverity.ERROR,
+    description="Ensures the users table has at least 1000 rows",
+    config={"min_rows": 1000}
+)
+
+# Column-level test
+column_test = Test(
+    id="users_email_uniqueness_test",
+    name="Email uniqueness check",
+    test_type="uniqueness",
+    asset_id="analytics.public.users",
+    severity=TestSeverity.ERROR,
+    description="Ensures email addresses are unique",
+    column_name="email",
+    config={}
+)
+```
+
+## Best Practices
+
+1. **Use descriptive names** - Choose clear, descriptive test names that explain what the test checks
+
+2. **Link to assets** - Always ensure the `asset_id` matches an existing table asset ID
+
+3. **Set appropriate severity** - Use `ERROR` for critical checks and `WARNING` for monitoring
+
+4. **Include descriptions** - Add descriptions to help your team understand test purpose
+
+5. **Use column_name for column tests** - Set `column_name` for column-level tests, leave `None` for table-level tests
+
+<Tip>
+Tests are replaced on each ingest, so include all current test definitions in every request.
+</Tip>
+
+## Related Documentation
+
+- [Table Assets](/python-sdk/api-reference/table-assets) - Create table assets to test
+- [Test Executions](/python-sdk/api-reference/test-executions) - Report test execution results
+- [Sending Data Guide](/python-sdk/guides/sending-data) - Learn how to send tests
+

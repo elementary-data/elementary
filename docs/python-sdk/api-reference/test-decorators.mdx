@@ -1,0 +1,245 @@
+---
+title: "Test Decorators Reference"
+---
+
+Complete reference for all test decorators available in the Elementary Python SDK.
+
+## Import Statement
+
+```python
+from elementary_python_sdk.core.tests import (
+    boolean_test,
+    expected_range,
+    expected_values,
+    row_count,
+)
+```
+
+## @boolean_test
+
+Tests that return a boolean (True/False) result.
+
+### Signature
+
+```python
+@boolean_test(
+    name: str,
+    severity: str | TestSeverity = "ERROR",
+    description: str | None = None,
+    tags: list[str] | None = None,
+    owners: list[str] | None = None,
+    metadata: dict | None = None,
+    column_name: str | None = None,
+    quality_dimension: QualityDimension | None = None,
+    skip: bool = False,
+)
+def test_function(df: pd.DataFrame) -> bool:
+    # Your test logic
+    return True  # or False
+```
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `name` | str | Yes | - | Test name |
+| `severity` | str | No | `"ERROR"` | Test severity: `"ERROR"` or `"WARNING"` |
+| `description` | str | No | `None` | Test description |
+| `column_name` | str | No | `None` | Column being tested (for column-level tests) |
+| `tags` | list[str] | No | `None` | List of tags |
+| `owners` | list[str] | No | `None` | List of owners |
+| `metadata` | dict | No | `None` | Additional metadata |
+| `quality_dimension` | QualityDimension | No | `None` | Quality dimension (defaults to VALIDITY if column_name is set) |
+| `skip` | bool | No | `False` | Whether to skip this test |
+
+### Example
+
+```python
+@boolean_test(
+    name="unique_ids",
+    description="All user IDs must be unique",
+    column_name="id",
+    severity="ERROR",
+)
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    ids = df["id"].dropna().tolist()
+    return len(ids) == len(set(ids))
+```
+
+## @expected_range
+
+Tests that return a numeric value that should fall within a range.
+
+### Signature
+
+```python
+@expected_range(
+    name: str,
+    min: float | None = None,
+    max: float | None = None,
+    severity: str | TestSeverity = "ERROR",
+    description: str | None = None,
+    tags: list[str] | None = None,
+    owners: list[str] | None = None,
+    metadata: dict | None = None,
+    column_name: str | None = None,
+    quality_dimension: QualityDimension | None = None,
+    skip: bool = False,
+)
+def test_function(df: pd.DataFrame) -> float:
+    # Your test logic
+    return 25.5  # Numeric value
+```
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `name` | str | Yes | - | Test name |
+| `min` | float | No | `None` | Minimum expected value (inclusive) |
+| `max` | float | No | `None` | Maximum expected value (inclusive) |
+| `severity` | str | No | `"ERROR"` | Test severity |
+| `description` | str | No | `None` | Test description |
+| `column_name` | str | No | `None` | Column being tested |
+| `tags`, `owners`, `metadata`, `quality_dimension`, `skip` | - | No | - | Same as `@boolean_test` |
+
+### Example
+
+```python
+@expected_range(
+    name="average_age",
+    min=18,
+    max=50,
+    description="Average age should be between 18 and 50",
+    column_name="age",
+    severity="ERROR",
+)
+def test_average_age(df: pd.DataFrame) -> float:
+    return df["age"].mean()
+```
+
+## @expected_values
+
+Tests that return a value that should match one of a list of expected values.
+
+### Signature
+
+```python
+@expected_values(
+    name: str,
+    expected: Any | list[Any],
+    allow_none: bool = False,
+    severity: str | TestSeverity = "ERROR",
+    description: str | None = None,
+    tags: list[str] | None = None,
+    owners: list[str] | None = None,
+    metadata: dict | None = None,
+    column_name: str | None = None,
+    quality_dimension: QualityDimension | None = None,
+    skip: bool = False,
+)
+def test_function(df: pd.DataFrame) -> Any:
+    # Your test logic
+    return value  # Should match one of expected values
+```
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `name` | str | Yes | - | Test name |
+| `expected` | Any \| list[Any] | Yes | - | Expected value(s) - can be single value or list |
+| `allow_none` | bool | No | `False` | Whether to allow None values |
+| `severity` | str | No | `"ERROR"` | Test severity |
+| `description` | str | No | `None` | Test description |
+| `column_name` | str | No | `None` | Column being tested |
+| `tags`, `owners`, `metadata`, `quality_dimension`, `skip` | - | No | - | Same as `@boolean_test` |
+
+### Example
+
+```python
+@expected_values(
+    name="country_count",
+    expected=2,
+    severity="ERROR",
+    description="Should have exactly 2 countries",
+    column_name="country",
+)
+def count_unique_countries(df: pd.DataFrame) -> int:
+    return df["country"].nunique()
+```
+
+## @row_count
+
+Tests that return a Sized object (DataFrame, list, etc.) to check row count.
+
+### Signature
+
+```python
+@row_count(
+    name: str,
+    min: int | None = None,
+    max: int | None = None,
+    severity: str | TestSeverity = "ERROR",
+    description: str | None = None,
+    tags: list[str] | None = None,
+    owners: list[str] | None = None,
+    metadata: dict | None = None,
+    skip: bool = False,
+)
+def test_function(df: pd.DataFrame) -> Sized:
+    # Your test logic - return DataFrame, list, etc.
+    return df  # or any object with __len__
+```
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `name` | str | Yes | - | Test name |
+| `min` | int | No | `None` | Minimum expected row count (inclusive) |
+| `max` | int | No | `None` | Maximum expected row count (inclusive) |
+| `severity` | str | No | `"ERROR"` | Test severity |
+| `description` | str | No | `None` | Test description |
+| `tags`, `owners`, `metadata`, `skip` | - | No | - | Same as `@boolean_test` |
+
+### Example
+
+```python
+@row_count(
+    name="user_count_range",
+    min=1,
+    max=1000000,
+    severity="WARNING",
+    description="Validate user count is within expected range",
+)
+def get_users_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Return the dataframe - decorator calls len() on it."""
+    return df
+```
+
+## Common Parameters
+
+All decorators support these common parameters:
+
+- **`name`** (required): Unique test name
+- **`severity`**: `"ERROR"` or `"WARNING"` (default: `"ERROR"`)
+- **`description`**: Human-readable test description
+- **`tags`**: List of tags for categorization
+- **`owners`**: List of owner emails/usernames
+- **`metadata`**: Dictionary of additional metadata
+- **`skip`**: Boolean to skip the test
+
+## Return Types
+
+- **`@boolean_test`**: Must return `bool`
+- **`@expected_range`**: Must return numeric value (int or float)
+- **`@expected_values`**: Can return any type that can be compared
+- **`@row_count`**: Must return a Sized object (has `__len__` method)
+
+## Related Documentation
+
+- [Quickstart](/python-sdk/quickstart) - Get started with test decorators
+- [Sending Data](/python-sdk/guides/sending-data) - Learn how to send test results
+- [Best Practices](/python-sdk/guides/best-practices) - Best practices for using the SDK
+
