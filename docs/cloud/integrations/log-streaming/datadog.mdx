@@ -1,0 +1,137 @@
+---
+title: "Datadog"
+---
+
+Elementary's Datadog integration enables streaming audit logs and system logs directly to your Datadog account for centralized log management and monitoring.
+
+## Overview
+
+When enabled, Elementary automatically streams your workspace's [audit logs](/cloud/features/collaboration-and-communication/audit_logs/overview) ([user activity logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs) and [system logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)) to Datadog using the [Datadog Logs API](https://docs.datadoghq.com/api/latest/logs/#send-logs). This allows you to:
+
+- Centralize all logs in your Datadog dashboard
+- Set up custom alerts and monitors on log events
+- Correlate Elementary logs with other application logs
+- Perform advanced log analysis and search
+- Maintain long-term log retention in Datadog
+
+## Prerequisites
+
+Before configuring log streaming to Datadog, you'll need:
+
+1. **Datadog API Key** - Your Datadog API key for authentication
+   - You can find or create an API key in your Datadog account under [Organization Settings > API Keys](https://app.datadoghq.com/organization-settings/api-keys)
+
+2. **Datadog Site** (optional) - Your Datadog site region
+   - Default: `datadoghq.com` (US)
+   - EU: `datadoghq.eu`
+   - US3: `us3.datadoghq.com`
+   - US5: `us5.datadoghq.com`
+   - AP1: `ap1.datadoghq.com`
+
+## Configuring Log Streaming to Datadog
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page:
+   - Click on your **account name** in the top-right corner of the UI
+   - Open the dropdown menu
+   - Select **Logs**
+
+2. Click on **Configure Log Streaming** or the **Settings** icon in the logs interface
+
+3. Select **Datadog** as your log streaming destination
+
+4. Enter your Datadog configuration:
+   - **API Key**: Your Datadog API key
+   - **Site** (optional): Your Datadog site region (defaults to `datadoghq.com` if not specified)
+   - **Service Name** (optional): Custom service name for logs in Datadog (defaults to `elementary`)
+   - **Source** (optional): Custom source tag for logs (defaults to `elementary-cloud`)
+
+5. Choose which log types to stream:
+   - **[User Activity Logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs)**: Stream all user activity and audit events
+   - **[System Logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)**: Stream system-level events (syncs, alert deliveries, etc.)
+   - You can enable one or both log types
+
+6. Click **Save** to enable log streaming
+
+<Note>
+The log streaming configuration applies to your entire workspace. All logs matching your selected log types will be streamed to Datadog in real-time.
+</Note>
+
+## Log Format in Datadog
+
+Logs are sent to Datadog with the following structure:
+
+### User Activity Logs
+
+Each user activity log entry includes:
+
+- `timestamp`: ISO 8601 timestamp of the event
+- `status`: Log level (`info` for successful actions, `error` for failed actions)
+- `message`: Human-readable description of the action
+- `service`: Service name (configurable, defaults to `elementary`)
+- `source`: Source tag (configurable, defaults to `elementary-cloud`)
+- `dd.tags`: Additional tags including:
+  - `log_type:audit`
+  - `action:<action_name>` (e.g., `user_login`, `create_test`)
+  - `success:<true|false>`
+  - `user_email:<user_email>`
+  - `env_id:<environment_id>` (if applicable)
+  - `env_name:<environment_name>` (if applicable)
+- Custom attributes from the event content (JSON parsed)
+
+### System Logs
+
+Each system log entry includes:
+
+- `timestamp`: ISO 8601 timestamp of the event
+- `status`: Log level (`info` for successful operations, `error` for failed operations)
+- `message`: Human-readable description of the system event
+- `service`: Service name (configurable, defaults to `elementary`)
+- `source`: Source tag (configurable, defaults to `elementary-cloud`)
+- `dd.tags`: Additional tags including:
+  - `log_type:system`
+  - `action:<action_name>` (e.g., `dbt_data_sync_completed`, `alerts_sent`)
+  - `success:<true|false>`
+  - `env_id:<environment_id>` (if applicable)
+  - `env_name:<environment_name>` (if applicable)
+- Custom attributes from the event content (JSON parsed)
+
+## Viewing Logs in Datadog
+
+Once configured, logs will appear in your Datadog [Log Explorer](https://app.datadoghq.com/logs) within a few seconds of being generated.
+
+You can filter logs using:
+- `source:elementary-cloud` - All Elementary logs
+- `log_type:audit` - User activity logs only
+- `log_type:system` - System logs only
+- `action:<action_name>` - Specific action types
+- `env_name:<environment_name>` - Logs from a specific environment
+- `success:false` - Failed operations only
+
+## Troubleshooting
+
+### Logs not appearing in Datadog
+
+1. **Verify API Key**: Ensure your Datadog API key is valid and has the necessary permissions
+2. **Check Site Configuration**: Verify you've selected the correct Datadog site region
+3. **Review Log Types**: Confirm the log types you want to stream are enabled
+4. **Check Datadog Status**: Verify your Datadog account is active and not rate-limited
+
+### Rate Limiting
+
+Datadog has rate limits for log ingestion. If you're experiencing issues:
+- Check your Datadog account's rate limits in the [Usage & Billing](https://app.datadoghq.com/billing/usage) page
+- Consider filtering which log types you stream if you have high log volume
+- Contact Datadog support if you need to increase your rate limits
+
+## Disabling Log Streaming
+
+To disable log streaming to Datadog:
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page
+2. Click on **Configure Log Streaming** or the **Settings** icon
+3. Click **Disable** or remove the Datadog configuration
+4. Confirm the action
+
+<Warning>
+Disabling log streaming will stop sending new logs to Datadog immediately. Historical logs already sent to Datadog will remain in your Datadog account according to your retention settings.
+</Warning>
