@@ -451,7 +451,8 @@
               "oss/quickstart/quickstart-tests",
               "oss/quickstart/quickstart-report",
               "oss/quickstart/quickstart-alerts",
-              "oss/quickstart/quickstart-prod"
+              "oss/quickstart/quickstart-prod",
+              "oss/quickstart/quickstart-support"
             ]
           },
           {
