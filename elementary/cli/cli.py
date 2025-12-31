@@ -31,10 +31,8 @@ def get_log_path(ctx):
 
 def get_quiet_logs(ctx):
     try:
-        ctx_args = ctx.args
-        idx = ctx_args.index("--quiet-logs")
-        return ctx_args[idx + 1].lower() == "true"
-    except (ValueError, IndexError):
+        return "--quiet-logs" in ctx.args
+    except (ValueError, AttributeError):
         return False
 
 
