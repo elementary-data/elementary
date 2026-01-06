@@ -1,0 +1,168 @@
+---
+title: "Google Cloud Storage (GCS)"
+---
+
+Elementary's Google Cloud Storage (GCS) integration enables streaming audit logs and system logs directly to your GCS bucket for long-term storage, analysis, and integration with other Google Cloud services.
+
+## Overview
+
+When enabled, Elementary automatically streams your workspace's [audit logs](/cloud/features/collaboration-and-communication/audit_logs/overview) ([user activity logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs) and [system logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)) to your GCS bucket using the [Google Cloud Storage API](https://cloud.google.com/storage/docs/json_api). This allows you to:
+
+- Store logs in your own GCS bucket for long-term retention
+- Integrate logs with BigQuery, Dataflow, or other Google Cloud analytics services
+- Maintain full control over log storage and access policies
+- Process logs using Google Cloud data processing tools
+- Archive logs for compliance and audit requirements
+
+## Prerequisites
+
+Before configuring log streaming to GCS, you'll need:
+
+1. **GCS Bucket** - A Google Cloud Storage bucket where logs will be stored
+   - The bucket must exist and be accessible
+   - You'll need the bucket path (e.g., `gs://my-logs-bucket`)
+
+2. **Google Cloud Service Account** - A service account with permissions to write to the bucket
+   - Required permissions: `storage.objects.create` and `storage.objects.list`
+   - The service account credentials must be configured in Elementary
+
+3. **Base Folder** - A folder path within the bucket where logs will be stored
+   - This helps organize logs and can include environment or workspace identifiers
+   - Example: `elementary-logs/production` or `audit-logs/workspace-123`
+
+## Configuring Log Streaming to GCS
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page:
+   - Click on your **account name** in the top-right corner of the UI
+   - Open the dropdown menu
+   - Select **Logs**
+
+2. Click on **Configure Log Streaming** or the **Settings** icon in the logs interface
+
+3. Select **Google Cloud Storage (GCS)** as your log streaming destination
+
+4. Enter your GCS configuration:
+   - **Bucket Path**: The full GCS bucket path (e.g., `gs://my-logs-bucket`)
+   - **Base Folder**: The folder path within the bucket where logs will be stored (e.g., `elementary-logs/production`)
+   - **Service Account Credentials**: Upload or paste your Google Cloud service account JSON credentials
+
+5. Choose which log types to stream:
+   - **[User Activity Logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs)**: Stream all user activity and audit events
+   - **[System Logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)**: Stream system-level events (syncs, alert deliveries, etc.)
+   - You can enable one or both log types
+
+6. Click **Save** to enable log streaming
+
+<Note>
+The log streaming configuration applies to your entire workspace. All logs matching your selected log types will be streamed to your GCS bucket in batches.
+</Note>
+
+## Log Batching
+
+Logs are automatically batched and written to GCS files based on the following criteria:
+
+- **Time-based batching**: A new file is created every **15 minutes**
+- **Size-based batching**: A new file is created when the batch reaches **100MB**
+
+**Whichever condition is met first** triggers a new file to be created. This ensures efficient storage while maintaining reasonable file sizes for processing.
+
+## File Path Format
+
+Logs are stored using a Hive-based partitioning structure for efficient querying and organization:
+
+```
+{base_folder}/log_type={log_type}/date={YYYY-MM-DD}/hour={HH}/file_{timestamp}_{batch_id}.ndjson
+```
+
+Where:
+- `{base_folder}`: The base folder you configured
+- `{log_type}`: Either `audit` (for user activity logs) or `system` (for system logs)
+- `{YYYY-MM-DD}`: Date in ISO format (e.g., `2024-01-15`)
+- `{HH}`: Hour in 24-hour format (e.g., `14`)
+- `{timestamp}`: Unix timestamp when the file was created
+- `{batch_id}`: Unique identifier for the batch
+
+### Example File Paths
+
+```
+elementary-logs/production/log_type=audit/date=2024-01-15/hour=14/file_1705320000_batch_abc123.ndjson
+elementary-logs/production/log_type=system/date=2024-01-15/hour=14/file_1705320900_batch_def456.ndjson
+```
+
+This Hive-based structure allows you to:
+- Efficiently query logs by date and hour using BigQuery or other tools
+- Filter logs by type (`audit` or `system`)
+- Process logs in parallel by partition
+
+## Log Format
+
+Logs are stored as **line-delimited JSON** (NDJSON), where each line represents a single log entry as a JSON object.
+
+### User Activity Logs
+
+Each user activity log entry includes:
+
+```json
+{
+  "timestamp": "2024-01-15T14:30:45.123456Z",
+  "log_type": "audit",
+  "action": "user_login",
+  "success": true,
+  "user": {
+    "id": "usr_abcdef1234567890",
+    "email": "john.doe@example.com",
+    "name": "John Doe"
+  },
+  "env_id": "env_7890123456abcdef",
+  "env_name": "Production",
+  "data": {
+    "additional": "context"
+  }
+}
+```
+
+### System Logs
+
+Each system log entry includes:
+
+```json
+{
+  "timestamp": "2024-01-15T14:30:45.123456Z",
+  "log_type": "system",
+  "action": "dbt_data_sync_completed",
+  "success": true,
+  "env_id": "env_7890123456abcdef",
+  "env_name": "Production",
+  "data": {
+    "environment_id": "env_789",
+    "environment_name": "Production"
+  }
+}
+```
+
+### Field Descriptions
+
+- `timestamp`: ISO 8601 timestamp of the event (UTC)
+- `log_type`: Either `"audit"` for user activity logs or `"system"` for system logs
+- `action`: The specific action that was performed (e.g., `user_login`, `create_test`, `dbt_data_sync_completed`)
+- `success`: Boolean indicating whether the action completed successfully
+- `user`: User information (only present in audit logs)
+  - `id`: User ID
+  - `email`: User email address
+  - `name`: User display name
+- `env_id`: Environment identifier (empty string for account-level actions)
+- `env_name`: Environment name (empty string for account-level actions)
+- `data`: Additional context-specific information as a JSON object
+
+## Disabling Log Streaming
+
+To disable log streaming to GCS:
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page
+2. Click on **Configure Log Streaming** or the **Settings** icon
+3. Click **Disable** or remove the GCS configuration
+4. Confirm the action
+
+<Warning>
+Disabling log streaming will stop sending new logs to GCS immediately. Historical logs already written to GCS will remain in your bucket.
+</Warning>
