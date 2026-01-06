@@ -1,6 +1,10 @@
+from unittest.mock import patch
+
 import pytest
 
 from elementary.monitor.data_monitoring.schema import FiltersSchema, FilterType
+from tests.mocks.anonymous_tracking_mock import MockAnonymousTracking
+from tests.mocks.config_mock import MockConfig
 
 
 def test_empty_from_cli_params():
@@ -310,3 +314,102 @@ def test_exclude_statuses_filters():
         ["fail", "error", "runtime error", "warn"]
     )
     assert filter_schema.statuses[1].type == FilterType.IS
+
+
+def test_models_with_graph_operators_from_cli_params():
+    with patch(
+        "elementary.clients.dbt.command_line_dbt_runner.CommandLineDbtRunner.ls"
+    ) as mock_ls:
+        mock_ls.return_value = ["model.customers", "model.orders", "model.payments"]
+
+        config = MockConfig("mock_project_dir")
+        tracking = MockAnonymousTracking()
+
+        cli_filter = ("models:customers+",)
+        cli_excludes = ()
+        filter_schema = FiltersSchema.from_cli_params(
+            cli_filter, cli_excludes, config, tracking
+        )
+        assert len(filter_schema.tags) == 0
+        assert len(filter_schema.models) == 0
+        assert len(filter_schema.owners) == 0
+        assert len(filter_schema.node_names) == 3
+        assert sorted(filter_schema.node_names) == sorted(
+            ["model.customers", "model.orders", "model.payments"]
+        )
+        assert len(filter_schema.statuses) == 1
+        assert sorted(filter_schema.statuses[0].values) == sorted(
+            ["fail", "error", "runtime error", "warn"]
+        )
+        assert len(filter_schema.resource_types) == 0
+
+
+def test_models_with_upstream_graph_operators_from_cli_params():
+    with patch(
+        "elementary.clients.dbt.command_line_dbt_runner.CommandLineDbtRunner.ls"
+    ) as mock_ls:
+        mock_ls.return_value = [
+            "model.raw_customers",
+            "model.stg_customers",
+            "model.customers",
+        ]
+
+        config = MockConfig("mock_project_dir")
+        tracking = MockAnonymousTracking()
+
+        cli_filter = ("models:+customers",)
+        cli_excludes = ()
+        filter_schema = FiltersSchema.from_cli_params(
+            cli_filter, cli_excludes, config, tracking
+        )
+        assert len(filter_schema.tags) == 0
+        assert len(filter_schema.models) == 0
+        assert len(filter_schema.owners) == 0
+        assert len(filter_schema.node_names) == 3
+        assert sorted(filter_schema.node_names) == sorted(
+            ["model.raw_customers", "model.stg_customers", "model.customers"]
+        )
+        assert len(filter_schema.statuses) == 1
+        assert sorted(filter_schema.statuses[0].values) == sorted(
+            ["fail", "error", "runtime error", "warn"]
+        )
+        assert len(filter_schema.resource_types) == 0
+
+
+def test_models_without_graph_operators_from_cli_params_no_config():
+    cli_filter = ("models:customers+",)
+    cli_excludes = ()
+    filter_schema = FiltersSchema.from_cli_params(cli_filter, cli_excludes)
+    assert len(filter_schema.tags) == 0
+    assert len(filter_schema.models) == 1
+    assert filter_schema.models[0].values == ["customers+"]
+    assert len(filter_schema.owners) == 0
+    assert len(filter_schema.node_names) == 0
+    assert len(filter_schema.statuses) == 1
+    assert sorted(filter_schema.statuses[0].values) == sorted(
+        ["fail", "error", "runtime error", "warn"]
+    )
+    assert len(filter_schema.resource_types) == 0
+
+
+def test_exclude_models_with_graph_operators_from_cli_params():
+    """Test that graph operators in excludes are NOT resolved to node_names"""
+    config = MockConfig("mock_project_dir")
+    tracking = MockAnonymousTracking()
+
+    cli_filter = ()
+    cli_excludes = ("models:customers+",)
+    filter_schema = FiltersSchema.from_cli_params(
+        cli_filter, cli_excludes, config, tracking
+    )
+    assert len(filter_schema.tags) == 0
+    assert len(filter_schema.models) == 1
+    assert filter_schema.models[0].values == ["customers+"]
+    assert filter_schema.models[0].type == FilterType.IS_NOT
+    assert len(filter_schema.owners) == 0
+    assert len(filter_schema.node_names) == 0
+    assert len(filter_schema.statuses) == 1
+    assert sorted(filter_schema.statuses[0].values) == sorted(
+        ["fail", "error", "runtime error", "warn"]
+    )
+    assert len(filter_schema.resource_types) == 0
