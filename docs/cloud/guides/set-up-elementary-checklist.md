@@ -69,5 +69,5 @@ Let's get you set up.
 [ ] Configure [roles and permissions](/cloud/manage-team) in Elementary (optional).  
 [ ] Add SSO authentication with [Okta](/cloud/integrations/security-and-connectivity/okta) or [Azure AD](/cloud/integrations/security-and-connectivity/ms-entra) (optional).  
 [ ] Connect using [AWS private link](/cloud/integrations/security-and-connectivity/aws-privatelink-integration) (optional)   
-[ ] Export [user activity logs](/cloud/features/collaboration-and-communication/user-activity-logs) (optional).
+[ ] Export [user activity logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs) (optional).
 
