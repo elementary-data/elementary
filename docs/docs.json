@@ -636,6 +636,10 @@
       "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-38gg3xy5u-exKL8vkQpoFkng0MAzt1Pg"
     }
   },
+  "banner": {
+    "content": "Introducing Elementary 2.0 - The Data and AI Control Plane. [Join the webinar](https://www.elementary-data.com/webinar/introducing-elementary-2-0) on Jan 21st.",
+    "dismissible": false
+  },
   "search": {
     "prompt": "Ask me anything..."
   },
