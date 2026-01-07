@@ -1,0 +1,201 @@
+---
+title: "Sending Data"
+---
+
+Learn how to efficiently send data to Elementary Cloud using the Python SDK, including batching, error handling, and performance optimization.
+
+## Basic Usage
+
+The simplest way to send data is using the test context and client:
+
+```python
+from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
+from elementary_python_sdk.core.tests import (
+    boolean_test,
+    elementary_test_context,
+)
+from elementary_python_sdk.core.types.asset import TableAsset
+import pandas as pd
+
+@boolean_test(
+    name="unique_ids",
+    description="All user IDs must be unique",
+    severity="ERROR",
+)
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    return len(df["id"]) == len(df["id"].unique())
+
+# Define your asset
+asset = TableAsset(
+    name="users",
+    database_name="prod",
+    schema_name="public",
+    table_name="users"
+)
+
+# Initialize client
+PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+API_KEY = "your-api-key"
+URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+
+client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
+
+# Run tests and send results
+with elementary_test_context(asset=asset) as ctx:
+    users_df = pd.DataFrame({"id": [1, 2, 3]})
+    test_unique_ids(users_df)
+    client.send_to_cloud(ctx)
+```
+
+## Running Multiple Tests
+
+Run multiple tests in a single context and send them together:
+
+```python
+from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
+from elementary_python_sdk.core.tests import (
+    boolean_test,
+    elementary_test_context,
+    expected_range,
+)
+from elementary_python_sdk.core.types.asset import TableAsset
+import pandas as pd
+
+@boolean_test(name="unique_ids", severity="ERROR")
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    return len(df["id"]) == len(df["id"].unique())
+
+@expected_range(name="average_age", min=18, max=50, severity="ERROR")
+def test_average_age(df: pd.DataFrame) -> float:
+    return df["age"].mean()
+
+@boolean_test(name="no_nulls", severity="ERROR")
+def test_no_nulls(df: pd.DataFrame) -> bool:
+    return df["email"].notna().all()
+
+# Define your asset
+asset = TableAsset(
+    name="users",
+    database_name="prod",
+    schema_name="public",
+    table_name="users"
+)
+
+# Initialize client
+PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+API_KEY = "your-api-key"
+URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+
+client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
+
+# Run all tests in a single context
+with elementary_test_context(asset=asset) as ctx:
+    users_df = pd.DataFrame({
+        "id": [1, 2, 3],
+        "age": [25, 30, 35],
+        "email": ["a@example.com", "b@example.com", "c@example.com"]
+    })
+    
+    # Run all tests - all results captured in context
+    test_unique_ids(users_df)
+    test_average_age(users_df)
+    test_no_nulls(users_df)
+    
+    # Send all results in one request
+    client.send_to_cloud(ctx)
+```
+
+<Tip>
+All tests run within a single `elementary_test_context` are automatically batched and sent together.
+</Tip>
+
+## Error Handling
+
+Always include error handling when sending data:
+
+```python
+try:
+    client.send_to_cloud(ctx)
+    print("Data sent successfully")
+except Exception as e:
+    print(f"Error sending data: {e}")
+    # The SDK will log detailed error information
+```
+
+## Retry Logic
+
+Implement retry logic for transient failures:
+
+```python
+import time
+
+def send_with_retry(client, ctx, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            client.send_to_cloud(ctx)
+            return
+        except Exception as e:
+            if attempt < max_retries - 1:
+                # Retry on errors with exponential backoff
+                wait_time = 2 ** attempt
+                time.sleep(wait_time)
+                continue
+            else:
+                raise
+
+send_with_retry(client, ctx)
+```
+
+## Using Context Managers for Inline Tests
+
+You can create tests inline using context managers without decorators:
+
+```python
+with elementary_test_context(asset=asset) as ctx:
+    # Inline boolean test
+    with ctx.boolean_test(name="my_test", description="Inline test") as my_bool_test:
+        my_bool_test.assert_value(False)
+    
+    # Inline expected values test
+    with ctx.expected_values_test(
+        name="country_count",
+        expected=[2, 3],
+        allow_none=True,
+        metadata={"my_metadata_field": "my_metadata_value"},
+    ) as my_expected_values_test:
+        my_expected_values_test.assert_value(5)  # Will fail
+        my_expected_values_test.assert_value(3)  # Will pass
+    
+    # Inline expected range test
+    with ctx.expected_range_test(
+        name="age_range",
+        min=18,
+        max=50,
+    ) as my_range_test:
+        my_range_test.assert_value(25.5)  # Will pass
+    
+    # Inline row count test
+    with ctx.row_count_test(
+        name="row_count",
+        min=1,
+        max=1000,
+    ) as my_row_count_test:
+        my_row_count_test.assert_value(users_df)  # Passes DataFrame, list, etc.
+    
+    client.send_to_cloud(ctx)
+```
+
+## Performance Tips
+
+1. **Batch requests** - Send multiple objects in a single request
+2. **Use async when possible** - For high-volume scenarios, consider async operations
+3. **Don't send duplicates** - Avoid sending the same data multiple times
+4. **Update incrementally** - Only send changed data, not everything every time
+5. **Monitor API usage** - Track your API usage to avoid rate limits
+
+## Related Documentation
+
+- [API Reference](/python-sdk/api-reference/overview) - Full API documentation
+- [Best Practices](/python-sdk/guides/best-practices) - Best practices for using the SDK
+- [Authentication](/python-sdk/guides/authentication) - Authentication setup
+

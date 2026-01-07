@@ -1,0 +1,74 @@
+---
+title: "Python SDK"
+sidebarTitle: "Introduction"
+icon: "code"
+---
+
+The Elementary Python SDK enables you to programmatically send data quality information to Elementary Cloud. Use the SDK to integrate Elementary's data observability capabilities into your custom data pipelines, Python applications, or any system that needs to report data quality metrics.
+
+<CardGroup cols={3}>
+  <Card title="Installation" icon="download" href="/python-sdk/installation" >
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/python-sdk/quickstart" >
+  </Card>
+  <Card title="API Reference" icon="book" href="/python-sdk/api-reference/overview" >
+  </Card>
+</CardGroup>
+
+## What is the Python SDK?
+
+The Elementary Python SDK brings observability and testing directly into your Python pipelines. It captures any Python test result, from any framework, and reports it to Elementary Cloud.
+
+The SDK allows you to:
+
+- **Define data quality tests** - Use decorators to create tests that validate your data
+- **Report test results** - Automatically send test execution results to Elementary Cloud
+- **Register assets** - Define tables, views, and other data assets with metadata
+- **Track execution context** - Capture run metadata, lineage, and dependencies
+- **Integrate with any framework** - Works with Great Expectations, DQX, or your own test code
+
+## Key Features
+
+- **Framework-agnostic** - Works with any Python testing framework (Great Expectations, DQX, custom code)
+- **Decorator-based API** - Simple decorators to define tests (`@boolean_test`, `@expected_range`, etc.)
+- **Context management** - Use `elementary_test_context` to automatically capture test results
+- **Unified observability** - Python tests appear alongside dbt tests and cloud tests in Elementary
+- **Full lineage** - Connect Python assets to dbt models, warehouse tables, and ML outputs
+
+## Use Cases
+
+The Python SDK is ideal for:
+
+- **Ingestion pipelines** - Catch issues before data hits the warehouse
+- **Python-based transformations** - Monitor PySpark, SQL generation, and data processing pipelines
+- **AI/ML pipelines** - Track vectorization, embeddings, model training, and feature generation
+- **Hybrid pipelines** - Monitor structured, semi-structured, and unstructured data flows
+- **Post-warehouse pipelines** - Validate data streaming to downstream destinations, APIs, and operational systems
+
+<Tip>
+The Python SDK works alongside the Elementary dbt package. You can use both to monitor your entire data stack.
+</Tip>
+
+## How It Works
+
+1. **Install the SDK** - Add the Elementary Python SDK to your Python environment
+2. **Define tests** - Use decorators (`@boolean_test`, `@expected_range`, etc.) to create data quality tests
+3. **Create assets** - Define table assets with metadata, owners, tags, and dependencies
+4. **Run tests in context** - Use `elementary_test_context` to automatically capture test results
+5. **Send results** - Use `ElementaryCloudClient` to send test results to Elementary Cloud
+6. **Monitor** - View your data quality metrics unified with dbt tests and cloud tests
+
+<Card
+  title="Get Started"
+  href="/python-sdk/quickstart"
+>
+  Follow our quickstart guide to send your first data to Elementary Cloud in minutes.
+</Card>
+
+<Card
+  title="Read the Blog Post"
+  href="https://www.elementary-data.com/post/data-quality-in-python-pipelines"
+>
+  Learn more about the Python SDK and see real-world examples in our blog post.
+</Card>
+

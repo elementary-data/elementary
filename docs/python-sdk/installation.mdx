@@ -1,0 +1,63 @@
+---
+title: "Installation"
+---
+
+Install the Elementary Python SDK to start sending data quality information to Elementary Cloud.
+
+## Prerequisites
+
+- Python 3.8 or higher
+- An Elementary Cloud account
+- API key and environment ID from your Elementary Cloud account
+
+## Install via pip
+
+```bash
+pip install elementary-python-sdk
+```
+
+## Install via poetry
+
+```bash
+poetry add elementary-python-sdk
+```
+
+## Verify Installation
+
+After installation, verify that the SDK is correctly installed:
+
+```python
+import elementary_python_sdk
+print(elementary_python_sdk.__version__)
+```
+
+## Get Your Credentials
+
+To use the Python SDK, you'll need:
+
+1. **Project ID** - Your Python project identifier (choose any string to identify your code project; used to deduplicate and identify reported assets)
+2. **API Key** - Your Elementary Cloud API token
+3. **URL** - The full endpoint URL: `{base_url}/sdk-ingest/{env_id}/batch`
+   - Example: `https://app.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
+
+### Generate an Access Token
+
+You can generate tokens directly from the Elementary UI:
+
+1. Go to [User → Personal Tokens](https://app.elementary-data.com/settings/user-tokens) or [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens)
+2. Click **Generate token**
+3. (Optional) Add a name/description for the token
+4. Copy the token and store it securely — **it is shown only once**
+
+For detailed instructions, see the [API Reference](/python-sdk/api-reference/overview#getting-your-api-credentials) or the [MCP Setup Guide](/cloud/mcp/setup-guide#1--generate-an-access-token).
+
+<Tip>
+Keep your API key secure. Never commit it to version control. Use environment variables or a secrets management system.
+</Tip>
+
+## Next Steps
+
+- [Quickstart Guide](/python-sdk/quickstart) - Send your first data to Elementary Cloud
+- [Authentication Guide](/python-sdk/guides/authentication) - Learn about authentication options
+- [API Reference](/python-sdk/api-reference/overview) - Explore the full API documentation
+

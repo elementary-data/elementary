@@ -1,0 +1,219 @@
+---
+title: "Quickstart"
+---
+
+Get started with the Elementary Python SDK in minutes. This guide shows you how to define data quality tests using decorators and automatically report them to Elementary Cloud.
+
+## Step 1: Install the SDK
+
+```bash
+pip install elementary-python-sdk
+```
+
+## Step 2: Import Required Modules
+
+```python
+import pandas as pd
+from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
+from elementary_python_sdk.core.tests import (
+    boolean_test,
+    elementary_test_context,
+    expected_range,
+)
+from elementary_python_sdk.core.types.asset import TableAsset
+```
+
+## Step 3: Define Your Tests Using Decorators
+
+The SDK provides decorators to define tests. Here are examples:
+
+```python
+# Define a boolean test (pass/fail)
+@boolean_test(
+    name="unique_ids",
+    description="All user IDs must be unique",
+    column_name="id",
+    severity="ERROR",
+)
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    ids = df["id"].dropna().tolist()
+    return len(ids) == len(set(ids))
+
+# Define a range test
+@expected_range(
+    name="average_age",
+    min=18,
+    max=50,
+    description="Average age should be between 18 and 50",
+    column_name="age",
+    severity="ERROR",
+)
+def test_average_age(df: pd.DataFrame) -> float:
+    return df["age"].mean()
+
+# Define a row count test
+@row_count(
+    name="user_count_range",
+    min=1,
+    max=1000000,
+    severity="WARNING",
+    description="Validate user count is within expected range",
+)
+def get_users_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Return the dataframe - decorator calls len() on it."""
+    return df
+
+# Define an expected values test
+@expected_values(
+    name="country_count",
+    expected=2,
+    severity="ERROR",
+    description="Should have exactly 2 countries",
+    column_name="country",
+)
+def count_unique_countries(df: pd.DataFrame) -> int:
+    return df["country"].nunique()
+```
+
+## Step 4: Create Your Data Asset
+
+```python
+# Define the tested asset
+asset = TableAsset(
+    name="users",
+    database_name="prod",
+    schema_name="public",
+    table_name="users",
+    description="Users table",
+    owners=["data-team"],
+    tags=["pii", "production"],
+    depends_on=["prod.public.customers", "prod.public.orders"]
+)
+```
+
+## Step 5: Run Tests and Send Results
+
+```python
+def main():
+    # Create sample data
+    users_df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5, 6, 7, 8],
+            "age": [23, 30, 46, 76, 76, 123, 45, 32],
+            "country": ["Germany", "France", "Germany", "France", "", "Italy", "France", "Germany"],
+        }
+    )
+    
+    # Use the test context to automatically capture test results
+    with elementary_test_context(asset=asset) as ctx:
+        # Run tests - results are automatically captured
+        test_average_age(users_df)
+        test_unique_ids(users_df)
+        
+        # Send results to Elementary Cloud
+        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+        API_KEY = "your-api-key"
+        URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+        
+        client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
+        client.send_to_cloud(ctx)
+
+if __name__ == "__main__":
+    main()
+```
+
+## Complete Example
+
+Here's the complete example from the [Elementary blog post](https://www.elementary-data.com/post/data-quality-in-python-pipelines):
+
+```python
+import pandas as pd
+from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
+from elementary_python_sdk.core.tests import (
+    boolean_test,
+    elementary_test_context,
+    expected_range,
+)
+from elementary_python_sdk.core.types.asset import TableAsset
+
+# Define "unique ids" test
+@boolean_test(
+    name="unique_ids",
+    description="All user IDs must be unique",
+    column_name="id",
+)
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    ids = df["id"].dropna().tolist()
+    return len(ids) == len(set(ids))
+
+# Define "average age" test
+@expected_range(
+    name="average_age",
+    min=18,
+    max=50,
+    description="Average age should be between 18 and 50",
+    column_name="age",
+)
+def test_average_age(df: pd.DataFrame) -> float:
+    return df["age"].mean()
+
+def main():
+    # Create sample data
+    users_df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5, 6, 7, 8],
+            "age": [23, 30, 46, 76, 76, 123, 45, 32],
+            "country": ["Germany", "France", "Germany", "France", "", "Italy", "France", "Germany"],
+        }
+    )
+    
+    # Define the tested asset
+    asset = TableAsset(
+        name="users",
+        database_name="prod",
+        schema_name="public",
+        table_name="users",
+        description="Users table",
+        owners=["data-team"],
+        tags=["pii", "production"],
+        depends_on=["prod.public.customers", "prod.public.orders"]
+    )
+    
+    # Run tests and report the results
+    with elementary_test_context(asset=asset) as ctx:
+        test_average_age(users_df)
+        test_unique_ids(users_df)
+        
+        # Initialize client and send results
+        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+        API_KEY = "your-api-key"
+        URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+        
+        client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
+        client.send_to_cloud(ctx)
+```
+
+**Note:** 
+- Replace `API_KEY` and `URL` with your actual credentials. The `URL` should be the full SDK ingest endpoint including your environment ID.
+- `PROJECT_ID` is your Python project identifier - choose any string to identify your code project. This will appear in the metadata of assets you report and is used for deduplication.
+
+if __name__ == "__main__":
+    main()
+```
+
+## What Happens Next?
+
+Once you send test results to Elementary Cloud:
+
+- **Tests appear in the test overview** - View execution history, test queries, and configuration
+- **Alerts fire automatically** - Get notified via Slack, PagerDuty, or email when tests fail
+- **Incidents are created** - Automatic incident creation with Jira ticket integration
+- **Lineage is connected** - Python assets link to dbt models, warehouse tables, and ML outputs
+- **Assets are discoverable** - All tables, views, and data entities appear in the Elementary catalog
+
+## What's Next?
+
+- [API Reference](/python-sdk/api-reference/overview) - Learn about all available objects and methods
+- [Sending Data Guide](/python-sdk/guides/sending-data) - Best practices for sending data
+- [Best Practices](/python-sdk/guides/best-practices) - Tips for using the SDK effectively
+

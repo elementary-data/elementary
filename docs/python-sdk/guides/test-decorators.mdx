@@ -1,0 +1,268 @@
+---
+title: "Test Decorators"
+---
+
+The Elementary Python SDK provides decorators to define data quality tests. These decorators automatically capture test results and metadata when tests are run within an `elementary_test_context`.
+
+## Available Decorators
+
+### @boolean_test
+
+Use `@boolean_test` for tests that return a boolean (pass/fail) result.
+
+```python
+from elementary_python_sdk.core.tests import boolean_test
+import pandas as pd
+
+@boolean_test(
+    name="unique_ids",
+    severity="ERROR",
+    description="All user IDs must be unique",
+    column_name="id",
+)
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    ids = df["id"].dropna().tolist()
+    return len(ids) == len(set(ids))
+```
+
+**Parameters:**
+- `name` (required): Test name
+- `severity` (optional): Test severity - `"ERROR"` or `"WARNING"` (default: `"ERROR"`)
+- `description` (optional): Test description
+- `column_name` (optional): Column being tested
+
+### @expected_range
+
+Use `@expected_range` for tests that return a numeric value that should fall within a range.
+
+```python
+from elementary_python_sdk.core.tests import expected_range
+import pandas as pd
+
+@expected_range(
+    name="average_age",
+    min=18,
+    max=50,
+    severity="ERROR",
+    description="Average age should be between 18 and 50",
+    column_name="age",
+)
+def test_average_age(df: pd.DataFrame) -> float:
+    return df["age"].mean()
+```
+
+**Parameters:**
+- `name` (required): Test name
+- `min` (required): Minimum expected value
+- `max` (required): Maximum expected value
+- `severity` (optional): Test severity - `"ERROR"` or `"WARNING"` (default: `"ERROR"`)
+- `description` (optional): Test description
+- `column_name` (optional): Column being tested
+
+### @row_count
+
+Use `@row_count` to validate the number of rows in a DataFrame.
+
+```python
+from elementary_python_sdk.core.tests import row_count
+import pandas as pd
+
+@row_count(
+    name="user_count_range",
+    min=1,
+    max=1000000,
+    severity="WARNING",
+    description="Validate user count is within expected range",
+)
+def get_users_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Return the dataframe - decorator calls len() on it."""
+    return df
+```
+
+**Parameters:**
+- `name` (required): Test name
+- `min` (required): Minimum expected row count
+- `max` (required): Maximum expected row count
+- `severity` (optional): Test severity - `"ERROR"` or `"WARNING"` (default: `"ERROR"`)
+- `description` (optional): Test description
+
+### @expected_values
+
+Use `@expected_values` to validate that a value matches one of the expected values.
+
+```python
+from elementary_python_sdk.core.tests import expected_values
+import pandas as pd
+
+@expected_values(
+    name="country_count",
+    expected=2,
+    severity="ERROR",
+    description="Should have exactly 2 countries",
+    column_name="country",
+)
+def count_unique_countries(df: pd.DataFrame) -> int:
+    return df["country"].nunique()
+```
+
+**Parameters:**
+- `name` (required): Test name
+- `expected` (required): Expected value or list of expected values
+- `severity` (optional): Test severity - `"ERROR"` or `"WARNING"` (default: `"ERROR"`)
+- `description` (optional): Test description
+- `column_name` (optional): Column being tested
+
+## Using Decorators with Test Context
+
+Tests decorated with SDK decorators must be run within an `elementary_test_context`:
+
+```python
+from elementary_python_sdk.core.cloud.cloud_client import ElementaryCloudClient
+from elementary_python_sdk.core.tests import (
+    boolean_test,
+    elementary_test_context,
+    expected_range,
+)
+from elementary_python_sdk.core.types.asset import TableAsset
+import pandas as pd
+
+@boolean_test(
+    name="unique_ids",
+    description="All user IDs must be unique",
+    severity="ERROR",
+)
+def test_unique_ids(df: pd.DataFrame) -> bool:
+    return len(df["id"]) == len(df["id"].unique())
+
+@expected_range(
+    name="average_age",
+    min=18,
+    max=50,
+    severity="ERROR",
+)
+def test_average_age(df: pd.DataFrame) -> float:
+    return df["age"].mean()
+
+# Define your asset
+asset = TableAsset(
+    name="users",
+    database_name="prod",
+    schema_name="public",
+    table_name="users"
+)
+
+# Run tests within context
+with elementary_test_context(asset=asset) as ctx:
+    users_df = pd.DataFrame({"id": [1, 2, 3], "age": [25, 30, 35]})
+    
+    # Run tests - results are automatically captured
+    test_unique_ids(users_df)
+    test_average_age(users_df)
+    
+    # Send results to Elementary Cloud
+    PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+    API_KEY = "your-api-key"
+    URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+    
+    client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
+    client.send_to_cloud(ctx)
+```
+
+## Using Context Manager Tests
+
+You can also create tests directly within the context using context managers:
+
+```python
+with elementary_test_context(asset=asset) as ctx:
+    # Using boolean_test context manager
+    with ctx.boolean_test(name="my_test", description="Test description") as my_bool_test:
+        my_bool_test.assert_value(False)  # Assert a boolean value
+    
+    # Using expected_values_test context manager
+    with ctx.expected_values_test(
+        name="country_count",
+        expected=[2, 3],
+        allow_none=True,
+        metadata={"my_metadata_field": "my_metadata_value"},
+    ) as my_expected_values_test:
+        my_expected_values_test.assert_value(5)  # This will fail (not in expected list)
+        my_expected_values_test.assert_value(3)  # This will pass
+    
+    # Using expected_range_test context manager
+    with ctx.expected_range_test(
+        name="age_range",
+        min=18,
+        max=50,
+    ) as my_range_test:
+        my_range_test.assert_value(25.5)  # Assert a numeric value
+    
+    # Using row_count_test context manager
+    with ctx.row_count_test(
+        name="row_count",
+        min=1,
+        max=1000,
+    ) as my_row_count_test:
+        my_row_count_test.assert_value(users_df)  # Assert a Sized object
+    
+    PROJECT_ID = "your-project-id"
+    API_KEY = "your-api-key"
+    URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+    
+    client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
+    client.send_to_cloud(ctx)
+```
+
+## Framework Integration
+
+The SDK works with any Python testing framework. You can wrap existing test functions:
+
+```python
+from elementary_python_sdk.core.tests import boolean_test
+
+# Existing Great Expectations test
+def ge_test(df):
+    # Your Great Expectations code here
+    return result
+
+# Wrap it with Elementary decorator
+@boolean_test(
+    name="ge_wrapped_test",
+    description="Great Expectations test",
+    severity="ERROR",
+)
+def elementary_wrapped_test(df):
+    return ge_test(df)
+```
+
+## Error Handling in Tests
+
+Tests can raise exceptions, which will be automatically captured and reported:
+
+```python
+@expected_range(
+    name="average_age",
+    min=18,
+    max=50,
+    description="Average age should be between 18 and 50",
+)
+def test_average_age(df: pd.DataFrame) -> float:
+    # If an exception is raised, it will be captured and reported as a test error
+    if df.empty:
+        raise ValueError("DataFrame is empty")
+    return df["age"].mean()
+```
+
+## Best Practices
+
+1. **Use descriptive names** - Choose clear test names that explain what's being validated
+2. **Add descriptions** - Include descriptions to help your team understand test purpose
+3. **Specify column names** - Set `column_name` for column-level tests
+4. **Run in context** - Always run decorated tests within `elementary_test_context`
+5. **Send results** - Call `client.send_to_cloud(ctx)` to report results to Elementary
+
+## Related Documentation
+
+- [Quickstart](/python-sdk/quickstart) - Get started with test decorators
+- [Sending Data](/python-sdk/guides/sending-data) - Learn how to send test results
+- [Best Practices](/python-sdk/guides/best-practices) - Best practices for using the SDK
+
