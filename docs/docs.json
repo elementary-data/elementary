@@ -637,7 +637,7 @@
     }
   },
   "banner": {
-    "content": "Introducing Elementary 2.0 - The Data and AI Control Plane. [Join the webinar](https://www.elementary-data.com/webinar/introducing-elementary-2-0) on Jan 21st.",
+    "content": "[Introducing Elementary 2.0 - The Data and AI Control Plane. Join the webinar on Jan 21st.](https://www.elementary-data.com/webinar/introducing-elementary-2-0)",
     "dismissible": false
   },
   "search": {
