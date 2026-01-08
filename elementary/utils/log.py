@@ -30,10 +30,15 @@ MAX_BYTES_IN_FILE = 10 * 1024 * 1024
 ROTATION_BACKUP_COUNT = 4
 
 
-def get_console_handler():
+def get_console_handler(quiet_logs: bool = False):
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(FORMATTER)
-    console_handler.setLevel(logging.DEBUG if is_debug() else logging.INFO)
+    if is_debug():
+        console_handler.setLevel(logging.DEBUG)
+    elif quiet_logs:
+        console_handler.setLevel(logging.WARNING)
+    else:
+        console_handler.setLevel(logging.INFO)
     return console_handler
 
 
@@ -55,7 +60,14 @@ def get_logger(logger_name):
     return logger
 
 
-def set_root_logger_handlers(logger_name, files_target_path):
+def set_root_logger_handlers(logger_name, files_target_path, quiet_logs: bool = False):
     logger = logging.getLogger(logger_name)
-    logger.addHandler(get_console_handler())
+
+    # Disable propagation to root logger to avoid duplicate logs
+    logger.propagate = False
+
+    logger.addHandler(get_console_handler(quiet_logs=quiet_logs))
     logger.addHandler(get_file_handler(files_target_path))
+
+    # Set logger level to DEBUG so it doesn't filter messages (handler will filter)
+    logger.setLevel(logging.DEBUG)

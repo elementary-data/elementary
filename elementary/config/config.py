@@ -75,6 +75,7 @@ class Config:
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
+        quiet_logs: Optional[bool] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
