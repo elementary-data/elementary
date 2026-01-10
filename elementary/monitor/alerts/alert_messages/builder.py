@@ -122,17 +122,14 @@ class AlertMessageBuilder:
         if detected_at_str:
             summary.append(("Time:", detected_at_str))
 
-        # Initialize subtitle lines with summary
         subtitle_lines = []
 
         if orchestrator_info and orchestrator_info.job_name:
             orchestrator_name = orchestrator_info.orchestrator or "orchestrator"
             job_info_text = f"{orchestrator_info.job_name} (via {orchestrator_name})"
 
-            # Create job info with inline orchestrator link
             orchestrator_link = create_orchestrator_link(orchestrator_info)
             if orchestrator_link:
-                # Create inline blocks for job info + link
                 job_inlines: List[InlineBlock] = [
                     BoldTextBlock(text="Job:"),
                     TextBlock(text=job_info_text + " | "),
@@ -145,24 +142,19 @@ class AlertMessageBuilder:
                     )
                 )
 
-                # Add custom line with job info + link instead of summary item
                 subtitle_lines.append(LineBlock(inlines=job_inlines))
             else:
                 summary.append(("Job:", job_info_text))
         if suppression_interval:
             summary.append(("Suppression interval:", str(suppression_interval)))
 
-        # Add the main summary line
         subtitle_lines.append(SummaryLineBlock(summary=summary))
 
-        # Combine regular links with orchestrator links
         all_links = []
 
-        # Add existing report links
         for link in links:
             all_links.append((link.text, link.url, link.icon))
 
-        # Add orchestrator link if available (only if not already added inline)
         if orchestrator_info and not orchestrator_info.job_name:
             orchestrator_link = create_orchestrator_link(orchestrator_info)
             if orchestrator_link:

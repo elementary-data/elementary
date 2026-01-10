@@ -39,7 +39,6 @@ def create_job_link(
     orchestrator = orchestrator_info.orchestrator or "orchestrator"
     job_name = orchestrator_info.job_name or "Job"
 
-    # Capitalize orchestrator name for display
     display_name = orchestrator.replace("_", " ").title()
 
     return OrchestratorLinkData(
