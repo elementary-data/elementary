@@ -144,14 +144,14 @@ class TestOrchestratorMessageIntegration:
         orchestrator_info = alert.orchestrator_info
 
         assert orchestrator_info is not None
-        assert orchestrator_info["job_name"] == "integration_test"
-        assert orchestrator_info["run_id"] == "run_123"
-        assert orchestrator_info["orchestrator"] == "airflow"
+        assert orchestrator_info.job_name == "integration_test"
+        assert orchestrator_info.run_id == "run_123"
+        assert orchestrator_info.orchestrator == "airflow"
         assert (
-            orchestrator_info["job_url"]
+            orchestrator_info.job_url
             == "https://airflow.example.com/job/integration_test"
         )
-        assert orchestrator_info["run_url"] == "https://airflow.example.com/run/123"
+        assert orchestrator_info.run_url == "https://airflow.example.com/run/123"
 
         # Test message includes this data
         alert.get_report_link = Mock(return_value=None)

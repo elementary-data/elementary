@@ -7,9 +7,21 @@ from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link im
     ReportLinkData,
 )
 from elementary.utils.log import get_logger
+from elementary.utils.pydantic_shim import BaseModel
 from elementary.utils.time import DATETIME_WITH_TIMEZONE_FORMAT
 
 logger = get_logger(__name__)
+
+
+class OrchestratorInfo(BaseModel):
+    """Structured orchestrator metadata for alerts."""
+
+    job_id: Optional[str] = None
+    job_name: Optional[str] = None
+    run_id: Optional[str] = None
+    orchestrator: Optional[str] = None
+    job_url: Optional[str] = None
+    run_url: Optional[str] = None
 
 
 class AlertModel:
@@ -98,7 +110,7 @@ class AlertModel:
         raise NotImplementedError
 
     @property
-    def orchestrator_info(self) -> Optional[Dict[str, str]]:
+    def orchestrator_info(self) -> Optional[OrchestratorInfo]:
         """Returns structured orchestrator metadata if available."""
         if not any(
             [
@@ -111,18 +123,11 @@ class AlertModel:
         ):
             return None
 
-        info = {}
-        if self.job_id:
-            info["job_id"] = self.job_id
-        if self.job_name:
-            info["job_name"] = self.job_name
-        if self.job_run_id:
-            info["run_id"] = self.job_run_id
-        if self.orchestrator:
-            info["orchestrator"] = self.orchestrator
-        if self.job_url:
-            info["job_url"] = self.job_url
-        if self.job_run_url:
-            info["run_url"] = self.job_run_url
-
-        return info
+        return OrchestratorInfo(
+            job_id=self.job_id or None,
+            job_name=self.job_name or None,
+            run_id=self.job_run_id or None,
+            orchestrator=self.orchestrator or None,
+            job_url=self.job_url or None,
+            run_url=self.job_run_url or None,
+        )

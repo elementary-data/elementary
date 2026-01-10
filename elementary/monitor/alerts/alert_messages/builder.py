@@ -35,6 +35,7 @@ from elementary.messages.blocks import (
     TextStyle,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.monitor.alerts.alert import OrchestratorInfo
 from elementary.monitor.alerts.alert_messages.alert_fields import AlertField
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
@@ -111,7 +112,7 @@ class AlertMessageBuilder:
         suppression_interval: Optional[int] = None,
         env: Optional[str] = None,
         links: list[ReportLinkData] = [],
-        orchestrator_info: Optional[Dict[str, str]] = None,
+        orchestrator_info: Optional[OrchestratorInfo] = None,
     ) -> LinesBlock:
         summary = []
         summary.append((type.capitalize() + ":", name))
@@ -124,9 +125,9 @@ class AlertMessageBuilder:
         # Initialize subtitle lines with summary
         subtitle_lines = []
 
-        if orchestrator_info and orchestrator_info.get("job_name"):
-            orchestrator_name = orchestrator_info.get("orchestrator", "orchestrator")
-            job_info_text = f"{orchestrator_info['job_name']} (via {orchestrator_name})"
+        if orchestrator_info and orchestrator_info.job_name:
+            orchestrator_name = orchestrator_info.orchestrator or "orchestrator"
+            job_info_text = f"{orchestrator_info.job_name} (via {orchestrator_name})"
 
             # Create job info with inline orchestrator link
             orchestrator_link = create_orchestrator_link(orchestrator_info)
@@ -162,7 +163,7 @@ class AlertMessageBuilder:
             all_links.append((link.text, link.url, link.icon))
 
         # Add orchestrator link if available (only if not already added inline)
-        if orchestrator_info and not orchestrator_info.get("job_name"):
+        if orchestrator_info and not orchestrator_info.job_name:
             orchestrator_link = create_orchestrator_link(orchestrator_info)
             if orchestrator_link:
                 all_links.append(

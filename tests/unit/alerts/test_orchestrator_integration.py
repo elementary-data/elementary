@@ -1,6 +1,7 @@
 import pytest
 
 from elementary.messages.blocks import Icon
+from elementary.monitor.alerts.alert import OrchestratorInfo
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -15,12 +16,12 @@ class TestOrchestratorLinkCreation:
     """Test orchestrator link creation functionality."""
 
     def test_create_orchestrator_link_with_valid_data(self):
-        orchestrator_info = {
-            "job_name": "nightly_load",
-            "run_id": "12345",
-            "orchestrator": "airflow",
-            "run_url": "https://airflow.example.com/run/12345",
-        }
+        orchestrator_info = OrchestratorInfo(
+            job_name="nightly_load",
+            run_id="12345",
+            orchestrator="airflow",
+            run_url="https://airflow.example.com/run/12345",
+        )
 
         link = create_orchestrator_link(orchestrator_info)
 
@@ -30,25 +31,25 @@ class TestOrchestratorLinkCreation:
         assert link.icon == Icon.LINK
 
     def test_create_orchestrator_link_without_url_returns_none(self):
-        orchestrator_info = {
-            "job_name": "nightly_load",
-            "orchestrator": "airflow"
+        orchestrator_info = OrchestratorInfo(
+            job_name="nightly_load",
+            orchestrator="airflow",
             # No run_url
-        }
+        )
 
         link = create_orchestrator_link(orchestrator_info)
         assert link is None
 
     def test_create_orchestrator_link_with_empty_info_returns_none(self):
-        link = create_orchestrator_link({})
+        link = create_orchestrator_link(OrchestratorInfo())
         assert link is None
 
     def test_create_job_link_with_valid_data(self):
-        orchestrator_info = {
-            "job_name": "nightly_load",
-            "orchestrator": "airflow",
-            "job_url": "https://airflow.example.com/job/nightly_load",
-        }
+        orchestrator_info = OrchestratorInfo(
+            job_name="nightly_load",
+            orchestrator="airflow",
+            job_url="https://airflow.example.com/job/nightly_load",
+        )
 
         link = create_job_link(orchestrator_info)
 
@@ -59,11 +60,11 @@ class TestOrchestratorLinkCreation:
         assert link.icon == Icon.GEAR
 
     def test_create_job_link_without_url_returns_none(self):
-        orchestrator_info = {
-            "job_name": "nightly_load",
-            "orchestrator": "airflow"
+        orchestrator_info = OrchestratorInfo(
+            job_name="nightly_load",
+            orchestrator="airflow",
             # No job_url
-        }
+        )
 
         link = create_job_link(orchestrator_info)
         assert link is None
@@ -92,11 +93,11 @@ class TestAlertModelOrchestratorInfo:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert info["job_name"] == "nightly_load"
-        assert info["run_id"] == "12345"
-        assert info["orchestrator"] == "airflow"
-        assert info["job_url"] == "https://airflow.example.com/job/nightly_load"
-        assert info["run_url"] == "https://airflow.example.com/run/12345"
+        assert info.job_name == "nightly_load"
+        assert info.run_id == "12345"
+        assert info.orchestrator == "airflow"
+        assert info.job_url == "https://airflow.example.com/job/nightly_load"
+        assert info.run_url == "https://airflow.example.com/run/12345"
 
     def test_test_alert_orchestrator_info_with_minimal_data(self):
         alert = TestAlertModel(
@@ -115,8 +116,10 @@ class TestAlertModelOrchestratorInfo:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert info["job_name"] == "test_job"
-        assert len(info) == 1
+        assert info.job_name == "test_job"
+        # Other fields should be None
+        assert info.run_id is None
+        assert info.orchestrator is None
 
     def test_test_alert_orchestrator_info_with_no_data_returns_none(self):
         alert = TestAlertModel(
@@ -152,10 +155,10 @@ class TestAlertModelOrchestratorInfo:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert info["job_name"] == "nightly_build"
-        assert info["run_id"] == "67890"
-        assert info["orchestrator"] == "dbt_cloud"
-        assert info["run_url"] == "https://cloud.getdbt.com/run/67890"
+        assert info.job_name == "nightly_build"
+        assert info.run_id == "67890"
+        assert info.orchestrator == "dbt_cloud"
+        assert info.run_url == "https://cloud.getdbt.com/run/67890"
 
     def test_source_freshness_alert_orchestrator_info(self):
         alert = SourceFreshnessAlertModel(
@@ -174,9 +177,9 @@ class TestAlertModelOrchestratorInfo:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert info["job_name"] == "freshness_check"
-        assert info["orchestrator"] == "airflow"
-        assert info["run_url"] == "https://airflow.example.com/run/111"
+        assert info.job_name == "freshness_check"
+        assert info.orchestrator == "airflow"
+        assert info.run_url == "https://airflow.example.com/run/111"
 
 
 class TestOrchestratorInfoEdgeCases:
@@ -201,7 +204,7 @@ class TestOrchestratorInfoEdgeCases:
         info = alert.orchestrator_info
         assert info is None
 
-    def test_orchestrator_info_filters_none_values(self):
+    def test_orchestrator_info_sets_none_for_empty_values(self):
         alert = TestAlertModel(
             id="test_id",
             test_unique_id="test_unique_id",
@@ -219,10 +222,9 @@ class TestOrchestratorInfoEdgeCases:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert "job_name" in info
-        assert "orchestrator" not in info
-        assert "run_url" not in info
-        assert len(info) == 1
+        assert info.job_name == "valid_job"
+        assert info.orchestrator is None
+        assert info.run_url is None
 
     def test_orchestrator_info_with_only_run_id(self):
         alert = TestAlertModel(
@@ -240,8 +242,9 @@ class TestOrchestratorInfoEdgeCases:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert info["run_id"] == "12345"
-        assert len(info) == 1
+        assert info.run_id == "12345"
+        assert info.job_name is None
+        assert info.orchestrator is None
 
     def test_orchestrator_info_with_only_orchestrator(self):
         alert = TestAlertModel(
@@ -259,8 +262,9 @@ class TestOrchestratorInfoEdgeCases:
 
         info = alert.orchestrator_info
         assert info is not None
-        assert info["orchestrator"] == "dbt_cloud"
-        assert len(info) == 1
+        assert info.orchestrator == "dbt_cloud"
+        assert info.job_name is None
+        assert info.run_id is None
 
 
 class TestOrchestratorLinkDataModel:
