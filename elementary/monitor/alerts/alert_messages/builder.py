@@ -4,11 +4,13 @@ from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 from pydantic import BaseModel
 
 from elementary.messages.block_builders import (
+    BoldTextBlock,
     BoldTextLineBlock,
     BulletListBlock,
     FactsBlock,
     ItalicTextLineBlock,
     JsonCodeBlock,
+    LinkInlineBlocks,
     LinksLineBlock,
     MentionLineBlock,
     NonPrimaryFactBlock,
@@ -33,6 +35,7 @@ from elementary.messages.blocks import (
     TextStyle,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.monitor.alerts.alert import OrchestratorInfo
 from elementary.monitor.alerts.alert_messages.alert_fields import AlertField
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
@@ -42,6 +45,9 @@ from elementary.monitor.alerts.alerts_groups.grouped_by_table import (
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.data_monitoring.alerts.integrations.utils.orchestrator_link import (
+    create_orchestrator_link,
+)
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
 )
@@ -106,6 +112,7 @@ class AlertMessageBuilder:
         suppression_interval: Optional[int] = None,
         env: Optional[str] = None,
         links: list[ReportLinkData] = [],
+        orchestrator_info: Optional[OrchestratorInfo] = None,
     ) -> LinesBlock:
         summary = []
         summary.append((type.capitalize() + ":", name))
@@ -114,16 +121,54 @@ class AlertMessageBuilder:
         summary.append(("Status:", status or "Unknown"))
         if detected_at_str:
             summary.append(("Time:", detected_at_str))
+
+        subtitle_lines = []
+
+        if orchestrator_info and orchestrator_info.job_name:
+            orchestrator_name = orchestrator_info.orchestrator or "orchestrator"
+            job_info_text = f"{orchestrator_info.job_name} (via {orchestrator_name})"
+
+            orchestrator_link = create_orchestrator_link(orchestrator_info)
+            if orchestrator_link:
+                job_inlines: List[InlineBlock] = [
+                    BoldTextBlock(text="Job:"),
+                    TextBlock(text=job_info_text + " | "),
+                ]
+                job_inlines.extend(
+                    LinkInlineBlocks(
+                        text=orchestrator_link.text,
+                        url=orchestrator_link.url,
+                        icon=orchestrator_link.icon,
+                    )
+                )
+
+                subtitle_lines.append(LineBlock(inlines=job_inlines))
+            else:
+                summary.append(("Job:", job_info_text))
         if suppression_interval:
             summary.append(("Suppression interval:", str(suppression_interval)))
-        subtitle_lines = [SummaryLineBlock(summary=summary)]
 
-        if links:
-            subtitle_lines.append(
-                LinksLineBlock(
-                    links=[(link.text, link.url, link.icon) for link in links]
+        subtitle_lines.append(SummaryLineBlock(summary=summary))
+
+        all_links = []
+
+        for link in links:
+            all_links.append((link.text, link.url, link.icon))
+
+        if orchestrator_info and not orchestrator_info.job_name:
+            orchestrator_link = create_orchestrator_link(orchestrator_info)
+            if orchestrator_link:
+                all_links.append(
+                    (
+                        orchestrator_link.text,
+                        orchestrator_link.url,
+                        orchestrator_link.icon,
+                    )
                 )
-            )
+
+        if all_links:
+            subtitle_lines.append(LinksLineBlock(links=all_links))
+
         return LinesBlock(lines=subtitle_lines)
 
     def _get_run_alert_subtitle_links(
@@ -151,6 +196,7 @@ class AlertMessageBuilder:
             asset_type = "snapshot" if alert.materialization == "snapshot" else "model"
             asset_name = alert.alias
         links = self._get_run_alert_subtitle_links(alert)
+        orchestrator_info = alert.orchestrator_info
         return [
             self._get_run_alert_subtitle_block(
                 type=asset_type,
@@ -160,6 +206,7 @@ class AlertMessageBuilder:
                 suppression_interval=alert.suppression_interval,
                 env=alert.env,
                 links=links,
+                orchestrator_info=orchestrator_info,
             )
         ]
 

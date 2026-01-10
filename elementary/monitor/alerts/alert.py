@@ -7,9 +7,21 @@ from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link im
     ReportLinkData,
 )
 from elementary.utils.log import get_logger
+from elementary.utils.pydantic_shim import BaseModel
 from elementary.utils.time import DATETIME_WITH_TIMEZONE_FORMAT
 
 logger = get_logger(__name__)
+
+
+class OrchestratorInfo(BaseModel):
+    """Structured orchestrator metadata for alerts."""
+
+    job_id: Optional[str] = None
+    job_name: Optional[str] = None
+    run_id: Optional[str] = None
+    orchestrator: Optional[str] = None
+    job_url: Optional[str] = None
+    run_url: Optional[str] = None
 
 
 class AlertModel:
@@ -32,6 +44,12 @@ class AlertModel:
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
         env: Optional[str] = None,
+        job_id: Optional[str] = None,
+        job_name: Optional[str] = None,
+        job_run_id: Optional[str] = None,
+        job_url: Optional[str] = None,
+        job_run_url: Optional[str] = None,
+        orchestrator: Optional[str] = None,
         **kwargs,
     ):
         self.id = id
@@ -65,6 +83,12 @@ class AlertModel:
         self.alert_fields = alert_fields
         self.elementary_database_and_schema = elementary_database_and_schema
         self.env = env
+        self.job_id = job_id
+        self.job_name = job_name
+        self.job_run_id = job_run_id
+        self.job_url = job_url
+        self.job_run_url = job_run_url
+        self.orchestrator = orchestrator
 
     @property
     def unified_meta(self) -> Dict:
@@ -84,3 +108,26 @@ class AlertModel:
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         raise NotImplementedError
+
+    @property
+    def orchestrator_info(self) -> Optional[OrchestratorInfo]:
+        """Returns structured orchestrator metadata if available."""
+        if not any(
+            [
+                self.job_name,
+                self.job_run_id,
+                self.orchestrator,
+                self.job_url,
+                self.job_run_url,
+            ]
+        ):
+            return None
+
+        return OrchestratorInfo(
+            job_id=self.job_id or None,
+            job_name=self.job_name or None,
+            run_id=self.job_run_id or None,
+            orchestrator=self.orchestrator or None,
+            job_url=self.job_url or None,
+            run_url=self.job_run_url or None,
+        )
