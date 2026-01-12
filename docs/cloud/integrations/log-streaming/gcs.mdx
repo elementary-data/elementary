@@ -25,6 +25,7 @@ Before configuring log streaming to GCS, you'll need:
 2. **Google Cloud Service Account** - A service account with permissions to write to the bucket
    - Required permissions: `storage.objects.create` and `storage.objects.list`
    - The service account credentials must be configured in Elementary
+   - **Workload Identity Federation**: Support for Workload Identity Federation with BigQuery service accounts is coming soon
 
 3. **Base Folder** - A folder path within the bucket where logs will be stored
    - This helps organize logs and can include environment or workspace identifiers
