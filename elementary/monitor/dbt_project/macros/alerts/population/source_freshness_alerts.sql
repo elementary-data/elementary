@@ -33,7 +33,13 @@
           'error': raw_source_freshness_alert.get('error'),
           'tags': raw_source_freshness_alert.get('tags'),
           'model_meta': raw_source_freshness_alert.get('model_meta'),
-          'freshness_description': raw_source_freshness_alert.get('freshness_description')
+          'freshness_description': raw_source_freshness_alert.get('freshness_description'),
+          'job_id': raw_source_freshness_alert.get('job_id'),
+          'job_name': raw_source_freshness_alert.get('job_name'),
+          'job_run_id': raw_source_freshness_alert.get('job_run_id'),
+          'job_url': raw_source_freshness_alert.get('job_url'),
+          'job_run_url': raw_source_freshness_alert.get('job_run_url'),
+          'orchestrator': raw_source_freshness_alert.get('orchestrator')
         } %}
 
         {% set source_freshness_alert = elementary_cli.generate_alert_object(
@@ -65,6 +71,14 @@
     select * from {{ sources_relation }}
   ),
 
+  dbt_invocations as (
+    select * from {{ ref('elementary', 'dbt_invocations') }}
+  ),
+
+  dbt_run_results as (
+    select * from {{ ref('elementary', 'dbt_run_results') }}
+  ),
+
   source_freshness_alerts as (
     select
       results.source_freshness_execution_id as alert_id,
@@ -78,7 +92,7 @@
       {{ elementary.edr_current_timestamp() }} as created_at,
       results.max_loaded_at_time_ago_in_s,
       results.status as original_status,
-      {{ elementary_cli.normalized_source_freshness_status()}},
+      {{ elementary_cli.normalized_source_freshness_status('results.status')}},
       {# backwards compatibility - these fields were added together #}
       {% if error_after_column_exists %}
         results.error_after,
@@ -103,11 +117,19 @@
       sources.meta as model_meta,
       sources.freshness_error_after,
       sources.freshness_warn_after,
-      sources.freshness_filter
+      sources.freshness_filter,
+      invocations.job_id,
+      invocations.job_name,
+      invocations.job_run_id,
+      invocations.job_url,
+      invocations.job_run_url,
+      invocations.orchestrator
     from dbt_source_freshness_results as results
     join dbt_sources as sources
     on results.unique_id = sources.unique_id
-    where lower(status) != 'pass'
+    left join dbt_run_results on results.source_freshness_execution_id = dbt_run_results.model_execution_id
+    left join dbt_invocations as invocations on dbt_run_results.invocation_id = invocations.invocation_id
+    where lower(results.status) != 'pass'
     and {{ elementary.edr_cast_as_timestamp('results.generated_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
   )
 
