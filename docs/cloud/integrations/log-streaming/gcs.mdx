@@ -53,6 +53,14 @@ Before configuring log streaming to GCS, you'll need:
 
 5. Click **Save** to enable log streaming
 
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1768306580/image_29_hn6lfx.png"
+    />
+  </div>
+</Frame>
+
 <Note>
 The log streaming configuration applies to your entire workspace. Both user activity logs and system logs will be streamed to your GCS bucket in batches.
 </Note>
@@ -92,6 +100,14 @@ This Hive-based structure allows you to:
 - Efficiently query logs by date and hour using BigQuery or other tools
 - Filter logs by type (`audit` or `system`)
 - Process logs in parallel by partition
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1768306580/image_31_ojjhyz.png"
+    />
+  </div>
+</Frame>
 
 ## Log Format
 
@@ -152,6 +168,14 @@ Each system log entry includes:
 - `env_id`: Environment identifier (empty string for account-level actions)
 - `env_name`: Environment name (empty string for account-level actions)
 - `data`: Additional context-specific information as a JSON object
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1768306581/image_32_jtfdjk.png"
+    />
+  </div>
+</Frame>
 
 ## Disabling Log Streaming
 
