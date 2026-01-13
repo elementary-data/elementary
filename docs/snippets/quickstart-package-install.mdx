@@ -1,5 +1,9 @@
 To start using Elementary, you need to add our dbt package to your dbt project.
 
+<Info>
+  **Note:** elementary dbt package has to be installed in all of the connected projects in your environment.
+</Info>
+
 <Accordion title="What are dbt packages and packages.yml?">
 A dbt package is additional Jinja and SQL code that is added to your project, for additional functionality. In fact, each package is a dbt project. By adding a package to your project, you are adding the package code to be part of your project, you can reference its macros, execute its models, and so on.
 
@@ -137,3 +141,5 @@ Some packages we recommend you check out: [dbt_utils](https://github.com/dbt-lab
 Once the elementary dbt package has been installed and configured, your test results, run results and [dbt artifacts](data-tests/dbt/dbt-artifacts) will be loaded to elementary schema tables.
 
 If you see data in these models you completed the package deployment (Congrats! 🎉).
+
+Updating environment settings can take up to a few minutes.
