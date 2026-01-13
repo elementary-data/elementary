@@ -39,7 +39,7 @@ client = ElementaryCloudClient(project_id, api_key, url)
 Where:
 - `project_id` is your Python project identifier (chosen by you, used to deduplicate and identify reported assets)
 - `api_key` is your API token (generated from the steps above)
-- `url` is the full SDK ingest endpoint URL: `{base_url}/sdk-ingest/{env_id}/batch`
+- `url` is the full SDK ingest endpoint URL (the Elementary team will provide you with this URL): `{base_url}/sdk-ingest/{env_id}/batch`
   - Example: `https://app.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
 
 ## Test Context
@@ -75,7 +75,7 @@ You can also use context managers for inline tests:
 with elementary_test_context(asset=asset) as ctx:
     # Using context managers
     with ctx.boolean_test(name="my_test", description="Inline test") as my_bool_test:
-        my_bool_test.assert_value(False)
+        my_bool_test.assert_value(my_test_function())
     
     with ctx.expected_values_test(
         name="country_count",
@@ -83,7 +83,9 @@ with elementary_test_context(asset=asset) as ctx:
         allow_none=True,
         metadata={"my_metadata_field": "my_metadata_value"},
     ) as my_expected_values_test:
+        # This will fail
         my_expected_values_test.assert_value(5)
+        # This will pass
         my_expected_values_test.assert_value(3)
     
     with ctx.expected_range_test(
@@ -143,7 +145,6 @@ except Exception as e:
 - **Run multiple tests in one context** - All tests in a single `elementary_test_context` are automatically batched
 - **Use descriptive test names** - Clear names help identify tests in the Elementary UI
 - **Include asset metadata** - Add descriptions, owners, tags, and dependencies to assets
-- **Handle errors gracefully** - Wrap `send_to_cloud` calls in try-except blocks
 
 <Tip>
 All tests run within a single `elementary_test_context` are automatically batched and sent together.

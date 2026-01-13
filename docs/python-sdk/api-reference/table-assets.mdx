@@ -17,7 +17,7 @@ asset = TableAsset(
     description="string",           # Optional: Table description
     owners=["string"],              # Optional: List of owners (emails or usernames)
     tags=["string"],               # Optional: List of tags
-    depends_on=["string"]           # Optional: List of upstream asset IDs
+    depends_on=["string"]           # Optional: List of upstream fully qualified table names
 )
 ```
 
@@ -37,7 +37,7 @@ asset = TableAsset(
 | `description` | string | Human-readable description of the table |
 | `owners` | list[string] | List of owners (email addresses or usernames) |
 | `tags` | list[string] | List of tags for categorization |
-| `depends_on` | list[string] | List of upstream asset IDs (e.g., `["prod.public.customers", "prod.public.orders"]`) for lineage tracking |
+| `depends_on` | list[string] | List of upstream fully qualified table names (e.g., `["prod.public.customers", "prod.public.orders"]`) for lineage tracking |
 
 ## Example
 

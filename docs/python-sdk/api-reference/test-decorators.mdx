@@ -49,8 +49,8 @@ def test_function(df: pd.DataFrame) -> bool:
 | `tags` | list[str] | No | `None` | List of tags |
 | `owners` | list[str] | No | `None` | List of owners |
 | `metadata` | dict | No | `None` | Additional metadata |
-| `quality_dimension` | QualityDimension | No | `None` | Quality dimension (defaults to VALIDITY if column_name is set) |
-| `skip` | bool | No | `False` | Whether to skip this test |
+| `quality_dimension` | QualityDimension | No | `None` | Quality dimension (defaults to VALIDITY) |
+| `skip` | bool | No | `False` | Whether to skip this test. Useful if you want the test to appear in Elementary Cloud, but you don't want to execute it in this run. |
 
 ### Example
 
@@ -68,7 +68,7 @@ def test_unique_ids(df: pd.DataFrame) -> bool:
 
 ## @expected_range
 
-Tests that return a numeric value that should fall within a range.
+Tests that return a numeric value that should fall within a range. They can also return a list of numeric values or a pandas Series.
 
 ### Signature
 
@@ -86,9 +86,11 @@ Tests that return a numeric value that should fall within a range.
     quality_dimension: QualityDimension | None = None,
     skip: bool = False,
 )
-def test_function(df: pd.DataFrame) -> float:
+def test_function(df: pd.DataFrame) -> float | list[float] | pd.Series:
     # Your test logic
-    return 25.5  # Numeric value
+    return df["age"].mean()  # Numeric value
+    # return [1, 2, 3]  # Numeric values
+    # return df["age"]  # pandas Series
 ```
 
 ### Parameters
@@ -120,7 +122,7 @@ def test_average_age(df: pd.DataFrame) -> float:
 
 ## @expected_values
 
-Tests that return a value that should match one of a list of expected values.
+Tests that return a value (or values) that should match one of a list of expected values.
 
 ### Signature
 
