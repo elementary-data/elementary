@@ -23,12 +23,9 @@ Before configuring log streaming to GCS, you'll need:
    - You'll need the bucket path (e.g., `gs://my-logs-bucket`)
 
 2. **Google Cloud Service Account** - A service account with permissions to write to the bucket
-   - Required permissions: `storage.objects.create` and `storage.objects.list`
-   - The service account credentials must be configured in Elementary
-
-3. **Base Folder** - A folder path within the bucket where logs will be stored
-   - This helps organize logs and can include environment or workspace identifiers
-   - Example: `elementary-logs/production` or `audit-logs/workspace-123`
+   - Required role: `Storage Object User` (roles/storage.objectUser)
+   - You'll need to generate a service account JSON key file
+   - The service account key file must be uploaded in Elementary
 
 ## Configuring Log Streaming to GCS
 
@@ -37,24 +34,25 @@ Before configuring log streaming to GCS, you'll need:
    - Open the dropdown menu
    - Select **Logs**
 
-2. Click on **Configure Log Streaming** or the **Settings** icon in the logs interface
+2. In the **External Integrations** section, click the **Connect** button
 
-3. Select **Google Cloud Storage (GCS)** as your log streaming destination
+3. In the modal that opens, select **Google Cloud Storage (GCS)** as your log streaming destination
 
 4. Enter your GCS configuration:
    - **Bucket Path**: The full GCS bucket path (e.g., `gs://my-logs-bucket`)
-   - **Base Folder**: The folder path within the bucket where logs will be stored (e.g., `elementary-logs/production`)
-   - **Service Account Credentials**: Upload or paste your Google Cloud service account JSON credentials
+   - **Service Account Key File**: Upload your Google Cloud service account JSON key file
+     - To generate a service account key file:
+       1. Go to [Google Cloud Console > IAM & Admin > Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts)
+       2. Select your service account (or create a new one)
+       3. Click the three dots menu and select "Manage keys"
+       4. Click "ADD KEY" and select "Create new key"
+       5. Choose "JSON" format and click "CREATE"
+       6. The JSON file will be downloaded automatically
 
-5. Choose which log types to stream:
-   - **[User Activity Logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs)**: Stream all user activity and audit events
-   - **[System Logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)**: Stream system-level events (syncs, alert deliveries, etc.)
-   - You can enable one or both log types
-
-6. Click **Save** to enable log streaming
+5. Click **Save** to enable log streaming
 
 <Note>
-The log streaming configuration applies to your entire workspace. All logs matching your selected log types will be streamed to your GCS bucket in batches.
+The log streaming configuration applies to your entire workspace. Both user activity logs and system logs will be streamed to your GCS bucket in batches.
 </Note>
 
 ## Log Batching
@@ -68,14 +66,13 @@ Logs are automatically batched and written to GCS files based on the following c
 
 ## File Path Format
 
-Logs are stored using a Hive-based partitioning structure for efficient querying and organization:
+Logs are stored at the root of your bucket using a Hive-based partitioning structure for efficient querying and organization:
 
 ```
-{base_folder}/log_type={log_type}/date={YYYY-MM-DD}/hour={HH}/file_{timestamp}_{batch_id}.ndjson
+log_type={log_type}/date={YYYY-MM-DD}/hour={HH}/file_{timestamp}_{batch_id}.ndjson
 ```
 
 Where:
-- `{base_folder}`: The base folder you configured
 - `{log_type}`: Either `audit` (for user activity logs) or `system` (for system logs)
 - `{YYYY-MM-DD}`: Date in ISO format (e.g., `2024-01-15`)
 - `{HH}`: Hour in 24-hour format (e.g., `14`)
@@ -85,8 +82,8 @@ Where:
 ### Example File Paths
 
 ```
-elementary-logs/production/log_type=audit/date=2024-01-15/hour=14/file_1705320000_batch_abc123.ndjson
-elementary-logs/production/log_type=system/date=2024-01-15/hour=14/file_1705320900_batch_def456.ndjson
+log_type=audit/date=2024-01-15/hour=14/file_1705320000_batch_abc123.ndjson
+log_type=system/date=2024-01-15/hour=14/file_1705320900_batch_def456.ndjson
 ```
 
 This Hive-based structure allows you to:
@@ -159,7 +156,7 @@ Each system log entry includes:
 To disable log streaming to GCS:
 
 1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page
-2. Click on **Configure Log Streaming** or the **Settings** icon
+2. In the **External Integrations** section, find your GCS integration
 3. Click **Disable** or remove the GCS configuration
 4. Confirm the action
 

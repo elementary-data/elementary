@@ -265,6 +265,7 @@
                 "group": "Log Streaming",
                 "pages": [
                   "cloud/integrations/log-streaming/datadog",
+                  "cloud/integrations/log-streaming/splunk",
                   "cloud/integrations/log-streaming/gcs"
                 ]
               },

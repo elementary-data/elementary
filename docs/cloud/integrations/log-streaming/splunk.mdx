@@ -1,0 +1,163 @@
+---
+title: "Splunk"
+---
+
+Elementary's Splunk integration enables streaming audit logs and system logs directly to your Splunk instance via HTTP Event Collector (HEC) for centralized log management, monitoring, and analysis.
+
+## Overview
+
+When enabled, Elementary automatically streams your workspace's [audit logs](/cloud/features/collaboration-and-communication/audit_logs/overview) ([user activity logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs) and [system logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)) to Splunk using the [Splunk HTTP Event Collector (HEC)](https://docs.splunk.com/Documentation/Splunk/latest/Data/HECExamples). This allows you to:
+
+- Centralize all logs in your Splunk instance
+- Set up custom alerts and dashboards on log events
+- Correlate Elementary logs with other application logs
+- Perform advanced log analysis and search using Splunk's powerful query language
+- Maintain long-term log retention in Splunk
+
+## Prerequisites
+
+Before configuring log streaming to Splunk, you'll need:
+
+1. **Splunk Instance** - A Splunk Enterprise or Splunk Cloud instance with HTTP Event Collector (HEC) enabled
+   - HEC must be configured and accessible from Elementary's servers
+   - You'll need the HEC URL (e.g., `https://splunk.example.com:8088`)
+
+2. **HEC Token** - An HTTP Event Collector token for authentication
+   - You can create a token in Splunk under **Settings > Data Inputs > HTTP Event Collector**
+   - The token must have write permissions
+
+3. **Splunk Index** (optional) - A specific index where logs should be stored
+   - If not specified, logs will be sent to the default index configured for the HEC token
+
+## Configuring Log Streaming to Splunk
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page:
+   - Click on your **account name** in the top-right corner of the UI
+   - Open the dropdown menu
+   - Select **Logs**
+
+2. In the **External Integrations** section, click the **Connect** button
+
+3. In the modal that opens, select **Splunk** as your log streaming destination
+
+4. Enter your Splunk configuration:
+   - **HEC URL**: Your Splunk HTTP Event Collector URL (e.g., `https://splunk.example.com:8088` or `https://example.splunkcloud.com:8088`)
+   - **HEC Token**: Your Splunk HEC authentication token
+   - **Index** (optional): The Splunk index where logs should be stored (defaults to the token's configured index if not specified)
+
+5. Click **Save** to enable log streaming
+
+<Note>
+The log streaming configuration applies to your entire workspace. Both user activity logs and system logs will be streamed to Splunk in batches.
+</Note>
+
+## Log Format in Splunk
+
+Logs are sent to Splunk with the following structure:
+
+### Event Structure
+
+Each log entry is sent as a JSON event with the following fields:
+
+- `event`: The log data as a JSON object
+- `sourcetype`: `_json` (indicating JSON format)
+- `source`: `elementary-cloud` (identifying the source)
+- `time`: Unix timestamp of the event
+- `index`: The Splunk index (if specified in configuration)
+
+### User Activity Logs
+
+Each user activity log entry includes:
+
+```json
+{
+  "timestamp": "2024-01-15T14:30:45.123456Z",
+  "log_type": "audit",
+  "action": "user_login",
+  "success": true,
+  "user": {
+    "id": "usr_abcdef1234567890",
+    "email": "john.doe@example.com",
+    "name": "John Doe"
+  },
+  "env_id": "env_7890123456abcdef",
+  "env_name": "Production",
+  "data": {
+    "additional": "context"
+  }
+}
+```
+
+### System Logs
+
+Each system log entry includes:
+
+```json
+{
+  "timestamp": "2024-01-15T14:30:45.123456Z",
+  "log_type": "system",
+  "action": "dbt_data_sync_completed",
+  "success": true,
+  "env_id": "env_7890123456abcdef",
+  "env_name": "Production",
+  "data": {
+    "environment_id": "env_789",
+    "environment_name": "Production"
+  }
+}
+```
+
+### Field Descriptions
+
+- `timestamp`: ISO 8601 timestamp of the event (UTC)
+- `log_type`: Either `"audit"` for user activity logs or `"system"` for system logs
+- `action`: The specific action that was performed (e.g., `user_login`, `create_test`, `dbt_data_sync_completed`)
+- `success`: Boolean indicating whether the action completed successfully
+- `user`: User information (only present in audit logs)
+  - `id`: User ID
+  - `email`: User email address
+  - `name`: User display name
+- `env_id`: Environment identifier (empty string for account-level actions)
+- `env_name`: Environment name (empty string for account-level actions)
+- `data`: Additional context-specific information as a JSON object
+
+## Viewing Logs in Splunk
+
+Once configured, logs will appear in your Splunk instance within a few seconds of being generated.
+
+You can search logs using Splunk Search Processing Language (SPL):
+
+```
+# Search for all Elementary logs
+source="elementary-cloud"
+
+# Filter by log type
+source="elementary-cloud" log_type="audit"
+source="elementary-cloud" log_type="system"
+
+# Search for specific actions
+source="elementary-cloud" action="user_login"
+source="elementary-cloud" action="dbt_data_sync_completed"
+
+# Filter by environment
+source="elementary-cloud" env_name="Production"
+
+# Search for failed operations
+source="elementary-cloud" success=false
+
+# Search by user email
+source="elementary-cloud" user.email="john.doe@example.com"
+```
+
+## Disabling Log Streaming
+
+To disable log streaming to Splunk:
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page
+2. In the **External Integrations** section, find your Splunk integration
+3. Click **Disable** or remove the Splunk configuration
+4. Confirm the action
+
+<Warning>
+Disabling log streaming will stop sending new logs to Splunk immediately. Historical logs already sent to Splunk will remain in your Splunk instance according to your retention settings.
+</Warning>
