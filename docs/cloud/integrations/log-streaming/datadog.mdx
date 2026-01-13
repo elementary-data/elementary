@@ -35,9 +35,9 @@ Before configuring log streaming to Datadog, you'll need:
    - Open the dropdown menu
    - Select **Logs**
 
-2. Click on **Configure Log Streaming** or the **Settings** icon in the logs interface
+2. In the **External Integrations** section, click the **Connect** button
 
-3. Select **Datadog** as your log streaming destination
+3. In the modal that opens, select **Datadog** as your log streaming destination
 
 4. Enter your Datadog configuration:
    - **API Key**: Your Datadog API key
@@ -45,12 +45,24 @@ Before configuring log streaming to Datadog, you'll need:
    - **Service Name** (optional): Custom service name for logs in Datadog (defaults to `elementary`)
    - **Source** (optional): Custom source tag for logs (defaults to `elementary-cloud`)
 
-5. Choose which log types to stream:
-   - **[User Activity Logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs)**: Stream all user activity and audit events
-   - **[System Logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)**: Stream system-level events (syncs, alert deliveries, etc.)
-   - You can enable one or both log types
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1768276962/b3d70f5a-88c7-4c6d-a0e6-ff56d392b901.png"
+    />
+  </div>
+</Frame>
 
-6. Click **Save** to enable log streaming
+6. Click **Connect** to enable log streaming
+
+7. After connecting, you will see the Datadog integration listed in the **External Integrations** section. You can edit or disable the integration at any time.
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1767005465/Pasted_Graphic_2_gyg7dh.png"
+    />
+  </div>
+</Frame>
 
 <Note>
 The log streaming configuration applies to your entire workspace. All logs matching your selected log types will be streamed to Datadog in real-time.
@@ -107,6 +119,20 @@ You can filter logs using:
 - `env_name:<environment_name>` - Logs from a specific environment
 - `success:false` - Failed operations only
 
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1767005465/image_28_w1pkgl.png"
+    />
+  </div>
+</Frame><Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1767005466/image_27_ux2nv2.png"
+    />
+  </div>
+</Frame>
+
 ## Troubleshooting
 
 ### Logs not appearing in Datadog
@@ -128,7 +154,7 @@ Datadog has rate limits for log ingestion. If you're experiencing issues:
 To disable log streaming to Datadog:
 
 1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page
-2. Click on **Configure Log Streaming** or the **Settings** icon
+2. In the **External Integrations** section, find your Datadog integration
 3. Click **Disable** or remove the Datadog configuration
 4. Confirm the action
 
