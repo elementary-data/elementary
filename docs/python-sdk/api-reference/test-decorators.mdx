@@ -100,10 +100,7 @@ def test_function(df: pd.DataFrame) -> float | list[float] | pd.Series:
 | `name` | str | Yes | - | Test name |
 | `min` | float | No | `None` | Minimum expected value (inclusive) |
 | `max` | float | No | `None` | Maximum expected value (inclusive) |
-| `severity` | str | No | `"ERROR"` | Test severity |
-| `description` | str | No | `None` | Test description |
-| `column_name` | str | No | `None` | Column being tested |
-| `tags`, `owners`, `metadata`, `quality_dimension`, `skip` | - | No | - | Same as `@boolean_test` |
+| `severity`, `description`, `column_name`, `tags`, `owners`, `metadata`, `quality_dimension`, `skip` | - | No | - | Same as `@boolean_test` |
 
 ### Example
 
@@ -152,10 +149,7 @@ def test_function(df: pd.DataFrame) -> Any:
 | `name` | str | Yes | - | Test name |
 | `expected` | Any \| list[Any] | Yes | - | Expected value(s) - can be single value or list |
 | `allow_none` | bool | No | `False` | Whether to allow None values |
-| `severity` | str | No | `"ERROR"` | Test severity |
-| `description` | str | No | `None` | Test description |
-| `column_name` | str | No | `None` | Column being tested |
-| `tags`, `owners`, `metadata`, `quality_dimension`, `skip` | - | No | - | Same as `@boolean_test` |
+| `severity`, `description`, `column_name`, `tags`, `owners`, `metadata`, `quality_dimension`, `skip` | - | No | - | Same as `@boolean_test` |
 
 ### Example
 
@@ -201,9 +195,7 @@ def test_function(df: pd.DataFrame) -> Sized:
 | `name` | str | Yes | - | Test name |
 | `min` | int | No | `None` | Minimum expected row count (inclusive) |
 | `max` | int | No | `None` | Maximum expected row count (inclusive) |
-| `severity` | str | No | `"ERROR"` | Test severity |
-| `description` | str | No | `None` | Test description |
-| `tags`, `owners`, `metadata`, `skip` | - | No | - | Same as `@boolean_test` |
+| `severity`, `description`, `tags`, `owners`, `metadata`, `skip` | - | No | - | Same as `@boolean_test` |
 
 ### Example
 
@@ -216,7 +208,7 @@ def test_function(df: pd.DataFrame) -> Sized:
     description="Validate user count is within expected range",
 )
 def get_users_df(df: pd.DataFrame) -> pd.DataFrame:
-    """Return the dataframe - decorator calls len() on it."""
+    """Return the DataFrame; the decorator calls len() on it."""
     return df
 ```
 
