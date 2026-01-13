@@ -54,7 +54,18 @@ This feature lets you maintain the separation between projects while still using
 
 ### Setup and Configuration
 
-Multi-environment support is currently available through the Elementary team.
-If you want to enable it or learn more about recommended setups, reach out to the team.
+<Note>
+Each dbt project added to the environment must use a different Elementary schema, the Elementary dbt package must be installed in each project.
+</Note>
 
-A self-serve configuration flow will be available soon.
+Multi-environment support is done in the environment settings, directly in the UI.
+After configuring the DWH connection, click "Continue" and you will get to the environment content section, where you can add additional dbt projects to the same environment.
+
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1768320449/eb197aa5-f814-4e64-8a98-223f283192ec.png"
+    />
+  </div>
+</Frame>
