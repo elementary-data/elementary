@@ -161,12 +161,7 @@ class ReportAPI(APIClient):
                 lineage_node_ids, exclude_elementary_models
             )
             filters = filters_api.get_filters(
-                test_results_totals,
-                test_runs_totals,
-                models,
-                sources,
-                models_runs.runs,
-                seeds,
+                test_results_totals, test_runs_totals, models, sources, models_runs.runs
             )
 
             serializable_groups = groups.dict()
