@@ -218,6 +218,10 @@ class Config:
             "disable_elementary_logo_print", False
         )
 
+        self.quiet_logs = self._first_not_none(
+            quiet_logs, config.get("quiet_logs"), False
+        )
+
     def _load_configuration(self) -> dict:
         if not os.path.exists(self.config_dir):
             os.makedirs(self.config_dir)
