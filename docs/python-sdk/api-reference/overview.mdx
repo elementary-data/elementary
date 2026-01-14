@@ -58,6 +58,17 @@ with elementary_test_context(asset=asset) as ctx:
     client.send_to_cloud(ctx)
 ```
 
+### `raise_on_error`
+
+By default, `elementary_test_context` uses `raise_on_error=False`. This means that if a decorated test (or something inside the context) raises an exception, the SDK **captures it and records an `ERROR` execution** so you can still send results to Elementary Cloud without crashing your pipeline.
+
+If you prefer **fail-fast** behavior (for example in CI), pass `raise_on_error=True` to re-raise exceptions after they are recorded:
+
+```python
+with elementary_test_context(asset=asset, raise_on_error=True) as ctx:
+    run_my_tests(df)
+```
+
 ## Test Decorators
 
 The SDK provides decorators to define tests:
