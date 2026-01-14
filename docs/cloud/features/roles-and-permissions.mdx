@@ -69,17 +69,17 @@ Each role may include permissions at one, two, or all three levels:
     - **Filters** — e.g., `Asset tag = #marketing`, `Test Owner = @data-team`.
     - **Permission type** — Choose read-only or edit access (e.g., create tests, update metadata, modify configurations) for each filter group.
 
-**Custom role example: Marketing analysts**
+**Custom role example: Finance Prod Editor**
+
+**Description** - Can edit finance assets, cannot see PII assets
 
 - Account level - No permissions to view/edit account configuration
 - Environment level -
-    - For 'Prod' environment
-        - Access to pages - Catalog, lineage, data health
-        - Permissions type - read only
-    - Other environments - No access
+    - For 'Prod' environment - Can edit
+    - Other environments - Hidden (No access)
 - Assets/tests level -
-    - `Asset tag = #marketing`  - Can edit
-    - `Asset tag = #Sales` - Read only
+    - `Asset tag = #finance OR Asset tag = #finance-data-product` - Can edit
+    - `Asset tag = #PII` - Hidden (No access)
 
 ![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1768402089/image_39_puhpqm.png)
 
