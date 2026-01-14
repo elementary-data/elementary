@@ -326,9 +326,7 @@
             "pages": [
               "python-sdk/api-reference/overview",
               "python-sdk/api-reference/test-decorators",
-              "python-sdk/api-reference/table-assets",
-              "python-sdk/api-reference/tests",
-              "python-sdk/api-reference/test-executions"
+              "python-sdk/api-reference/table-assets"
             ]
           }
         ]

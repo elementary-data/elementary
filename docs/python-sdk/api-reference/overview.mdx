@@ -105,17 +105,14 @@ with elementary_test_context(asset=asset) as ctx:
 
 ## Supported Objects
 
-The SDK supports three types of objects:
+The SDK supports reporting table assets and test results.
 
-<CardGroup cols={3}>
+<CardGroup cols={2}>
   <Card title="Table Assets" icon="table" href="/python-sdk/api-reference/table-assets" >
     Register tables and views in your data warehouse
   </Card>
-  <Card title="Tests" icon="flask" href="/python-sdk/api-reference/tests" >
-    Define data quality tests
-  </Card>
-  <Card title="Test Executions" icon="play" href="/python-sdk/api-reference/test-executions" >
-    Report test execution results
+  <Card title="Test Decorators" icon="flask" href="/python-sdk/api-reference/test-decorators" >
+    Define data quality tests using decorators
   </Card>
 </CardGroup>
 
@@ -154,6 +151,5 @@ All tests run within a single `elementary_test_context` are automatically batche
 
 - [Test Decorators](/python-sdk/api-reference/test-decorators) - Complete reference for all test decorators
 - [Table Assets](/python-sdk/api-reference/table-assets) - Learn about table asset structure
-- [Tests](/python-sdk/api-reference/tests) - Understand test definitions
-- [Test Executions](/python-sdk/api-reference/test-executions) - See how to report test results
+- [Quickstart](/python-sdk/quickstart) - Send your first test results to Elementary Cloud
 
