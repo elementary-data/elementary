@@ -330,15 +330,6 @@
               "python-sdk/api-reference/tests",
               "python-sdk/api-reference/test-executions"
             ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              "python-sdk/guides/authentication",
-              "python-sdk/guides/test-decorators",
-              "python-sdk/guides/sending-data",
-              "python-sdk/guides/best-practices"
-            ]
           }
         ]
       },
