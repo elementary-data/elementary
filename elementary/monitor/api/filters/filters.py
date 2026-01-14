@@ -5,6 +5,7 @@ from elementary.monitor.api.filters.schema import FilterSchema, FiltersSchema
 from elementary.monitor.api.models.schema import (
     ModelRunsSchema,
     NormalizedModelSchema,
+    NormalizedSeedSchema,
     NormalizedSourceSchema,
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
@@ -25,11 +26,14 @@ class FiltersAPI(APIClient):
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
         models_runs: List[ModelRunsSchema],
+        seeds: Dict[str, NormalizedSeedSchema],
     ) -> FiltersSchema:
         test_results_filters = self._get_test_filters(
-            test_results_totals, models, sources
+            test_results_totals, models, sources, seeds
         )
-        test_runs_filters = self._get_test_filters(test_runs_totals, models, sources)
+        test_runs_filters = self._get_test_filters(
+            test_runs_totals, models, sources, seeds
+        )
         model_runs_filters = self._get_model_runs_filters(models_runs)
         return FiltersSchema(
             test_results=test_results_filters,
@@ -42,6 +46,7 @@ class FiltersAPI(APIClient):
         totals: Dict[str, TotalsSchema],
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
+        seeds: Dict[str, NormalizedSeedSchema],
     ) -> List[FilterSchema]:
         failures_filter = FilterSchema(name="failures", display_name="Failures")
         warnings_filter = FilterSchema(name="warnings", display_name="Warnings")
@@ -50,7 +55,11 @@ class FiltersAPI(APIClient):
         no_tests_filter = FilterSchema(name="no_test", display_name="No Tests")
 
         totals_models_ids = totals.keys()
-        artifacts: List[ArtifactSchema] = [*models.values(), *sources.values()]
+        artifacts: List[ArtifactSchema] = [
+            *models.values(),
+            *sources.values(),
+            *seeds.values(),
+        ]
         for artifact in artifacts:
             if artifact.unique_id and artifact.unique_id not in totals_models_ids:
                 no_tests_filter.add_model_unique_id(artifact.unique_id)
