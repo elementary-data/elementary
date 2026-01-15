@@ -29,6 +29,13 @@ def get_log_path(ctx):
         return os.path.join(target_path, "edr.log")
 
 
+def get_quiet_logs(ctx):
+    try:
+        return "--quiet-logs" in ctx.args
+    except (ValueError, AttributeError):
+        return False
+
+
 class ElementaryCLI(click.MultiCommand):
     _CMD_MAP = {
         "monitor": monitor,
@@ -57,12 +64,14 @@ class ElementaryCLI(click.MultiCommand):
 
     def invoke(self, ctx: click.Context) -> Any:
         files_target_path = get_log_path(ctx)
-        set_root_logger_handlers("elementary", files_target_path)
-        click.echo(
-            "Any feedback and suggestions are welcomed! join our community here - "
-            "https://bit.ly/slack-elementary\n"
-        )
-        logger.info(f"Running with edr={package.get_package_version()}")
+        quiet_logs = get_quiet_logs(ctx)
+        set_root_logger_handlers("elementary", files_target_path, quiet_logs=quiet_logs)
+        if not quiet_logs:
+            click.echo(
+                "Any feedback and suggestions are welcomed! join our community here - "
+                "https://bit.ly/slack-elementary\n"
+            )
+            logger.info(f"Running with edr={package.get_package_version()}")
         return super().invoke(ctx)
 
 
