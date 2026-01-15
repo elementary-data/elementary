@@ -42,7 +42,7 @@ class TestResultDBRowSchema(ExtendedBaseModel):
     other: Optional[str]
     test_name: str
     test_params: dict
-    severity: str
+    severity: Optional[str] = None
     status: str
     test_created_at: Optional[str] = None
     days_diff: float
