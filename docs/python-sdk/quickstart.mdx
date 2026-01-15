@@ -19,6 +19,8 @@ from elementary_python_sdk.core.tests import (
     boolean_test,
     elementary_test_context,
     expected_range,
+    expected_values,
+    row_count,
 )
 from elementary_python_sdk.core.types.asset import TableAsset
 ```
@@ -59,20 +61,20 @@ def test_average_age(df: pd.DataFrame) -> float:
     severity="WARNING",
     description="Validate user count is within expected range",
 )
-def get_users_df(df: pd.DataFrame) -> pd.DataFrame:
-    """Return the dataframe - decorator calls len() on it."""
+def test_users_row_count(df: pd.DataFrame) -> pd.DataFrame:
+    """Return the DataFrame; the decorator calls len() on it."""
     return df
 
 # Define an expected values test
 @expected_values(
-    name="country_count",
-    expected=2,
+    name="only_valid_countries",
+    expected=["Germany", "France", "Italy"],
     severity="ERROR",
-    description="Should have exactly 2 countries",
+    description="Should contain only valid countries",
     column_name="country",
 )
-def count_unique_countries(df: pd.DataFrame) -> int:
-    return df["country"].nunique()
+def test_only_valid_countries(df: pd.DataFrame) -> pd.Series:
+    return df["country"]
 ```
 
 ## Step 4: Create Your Data Asset
@@ -109,6 +111,8 @@ def main():
         # Run tests - results are automatically captured
         test_average_age(users_df)
         test_unique_ids(users_df)
+        test_users_row_count(users_df)
+        test_only_valid_countries(users_df)
         
         # Send results to Elementary Cloud
         PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
@@ -191,15 +195,15 @@ def main():
         
         client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
         client.send_to_cloud(ctx)
+
+if __name__ == "__main__":
+    main()
 ```
 
 **Note:** 
 - Replace `API_KEY` and `URL` with your actual credentials. The `URL` should be the full SDK ingest endpoint including your environment ID.
 - `PROJECT_ID` is your Python project identifier - choose any string to identify your code project. This will appear in the metadata of assets you report and is used for deduplication.
 
-if __name__ == "__main__":
-    main()
-```
 
 ## What Happens Next?
 
@@ -214,6 +218,6 @@ Once you send test results to Elementary Cloud:
 ## What's Next?
 
 - [API Reference](/python-sdk/api-reference/overview) - Learn about all available objects and methods
-- [Sending Data Guide](/python-sdk/guides/sending-data) - Best practices for sending data
-- [Best Practices](/python-sdk/guides/best-practices) - Tips for using the SDK effectively
+- [Test Decorators](/python-sdk/api-reference/test-decorators) - Complete reference for all test decorators
+- [Table Assets](/python-sdk/api-reference/table-assets) - Learn about table asset structure
 

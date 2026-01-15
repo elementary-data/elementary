@@ -39,7 +39,7 @@ client = ElementaryCloudClient(project_id, api_key, url)
 Where:
 - `project_id` is your Python project identifier (chosen by you, used to deduplicate and identify reported assets)
 - `api_key` is your API token (generated from the steps above)
-- `url` is the full SDK ingest endpoint URL: `{base_url}/sdk-ingest/{env_id}/batch`
+- `url` is the full SDK ingest endpoint URL (the Elementary team will provide you with this URL): `{base_url}/sdk-ingest/{env_id}/batch`
   - Example: `https://app.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
 
 ## Test Context
@@ -56,6 +56,17 @@ with elementary_test_context(asset=asset) as ctx:
     # Run your tests here
     # Results are automatically captured in ctx
     client.send_to_cloud(ctx)
+```
+
+### `raise_on_error`
+
+By default, `elementary_test_context` uses `raise_on_error=False`. This means that if a decorated test (or something inside the context) raises an exception, the SDK **captures it and records an `ERROR` execution** so you can still send results to Elementary Cloud without crashing your pipeline.
+
+If you prefer **fail-fast** behavior (for example in CI), pass `raise_on_error=True` to re-raise exceptions after they are recorded:
+
+```python
+with elementary_test_context(asset=asset, raise_on_error=True) as ctx:
+    run_my_tests(df)
 ```
 
 ## Test Decorators
@@ -75,7 +86,7 @@ You can also use context managers for inline tests:
 with elementary_test_context(asset=asset) as ctx:
     # Using context managers
     with ctx.boolean_test(name="my_test", description="Inline test") as my_bool_test:
-        my_bool_test.assert_value(False)
+        my_bool_test.assert_value(my_test_function())
     
     with ctx.expected_values_test(
         name="country_count",
@@ -83,7 +94,9 @@ with elementary_test_context(asset=asset) as ctx:
         allow_none=True,
         metadata={"my_metadata_field": "my_metadata_value"},
     ) as my_expected_values_test:
+        # This will fail
         my_expected_values_test.assert_value(5)
+        # This will pass
         my_expected_values_test.assert_value(3)
     
     with ctx.expected_range_test(
@@ -103,17 +116,14 @@ with elementary_test_context(asset=asset) as ctx:
 
 ## Supported Objects
 
-The SDK supports three types of objects:
+The SDK supports reporting table assets and test results.
 
-<CardGroup cols={3}>
+<CardGroup cols={2}>
   <Card title="Table Assets" icon="table" href="/python-sdk/api-reference/table-assets" >
     Register tables and views in your data warehouse
   </Card>
-  <Card title="Tests" icon="flask" href="/python-sdk/api-reference/tests" >
-    Define data quality tests
-  </Card>
-  <Card title="Test Executions" icon="play" href="/python-sdk/api-reference/test-executions" >
-    Report test execution results
+  <Card title="Test Decorators" icon="flask" href="/python-sdk/api-reference/test-decorators" >
+    Define data quality tests using decorators
   </Card>
 </CardGroup>
 
@@ -143,7 +153,6 @@ except Exception as e:
 - **Run multiple tests in one context** - All tests in a single `elementary_test_context` are automatically batched
 - **Use descriptive test names** - Clear names help identify tests in the Elementary UI
 - **Include asset metadata** - Add descriptions, owners, tags, and dependencies to assets
-- **Handle errors gracefully** - Wrap `send_to_cloud` calls in try-except blocks
 
 <Tip>
 All tests run within a single `elementary_test_context` are automatically batched and sent together.
@@ -153,6 +162,5 @@ All tests run within a single `elementary_test_context` are automatically batche
 
 - [Test Decorators](/python-sdk/api-reference/test-decorators) - Complete reference for all test decorators
 - [Table Assets](/python-sdk/api-reference/table-assets) - Learn about table asset structure
-- [Tests](/python-sdk/api-reference/tests) - Understand test definitions
-- [Test Executions](/python-sdk/api-reference/test-executions) - See how to report test results
+- [Quickstart](/python-sdk/quickstart) - Send your first test results to Elementary Cloud
 
