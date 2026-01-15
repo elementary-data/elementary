@@ -167,6 +167,7 @@ class ReportAPI(APIClient):
                 sources,
                 models_runs.runs,
                 seeds,
+                snapshots,
             )
 
             serializable_groups = groups.dict()

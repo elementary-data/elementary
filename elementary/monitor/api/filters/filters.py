@@ -6,6 +6,7 @@ from elementary.monitor.api.models.schema import (
     ModelRunsSchema,
     NormalizedModelSchema,
     NormalizedSeedSchema,
+    NormalizedSnapshotSchema,
     NormalizedSourceSchema,
 )
 from elementary.monitor.api.totals_schema import TotalsSchema
@@ -27,12 +28,13 @@ class FiltersAPI(APIClient):
         sources: Dict[str, NormalizedSourceSchema],
         models_runs: List[ModelRunsSchema],
         seeds: Dict[str, NormalizedSeedSchema],
+        snapshots: Dict[str, NormalizedSnapshotSchema],
     ) -> FiltersSchema:
         test_results_filters = self._get_test_filters(
-            test_results_totals, models, sources, seeds
+            test_results_totals, models, sources, seeds, snapshots
         )
         test_runs_filters = self._get_test_filters(
-            test_runs_totals, models, sources, seeds
+            test_runs_totals, models, sources, seeds, snapshots
         )
         model_runs_filters = self._get_model_runs_filters(models_runs)
         return FiltersSchema(
@@ -47,6 +49,7 @@ class FiltersAPI(APIClient):
         models: Dict[str, NormalizedModelSchema],
         sources: Dict[str, NormalizedSourceSchema],
         seeds: Dict[str, NormalizedSeedSchema],
+        snapshots: Dict[str, NormalizedSnapshotSchema],
     ) -> List[FilterSchema]:
         failures_filter = FilterSchema(name="failures", display_name="Failures")
         warnings_filter = FilterSchema(name="warnings", display_name="Warnings")
@@ -59,6 +62,7 @@ class FiltersAPI(APIClient):
             *models.values(),
             *sources.values(),
             *seeds.values(),
+            *snapshots.values(),
         ]
         for artifact in artifacts:
             if artifact.unique_id and artifact.unique_id not in totals_models_ids:
