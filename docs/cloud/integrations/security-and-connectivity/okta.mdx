@@ -45,28 +45,44 @@ Elementary Cloud does not enforce MFA directly, but any MFA policies configured 
 ## How to Set Up Okta SSO for Elementary Cloud
 Please follow the steps below to configure an SSO connection in Elementary.
 
-- Go to Applications → Applications, and click on **Create App Integration**
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta1_ol0ewc.png" />
-Choose SAML 2.0 as the sign-in method:
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta2_pgsp4o.png" />
-- Name the app “Elementary Data” and click “Next”
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030736/okta3_p8rzbr.png" />
-- Under **SAML Settings**, please enter the following details:
-    - Single sign-on URL: **https://elementary-data.frontegg.com/auth/saml/callback**
-    - Audience URI (SP Entity ID): elementary
-    - Name ID Format: EmailAddress
-    - Application Username: Email
-    - Update application username on: Create and update
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta4_pfqkxu.png" />
-- Click “Finish” on the next screen, and the app will be created!
-- Now, let’s configure users / groups that have access to the app. To do so, please go to the “Assignments” tab and add relevant groups / users.
-    - Note -
-        - It is recommended to set up an “Elementary Users” group dedicated for this purpose, though you can also add access for individual users.
-        - The setting below is for **assignment** of users to your app, e.g. users that are permitted to login to Elementary via Okta. This does not cover actually provisioning the user in Elementary (this is covered in the next section).
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta5_bhu0nz.png" />
-Finally, go to the “Sign On” tab, and provide Elementary with the value under Metadata URL:
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta6_bmva9i.png" />
-We will then configure the integration on our end, and then enable it live in a call with you (to ensure you are able to login without issues).
+<Accordion title="Configure Okta application">
+    - Go to Applications → Applications, and click on **Create App Integration**
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta1_ol0ewc.png" />
+    Choose SAML 2.0 as the sign-in method:
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta2_pgsp4o.png" />
+    - Name the app “Elementary Data” and click “Next”
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030736/okta3_p8rzbr.png" />
+    - Under **SAML Settings**, please enter the following details:
+        - Single sign-on URL: **https://elementary-data.frontegg.com/auth/saml/callback**
+        - Audience URI (SP Entity ID): elementary
+        - Name ID Format: EmailAddress
+        - Application Username: Email
+        - Update application username on: Create and update
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta4_pfqkxu.png" />
+    - Click “Finish” on the next screen, and the app will be created!
+    - Now, let’s configure users / groups that have access to the app. To do so, please go to the “Assignments” tab and add relevant groups / users.
+        - Note -
+            - It is recommended to set up an “Elementary Users” group dedicated for this purpose, though you can also add access for individual users.
+            - The setting below is for **assignment** of users to your app, e.g. users that are permitted to login to Elementary via Okta. This does not cover actually provisioning the user in Elementary (this is covered in the next section).
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta5_bhu0nz.png" />
+    - Go to the “Sign On” tab, and copy the link under Metadata URL:
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta6_bmva9i.png" />
+</Accordion>
+
+<Accordion title="Configure SSO in Elementary">
+    - Go to your account settings page in Elementary (Your avatar in the top right corner -> Account -> Settings)
+    - In the SSO section, click on "Configure connection"
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768831426/elementary_sso_settings_qqmkve.png" />
+    - Fill in the form with the following details:
+        - SAML Metadata: Choose "URL", paste the link you copied from Okta into the URL field, and click "Fetch".
+        - Domains: Add the domains you want to allow access to Elementary.
+    - Click on "Save" to save the configuration.
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768831419/elementary_sso_form_u8njve.png" />
+    <Note>
+    Make sure to verify that login works in an incognito window or with another user before logging out.
+    If it does not, disable the SSO configuration immediately and contact the Elementary team.
+    </Note>
+</Accordion>
 
 ## How to Set Up SCIM for Automated Provisioning
 <Note> This section covers how to automatically provision users and groups from Okta in Elementary. If you prefer, it is also possible to set up the SSO part without provisioning. In that case, users can be invited to the platform via the Team page in Elementary.</Note>
