@@ -7,45 +7,58 @@ sidebarTitle: "Microsoft Entra ID"
 
 In order to enable SAML using Microsoft Entra ID (Previously Azure AD SSO), we need the following steps to be taken:
 
-- Go to the [Microsoft Entra portal](https://entra.microsoft.com/)
-- On the left, choose Applications → Enterprise Applications
+<Accordion title="Configure Microsoft Entra ID application">
+    - Go to the [Microsoft Entra portal](https://entra.microsoft.com/)
+    - On the left, choose Applications → Enterprise Applications
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384397/sso1.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384397/sso1.webp" />
 
-- Click on “New Application”
- 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384486/sso2.webp" />
+    - Click on “New Application”
+    
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384486/sso2.webp" />
 
-- Click on “Create your own application”
+    - Click on “Create your own application”
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384522/sso3.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384522/sso3.webp" />
 
-- Choose the last option in the side-window that opens and click “Create”
+    - Choose the last option in the side-window that opens and click “Create”
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384523/sso4.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384523/sso4.webp" />
 
-- In the App window that opens, click on “Single Sign-On”
+    - In the App window that opens, click on “Single Sign-On”
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384527/sso5.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384527/sso5.webp" />
 
-- Choose SAML
+    - Choose SAML
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384529/sso6.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384529/sso6.webp" />
 
-- Click on Edit on the “Basic SAML Configuration” section
+    - Click on Edit on the “Basic SAML Configuration” section
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384532/sso7.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384532/sso7.webp" />
 
-- Fill the following entries:
-    - Identifier (Entity ID) - `elementary`
-    - Reply URL - [`https://elementary-data.frontegg.com/auth/saml/callback`](https://elementary-data.frontegg.com/auth/saml/callback)
-- Download the Federation Metadata XML and send it to the Elementary team.
+    - Fill the following entries:
+        - Identifier (Entity ID) - `elementary`
+        - Reply URL - [`https://elementary-data.frontegg.com/auth/saml/callback`](https://elementary-data.frontegg.com/auth/saml/callback)
+    - Download the Federation Metadata XML.
 
-<img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384534/sso8.webp" />
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384534/sso8.webp" />
+</Accordion>
 
-- We recommend setting up a short call where we’ll validate together that the new configuration works.
-- After that, if you wish, we can disable until you update your team internally about the new configuration and update when you give us the OK!
-
+<Accordion title="Configure SSO in Elementary">
+    - Go to your account settings page in Elementary (Your avatar in the top right corner -> Account -> Settings)
+    - In the SSO section, click on "Configure connection"
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768831426/elementary_sso_settings_qqmkve.png" />
+    - Fill in the form with the following details:
+        - SAML Metadata: Choose "Upload file", upload the Federation Metadata XML you downloaded.
+        - Domains: Add the domains you want to allow access to Elementary.
+    - Click on "Save" to save the configuration.
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768831419/elementary_sso_form_u8njve.png" />
+    <Note>
+    Make sure to verify that login works in an incognito window or with another user before logging out.
+    If it does not, disable the SSO configuration immediately and contact the Elementary team.
+    </Note>
+</Accordion>
 
 ## Provisioning
 
