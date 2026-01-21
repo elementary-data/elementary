@@ -46,7 +46,7 @@ class Config:
         project_dir: Optional[str] = None,
         profile_target: Optional[str] = None,
         project_profile_target: Optional[str] = None,
-        target_path: str = DEFAULT_TARGET_PATH,
+        target_path: Optional[str] = None,
         dbt_quoting: Optional[bool] = None,
         update_bucket_website: Optional[bool] = None,
         slack_webhook: Optional[str] = None,
@@ -93,10 +93,15 @@ class Config:
         self.target_dir = self._first_not_none(
             target_path,
             config.get("target-path"),
-            os.getcwd(),
+            self.DEFAULT_TARGET_PATH,
         )
+        print(target_path)
+        print(config)
+        print(self.DEFAULT_TARGET_PATH)
+        print(self.target_dir)
         os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
-        os.environ["DBT_LOG_PATH"] = os.path.abspath(target_path)
+
+        os.environ["DBT_LOG_PATH"] = os.path.abspath(self.target_dir)
 
         self.update_bucket_website = self._first_not_none(
             update_bucket_website,
