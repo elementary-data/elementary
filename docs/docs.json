@@ -627,7 +627,7 @@
     }
   },
   "banner": {
-    "content": "[Introducing Elementary 2.0 - The Data and AI Control Plane. Join the webinar on Jan 21st.](https://www.elementary-data.com/webinar/introducing-elementary-2-0)",
+    "content": "[Monitor Python pipelines alongside dbt. Explore the Python SDK.](https://www.elementary-data.com/post/data-quality-in-python-pipelines)",
     "dismissible": false
   },
   "search": {
