@@ -95,12 +95,8 @@ class Config:
             config.get("target-path"),
             self.DEFAULT_TARGET_PATH,
         )
-        print(target_path)
-        print(config)
-        print(self.DEFAULT_TARGET_PATH)
-        print(self.target_dir)
-        os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
 
+        os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
         os.environ["DBT_LOG_PATH"] = os.path.abspath(self.target_dir)
 
         self.update_bucket_website = self._first_not_none(
