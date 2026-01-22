@@ -627,7 +627,7 @@
     }
   },
   "banner": {
-    "content": "[Monitor Python pipelines alongside dbt. Explore the Python SDK.](https://www.elementary-data.com/post/data-quality-in-python-pipelines)",
+    "content": "[You can now monitor Python pipelines alongside dbt. Explore the Python SDK.](https://www.elementary-data.com/post/data-quality-in-python-pipelines)",
     "dismissible": false
   },
   "search": {
