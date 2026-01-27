@@ -94,6 +94,24 @@
 
         {% do log('DEBUG: test_rows_sample = ' ~ test_rows_sample, info=True) %}
         {% do log('DEBUG: test_alert_data keys = ' ~ test_alert_data.keys() | list, info=True) %}
+        
+        {# DEBUG: Log actual VALUES of complex fields to find nested Undefined #}
+        {% do log('DEBUG VALUE: test_meta = ' ~ raw_test_alert.test_meta, info=True) %}
+        {% do log('DEBUG VALUE: model_meta = ' ~ raw_test_alert.model_meta, info=True) %}
+        {% do log('DEBUG VALUE: test_params = ' ~ raw_test_alert.test_params, info=True) %}
+        {% do log('DEBUG VALUE: owners = ' ~ raw_test_alert.owners, info=True) %}
+        {% do log('DEBUG VALUE: tags = ' ~ raw_test_alert.tags, info=True) %}
+        {% do log('DEBUG VALUE: other = ' ~ raw_test_alert.other, info=True) %}
+        {% do log('DEBUG VALUE: test_description = ' ~ raw_test_alert.test_description, info=True) %}
+        {% do log('DEBUG VALUE: alert_description = ' ~ raw_test_alert.alert_description, info=True) %}
+        
+        {# DEBUG: Check if any value in test_alert_data is Undefined using is defined #}
+        {% for key, value in test_alert_data.items() %}
+            {% if value is not defined %}
+                {% do log('DEBUG UNDEFINED FOUND: key=' ~ key, info=True) %}
+            {% endif %}
+        {% endfor %}
+        
         {% do log('DEBUG: About to call generate_alert_object', info=True) %}
         {% set test_alert = elementary_cli.generate_alert_object(
             raw_test_alert.alert_id,
