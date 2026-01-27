@@ -46,7 +46,7 @@ class Config:
         project_dir: Optional[str] = None,
         profile_target: Optional[str] = None,
         project_profile_target: Optional[str] = None,
-        target_path: str = DEFAULT_TARGET_PATH,
+        target_path: Optional[str] = None,
         dbt_quoting: Optional[bool] = None,
         update_bucket_website: Optional[bool] = None,
         slack_webhook: Optional[str] = None,
@@ -75,6 +75,7 @@ class Config:
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
+        quiet_logs: Optional[bool] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -93,10 +94,11 @@ class Config:
         self.target_dir = self._first_not_none(
             target_path,
             config.get("target-path"),
-            os.getcwd(),
+            self.DEFAULT_TARGET_PATH,
         )
+
         os.makedirs(os.path.abspath(self.target_dir), exist_ok=True)
-        os.environ["DBT_LOG_PATH"] = os.path.abspath(target_path)
+        os.environ["DBT_LOG_PATH"] = os.path.abspath(self.target_dir)
 
         self.update_bucket_website = self._first_not_none(
             update_bucket_website,
@@ -215,6 +217,10 @@ class Config:
 
         self.disable_elementary_logo_print = config.get(
             "disable_elementary_logo_print", False
+        )
+
+        self.quiet_logs = self._first_not_none(
+            quiet_logs, config.get("quiet_logs"), False
         )
 
     def _load_configuration(self) -> dict:
