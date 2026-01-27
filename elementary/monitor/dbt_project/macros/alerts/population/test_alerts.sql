@@ -6,23 +6,22 @@
     {% set raw_test_alerts = elementary.agate_to_dicts(raw_test_alerts_agate) %}
     
     {% for raw_test_alert in raw_test_alerts %}
-        {% set test_type = raw_test_alert.get('alert_type', raw_test_alert.get('failed_tests.test_type')) %}
-        {% set status = raw_test_alert.get('status', raw_test_alert.get('failed_tests.status')) | lower %}
+        {% set test_type = raw_test_alert.alert_type %}
+        {% set status = raw_test_alert.status | lower %}
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_cli.get_test_rows_sample(raw_test_alert.get('result_rows', raw_test_alert.get('failed_tests.result_rows')), test_result_rows_agate.get(raw_test_alert.alert_id)) %}
+            {% set test_rows_sample = elementary_cli.get_test_rows_sample(raw_test_alert.result_rows, test_result_rows_agate.get(raw_test_alert.alert_id)) %}
         {%- endif -%}
 
-        {# Use .get() with fallbacks for columns that ClickHouse may return with table prefix #}
         {% set test_alert_data = {
             'id': raw_test_alert.alert_id,
             'alert_class_id': raw_test_alert.alert_class_id,
             'model_unique_id': raw_test_alert.model_unique_id,
             'test_unique_id': raw_test_alert.test_unique_id,
             'detected_at': raw_test_alert.detected_at,
-            'database_name': raw_test_alert.get('database_name', raw_test_alert.get('failed_tests.database_name')),
-            'schema_name': raw_test_alert.get('schema_name', raw_test_alert.get('failed_tests.schema_name')),
+            'database_name': raw_test_alert.database_name,
+            'schema_name': raw_test_alert.schema_name,
             'table_name': raw_test_alert.table_name,
             'column_name': raw_test_alert.column_name,
             'test_type': test_type,
@@ -30,14 +29,14 @@
             'test_description': raw_test_alert.test_description,
             'test_results_description': raw_test_alert.alert_description,
             'owners': raw_test_alert.owners,
-            'tags': raw_test_alert.get('tags', raw_test_alert.get('failed_tests.tags')),
+            'tags': raw_test_alert.tags,
             'test_results_query': raw_test_alert.alert_results_query,
             'test_rows_sample': test_rows_sample,
             'other': raw_test_alert.other,
             'test_name': raw_test_alert.test_name,
             'test_short_name': raw_test_alert.test_short_name,
-            'test_params': raw_test_alert.get('test_params', raw_test_alert.get('failed_tests.test_params')),
-            'severity': raw_test_alert.get('severity', raw_test_alert.get('failed_tests.severity')),
+            'test_params': raw_test_alert.test_params,
+            'severity': raw_test_alert.severity,
             'test_meta': raw_test_alert.test_meta,
             'model_meta': raw_test_alert.model_meta,
             'status': status,
@@ -140,25 +139,26 @@
         failed_tests.test_execution_id,
         failed_tests.test_unique_id,
         failed_tests.model_unique_id,
-        failed_tests.database_name,
+        {# Explicit aliases for columns that exist in both failed_tests and tests tables to avoid ClickHouse column name ambiguity #}
+        failed_tests.database_name as database_name,
         failed_tests.detected_at,
         {{ elementary.edr_current_timestamp() }} as created_at,
-        failed_tests.schema_name,
+        failed_tests.schema_name as schema_name,
         failed_tests.table_name,
         failed_tests.column_name,
         failed_tests.test_type as alert_type,
         failed_tests.sub_type,
         failed_tests.test_results_description as alert_description,
         failed_tests.owners,
-        failed_tests.tags,
+        failed_tests.tags as tags,
         failed_tests.test_results_query as alert_results_query,
         failed_tests.other,
         failed_tests.test_name,
         failed_tests.test_short_name,
-        failed_tests.test_params,
-        failed_tests.severity,
-        failed_tests.status,
-        failed_tests.result_rows,
+        failed_tests.test_params as test_params,
+        failed_tests.severity as severity,
+        failed_tests.status as status,
+        failed_tests.result_rows as result_rows,
         tests.meta as test_meta,
         tests.description as test_description,
         artifacts_meta.meta as model_meta,
