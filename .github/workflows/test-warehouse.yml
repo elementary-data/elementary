@@ -14,6 +14,7 @@ on:
           - databricks_catalog
           - spark
           - athena
+          - clickhouse
       elementary-ref:
         type: string
         required: false
@@ -103,10 +104,10 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: docker compose up -d postgres
 
-      # - name: Start Clickhouse
-      #   if: inputs.warehouse-type == 'clickhouse'
-      #   working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-      #   run: docker compose up -d clickhouse
+      - name: Start Clickhouse
+        if: inputs.warehouse-type == 'clickhouse'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: docker compose up -d clickhouse
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -161,7 +162,7 @@ jobs:
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: inputs.warehouse-type == 'postgres' || inputs.generate-data
+        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.generate-data
         run: |
           python generate_data.py
           dbt seed -f --target "${{ inputs.warehouse-type }}"

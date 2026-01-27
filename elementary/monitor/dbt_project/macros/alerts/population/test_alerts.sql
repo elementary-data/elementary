@@ -4,6 +4,7 @@
     {% set test_alerts = [] %}
     {% set raw_test_alerts_agate = run_query(elementary_cli.populate_test_alerts_query(days_back)) %}
     {% set raw_test_alerts = elementary.agate_to_dicts(raw_test_alerts_agate) %}
+    
     {% for raw_test_alert in raw_test_alerts %}
         {% set test_type = raw_test_alert.alert_type %}
         {% set status = raw_test_alert.status | lower %}
@@ -138,25 +139,26 @@
         failed_tests.test_execution_id,
         failed_tests.test_unique_id,
         failed_tests.model_unique_id,
-        failed_tests.database_name,
+        {# Explicit aliases for columns that exist in both failed_tests and tests tables to avoid ClickHouse column name ambiguity #}
+        failed_tests.database_name as database_name,
         failed_tests.detected_at,
         {{ elementary.edr_current_timestamp() }} as created_at,
-        failed_tests.schema_name,
+        failed_tests.schema_name as schema_name,
         failed_tests.table_name,
         failed_tests.column_name,
         failed_tests.test_type as alert_type,
         failed_tests.sub_type,
         failed_tests.test_results_description as alert_description,
         failed_tests.owners,
-        failed_tests.tags,
+        failed_tests.tags as tags,
         failed_tests.test_results_query as alert_results_query,
         failed_tests.other,
         failed_tests.test_name,
         failed_tests.test_short_name,
-        failed_tests.test_params,
-        failed_tests.severity,
-        failed_tests.status,
-        failed_tests.result_rows,
+        failed_tests.test_params as test_params,
+        failed_tests.severity as severity,
+        failed_tests.status as status,
+        failed_tests.result_rows as result_rows,
         tests.meta as test_meta,
         tests.description as test_description,
         artifacts_meta.meta as model_meta,
