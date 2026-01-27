@@ -5,16 +5,23 @@
     {% set raw_test_alerts_agate = run_query(elementary_cli.populate_test_alerts_query(days_back)) %}
     {% set raw_test_alerts = elementary.agate_to_dicts(raw_test_alerts_agate) %}
     {% for raw_test_alert in raw_test_alerts %}
-        {% set test_type = raw_test_alert.alert_type %}
+        {# ClickHouse may return original column names instead of aliases, so we handle both cases #}
+        {% set test_type = raw_test_alert.get('alert_type', raw_test_alert.get('test_type')) %}
         {% set status = raw_test_alert.status | lower %}
+
+        {# ClickHouse may return original column names instead of aliases, so we handle both cases #}
+        {% set alert_id = raw_test_alert.get('alert_id', raw_test_alert.get('id')) %}
 
         {% set test_rows_sample = none %}
         {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status != 'error')) -%}
-            {% set test_rows_sample = elementary_cli.get_test_rows_sample(raw_test_alert.result_rows, test_result_rows_agate.get(raw_test_alert.alert_id)) %}
+            {% set test_rows_sample = elementary_cli.get_test_rows_sample(raw_test_alert.result_rows, test_result_rows_agate.get(alert_id)) %}
         {%- endif -%}
+        {% set sub_type = raw_test_alert.get('sub_type', raw_test_alert.get('test_sub_type')) %}
+        {% set alert_description = raw_test_alert.get('alert_description', raw_test_alert.get('test_results_description')) %}
+        {% set alert_results_query = raw_test_alert.get('alert_results_query', raw_test_alert.get('test_results_query')) %}
 
         {% set test_alert_data = {
-            'id': raw_test_alert.alert_id,
+            'id': alert_id,
             'alert_class_id': raw_test_alert.alert_class_id,
             'model_unique_id': raw_test_alert.model_unique_id,
             'test_unique_id': raw_test_alert.test_unique_id,
@@ -24,12 +31,12 @@
             'table_name': raw_test_alert.table_name,
             'column_name': raw_test_alert.column_name,
             'test_type': test_type,
-            'test_sub_type': raw_test_alert.sub_type,
+            'test_sub_type': sub_type,
             'test_description': raw_test_alert.test_description,
-            'test_results_description': raw_test_alert.alert_description,
+            'test_results_description': alert_description,
             'owners': raw_test_alert.owners,
             'tags': raw_test_alert.tags,
-            'test_results_query': raw_test_alert.alert_results_query,
+            'test_results_query': alert_results_query,
             'test_rows_sample': test_rows_sample,
             'other': raw_test_alert.other,
             'test_name': raw_test_alert.test_name,
@@ -46,11 +53,11 @@
             'job_url': raw_test_alert.job_url,
             'job_run_url': raw_test_alert.job_run_url,
             'orchestrator': raw_test_alert.orchestrator
-        } 
+        }
         %}
 
         {% set test_alert = elementary_cli.generate_alert_object(
-            raw_test_alert.alert_id,
+            alert_id,
             raw_test_alert.alert_class_id,
             'test',
             raw_test_alert.detected_at,
