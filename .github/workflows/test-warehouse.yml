@@ -200,6 +200,7 @@ jobs:
       - name: Run monitor
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
+          DBT_EDR_DEBUG: "1"
         run: >
           edr monitor
           -t "${{ inputs.warehouse-type }}"

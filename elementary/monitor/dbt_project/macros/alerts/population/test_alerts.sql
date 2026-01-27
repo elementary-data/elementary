@@ -4,7 +4,50 @@
     {% set test_alerts = [] %}
     {% set raw_test_alerts_agate = run_query(elementary_cli.populate_test_alerts_query(days_back)) %}
     {% set raw_test_alerts = elementary.agate_to_dicts(raw_test_alerts_agate) %}
+    
+    {# DEBUG: Log the number of alerts and column names from first row #}
+    {% do log('DEBUG populate_test_alerts: Processing ' ~ raw_test_alerts | length ~ ' alerts', info=True) %}
+    {% if raw_test_alerts | length > 0 %}
+        {% do log('DEBUG populate_test_alerts: Available columns in first row: ' ~ raw_test_alerts[0].keys() | list, info=True) %}
+    {% endif %}
+    
     {% for raw_test_alert in raw_test_alerts %}
+        {# DEBUG: Log each field access to identify which one is Undefined #}
+        {% do log('DEBUG populate_test_alerts: Processing alert index ' ~ loop.index0, info=True) %}
+        {% do log('DEBUG: alert_type = ' ~ raw_test_alert.alert_type, info=True) %}
+        {% do log('DEBUG: status = ' ~ raw_test_alert.status, info=True) %}
+        {% do log('DEBUG: alert_id = ' ~ raw_test_alert.alert_id, info=True) %}
+        {% do log('DEBUG: alert_class_id = ' ~ raw_test_alert.alert_class_id, info=True) %}
+        {% do log('DEBUG: model_unique_id = ' ~ raw_test_alert.model_unique_id, info=True) %}
+        {% do log('DEBUG: test_unique_id = ' ~ raw_test_alert.test_unique_id, info=True) %}
+        {% do log('DEBUG: detected_at = ' ~ raw_test_alert.detected_at, info=True) %}
+        {% do log('DEBUG: database_name = ' ~ raw_test_alert.database_name, info=True) %}
+        {% do log('DEBUG: schema_name = ' ~ raw_test_alert.schema_name, info=True) %}
+        {% do log('DEBUG: table_name = ' ~ raw_test_alert.table_name, info=True) %}
+        {% do log('DEBUG: column_name = ' ~ raw_test_alert.column_name, info=True) %}
+        {% do log('DEBUG: sub_type = ' ~ raw_test_alert.sub_type, info=True) %}
+        {% do log('DEBUG: test_description = ' ~ raw_test_alert.test_description, info=True) %}
+        {% do log('DEBUG: alert_description = ' ~ raw_test_alert.alert_description, info=True) %}
+        {% do log('DEBUG: owners = ' ~ raw_test_alert.owners, info=True) %}
+        {% do log('DEBUG: tags = ' ~ raw_test_alert.tags, info=True) %}
+        {% do log('DEBUG: alert_results_query = ' ~ raw_test_alert.alert_results_query, info=True) %}
+        {% do log('DEBUG: other = ' ~ raw_test_alert.other, info=True) %}
+        {% do log('DEBUG: test_name = ' ~ raw_test_alert.test_name, info=True) %}
+        {% do log('DEBUG: test_short_name = ' ~ raw_test_alert.test_short_name, info=True) %}
+        {% do log('DEBUG: test_params = ' ~ raw_test_alert.test_params, info=True) %}
+        {% do log('DEBUG: severity = ' ~ raw_test_alert.severity, info=True) %}
+        {% do log('DEBUG: test_meta = ' ~ raw_test_alert.test_meta, info=True) %}
+        {% do log('DEBUG: model_meta = ' ~ raw_test_alert.model_meta, info=True) %}
+        {% do log('DEBUG: elementary_unique_id = ' ~ raw_test_alert.elementary_unique_id, info=True) %}
+        {% do log('DEBUG: job_id = ' ~ raw_test_alert.job_id, info=True) %}
+        {% do log('DEBUG: job_name = ' ~ raw_test_alert.job_name, info=True) %}
+        {% do log('DEBUG: job_run_id = ' ~ raw_test_alert.job_run_id, info=True) %}
+        {% do log('DEBUG: job_url = ' ~ raw_test_alert.job_url, info=True) %}
+        {% do log('DEBUG: job_run_url = ' ~ raw_test_alert.job_run_url, info=True) %}
+        {% do log('DEBUG: orchestrator = ' ~ raw_test_alert.orchestrator, info=True) %}
+        {% do log('DEBUG: result_rows = ' ~ raw_test_alert.result_rows, info=True) %}
+        {% do log('DEBUG: created_at = ' ~ raw_test_alert.created_at, info=True) %}
+        
         {% set test_type = raw_test_alert.alert_type %}
         {% set status = raw_test_alert.status | lower %}
 
@@ -49,6 +92,7 @@
         } 
         %}
 
+        {% do log('DEBUG: About to call generate_alert_object', info=True) %}
         {% set test_alert = elementary_cli.generate_alert_object(
             raw_test_alert.alert_id,
             raw_test_alert.alert_class_id,
