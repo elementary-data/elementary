@@ -5,7 +5,7 @@
 <a href="https://join.slack.com/t/elementary-community/shared_invite/zt-uehfrq2f-zXeVTtXrjYRbdE_V6xq4Rg"><img src="https://img.shields.io/badge/join-Slack-ff69b4"/></a>
 <a href="https://docs.elementary-data.com/oss/quickstart/quickstart-cli-package"><img src="https://img.shields.io/badge/docs-quickstart-orange"/></a>
 <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-ff69b4"/>
-<img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-lineage?period=total&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads/>
+<img alt="Downloads" src="https://static.pepy.tech/personalized-badge/elementary-data?period=month&units=international_system&left_color=grey&right_color=orange"&left_text=Downloads/>
 </p>
 
 <h2 align="center">
@@ -198,7 +198,10 @@ For additional information and help:
 <a href="https://github.com/Lawiss"><img src="https://avatars.githubusercontent.com/u/30115537?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/abhipalsingh"><img src="https://avatars.githubusercontent.com/u/57302403?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/pushrbx"><img src="https://avatars.githubusercontent.com/u/6832715?v=4" width="50" height="50" alt=""/></a>
-
+<a href="https://github.com/Ryosuke839"><img src="https://avatars.githubusercontent.com/u/389513?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/tlangton3"><img src="https://avatars.githubusercontent.com/u/155970791?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/SoloJ"><img src="https://avatars.githubusercontent.com/u/7585392?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/StevenReitsma"><img src="https://avatars.githubusercontent.com/u/4895139?v=4" width="50" height="50" alt=""/></a>
 
 
 <!-- markdownlint-restore -->
