@@ -1,6 +1,8 @@
 import json
 from typing import Dict, List, Optional
 
+import click
+
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.fetcher.fetcher import FetcherClient
 from elementary.config.config import Config
@@ -29,7 +31,7 @@ class AlertsFetcher(FetcherClient):
     ):
         alert_ids = [alert.id for alert in alerts_to_skip]
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
-        logger.info("Update skipped alerts")
+        click.echo(f"Update skipped alerts ({len(alerts_to_skip)})")
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run(
                 select="elementary_cli.update_alerts.update_skipped_alerts",
@@ -60,7 +62,7 @@ class AlertsFetcher(FetcherClient):
 
     def update_sent_alerts(self, alert_ids: List[str]) -> None:
         alert_ids_chunks = self._split_list_to_chunks(alert_ids)
-        logger.info("Update sent alerts")
+        click.echo(f"Update sent alerts ({len(alert_ids)})")
         for alert_ids_chunk in alert_ids_chunks:
             self.dbt_runner.run(
                 select="elementary_cli.update_alerts.update_sent_alerts",
