@@ -162,7 +162,7 @@ jobs:
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: inputs.warehouse-type == 'postgres' || inputs.generate-data
+        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.generate-data
         run: |
           python generate_data.py
           dbt seed -f --target "${{ inputs.warehouse-type }}"
