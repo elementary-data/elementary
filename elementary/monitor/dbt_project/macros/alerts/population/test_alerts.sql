@@ -12,41 +12,41 @@
     {% endif %}
     
     {% for raw_test_alert in raw_test_alerts %}
-        {# DEBUG: Log each field access to identify which one is Undefined #}
+        {# DEBUG: Use 'is defined' checks to accurately detect Undefined values #}
         {% do log('DEBUG populate_test_alerts: Processing alert index ' ~ loop.index0, info=True) %}
-        {% do log('DEBUG: alert_type = ' ~ raw_test_alert.alert_type, info=True) %}
-        {% do log('DEBUG: status = ' ~ raw_test_alert.status, info=True) %}
-        {% do log('DEBUG: alert_id = ' ~ raw_test_alert.alert_id, info=True) %}
-        {% do log('DEBUG: alert_class_id = ' ~ raw_test_alert.alert_class_id, info=True) %}
-        {% do log('DEBUG: model_unique_id = ' ~ raw_test_alert.model_unique_id, info=True) %}
-        {% do log('DEBUG: test_unique_id = ' ~ raw_test_alert.test_unique_id, info=True) %}
-        {% do log('DEBUG: detected_at = ' ~ raw_test_alert.detected_at, info=True) %}
-        {% do log('DEBUG: database_name = ' ~ raw_test_alert.database_name, info=True) %}
-        {% do log('DEBUG: schema_name = ' ~ raw_test_alert.schema_name, info=True) %}
-        {% do log('DEBUG: table_name = ' ~ raw_test_alert.table_name, info=True) %}
-        {% do log('DEBUG: column_name = ' ~ raw_test_alert.column_name, info=True) %}
-        {% do log('DEBUG: sub_type = ' ~ raw_test_alert.sub_type, info=True) %}
-        {% do log('DEBUG: test_description = ' ~ raw_test_alert.test_description, info=True) %}
-        {% do log('DEBUG: alert_description = ' ~ raw_test_alert.alert_description, info=True) %}
-        {% do log('DEBUG: owners = ' ~ raw_test_alert.owners, info=True) %}
-        {% do log('DEBUG: tags = ' ~ raw_test_alert.tags, info=True) %}
-        {% do log('DEBUG: alert_results_query = ' ~ raw_test_alert.alert_results_query, info=True) %}
-        {% do log('DEBUG: other = ' ~ raw_test_alert.other, info=True) %}
-        {% do log('DEBUG: test_name = ' ~ raw_test_alert.test_name, info=True) %}
-        {% do log('DEBUG: test_short_name = ' ~ raw_test_alert.test_short_name, info=True) %}
-        {% do log('DEBUG: test_params = ' ~ raw_test_alert.test_params, info=True) %}
-        {% do log('DEBUG: severity = ' ~ raw_test_alert.severity, info=True) %}
-        {% do log('DEBUG: test_meta = ' ~ raw_test_alert.test_meta, info=True) %}
-        {% do log('DEBUG: model_meta = ' ~ raw_test_alert.model_meta, info=True) %}
-        {% do log('DEBUG: elementary_unique_id = ' ~ raw_test_alert.elementary_unique_id, info=True) %}
-        {% do log('DEBUG: job_id = ' ~ raw_test_alert.job_id, info=True) %}
-        {% do log('DEBUG: job_name = ' ~ raw_test_alert.job_name, info=True) %}
-        {% do log('DEBUG: job_run_id = ' ~ raw_test_alert.job_run_id, info=True) %}
-        {% do log('DEBUG: job_url = ' ~ raw_test_alert.job_url, info=True) %}
-        {% do log('DEBUG: job_run_url = ' ~ raw_test_alert.job_run_url, info=True) %}
-        {% do log('DEBUG: orchestrator = ' ~ raw_test_alert.orchestrator, info=True) %}
-        {% do log('DEBUG: result_rows = ' ~ raw_test_alert.result_rows, info=True) %}
-        {% do log('DEBUG: created_at = ' ~ raw_test_alert.created_at, info=True) %}
+        {% do log('DEBUG: alert_type defined=' ~ (raw_test_alert.alert_type is defined) ~ ' val=' ~ raw_test_alert.alert_type, info=True) %}
+        {% do log('DEBUG: status defined=' ~ (raw_test_alert.status is defined) ~ ' val=' ~ raw_test_alert.status, info=True) %}
+        {% do log('DEBUG: alert_id defined=' ~ (raw_test_alert.alert_id is defined) ~ ' val=' ~ raw_test_alert.alert_id, info=True) %}
+        {% do log('DEBUG: alert_class_id defined=' ~ (raw_test_alert.alert_class_id is defined), info=True) %}
+        {% do log('DEBUG: model_unique_id defined=' ~ (raw_test_alert.model_unique_id is defined), info=True) %}
+        {% do log('DEBUG: test_unique_id defined=' ~ (raw_test_alert.test_unique_id is defined), info=True) %}
+        {% do log('DEBUG: detected_at defined=' ~ (raw_test_alert.detected_at is defined), info=True) %}
+        {% do log('DEBUG: database_name defined=' ~ (raw_test_alert.database_name is defined), info=True) %}
+        {% do log('DEBUG: schema_name defined=' ~ (raw_test_alert.schema_name is defined), info=True) %}
+        {% do log('DEBUG: table_name defined=' ~ (raw_test_alert.table_name is defined), info=True) %}
+        {% do log('DEBUG: column_name defined=' ~ (raw_test_alert.column_name is defined), info=True) %}
+        {% do log('DEBUG: sub_type defined=' ~ (raw_test_alert.sub_type is defined), info=True) %}
+        {% do log('DEBUG: test_description defined=' ~ (raw_test_alert.test_description is defined), info=True) %}
+        {% do log('DEBUG: alert_description defined=' ~ (raw_test_alert.alert_description is defined), info=True) %}
+        {% do log('DEBUG: owners defined=' ~ (raw_test_alert.owners is defined), info=True) %}
+        {% do log('DEBUG: tags defined=' ~ (raw_test_alert.tags is defined), info=True) %}
+        {% do log('DEBUG: alert_results_query defined=' ~ (raw_test_alert.alert_results_query is defined), info=True) %}
+        {% do log('DEBUG: other defined=' ~ (raw_test_alert.other is defined), info=True) %}
+        {% do log('DEBUG: test_name defined=' ~ (raw_test_alert.test_name is defined), info=True) %}
+        {% do log('DEBUG: test_short_name defined=' ~ (raw_test_alert.test_short_name is defined), info=True) %}
+        {% do log('DEBUG: test_params defined=' ~ (raw_test_alert.test_params is defined), info=True) %}
+        {% do log('DEBUG: severity defined=' ~ (raw_test_alert.severity is defined), info=True) %}
+        {% do log('DEBUG: test_meta defined=' ~ (raw_test_alert.test_meta is defined), info=True) %}
+        {% do log('DEBUG: model_meta defined=' ~ (raw_test_alert.model_meta is defined), info=True) %}
+        {% do log('DEBUG: elementary_unique_id defined=' ~ (raw_test_alert.elementary_unique_id is defined), info=True) %}
+        {% do log('DEBUG: job_id defined=' ~ (raw_test_alert.job_id is defined), info=True) %}
+        {% do log('DEBUG: job_name defined=' ~ (raw_test_alert.job_name is defined), info=True) %}
+        {% do log('DEBUG: job_run_id defined=' ~ (raw_test_alert.job_run_id is defined), info=True) %}
+        {% do log('DEBUG: job_url defined=' ~ (raw_test_alert.job_url is defined), info=True) %}
+        {% do log('DEBUG: job_run_url defined=' ~ (raw_test_alert.job_run_url is defined), info=True) %}
+        {% do log('DEBUG: orchestrator defined=' ~ (raw_test_alert.orchestrator is defined), info=True) %}
+        {% do log('DEBUG: result_rows defined=' ~ (raw_test_alert.result_rows is defined), info=True) %}
+        {% do log('DEBUG: created_at defined=' ~ (raw_test_alert.created_at is defined), info=True) %}
         
         {% set test_type = raw_test_alert.alert_type %}
         {% set status = raw_test_alert.status | lower %}
@@ -92,6 +92,8 @@
         } 
         %}
 
+        {% do log('DEBUG: test_rows_sample = ' ~ test_rows_sample, info=True) %}
+        {% do log('DEBUG: test_alert_data keys = ' ~ test_alert_data.keys() | list, info=True) %}
         {% do log('DEBUG: About to call generate_alert_object', info=True) %}
         {% set test_alert = elementary_cli.generate_alert_object(
             raw_test_alert.alert_id,
