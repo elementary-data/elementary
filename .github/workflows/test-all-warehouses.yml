@@ -76,7 +76,6 @@ jobs:
 
   test:
     needs: [check-fork-status, approve-fork]
-    # Run if: not cancelled, fork check succeeded, not skipped, AND (not a fork OR fork approval succeeded)
     if: |
       ! cancelled() &&
       needs.check-fork-status.result == 'success' &&
