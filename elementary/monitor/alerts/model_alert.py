@@ -37,6 +37,12 @@ class ModelAlertModel(AlertModel):
         alert_fields: Optional[List[str]] = None,
         elementary_database_and_schema: Optional[str] = None,
         env: Optional[str] = None,
+        job_id: Optional[str] = None,
+        job_name: Optional[str] = None,
+        job_run_id: Optional[str] = None,
+        job_url: Optional[str] = None,
+        job_run_url: Optional[str] = None,
+        orchestrator: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(
@@ -57,6 +63,13 @@ class ModelAlertModel(AlertModel):
             alert_fields,
             elementary_database_and_schema,
             env=env,
+            job_id=job_id,
+            job_name=job_name,
+            job_run_id=job_run_id,
+            job_url=job_url,
+            job_run_url=job_run_url,
+            orchestrator=orchestrator,
+            **kwargs,
         )
         self.alias = alias
         self.path = path

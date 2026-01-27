@@ -198,7 +198,10 @@ For additional information and help:
 <a href="https://github.com/Lawiss"><img src="https://avatars.githubusercontent.com/u/30115537?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/abhipalsingh"><img src="https://avatars.githubusercontent.com/u/57302403?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/pushrbx"><img src="https://avatars.githubusercontent.com/u/6832715?v=4" width="50" height="50" alt=""/></a>
-
+<a href="https://github.com/Ryosuke839"><img src="https://avatars.githubusercontent.com/u/389513?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/tlangton3"><img src="https://avatars.githubusercontent.com/u/155970791?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/SoloJ"><img src="https://avatars.githubusercontent.com/u/7585392?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/StevenReitsma"><img src="https://avatars.githubusercontent.com/u/4895139?v=4" width="50" height="50" alt=""/></a>
 
 
 <!-- markdownlint-restore -->
