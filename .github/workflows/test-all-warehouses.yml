@@ -26,22 +26,6 @@ on:
         default: false
         description: Whether to generate new data
 
-  workflow_call:
-    inputs:
-      elementary-ref:
-        type: string
-        required: false
-      dbt-data-reliability-ref:
-        type: string
-        required: false
-      dbt-version:
-        type: string
-        required: false
-      generate-data:
-        type: boolean
-        required: false
-        default: false
-
 jobs:
   test:
     strategy:
