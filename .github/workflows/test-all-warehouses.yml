@@ -33,7 +33,15 @@ jobs:
       matrix:
         dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('[null]') }}
         warehouse-type:
-          [postgres, snowflake, bigquery, redshift, databricks_catalog, athena, clickhouse]
+          [
+            postgres,
+            snowflake,
+            bigquery,
+            redshift,
+            databricks_catalog,
+            athena,
+            clickhouse,
+          ]
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
