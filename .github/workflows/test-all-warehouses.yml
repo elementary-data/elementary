@@ -1,5 +1,11 @@
 name: Test all warehouse platforms
 on:
+  pull_request_target:
+    branches: ["master"]
+    paths:
+      - elementary/**
+      - .github/**
+      - pyproject.toml
   workflow_dispatch:
     inputs:
       elementary-ref:
@@ -20,18 +26,34 @@ on:
         default: false
         description: Whether to generate new data
 
+  workflow_call:
+    inputs:
+      elementary-ref:
+        type: string
+        required: false
+      dbt-data-reliability-ref:
+        type: string
+        required: false
+      dbt-version:
+        type: string
+        required: false
+      generate-data:
+        type: boolean
+        required: false
+        default: false
+
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('["1.8.0", null]') }}
+        dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('[null]') }}
         warehouse-type:
           [postgres, snowflake, bigquery, redshift, databricks_catalog, athena]
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
-      elementary-ref: ${{ inputs.elementary-ref }}
+      elementary-ref: ${{ inputs.elementary-ref || (github.event_name == 'pull_request_target' && github.event.pull_request.head.sha) || '' }}
       dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
       dbt-version: ${{ matrix.dbt-version }}
       generate-data: ${{ inputs.generate-data || false }}
@@ -45,7 +67,8 @@ jobs:
       always() &&
       ! cancelled() &&
       ! contains(needs.test.result, 'success') &&
-      ! contains(needs.test.result, 'cancelled')
+      ! contains(needs.test.result, 'cancelled') &&
+      github.event_name != 'pull_request_target'
     uses: ./.github/workflows/notify_slack.yml
     with:
       result: "failure"
