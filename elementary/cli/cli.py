@@ -36,7 +36,7 @@ def get_quiet_logs(ctx):
         return False
 
 
-class ElementaryCLI(click.MultiCommand):
+class ElementaryCLI(click.MultiCommand):  # type: ignore[misc, valid-type]
     _CMD_MAP = {
         "monitor": monitor,
         "report": report,
