@@ -58,25 +58,8 @@ env:
   E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
 
 jobs:
-  # PRs from forks require approval, specifically with the "pull_request_target" event as it contains repo secrets.
-  check-if-requires-approval:
-    runs-on: ubuntu-latest
-    outputs:
-      requires_approval: ${{ steps.set-output.outputs.requires_approval }}
-    steps:
-      - name: Set requires approval output
-        id: set-output
-        run: |
-          if [[ "${{ github.event_name }}" =~ ^pull_request && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
-            echo "requires_approval=true" >> $GITHUB_OUTPUT
-          else
-            echo "requires_approval=false" >> $GITHUB_OUTPUT
-          fi
-
   test:
     runs-on: ubuntu-latest
-    needs: [check-if-requires-approval]
-    environment: ${{ (needs.check-if-requires-approval.outputs.requires_approval == 'true' && 'elementary_test_env') || '' }}
     defaults:
       run:
         working-directory: elementary
