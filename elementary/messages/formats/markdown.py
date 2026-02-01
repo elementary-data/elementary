@@ -95,7 +95,12 @@ class MarkdownFormatter:
 
     def format_table_block(self, block: TableBlock) -> str:
         if self._table_style == TableStyle.TABULATE:
-            table = tabulate(block.rows, headers=block.headers, tablefmt="simple")
+            table = tabulate(
+                block.rows,
+                headers=block.headers,
+                tablefmt="simple",
+                disable_numparse=True,
+            )
             return f"```\n{table}\n```"
         elif self._table_style == TableStyle.JSON:
             dicts = [

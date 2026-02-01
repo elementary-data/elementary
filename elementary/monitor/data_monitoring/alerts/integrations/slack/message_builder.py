@@ -27,16 +27,36 @@ class SlackAlertMessageSchema(BaseModel):
 
 
 class SlackAlertMessageBuilder(SlackMessageBuilder):
-    def __init__(self) -> None:
+    def __init__(self, full_width: bool = False) -> None:
         super().__init__()
+        self.full_width = full_width
 
     def get_slack_message(
         self,
         alert_schema: SlackAlertMessageSchema,
     ) -> SlackMessageSchema:
+        if self.full_width:
+            return self._get_full_width_slack_message(alert_schema)
         self.add_title_to_slack_alert(alert_schema.title)
         self.add_preview_to_slack_alert(alert_schema.preview)
         self.add_details_to_slack_alert(alert_schema.details)
+        return super().get_slack_message()
+
+    def _get_full_width_slack_message(
+        self,
+        alert_schema: SlackAlertMessageSchema,
+    ) -> SlackMessageSchema:
+        # Add empty rich_text block first to force Slack to render full width
+        self._add_always_displayed_blocks([{"type": "rich_text", "elements": []}])
+        self.add_title_to_slack_alert(alert_schema.title)
+        # Add preview and details to main blocks instead of attachments
+        # Skip padding for full-width mode since all content is displayed
+        if alert_schema.preview:
+            self._add_always_displayed_blocks(alert_schema.preview)
+        if alert_schema.details:
+            self._add_always_displayed_blocks(alert_schema.details)
+        # Clear attachments for full-width mode
+        self.slack_message["attachments"] = []
         return super().get_slack_message()
 
     def add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
