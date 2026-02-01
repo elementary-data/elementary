@@ -45,7 +45,7 @@ class Integrations:
     ) -> Union[BaseMessagingIntegration, BaseIntegration]:
         if config.has_slack:
             ssl_context = create_ssl_context(config.ssl_ca_bundle)
-            if config.is_slack_workflow:
+            if config.is_slack_workflow or config.slack_full_width:
                 return SlackIntegration(
                     config=config,
                     tracking=tracking,

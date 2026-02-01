@@ -1,6 +1,8 @@
 import json
 import math
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
+from tabulate import tabulate
 
 
 def try_load_json(value: Optional[Union[str, dict, list]]):
@@ -94,3 +96,36 @@ def inf_and_nan_to_str(obj) -> Any:
         return [inf_and_nan_to_str(i) for i in obj]
     else:
         return obj
+
+
+def _format_value(value: Any) -> str:
+    """Format a value for table display, avoiding scientific notation for floats."""
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        if math.isinf(value) or math.isnan(value):
+            return str(value)
+        # Format floats without scientific notation
+        if value == int(value) and abs(value) < 1e15:
+            return str(int(value))
+        return f"{value:.10f}".rstrip("0").rstrip(".")
+    return str(value)
+
+
+def list_of_dicts_to_markdown_table(data: List[Dict[str, Any]]) -> str:
+    """
+    Convert a list of dictionaries to a markdown table string.
+
+    Args:
+        data: List of dictionaries with consistent keys
+
+    Returns:
+        A markdown-formatted table string using GitHub table format
+    """
+    if not data:
+        return ""
+
+    processed_data = [{k: _format_value(v) for k, v in row.items()} for row in data]
+    return tabulate(
+        processed_data, headers="keys", tablefmt="github", disable_numparse=True
+    )
