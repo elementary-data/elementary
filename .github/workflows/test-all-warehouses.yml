@@ -52,13 +52,13 @@ jobs:
             if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
               IS_FORK="true"
             fi
-          fi
 
-          # Skip if: pull_request from fork (should use pull_request_target) OR pull_request_target from non-fork (should use pull_request)
-          if [[ "${{ github.event_name }}" == "pull_request" && "$IS_FORK" == "true" ]]; then
-            SHOULD_SKIP="true"
-          elif [[ "${{ github.event_name }}" == "pull_request_target" && "$IS_FORK" == "false" ]]; then
-            SHOULD_SKIP="true"
+            # Skip if: pull_request from fork (should use pull_request_target) OR pull_request_target from non-fork (should use pull_request)
+            if [[ "${{ github.event_name }}" == "pull_request" && "$IS_FORK" == "true" ]]; then
+              SHOULD_SKIP="true"
+            elif [[ "${{ github.event_name }}" == "pull_request_target" && "$IS_FORK" == "false" ]]; then
+              SHOULD_SKIP="true"
+            fi
           fi
 
           echo "is_fork=$IS_FORK" >> $GITHUB_OUTPUT
