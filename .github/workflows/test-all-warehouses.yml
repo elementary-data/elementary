@@ -1,5 +1,13 @@
 name: Test all warehouse platforms
 on:
+  # For internal PRs (non-forks) - no approval needed, can test workflow changes immediately
+  pull_request:
+    branches: ["master"]
+    paths:
+      - elementary/**
+      - .github/**
+      - pyproject.toml
+  # For fork PRs - requires approval before running (has access to secrets)
   pull_request_target:
     branches: ["master"]
     paths:
@@ -27,7 +35,52 @@ on:
         description: Whether to generate new data
 
 jobs:
+  # Determine if this is a fork PR and skip if wrong trigger is used
+  check-fork-status:
+    runs-on: ubuntu-latest
+    outputs:
+      is_fork: ${{ steps.check.outputs.is_fork }}
+      should_skip: ${{ steps.check.outputs.should_skip }}
+    steps:
+      - name: Check if PR is from fork
+        id: check
+        run: |
+          IS_FORK="false"
+          SHOULD_SKIP="false"
+
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]]; then
+            if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+              IS_FORK="true"
+            fi
+
+            # Skip if: pull_request from fork (should use pull_request_target) OR pull_request_target from non-fork (should use pull_request)
+            if [[ "${{ github.event_name }}" == "pull_request" && "$IS_FORK" == "true" ]]; then
+              SHOULD_SKIP="true"
+            elif [[ "${{ github.event_name }}" == "pull_request_target" && "$IS_FORK" == "false" ]]; then
+              SHOULD_SKIP="true"
+            fi
+          fi
+
+          echo "is_fork=$IS_FORK" >> $GITHUB_OUTPUT
+          echo "should_skip=$SHOULD_SKIP" >> $GITHUB_OUTPUT
+
+  # Approval gate for fork PRs (only runs once for all platforms)
+  approve-fork:
+    runs-on: ubuntu-latest
+    needs: [check-fork-status]
+    if: needs.check-fork-status.outputs.should_skip != 'true' && needs.check-fork-status.outputs.is_fork == 'true'
+    environment: elementary_test_env
+    steps:
+      - name: Approved
+        run: echo "Fork PR approved for testing"
+
   test:
+    needs: [check-fork-status, approve-fork]
+    if: |
+      ! cancelled() &&
+      needs.check-fork-status.result == 'success' &&
+      needs.check-fork-status.outputs.should_skip != 'true' &&
+      (needs.check-fork-status.outputs.is_fork != 'true' || needs.approve-fork.result == 'success')
     strategy:
       fail-fast: false
       matrix:
@@ -45,7 +98,7 @@ jobs:
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
-      elementary-ref: ${{ inputs.elementary-ref || (github.event_name == 'pull_request_target' && github.event.pull_request.head.sha) || '' }}
+      elementary-ref: ${{ inputs.elementary-ref || ((github.event_name == 'pull_request_target' || github.event_name == 'pull_request') && github.event.pull_request.head.sha) || '' }}
       dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
       dbt-version: ${{ matrix.dbt-version }}
       generate-data: ${{ inputs.generate-data || false }}
