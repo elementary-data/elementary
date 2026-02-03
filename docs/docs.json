@@ -433,7 +433,8 @@
           {
             "group": "Other Tests",
             "pages": [
-              "data-tests/python-tests"
+              "data-tests/python-tests",
+              "data-tests/execution-sla"
             ]
           },
           {

@@ -1,0 +1,126 @@
+---
+title: "execution_sla"
+sidebarTitle: "Execution SLA"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
+`elementary.execution_sla`
+
+Verifies that dbt models are executed successfully before a specified SLA deadline time.
+
+This test checks whether your pipeline completed before a specified deadline on the days you care about. It queries `dbt_run_results` for successful runs of the model and validates that at least one run completed before the SLA deadline.
+
+### Use Case
+
+"Did my pipeline complete before 7 AM Pacific on the days I care about?"
+
+### Test Logic
+
+1. If today is not a scheduled check day → **PASS** (skip)
+2. Query `dbt_run_results` for successful runs of the model today
+3. If any run completed before the SLA deadline → **PASS**
+4. If SLA deadline hasn't passed yet → **PASS** (still time)
+5. If model ran but after deadline → **FAIL** (MISSED_SLA)
+6. If all runs failed → **FAIL** (ALL_FAILED)
+7. If model didn't run today → **FAIL** (NOT_RUN)
+
+### Test configuration
+
+_Required configuration: `sla_time`, `timezone`_
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  data_tests:
+    &nbsp;&nbsp;-- elementary.execution_sla:
+      &nbsp;&nbsp;&nbsp;&nbsp;arguments:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">sla_time: string</font> # Required - e.g., "07:00", "7am", "2:30pm", "14:30"
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">timezone: string</font> # Required - IANA timezone name, e.g., "America/Los_Angeles", "Europe/Amsterdam"
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">day_of_week: string | array</font> # Optional - Day(s) to check: "Monday" or ["Monday", "Wednesday"]
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">day_of_month: int | array</font> # Optional - Day(s) of month to check: 1 or [1, 15]
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    data_tests:
+      - elementary.execution_sla:
+          arguments:
+            sla_time: < deadline time > # Required - e.g., "07:00", "7am", "2:30pm"
+            timezone: < IANA timezone > # Required - e.g., "America/Los_Angeles"
+            day_of_week: < day or array > # Optional
+            day_of_month: < day or array > # Optional
+```
+
+```yml Daily check (default)
+models:
+  - name: daily_revenue
+    data_tests:
+      - elementary.execution_sla:
+          arguments:
+            sla_time: "07:00"
+            timezone: "America/Los_Angeles"
+          config:
+            tags: ["elementary"]
+            severity: error
+```
+
+```yml Weekly - only Mondays and Wednesdays
+models:
+  - name: weekly_report
+    data_tests:
+      - elementary.execution_sla:
+          arguments:
+            sla_time: "06:00"
+            timezone: "Europe/London"
+            day_of_week: ["Monday", "Wednesday"]
+          config:
+            tags: ["elementary"]
+```
+
+```yml Monthly - only 1st and 15th
+models:
+  - name: monthly_close
+    data_tests:
+      - elementary.execution_sla:
+          arguments:
+            sla_time: "09:00"
+            timezone: "Asia/Tokyo"
+            day_of_month: [1, 15]
+          config:
+            tags: ["elementary"]
+```
+
+</RequestExample>
+
+### Features
+
+- **Flexible time formats**: Supports `"07:00"`, `"7am"`, `"2:30pm"`, `"14:30"`, and other common formats
+- **IANA timezone support**: Uses standard timezone names like `"America/Los_Angeles"`, `"Europe/Amsterdam"`, etc.
+- **Automatic DST handling**: Uses `pytz` for timezone conversions with automatic daylight saving time handling
+- **Database-agnostic**: All timezone logic happens at compile time
+- **Schedule filters**: Optional `day_of_week` and `day_of_month` parameters to check only specific days
+
+### Parameters
+
+| Parameter      | Required | Description                                            |
+| -------------- | -------- | ------------------------------------------------------ |
+| `sla_time`     | Yes      | Deadline time (e.g., `"07:00"`, `"7am"`, `"2:30pm"`)  |
+| `timezone`     | Yes      | IANA timezone name (e.g., `"America/Los_Angeles"`)    |
+| `day_of_week`  | No       | Day(s) to check: `"Monday"` or `["Monday", "Wednesday"]` |
+| `day_of_month` | No       | Day(s) of month to check: `1` or `[1, 15]`            |
+
+### Notes
+
+- This test only works with **models**, not sources
+- The test automatically skips on non-scheduled days (when `day_of_week` or `day_of_month` filters are set)
+- If both `day_of_week` and `day_of_month` are set, the test uses OR logic (checks if either matches)
+- The test passes if the SLA deadline hasn't been reached yet, giving your pipeline time to complete
+
