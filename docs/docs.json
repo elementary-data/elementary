@@ -340,6 +340,7 @@
             "pages": [
               "data-tests/dbt/dbt-package",
               "data-tests/dbt/quickstart-package",
+              "data-tests/dbt/upgrade-package",
               "data-tests/dbt/dbt-artifacts",
               {
                 "group": "on-run-end hooks",

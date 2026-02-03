@@ -1,0 +1,33 @@
+---
+title: "Upgrade Elementary dbt package"
+sidebarTitle: "Upgrade package"
+---
+
+On new releases, you will need to upgrade the Elementary dbt package.
+
+## Upgrade Elementary dbt package
+
+1. On your `packages.yml` file, change the version to the latest:
+
+```yml packages.yml
+packages:
+  - package: elementary-data/elementary
+    version: < latest version >
+```
+
+2. Run the command:
+
+```shell
+dbt deps
+```
+
+3. When there's a change in the structure of the Elementary tables, the minor version is raised. If you're updating a minor version (for example 0.21.X -> 0.22.X), run this command to rebuild the Elementary tables:
+
+```shell
+dbt run --select elementary
+```
+
+<Info>
+**Note:** For CLI upgrades, refer to the [Elementary OSS upgrade guide](/oss/release-notes/upgrading-elementary#upgrade-elementary-cli).
+</Info>
+
