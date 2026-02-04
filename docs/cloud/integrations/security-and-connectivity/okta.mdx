@@ -89,33 +89,41 @@ Please follow the steps below to configure an SSO connection in Elementary.
 
 Please follow the steps below to configure SCIM provisioning within Elementary:
 
-- First, you should receive a 1Password link from the Elementary team - this contain the SCIM endpoint and access token that should be configured in Okta.
-- Under the **Elementary Data** app, go to the **General** tab, and click **Edit**. Then modify the **Provisioning** setting to **SCIM** and click **Save**.
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta7_qukvm9.png" />
-A new Provisioning tab should appear, click it and then click Edit.
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta8_hg0vhe.png" />
-- Please fill the following details:
-    - **SCIM connector base URL** - _value from 1password link above_
-    - **Unique identifier field for users** - email
-    - **Supported provisioning actions**  - mark all the “Push” settings (New users, Profile updates and Groups).
-    - **Authentication Mode -** HTTP Header
-        - **Authorization** - _access token from 1password link above_
-    
-    When you are done, click on **Test Connector Configuration**
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta9_nooz3a.png" />
-Ensure that all the marked provisioning actions were successful:
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta10_ouhvea.png" />
-- Click **Save** to update the provisioning configuration.
-- Click the **To App** section on the left and click **Edit**:
-<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta11_xgcyvi.png" />
-- Please enable the settings:
-    - Create Users
-    - Update User Attributes
-    - Deactivate Users
-    
-    And click **Save.**
+<Accordion title="Configure Provisioning in Elementary">
+    - Go to your account settings page in Elementary (Your avatar in the top right corner -> Account -> Settings)
+    - In the Provisioning section, click on "Configure"
+    - Choose "Okta", and click "Create" to create a new URL and token for provisioning
+    - DO NOT close this dialog until you have configured SCIM in Okta
+</Accordion>
 
-<Info>If you already created an “Elementary Users” group under the Assignments tab in the previous section, you may want to remove and re-add it to ensure all the users there are created successfully in Elementary. </Info>
+<Accordion title="Configure SCIM in Okta">
+    - Under the **Elementary Data** app, go to the **General** tab, and click **Edit**. Then modify the **Provisioning** setting to **SCIM** and click **Save**.
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta7_qukvm9.png" />
+    A new Provisioning tab should appear, click it and then click Edit.
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta8_hg0vhe.png" />
+    - Please fill the following details:
+        - **SCIM connector base URL** - _value from Elementary Provisioning section_
+        - **Unique identifier field for users** - email
+        - **Supported provisioning actions**  - mark all the “Push” settings (New users, Profile updates and Groups).
+        - **Authentication Mode -** HTTP Header
+            - **Authorization** - _access token from Elementary Provisioning section_
+        
+        When you are done, click on **Test Connector Configuration**
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta9_nooz3a.png" />
+    Ensure that all the marked provisioning actions were successful:
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030738/okta10_ouhvea.png" />
+    - Click **Save** to update the provisioning configuration.
+    - Click the **To App** section on the left and click **Edit**:
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1749030737/okta11_xgcyvi.png" />
+    - Please enable the settings:
+        - Create Users
+        - Update User Attributes
+        - Deactivate Users
+        
+        And click **Save.**
+
+    <Info>If you already created an “Elementary Users” group under the Assignments tab in the previous section, you may want to remove and re-add it to ensure all the users there are created successfully in Elementary. </Info>
+</Accordion>
 
 ## **Pushing groups to Elementary**
 
