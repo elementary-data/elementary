@@ -72,6 +72,7 @@ class Config:
         report_url: Optional[str] = None,
         teams_webhook: Optional[str] = None,
         maximum_columns_in_alert_samples: Optional[int] = None,
+        maximum_rows_in_alert_samples_table: Optional[int] = None,
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
@@ -110,6 +111,12 @@ class Config:
             maximum_columns_in_alert_samples,
             config.get("maximum_columns_in_alert_samples"),
             4,
+        )
+
+        self.maximum_rows_in_alert_samples_table = self._first_not_none(
+            maximum_rows_in_alert_samples_table,
+            config.get("maximum_rows_in_alert_samples_table"),
+            25,
         )
 
         self.timezone = self._first_not_none(

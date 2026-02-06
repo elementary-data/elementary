@@ -298,6 +298,13 @@ def get_cli_properties() -> dict:
     default=4,
     help="Maximum number of columns to display as a table in alert samples. Above this, the output is shown as raw JSON.",
 )
+@click.option(
+    "--maximum-rows-in-alert-samples-table",
+    "-mr",
+    type=int,
+    default=25,
+    help="Maximum number of rows to display in a table in alert samples. Above this, the table will be truncated to prevent Teams payload size issues.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -330,6 +337,7 @@ def monitor(
     excludes,
     teams_webhook,
     maximum_columns_in_alert_samples,
+    maximum_rows_in_alert_samples_table,
     quiet_logs,
 ):
     """
@@ -364,6 +372,7 @@ def monitor(
         report_url=report_url,
         teams_webhook=teams_webhook,
         maximum_columns_in_alert_samples=maximum_columns_in_alert_samples,
+        maximum_rows_in_alert_samples_table=maximum_rows_in_alert_samples_table,
         quiet_logs=quiet_logs,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
