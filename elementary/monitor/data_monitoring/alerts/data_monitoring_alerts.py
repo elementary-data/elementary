@@ -129,7 +129,8 @@ class DataMonitoringAlerts(DataMonitoring):
         self.alerts_integration = self._get_integration_client()
         self.alert_message_builder = AlertMessageBuilder(
             MessageBuilderConfig(
-                maximum_columns_in_alert_samples=self.config.maximum_columns_in_alert_samples
+                maximum_columns_in_alert_samples=self.config.maximum_columns_in_alert_samples,
+                maximum_rows_in_alert_samples_table=self.config.maximum_rows_in_alert_samples_table,
             )
         )
 

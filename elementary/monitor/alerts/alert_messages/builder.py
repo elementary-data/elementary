@@ -63,6 +63,7 @@ AlertType = Union[
 class MessageBuilderConfig(BaseModel):
     alert_groups_subscribers: bool = False
     maximum_columns_in_alert_samples: int = 4
+    maximum_rows_in_alert_samples_table: int = 25
 
 
 class AlertMessageBuilder:
@@ -394,9 +395,26 @@ class AlertMessageBuilder:
                     and len(result_sample[0].keys())
                     <= self.config.maximum_columns_in_alert_samples
                 ):
-                    result_blocks.append(
-                        TableBlock.from_dicts(result_sample),
-                    )
+                    # Truncate table if too many rows to prevent Teams payload size issues
+                    if len(result_sample) > self.config.maximum_rows_in_alert_samples_table:
+                        truncated_sample = result_sample[:self.config.maximum_rows_in_alert_samples_table]
+                        omitted_rows_count = len(result_sample) - self.config.maximum_rows_in_alert_samples_table
+                        result_blocks.append(
+                            TableBlock.from_dicts(truncated_sample),
+                        )
+                        result_blocks.append(
+                            LinesBlock(
+                                lines=[
+                                    ItalicTextLineBlock(
+                                        text=f"... and {omitted_rows_count} more rows (truncated to prevent payload size issues)"
+                                    ),
+                                ]
+                            )
+                        )
+                    else:
+                        result_blocks.append(
+                            TableBlock.from_dicts(result_sample),
+                        )
                 else:
                     result_blocks.append(
                         JsonCodeBlock(content=result_sample),
