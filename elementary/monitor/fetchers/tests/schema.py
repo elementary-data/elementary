@@ -101,6 +101,16 @@ class TestResultDBRowSchema(ExtendedBaseModel):
         # Elementary's tests doesn't return correct failures.
         return failures or None if test_type == "dbt_test" else None
 
+    @validator("severity", pre=True)
+    def normalize_severity(cls, severity):
+        # Handle dbt-fusion and other adapters that may return "none" as a string
+        # instead of null/None. See issue #2084.
+        if severity is None:
+            return None
+        if isinstance(severity, str) and severity.lower() == "none":
+            return None
+        return severity
+
 
 class TestDBRowSchema(ExtendedBaseModel):
     unique_id: str
