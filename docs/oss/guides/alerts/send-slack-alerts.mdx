@@ -24,6 +24,8 @@ Make sure to run the following command after your dbt runs and tests:
 edr monitor --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at> --group-by [table | alert]
 ```
 
+Add `--slack-full-width` to use the full message width and show test results as markdown tables. See [Slack setup - Full-width alerts](/oss/deployment-and-configuration/slack#full-width-alerts).
+
 Or just `edr monitor` if you used `config.yml`. Please note that when you specify the --slack-channel-name, it's the
 default channel name to which all the alerts will be sent that are not attributed to any custom channel. Therefore,
 if you execute several `edr monitor` commands at the same time with different `slack-channel-name` arguments, they can
