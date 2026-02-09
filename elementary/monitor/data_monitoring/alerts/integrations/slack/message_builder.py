@@ -36,7 +36,8 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         alert_schema: SlackAlertMessageSchema,
     ) -> SlackMessageSchema:
         if self.full_width:
-            # Add empty rich_text block first to force Slack to render full width
+            # Empty rich_text block forces Slack to use full message width for following
+            # blocks instead of the narrower attachment-style layout.
             self._add_always_displayed_blocks([{"type": "rich_text", "elements": []}])
         self.add_title_to_slack_alert(alert_schema.title)
         self.add_preview_to_slack_alert(alert_schema.preview)
