@@ -36,27 +36,13 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         alert_schema: SlackAlertMessageSchema,
     ) -> SlackMessageSchema:
         if self.full_width:
-            return self._get_full_width_slack_message(alert_schema)
+            # Add empty rich_text block first to force Slack to render full width
+            self._add_always_displayed_blocks([{"type": "rich_text", "elements": []}])
         self.add_title_to_slack_alert(alert_schema.title)
         self.add_preview_to_slack_alert(alert_schema.preview)
         self.add_details_to_slack_alert(alert_schema.details)
-        return super().get_slack_message()
-
-    def _get_full_width_slack_message(
-        self,
-        alert_schema: SlackAlertMessageSchema,
-    ) -> SlackMessageSchema:
-        # Add empty rich_text block first to force Slack to render full width
-        self._add_always_displayed_blocks([{"type": "rich_text", "elements": []}])
-        self.add_title_to_slack_alert(alert_schema.title)
-        # Add preview and details to main blocks instead of attachments
-        # Skip padding for full-width mode since all content is displayed
-        if alert_schema.preview:
-            self._add_always_displayed_blocks(alert_schema.preview)
-        if alert_schema.details:
-            self._add_always_displayed_blocks(alert_schema.details)
-        # Clear attachments for full-width mode
-        self.slack_message["attachments"] = []
+        if self.full_width:
+            self.slack_message["attachments"] = []
         return super().get_slack_message()
 
     def add_title_to_slack_alert(self, title_blocks: Optional[SlackBlocksType] = None):
@@ -67,7 +53,11 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
     def add_preview_to_slack_alert(
         self, preview_blocks: Optional[SlackBlocksType] = None
     ):
-        if preview_blocks:
+        if not preview_blocks:
+            return
+        if self.full_width:
+            self._add_always_displayed_blocks(preview_blocks)
+        else:
             validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
             self._add_blocks_as_attachments(validated_preview_blocks)
 
@@ -75,7 +65,11 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         self,
         detail_blocks: Optional[SlackBlocksType] = None,
     ):
-        if detail_blocks:
+        if not detail_blocks:
+            return
+        if self.full_width:
+            self._add_always_displayed_blocks(detail_blocks)
+        else:
             self._add_blocks_as_attachments(detail_blocks)
 
     @classmethod

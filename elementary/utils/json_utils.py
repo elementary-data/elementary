@@ -114,10 +114,10 @@ def _format_value(value: Any) -> str:
 
 def list_of_dicts_to_markdown_table(data: List[Dict[str, Any]]) -> str:
     """
-    Convert a list of dictionaries to a markdown table string.
+    Convert a list of dictionaries with consistent keys to a markdown table string.
 
     Args:
-        data: List of dictionaries with consistent keys
+        data: List of dictionaries
 
     Returns:
         A markdown-formatted table string using GitHub table format
