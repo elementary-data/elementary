@@ -223,7 +223,7 @@ class Config:
         self.quiet_logs = self._first_not_none(
             quiet_logs, config.get("quiet_logs"), False
         )
-        
+
         self.use_system_ca_files = use_system_ca_files
 
     def _load_configuration(self) -> dict:
