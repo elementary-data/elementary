@@ -210,7 +210,7 @@ def test_full_width_get_slack_message_structure():
     result = message_builder.get_slack_message(alert_schema=schema)
 
     blocks = result.blocks
-    assert len(blocks) >= 4
+    assert len(blocks) >= 5
     assert blocks[0] == {"type": "rich_text", "elements": []}
     assert blocks[1] == title
     assert blocks[2]["type"] == "divider"
