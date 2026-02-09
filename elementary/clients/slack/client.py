@@ -262,18 +262,9 @@ class SlackWebhookClient(SlackClient):
 
     def _initial_client(self, ssl_context: Optional[ssl.SSLContext]):
         if self.is_workflow:
-            session = requests.Session()
-            if ssl_context is not None:
-                # For workflow webhooks, requests.Session doesn't directly support ssl.SSLContext,
-                # so we configure it to use certifi's CA bundle instead.
-                # The ssl_context parameter indicates that certifi should be used (not system CA files).
-                logger.warning(
-                    "Workflow webhooks use requests.Session which doesn't fully support SSLContext. "
-                    "Using certifi CA bundle for SSL verification instead of --use-system-ca-files setting."
-                )
-                session.verify = certifi.where()
-            # If ssl_context is None, use system CA files (requests default behavior)
-            return session
+            # Workflow webhooks do not support the ssl_context parameter.
+            # requests.Session() uses the requests default CA bundle (certifi).
+            return requests.Session()
 
         return WebhookClient(
             url=self.webhook,
