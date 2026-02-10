@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 from typing_extensions import Literal
 
 
@@ -114,10 +114,7 @@ InlineBlock = Union[
     "LineBlock",
 ]
 
-if hasattr(LineBlock, 'model_rebuild'):
-    LineBlock.model_rebuild()
-else:
-    LineBlock.update_forward_refs()
+LineBlock.update_forward_refs()
 
 
 class HeaderBlock(BaseBlock):
@@ -187,7 +184,4 @@ InExpandableBlock = Union[
     "ExpandableBlock",
 ]
 
-if hasattr(ExpandableBlock, 'model_rebuild'):
-    ExpandableBlock.model_rebuild()
-else:
-    ExpandableBlock.update_forward_refs()
+ExpandableBlock.update_forward_refs()

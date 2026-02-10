@@ -1,7 +1,7 @@
 import json
 from typing import Any, Callable, List, Optional, Tuple
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 from slack_sdk.models import blocks as slack_blocks
 from tabulate import tabulate
 

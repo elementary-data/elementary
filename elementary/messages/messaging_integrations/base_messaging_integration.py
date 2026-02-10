@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Generic, Optional, TypeVar
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.exceptions import (

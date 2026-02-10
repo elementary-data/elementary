@@ -2,7 +2,7 @@ import json
 import time
 from typing import Any, Dict, Iterator, Optional
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError

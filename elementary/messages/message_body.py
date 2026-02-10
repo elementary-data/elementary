@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 from elementary.messages.blocks import (
     ActionsBlock,
@@ -39,7 +39,4 @@ class MessageBody(BaseModel):
     id: Optional[str] = None
 
 
-if hasattr(MessageBody, 'model_rebuild'):
-    MessageBody.model_rebuild()
-else:
-    MessageBody.update_forward_refs()
+MessageBody.update_forward_refs()
