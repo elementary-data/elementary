@@ -24,9 +24,10 @@ def get_log_path(ctx):
         ctx_args = ctx.args
         target_path_flag = "--target-path"
         target_path = ctx_args[ctx_args.index(target_path_flag) + 1]
-    finally:
-        os.makedirs(os.path.abspath(target_path), exist_ok=True)
-        return os.path.join(target_path, "edr.log")
+    except (ValueError, IndexError):
+        pass
+    os.makedirs(os.path.abspath(target_path), exist_ok=True)
+    return os.path.join(target_path, "edr.log")
 
 
 def get_quiet_logs(ctx):
