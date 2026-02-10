@@ -9,6 +9,8 @@ from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
+from elementary.messages.blocks import Icon
+from elementary.messages.formats.unicode import ICON_TO_UNICODE
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -171,8 +173,11 @@ class SlackIntegration(BaseIntegration):
             )
 
         compacted_sections = []
-        if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            compacted_sections.append(f"*Column*\n{alert.column_name or '_No column_'}")
+        if (
+            COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.column_name
+        ):
+            compacted_sections.append(f"*Column*\n{alert.column_name}")
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
@@ -223,7 +228,7 @@ class SlackIntegration(BaseIntegration):
             result.extend(
                 [
                     self.message_builder.create_text_section_block(
-                        "*Test results sample*"
+                        f"{ICON_TO_UNICODE[Icon.MAGNIFYING_GLASS]} *Test results sample*"
                     ),
                     self.message_builder.create_text_section_block(
                         f"```{test_rows_sample_table}```"
@@ -332,8 +337,11 @@ class SlackIntegration(BaseIntegration):
             )
 
         compacted_sections = []
-        if COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            compacted_sections.append(f"*Column*\n{alert.column_name or '_No column_'}")
+        if (
+            COLUMN_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
+            and alert.column_name
+        ):
+            compacted_sections.append(f"*Column*\n{alert.column_name}")
         if TAGS_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
             tags = prettify_and_dedup_list(alert.tags or [])
             compacted_sections.append(f"*Tags*\n{tags or '_No tags_'}")
@@ -1196,6 +1204,9 @@ class SlackIntegration(BaseIntegration):
         if result:
             details_blocks.extend(
                 [
+                    self.message_builder.create_text_section_block(
+                        f"{ICON_TO_UNICODE[Icon.INFO]} *Details*"
+                    ),
                     self.message_builder.create_divider_block(),
                     *result,
                 ]
