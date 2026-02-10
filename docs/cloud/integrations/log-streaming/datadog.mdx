@@ -72,40 +72,22 @@ The log streaming configuration applies to your entire workspace. All logs match
 
 Logs are sent to Datadog with the following structure:
 
-### User Activity Logs
-
-Each user activity log entry includes:
-
 - `timestamp`: ISO 8601 timestamp of the event
+- `log_type`: The type of log (`audit` for user activity logs, `system` for system logs)
 - `status`: Log level (`info` for successful actions, `error` for failed actions)
-- `message`: Human-readable description of the action
 - `service`: Service name (configurable, defaults to `elementary`)
 - `source`: Source tag (configurable, defaults to `elementary-cloud`)
+- `event_name`: The specific action that was performed (e.g., `user_login`, `create_test`)
+- `success`: Boolean indicating whether the action completed successfully
+- `user_email`: User email address (only present in audit logs)
+- `user_name`: User display name (only present in audit logs)
+- `env_id`: Environment identifier (empty for account-level actions)
+- `env_name`: Environment name (empty for account-level actions)
+- `event_content`: Additional context-specific information as a JSON object
 - `dd.tags`: Additional tags including:
-  - `log_type:audit`
-  - `action:<action_name>` (e.g., `user_login`, `create_test`)
-  - `success:<true|false>`
-  - `user_email:<user_email>`
+  - `log_type:<log_type>` (e.g., `audit`, `system`)
+  - `event_name:<event_name>` (e.g., `user_login`, `create_test`)
   - `env_id:<environment_id>` (if applicable)
-  - `env_name:<environment_name>` (if applicable)
-- Custom attributes from the event content (JSON parsed)
-
-### System Logs
-
-Each system log entry includes:
-
-- `timestamp`: ISO 8601 timestamp of the event
-- `status`: Log level (`info` for successful operations, `error` for failed operations)
-- `message`: Human-readable description of the system event
-- `service`: Service name (configurable, defaults to `elementary`)
-- `source`: Source tag (configurable, defaults to `elementary-cloud`)
-- `dd.tags`: Additional tags including:
-  - `log_type:system`
-  - `action:<action_name>` (e.g., `dbt_data_sync_completed`, `alerts_sent`)
-  - `success:<true|false>`
-  - `env_id:<environment_id>` (if applicable)
-  - `env_name:<environment_name>` (if applicable)
-- Custom attributes from the event content (JSON parsed)
 
 ## Viewing Logs in Datadog
 
@@ -115,8 +97,8 @@ You can filter logs using:
 - `source:elementary-cloud` - All Elementary logs
 - `log_type:audit` - User activity logs only
 - `log_type:system` - System logs only
-- `action:<action_name>` - Specific action types
-- `env_name:<environment_name>` - Logs from a specific environment
+- `event_name:<event_name>` - Specific action types
+- `env_id:<environment_id>` - Logs from a specific environment
 - `success:false` - Failed operations only
 
 <Frame>
