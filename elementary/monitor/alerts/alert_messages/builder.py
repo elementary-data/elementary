@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 from elementary.messages.block_builders import (
     BoldTextBlock,

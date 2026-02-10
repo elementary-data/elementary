@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder

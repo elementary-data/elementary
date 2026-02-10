@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from unittest.mock import MagicMock
 
 import pytest
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 from elementary.messages.blocks import HeaderBlock
 from elementary.messages.message_body import MessageBody

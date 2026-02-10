@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 from slack_sdk.models.blocks import HeaderBlock, SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
