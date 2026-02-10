@@ -1,11 +1,11 @@
 from enum import Enum
 from typing import List, Optional, Union
 
-from elementary.utils.pydantic_shim import BaseModel
 from slack_sdk.models.blocks import HeaderBlock, SectionBlock
 
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.utils.json_utils import unpack_and_flatten_str_to_list
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class OptionSchema(BaseModel):

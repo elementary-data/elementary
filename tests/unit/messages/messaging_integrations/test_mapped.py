@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 from unittest.mock import MagicMock
 
 import pytest
-from elementary.utils.pydantic_shim import BaseModel
 
 from elementary.messages.blocks import HeaderBlock
 from elementary.messages.message_body import MessageBody
@@ -15,6 +14,7 @@ from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
 from elementary.messages.messaging_integrations.mapped import MappedMessagingIntegration
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class MockMessageContext(BaseModel):

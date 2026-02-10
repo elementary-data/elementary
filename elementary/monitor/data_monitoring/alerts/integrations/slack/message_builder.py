@@ -1,9 +1,8 @@
 from typing import Optional
 
-from elementary.utils.pydantic_shim import BaseModel
-
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import SlackMessageBuilder
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class PreviewIsTooLongError(Exception):
