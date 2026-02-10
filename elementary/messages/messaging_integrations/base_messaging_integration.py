@@ -2,13 +2,12 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Generic, Optional, TypeVar
 
-from elementary.utils.pydantic_shim import BaseModel
-
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.exceptions import (
     MessageIntegrationReplyNotSupportedError,
 )
 from elementary.utils.log import get_logger
+from elementary.utils.pydantic_shim import BaseModel
 
 logger = get_logger(__name__)
 
