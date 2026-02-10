@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Any, Optional
 
@@ -94,7 +94,7 @@ class TeamsWebhookMessagingIntegration(
                 )
             return MessageSendResult(
                 message_context=EmptyMessageContext(),
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(tz=timezone.utc),
                 message_format="adaptive_cards",
             )
         except requests.HTTPError as e:
