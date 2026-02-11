@@ -51,7 +51,7 @@ def convert_time_to_timezone(
 
 
 def get_now_utc_str(format: str = DATETIME_FORMAT) -> str:
-    return datetime.utcnow().strftime(format)
+    return datetime.now(timezone.utc).strftime(format)
 
 
 def get_now_utc_iso_format() -> str:
