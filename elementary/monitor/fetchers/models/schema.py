@@ -108,6 +108,12 @@ class ExposureSchema(ArtifactSchema):
     owner: Optional[OwnerSchema] = None
     raw_queries: Optional[List[str]] = None
 
+    @validator("owner", pre=True)
+    def load_owner(cls, owner):
+        if isinstance(owner, str):
+            return OwnerSchema(name=owner)
+        return owner
+
     @validator("depends_on_nodes", pre=True)
     def load_depends_on_nodes(cls, depends_on_nodes):
         return cls._load_var_to_list(depends_on_nodes)
