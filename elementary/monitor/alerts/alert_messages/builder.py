@@ -1,8 +1,6 @@
 from datetime import timedelta
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
-from pydantic import BaseModel
-
 from elementary.messages.block_builders import (
     BoldTextBlock,
     BoldTextLineBlock,
@@ -51,6 +49,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.utils.orchestrator_l
 from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link import (
     ReportLinkData,
 )
+from elementary.utils.pydantic_shim import BaseModel
 
 AlertType = Union[
     TestAlertModel,
