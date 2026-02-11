@@ -72,6 +72,7 @@ class Config:
         report_url: Optional[str] = None,
         teams_webhook: Optional[str] = None,
         maximum_columns_in_alert_samples: Optional[int] = None,
+        slack_full_width: Optional[bool] = None,
         env: str = DEFAULT_ENV,
         run_dbt_deps_if_needed: Optional[bool] = None,
         project_name: Optional[str] = None,
@@ -143,6 +144,11 @@ class Config:
             group_alerts_threshold,
             slack_config.get("group_alerts_threshold"),
             self.DEFAULT_GROUP_ALERTS_THRESHOLD,
+        )
+        self.slack_full_width = self._first_not_none(
+            slack_full_width,
+            slack_config.get("full_width"),
+            False,
         )
 
         teams_config = config.get(self._TEAMS, {})
