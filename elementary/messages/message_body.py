@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel
-
 from elementary.messages.blocks import (
     ActionsBlock,
     CodeBlock,
@@ -13,6 +11,7 @@ from elementary.messages.blocks import (
     LinesBlock,
     TableBlock,
 )
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class Color(Enum):
