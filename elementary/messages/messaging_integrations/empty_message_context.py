@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class EmptyMessageContext(BaseModel):
