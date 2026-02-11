@@ -75,6 +75,11 @@ def common_options(cmd: str):
                 default=None,
                 help="The Slack token for your workspace.",
             )(func)
+            func = click.option(
+                "--use-system-ca-files/--no-use-system-ca-files",
+                default=True,
+                help="Whether to use the system CA files for SSL connections or the ones provided by certify (see https://pypi.org/project/certifi).",
+            )(func)
         if cmd in (Command.REPORT, Command.SEND_REPORT):
             func = click.option(
                 "--exclude-elementary-models",
@@ -331,6 +336,7 @@ def monitor(
     teams_webhook,
     maximum_columns_in_alert_samples,
     quiet_logs,
+    use_system_ca_files,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -365,6 +371,7 @@ def monitor(
         teams_webhook=teams_webhook,
         maximum_columns_in_alert_samples=maximum_columns_in_alert_samples,
         quiet_logs=quiet_logs,
+        use_system_ca_files=use_system_ca_files,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
@@ -692,6 +699,7 @@ def send_report(
     include,
     target_path,
     quiet_logs,
+    use_system_ca_files,
 ):
     """
     Generate and send the report to an external platform.
@@ -735,6 +743,7 @@ def send_report(
         env=env,
         project_name=project_name,
         quiet_logs=quiet_logs,
+        use_system_ca_files=use_system_ca_files,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
