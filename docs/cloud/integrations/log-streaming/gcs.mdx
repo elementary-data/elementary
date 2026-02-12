@@ -121,16 +121,13 @@ Each user activity log entry includes:
 {
   "timestamp": "2024-01-15T14:30:45.123456Z",
   "log_type": "audit",
-  "action": "user_login",
+  "event_name": "user_login",
   "success": true,
-  "user": {
-    "id": "usr_abcdef1234567890",
-    "email": "john.doe@example.com",
-    "name": "John Doe"
-  },
+  "user_email": "john.doe@example.com",
+  "user_name": "John Doe",
   "env_id": "env_7890123456abcdef",
   "env_name": "Production",
-  "data": {
+  "event_content": {
     "additional": "context"
   }
 }
@@ -144,11 +141,11 @@ Each system log entry includes:
 {
   "timestamp": "2024-01-15T14:30:45.123456Z",
   "log_type": "system",
-  "action": "dbt_data_sync_completed",
+  "event_name": "dbt_data_sync_completed",
   "success": true,
   "env_id": "env_7890123456abcdef",
   "env_name": "Production",
-  "data": {
+  "event_content": {
     "environment_id": "env_789",
     "environment_name": "Production"
   }
@@ -159,15 +156,13 @@ Each system log entry includes:
 
 - `timestamp`: ISO 8601 timestamp of the event (UTC)
 - `log_type`: Either `"audit"` for user activity logs or `"system"` for system logs
-- `action`: The specific action that was performed (e.g., `user_login`, `create_test`, `dbt_data_sync_completed`)
+- `event_name`: The specific action that was performed (e.g., `user_login`, `create_test`, `dbt_data_sync_completed`)
 - `success`: Boolean indicating whether the action completed successfully
-- `user`: User information (only present in audit logs)
-  - `id`: User ID
-  - `email`: User email address
-  - `name`: User display name
+- `user_email`: User email address (only present in audit logs)
+- `user_name`: User display name (only present in audit logs)
 - `env_id`: Environment identifier (empty string for account-level actions)
 - `env_name`: Environment name (empty string for account-level actions)
-- `data`: Additional context-specific information as a JSON object
+- `event_content`: Additional context-specific information as a JSON object
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
