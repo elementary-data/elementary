@@ -63,11 +63,20 @@ In order to enable SAML using Microsoft Entra ID (Previously Azure AD SSO), we n
 ## Provisioning
 
 Elementary supports user provisioning via SCIM to automate user management. If you want to enable automatic provisioning, follow these steps:
-- In the **Microsoft Entra portal**, go to **Enterprise Applications** and select the newly created SAML application.
-- Navigate to **Provisioning** and click **Get Started**.
-- Set the **Provisioning Mode** to **Automatic**.
-- Configure the **Tenant URL** and **Secret Token** (email the Elementary team for a 1password vault with the configuration).
-- Click **Test Connection** to validate the setup.
-- Enable provisioning and save changes.
+<Accordion title="Configure Provisioning in Elementary">
+    - Go to your account settings page in Elementary (Your avatar in the top right corner -> Account -> Settings)
+    - In the Provisioning section, click on "Configure"
+    - Choose "Azure AD", and click "Create" to create a new URL and token for provisioning
+    - DO NOT close this dialog until you have configured SCIM in Azure AD
+</Accordion>
+
+<Accordion title="Configure SCIM in Azure AD">
+    - In the **Microsoft Entra portal**, go to **Enterprise Applications** and select the newly created SAML application.
+    - Navigate to **Provisioning** and click **Get Started**.
+    - Set the **Provisioning Mode** to **Automatic**.
+    - Configure the **Tenant URL** and **Secret Token** - _value from Elementary Provisioning section_
+    - Click **Test Connection** to validate the setup.
+    - Enable provisioning and save changes.
+</Accordion>
 
 This setup ensures that users are automatically created, updated, and deactivated in Elementary based on their status in Microsoft Entra ID. You can always reach out if you need any help.
