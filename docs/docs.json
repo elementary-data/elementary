@@ -629,7 +629,7 @@
     }
   },
   "banner": {
-    "content": "[You can now monitor Python pipelines alongside dbt. Join the Python SDK webinar to learn more. Feb 11th, 11AM EST.](https://www.elementary-data.com/webinar/elementary-python-sdk?_gl=1*1612kmx*_up*MQ..*_ga*MTA3NDQ5OTUxNS4xNzcwMTExODU5*_ga_07N651TCNE*czE3NzAxMTE4NTYkbzEkZzAkdDE3NzAxMTE4NTYkajYwJGwwJGgw)",
+    "content": "[What does it require to build your data platform for AI agents? Join the webinar, Feb 25th, 11 AM EST.](https://www.elementary-data.com/webinar/how-to-prepare-your-data-platform-for-analytics-agents)",
     "dismissible": false
   },
   "search": {
