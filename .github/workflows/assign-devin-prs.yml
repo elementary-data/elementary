@@ -1,0 +1,32 @@
+name: Auto-assign Devin PRs
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  assign:
+    if: github.actor == 'devin-ai-integration[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Extract and assign requesting user
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const match = body.match(/Requested by[:\s]*(?:@(\w[\w-]*)|[\w][\w\s]*\(@(\w[\w-]*)\))/);
+            const user = match?.[1] || match?.[2];
+            if (user) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                assignees: [user]
+              });
+              console.log(`Assigned PR #${context.issue.number} to @${user}`);
+            } else {
+              console.log('Could not determine requesting user from PR description');
+            }
