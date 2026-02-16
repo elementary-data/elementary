@@ -349,7 +349,8 @@
                   "data-tests/dbt/reduce-on-run-end-time"
                 ]
               },
-              "data-tests/dbt/package-models"
+              "data-tests/dbt/package-models",
+              "data-tests/test-result-samples"
             ]
           },
           {

@@ -1,0 +1,168 @@
+---
+title: "Test Result Samples"
+sidebarTitle: "Test Result Samples"
+---
+
+When a test fails, Elementary captures a sample of the failing rows and stores them in the `test_result_rows` table. These samples help you quickly understand and investigate data issues without manually running queries.
+
+By default, Elementary saves **5 sample rows per failed test**.
+
+This page describes all the available controls for managing test result samples -- both self-service configuration in your dbt project and options available through the Elementary team for Cloud users.
+
+## Configuring sample size
+
+### Global setting
+
+Set the number of sample rows saved per failed test across your entire project by adding the `test_sample_row_count` variable to your `dbt_project.yml`:
+
+```yaml
+vars:
+  test_sample_row_count: 10
+```
+
+Or pass it as a flag when running dbt:
+
+```shell
+dbt test --vars '{"test_sample_row_count": 10}'
+```
+
+Set to `0` to disable sample collection entirely:
+
+```yaml
+vars:
+  test_sample_row_count: 0
+```
+
+<Warning>
+  The larger the number of rows you save, the more data you will store in your data warehouse. This can affect the performance and cost of your Elementary schema, depending on your database.
+</Warning>
+
+### Per-test override
+
+You can override the global sample size for individual tests using the `test_sample_row_count` meta configuration:
+
+```yaml
+models:
+  - name: orders
+    data_tests:
+      - unique:
+          config:
+            meta:
+              test_sample_row_count: 20  # Save more samples for this specific test
+      - not_null:
+          column_name: order_id
+          config:
+            meta:
+              test_sample_row_count: 0   # Disable samples for this test
+```
+
+The per-test setting takes precedence over the global variable.
+
+## Disabling samples for specific tests
+
+Use the `disable_test_samples` meta configuration to completely disable sample collection for a specific test:
+
+```yaml
+models:
+  - name: user_profiles
+    data_tests:
+      - elementary.volume_anomalies:
+          config:
+            meta:
+              disable_test_samples: true
+```
+
+## PII protection
+
+Elementary provides built-in protection for sensitive data by automatically disabling test sample collection for tables tagged as PII.
+
+### Enable PII protection
+
+Add these variables to your `dbt_project.yml`:
+
+```yaml
+vars:
+  disable_samples_on_pii_tags: true   # Enable PII protection (default: false)
+  pii_tags: ['pii', 'sensitive']      # Tags that identify PII tables (default: ['pii'])
+```
+
+### Tag tables as PII
+
+Tag individual models:
+
+```yaml
+models:
+  - name: customer_data
+    config:
+      tags: ['pii']
+```
+
+Or tag entire directories:
+
+```yaml
+# dbt_project.yml
+models:
+  my_project:
+    sensitive_data:
+      +tags: ['pii']
+```
+
+PII tag matching is **case-insensitive** -- `PII`, `pii`, and `Pii` are all equivalent.
+
+### Override PII protection for specific tests
+
+If a table is tagged as PII but you want to allow samples for a specific test, you can override:
+
+```yaml
+models:
+  - name: customer_data
+    config:
+      tags: ['pii']
+    data_tests:
+      - elementary.volume_anomalies:
+          config:
+            meta:
+              disable_test_samples: false  # Allow samples despite PII tag
+```
+
+## Configuration precedence
+
+When multiple settings apply, Elementary follows this order (highest priority first):
+
+1. **`disable_test_samples` in test meta** -- per-test on/off switch
+2. **`test_sample_row_count` in test meta** -- per-test sample size
+3. **PII tag detection** -- when `disable_samples_on_pii_tags: true` and the table has a matching tag
+4. **`test_sample_row_count` global var** -- project-wide sample size
+5. **Default** -- 5 rows
+
+## Elementary Cloud: additional controls
+
+For Elementary Cloud users, there are additional environment-level controls that can be enabled by the Elementary team.
+
+<Note>
+  The controls below are managed by Elementary and apply to how test samples are handled after they are synced from your data warehouse. To request changes, contact the Elementary team via Slack or email.
+</Note>
+
+### Disable test samples for an environment
+
+The Elementary team can disable test samples entirely for a specific environment. When enabled:
+- Test samples will **not be synced** from your Elementary schema.
+- Test samples will **not appear** in the UI or in alerts, even if they exist in your warehouse.
+
+This is useful for environments that contain highly sensitive data where no sample rows should ever leave the warehouse.
+
+### Skip database storage of sample rows
+
+The Elementary team can configure an environment so that the `test_result_rows` data is stored only in the data lake (S3) and **not loaded into the application database**. This reduces database size while keeping the raw data available for debugging if needed.
+
+## Summary of all controls
+
+| Control | Scope | Where to configure | Default |
+| --- | --- | --- | --- |
+| `test_sample_row_count` | Global | `dbt_project.yml` vars | `5` |
+| `test_sample_row_count` | Per-test | Test meta | Inherits global |
+| `disable_test_samples` | Per-test | Test meta | `false` |
+| `disable_samples_on_pii_tags` | Global | `dbt_project.yml` vars | `false` |
+| `pii_tags` | Global | `dbt_project.yml` vars | `['pii']` |
+| Disable samples for environment | Per-environment | Contact Elementary team | Disabled |
+| Skip DB storage of sample rows | Per-environment | Contact Elementary team | Disabled |
