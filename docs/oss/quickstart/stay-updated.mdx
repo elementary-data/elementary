@@ -5,8 +5,6 @@ description: "Get notified about new features, breaking changes, and data qualit
 icon: "square-5"
 ---
 
-import { useState } from 'react';
-
 Elementary moves fast — new tests, integrations, and features ship regularly.
 
 Subscribe to stay in the loop so nothing catches you off guard in production.
@@ -25,121 +23,149 @@ Our Slack is where data teams share experiences, talk to the team and troublesho
 
 Subscribe for release highlights, breaking change alerts, and best practices from teams running Elementary at scale.
 
-const HUBSPOT_PORTAL_ID = '142608385';
-const HUBSPOT_FORM_ID = '4734860b-68fb-4f7f-aada-afb14e61afe7';
+<div id="newsletter-signup-container">
+  <form id="newsletter-signup-form">
+    <input
+      type="email"
+      id="newsletter-email"
+      placeholder="you@company.com"
+      required
+    />
+    <button
+      type="submit"
+      id="newsletter-submit"
+    >
+      Subscribe
+    </button>
+  </form>
+</div>
 
-function NewsletterSignup() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email) return;
-    setStatus('loading');
-
-    try {
-      const res = await fetch(
-        `https://api.hsforms.com/submissions/v3/integration/submit/${HUBSPOT_PORTAL_ID}/${HUBSPOT_FORM_ID}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fields: [{ name: 'email', value: email }],
-            context: {
-              pageUri: typeof window !== 'undefined' ? window.location.href : '',
-              pageName: 'Elementary Docs - Stay Updated',
-            },
-          }),
-        }
-      );
-      if (res.ok) {
-        setStatus('success');
-        setEmail('');
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
-  if (status === 'success') {
-    return (
-      <div style={{
-        padding: '14px 18px',
-        borderRadius: '8px',
-        backgroundColor: 'var(--tw-prose-pre-bg, #f0fdf4)',
-        border: '1px solid #bbf7d0',
-        color: '#15803d',
-        fontSize: '14px',
-        lineHeight: '1.5',
-      }}>
-        You're in! We'll keep you posted on new releases and data quality tips.
-      </div>
-    );
+<style>{`
+  #newsletter-signup-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
   }
+  #newsletter-email {
+    flex: 1 1 260px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    background-color: var(--tw-prose-pre-bg, #ffffff);
+    color: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+    min-width: 200px;
+  }
+  #newsletter-submit {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    background-color: #FF20B8;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1.5;
+    transition: opacity 0.2s, background-color 0.2s;
+  }
+  #newsletter-submit:hover {
+    background-color: #E01A9F;
+  }
+  #newsletter-submit:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+  .error-msg {
+    width: 100%;
+    color: #dc2626;
+    font-size: 13px;
+    margin: 4px 0 0;
+  }
+  .success-msg {
+    padding: 14px 18px;
+    border-radius: 8px;
+    background-color: var(--tw-prose-pre-bg, #f0fdf4);
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+`}</style>
 
-  return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@company.com"
-        required
-        style={{
-          flex: '1 1 260px',
-          padding: '10px 14px',
-          borderRadius: '8px',
-          border: '1px solid var(--border-color, #e5e7eb)',
-          backgroundColor: 'var(--tw-prose-pre-bg, #ffffff)',
-          color: 'inherit',
-          fontSize: '14px',
-          lineHeight: '1.5',
-          outline: 'none',
-          minWidth: '200px',
-        }}
-      />
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        style={{
-          padding: '10px 22px',
-          borderRadius: '8px',
-          border: 'none',
-          backgroundColor: '#FF20B8',
-          color: '#ffffff',
-          fontSize: '14px',
-          fontWeight: '500',
-          cursor: status === 'loading' ? 'wait' : 'pointer',
-          opacity: status === 'loading' ? 0.7 : 1,
-          whiteSpace: 'nowrap',
-          lineHeight: '1.5',
-          transition: 'opacity 0.2s, background-color 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          if (status !== 'loading') {
-            e.target.style.backgroundColor = '#E01A9F';
+<script>{`
+  (function() {
+    const HUBSPOT_PORTAL_ID = '142608385';
+    const HUBSPOT_FORM_ID = '4734860b-68fb-4f7f-aada-afb14e61afe7';
+    
+    function initNewsletter() {
+      const form = document.getElementById('newsletter-signup-form');
+      const emailInput = document.getElementById('newsletter-email');
+      const submitButton = document.getElementById('newsletter-submit');
+      const container = document.getElementById('newsletter-signup-container');
+      
+      if (!form || !emailInput || !submitButton || !container) {
+        setTimeout(initNewsletter, 100);
+        return;
+      }
+      
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = emailInput.value;
+        if (!email) return;
+        
+        submitButton.disabled = true;
+        submitButton.textContent = 'Subscribing...';
+        
+        const existingError = container.querySelector('.error-msg');
+        if (existingError) existingError.remove();
+        
+        try {
+          const res = await fetch(
+            'https://api.hsforms.com/submissions/v3/integration/submit/' + HUBSPOT_PORTAL_ID + '/' + HUBSPOT_FORM_ID,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fields: [{ name: 'email', value: email }],
+                context: {
+                  pageUri: window.location.href,
+                  pageName: 'Elementary Docs - Stay Updated',
+                },
+              }),
+            }
+          );
+          
+          if (res.ok) {
+            form.style.display = 'none';
+            const success = document.createElement('div');
+            success.className = 'success-msg';
+            success.textContent = "You're in! We'll keep you posted on new releases and data quality tips.";
+            container.appendChild(success);
+          } else {
+            throw new Error('Submission failed');
           }
-        }}
-        onMouseLeave={(e) => {
-          if (status !== 'loading') {
-            e.target.style.backgroundColor = '#FF20B8';
-          }
-        }}
-      >
-        {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
-      </button>
-      {status === 'error' && (
-        <p style={{ width: '100%', color: '#dc2626', fontSize: '13px', margin: '4px 0 0' }}>
-          Something went wrong — try again or <a href="https://elementary-data.com/community" style={{ color: '#dc2626', textDecoration: 'underline' }}>join Slack</a> instead.
-        </p>
-      )}
-    </form>
-  );
-}
-
-<NewsletterSignup />
+        } catch (error) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Subscribe';
+          
+          const errorMsg = document.createElement('p');
+          errorMsg.className = 'error-msg';
+          errorMsg.innerHTML = 'Something went wrong — try again or <a href="https://elementary-data.com/community" style="color: #dc2626; text-decoration: underline;">join Slack</a> instead.';
+          container.appendChild(errorMsg);
+        }
+      });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initNewsletter);
+    } else {
+      initNewsletter();
+    }
+  })();
+`}</script>
 
 <Tip>
 
