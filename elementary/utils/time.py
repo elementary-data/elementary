@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -89,17 +90,24 @@ def datetime_strftime(datetime: datetime, include_timezone: bool = False) -> str
     )
 
 
+_ABBREVIATED_TZ_OFFSET_PATTERN = re.compile(r"([+-])(\d{2})$")
+
+
+def _normalize_timezone_offset(time_string: str) -> str:
+    return _ABBREVIATED_TZ_OFFSET_PATTERN.sub(r"\1\2:00", time_string)
+
+
 def convert_partial_iso_format_to_full_iso_format(partial_iso_format_time: str) -> str:
     try:
-        date = datetime.fromisoformat(partial_iso_format_time)
-        # Get the given date timezone
+        normalized = _normalize_timezone_offset(partial_iso_format_time)
+        date = datetime.fromisoformat(normalized)
         time_zone_name = date.strftime("%Z")
         time_zone = tz.gettz(time_zone_name) if time_zone_name else tz.UTC
         date_with_timezone = date.replace(tzinfo=time_zone, microsecond=0)
         return date_with_timezone.isoformat()
     except ValueError:
         logger.exception(
-            f'Failed to covert time string: "{partial_iso_format_time}" to ISO format'
+            f'Failed to convert time string: "{partial_iso_format_time}" to ISO format'
         )
         return partial_iso_format_time
 
