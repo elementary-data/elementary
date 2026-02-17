@@ -4,6 +4,122 @@ sidebarTitle: "Stay updated"
 icon: "square-5"
 ---
 
+import { useState } from 'react';
+
+export const NewsletterSignup = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle');
+
+  const HUBSPOT_PORTAL_ID = '142608385';
+  const HUBSPOT_FORM_ID = '4734860b-68fb-4f7f-aada-afb14e61afe7';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setStatus('loading');
+
+    try {
+      const res = await fetch(
+        `https://api.hsforms.com/submissions/v3/integration/submit/${HUBSPOT_PORTAL_ID}/${HUBSPOT_FORM_ID}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: [{ name: 'email', value: email }],
+            context: {
+              pageUri: typeof window !== 'undefined' ? window.location.href : '',
+              pageName: 'Elementary Docs - Stay Updated',
+            },
+          }),
+        }
+      );
+      if (res.ok) {
+        setStatus('success');
+        setEmail('');
+      } else {
+        setStatus('error');
+      }
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  if (status === 'success') {
+    return (
+      <div style={{
+        padding: '14px 18px',
+        borderRadius: '8px',
+        backgroundColor: 'var(--tw-prose-pre-bg, #f0fdf4)',
+        border: '1px solid #bbf7d0',
+        color: '#15803d',
+        fontSize: '14px',
+        lineHeight: '1.5',
+      }}>
+        You're in! We'll keep you posted on new releases and data quality tips.
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@company.com"
+        required
+        style={{
+          flex: '1 1 260px',
+          padding: '10px 14px',
+          borderRadius: '8px',
+          border: '1px solid var(--border-color, #e5e7eb)',
+          backgroundColor: 'var(--tw-prose-pre-bg, #ffffff)',
+          color: 'inherit',
+          fontSize: '14px',
+          lineHeight: '1.5',
+          outline: 'none',
+          minWidth: '200px',
+        }}
+      />
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        style={{
+          padding: '10px 22px',
+          borderRadius: '8px',
+          border: 'none',
+          backgroundColor: '#FF20B8',
+          color: '#ffffff',
+          fontSize: '14px',
+          fontWeight: '500',
+          cursor: status === 'loading' ? 'wait' : 'pointer',
+          opacity: status === 'loading' ? 0.7 : 1,
+          whiteSpace: 'nowrap',
+          lineHeight: '1.5',
+          transition: 'opacity 0.2s, background-color 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          if (status !== 'loading') {
+            e.target.style.backgroundColor = '#E01A9F';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (status !== 'loading') {
+            e.target.style.backgroundColor = '#FF20B8';
+          }
+        }}
+      >
+        {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+      </button>
+      {status === 'error' && (
+        <p style={{ width: '100%', color: '#dc2626', fontSize: '13px', margin: '4px 0 0' }}>
+          Something went wrong — try again or <a href="https://elementary-data.com/community" style={{ color: '#dc2626', textDecoration: 'underline' }}>join Slack</a> instead.
+        </p>
+      )}
+    </form>
+  );
+}
+
 Elementary moves fast — stay in the loop on new releases, breaking changes, and tips from the team and community.
 
 ## Join the community
@@ -20,132 +136,7 @@ Our Slack is where you'll hear about new releases, upcoming events, and get supp
 
 Subscribe for product highlights, breaking change alerts, and best practices from teams running Elementary at scale.
 
-<div id="newsletter-signup-container">
-  <form id="newsletter-signup-form" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-    <input
-      type="email"
-      id="newsletter-email"
-      placeholder="you@company.com"
-      required
-      style={{
-        flex: '1 1 260px',
-        padding: '10px 14px',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color, #e5e7eb)',
-        backgroundColor: 'var(--tw-prose-pre-bg, #ffffff)',
-        color: 'inherit',
-        fontSize: '14px',
-        lineHeight: '1.5',
-        outline: 'none',
-        minWidth: '200px',
-      }}
-    />
-    <button
-      type="submit"
-      id="newsletter-submit"
-      style={{
-        padding: '10px 22px',
-        borderRadius: '8px',
-        border: 'none',
-        backgroundColor: '#FF20B8',
-        color: '#ffffff',
-        fontSize: '14px',
-        fontWeight: '500',
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-        lineHeight: '1.5',
-        transition: 'opacity 0.2s, background-color 0.2s',
-      }}
-    >
-      Subscribe
-    </button>
-  </form>
-</div>
-
-<script>{`
-  (function() {
-    const HUBSPOT_PORTAL_ID = '142608385';
-    const HUBSPOT_FORM_ID = '4734860b-68fb-4f7f-aada-afb14e61afe7';
-    
-    function initNewsletter() {
-      const form = document.getElementById('newsletter-signup-form');
-      const emailInput = document.getElementById('newsletter-email');
-      const submitButton = document.getElementById('newsletter-submit');
-      const container = document.getElementById('newsletter-signup-container');
-      
-      if (!form || !emailInput || !submitButton || !container) {
-        setTimeout(initNewsletter, 100);
-        return;
-      }
-      
-      submitButton.addEventListener('mouseenter', function() {
-        this.style.backgroundColor = '#E01A9F';
-      });
-      
-      submitButton.addEventListener('mouseleave', function() {
-        this.style.backgroundColor = '#FF20B8';
-      });
-      
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = emailInput.value;
-        if (!email) return;
-        
-        submitButton.disabled = true;
-        submitButton.textContent = 'Subscribing...';
-        submitButton.style.opacity = '0.7';
-        submitButton.style.cursor = 'wait';
-        
-        const existingError = container.querySelector('.error-msg');
-        if (existingError) existingError.remove();
-        
-        try {
-          const res = await fetch(
-            'https://api.hsforms.com/submissions/v3/integration/submit/' + HUBSPOT_PORTAL_ID + '/' + HUBSPOT_FORM_ID,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fields: [{ name: 'email', value: email }],
-                context: {
-                  pageUri: window.location.href,
-                  pageName: 'Elementary Docs - Stay Updated',
-                },
-              }),
-            }
-          );
-          
-          if (res.ok) {
-            form.style.display = 'none';
-            const success = document.createElement('div');
-            success.style.cssText = 'padding: 14px 18px; border-radius: 8px; background-color: var(--tw-prose-pre-bg, #f0fdf4); border: 1px solid #bbf7d0; color: #15803d; font-size: 14px; line-height: 1.5;';
-            success.textContent = "You're in! We'll keep you posted on new releases and data quality tips.";
-            container.appendChild(success);
-          } else {
-            throw new Error('Submission failed');
-          }
-        } catch (error) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Subscribe';
-          submitButton.style.opacity = '1';
-          submitButton.style.cursor = 'pointer';
-          
-          const errorMsg = document.createElement('p');
-          errorMsg.className = 'error-msg';
-          errorMsg.style.cssText = 'width: 100%; color: #dc2626; font-size: 13px; margin: 4px 0 0;';
-          errorMsg.innerHTML = 'Something went wrong — try again or <a href="https://elementary-data.com/community" style="color: #dc2626; text-decoration: underline;">join Slack</a> instead.';
-          container.appendChild(errorMsg);
-        }
-      });
-    }
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initNewsletter);
-    } else {
-      initNewsletter();
-    }
-  })();
-`}</script>
+<NewsletterSignup />
 
 <Tip>
 
