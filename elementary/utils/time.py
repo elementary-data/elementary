@@ -90,11 +90,11 @@ def datetime_strftime(datetime: datetime, include_timezone: bool = False) -> str
     )
 
 
-_ABBREVIATED_TZ_OFFSET_PATTERN = re.compile(r"([+-])(\d{2})$")
+_ABBREVIATED_TZ_OFFSET_PATTERN = re.compile(r"(:\d{2}(?:\.\d+)?)([+-])(\d{2})$")
 
 
 def _normalize_timezone_offset(time_string: str) -> str:
-    return _ABBREVIATED_TZ_OFFSET_PATTERN.sub(r"\1\2:00", time_string)
+    return _ABBREVIATED_TZ_OFFSET_PATTERN.sub(r"\1\2\3:00", time_string)
 
 
 def convert_partial_iso_format_to_full_iso_format(partial_iso_format_time: str) -> str:
