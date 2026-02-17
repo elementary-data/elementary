@@ -24,76 +24,46 @@ Our Slack is where data teams share experiences, talk to the team and troublesho
 Subscribe for release highlights, breaking change alerts, and best practices from teams running Elementary at scale.
 
 <div id="newsletter-signup-container">
-  <form id="newsletter-signup-form">
+  <form id="newsletter-signup-form" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
     <input
       type="email"
       id="newsletter-email"
       placeholder="you@company.com"
       required
+      style={{
+        flex: '1 1 260px',
+        padding: '10px 14px',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color, #e5e7eb)',
+        backgroundColor: 'var(--tw-prose-pre-bg, #ffffff)',
+        color: 'inherit',
+        fontSize: '14px',
+        lineHeight: '1.5',
+        outline: 'none',
+        minWidth: '200px',
+      }}
     />
     <button
       type="submit"
       id="newsletter-submit"
+      style={{
+        padding: '10px 22px',
+        borderRadius: '8px',
+        border: 'none',
+        backgroundColor: '#FF20B8',
+        color: '#ffffff',
+        fontSize: '14px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        lineHeight: '1.5',
+        transition: 'opacity 0.2s, background-color 0.2s',
+      }}
     >
       Subscribe
     </button>
   </form>
 </div>
-
-<style>{`
-  #newsletter-signup-form {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  #newsletter-email {
-    flex: 1 1 260px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color, #e5e7eb);
-    background-color: var(--tw-prose-pre-bg, #ffffff);
-    color: inherit;
-    font-size: 14px;
-    line-height: 1.5;
-    outline: none;
-    min-width: 200px;
-  }
-  #newsletter-submit {
-    padding: 10px 22px;
-    border-radius: 8px;
-    border: none;
-    background-color: #FF20B8;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    line-height: 1.5;
-    transition: opacity 0.2s, background-color 0.2s;
-  }
-  #newsletter-submit:hover {
-    background-color: #E01A9F;
-  }
-  #newsletter-submit:disabled {
-    opacity: 0.7;
-    cursor: wait;
-  }
-  .error-msg {
-    width: 100%;
-    color: #dc2626;
-    font-size: 13px;
-    margin: 4px 0 0;
-  }
-  .success-msg {
-    padding: 14px 18px;
-    border-radius: 8px;
-    background-color: var(--tw-prose-pre-bg, #f0fdf4);
-    border: 1px solid #bbf7d0;
-    color: #15803d;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-`}</style>
 
 <script>{`
   (function() {
@@ -111,6 +81,14 @@ Subscribe for release highlights, breaking change alerts, and best practices fro
         return;
       }
       
+      submitButton.addEventListener('mouseenter', function() {
+        this.style.backgroundColor = '#E01A9F';
+      });
+      
+      submitButton.addEventListener('mouseleave', function() {
+        this.style.backgroundColor = '#FF20B8';
+      });
+      
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
         const email = emailInput.value;
@@ -118,6 +96,8 @@ Subscribe for release highlights, breaking change alerts, and best practices fro
         
         submitButton.disabled = true;
         submitButton.textContent = 'Subscribing...';
+        submitButton.style.opacity = '0.7';
+        submitButton.style.cursor = 'wait';
         
         const existingError = container.querySelector('.error-msg');
         if (existingError) existingError.remove();
@@ -141,7 +121,7 @@ Subscribe for release highlights, breaking change alerts, and best practices fro
           if (res.ok) {
             form.style.display = 'none';
             const success = document.createElement('div');
-            success.className = 'success-msg';
+            success.style.cssText = 'padding: 14px 18px; border-radius: 8px; background-color: var(--tw-prose-pre-bg, #f0fdf4); border: 1px solid #bbf7d0; color: #15803d; font-size: 14px; line-height: 1.5;';
             success.textContent = "You're in! We'll keep you posted on new releases and data quality tips.";
             container.appendChild(success);
           } else {
@@ -150,9 +130,12 @@ Subscribe for release highlights, breaking change alerts, and best practices fro
         } catch (error) {
           submitButton.disabled = false;
           submitButton.textContent = 'Subscribe';
+          submitButton.style.opacity = '1';
+          submitButton.style.cursor = 'pointer';
           
           const errorMsg = document.createElement('p');
           errorMsg.className = 'error-msg';
+          errorMsg.style.cssText = 'width: 100%; color: #dc2626; font-size: 13px; margin: 4px 0 0;';
           errorMsg.innerHTML = 'Something went wrong — try again or <a href="https://elementary-data.com/community" style="color: #dc2626; text-decoration: underline;">join Slack</a> instead.';
           container.appendChild(errorMsg);
         }
