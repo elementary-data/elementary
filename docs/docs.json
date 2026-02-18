@@ -436,7 +436,9 @@
             "group": "Other Tests",
             "pages": [
               "data-tests/python-tests",
-              "data-tests/execution-sla"
+              "data-tests/execution-sla",
+              "data-tests/data-freshness-sla",
+              "data-tests/volume-threshold"
             ]
           },
           {
