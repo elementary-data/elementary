@@ -12,7 +12,9 @@ import AiGenerateTest from '/snippets/ai-generate-test.mdx';
 
 Verifies that data in a model was updated before a specified SLA deadline time.
 
-This test checks the maximum timestamp value of a specified column in your data to determine whether the data was refreshed before your deadline. Unlike `freshness_anomalies` (which uses ML-based anomaly detection), this test validates against a fixed, explicit SLA time — making it ideal when you have a concrete contractual or operational deadline.
+This test checks the maximum timestamp value of a specified column in your data to determine whether the data was actually refreshed before your deadline. Unlike `freshness_anomalies` (which uses z-score based anomaly detection as a dbt test, or ML-based detection in Elementary Cloud), this test validates against a fixed, explicit SLA time, making it ideal when you have a concrete contractual or operational deadline.
+
+Unlike `execution_sla` (which only checks if the dbt model _ran_ on time), `data_freshness_sla` checks whether the actual _data_ is fresh. A pipeline can run successfully but still serve stale data if, for example, an upstream source didn't update. This test catches that.
 
 ### Use Case
 
@@ -131,9 +133,9 @@ models:
 
 | Feature | `data_freshness_sla` | `freshness_anomalies` | `execution_sla` |
 | --- | --- | --- | --- |
-| What it checks | Data timestamps | Data timestamps | Pipeline run time |
-| Detection method | Fixed SLA deadline | ML-based anomaly detection | Fixed SLA deadline |
-| Best for | Contractual/operational deadlines | Detecting unexpected delays | Pipeline execution deadlines |
+| What it checks | Actual data freshness (timestamps in the data) | Actual data freshness (timestamps in the data) | Pipeline execution (did the model run?) |
+| Detection method | Fixed SLA deadline | Z-score (dbt test) / ML (Cloud) | Fixed SLA deadline |
+| Best for | Contractual/operational deadlines on data | Detecting unexpected delays in data updates | Ensuring the pipeline itself ran on time |
 | Works with sources | Yes | Yes | No (models only) |
 
 ### Notes

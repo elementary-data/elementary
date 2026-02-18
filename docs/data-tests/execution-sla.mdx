@@ -12,7 +12,9 @@ import AiGenerateTest from '/snippets/ai-generate-test.mdx';
 
 Verifies that dbt models are executed successfully before a specified SLA deadline time.
 
-This test checks whether your pipeline completed before a specified deadline on the days you care about. It queries `dbt_run_results` for successful runs of the model and validates that at least one run completed before the SLA deadline.
+This test checks whether your pipeline _ran_ before a specified deadline on the days you care about. It queries `dbt_run_results` for successful runs of the model and validates that at least one run completed before the SLA deadline.
+
+Note that this test only verifies that the model executed, not that the data is actually fresh. If you need to verify that the underlying data was updated (e.g., an upstream source refreshed), use [`data_freshness_sla`](/data-tests/data-freshness-sla) instead.
 
 ### Use Case
 

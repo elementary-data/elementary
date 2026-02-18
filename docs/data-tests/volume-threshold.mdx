@@ -12,7 +12,7 @@ import AiGenerateTest from '/snippets/ai-generate-test.mdx';
 
 Monitors row count changes between time buckets using configurable percentage thresholds with multiple severity levels.
 
-Unlike `volume_anomalies` (which uses ML-based anomaly detection to determine what's "normal"), this test lets you define explicit percentage thresholds for warnings and errors — giving you precise control over when to be alerted. It uses Elementary's metric caching infrastructure to avoid recalculating row counts for buckets that have already been computed.
+Unlike `volume_anomalies` (which uses z-score based anomaly detection as a dbt test, or ML-based detection in Elementary Cloud), this test lets you define explicit percentage thresholds for warnings and errors, giving you precise control over when to be alerted. It uses Elementary's metric caching infrastructure to avoid recalculating row counts for buckets that have already been computed.
 
 ### Use Case
 
@@ -124,12 +124,12 @@ models:
 
 | Parameter                 | Required | Default | Description                                                                  |
 | ------------------------- | -------- | ------- | ---------------------------------------------------------------------------- |
-| `timestamp_column`        | Yes      | —       | Column to determine time periods                                             |
+| `timestamp_column`        | Yes      | -       | Column to determine time periods                                             |
 | `warn_threshold_percent`  | No       | 5       | Percentage change that triggers a warning                                    |
 | `error_threshold_percent` | No       | 10      | Percentage change that triggers an error                                     |
 | `direction`               | No       | `both`  | Direction to monitor: `both`, `spike`, or `drop`                             |
 | `time_bucket`             | No       | `{period: day, count: 1}` | Time bucket configuration                              |
-| `where_expression`        | No       | —       | SQL expression to filter the data                                            |
+| `where_expression`        | No       | -       | SQL expression to filter the data                                            |
 | `days_back`               | No       | 14      | Days of metric history to retain                                             |
 | `backfill_days`           | No       | 2       | Days to recalculate on each run                                              |
 | `min_row_count`           | No       | 100     | Minimum rows in the previous bucket required to trigger the check            |
@@ -138,7 +138,7 @@ models:
 
 | Feature | `volume_threshold` | `volume_anomalies` |
 | --- | --- | --- |
-| Detection method | Fixed percentage thresholds | ML-based anomaly detection |
+| Detection method | Fixed percentage thresholds | Z-score (dbt test) / ML (Cloud) |
 | Severity levels | Dual (warn + error) | Single (pass/fail) |
 | Best for | Known acceptable ranges | Unknown/variable patterns |
 | Configuration | Explicit thresholds | Sensitivity tuning |
@@ -147,6 +147,6 @@ models:
 ### Notes
 
 - The `warn_threshold_percent` must be less than or equal to `error_threshold_percent`
-- The test uses Elementary's metric caching infrastructure — row counts for previously computed time buckets are reused across runs
+- The test uses Elementary's metric caching infrastructure. Row counts for previously computed time buckets are reused across runs
 - If the previous bucket has fewer rows than `min_row_count`, the test passes (insufficient data for a meaningful comparison)
 - The test only evaluates completed time buckets
