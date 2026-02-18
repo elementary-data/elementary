@@ -77,7 +77,7 @@ models:
             tags: ["elementary"]
 ```
 
-```yml Custom thresholds
+```yml Custom thresholds - drop only
 models:
   - name: critical_transactions
     data_tests:
@@ -89,7 +89,6 @@ models:
             direction: drop
           config:
             tags: ["elementary"]
-            severity: error
 ```
 
 ```yml With time bucket and filter
@@ -143,6 +142,23 @@ models:
 | Best for | Known acceptable ranges | Unknown/variable patterns |
 | Configuration | Explicit thresholds | Sensitivity tuning |
 | Baseline | Previous bucket | Training period average |
+
+### How severity levels work
+
+This test has built-in dual severity using dbt's `warn_if` / `error_if` config. You do **not** need to set `config.severity` yourself. The behavior is:
+
+- Change exceeds `warn_threshold_percent` but not `error_threshold_percent` → **dbt warning**
+- Change exceeds `error_threshold_percent` → **dbt error** (test fails)
+- Change is below `warn_threshold_percent` → **pass**
+
+For example, with `warn_threshold_percent: 3` and `error_threshold_percent: 8`:
+- A 2% drop → pass
+- A 5% drop → warning
+- A 10% drop → error
+
+<Warning>
+Do not set `config.severity: error` on this test. That would override the built-in dual severity and turn all warnings into errors, defeating the purpose of having separate thresholds.
+</Warning>
 
 ### Notes
 
