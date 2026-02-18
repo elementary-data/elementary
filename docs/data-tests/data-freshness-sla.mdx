@@ -1,0 +1,143 @@
+---
+title: "data_freshness_sla"
+sidebarTitle: "Data Freshness SLA"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
+`elementary.data_freshness_sla`
+
+Verifies that data in a model was updated before a specified SLA deadline time.
+
+This test checks the maximum timestamp value of a specified column in your data to determine whether the data was refreshed before your deadline. Unlike `freshness_anomalies` (which uses ML-based anomaly detection), this test validates against a fixed, explicit SLA time — making it ideal when you have a concrete contractual or operational deadline.
+
+### Use Case
+
+"Was the data in my model updated before 7 AM Pacific today?"
+
+### Test Logic
+
+1. If today is not a scheduled check day → **PASS** (skip)
+2. Query the model for the maximum value of `timestamp_column`
+3. If the max timestamp is from today → **PASS** (data is fresh)
+4. If the SLA deadline hasn't passed yet → **PASS** (still time)
+5. If the max timestamp is from a previous day → **FAIL** (DATA_STALE)
+6. If no data exists in the table → **FAIL** (NO_DATA)
+
+### Test configuration
+
+_Required configuration: `timestamp_column`, `sla_time`, `timezone`_
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  data_tests:
+    &nbsp;&nbsp;-- elementary.data_freshness_sla:
+      &nbsp;&nbsp;&nbsp;&nbsp;arguments:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">timestamp_column: column name</font> # Required - timestamp column to check for freshness
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">sla_time: string</font> # Required - e.g., "07:00", "7am", "2:30pm", "14:30"
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">timezone: string</font> # Required - IANA timezone name, e.g., "America/Los_Angeles"
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">day_of_week: string | array</font> # Optional - Day(s) to check: "Monday" or ["Monday", "Wednesday"]
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">day_of_month: int | array</font> # Optional - Day(s) of month to check: 1 or [1, 15]
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a> # Optional - filter the data before checking
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    data_tests:
+      - elementary.data_freshness_sla:
+          arguments:
+            timestamp_column: < column name > # Required
+            sla_time: < deadline time > # Required - e.g., "07:00", "7am", "2:30pm"
+            timezone: < IANA timezone > # Required - e.g., "America/Los_Angeles"
+            day_of_week: < day or array > # Optional
+            day_of_month: < day or array > # Optional
+            where_expression: < sql expression > # Optional
+```
+
+```yml Daily check
+models:
+  - name: daily_revenue
+    data_tests:
+      - elementary.data_freshness_sla:
+          arguments:
+            timestamp_column: updated_at
+            sla_time: "07:00"
+            timezone: "America/Los_Angeles"
+          config:
+            tags: ["elementary"]
+            severity: error
+```
+
+```yml With filter expression
+models:
+  - name: daily_events
+    data_tests:
+      - elementary.data_freshness_sla:
+          arguments:
+            timestamp_column: event_timestamp
+            sla_time: "6am"
+            timezone: "Europe/Amsterdam"
+            where_expression: "event_type = 'completed'"
+          config:
+            tags: ["elementary"]
+```
+
+```yml Weekly - only Mondays
+models:
+  - name: weekly_report_data
+    data_tests:
+      - elementary.data_freshness_sla:
+          arguments:
+            timestamp_column: report_date
+            sla_time: "09:00"
+            timezone: "Asia/Tokyo"
+            day_of_week: ["Monday"]
+          config:
+            tags: ["elementary"]
+```
+
+</RequestExample>
+
+### Features
+
+- **Data-level freshness**: Checks actual data timestamps, not just pipeline execution time
+- **Flexible time formats**: Supports `"07:00"`, `"7am"`, `"2:30pm"`, `"14:30"`, and other common formats
+- **IANA timezone support**: Uses standard timezone names like `"America/Los_Angeles"`, `"Europe/Amsterdam"`, etc.
+- **Automatic DST handling**: Uses `pytz` for timezone conversions with automatic daylight saving time handling
+- **Database-agnostic**: All timezone logic happens at compile time
+- **Schedule filters**: Optional `day_of_week` and `day_of_month` parameters to check only specific days
+- **Filter support**: Use `where_expression` to check freshness of a specific subset of data
+
+### Parameters
+
+| Parameter          | Required | Description                                                    |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `timestamp_column` | Yes      | Column name containing timestamps to check for freshness       |
+| `sla_time`         | Yes      | Deadline time (e.g., `"07:00"`, `"7am"`, `"2:30pm"`)          |
+| `timezone`         | Yes      | IANA timezone name (e.g., `"America/Los_Angeles"`)             |
+| `day_of_week`      | No       | Day(s) to check: `"Monday"` or `["Monday", "Wednesday"]`      |
+| `day_of_month`     | No       | Day(s) of month to check: `1` or `[1, 15]`                    |
+| `where_expression` | No       | SQL expression to filter the data before checking              |
+
+### Comparison with other freshness tests
+
+| Feature | `data_freshness_sla` | `freshness_anomalies` | `execution_sla` |
+| --- | --- | --- | --- |
+| What it checks | Data timestamps | Data timestamps | Pipeline run time |
+| Detection method | Fixed SLA deadline | ML-based anomaly detection | Fixed SLA deadline |
+| Best for | Contractual/operational deadlines | Detecting unexpected delays | Pipeline execution deadlines |
+| Works with sources | Yes | Yes | No (models only) |
+
+### Notes
+
+- The `timestamp_column` values are assumed to be in **UTC** (or timezone-naive timestamps that represent UTC). If your data stores local timestamps, the comparison may be incorrect.
+- If both `day_of_week` and `day_of_month` are set, the test uses OR logic (checks if either matches)
+- The test passes if the SLA deadline hasn't been reached yet, giving your data time to be updated
