@@ -77,13 +77,11 @@
             ]
           },
           {
-            "group": "End-to-End Lineage",
+            "group": "Data Lineage",
             "pages": [
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
-              "cloud/features/data-lineage/exposures-lineage",
-              "cloud/features/multi-env",
-              "cloud/features/anomaly-detection/monitor-dwh-assets"
+              "cloud/features/data-lineage/exposures-lineage"
             ]
           },
           {
@@ -131,8 +129,7 @@
                   "cloud/features/collaboration-and-communication/data-health"
                 ]
               },
-              "cloud/features/collaboration-and-communication/catalog",
-              "cloud/features/collaboration-and-communication/saved-views"
+              "cloud/features/collaboration-and-communication/catalog"
             ]
           },
           {
@@ -154,16 +151,9 @@
                   "cloud/features/gpg-signed-commits"
                 ]
               },
-              "cloud/features/roles-and-permissions",
+              "cloud/features/multi-env",
               "cloud/features/ci",
-              {
-                "group": "Audit Logs",
-                "pages": [
-                  "cloud/features/collaboration-and-communication/audit_logs/overview",
-                  "cloud/features/collaboration-and-communication/audit_logs/user-activity-logs",
-                  "cloud/features/collaboration-and-communication/audit_logs/system-logs"
-                ]
-              }
+              "cloud/features/collaboration-and-communication/user-activity-logs"
             ]
           },
           {
@@ -172,8 +162,6 @@
               {
                 "group": "Onboarding guides",
                 "pages": [
-                  "cloud/guides/set-up-elementary",
-                  "cloud/guides/start-using-elementary",
                   "cloud/onboarding/quickstart-dbt-package",
                   "cloud/onboarding/connect-data-warehouse",
                   "cloud/manage-team"
@@ -257,16 +245,7 @@
                   "cloud/integrations/alerts/jira",
                   "cloud/integrations/alerts/linear",
                   "cloud/integrations/alerts/servicenow",
-                  "cloud/integrations/alerts/webhooks",
-                  "cloud/integrations/alerts/email"
-                ]
-              },
-              {
-                "group": "Log Streaming",
-                "pages": [
-                  "cloud/integrations/log-streaming/datadog",
-                  "cloud/integrations/log-streaming/splunk",
-                  "cloud/integrations/log-streaming/gcs"
+                  "cloud/integrations/alerts/webhooks"
                 ]
               },
               {
@@ -312,27 +291,6 @@
         ]
       },
       {
-        "tab": "Python SDK",
-        "groups": [
-          {
-            "group": "Getting Started",
-            "pages": [
-              "python-sdk/introduction",
-              "python-sdk/installation",
-              "python-sdk/quickstart"
-            ]
-          },
-          {
-            "group": "API Reference",
-            "pages": [
-              "python-sdk/api-reference/overview",
-              "python-sdk/api-reference/test-decorators",
-              "python-sdk/api-reference/table-assets"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "dbt Package and Tests",
         "groups": [
           {
@@ -349,8 +307,7 @@
                   "data-tests/dbt/reduce-on-run-end-time"
                 ]
               },
-              "data-tests/dbt/package-models",
-              "data-tests/test-result-samples"
+              "data-tests/dbt/package-models"
             ]
           },
           {
@@ -381,7 +338,6 @@
                   "data-tests/anomaly-detection-configuration/anomaly-direction",
                   "data-tests/anomaly-detection-configuration/training-period",
                   "data-tests/anomaly-detection-configuration/detection-period",
-                  "data-tests/anomaly-detection-configuration/exclude_detection_period_from_training",
                   "data-tests/anomaly-detection-configuration/time-bucket",
                   "data-tests/anomaly-detection-configuration/seasonality",
                   "data-tests/anomaly-detection-configuration/column-anomalies",
@@ -435,8 +391,7 @@
           {
             "group": "Other Tests",
             "pages": [
-              "data-tests/python-tests",
-              "data-tests/execution-sla"
+              "data-tests/python-tests"
             ]
           },
           {
@@ -459,6 +414,27 @@
         ]
       },
       {
+        "tab": "Python SDK",
+        "groups": [
+          {
+            "group": "Python SDK",
+            "pages": [
+              "python-sdk/introduction",
+              "python-sdk/installation",
+              "python-sdk/quickstart",
+              {
+                "group": "API Reference",
+                "pages": [
+                  "python-sdk/api-reference/overview",
+                  "python-sdk/api-reference/test-decorators",
+                  "python-sdk/api-reference/table-assets"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Elementary OSS",
         "groups": [
           {
@@ -475,10 +451,8 @@
               "oss/quickstart/quickstart-cli",
               "oss/quickstart/quickstart-tests",
               "oss/quickstart/quickstart-report",
-              "oss/quickstart/stay-updated",
               "oss/quickstart/quickstart-alerts",
-              "oss/quickstart/quickstart-prod",
-              "oss/quickstart/quickstart-support"
+              "oss/quickstart/quickstart-prod"
             ]
           },
           {
@@ -631,10 +605,6 @@
       "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-38gg3xy5u-exKL8vkQpoFkng0MAzt1Pg"
     }
   },
-  "banner": {
-    "content": "[What does it require to build your data platform for AI agents? Join the webinar, Feb 25th, 11 AM EST.](https://www.elementary-data.com/webinar/how-to-prepare-your-data-platform-for-analytics-agents)",
-    "dismissible": false
-  },
   "search": {
     "prompt": "Ask me anything..."
   },
@@ -652,6 +622,7 @@
       "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
     }
   },
+  "js": ["kapa-widget.js"],
   "redirects": [
     {
       "source": "/features/lineage",
