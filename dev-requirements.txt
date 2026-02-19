@@ -4,7 +4,6 @@ pre-commit
 mypy
 
 # MyPy stubs
-types-pkg-resources
 types-requests
 networkx-stubs
 types-python-dateutil

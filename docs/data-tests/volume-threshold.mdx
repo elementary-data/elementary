@@ -1,0 +1,152 @@
+---
+title: "volume_threshold"
+sidebarTitle: "Volume Threshold"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
+`elementary.volume_threshold`
+
+Monitors row count changes between time buckets using configurable percentage thresholds with multiple severity levels.
+
+Unlike `volume_anomalies` (which uses z-score based anomaly detection as a dbt test, or ML-based detection in Elementary Cloud), this test lets you define explicit percentage thresholds for warnings and errors, giving you precise control over when to be alerted. It uses Elementary's metric caching infrastructure to avoid recalculating row counts for buckets that have already been computed.
+
+### Use Case
+
+"Alert me if my table's row count drops or spikes by more than 10% compared to the previous period."
+
+### Test Logic
+
+1. Collect row count metrics per time bucket (using Elementary's incremental metric caching)
+2. Compare the most recent completed bucket against the previous bucket
+3. Calculate the percentage change between the two
+4. If the previous bucket has fewer rows than `min_row_count` → **PASS** (insufficient baseline)
+5. If the absolute change exceeds `error_threshold_percent` → **ERROR**
+6. If the absolute change exceeds `warn_threshold_percent` → **WARN**
+7. Otherwise → **PASS**
+
+### Test configuration
+
+_Required configuration: `timestamp_column`_
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  data_tests:
+    &nbsp;&nbsp;-- elementary.volume_threshold:
+      &nbsp;&nbsp;&nbsp;&nbsp;arguments:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a> # Required
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">warn_threshold_percent: int</font> # Optional - default: 5
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">error_threshold_percent: int</font> # Optional - default: 10
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">direction: [both | spike | drop]</font> # Optional - default: both
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a> # Optional
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a> # Optional
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">days_back: int</font> # Optional - default: 14
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">backfill_days: int</font> # Optional - default: 2
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">min_row_count: int</font> # Optional - default: 100
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    data_tests:
+      - elementary.volume_threshold:
+          arguments:
+            timestamp_column: < column name > # Required
+            warn_threshold_percent: < int > # Optional - default: 5
+            error_threshold_percent: < int > # Optional - default: 10
+            direction: < both | spike | drop > # Optional - default: both
+```
+
+```yml Default thresholds (5% warn, 10% error)
+models:
+  - name: daily_orders
+    data_tests:
+      - elementary.volume_threshold:
+          arguments:
+            timestamp_column: created_at
+          config:
+            tags: ["elementary"]
+```
+
+```yml Custom thresholds
+models:
+  - name: critical_transactions
+    data_tests:
+      - elementary.volume_threshold:
+          arguments:
+            timestamp_column: transaction_time
+            warn_threshold_percent: 3
+            error_threshold_percent: 8
+            direction: drop
+          config:
+            tags: ["elementary"]
+            severity: error
+```
+
+```yml With time bucket and filter
+models:
+  - name: hourly_events
+    data_tests:
+      - elementary.volume_threshold:
+          arguments:
+            timestamp_column: event_timestamp
+            warn_threshold_percent: 10
+            error_threshold_percent: 25
+            direction: both
+            time_bucket:
+              period: hour
+              count: 1
+            where_expression: "event_type = 'purchase'"
+          config:
+            tags: ["elementary"]
+```
+
+</RequestExample>
+
+### Features
+
+- **Dual severity levels**: Separate thresholds for warnings and errors, giving you graduated alerting
+- **Directional monitoring**: Choose to monitor `both` directions, only `spike` (increases), or only `drop` (decreases)
+- **Incremental metric caching**: Uses Elementary's `data_monitoring_metrics` table to avoid recalculating row counts for previously computed time buckets
+- **Minimum baseline protection**: The `min_row_count` parameter prevents false alerts when the baseline is too small
+- **Configurable time buckets**: Works with hourly, daily, weekly, or monthly buckets
+
+### Parameters
+
+| Parameter                 | Required | Default | Description                                                                  |
+| ------------------------- | -------- | ------- | ---------------------------------------------------------------------------- |
+| `timestamp_column`        | Yes      | -       | Column to determine time periods                                             |
+| `warn_threshold_percent`  | No       | 5       | Percentage change that triggers a warning                                    |
+| `error_threshold_percent` | No       | 10      | Percentage change that triggers an error                                     |
+| `direction`               | No       | `both`  | Direction to monitor: `both`, `spike`, or `drop`                             |
+| `time_bucket`             | No       | `{period: day, count: 1}` | Time bucket configuration                              |
+| `where_expression`        | No       | -       | SQL expression to filter the data                                            |
+| `days_back`               | No       | 14      | Days of metric history to retain                                             |
+| `backfill_days`           | No       | 2       | Days to recalculate on each run                                              |
+| `min_row_count`           | No       | 100     | Minimum rows in the previous bucket required to trigger the check            |
+
+### Comparison with volume_anomalies
+
+| Feature | `volume_threshold` | `volume_anomalies` |
+| --- | --- | --- |
+| Detection method | Fixed percentage thresholds | Z-score (dbt test) / ML (Cloud) |
+| Severity levels | Dual (warn + error) | Single (pass/fail) |
+| Best for | Known acceptable ranges | Unknown/variable patterns |
+| Configuration | Explicit thresholds | Sensitivity tuning |
+| Baseline | Previous bucket | Training period average |
+
+### Notes
+
+- The `warn_threshold_percent` must be less than or equal to `error_threshold_percent`
+- The test uses Elementary's metric caching infrastructure. Row counts for previously computed time buckets are reused across runs
+- If the previous bucket has fewer rows than `min_row_count`, the test passes (insufficient data for a meaningful comparison)
+- The test only evaluates completed time buckets
