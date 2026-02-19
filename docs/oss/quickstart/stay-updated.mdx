@@ -61,62 +61,84 @@ export const NewsletterSignup = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@company.com"
-        required
-        style={{
-          flex: '1 1 260px',
-          padding: '10px 14px',
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb',
-          backgroundColor: '#ffffff',
-          color: '#111827',
-          fontSize: '14px',
-          lineHeight: '1.5',
-          outline: 'none',
-          minWidth: '200px',
-        }}
-      />
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        style={{
-          padding: '10px 22px',
-          borderRadius: '8px',
-          border: 'none',
-          backgroundColor: '#FF20B8',
-          color: '#ffffff',
-          fontSize: '14px',
-          fontWeight: '500',
-          cursor: status === 'loading' ? 'wait' : 'pointer',
-          opacity: status === 'loading' ? 0.7 : 1,
-          whiteSpace: 'nowrap',
-          lineHeight: '1.5',
-          transition: 'opacity 0.2s, background-color 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          if (status !== 'loading') {
-            e.target.style.backgroundColor = '#E01A9F';
+    <>
+      <style>{`
+        .newsletter-email-input {
+          background: #ffffff;
+          color: #111827;
+          border-color: #e5e7eb;
+        }
+        .dark .newsletter-email-input,
+        html[data-theme="dark"] .newsletter-email-input,
+        [data-theme="dark"] .newsletter-email-input {
+          background: #1f2937;
+          color: #f9fafb;
+          border-color: #374151;
+        }
+        @media (prefers-color-scheme: dark) {
+          html:not([data-theme="light"]) .newsletter-email-input {
+            background: #1f2937;
+            color: #f9fafb;
+            border-color: #374151;
           }
-        }}
-        onMouseLeave={(e) => {
-          if (status !== 'loading') {
-            e.target.style.backgroundColor = '#FF20B8';
-          }
-        }}
-      >
-        {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
-      </button>
-      {status === 'error' && (
-        <p style={{ width: '100%', color: '#dc2626', fontSize: '13px', margin: '4px 0 0' }}>
-          Something went wrong — try again or <a href="https://elementary-data.com/community" style={{ color: '#dc2626', textDecoration: 'underline' }}>join Slack</a> instead.
-        </p>
-      )}
-    </form>
+        }
+      `}</style>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@company.com"
+          required
+          className="newsletter-email-input"
+          style={{
+            flex: '1 1 260px',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            border: '1px solid',
+            fontSize: '14px',
+            lineHeight: '1.5',
+            outline: 'none',
+            minWidth: '200px',
+          }}
+        />
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          style={{
+            padding: '10px 22px',
+            borderRadius: '8px',
+            border: 'none',
+            backgroundColor: '#FF20B8',
+            color: '#ffffff',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: status === 'loading' ? 'wait' : 'pointer',
+            opacity: status === 'loading' ? 0.7 : 1,
+            whiteSpace: 'nowrap',
+            lineHeight: '1.5',
+            transition: 'opacity 0.2s, background-color 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            if (status !== 'loading') {
+              e.target.style.backgroundColor = '#E01A9F';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (status !== 'loading') {
+              e.target.style.backgroundColor = '#FF20B8';
+            }
+          }}
+        >
+          {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+        </button>
+        {status === 'error' && (
+          <p style={{ width: '100%', color: '#dc2626', fontSize: '13px', margin: '4px 0 0' }}>
+            Something went wrong — try again or <a href="https://elementary-data.com/community" style={{ color: '#dc2626', textDecoration: 'underline' }}>join Slack</a> instead.
+          </p>
+        )}
+      </form>
+    </>
   );
 }
 
