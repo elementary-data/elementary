@@ -456,8 +456,8 @@
               "oss/quickstart/quickstart-report",
               "oss/quickstart/stay-updated",
               "oss/quickstart/quickstart-alerts",
-              "oss/quickstart/quickstart-support",
-              "oss/quickstart/quickstart-prod"
+              "oss/quickstart/quickstart-prod",
+              "oss/quickstart/quickstart-support"
             ]
           },
           {
@@ -609,6 +609,10 @@
       "label": "Join the Community",
       "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-38gg3xy5u-exKL8vkQpoFkng0MAzt1Pg"
     }
+  },
+  "banner": {
+    "content": "[What does it require to build your data platform for AI agents? Join the webinar, Feb 25th, 11 AM EST.](https://www.elementary-data.com/webinar/how-to-prepare-your-data-platform-for-analytics-agents)",
+    "dismissible": false
   },
   "search": {
     "prompt": "Ask me anything..."
