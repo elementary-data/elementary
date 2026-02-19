@@ -454,7 +454,9 @@
               "oss/quickstart/quickstart-cli",
               "oss/quickstart/quickstart-tests",
               "oss/quickstart/quickstart-report",
+              "oss/quickstart/stay-updated",
               "oss/quickstart/quickstart-alerts",
+              "oss/quickstart/quickstart-support",
               "oss/quickstart/quickstart-prod"
             ]
           },
