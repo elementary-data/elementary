@@ -42,6 +42,8 @@ elementary_tests:
       project: {{ bigquery_project }}
       dataset: {{ schema_name }}
       keyfile_json: {{ bigquery_keyfile | toyaml }}
+      location: US
+      priority: interactive
       threads: 4
 
     redshift: &redshift
