@@ -87,6 +87,11 @@ def main(
             raise click.ClickException(
                 f"Failed to decode ${secrets_json_env}: {e}"
             ) from e
+        if not isinstance(decoded, dict):
+            raise click.ClickException(
+                f"Expected JSON object for ${secrets_json_env}, "
+                f"got {type(decoded).__name__}"
+            )
         for key, value in decoded.items():
             context[key.lower()] = value
         click.echo(
