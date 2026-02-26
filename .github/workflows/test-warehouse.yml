@@ -114,12 +114,51 @@ jobs:
 
       - name: Write dbt profiles
         env:
+          # New lean JSON secret (base64 encoded)
+          SECRETS_JSON: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
+          # Backwards-compat fallback while migrating secrets
           PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
         run: |
           mkdir -p ~/.dbt
+
+          if ! command -v envsubst >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y gettext-base
+          fi
+
           DBT_VERSION=$(pip show dbt-core | grep -i version | awk '{print $2}' | sed 's/\.//g')
           UNDERSCORED_REF_NAME=$(echo "${{ inputs.warehouse-type }}_dbt_${DBT_VERSION}_${BRANCH_NAME}" | awk '{print tolower($0)}' | head -c 40 | sed "s/[-\/]/_/g")
-          echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/py_$UNDERSCORED_REF_NAME/g" > ~/.dbt/profiles.yml
+          export SCHEMA_NAME="py_$UNDERSCORED_REF_NAME"
+
+          if [ -n "$SECRETS_JSON" ]; then
+            DECODED=$(echo "$SECRETS_JSON" | base64 -d)
+            BQ_KEYFILE_CONTENT=$(echo "$DECODED" | jq -r '.BIGQUERY_KEYFILE // empty')
+            if [ -n "$BQ_KEYFILE_CONTENT" ]; then
+              BIGQUERY_KEYFILE_PATH="$(mktemp /tmp/bigquery_keyfile.XXXXXX.json)"
+              echo "$BQ_KEYFILE_CONTENT" > "$BIGQUERY_KEYFILE_PATH"
+              chmod 600 "$BIGQUERY_KEYFILE_PATH"
+              export BIGQUERY_KEYFILE_PATH
+            fi
+
+            while IFS= read -r entry; do
+              key=$(jq -r '.key' <<<"$entry")
+              value=$(jq -r '.value' <<<"$entry")
+              if [[ "$key" =~ ^[A-Z_][A-Z0-9_]*$ ]]; then
+                printf -v "$key" '%s' "$value"
+                export "$key"
+              else
+                echo "Skipping invalid secret key: $key" >&2
+              fi
+            done < <(echo "$DECODED" | jq -c 'to_entries[] | select(.key != "BIGQUERY_KEYFILE" and (.value | type == "string"))')
+
+            envsubst < "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.template" > ~/.dbt/profiles.yml
+          elif [ -n "$PROFILES_YML" ]; then
+            echo "$PROFILES_YML" | base64 -d | sed "s/<SCHEMA_NAME>/$SCHEMA_NAME/g" > ~/.dbt/profiles.yml
+          else
+            # Fork PRs: no secrets available — only substitute SCHEMA_NAME so
+            # cloud-target placeholders stay as-is (only docker targets work).
+            envsubst '$SCHEMA_NAME' < "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.template" > ~/.dbt/profiles.yml
+          fi
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}

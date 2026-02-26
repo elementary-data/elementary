@@ -35,6 +35,27 @@ on:
         description: Whether to generate new data
 
 jobs:
+  # ── Docker targets ────────────────────────────────────────────────────
+  # No secrets needed — run on pull_request (works for forks without approval).
+  # Skipped on pull_request_target to avoid duplicate runs for internal PRs.
+  test-docker:
+    if: github.event_name != 'pull_request_target'
+    strategy:
+      fail-fast: false
+      matrix:
+        dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('[null]') }}
+        warehouse-type: [postgres, clickhouse]
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: ${{ matrix.warehouse-type }}
+      elementary-ref: ${{ inputs.elementary-ref || ((github.event_name == 'pull_request_target' || github.event_name == 'pull_request') && github.event.pull_request.head.sha) || '' }}
+      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
+      dbt-version: ${{ matrix.dbt-version }}
+      generate-data: ${{ inputs.generate-data || false }}
+
+  # ── Cloud targets ─────────────────────────────────────────────────────
+  # Require secrets — use fork check / approval gate for pull_request_target.
+
   # Determine if this is a fork PR and skip if wrong trigger is used
   check-fork-status:
     runs-on: ubuntu-latest
@@ -74,7 +95,7 @@ jobs:
       - name: Approved
         run: echo "Fork PR approved for testing"
 
-  test:
+  test-cloud:
     needs: [check-fork-status, approve-fork]
     if: |
       ! cancelled() &&
@@ -86,15 +107,7 @@ jobs:
       matrix:
         dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('[null]') }}
         warehouse-type:
-          [
-            postgres,
-            snowflake,
-            bigquery,
-            redshift,
-            databricks_catalog,
-            athena,
-            clickhouse,
-          ]
+          [snowflake, bigquery, redshift, databricks_catalog, athena]
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
