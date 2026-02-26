@@ -29,32 +29,16 @@ class _NullUndefined(Undefined):
 
 
 def _yaml_inline(value: Any) -> str:
-    """Dump *value* as a YAML-safe scalar or compact inline mapping.
+    """Render *value* for inline YAML.
 
-    For dicts (e.g. bigquery_keyfile) this produces ``{key: val, ...}``.
-    For non-string scalars (int, float, bool) the value passes through
-    unchanged so that YAML keeps its native type.
-    For strings, values that YAML would misinterpret (e.g. ``"yes"`` as
-    bool, ``"123"`` as int, ``"null"`` as None) are quoted.
+    * Dicts (e.g. bigquery keyfile) → compact ``{key: val, …}``
+    * Undefined (docker-only, no secrets) → empty string ``''``
+    * Everything else → pass through as-is
     """
     if isinstance(value, Undefined):
         return "''"
     if isinstance(value, dict):
         return yaml.dump(value, default_flow_style=True).strip()
-    if not isinstance(value, str):
-        # int, float, bool — pass through so YAML keeps native type
-        return str(value).lower() if isinstance(value, bool) else str(value)
-    # For strings, check if YAML would misinterpret the value
-    loaded = yaml.safe_load(value)
-    if loaded is None or isinstance(loaded, bool):
-        # 'null', 'yes', 'no', 'true', 'false' — quote to keep as string
-        dumped = yaml.dump(value, default_flow_style=True).rstrip()
-        if dumped.endswith("..."):
-            dumped = dumped[: -len("...")].rstrip()
-        return dumped
-    if isinstance(loaded, (int, float)):
-        # '5439' → emit as 5439 so YAML sees native int/float
-        return str(loaded)
     return value
 
 
