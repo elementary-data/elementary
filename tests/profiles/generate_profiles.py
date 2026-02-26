@@ -11,7 +11,7 @@ from typing import Any
 
 import click
 import yaml
-from jinja2 import BaseLoader, Environment, Undefined
+from jinja2 import BaseLoader, Environment, StrictUndefined, Undefined
 
 
 class _NullUndefined(Undefined):
@@ -100,9 +100,13 @@ def main(
         )
 
     # ── Render ──────────────────────────────────────────────────────────
+    # When secrets are loaded, use StrictUndefined so typos in secret keys
+    # fail fast.  For docker-only runs (no secrets) use _NullUndefined so
+    # cloud placeholders silently resolve to empty strings.
+    undefined_cls = StrictUndefined if secrets_b64 else _NullUndefined
     env = Environment(
         loader=BaseLoader(),
-        undefined=_NullUndefined,
+        undefined=undefined_cls,
         keep_trailing_newline=True,
     )
     env.filters["toyaml"] = _yaml_inline
