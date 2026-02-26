@@ -38,7 +38,7 @@ def _yaml_inline(value: Any) -> str:
     bool, ``"123"`` as int, ``"null"`` as None) are quoted.
     """
     if isinstance(value, Undefined):
-        return "{}"
+        return "''"
     if isinstance(value, dict):
         return yaml.dump(value, default_flow_style=True).strip()
     if not isinstance(value, str):
