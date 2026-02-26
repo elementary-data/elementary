@@ -32,18 +32,27 @@ def _yaml_inline(value: Any) -> str:
     """Dump *value* as a YAML-safe scalar or compact inline mapping.
 
     For dicts (e.g. bigquery_keyfile) this produces ``{key: val, ...}``.
-    For scalars it strips the trailing YAML document-end marker (``...``)
-    that ``yaml.dump`` appends to bare values.
+    For non-string scalars (int, float, bool) the value passes through
+    unchanged so that YAML keeps its native type.
+    For strings, values that YAML would misinterpret (e.g. ``"yes"`` as
+    bool, ``"123"`` as int, ``"null"`` as None) are quoted.
     """
     if isinstance(value, Undefined):
         return "{}"
-    dumped = yaml.dump(value, default_flow_style=True)
-    result = dumped.rstrip()
-    if result.endswith("\n..."):
-        result = result[: -len("\n...")]
-    elif result.endswith("..."):
-        result = result[: -len("...")]
-    return result.rstrip()
+    if isinstance(value, dict):
+        return yaml.dump(value, default_flow_style=True).strip()
+    if not isinstance(value, str):
+        # int, float, bool — pass through so YAML keeps native type
+        return str(value).lower() if isinstance(value, bool) else str(value)
+    # For strings, check if YAML would misinterpret the value
+    loaded = yaml.safe_load(value)
+    if loaded is None or not isinstance(loaded, str):
+        # YAML would coerce to non-string — quote it
+        dumped = yaml.dump(value, default_flow_style=True).rstrip()
+        if dumped.endswith("..."):
+            dumped = dumped[: -len("...")].rstrip()
+        return dumped
+    return value
 
 
 @click.command()
