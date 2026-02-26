@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 import os
 from pathlib import Path
@@ -83,7 +84,7 @@ def main(
     if secrets_b64:
         try:
             decoded: dict = json.loads(base64.b64decode(secrets_b64))
-        except (ValueError, json.JSONDecodeError) as e:
+        except (binascii.Error, json.JSONDecodeError) as e:
             raise click.ClickException(
                 f"Failed to decode ${secrets_json_env}: {e}"
             ) from e
