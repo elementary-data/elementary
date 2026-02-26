@@ -27,19 +27,19 @@ elementary_tests:
 
     snowflake: &snowflake
       type: snowflake
-      account: {{ snowflake_account }}
-      user: {{ snowflake_user }}
-      password: {{ snowflake_password }}
-      role: {{ snowflake_role }}
-      database: {{ snowflake_database }}
-      warehouse: {{ snowflake_warehouse }}
+      account: {{ snowflake_account | toyaml }}
+      user: {{ snowflake_user | toyaml }}
+      password: {{ snowflake_password | toyaml }}
+      role: {{ snowflake_role | toyaml }}
+      database: {{ snowflake_database | toyaml }}
+      warehouse: {{ snowflake_warehouse | toyaml }}
       schema: {{ schema_name }}
       threads: 4
 
     bigquery: &bigquery
       type: bigquery
       method: service-account-json
-      project: {{ bigquery_project }}
+      project: {{ bigquery_project | toyaml }}
       dataset: {{ schema_name }}
       keyfile_json: {{ bigquery_keyfile | toyaml }}
       location: US
@@ -48,34 +48,34 @@ elementary_tests:
 
     redshift: &redshift
       type: redshift
-      host: {{ redshift_host }}
-      user: {{ redshift_user }}
-      password: {{ redshift_password }}
-      port: {{ redshift_port }}
-      dbname: {{ redshift_dbname }}
+      host: {{ redshift_host | toyaml }}
+      user: {{ redshift_user | toyaml }}
+      password: {{ redshift_password | toyaml }}
+      port: {{ redshift_port | toyaml }}
+      dbname: {{ redshift_dbname | toyaml }}
       schema: {{ schema_name }}
       threads: 4
 
     databricks_catalog: &databricks_catalog
       type: databricks
-      host: {{ databricks_host }}
-      http_path: {{ databricks_http_path }}
-      catalog: {{ databricks_catalog }}
+      host: {{ databricks_host | toyaml }}
+      http_path: {{ databricks_http_path | toyaml }}
+      catalog: {{ databricks_catalog | toyaml }}
       schema: {{ schema_name }}
       auth_type: oauth
-      client_id: {{ databricks_client_id }}
-      client_secret: {{ databricks_client_secret }}
+      client_id: {{ databricks_client_id | toyaml }}
+      client_secret: {{ databricks_client_secret | toyaml }}
       threads: 4
 
     athena: &athena
       type: athena
-      s3_staging_dir: {{ athena_s3_staging_dir }}
-      s3_data_dir: {{ athena_s3_data_dir }}
-      region_name: {{ athena_region }}
+      s3_staging_dir: {{ athena_s3_staging_dir | toyaml }}
+      s3_data_dir: {{ athena_s3_data_dir | toyaml }}
+      region_name: {{ athena_region | toyaml }}
       database: awsdatacatalog
       schema: {{ schema_name }}
-      aws_access_key_id: {{ athena_aws_access_key_id }}
-      aws_secret_access_key: {{ athena_aws_secret_access_key }}
+      aws_access_key_id: {{ athena_aws_access_key_id | toyaml }}
+      aws_secret_access_key: {{ athena_aws_secret_access_key | toyaml }}
       threads: 4
 
 # The internal CLI dbt_project uses profile "elementary", so we alias the
