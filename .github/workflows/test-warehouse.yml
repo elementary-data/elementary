@@ -115,8 +115,6 @@ jobs:
       - name: Write dbt profiles
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
-          # Backwards-compat fallback while migrating secrets
-          CI_PROFILES_YML: ${{ secrets.CI_PROFILES_YML }}
         run: |
           DBT_VERSION=$(pip show dbt-core | grep -i version | awk '{print $2}' | sed 's/\.//g')
           UNDERSCORED_REF_NAME=$(echo "${{ inputs.warehouse-type }}_dbt_${DBT_VERSION}_${BRANCH_NAME}" | awk '{print tolower($0)}' | head -c 40 | sed "s/[-\/]/_/g")
@@ -124,8 +122,7 @@ jobs:
           python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
             --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
             --output ~/.dbt/profiles.yml \
-            --schema-name "py_$UNDERSCORED_REF_NAME" \
-            --profiles-yml-env CI_PROFILES_YML
+            --schema-name "py_$UNDERSCORED_REF_NAME"
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}

@@ -80,24 +80,9 @@ elementary_tests:
 elementary:
   target: postgres
   outputs:
-    postgres:
-      <<: *postgres
-      schema: {{ schema_name }}_elementary
-    clickhouse:
-      <<: *clickhouse
-      schema: {{ schema_name }}_elementary
-    snowflake:
-      <<: *snowflake
-      schema: {{ schema_name }}_elementary
-    bigquery:
-      <<: *bigquery
-      dataset: {{ schema_name }}_elementary
-    redshift:
-      <<: *redshift
-      schema: {{ schema_name }}_elementary
-    databricks_catalog:
-      <<: *databricks_catalog
-      schema: {{ schema_name }}_elementary
-    athena:
-      <<: *athena
-      schema: {{ schema_name }}_elementary
+{%- set targets = ['postgres', 'clickhouse', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
+{%- for t in targets %}
+    {{ t }}:
+      <<: *{{ t }}
+      {{ 'dataset' if t == 'bigquery' else 'schema' }}: {{ schema_name }}_elementary
+{%- endfor %}

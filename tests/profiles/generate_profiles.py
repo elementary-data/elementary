@@ -58,48 +58,35 @@ def _yaml_inline(value: Any) -> str:
     show_default=True,
     help="Name of the env-var holding the base64-encoded JSON secrets blob.",
 )
-@click.option(
-    "--profiles-yml-env",
-    default="",
-    help="Name of an env-var holding a legacy base64-encoded profiles.yml (fallback).",
-)
 def main(
     template: Path,
     output: Path,
     schema_name: str,
     secrets_json_env: str,
-    profiles_yml_env: str,
 ) -> None:
     """Render a Jinja2 profiles template into a dbt profiles.yml file.
 
     Resolution order:
       1. If the env-var named by ``--secrets-json-env`` is set, decode it and
          use its key/value pairs (plus *schema_name*) as template variables.
-      2. Else if ``--profiles-yml-env`` names a non-empty env-var, decode that
-         as a legacy base64 profiles.yml and write it directly (replacing
-         ``<SCHEMA_NAME>`` with *schema_name*).
-      3. Otherwise render the template with only *schema_name* populated (all
+      2. Otherwise render the template with only *schema_name* populated (all
          other variables resolve to empty strings — suitable for docker-only
          targets on fork PRs).
     """
     output.parent.mkdir(parents=True, exist_ok=True)
 
     secrets_b64 = os.environ.get(secrets_json_env, "").strip()
-    legacy_b64 = os.environ.get(profiles_yml_env, "").strip() if profiles_yml_env else ""
-
-    # ── Path 2: legacy base64 profiles.yml ──────────────────────────────
-    if not secrets_b64 and legacy_b64:
-        click.echo("Using legacy base64 profiles.yml fallback.", err=True)
-        content = base64.b64decode(legacy_b64).decode()
-        content = content.replace("<SCHEMA_NAME>", schema_name)
-        output.write_text(content)
-        return
 
     # ── Build template context ──────────────────────────────────────────
     context: dict[str, object] = {"schema_name": schema_name}
 
     if secrets_b64:
-        decoded: dict = json.loads(base64.b64decode(secrets_b64))
+        try:
+            decoded: dict = json.loads(base64.b64decode(secrets_b64))
+        except (ValueError, json.JSONDecodeError) as e:
+            raise click.ClickException(
+                f"Failed to decode ${secrets_json_env}: {e}"
+            ) from e
         for key, value in decoded.items():
             context[key.lower()] = value
         click.echo(
