@@ -46,12 +46,15 @@ def _yaml_inline(value: Any) -> str:
         return str(value).lower() if isinstance(value, bool) else str(value)
     # For strings, check if YAML would misinterpret the value
     loaded = yaml.safe_load(value)
-    if loaded is None or not isinstance(loaded, str):
-        # YAML would coerce to non-string — quote it
+    if loaded is None or isinstance(loaded, bool):
+        # 'null', 'yes', 'no', 'true', 'false' — quote to keep as string
         dumped = yaml.dump(value, default_flow_style=True).rstrip()
         if dumped.endswith("..."):
             dumped = dumped[: -len("...")].rstrip()
         return dumped
+    if isinstance(loaded, (int, float)):
+        # '5439' → emit as 5439 so YAML sees native int/float
+        return str(loaded)
     return value
 
 
