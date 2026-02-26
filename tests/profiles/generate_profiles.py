@@ -29,10 +29,21 @@ class _NullUndefined(Undefined):
 
 
 def _yaml_inline(value: Any) -> str:
-    """Dump *value* as a compact inline YAML scalar / mapping."""
+    """Dump *value* as a YAML-safe scalar or compact inline mapping.
+
+    For dicts (e.g. bigquery_keyfile) this produces ``{key: val, ...}``.
+    For scalars it strips the trailing YAML document-end marker (``...``)
+    that ``yaml.dump`` appends to bare values.
+    """
     if isinstance(value, Undefined):
         return "{}"
-    return yaml.dump(value, default_flow_style=True).strip()
+    dumped = yaml.dump(value, default_flow_style=True)
+    result = dumped.rstrip()
+    if result.endswith("\n..."):
+        result = result[: -len("\n...")]
+    elif result.endswith("..."):
+        result = result[: -len("...")]
+    return result.rstrip()
 
 
 @click.command()
