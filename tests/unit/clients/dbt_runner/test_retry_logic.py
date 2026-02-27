@@ -5,12 +5,8 @@ from unittest import mock
 
 import pytest
 
-from elementary.clients.dbt.command_line_dbt_runner import (
-    CommandLineDbtRunner,
-    DbtCommandResult,
-    DbtTransientError,
-    _TRANSIENT_MAX_RETRIES,
-)
+from elementary.clients.dbt.command_line_dbt_runner import \
+    _TRANSIENT_MAX_RETRIES
 from elementary.exceptions.exceptions import DbtCommandError
 
 # Patch tenacity wait to zero so tests don't block on exponential backoff.
@@ -31,7 +27,8 @@ def _make_runner(**kwargs):
     defaults.update(kwargs)
     # Use SubprocessDbtRunner but stub out _run_deps_if_needed so it
     # doesn't touch the filesystem.
-    from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
+    from elementary.clients.dbt.subprocess_dbt_runner import \
+        SubprocessDbtRunner
 
     with mock.patch.object(SubprocessDbtRunner, "_run_deps_if_needed"):
         return SubprocessDbtRunner(**defaults)
