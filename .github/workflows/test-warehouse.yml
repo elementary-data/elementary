@@ -128,7 +128,7 @@ jobs:
           CONCURRENCY_GROUP="tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
           SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
           SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 21)
-          DATE_STAMP=$(date +%y%m%d_%H%M)
+          DATE_STAMP=$(date -u +%y%m%d_%H%M)
           SCHEMA_NAME="py_${DATE_STAMP}_${SAFE_BRANCH}_${SHORT_HASH}"
 
           echo "Schema name: $SCHEMA_NAME (branch='${BRANCH_NAME}', timestamp=${DATE_STAMP}, hash of concurrency group)"
