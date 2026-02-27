@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import sys
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -83,7 +82,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
     def _inner_run_command(
         self,
         dbt_command_args: List[str],
-        capture_output: bool,
         quiet: bool,
         log_output: bool,
         log_format: str,
@@ -98,15 +96,13 @@ class CommandLineDbtRunner(BaseDbtRunner):
     def _run_command(
         self,
         command_args: List[str],
-        capture_output: bool = False,
         log_format: str = "json",
         vars: Optional[dict] = None,
         quiet: bool = False,
         log_output: bool = True,
     ) -> DbtCommandResult:
         dbt_command_args = []
-        if capture_output:
-            dbt_command_args.extend(["--log-format", log_format])
+        dbt_command_args.extend(["--log-format", log_format])
         dbt_command_args.extend(command_args)
         dbt_command_args.extend(["--project-dir", os.path.abspath(self.project_dir)])
         if self.profiles_dir:
@@ -138,7 +134,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
         result = self._execute_inner_command(
             dbt_command_args=dbt_command_args,
             log_command_args=log_command_args,
-            capture_output=capture_output,
             quiet=quiet,
             log_output=log_output,
             log_format=log_format,
@@ -150,7 +145,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
         self,
         dbt_command_args: List[str],
         log_command_args: List[str],
-        capture_output: bool,
         quiet: bool,
         log_output: bool,
         log_format: str,
@@ -183,15 +177,9 @@ class CommandLineDbtRunner(BaseDbtRunner):
             reraise=True,
         )
         def _attempt() -> DbtCommandResult:
-            # Always capture output so transient-error detection can inspect
-            # stdout/stderr.  When the caller set capture_output=False
-            # (expecting streaming output), we print the captured output
-            # to stdout/stderr after the command completes so it still
-            # appears in the terminal.
             try:
                 result = self._inner_run_command(
                     dbt_command_args,
-                    capture_output=True,
                     quiet=quiet,
                     log_output=log_output,
                     log_format=log_format,
@@ -229,22 +217,13 @@ class CommandLineDbtRunner(BaseDbtRunner):
                     ) from exc
                 raise
 
-            if not capture_output and not quiet:
-                # The caller expected output to stream to the terminal.
-                # Since we captured it for transient-error detection,
-                # print it now so the user still sees it.
-                if isinstance(result.output, str) and result.output:
-                    sys.stdout.write(result.output)
-                if isinstance(result.stderr, str) and result.stderr:
-                    sys.stderr.write(result.stderr)
-
-            if capture_output and result.output:
+            if result.output:
                 logger.debug(
                     "Result bytes size for command '%s' is %d",
                     log_command_args,
                     len(result.output),
                 )
-                if log_output or is_debug():
+                if log_format == "json" and (log_output or is_debug()):
                     for log in parse_dbt_output(result.output, log_format):
                         logger.info(log.msg)
 
@@ -281,10 +260,12 @@ class CommandLineDbtRunner(BaseDbtRunner):
             # failed result so callers that check result.success work.
             return exc.result
 
-    def deps(self, quiet: bool = False, capture_output: bool = True) -> bool:
-        result = self._run_command(
-            command_args=["deps"], quiet=quiet, capture_output=capture_output
-        )
+    def deps(
+        self,
+        quiet: bool = False,
+        capture_output: bool = True,  # Deprecated: no-op, kept for backward compatibility.
+    ) -> bool:
+        result = self._run_command(command_args=["deps"], quiet=quiet)
         return result.success
 
     def seed(self, select: Optional[str] = None, full_refresh: bool = False) -> bool:
@@ -303,7 +284,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
     def run_operation(
         self,
         macro_name: str,
-        capture_output: bool = True,
+        capture_output: bool = True,  # Deprecated: no-op, kept for backward compatibility.
         macro_args: Optional[dict] = None,
         log_errors: bool = True,
         vars: Optional[dict] = None,
@@ -328,7 +309,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
         command_args.extend(["--args", json_args])
         result = self._run_command(
             command_args=command_args,
-            capture_output=capture_output,
             vars=vars,
             quiet=quiet,
             log_output=log_output,
@@ -342,23 +322,22 @@ class CommandLineDbtRunner(BaseDbtRunner):
         log_pattern = (
             RAW_EDR_LOGS_PATTERN if return_raw_edr_logs else MACRO_RESULT_PATTERN
         )
-        if capture_output:
-            if result.output is not None:
-                for log in parse_dbt_output(result.output):
-                    if log_errors and log.level == "error":
-                        logger.error(log.msg)
-                        continue
+        if result.output is not None:
+            for log in parse_dbt_output(result.output):
+                if log_errors and log.level == "error":
+                    logger.error(log.msg)
+                    continue
 
-                    if log.msg:
-                        match = log_pattern.match(log.msg)
-                        if match:
-                            run_operation_results.append(match.group(1))
+                if log.msg:
+                    match = log_pattern.match(log.msg)
+                    if match:
+                        run_operation_results.append(match.group(1))
 
-            if result.stderr is not None and log_errors:
-                for log in parse_dbt_output(result.stderr):
-                    if log.level == "error":
-                        logger.error(log.msg)
-                        continue
+        if result.stderr is not None and log_errors:
+            for log in parse_dbt_output(result.stderr):
+                if log.level == "error":
+                    logger.error(log.msg)
+                    continue
 
         return run_operation_results
 
@@ -369,7 +348,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
         full_refresh: bool = False,
         vars: Optional[dict] = None,
         quiet: bool = False,
-        capture_output: bool = False,
+        capture_output: bool = False,  # Deprecated: no-op, kept for backward compatibility.
     ) -> bool:
         command_args = ["run"]
         if full_refresh:
@@ -382,7 +361,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
             command_args=command_args,
             vars=vars,
             quiet=quiet,
-            capture_output=capture_output,
         )
         return result.success
 
@@ -391,7 +369,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
         select: Optional[str] = None,
         vars: Optional[dict] = None,
         quiet: bool = False,
-        capture_output: bool = False,
+        capture_output: bool = False,  # Deprecated: no-op, kept for backward compatibility.
     ) -> bool:
         command_args = ["test"]
         if select:
@@ -400,7 +378,6 @@ class CommandLineDbtRunner(BaseDbtRunner):
             command_args=command_args,
             vars=vars,
             quiet=quiet,
-            capture_output=capture_output,
         )
         return result.success
 
@@ -417,9 +394,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
         if select:
             command_args.extend(["-s", select])
         try:
-            result = self._run_command(
-                command_args=command_args, capture_output=True, log_format="text"
-            )
+            result = self._run_command(command_args=command_args, log_format="text")
             return self._parse_ls_command_result(select, result)
         except DbtCommandError:
             raise DbtLsCommandError(select)

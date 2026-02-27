@@ -27,7 +27,6 @@ class APIDbtRunner(CommandLineDbtRunner):
     def _inner_run_command(
         self,
         dbt_command_args: List[str],
-        capture_output: bool,
         quiet: bool,
         log_output: bool,
         log_format: str,
