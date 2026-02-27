@@ -223,7 +223,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
                     log_command_args,
                     len(result.output),
                 )
-                if log_format == "json" and (log_output or is_debug()):
+                if log_output or is_debug():
                     for log in parse_dbt_output(result.output, log_format):
                         logger.info(log.msg)
 
