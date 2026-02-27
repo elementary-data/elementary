@@ -264,7 +264,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
             # re-raise it so callers relying on exception handling still
             # see the expected exception type.
             if isinstance(exc.__cause__, DbtCommandError):
-                raise exc.__cause__
+                raise exc.__cause__ from exc
             # Otherwise (raise_on_failure=False path), return the last
             # failed result so callers that check result.success work.
             return exc.result

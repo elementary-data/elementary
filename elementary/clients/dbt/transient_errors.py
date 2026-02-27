@@ -101,6 +101,12 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
     ),
 }
 
+# Pre-computed union of all adapter-specific patterns for the unknown-target
+# fallback path.  Built once at import time to avoid repeated iteration.
+_ALL_ADAPTER_PATTERNS: Tuple[str, ...] = tuple(
+    pattern for patterns in _ADAPTER_PATTERNS.values() for pattern in patterns
+)
+
 
 def is_transient_error(
     target: Optional[str],
@@ -128,17 +134,17 @@ def is_transient_error(
     if not haystack:
         return False
 
-    patterns: Sequence[str] = _COMMON
-    if target is not None:
-        adapter_patterns = _ADAPTER_PATTERNS.get(target.lower(), ())
-        if adapter_patterns:
+    if isinstance(target, str):
+        adapter_patterns = _ADAPTER_PATTERNS.get(target.lower())
+        if adapter_patterns is not None:
             # Known adapter — use common + adapter-specific patterns.
-            patterns = (*_COMMON, *adapter_patterns)
+            patterns: Sequence[str] = (*_COMMON, *adapter_patterns)
         else:
-            # Target doesn't match a known adapter key (e.g. "dev",
-            # "prod").  Check all adapter patterns defensively.
-            all_adapter = tuple(p for ps in _ADAPTER_PATTERNS.values() for p in ps)
-            patterns = (*_COMMON, *all_adapter)
+            # Unknown target key (e.g. profile target name). Check all adapters.
+            patterns = (*_COMMON, *_ALL_ADAPTER_PATTERNS)
+    else:
+        # No target provided; still check all adapters defensively.
+        patterns = (*_COMMON, *_ALL_ADAPTER_PATTERNS)
 
     return any(pattern in haystack for pattern in patterns)
 
