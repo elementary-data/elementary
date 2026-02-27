@@ -182,22 +182,45 @@ class CommandLineDbtRunner(BaseDbtRunner):
             reraise=True,
         )
         def _attempt() -> DbtCommandResult:
+            # Always capture output so transient-error detection can inspect
+            # stdout/stderr.  The original ``capture_output`` flag is still
+            # honoured for logging behaviour (see below).
             try:
                 result = self._inner_run_command(
                     dbt_command_args,
-                    capture_output=capture_output,
+                    capture_output=True,
                     quiet=quiet,
                     log_output=log_output,
                     log_format=log_format,
                 )
             except DbtCommandError as exc:
                 # DbtCommandError is raised when raise_on_failure=True and
-                # the command exits with a non-zero return code.  Check
-                # whether the error is transient before propagating.
-                if is_transient_error(self.target, output=str(exc), stderr=None):
+                # the command exits with a non-zero return code.  Extract
+                # actual output/stderr from the underlying process error
+                # for more accurate transient-error detection.
+                output_text = str(exc)
+                stderr_text: Optional[str] = None
+                if exc.proc_err is not None:
+                    if exc.proc_err.output:
+                        output_text = (
+                            exc.proc_err.output.decode()
+                            if isinstance(exc.proc_err.output, bytes)
+                            else str(exc.proc_err.output)
+                        )
+                    if exc.proc_err.stderr:
+                        stderr_text = (
+                            exc.proc_err.stderr.decode()
+                            if isinstance(exc.proc_err.stderr, bytes)
+                            else str(exc.proc_err.stderr)
+                        )
+                if is_transient_error(
+                    self.target, output=output_text, stderr=stderr_text
+                ):
                     raise DbtTransientError(
                         result=DbtCommandResult(
-                            success=False, output=str(exc), stderr=None
+                            success=False,
+                            output=output_text,
+                            stderr=stderr_text,
                         ),
                         message=(f"Transient error during dbt command: {exc}"),
                     ) from exc
@@ -230,14 +253,20 @@ class CommandLineDbtRunner(BaseDbtRunner):
         try:
             return _attempt()
         except DbtTransientError as exc:
-            # All retry attempts exhausted — return the last failed result
-            # so callers that check ``result.success`` still work.
+            # All retry attempts exhausted.
             logger.exception(
-                "dbt command '%s' failed after %d attempts due to "
-                "transient errors. Returning last failure.",
+                "dbt command '%s' failed after %d attempts due to " "transient errors.",
                 " ".join(log_command_args),
                 _TRANSIENT_MAX_RETRIES,
             )
+            # Preserve the raise_on_failure contract: if the original
+            # failure was a DbtCommandError (i.e. raise_on_failure=True),
+            # re-raise it so callers relying on exception handling still
+            # see the expected exception type.
+            if isinstance(exc.__cause__, DbtCommandError):
+                raise exc.__cause__
+            # Otherwise (raise_on_failure=False path), return the last
+            # failed result so callers that check result.success work.
             return exc.result
 
     def deps(self, quiet: bool = False, capture_output: bool = True) -> bool:
