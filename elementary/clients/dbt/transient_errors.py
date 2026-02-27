@@ -129,8 +129,8 @@ def is_transient_error(
 def _build_haystack(output: Optional[str] = None, stderr: Optional[str] = None) -> str:
     """Concatenate and lowercase *output* + *stderr* for matching."""
     parts = []
-    if output:
+    if output and isinstance(output, str):
         parts.append(output)
-    if stderr:
+    if stderr and isinstance(stderr, str):
         parts.append(stderr)
     return "\n".join(parts).lower()
