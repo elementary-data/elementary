@@ -117,18 +117,18 @@ jobs:
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
         run: |
-          # Schema name = py_<YYMMDD_HHMM>_<branch≤21>_<8-char hash>
+          # Schema name = py_<YYMMDD_HHMMSS>_<branch≤19>_<8-char hash>
           # The hash prevents collisions across concurrent jobs; the branch
           # keeps it human-readable; the timestamp helps with stale schema
           # cleanup and ensures each CI run gets a unique schema.
           #
           # Budget (PostgreSQL 63-char limit):
-          #   py_(3) + timestamp(11) + _(1) + branch(≤21) + _(1) + hash(8) = 45
+          #   py_(3) + timestamp(13) + _(1) + branch(≤19) + _(1) + hash(8) = 45
           #   + _elementary(11) + _gw7(4) = 60
           CONCURRENCY_GROUP="tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
           SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
-          SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 21)
-          DATE_STAMP=$(date -u +%y%m%d_%H%M)
+          SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 19)
+          DATE_STAMP=$(date -u +%y%m%d_%H%M%S)
           SCHEMA_NAME="py_${DATE_STAMP}_${SAFE_BRANCH}_${SHORT_HASH}"
 
           echo "Schema name: $SCHEMA_NAME (branch='${BRANCH_NAME}', timestamp=${DATE_STAMP}, hash of concurrency group)"
