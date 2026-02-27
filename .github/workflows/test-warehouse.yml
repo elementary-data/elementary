@@ -65,7 +65,8 @@ jobs:
       run:
         working-directory: elementary
     concurrency:
-      # This is what eventually defines the schema name in the data platform.
+      # Serialises runs for the same warehouse × dbt-version × branch.
+      # The schema name is derived from a hash of this group (see "Write dbt profiles").
       group: tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
     steps:
@@ -116,13 +117,25 @@ jobs:
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
         run: |
-          DBT_VERSION=$(pip show dbt-core | grep -i version | awk '{print $2}' | sed 's/\.//g')
-          UNDERSCORED_REF_NAME=$(echo "${{ inputs.warehouse-type }}_dbt_${DBT_VERSION}_${BRANCH_NAME}" | awk '{print tolower($0)}' | head -c 40 | sed "s/[-\/]/_/g")
+          # Schema name = py_<YYMMDD>_<branch≤29>_<8-char hash>
+          # The hash prevents collisions across concurrent jobs; the branch
+          # keeps it human-readable; the date helps with stale schema cleanup.
+          #
+          # Budget (PostgreSQL 63-char limit):
+          #   py_(3) + date(6) + _(1) + branch(≤29) + _(1) + hash(8) = 48
+          #   + _elementary(11) + _gw7(4) = 63
+          CONCURRENCY_GROUP="tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
+          SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
+          SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g" | head -c 29)
+          DATE_STAMP=$(date +%y%m%d)
+          SCHEMA_NAME="py_${DATE_STAMP}_${SAFE_BRANCH}_${SHORT_HASH}"
+
+          echo "Schema name: $SCHEMA_NAME (branch='${BRANCH_NAME}', date=${DATE_STAMP}, hash of concurrency group)"
 
           python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
             --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
             --output ~/.dbt/profiles.yml \
-            --schema-name "py_$UNDERSCORED_REF_NAME"
+            --schema-name "$SCHEMA_NAME"
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}
