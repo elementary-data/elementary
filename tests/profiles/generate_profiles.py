@@ -29,10 +29,17 @@ class _NullUndefined(Undefined):
 
 
 def _yaml_inline(value: Any) -> str:
-    """Dump *value* as a compact inline YAML scalar / mapping."""
+    """Render *value* for inline YAML.
+
+    * Dicts (e.g. bigquery keyfile) → compact ``{key: val, …}``
+    * Undefined (docker-only, no secrets) → empty string ``''``
+    * Everything else → pass through as-is
+    """
     if isinstance(value, Undefined):
-        return "{}"
-    return yaml.dump(value, default_flow_style=True).strip()
+        return "''"
+    if isinstance(value, dict):
+        return yaml.dump(value, default_flow_style=True).strip()
+    return value
 
 
 @click.command()
