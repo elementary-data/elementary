@@ -233,9 +233,9 @@ class CommandLineDbtRunner(BaseDbtRunner):
                 # The caller expected output to stream to the terminal.
                 # Since we captured it for transient-error detection,
                 # print it now so the user still sees it.
-                if result.output:
+                if isinstance(result.output, str) and result.output:
                     sys.stdout.write(result.output)
-                if result.stderr:
+                if isinstance(result.stderr, str) and result.stderr:
                     sys.stderr.write(result.stderr)
 
             if capture_output and result.output:
