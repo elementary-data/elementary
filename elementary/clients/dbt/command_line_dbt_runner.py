@@ -221,7 +221,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
                     result=result,
                     message=(
                         f"Transient error during dbt command: "
-                        f"{''.join(log_command_args)}"
+                        f"{' '.join(log_command_args)}"
                     ),
                 )
 
@@ -232,7 +232,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
         except DbtTransientError as exc:
             # All retry attempts exhausted — return the last failed result
             # so callers that check ``result.success`` still work.
-            logger.error(
+            logger.exception(
                 "dbt command '%s' failed after %d attempts due to "
                 "transient errors. Returning last failure.",
                 " ".join(log_command_args),

@@ -28,7 +28,6 @@ _COMMON: Tuple[str, ...] = (
     "connectionerror",
     "brokenpipeerror",
     "connection aborted",
-    "connection refused",
     "read timed out",
 )
 
@@ -46,12 +45,13 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "quota exceeded",
         # Internal errors surfaced as 503 / "internal error".
         "internal error encountered",
-        "503",
+        "503 service unavailable",
+        "http 503",
     ),
     "snowflake": (
         "could not connect to snowflake backend",
         "authentication token has expired",
-        "incident",
+        "incident id:",
         "service is unavailable",
     ),
     "redshift": (
@@ -77,8 +77,9 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "service unavailable",
     ),
     "dremio": (
-        "remotedisconnected",
-        "connection was closed",
+        # Common patterns (remotedisconnected, connection was closed) already
+        # cover the most frequent Dremio transient errors.  Add Dremio-specific
+        # patterns here as they are identified.
     ),
     "postgres": (
         "could not connect to server",
