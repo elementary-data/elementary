@@ -182,13 +182,24 @@ class CommandLineDbtRunner(BaseDbtRunner):
             reraise=True,
         )
         def _attempt() -> DbtCommandResult:
-            # Always capture output so transient-error detection can inspect
-            # stdout/stderr.  The original ``capture_output`` flag is still
-            # honoured for logging behaviour (see below).
+            # Pass through the original capture_output flag so that when
+            # capture_output=False the subprocess streams output directly
+            # to the terminal (preserving the pre-retry behaviour).
+            # Transient-error detection still works because:
+            #   - DbtCommandError path: we extract output from exc.proc_err
+            #     (subprocess always captures on CalledProcessError).
+            #   - Failed-result path (capture_output=True or quiet=True):
+            #     result.output/stderr are available for pattern matching.
+            #   - Failed-result path (capture_output=False, quiet=False):
+            #     output streamed to terminal and result.output is None,
+            #     so is_transient_error receives None and won't match —
+            #     the failure is treated as non-transient and returned
+            #     immediately.  This is acceptable because the user already
+            #     saw the output in real-time.
             try:
                 result = self._inner_run_command(
                     dbt_command_args,
-                    capture_output=True,
+                    capture_output=capture_output,
                     quiet=quiet,
                     log_output=log_output,
                     log_format=log_format,
