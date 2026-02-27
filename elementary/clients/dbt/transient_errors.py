@@ -57,6 +57,8 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "exceeded rate limits",
         "rateLimitExceeded".lower(),
         "quota exceeded",
+        # Duplicate job ID (409 conflict) — seen with dbt-fusion + xdist.
+        "already exists",
         # Internal errors surfaced as 503 / "internal error".
         "internal error encountered",
         "503 service unavailable",
