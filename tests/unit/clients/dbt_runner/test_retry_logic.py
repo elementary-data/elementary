@@ -109,6 +109,33 @@ class TestTransientRetryFailedResult:
         # Result should indicate failure (not raise)
         assert result is False
 
+    @mock.patch(
+        "elementary.clients.dbt.command_line_dbt_runner.is_transient_error",
+        return_value=True,
+    )
+    @mock.patch("subprocess.run")
+    def test_retry_succeeds_on_second_attempt(
+        self, mock_subprocess_run, mock_is_transient
+    ):
+        """A transient failure followed by success should return the successful result."""
+        fail_result = mock.MagicMock()
+        fail_result.returncode = 1
+        fail_result.stdout = b"service unavailable"
+        fail_result.stderr = b""
+
+        success_result = mock.MagicMock()
+        success_result.returncode = 0
+        success_result.stdout = b"ok"
+        success_result.stderr = b""
+
+        mock_subprocess_run.side_effect = [fail_result, success_result]
+
+        runner = _make_runner(raise_on_failure=False)
+        result = runner.run()
+
+        assert mock_subprocess_run.call_count == 2
+        assert result is True
+
 
 @_ZERO_WAIT
 class TestNonTransientNotRetried:
