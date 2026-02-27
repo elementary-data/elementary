@@ -5,15 +5,37 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import yaml
+from tenacity import (
+    RetryCallState,
+    retry,
+    retry_if_exception,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.dbt_log import parse_dbt_output
+from elementary.clients.dbt.transient_errors import is_transient_error
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
 from elementary.monitor.dbt_project_utils import is_dbt_package_up_to_date
 from elementary.utils.env_vars import is_debug
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
+
+# Retry configuration for transient errors.
+_TRANSIENT_MAX_RETRIES = 3
+_TRANSIENT_WAIT_MULTIPLIER = 10  # seconds
+_TRANSIENT_WAIT_MAX = 60  # seconds
+
+
+class DbtTransientError(Exception):
+    """Raised internally to signal a transient dbt failure that should be retried."""
+
+    def __init__(self, result: "DbtCommandResult", message: str) -> None:
+        super().__init__(message)
+        self.result = result
+
 
 MACRO_RESULT_PATTERN = re.compile(
     "Elementary: --ELEMENTARY-MACRO-OUTPUT-START--(.*)--ELEMENTARY-MACRO-OUTPUT-END--"
@@ -112,23 +134,111 @@ class CommandLineDbtRunner(BaseDbtRunner):
         else:
             logger.debug(log_msg)
 
-        result = self._inner_run_command(
-            dbt_command_args,
+        result = self._execute_inner_command(
+            dbt_command_args=dbt_command_args,
+            log_command_args=log_command_args,
             capture_output=capture_output,
             quiet=quiet,
             log_output=log_output,
             log_format=log_format,
         )
 
-        if capture_output and result.output:
-            logger.debug(
-                f"Result bytes size for command '{log_command_args}' is {len(result.output)}"
-            )
-            if log_output or is_debug():
-                for log in parse_dbt_output(result.output, log_format):
-                    logger.info(log.msg)
-
         return result
+
+    def _execute_inner_command(
+        self,
+        dbt_command_args: List[str],
+        log_command_args: List[str],
+        capture_output: bool,
+        quiet: bool,
+        log_output: bool,
+        log_format: str,
+    ) -> DbtCommandResult:
+        """Execute ``_inner_run_command`` with automatic retries for transient errors.
+
+        This method wraps the actual command execution, checks the result
+        for known transient error patterns (per adapter), and retries using
+        ``tenacity`` when appropriate.  Non-transient failures are returned
+        immediately without retrying.
+        """
+
+        def _before_retry(retry_state: RetryCallState) -> None:
+            attempt = retry_state.attempt_number
+            logger.warning(
+                "Transient error detected for dbt command '%s' "
+                "(attempt %d/%d). Retrying...",
+                " ".join(log_command_args),
+                attempt,
+                _TRANSIENT_MAX_RETRIES,
+            )
+
+        @retry(
+            retry=retry_if_exception(lambda exc: isinstance(exc, DbtTransientError)),
+            stop=stop_after_attempt(_TRANSIENT_MAX_RETRIES),
+            wait=wait_exponential(
+                multiplier=_TRANSIENT_WAIT_MULTIPLIER, max=_TRANSIENT_WAIT_MAX
+            ),
+            before_sleep=_before_retry,
+            reraise=True,
+        )
+        def _attempt() -> DbtCommandResult:
+            try:
+                result = self._inner_run_command(
+                    dbt_command_args,
+                    capture_output=capture_output,
+                    quiet=quiet,
+                    log_output=log_output,
+                    log_format=log_format,
+                )
+            except DbtCommandError as exc:
+                # DbtCommandError is raised when raise_on_failure=True and
+                # the command exits with a non-zero return code.  Check
+                # whether the error is transient before propagating.
+                if is_transient_error(self.target, output=str(exc), stderr=None):
+                    raise DbtTransientError(
+                        result=DbtCommandResult(
+                            success=False, output=str(exc), stderr=None
+                        ),
+                        message=(f"Transient error during dbt command: {exc}"),
+                    ) from exc
+                raise
+
+            if capture_output and result.output:
+                logger.debug(
+                    "Result bytes size for command '%s' is %d",
+                    log_command_args,
+                    len(result.output),
+                )
+                if log_output or is_debug():
+                    for log in parse_dbt_output(result.output, log_format):
+                        logger.info(log.msg)
+
+            # Command completed but may have failed (raise_on_failure=False).
+            if not result.success and is_transient_error(
+                self.target, output=result.output, stderr=result.stderr
+            ):
+                raise DbtTransientError(
+                    result=result,
+                    message=(
+                        f"Transient error during dbt command: "
+                        f"{''.join(log_command_args)}"
+                    ),
+                )
+
+            return result
+
+        try:
+            return _attempt()
+        except DbtTransientError as exc:
+            # All retry attempts exhausted — return the last failed result
+            # so callers that check ``result.success`` still work.
+            logger.error(
+                "dbt command '%s' failed after %d attempts due to "
+                "transient errors. Returning last failure.",
+                " ".join(log_command_args),
+                _TRANSIENT_MAX_RETRIES,
+            )
+            return exc.result
 
     def deps(self, quiet: bool = False, capture_output: bool = True) -> bool:
         result = self._run_command(
