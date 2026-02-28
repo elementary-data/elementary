@@ -1,4 +1,4 @@
-"""Unit tests for transient-error retry logic in _execute_inner_command."""
+"""Unit tests for transient-error retry logic in _inner_run_command_with_retries."""
 
 import subprocess
 from unittest import mock

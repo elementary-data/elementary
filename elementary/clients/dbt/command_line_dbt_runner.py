@@ -37,6 +37,18 @@ class DbtTransientError(Exception):
         self.result = result
 
 
+def _before_retry_log(retry_state: RetryCallState) -> None:
+    """Log before each retry. Reads log_command_args from the retried call."""
+    log_command_args = retry_state.kwargs.get("log_command_args", [])
+    attempt = retry_state.attempt_number
+    logger.warning(
+        "Transient error detected for dbt command '%s' (attempt %d/%d). Retrying...",
+        " ".join(log_command_args),
+        attempt,
+        _TRANSIENT_MAX_RETRIES,
+    )
+
+
 MACRO_RESULT_PATTERN = re.compile(
     "Elementary: --ELEMENTARY-MACRO-OUTPUT-START--(.*)--ELEMENTARY-MACRO-OUTPUT-END--"
 )
@@ -131,17 +143,35 @@ class CommandLineDbtRunner(BaseDbtRunner):
         else:
             logger.debug(log_msg)
 
-        result = self._execute_inner_command(
-            dbt_command_args=dbt_command_args,
-            log_command_args=log_command_args,
-            quiet=quiet,
-            log_output=log_output,
-            log_format=log_format,
-        )
+        try:
+            return self._inner_run_command_with_retries(
+                dbt_command_args=dbt_command_args,
+                log_command_args=log_command_args,
+                quiet=quiet,
+                log_output=log_output,
+                log_format=log_format,
+            )
+        except DbtTransientError as exc:
+            logger.exception(
+                "dbt command '%s' failed after %d attempts due to transient errors.",
+                " ".join(log_command_args),
+                _TRANSIENT_MAX_RETRIES,
+            )
+            if isinstance(exc.__cause__, DbtCommandError):
+                raise exc.__cause__ from exc
+            return exc.result
 
-        return result
-
-    def _execute_inner_command(
+    @retry(
+        retry=retry_if_exception(lambda exc: isinstance(exc, DbtTransientError)),
+        stop=stop_after_attempt(_TRANSIENT_MAX_RETRIES),
+        wait=wait_exponential(
+            multiplier=_TRANSIENT_WAIT_MULTIPLIER,
+            max=_TRANSIENT_WAIT_MAX,
+        ),
+        before_sleep=_before_retry_log,
+        reraise=True,
+    )
+    def _inner_run_command_with_retries(
         self,
         dbt_command_args: List[str],
         log_command_args: List[str],
@@ -149,116 +179,65 @@ class CommandLineDbtRunner(BaseDbtRunner):
         log_output: bool,
         log_format: str,
     ) -> DbtCommandResult:
-        """Execute ``_inner_run_command`` with automatic retries for transient errors.
-
-        This method wraps the actual command execution, checks the result
-        for known transient error patterns (per adapter), and retries using
-        ``tenacity`` when appropriate.  Non-transient failures are returned
-        immediately without retrying.
-        """
-
-        def _before_retry(retry_state: RetryCallState) -> None:
-            attempt = retry_state.attempt_number
-            logger.warning(
-                "Transient error detected for dbt command '%s' "
-                "(attempt %d/%d). Retrying...",
-                " ".join(log_command_args),
-                attempt,
-                _TRANSIENT_MAX_RETRIES,
+        """Run one dbt command attempt. Raises DbtTransientError for transient failures so tenacity can retry."""
+        try:
+            result = self._inner_run_command(
+                dbt_command_args,
+                quiet=quiet,
+                log_output=log_output,
+                log_format=log_format,
             )
-
-        @retry(
-            retry=retry_if_exception(lambda exc: isinstance(exc, DbtTransientError)),
-            stop=stop_after_attempt(_TRANSIENT_MAX_RETRIES),
-            wait=wait_exponential(
-                multiplier=_TRANSIENT_WAIT_MULTIPLIER, max=_TRANSIENT_WAIT_MAX
-            ),
-            before_sleep=_before_retry,
-            reraise=True,
-        )
-        def _attempt() -> DbtCommandResult:
-            try:
-                result = self._inner_run_command(
-                    dbt_command_args,
-                    quiet=quiet,
-                    log_output=log_output,
-                    log_format=log_format,
-                )
-            except DbtCommandError as exc:
-                # DbtCommandError is raised when raise_on_failure=True and
-                # the command exits with a non-zero return code.  Extract
-                # actual output/stderr from the underlying process error
-                # for more accurate transient-error detection.
-                output_text = str(exc)
-                stderr_text: Optional[str] = None
-                if exc.proc_err is not None:
-                    if exc.proc_err.output:
-                        output_text = (
-                            exc.proc_err.output.decode()
-                            if isinstance(exc.proc_err.output, bytes)
-                            else str(exc.proc_err.output)
-                        )
-                    if exc.proc_err.stderr:
-                        stderr_text = (
-                            exc.proc_err.stderr.decode()
-                            if isinstance(exc.proc_err.stderr, bytes)
-                            else str(exc.proc_err.stderr)
-                        )
-                if is_transient_error(
-                    self.target, output=output_text, stderr=stderr_text
-                ):
-                    raise DbtTransientError(
-                        result=DbtCommandResult(
-                            success=False,
-                            output=output_text,
-                            stderr=stderr_text,
-                        ),
-                        message=(f"Transient error during dbt command: {exc}"),
-                    ) from exc
-                raise
-
-            if result.output:
-                logger.debug(
-                    "Result bytes size for command '%s' is %d",
-                    log_command_args,
-                    len(result.output),
-                )
-                if log_output or is_debug():
-                    for log in parse_dbt_output(result.output, log_format):
-                        logger.info(log.msg)
-
-            # Command completed but may have failed (raise_on_failure=False).
-            if not result.success and is_transient_error(
-                self.target, output=result.output, stderr=result.stderr
+        except DbtCommandError as exc:
+            output_text = str(exc)
+            stderr_text: Optional[str] = None
+            if exc.proc_err is not None:
+                if exc.proc_err.output:
+                    output_text = (
+                        exc.proc_err.output.decode()
+                        if isinstance(exc.proc_err.output, bytes)
+                        else str(exc.proc_err.output)
+                    )
+                if exc.proc_err.stderr:
+                    stderr_text = (
+                        exc.proc_err.stderr.decode()
+                        if isinstance(exc.proc_err.stderr, bytes)
+                        else str(exc.proc_err.stderr)
+                    )
+            if is_transient_error(
+                self.target, output=output_text, stderr=stderr_text
             ):
                 raise DbtTransientError(
-                    result=result,
-                    message=(
-                        f"Transient error during dbt command: "
-                        f"{' '.join(log_command_args)}"
+                    result=DbtCommandResult(
+                        success=False,
+                        output=output_text,
+                        stderr=stderr_text,
                     ),
-                )
+                    message=f"Transient error during dbt command: {exc}",
+                ) from exc
+            raise
 
-            return result
-
-        try:
-            return _attempt()
-        except DbtTransientError as exc:
-            # All retry attempts exhausted.
-            logger.exception(
-                "dbt command '%s' failed after %d attempts due to " "transient errors.",
+        if result.output:
+            logger.debug(
+                "Result bytes size for command '%s' is %d",
                 " ".join(log_command_args),
-                _TRANSIENT_MAX_RETRIES,
+                len(result.output),
             )
-            # Preserve the raise_on_failure contract: if the original
-            # failure was a DbtCommandError (i.e. raise_on_failure=True),
-            # re-raise it so callers relying on exception handling still
-            # see the expected exception type.
-            if isinstance(exc.__cause__, DbtCommandError):
-                raise exc.__cause__ from exc
-            # Otherwise (raise_on_failure=False path), return the last
-            # failed result so callers that check result.success work.
-            return exc.result
+            if log_output or is_debug():
+                for log in parse_dbt_output(result.output, log_format):
+                    logger.info(log.msg)
+
+        if not result.success and is_transient_error(
+            self.target, output=result.output, stderr=result.stderr
+        ):
+            raise DbtTransientError(
+                result=result,
+                message=(
+                    f"Transient error during dbt command: "
+                    f"{' '.join(log_command_args)}"
+                ),
+            )
+
+        return result
 
     def deps(
         self,
