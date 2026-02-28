@@ -203,9 +203,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
                         if isinstance(exc.proc_err.stderr, bytes)
                         else str(exc.proc_err.stderr)
                     )
-            if is_transient_error(
-                self.target, output=output_text, stderr=stderr_text
-            ):
+            if is_transient_error(self.target, output=output_text, stderr=stderr_text):
                 raise DbtTransientError(
                     result=DbtCommandResult(
                         success=False,
