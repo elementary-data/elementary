@@ -126,7 +126,7 @@ def is_transient_error(
         adapter's patterns (plus ``_COMMON``) are used.  When it does
         **not** match any known adapter, **all** adapter patterns are
         checked defensively to avoid missing transient errors.
-        When ``None`` only the common patterns are checked.
+        When ``None``, all adapter patterns are checked defensively.
     output:
         The captured stdout of the dbt command (may be ``None``).
     stderr:
