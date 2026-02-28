@@ -4,13 +4,13 @@
     {% set main_schema = target.schema %}
     {% set elementary_schema = main_schema ~ '_elementary' %}
 
-    {% do elementary_tests.edr_drop_schema(elementary_schema) %}
-    {% do elementary_tests.edr_drop_schema(main_schema) %}
+    {% do elementary_integration_tests.edr_drop_schema(elementary_schema) %}
+    {% do elementary_integration_tests.edr_drop_schema(main_schema) %}
     {% do log("Dropped schemas: " ~ main_schema ~ ", " ~ elementary_schema, info=true) %}
 {% endmacro %}
 
 {% macro edr_drop_schema(schema_name) %}
-    {% do return(adapter.dispatch('edr_drop_schema', 'elementary_tests')(schema_name)) %}
+    {% do return(adapter.dispatch('edr_drop_schema', 'elementary_integration_tests')(schema_name)) %}
 {% endmacro %}
 
 {% macro default__edr_drop_schema(schema_name) %}
