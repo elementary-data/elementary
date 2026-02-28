@@ -84,12 +84,85 @@ class CommandLineDbtRunner(BaseDbtRunner):
             secret_vars,
             allow_macros_without_package_prefix,
         )
+        self.adapter_type = self._get_adapter_type()
         self.raise_on_failure = raise_on_failure
         self.env_vars = env_vars
         if force_dbt_deps:
             self.deps()
         elif run_deps_if_needed:
             self._run_deps_if_needed()
+
+    def _get_adapter_type(self) -> Optional[str]:
+        """Resolve the adapter type from dbt profile configuration.
+
+        Reads ``dbt_project.yml`` to find the profile name, then looks up
+        the selected target in ``profiles.yml`` to extract its ``type``
+        field (e.g. ``"bigquery"``, ``"snowflake"``).
+
+        Returns ``None`` when the adapter type cannot be determined (missing
+        files, missing keys, parse errors, etc.).
+        """
+        try:
+            # Read dbt_project.yml to get the profile name.
+            dbt_project_path = os.path.join(self.project_dir, "dbt_project.yml")
+            if not os.path.exists(dbt_project_path):
+                logger.debug("dbt_project.yml not found at %s", dbt_project_path)
+                return None
+
+            with open(dbt_project_path) as f:
+                dbt_project = yaml.safe_load(f)
+
+            profile_name = dbt_project.get("profile")
+            if not profile_name:
+                logger.debug("No profile name found in dbt_project.yml")
+                return None
+
+            # Determine profiles directory.
+            if self.profiles_dir:
+                profiles_dir = self.profiles_dir
+            else:
+                profiles_dir = os.path.join(os.path.expanduser("~"), ".dbt")
+
+            profiles_path = os.path.join(profiles_dir, "profiles.yml")
+            if not os.path.exists(profiles_path):
+                logger.debug("profiles.yml not found at %s", profiles_path)
+                return None
+
+            with open(profiles_path) as f:
+                profiles = yaml.safe_load(f)
+
+            profile = profiles.get(profile_name)
+            if not profile:
+                logger.debug("Profile '%s' not found in profiles.yml", profile_name)
+                return None
+
+            # Determine which target to use.
+            target_name = self.target if self.target else profile.get("target")
+            if not target_name:
+                logger.debug("No target specified and no default target in profile")
+                return None
+
+            outputs = profile.get("outputs", {})
+            target_config = outputs.get(target_name)
+            if not target_config:
+                logger.debug("Target '%s' not found in profile outputs", target_name)
+                return None
+
+            adapter_type = target_config.get("type")
+            if adapter_type:
+                logger.debug(
+                    "Resolved adapter type '%s' for target '%s'",
+                    adapter_type,
+                    target_name,
+                )
+            else:
+                logger.debug("No type found in target configuration")
+
+            return adapter_type
+
+        except Exception as exc:
+            logger.debug("Failed to resolve adapter type: %s", exc)
+            return None
 
     def _inner_run_command(
         self,
@@ -203,7 +276,9 @@ class CommandLineDbtRunner(BaseDbtRunner):
                         if isinstance(exc.proc_err.stderr, bytes)
                         else str(exc.proc_err.stderr)
                     )
-            if is_transient_error(self.target, output=output_text, stderr=stderr_text):
+            if is_transient_error(
+                self.adapter_type, output=output_text, stderr=stderr_text
+            ):
                 raise DbtTransientError(
                     result=DbtCommandResult(
                         success=False,
@@ -225,7 +300,7 @@ class CommandLineDbtRunner(BaseDbtRunner):
                     logger.info(log.msg)
 
         if not result.success and is_transient_error(
-            self.target, output=result.output, stderr=result.stderr
+            self.adapter_type, output=result.output, stderr=result.stderr
         ):
             raise DbtTransientError(
                 result=result,

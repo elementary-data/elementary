@@ -10,11 +10,11 @@ To add patterns for a new adapter, append a new entry to
 substrings that appear in the error output.  Matching is
 case-insensitive substring search so regex is not needed.
 
-Note: The ``target`` argument accepted by :func:`is_transient_error` may
-be either the dbt adapter type *or* the profile target name (e.g.
-``"dev"``, ``"prod"``).  When it does not match any known adapter key,
-**all** adapter patterns are checked defensively.  This is safe because
-adapter-specific error messages only appear in output from that adapter.
+The ``target`` argument accepted by :func:`is_transient_error` should be
+the dbt **adapter type** (e.g. ``"bigquery"``, ``"snowflake"``), as
+resolved from ``profiles.yml``.  When the value does not match any known
+adapter key (or is ``None``), **all** adapter patterns are checked
+defensively so that transient errors are never missed.
 """
 
 from typing import Dict, Optional, Sequence, Tuple
@@ -76,7 +76,6 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "ssl syscall error",
     ),
     "databricks": _DATABRICKS_PATTERNS,
-    "databricks_catalog": _DATABRICKS_PATTERNS,
     "athena": (
         "throttlingexception",
         "toomanyrequestsexception",
@@ -120,13 +119,12 @@ def is_transient_error(
     Parameters
     ----------
     target:
-        The dbt adapter type (e.g. ``"bigquery"``, ``"snowflake"``) **or**
-        the dbt profile target name (e.g. ``"dev"``, ``"prod"``).
+        The dbt adapter type (e.g. ``"bigquery"``, ``"snowflake"``),
+        typically resolved from ``profiles.yml`` by the runner.
         When the value matches a key in ``_ADAPTER_PATTERNS``, only that
         adapter's patterns (plus ``_COMMON``) are used.  When it does
-        **not** match any known adapter, **all** adapter patterns are
-        checked defensively to avoid missing transient errors.
-        When ``None``, all adapter patterns are checked defensively.
+        **not** match any known adapter (or is ``None``), **all** adapter
+        patterns are checked defensively to avoid missing transient errors.
     output:
         The captured stdout of the dbt command (may be ``None``).
     stderr:
