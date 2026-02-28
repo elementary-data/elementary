@@ -14,7 +14,7 @@ on:
 
 env:
   # Re-use the dbt-data-reliability integration-test project so we get the
-  # cleanup macro (elementary.drop_stale_ci_schemas) without duplicating it.
+  # cleanup macro (drop_stale_ci_schemas) without duplicating it.
   TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
 
 jobs:
@@ -69,6 +69,6 @@ jobs:
       - name: Drop stale CI schemas
         working-directory: ${{ env.TESTS_DIR }}/dbt_project
         run: >
-          dbt run-operation elementary.drop_stale_ci_schemas
+          dbt run-operation drop_stale_ci_schemas
           --args '{prefixes: ["py_"], max_age_hours: ${{ inputs.max-age-hours || '24' }}}'
           -t "${{ matrix.warehouse-type }}"
