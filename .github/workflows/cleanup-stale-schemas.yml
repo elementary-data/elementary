@@ -45,13 +45,17 @@ jobs:
       - name: Install dbt
         run: >
           pip install
-          "dbt-core"
-          "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}"
+          "dbt-core>=1.8,<1.10"
+          "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}>=1.8,<1.10"
 
       - name: Write dbt profiles
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
         run: |
+          if [ -z "$CI_WAREHOUSE_SECRETS" ]; then
+            echo "::error::Missing required secret: CI_WAREHOUSE_SECRETS"
+            exit 1
+          fi
           # The cleanup job doesn't create schemas, but generate_profiles.py
           # requires --schema-name.  Use a dummy value.
           python "${{ github.workspace }}/dbt-data-reliability/integration_tests/profiles/generate_profiles.py" \
@@ -68,7 +72,14 @@ jobs:
 
       - name: Drop stale CI schemas
         working-directory: ${{ env.TESTS_DIR }}/dbt_project
-        run: >
-          dbt run-operation drop_stale_ci_schemas
-          --args '{prefixes: ["py_"], max_age_hours: ${{ inputs.max-age-hours || '24' }}}'
-          -t "${{ matrix.warehouse-type }}"
+        env:
+          MAX_AGE_HOURS: ${{ inputs.max-age-hours || '24' }}
+        run: |
+          if ! [[ "$MAX_AGE_HOURS" =~ ^[0-9]+$ ]]; then
+            echo "::error::max-age-hours must be a non-negative integer"
+            exit 1
+          fi
+          ARGS=$(printf '{"prefixes":["py_"],"max_age_hours":%s}' "$MAX_AGE_HOURS")
+          dbt run-operation drop_stale_ci_schemas \
+            --args "$ARGS" \
+            -t "${{ matrix.warehouse-type }}"
