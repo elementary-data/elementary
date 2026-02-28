@@ -1,0 +1,74 @@
+name: Cleanup stale CI schemas
+
+on:
+  schedule:
+    # Every Sunday at 03:00 UTC
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+    inputs:
+      max-age-hours:
+        type: string
+        required: false
+        default: "24"
+        description: Drop schemas older than this many hours
+
+env:
+  # Re-use the dbt-data-reliability integration-test project so we get the
+  # cleanup macro (elementary.drop_stale_ci_schemas) without duplicating it.
+  TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        warehouse-type:
+          - snowflake
+          - bigquery
+          - redshift
+          - databricks_catalog
+          - athena
+    steps:
+      - name: Checkout dbt package
+        uses: actions/checkout@v4
+        with:
+          repository: elementary-data/dbt-data-reliability
+          path: dbt-data-reliability
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dbt
+        run: >
+          pip install
+          "dbt-core"
+          "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}"
+
+      - name: Write dbt profiles
+        env:
+          CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
+        run: |
+          # The cleanup job doesn't create schemas, but generate_profiles.py
+          # requires --schema-name.  Use a dummy value.
+          python "${{ github.workspace }}/dbt-data-reliability/integration_tests/profiles/generate_profiles.py" \
+            --template "${{ github.workspace }}/dbt-data-reliability/integration_tests/profiles/profiles.yml.j2" \
+            --output ~/.dbt/profiles.yml \
+            --schema-name "cleanup_placeholder"
+
+      - name: Install dbt deps
+        working-directory: ${{ env.TESTS_DIR }}/dbt_project
+        run: dbt deps
+
+      - name: Symlink local elementary package
+        run: ln -sfn ${{ github.workspace }}/dbt-data-reliability ${{ env.TESTS_DIR }}/dbt_project/dbt_packages/elementary
+
+      - name: Drop stale CI schemas
+        working-directory: ${{ env.TESTS_DIR }}/dbt_project
+        run: >
+          dbt run-operation elementary.drop_stale_ci_schemas
+          --args '{prefixes: ["py_"], max_age_hours: ${{ inputs.max-age-hours || '24' }}}'
+          -t "${{ matrix.warehouse-type }}"
