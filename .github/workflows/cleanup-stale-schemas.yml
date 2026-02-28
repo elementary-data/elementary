@@ -2,8 +2,8 @@ name: Cleanup stale CI schemas
 
 on:
   schedule:
-    # Every Sunday at 03:00 UTC
-    - cron: "0 3 * * 0"
+    # Daily at 03:00 UTC
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       max-age-hours:
