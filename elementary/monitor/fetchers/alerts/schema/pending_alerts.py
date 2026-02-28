@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, Union
 
@@ -54,7 +54,7 @@ class PendingAlertSchema(BaseModel):
     def validate_times(cls, values: dict) -> dict:
         new_values = {**values}
 
-        current_datetime = datetime.utcnow()
+        current_datetime = datetime.now(tz=timezone.utc)
         if not values.get("detected_at"):
             new_values["detected_at"] = current_datetime
         if not values.get("created_at"):

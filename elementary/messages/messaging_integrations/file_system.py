@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -55,7 +55,7 @@ class FileSystemMessagingIntegration(
                     f"Channel directory {channel_dir} does not exist and create_if_missing is False"
                 )
 
-        filename = datetime.utcnow().strftime("%Y%m%dT%H%M%S_%fZ.json")
+        filename = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ.json")
         file_path = channel_dir / filename
 
         try:
@@ -71,7 +71,7 @@ class FileSystemMessagingIntegration(
             ) from exc
 
         return MessageSendResult(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(tz=timezone.utc),
             message_format="json",
             message_context=EmptyMessageContext(),
         )

@@ -1,8 +1,9 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from pydantic import BaseModel
 from typing_extensions import Literal
+
+from elementary.utils.pydantic_shim import BaseModel
 
 
 class Icon(Enum):
@@ -184,5 +185,4 @@ InExpandableBlock = Union[
     "ExpandableBlock",
 ]
 
-# Update forward references for recursive types
 ExpandableBlock.update_forward_refs()
