@@ -10,10 +10,10 @@ To add patterns for a new adapter, append a new entry to
 substrings that appear in the error output.  Matching is
 case-insensitive substring search so regex is not needed.
 
-The ``target`` argument accepted by :func:`is_transient_error` should be
-the dbt **adapter type** (e.g. ``"bigquery"``, ``"snowflake"``), as
-resolved from ``profiles.yml``.  When the value does not match any known
-adapter key (or is ``None``), **all** adapter patterns are checked
+The ``adapter_type`` argument accepted by :func:`is_transient_error`
+should be the dbt **adapter type** (e.g. ``"bigquery"``, ``"snowflake"``),
+as resolved from ``profiles.yml``.  When the value does not match any
+known adapter key (or is ``None``), **all** adapter patterns are checked
 defensively so that transient errors are never missed.
 """
 
@@ -102,15 +102,15 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
     ),
 }
 
-# Pre-computed union of all adapter-specific patterns for the unknown-target
-# fallback path.  Built once at import time to avoid repeated iteration.
+# Pre-computed union of all adapter-specific patterns for the fallback path
+# when adapter_type is unknown.  Built once at import time.
 _ALL_ADAPTER_PATTERNS: Tuple[str, ...] = tuple(
     pattern for patterns in _ADAPTER_PATTERNS.values() for pattern in patterns
 )
 
 
 def is_transient_error(
-    target: Optional[str],
+    adapter_type: Optional[str],
     output: Optional[str] = None,
     stderr: Optional[str] = None,
 ) -> bool:
@@ -118,7 +118,7 @@ def is_transient_error(
 
     Parameters
     ----------
-    target:
+    adapter_type:
         The dbt adapter type (e.g. ``"bigquery"``, ``"snowflake"``),
         typically resolved from ``profiles.yml`` by the runner.
         When the value matches a key in ``_ADAPTER_PATTERNS``, only that
@@ -134,16 +134,16 @@ def is_transient_error(
     if not haystack:
         return False
 
-    if isinstance(target, str):
-        adapter_patterns = _ADAPTER_PATTERNS.get(target.lower())
+    if isinstance(adapter_type, str):
+        adapter_patterns = _ADAPTER_PATTERNS.get(adapter_type.lower())
         if adapter_patterns is not None:
             # Known adapter — use common + adapter-specific patterns.
             patterns: Sequence[str] = (*_COMMON, *adapter_patterns)
         else:
-            # Unknown target key (e.g. profile target name). Check all adapters.
+            # Unknown adapter type. Check all adapters defensively.
             patterns = (*_COMMON, *_ALL_ADAPTER_PATTERNS)
     else:
-        # No target provided; still check all adapters defensively.
+        # No adapter type provided; check all adapters defensively.
         patterns = (*_COMMON, *_ALL_ADAPTER_PATTERNS)
 
     return any(pattern in haystack for pattern in patterns)
