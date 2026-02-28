@@ -192,7 +192,7 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         continue-on-error: true
         run: |
-          dbt test --target "${{ inputs.warehouse-type }}" --vars '{disable_dbt_artifacts_autoupload: true}'
+          dbt test --target "${{ inputs.warehouse-type }}"
 
       - name: Run help
         run: edr --help
