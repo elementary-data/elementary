@@ -283,4 +283,4 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         continue-on-error: true
         run: |
-          dbt run-operation elementary_tests.drop_test_schemas --target "${{ inputs.warehouse-type }}"
+          dbt run-operation elementary_integration_tests.drop_test_schemas --target "${{ inputs.warehouse-type }}"
