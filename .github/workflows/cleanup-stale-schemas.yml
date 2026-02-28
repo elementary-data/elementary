@@ -45,8 +45,8 @@ jobs:
       - name: Install dbt
         run: >
           pip install
-          "dbt-core>=1.8,<1.10"
-          "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}>=1.8,<1.10"
+          "dbt-core"
+          "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}"
 
       - name: Write dbt profiles
         env:
