@@ -19,7 +19,6 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
     def _inner_run_command(
         self,
         dbt_command_args: List[str],
-        capture_output: bool,
         quiet: bool,
         log_output: bool,
         log_format: str,
@@ -28,7 +27,7 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
             result = subprocess.run(
                 [self._get_dbt_command_name()] + dbt_command_args,
                 check=self.raise_on_failure,
-                capture_output=capture_output or quiet,
+                capture_output=True,
                 env=self._get_command_env(),
                 cwd=self.project_dir,
             )
@@ -43,7 +42,7 @@ class SubprocessDbtRunner(CommandLineDbtRunner):
                 if err.output
                 else []
             )
-            if capture_output and (log_output or is_debug()):
+            if log_output or is_debug():
                 for log in logs:
                     logger.info(log.msg)
             raise DbtCommandError(
