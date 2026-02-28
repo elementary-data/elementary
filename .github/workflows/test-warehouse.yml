@@ -277,3 +277,10 @@ jobs:
 
       - name: Run Python package e2e tests
         run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
+
+      - name: Drop test schemas
+        if: always()
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        continue-on-error: true
+        run: |
+          dbt run-operation elementary_integration_tests.drop_test_schemas --target "${{ inputs.warehouse-type }}"
