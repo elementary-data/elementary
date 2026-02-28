@@ -206,8 +206,8 @@ class TestNonTransientNotRetried:
 def _make_api_runner(**kwargs):
     """Create an APIDbtRunner with deps/packages stubbed out."""
     defaults = dict(
-        project_dir="/tmp/fake_project",
-        profiles_dir="/tmp/fake_profiles",
+        project_dir="fake_project",
+        profiles_dir="fake_profiles",
         target=None,
         raise_on_failure=False,
         run_deps_if_needed=False,
@@ -237,7 +237,7 @@ class TestAPIDbtRunnerTransientDetection:
         ),
     )
     @mock.patch("elementary.clients.dbt.api_dbt_runner.dbtRunner")
-    def test_transient_exception_triggers_retry(self, mock_dbt_runner_cls, mock_chdir):
+    def test_transient_exception_triggers_retry(self, mock_dbt_runner_cls, _mock_chdir):
         """A transient exception in res.exception should be retried."""
         # Simulate dbtRunnerResult with a transient exception.
         fail_result = mock.MagicMock()
@@ -269,7 +269,7 @@ class TestAPIDbtRunnerTransientDetection:
         ),
     )
     @mock.patch("elementary.clients.dbt.api_dbt_runner.dbtRunner")
-    def test_non_transient_exception_not_retried(self, mock_dbt_runner_cls, mock_chdir):
+    def test_non_transient_exception_not_retried(self, mock_dbt_runner_cls, _mock_chdir):
         """A non-transient exception should NOT be retried."""
         fail_result = mock.MagicMock()
         fail_result.success = False
@@ -293,7 +293,7 @@ class TestAPIDbtRunnerTransientDetection:
     )
     @mock.patch("elementary.clients.dbt.api_dbt_runner.dbtRunner")
     def test_transient_exception_exhausts_retries(
-        self, mock_dbt_runner_cls, mock_chdir
+        self, mock_dbt_runner_cls, _mock_chdir
     ):
         """After exhausting retries, the last failed result is returned."""
         fail_result = mock.MagicMock()
