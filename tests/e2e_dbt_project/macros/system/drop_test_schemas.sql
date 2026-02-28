@@ -25,7 +25,8 @@
 {% endmacro %}
 
 {% macro clickhouse__edr_drop_schema(schema_name) %}
-    {% do run_query("DROP DATABASE IF EXISTS " ~ schema_name) %}
+    {% set quoted_schema = adapter.quote(schema_name) %}
+    {% do run_query("DROP DATABASE IF EXISTS " ~ quoted_schema) %}
     {% do adapter.commit() %}
 {% endmacro %}
 
