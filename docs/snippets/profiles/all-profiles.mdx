@@ -177,4 +177,59 @@ elementary:
       # session_properties: [optional, sets Trino session properties used in the connection]
 ```
 
+```yml DuckDB
+## DUCKDB ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: duckdb
+      path: [path to your .duckdb file]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+```
+
+```yml Dremio
+## DREMIO ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: dremio
+      software_host: [hostname]
+      port: [port]
+      user: [username]
+      password: [password]
+      use_ssl: [true or false]
+      datalake: [datalake source name]
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+```
+
+```yml Spark
+## SPARK ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: spark
+      method: [thrift, http, or odbc]
+      host: [hostname]
+      port: [port]
+      user: [username]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+      # token: [optional, used with http method]
+```
+
 </CodeGroup>
