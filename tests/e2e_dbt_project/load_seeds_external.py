@@ -24,17 +24,15 @@ from __future__ import annotations
 
 import csv
 import glob
-import json
 import os
 import subprocess
 import sys
 import time
-from pathlib import Path
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _csv_has_data(path: str) -> bool:
     """Return True when the CSV has a header AND at least one data row."""
@@ -76,6 +74,7 @@ DREMIO_PASS = "dremio123"
 def _dremio_token() -> str:
     """Authenticate and return a Dremio REST API token."""
     import requests
+
     resp = requests.post(
         f"http://{DREMIO_HOST}:{DREMIO_PORT}/apiv2/login",
         json={"userName": DREMIO_USER, "password": DREMIO_PASS},
@@ -87,6 +86,7 @@ def _dremio_token() -> str:
 def _dremio_sql(token: str, sql: str, *, timeout: int = 120):
     """Execute a SQL statement on Dremio via the REST API and wait for it."""
     import requests
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"_dremio{token}",
@@ -122,6 +122,7 @@ def _dremio_sql(token: str, sql: str, *, timeout: int = 120):
 def _dremio_create_s3_source(token: str):
     """Create the 'SeedFiles' S3 source in Dremio pointing at MinIO."""
     import requests
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"_dremio{token}",
@@ -161,7 +162,9 @@ def _dremio_create_s3_source(token: str):
         json=source_payload,
     )
     if resp.status_code not in (200, 409):
-        print(f"  Warning: SeedFiles source creation returned {resp.status_code}: {resp.text}")
+        print(
+            f"  Warning: SeedFiles source creation returned {resp.status_code}: {resp.text}"
+        )
     else:
         print("  SeedFiles S3 source created/updated in Dremio")
 
@@ -179,15 +182,15 @@ def _upload_csvs_to_minio(data_dir: str):
     # Now use a temporary mc container on the same network to upload
     network = os.environ.get("DREMIO_NETWORK", "e2e_dbt_project_dremio-lakehouse")
     cmd = (
-        f'docker run --rm '
-        f'--network {network} '
-        f'--volumes-from dremio-storage '
-        f'minio/mc '
+        f"docker run --rm "
+        f"--network {network} "
+        f"--volumes-from dremio-storage "
+        f"minio/mc "
         f'sh -c "'
-        f'mc alias set myminio http://dremio-storage:9000 admin password && '
-        f'mc cp --recursive /tmp/seed-training/ myminio/datalake/seeds/training/ && '
-        f'mc cp --recursive /tmp/seed-validation/ myminio/datalake/seeds/validation/ && '
-        f'echo Upload complete'
+        f"mc alias set myminio http://dremio-storage:9000 admin password && "
+        f"mc cp --recursive /tmp/seed-training/ myminio/datalake/seeds/training/ && "
+        f"mc cp --recursive /tmp/seed-validation/ myminio/datalake/seeds/validation/ && "
+        f"echo Upload complete"
         f'"'
     )
     _run(cmd)
@@ -196,6 +199,7 @@ def _upload_csvs_to_minio(data_dir: str):
 def _dremio_refresh_source(token: str):
     """Trigger a metadata refresh on the SeedFiles source."""
     import requests
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"_dremio{token}",
@@ -221,6 +225,7 @@ def _dremio_refresh_source(token: str):
 def _promote_csv_dataset(token: str, path_parts: list[str]):
     """Promote a CSV file as a physical dataset in the SeedFiles source."""
     import requests
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"_dremio{token}",
@@ -228,21 +233,21 @@ def _promote_csv_dataset(token: str, path_parts: list[str]):
     # The catalog API path for the file
     full_path = ["SeedFiles"] + path_parts
     encoded_path = ".".join(f'"{p}"' for p in full_path)
-    
+
     # Try to get catalog entity first
     path_param = "/".join(full_path)
     resp = requests.get(
         f"http://{DREMIO_HOST}:{DREMIO_PORT}/api/v3/catalog/by-path/{path_param}",
         headers=headers,
     )
-    
+
     if resp.status_code == 200:
         entity = resp.json()
         entity_type = entity.get("entityType", "")
         if entity_type == "dataset":
             print(f"    Already promoted: {encoded_path}")
             return True
-        
+
         # It's a file, promote it
         entity_id = entity.get("id")
         if entity_id:
@@ -255,7 +260,7 @@ def _promote_csv_dataset(token: str, path_parts: list[str]):
                     "type": "Text",
                     "fieldDelimiter": ",",
                     "lineDelimiter": "\n",
-                    "quote": "\"",
+                    "quote": '"',
                     "comment": "#",
                     "extractHeader": True,
                     "trimHeader": True,
@@ -281,28 +286,28 @@ def _promote_csv_dataset(token: str, path_parts: list[str]):
 def load_dremio_seeds(data_dir: str, schema_name: str):
     """Load seeds into Dremio via MinIO external files."""
     print("\n=== Loading Dremio seeds via MinIO ===")
-    
+
     # Step 1: Upload CSVs to MinIO
     print("\nStep 1: Uploading CSVs to MinIO...")
     _upload_csvs_to_minio(data_dir)
-    
+
     # Step 2: Get auth token and create S3 source
     print("\nStep 2: Creating SeedFiles S3 source...")
     token = _dremio_token()
     _dremio_create_s3_source(token)
-    
+
     # Step 3: Refresh source metadata and wait
     print("\nStep 3: Refreshing source metadata...")
     _dremio_refresh_source(token)
     time.sleep(5)
-    
+
     # Step 4: Create Nessie namespace (folder) for seeds
     print(f"\nStep 4: Creating Nessie namespace '{schema_name}'...")
     try:
         _dremio_sql(token, f'CREATE SCHEMA IF NOT EXISTS NessieSource."{schema_name}"')
     except Exception as e:
         print(f"  Warning creating schema: {e}")
-    
+
     # Step 5: Promote CSV files and create Iceberg tables
     print("\nStep 5: Creating Iceberg tables from promoted CSVs...")
     for subdir in ["training", "validation"]:
@@ -311,7 +316,7 @@ def load_dremio_seeds(data_dir: str, schema_name: str):
         for csv_path in csv_files:
             fname = os.path.basename(csv_path)
             table_name = fname.replace(".csv", "")
-            
+
             if not _csv_has_data(csv_path):
                 # Empty CSV - create an empty table with just columns
                 cols = _csv_columns(csv_path)
@@ -329,20 +334,20 @@ def load_dremio_seeds(data_dir: str, schema_name: str):
                 except Exception as e:
                     print(f"    Error: {e}")
                 continue
-            
+
             # Promote the CSV file first
             path_parts = ["seeds", subdir, fname]
             promoted = _promote_csv_dataset(token, path_parts)
-            
+
             if not promoted:
                 print(f"  Skipping CTAS for {table_name} (promotion failed)")
                 continue
-            
+
             # Create Iceberg table via CTAS
             s3_ref = f'"SeedFiles"."seeds"."{subdir}"."{fname}"'
             sql = (
                 f'CREATE TABLE IF NOT EXISTS NessieSource."{schema_name}"."{table_name}" AS '
-                f'SELECT * FROM {s3_ref}'
+                f"SELECT * FROM {s3_ref}"
             )
             print(f"  CTAS: {table_name}")
             try:
@@ -355,6 +360,7 @@ def load_dremio_seeds(data_dir: str, schema_name: str):
 # Spark
 # ---------------------------------------------------------------------------
 
+
 def load_spark_seeds(data_dir: str, schema_name: str):
     """Load seeds into Spark from CSV files mounted in the container.
 
@@ -364,7 +370,9 @@ def load_spark_seeds(data_dir: str, schema_name: str):
     seeds, so the actual seed schema is ``test_seeds``.
     """
     seed_schema = "test_seeds"
-    print(f"\n=== Loading Spark seeds via external CSV tables (schema={seed_schema}) ===")
+    print(
+        f"\n=== Loading Spark seeds via external CSV tables (schema={seed_schema}) ==="
+    )
 
     from pyhive import hive
 
@@ -378,14 +386,14 @@ def load_spark_seeds(data_dir: str, schema_name: str):
     # Create the seed schema
     print(f"Creating schema '{seed_schema}'...")
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{seed_schema}`")
-    
+
     for subdir in ["training", "validation"]:
         csv_dir = os.path.join(data_dir, subdir)
         csv_files = sorted(glob.glob(os.path.join(csv_dir, "*.csv")))
         for csv_path in csv_files:
             fname = os.path.basename(csv_path)
             table_name = fname.replace(".csv", "")
-            
+
             if not _csv_has_data(csv_path):
                 cols = _csv_columns(csv_path)
                 if not cols:
@@ -400,10 +408,10 @@ def load_spark_seeds(data_dir: str, schema_name: str):
                 except Exception as e:
                     print(f"    Error: {e}")
                 continue
-            
+
             # Container path where the data dir is mounted
             container_path = f"/seed-data/{subdir}/{fname}"
-            
+
             # Create external CSV table, then convert to Delta for consistency
             tmp_view = f"_tmp_csv_{table_name}"
             print(f"  Loading: {table_name}")
@@ -422,7 +430,7 @@ def load_spark_seeds(data_dir: str, schema_name: str):
                 )
             except Exception as e:
                 print(f"    Error: {e}")
-    
+
     cursor.close()
     conn.close()
     print("\nSpark seed loading complete.")
@@ -432,19 +440,20 @@ def load_spark_seeds(data_dir: str, schema_name: str):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     if len(sys.argv) < 4:
         print(f"Usage: {sys.argv[0]} <adapter> <schema_name> <data_dir>")
         sys.exit(1)
-    
+
     adapter = sys.argv[1]
     schema_name = sys.argv[2]
     data_dir = sys.argv[3]
-    
+
     if not os.path.isdir(data_dir):
         print(f"Error: data directory '{data_dir}' not found")
         sys.exit(1)
-    
+
     if adapter == "dremio":
         load_dremio_seeds(data_dir, schema_name)
     elif adapter == "spark":
