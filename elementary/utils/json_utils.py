@@ -112,12 +112,17 @@ def _format_value(value: Any) -> str:
     return str(value)
 
 
-def list_of_dicts_to_markdown_table(data: List[Dict[str, Any]]) -> str:
+def list_of_dicts_to_markdown_table(
+    data: List[Dict[str, Any]], max_length: Optional[int] = None
+) -> str:
     """
     Convert a list of dictionaries with consistent keys to a markdown table string.
 
     Args:
         data: List of dictionaries
+        max_length: Optional maximum character length for the output. If the full
+            table exceeds this limit, rows are removed from the end and a
+            "(truncated)" note is appended to avoid cutting mid-row.
 
     Returns:
         A markdown-formatted table string using GitHub table format
@@ -126,6 +131,31 @@ def list_of_dicts_to_markdown_table(data: List[Dict[str, Any]]) -> str:
         return ""
 
     processed_data = [{k: _format_value(v) for k, v in row.items()} for row in data]
-    return tabulate(
+    full_table = tabulate(
         processed_data, headers="keys", tablefmt="github", disable_numparse=True
     )
+
+    if max_length is None or len(full_table) <= max_length:
+        return full_table
+
+    # Truncate by removing rows from the end until the table fits
+    truncation_note = "\n(truncated)"
+    effective_max = max_length - len(truncation_note)
+    for row_count in range(len(processed_data) - 1, 0, -1):
+        table = tabulate(
+            processed_data[:row_count],
+            headers="keys",
+            tablefmt="github",
+            disable_numparse=True,
+        )
+        if len(table) <= effective_max:
+            return table + truncation_note
+
+    # Even a single row doesn't fit — return what we can with a note
+    single_row_table = tabulate(
+        processed_data[:1],
+        headers="keys",
+        tablefmt="github",
+        disable_numparse=True,
+    )
+    return single_row_table + truncation_note

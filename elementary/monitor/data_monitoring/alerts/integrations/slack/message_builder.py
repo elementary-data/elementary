@@ -35,9 +35,22 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
         alert_schema: SlackAlertMessageSchema,
     ) -> SlackMessageSchema:
         if self.full_width:
-            # Empty rich_text block forces Slack to use full message width for following
-            # blocks instead of the narrower attachment-style layout.
-            self._add_always_displayed_blocks([{"type": "rich_text", "elements": []}])
+            # A rich_text block at the start forces Slack to use full message width
+            # for following blocks instead of the narrower attachment-style layout.
+            # The elements array must be non-empty per Slack Block Kit API.
+            self._add_always_displayed_blocks(
+                [
+                    {
+                        "type": "rich_text",
+                        "elements": [
+                            {
+                                "type": "rich_text_section",
+                                "elements": [{"type": "text", "text": " "}],
+                            }
+                        ],
+                    }
+                ]
+            )
         self.add_title_to_slack_alert(alert_schema.title)
         self.add_preview_to_slack_alert(alert_schema.preview)
         self.add_details_to_slack_alert(alert_schema.details)
@@ -55,10 +68,10 @@ class SlackAlertMessageBuilder(SlackMessageBuilder):
     ):
         if not preview_blocks:
             return
+        validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
         if self.full_width:
-            self._add_always_displayed_blocks(preview_blocks)
+            self._add_always_displayed_blocks(validated_preview_blocks)
         else:
-            validated_preview_blocks = self._validate_preview_blocks(preview_blocks)
             self._add_blocks_as_attachments(validated_preview_blocks)
 
     def add_details_to_slack_alert(
