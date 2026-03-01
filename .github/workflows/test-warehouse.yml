@@ -339,6 +339,14 @@ jobs:
           # Wait for services to be ready after restart
           case "${{ inputs.warehouse-type }}" in
             trino)
+              echo "Waiting for Hive Metastore to accept connections after restart..."
+              for i in $(seq 1 60); do
+                if nc -z 127.0.0.1 9083 2>/dev/null; then
+                  echo "Hive Metastore port is open."
+                  break
+                fi
+                echo "Waiting for Hive Metastore after restart... ($i/60)"; sleep 5
+              done
               echo "Waiting for Trino to be fully ready after restart..."
               for i in $(seq 1 60); do
                 if curl -sf http://localhost:8086/v1/info 2>/dev/null | grep -q '"starting":false'; then
@@ -346,6 +354,21 @@ jobs:
                   break
                 fi
                 echo "Waiting for Trino after restart... ($i/60)"; sleep 5
+              done
+              # Verify Trino can actually reach the Hive Metastore (catalog query)
+              echo "Verifying Trino-Hive Metastore connectivity..."
+              for i in $(seq 1 30); do
+                RESP=$(curl -s -X POST http://localhost:8086/v1/statement \
+                     -H "X-Trino-User: admin" \
+                     -d "SHOW SCHEMAS FROM iceberg" 2>/dev/null)
+                if echo "$RESP" | grep -q '"error"'; then
+                  echo "Trino-Hive Metastore not ready yet... ($i/30)"; sleep 5
+                elif echo "$RESP" | grep -q '"stats"'; then
+                  echo "Trino can reach Hive Metastore."
+                  break
+                else
+                  echo "Unexpected response, retrying... ($i/30)"; sleep 5
+                fi
               done
               ;;
             clickhouse)
