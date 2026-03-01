@@ -34,3 +34,20 @@
     {% set schema_relation = api.Relation.create(database=target.database, schema=schema_name) %}
     {% do dbt.drop_schema(schema_relation) %}
 {% endmacro %}
+
+{% macro trino__edr_drop_schema(schema_name) %}
+    {% set schema_relation = api.Relation.create(database=target.database, schema=schema_name) %}
+    {% do dbt.drop_schema(schema_relation) %}
+{% endmacro %}
+
+{% macro dremio__edr_drop_schema(schema_name) %}
+    {% do run_query("DROP SCHEMA IF EXISTS " ~ schema_name) %}
+{% endmacro %}
+
+{% macro duckdb__edr_drop_schema(schema_name) %}
+    {% do run_query("DROP SCHEMA IF EXISTS " ~ schema_name ~ " CASCADE") %}
+{% endmacro %}
+
+{% macro spark__edr_drop_schema(schema_name) %}
+    {% do run_query("DROP DATABASE IF EXISTS " ~ schema_name ~ " CASCADE") %}
+{% endmacro %}

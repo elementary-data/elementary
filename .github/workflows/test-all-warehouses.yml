@@ -96,6 +96,10 @@ jobs:
             databricks_catalog,
             athena,
             clickhouse,
+            duckdb,
+            trino,
+            dremio,
+            spark,
           ]
     uses: ./.github/workflows/test-warehouse.yml
     with:
