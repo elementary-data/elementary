@@ -144,7 +144,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Run Elementary
-        uses: elementary-data/run-elementary-action@v1.12
+        uses: elementary-data/run-elementary-action@devin/1772355616-fix-python-version
         with:
           warehouse-type: snowflake
           profile-target: snowflake
