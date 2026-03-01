@@ -61,6 +61,17 @@ jobs:
       - name: Bump version
         run: |
           sed -i 's/^version = "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version = "${{ inputs.cli-version }}"/' ./pyproject.toml
+      - name: Convert git hash reference to package version format (if needed)
+        run: |
+          PACKAGES_FILE="./elementary/monitor/dbt_project/packages.yml"
+          if grep -q 'git: https://github.com/elementary-data/dbt-data-reliability.git' "$PACKAGES_FILE"; then
+            echo "Found git hash reference in packages.yml, converting to package version format..."
+            # Replace the git+revision block with a package+version block using a placeholder version
+            sed -i '/- git: https:\/\/github.com\/elementary-data\/dbt-data-reliability.git/{N;s/- git: https:\/\/github.com\/elementary-data\/dbt-data-reliability.git\n    revision: [a-f0-9]*/- package: elementary-data\/elementary\n    version: 0.0.0/}' "$PACKAGES_FILE"
+            echo "Converted to package format with placeholder version."
+          else
+            echo "packages.yml already uses package version format."
+          fi
       - name: Bump version for package (using input)
         if: ${{ needs.validate-version.outputs.validated-dbt-package-version != ''}}
         run: |
