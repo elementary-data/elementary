@@ -5,6 +5,7 @@ import pytest
 from elementary.monitor.data_monitoring.alerts.integrations.slack.message_builder import (
     PreviewIsTooLongError,
     SlackAlertMessageBuilder,
+    SlackAlertMessageSchema,
 )
 
 
@@ -173,3 +174,57 @@ def test_add_details_to_slack_alert():
         },
         sort_keys=True,
     )
+
+
+def test_full_width_preview_goes_to_blocks_not_attachments():
+    """With full_width=True, preview blocks are validated and added to main blocks."""
+    message_builder = SlackAlertMessageBuilder(full_width=True)
+    block = message_builder.create_header_block("Preview header")
+    message_builder.add_preview_to_slack_alert([block])
+    assert len(message_builder.slack_message["blocks"]) == 5
+    assert message_builder.slack_message["blocks"][0] == block
+    assert message_builder.slack_message["attachments"][0]["blocks"] == []
+
+
+def test_full_width_details_go_to_blocks_not_attachments():
+    """With full_width=True, detail blocks are added to main blocks."""
+    message_builder = SlackAlertMessageBuilder(full_width=True)
+    block = message_builder.create_divider_block()
+    message_builder.add_details_to_slack_alert([block])
+    assert len(message_builder.slack_message["blocks"]) == 1
+    assert message_builder.slack_message["blocks"][0] == block
+    assert message_builder.slack_message["attachments"][0]["blocks"] == []
+
+
+def test_full_width_get_slack_message_structure():
+    """With full_width=True, get_slack_message adds rich_text first, title/preview/details in blocks, and clears attachments."""
+    message_builder = SlackAlertMessageBuilder(full_width=True)
+    title = message_builder.create_header_block("Alert title")
+    preview_block = message_builder.create_text_section_block("Preview text")
+    detail_block = message_builder.create_divider_block()
+    schema = SlackAlertMessageSchema(
+        title=[title],
+        preview=[preview_block],
+        details=[detail_block],
+    )
+    result = message_builder.get_slack_message(alert_schema=schema)
+
+    blocks = result.blocks
+    valid_rich_text_block = {
+        "type": "rich_text",
+        "elements": [
+            {
+                "type": "rich_text_section",
+                "elements": [{"type": "text", "text": " "}],
+            }
+        ],
+    }
+    assert blocks[0] == valid_rich_text_block
+    assert blocks[1] == title
+    assert blocks[2]["type"] == "divider"
+    assert blocks[3] == preview_block
+    # Blocks 4-7 are padding from preview validation
+    assert blocks[8] == detail_block
+    assert len(blocks) == 9
+
+    assert result.attachments == []

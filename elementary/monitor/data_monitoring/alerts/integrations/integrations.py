@@ -43,7 +43,7 @@ class Integrations:
         tracking: Optional[Tracking] = None,
     ) -> Union[BaseMessagingIntegration, BaseIntegration]:
         if config.has_slack:
-            if config.is_slack_workflow:
+            if config.is_slack_workflow or config.slack_full_width:
                 return SlackIntegration(
                     config=config,
                     tracking=tracking,

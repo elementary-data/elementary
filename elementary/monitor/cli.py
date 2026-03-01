@@ -298,6 +298,12 @@ def get_cli_properties() -> dict:
     default=4,
     help="Maximum number of columns to display as a table in alert samples. Above this, the output is shown as raw JSON.",
 )
+@click.option(
+    "--slack-full-width",
+    is_flag=True,
+    default=False,
+    help="When set, Slack alerts use rich text to achieve full message width instead of the default narrower layout with attachments.",
+)
 @click.pass_context
 def monitor(
     ctx,
@@ -331,6 +337,7 @@ def monitor(
     teams_webhook,
     maximum_columns_in_alert_samples,
     quiet_logs,
+    slack_full_width,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -365,6 +372,7 @@ def monitor(
         teams_webhook=teams_webhook,
         maximum_columns_in_alert_samples=maximum_columns_in_alert_samples,
         quiet_logs=quiet_logs,
+        slack_full_width=slack_full_width,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
