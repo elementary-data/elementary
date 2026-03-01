@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from elementary.config.config import Config
@@ -10,7 +10,7 @@ from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
 from elementary.utils.time import DATETIME_FORMAT
 from tests.mocks.dbt_runner_mock import MockDbtRunner
 
-CURRENT_DATETIME_UTC = datetime.utcnow()
+CURRENT_DATETIME_UTC = datetime.now(tz=timezone.utc)
 CURRENT_TIMESTAMP_UTC = CURRENT_DATETIME_UTC.strftime(DATETIME_FORMAT)
 
 PENDDING_TEST_ALERTS_MOCK_DATA = [

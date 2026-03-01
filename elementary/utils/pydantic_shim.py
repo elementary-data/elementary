@@ -11,8 +11,10 @@ pydantic_major = pydantic_version.split(".")[0]
 if pydantic_major == "1":
     from pydantic import (  # type: ignore  # noqa
         BaseModel,
+        EmailStr,
         Extra,
         Field,
+        ValidationError,
         create_model,
         root_validator,
         validator,
@@ -20,8 +22,10 @@ if pydantic_major == "1":
 elif pydantic_major == "2":
     from pydantic.v1 import (  # type: ignore  # noqa
         BaseModel,
+        EmailStr,
         Extra,
         Field,
+        ValidationError,
         create_model,
         root_validator,
         validator,

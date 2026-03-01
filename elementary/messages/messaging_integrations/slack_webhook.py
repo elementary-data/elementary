@@ -1,5 +1,5 @@
 import ssl
-from datetime import datetime
+from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Any, Optional
 
@@ -69,7 +69,7 @@ class SlackWebhookMessagingIntegration(
         self._send_message(formatted_message)
         return MessageSendResult(
             message_context=EmptyMessageContext(),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(tz=timezone.utc),
             message_format="block_kit",
         )
 

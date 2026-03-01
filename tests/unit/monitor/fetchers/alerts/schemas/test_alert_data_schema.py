@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -9,7 +9,7 @@ from elementary.monitor.fetchers.alerts.schema.alert_data import (
 )
 from elementary.utils.time import DATETIME_FORMAT
 
-CURRENT_DATETIME_UTC = datetime.utcnow()
+CURRENT_DATETIME_UTC = datetime.now(tz=timezone.utc)
 CURRENT_TIMESTAMP_UTC = CURRENT_DATETIME_UTC.strftime(DATETIME_FORMAT)
 
 BASE_ALERT = dict(

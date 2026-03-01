@@ -27,7 +27,6 @@ class APIDbtRunner(CommandLineDbtRunner):
     def _inner_run_command(
         self,
         dbt_command_args: List[str],
-        capture_output: bool,
         quiet: bool,
         log_output: bool,
         log_format: str,
@@ -50,15 +49,24 @@ class APIDbtRunner(CommandLineDbtRunner):
             with with_chdir(self.project_dir):
                 res: dbtRunnerResult = dbt.invoke(dbt_command_args)
         output = "\n".join(dbt_logs) or None
+        # Surface the exception text so that transient-error detection in
+        # _inner_run_command_with_retries can match against it.  The dbt
+        # Python API doesn't write to stderr, so we repurpose that field
+        # for the exception string (analogous to how SubprocessDbtRunner
+        # captures subprocess stderr).
+        exception_text = str(res.exception) if res.exception else None
         if self.raise_on_failure and not res.success:
             raise DbtCommandError(
                 base_command_args=dbt_command_args,
-                err_msg=(str(res.exception) if res.exception else output),
+                err_msg=(exception_text or output),
                 logs=[DbtLog.from_log_line(log) for log in dbt_logs],
             )
 
         return APIDbtCommandResult(
-            success=res.success, output=output, stderr=None, result_obj=res
+            success=res.success,
+            output=output,
+            stderr=exception_text,
+            result_obj=res,
         )
 
     def _parse_ls_command_result(

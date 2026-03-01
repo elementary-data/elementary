@@ -16,9 +16,16 @@ on:
         type: string
         required: false
         description: dbt's version to test with
+      generate-data:
+        type: boolean
+        required: false
+        default: false
+        description: Whether to generate new data
 
 env:
-  DBT_PKG_INTEG_TESTS_DIR: ${{ github.workspace }}/dbt-data-reliability/integration_tests/deprecated_tests
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
+  E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
 
 jobs:
   test:
@@ -26,6 +33,9 @@ jobs:
     defaults:
       run:
         working-directory: elementary
+    concurrency:
+      group: test_action_snowflake_dbt_${{ inputs.dbt-version }}_${{ github.head_ref || github.ref_name }}
+      cancel-in-progress: true
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v4
@@ -40,28 +50,38 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
-      - name: Write dbt profiles
-        id: profiles
-        env:
-          PROFILES_YML: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
-        run: |
-          mkdir -p ~/.dbt
-          echo "$PROFILES_YML" > ~/.dbt/profiles.yml
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Install dbt
-        run: pip install --pre
+        run: >
+          pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          "dbt-snowflake${{ inputs.dbt-version && format('<={0}', inputs.dbt-version) }}"
+          "dbt-snowflake${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
           pip install -r dev-requirements.txt
           pip install ".[snowflake]"
+
+      - name: Write dbt profiles
+        env:
+          CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
+        run: |
+          CONCURRENCY_GROUP="test_action_snowflake_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
+          SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
+          SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 19)
+          DATE_STAMP=$(date -u +%y%m%d_%H%M%S)
+          SCHEMA_NAME="ga_${DATE_STAMP}_${SAFE_BRANCH}_${SHORT_HASH}"
+
+          echo "Schema name: $SCHEMA_NAME (branch='${BRANCH_NAME}', timestamp=${DATE_STAMP}, hash of concurrency group)"
+
+          python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
+            --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
+            --output ~/.dbt/profiles.yml \
+            --schema-name "$SCHEMA_NAME"
 
       - name: Install dbt package
         run: |
@@ -72,21 +92,70 @@ jobs:
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
 
-      - name: Run dbt package integration tests
-        working-directory: ${{ env.DBT_PKG_INTEG_TESTS_DIR }}
+      - name: Run deps for E2E dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        env:
+          ELEMENTARY_DBT_PACKAGE_PATH: ${{ env.ELEMENTARY_DBT_PACKAGE_PATH }}
         run: |
           dbt deps
-          python run_e2e_tests.py -t "snowflake" --clear-tests "True" -e "regular"
+
+      - name: Seed e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        if: inputs.generate-data
+        run: |
+          python generate_data.py
+          dbt seed -f --target snowflake
+
+      - name: Run e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          dbt run --target snowflake || true
+
+          # Validate run_results.json: only error_model should be non-success
+          if jq -e '
+            [.results[] | select(.status != "success") | .unique_id]
+            | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
+          ' target/run_results.json > /dev/null; then
+            echo "Validation passed: only error_model failed."
+          else
+            echo "Validation failed. Unexpected failures:"
+            jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
+            exit 1
+          fi
+
+      - name: Test e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        continue-on-error: true
+        run: |
+          dbt test --target snowflake
+
+      - name: Read generated profiles
+        id: profiles
+        run: |
+          # Mask credentials so they don't appear in logs
+          while IFS= read -r line; do
+            echo "::add-mask::$line"
+          done < ~/.dbt/profiles.yml
+          {
+            echo "profiles_yml<<EOFPROFILES"
+            cat ~/.dbt/profiles.yml
+            echo "EOFPROFILES"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Run Elementary
-        uses: elementary-data/run-elementary-action@v1.8
+        uses: elementary-data/run-elementary-action@v1.13
         with:
           warehouse-type: snowflake
-          profiles-yml: ${{ secrets.TEST_GITHUB_ACTION_PROFILES_YML }}
-          edr-command:
-            edr monitor -t "snowflake" --slack-token "${{ secrets.CI_SLACK_TOKEN }}" --slack-channel-name data-ops
+          profile-target: snowflake
+          profiles-yml: ${{ steps.profiles.outputs.profiles_yml }}
+          edr-command: >
+            edr monitor
+            -t snowflake
+            --slack-token "${{ secrets.CI_SLACK_TOKEN }}"
+            --slack-channel-name data-ops
             &&
-            edr report
+            edr monitor report
+            -t snowflake
             --file-path "report.html"
 
       - name: Upload report
@@ -102,17 +171,9 @@ jobs:
           name: edr.log
           path: edr_target/edr.log
 
-  notify_failures:
-    name: Notify Slack
-    needs: test
-    if: |
-      always() &&
-      ! cancelled() &&
-      ! contains(needs.test.result, 'success') &&
-      ! contains(needs.test.result, 'cancelled') &&
-      ${{ github.event_name == 'schedule' }}
-    uses: ./.github/workflows/notify_slack.yml
-    with:
-      result: "failure"
-      run_id: ${{ github.run_id }}
-      workflow_name: "Test Elementary GitHub action"
+      - name: Drop test schemas
+        if: always()
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        continue-on-error: true
+        run: |
+          dbt run-operation elementary_integration_tests.drop_test_schemas --target snowflake

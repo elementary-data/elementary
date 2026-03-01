@@ -9,7 +9,27 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  validate-packages-yml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Elementary
+        uses: actions/checkout@v4
+
+      - name: Validate dbt-data-reliability is not a git hash reference
+        run: |
+          PACKAGES_FILE="./elementary/monitor/dbt_project/packages.yml"
+          if grep -q 'git: https://github.com/elementary-data/dbt-data-reliability.git' "$PACKAGES_FILE"; then
+            echo "::error::packages.yml contains a git hash reference for dbt-data-reliability. Releases must use a proper package version (e.g. 'package: elementary-data/elementary' with a 'version:' field). Please update packages.yml before releasing."
+            exit 1
+          fi
+          if ! grep -q 'package: elementary-data/elementary' "$PACKAGES_FILE"; then
+            echo "::error::packages.yml does not contain a proper package reference for elementary-data/elementary. Please update packages.yml before releasing."
+            exit 1
+          fi
+          echo "packages.yml validation passed - using proper package version reference."
+
   publish-to-pypi:
+    needs: validate-packages-yml
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Elementary
@@ -39,6 +59,7 @@ jobs:
           password: ${{ secrets.PYPI_PASS }}
 
   build-and-push-docker-image:
+    needs: validate-packages-yml
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -77,6 +98,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   merge-to-docs:
+    needs: validate-packages-yml
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
