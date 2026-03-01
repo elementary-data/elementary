@@ -303,9 +303,7 @@ jobs:
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: |
-          steps.seed-cache.outputs.cache-hit != 'true' &&
-          (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb' || inputs.generate-data)
+        if: steps.seed-cache.outputs.cache-hit != 'true'
         run: |
           python generate_data.py
           # Dremio needs single-threaded seeding to avoid Nessie catalog race conditions
