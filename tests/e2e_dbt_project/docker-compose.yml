@@ -29,5 +29,202 @@ services:
         soft: 262144
         hard: 262144
 
+  # ── Trino (with Iceberg + Hive Metastore + MinIO) ──────────────────
+  trino:
+    image: "trinodb/trino:439"
+    ports:
+      - "8086:8080"
+    volumes:
+      - ./docker/trino/etc:/usr/lib/trino/etc:ro
+      - ./docker/trino/catalog:/etc/trino/catalog
+
+  trino-metastore-db:
+    image: postgres:11
+    hostname: metastore_db
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
+
+  hive-metastore:
+    hostname: hive-metastore
+    image: "starburstdata/hive:3.1.2-e.18"
+    ports:
+      - "9083:9083"
+    environment:
+      HIVE_METASTORE_DRIVER: org.postgresql.Driver
+      HIVE_METASTORE_JDBC_URL: jdbc:postgresql://metastore_db:5432/metastore
+      HIVE_METASTORE_USER: hive
+      HIVE_METASTORE_PASSWORD: hive
+      HIVE_METASTORE_WAREHOUSE_DIR: s3://datalake/
+      S3_ENDPOINT: http://trino-minio:9000
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio123
+      S3_PATH_STYLE_ACCESS: "true"
+      REGION: ""
+      GOOGLE_CLOUD_KEY_FILE_PATH: ""
+      AZURE_ADL_CLIENT_ID: ""
+      AZURE_ADL_CREDENTIAL: ""
+      AZURE_ADL_REFRESH_URL: ""
+      AZURE_ABFS_STORAGE_ACCOUNT: ""
+      AZURE_ABFS_ACCESS_KEY: ""
+      AZURE_WASB_STORAGE_ACCOUNT: ""
+      AZURE_ABFS_OAUTH: ""
+      AZURE_ABFS_OAUTH_TOKEN_PROVIDER: ""
+      AZURE_ABFS_OAUTH_CLIENT_ID: ""
+      AZURE_ABFS_OAUTH_SECRET: ""
+      AZURE_ABFS_OAUTH_ENDPOINT: ""
+      AZURE_WASB_ACCESS_KEY: ""
+      HIVE_METASTORE_USERS_IN_ADMIN_ROLE: "admin"
+    depends_on:
+      - trino-metastore-db
+
+  trino-minio:
+    hostname: minio
+    image: "minio/minio:RELEASE.2022-05-26T05-48-41Z"
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server /data --console-address ":9001"
+
+  trino-mc-job:
+    image: "minio/mc:RELEASE.2022-05-09T04-08-26Z"
+    entrypoint: |
+      /bin/bash -c "
+      sleep 5;
+      /usr/bin/mc config --quiet host add myminio http://minio:9000 minio minio123;
+      /usr/bin/mc mb --quiet myminio/datalake
+      "
+    depends_on:
+      - trino-minio
+
+  # ── Dremio (with Nessie + MinIO) ───────────────────────────────────
+  nessie:
+    image: projectnessie/nessie:latest
+    container_name: catalog
+    networks:
+      - dremio-lakehouse
+    ports:
+      - "19120:19120"
+
+  dremio-minio:
+    image: minio/minio:latest
+    container_name: dremio-storage
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_DOMAIN=storage
+      - MINIO_REGION_NAME=us-east-1
+      - MINIO_REGION=us-east-1
+    networks:
+      - dremio-lakehouse
+    ports:
+      - "9004:9000"
+      - "9005:9001"
+    command: ["server", "/data", "--console-address", ":9001"]
+    volumes:
+      - dremio-minio-data:/data
+
+  dremio-minio-setup:
+    image: minio/mc
+    container_name: dremio-minio-setup
+    depends_on:
+      - dremio-minio
+    entrypoint: >
+      /bin/sh -c "
+      until (echo > /dev/tcp/dremio-storage/9000) >/dev/null 2>&1; do
+        echo 'Waiting for MinIO...';
+        sleep 2;
+      done;
+      mc alias set myminio http://dremio-storage:9000 admin password;
+      mc mb myminio/datalake;
+      mc ls myminio;
+      "
+    networks:
+      - dremio-lakehouse
+
+  dremio:
+    image: dremio/dremio-oss:latest
+    platform: linux/amd64
+    ports:
+      - "9047:9047"
+      - "31010:31010"
+      - "32010:32010"
+      - "45678:45678"
+    container_name: dremio
+    environment:
+      - DREMIO_JAVA_SERVER_EXTRA_OPTS=-Dpaths.dist=file:///opt/dremio/data/dist -Ddebug.addDefaultUser=true
+      - SERVICES_COORDINATOR_ENABLED=true
+      - SERVICES_EXECUTOR_ENABLED=true
+    networks:
+      - dremio-lakehouse
+    volumes:
+      - dremio-data:/opt/dremio/data:rw
+    user: "0"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9047 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+
+  dremio-setup:
+    image: alpine:latest
+    container_name: dremio-setup
+    depends_on:
+      dremio:
+        condition: service_healthy
+    volumes:
+      - ./docker/dremio/dremio-setup.sh:/dremio-setup.sh
+    command: sh /dremio-setup.sh
+    networks:
+      - dremio-lakehouse
+
+  # ── Spark Thrift Server (with Delta Lake + Hive Metastore) ─────────
+  spark-thrift:
+    container_name: spark-thrift
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
+    ports:
+      - "10000:10000"
+      - "4040:4040"
+    depends_on:
+      - spark-hive-metastore
+    command: >
+      --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
+      --name Thrift JDBC/ODBC Server
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 10000"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - spark-warehouse:/spark-warehouse/
+      - ./docker/spark/hive-site.xml:/usr/spark/conf/hive-site.xml
+      - ./docker/spark/spark-defaults.conf:/usr/spark/conf/spark-defaults.conf
+    environment:
+      - WAIT_FOR=spark-hive-metastore:5432
+
+  spark-hive-metastore:
+    image: postgres:15-alpine
+    volumes:
+      - spark-hive-metastore:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=dbt
+      - POSTGRES_PASSWORD=dbt
+      - POSTGRES_DB=metastore
+
+networks:
+  dremio-lakehouse:
+
 volumes:
   postgres:
+  dremio-data:
+  dremio-minio-data:
+  spark-warehouse:
+  spark-hive-metastore:
