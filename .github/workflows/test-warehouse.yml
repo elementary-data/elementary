@@ -15,6 +15,9 @@ on:
           - spark
           - athena
           - clickhouse
+          - duckdb
+          - trino
+          - dremio
       elementary-ref:
         type: string
         required: false
@@ -93,6 +96,54 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: docker compose up -d clickhouse
 
+      - name: Start Trino
+        if: inputs.warehouse-type == 'trino'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          docker compose up -d trino-minio trino-metastore-db
+          sleep 5
+          docker compose up -d hive-metastore trino-mc-job
+          sleep 10
+          docker compose up -d trino
+          # Wait for Trino to be ready
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8086/v1/info && break
+            echo "Waiting for Trino... ($i/60)"
+            sleep 5
+          done
+
+      - name: Start Dremio
+        if: inputs.warehouse-type == 'dremio'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          docker compose up -d nessie dremio-minio
+          sleep 5
+          docker compose up -d dremio-minio-setup
+          docker compose up -d dremio
+          # Wait for Dremio healthcheck
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:9047 && break
+            echo "Waiting for Dremio... ($i/60)"
+            sleep 5
+          done
+          docker compose up -d dremio-setup
+          # Wait for setup to complete
+          sleep 15
+
+      - name: Start Spark
+        if: inputs.warehouse-type == 'spark'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          docker compose up -d spark-hive-metastore
+          sleep 5
+          docker compose up -d --build spark-thrift
+          # Wait for Spark Thrift Server to be ready
+          for i in $(seq 1 60); do
+            nc -z 127.0.0.1 10000 && break
+            echo "Waiting for Spark Thrift Server... ($i/60)"
+            sleep 5
+          done
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -100,13 +151,13 @@ jobs:
 
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
-        run: sudo apt-get install python-dev libsasl2-dev gcc
+        run: sudo apt-get install -y python3-dev libsasl2-dev gcc
 
       - name: Install dbt
         run: >
           pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || (inputs.warehouse-type == 'athena' && 'athena-community') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
+          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || (inputs.warehouse-type == 'athena' && 'athena-community') || (inputs.warehouse-type == 'dremio' && 'dremio') || inputs.warehouse-type }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
@@ -162,7 +213,7 @@ jobs:
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.generate-data
+        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb' || inputs.generate-data
         run: |
           python generate_data.py
           dbt seed -f --target "${{ inputs.warehouse-type }}"
