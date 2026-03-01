@@ -41,7 +41,8 @@
 {% endmacro %}
 
 {% macro dremio__edr_drop_schema(schema_name) %}
-    {% do run_query("DROP SCHEMA IF EXISTS " ~ schema_name) %}
+    {# Dremio does not support DROP SCHEMA; Docker container cleanup handles this in CI #}
+    {% do log("Skipping schema drop for Dremio (not supported); Docker cleanup handles this.", info=true) %}
 {% endmacro %}
 
 {% macro duckdb__edr_drop_schema(schema_name) %}

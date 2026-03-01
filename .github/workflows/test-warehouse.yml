@@ -308,10 +308,15 @@ jobs:
           (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb' || inputs.generate-data)
         run: |
           python generate_data.py
-          dbt seed -f --target "${{ inputs.warehouse-type }}"
+          # Dremio needs single-threaded seeding to avoid Nessie catalog race conditions
+          SEED_EXTRA_ARGS=""
+          if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
+            SEED_EXTRA_ARGS="--threads 1"
+          fi
+          dbt seed -f --target "${{ inputs.warehouse-type }}" $SEED_EXTRA_ARGS
 
       - name: Save seed cache from Docker volumes
-        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
@@ -338,39 +343,6 @@ jobs:
 
           # Wait for services to be ready after restart
           case "${{ inputs.warehouse-type }}" in
-            trino)
-              echo "Waiting for Hive Metastore to accept connections after restart..."
-              for i in $(seq 1 60); do
-                if nc -z 127.0.0.1 9083 2>/dev/null; then
-                  echo "Hive Metastore port is open."
-                  break
-                fi
-                echo "Waiting for Hive Metastore after restart... ($i/60)"; sleep 5
-              done
-              echo "Waiting for Trino to be fully ready after restart..."
-              for i in $(seq 1 60); do
-                if curl -sf http://localhost:8086/v1/info 2>/dev/null | grep -q '"starting":false'; then
-                  echo "Trino is ready."
-                  break
-                fi
-                echo "Waiting for Trino after restart... ($i/60)"; sleep 5
-              done
-              # Verify Trino can actually reach the Hive Metastore (catalog query)
-              echo "Verifying Trino-Hive Metastore connectivity..."
-              for i in $(seq 1 30); do
-                RESP=$(curl -s -X POST http://localhost:8086/v1/statement \
-                     -H "X-Trino-User: admin" \
-                     -d "SHOW SCHEMAS FROM iceberg" 2>/dev/null)
-                if echo "$RESP" | grep -q '"error"'; then
-                  echo "Trino-Hive Metastore not ready yet... ($i/30)"; sleep 5
-                elif echo "$RESP" | grep -q '"stats"'; then
-                  echo "Trino can reach Hive Metastore."
-                  break
-                else
-                  echo "Unexpected response, retrying... ($i/30)"; sleep 5
-                fi
-              done
-              ;;
             clickhouse)
               for i in $(seq 1 30); do
                 curl -sf http://localhost:8123/ping > /dev/null && break
