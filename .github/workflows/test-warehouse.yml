@@ -86,6 +86,57 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
+      # ── Seed cache: compute key & restore volumes BEFORE starting services ──
+      # This ensures Docker volumes are populated before containers initialize.
+      - name: Compute seed cache key
+        id: seed-cache-key
+        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          # Cache key is a hash of seed-related files so that cache busts when
+          # the data generation script, dbt project config, or seed schemas change.
+          SEED_HASH=$(
+            cat generate_data.py \
+                dbt_project.yml \
+                ${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2 \
+            | sha256sum | head -c 16
+          )
+          echo "seed-hash=$SEED_HASH" >> "$GITHUB_OUTPUT"
+
+      - name: Restore seed cache
+        id: seed-cache
+        if: steps.seed-cache-key.outputs.seed-hash
+        uses: actions/cache@v4
+        with:
+          path: /tmp/seed-cache-${{ inputs.warehouse-type }}
+          key: seed-${{ inputs.warehouse-type }}-${{ steps.seed-cache-key.outputs.seed-hash }}
+
+      - name: Restore cached seed data into Docker volumes
+        if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type != 'duckdb'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          echo "Restoring seed cache for ${{ inputs.warehouse-type }}..."
+          CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
+
+          # Restore each Docker volume from the cached tarballs.
+          # This runs BEFORE services start so containers initialise with cached data.
+          for archive in "$CACHE_DIR"/*.tar.gz; do
+            [ -f "$archive" ] || continue
+            VOLUME_NAME=$(basename "$archive" .tar.gz)
+            echo "Restoring volume $VOLUME_NAME from $archive..."
+            docker volume create "$VOLUME_NAME" 2>/dev/null || true
+            docker run --rm -v "$VOLUME_NAME:/data" -v "$CACHE_DIR:/cache:ro" \
+              alpine sh -c "cd /data && tar xzf /cache/${VOLUME_NAME}.tar.gz"
+          done
+          echo "Seed cache restored."
+
+      - name: Restore cached DuckDB seed
+        if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type == 'duckdb'
+        run: |
+          cp /tmp/seed-cache-duckdb/elementary_test.duckdb /tmp/elementary_test.duckdb
+          echo "DuckDB seed cache restored."
+
+      # ── Start warehouse services ──────────────────────────────────────────
       - name: Start Postgres
         if: inputs.warehouse-type == 'postgres'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
@@ -222,53 +273,6 @@ jobs:
           ELEMENTARY_DBT_PACKAGE_PATH: ${{ env.ELEMENTARY_DBT_PACKAGE_PATH }}
         run: |
           dbt deps
-
-      - name: Compute seed cache key
-        id: seed-cache-key
-        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb'
-        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: |
-          # Cache key is a hash of seed-related files so that cache busts when
-          # the data generation script, dbt project config, or seed schemas change.
-          SEED_HASH=$(
-            cat generate_data.py \
-                dbt_project.yml \
-                ${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2 \
-            | sha256sum | head -c 16
-          )
-          echo "seed-hash=$SEED_HASH" >> "$GITHUB_OUTPUT"
-
-      - name: Restore seed cache
-        id: seed-cache
-        if: steps.seed-cache-key.outputs.seed-hash
-        uses: actions/cache@v4
-        with:
-          path: /tmp/seed-cache-${{ inputs.warehouse-type }}
-          key: seed-${{ inputs.warehouse-type }}-${{ steps.seed-cache-key.outputs.seed-hash }}
-
-      - name: Restore cached seed data into Docker volumes
-        if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type != 'duckdb'
-        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: |
-          echo "Restoring seed cache for ${{ inputs.warehouse-type }}..."
-          CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
-
-          # Restore each Docker volume from the cached tarballs
-          for archive in "$CACHE_DIR"/*.tar.gz; do
-            [ -f "$archive" ] || continue
-            VOLUME_NAME=$(basename "$archive" .tar.gz)
-            echo "Restoring volume $VOLUME_NAME from $archive..."
-            docker volume create "$VOLUME_NAME" 2>/dev/null || true
-            docker run --rm -v "$VOLUME_NAME:/data" -v "$CACHE_DIR:/cache:ro" \
-              alpine sh -c "cd /data && tar xzf /cache/${VOLUME_NAME}.tar.gz"
-          done
-          echo "Seed cache restored."
-
-      - name: Restore cached DuckDB seed
-        if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type == 'duckdb'
-        run: |
-          cp /tmp/seed-cache-duckdb/elementary_test.duckdb /tmp/elementary_test.duckdb
-          echo "DuckDB seed cache restored."
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
