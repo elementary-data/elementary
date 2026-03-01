@@ -177,18 +177,3 @@ jobs:
         continue-on-error: true
         run: |
           dbt run-operation elementary_integration_tests.drop_test_schemas --target snowflake
-
-  notify_failures:
-    name: Notify Slack
-    needs: test
-    if: |
-      always() &&
-      ! cancelled() &&
-      ! contains(needs.test.result, 'success') &&
-      ! contains(needs.test.result, 'cancelled') &&
-      ${{ github.event_name == 'schedule' }}
-    uses: ./.github/workflows/notify_slack.yml
-    with:
-      result: "failure"
-      run_id: ${{ github.run_id }}
-      workflow_name: "Test Elementary GitHub action"
