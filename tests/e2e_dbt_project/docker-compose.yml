@@ -207,6 +207,7 @@ services:
       - spark-warehouse:/spark-warehouse/
       - ./docker/spark/hive-site.xml:/usr/spark/conf/hive-site.xml
       - ./docker/spark/spark-defaults.conf:/usr/spark/conf/spark-defaults.conf
+      - ./data:/seed-data:ro
     environment:
       - WAIT_FOR=spark-hive-metastore:5432
 

@@ -301,17 +301,20 @@ jobs:
         run: |
           dbt deps
 
-      - name: Seed e2e dbt project
+      - name: Generate seed data
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: steps.seed-cache.outputs.cache-hit != 'true'
-        run: |
-          python generate_data.py
-          # Dremio needs single-threaded seeding to avoid Nessie catalog race conditions
-          SEED_EXTRA_ARGS=""
-          if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
-            SEED_EXTRA_ARGS="--threads 1"
-          fi
-          dbt seed -f --target "${{ inputs.warehouse-type }}" $SEED_EXTRA_ARGS
+        run: python generate_data.py
+
+      - name: Seed e2e dbt project (external)
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
+        run: python load_seeds_external.py "${{ inputs.warehouse-type }}" "$SCHEMA_NAME" data
+
+      - name: Seed e2e dbt project
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'dremio' && inputs.warehouse-type != 'spark'
+        run: dbt seed -f --target "${{ inputs.warehouse-type }}"
 
       - name: Save seed cache from Docker volumes
         if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
