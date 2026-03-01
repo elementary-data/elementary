@@ -40,9 +40,9 @@ elementary_tests:
       user: dremio
       password: dremio123
       use_ssl: false
-      datalake: S3Source
-      root_path: datalake.elementary_ci.{{ schema_name }}
-      database: elementary_ci
+      datalake: NessieSource
+      root_path: NessieSource.{{ schema_name }}
+      database: NessieSource
       schema: {{ schema_name }}
       threads: 4
 

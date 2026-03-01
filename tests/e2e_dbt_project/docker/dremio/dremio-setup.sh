@@ -24,10 +24,10 @@ fi
 
 echo "Obtained Dremio auth token"
 
-# Create the S3 source in Dremio
-curl -s -X PUT "http://dremio:9047/apiv2/source/S3Source" \
+# Create a Nessie catalog source in Dremio (supports CREATE TABLE for dbt seed)
+curl -s -X PUT "http://dremio:9047/apiv2/source/NessieSource" \
   -H "Content-Type: application/json" \
   -H "Authorization: _dremio$AUTH_TOKEN" \
-  --data "{\"name\":\"S3Source\",\"config\":{\"credentialType\":\"ACCESS_KEY\",\"accessKey\":\"admin\",\"accessSecret\":\"password\",\"secure\":false,\"externalBucketList\":[],\"enableAsync\":true,\"enableFileStatusCheck\":true,\"rootPath\":\"/\",\"defaultCtasFormat\":\"ICEBERG\",\"propertyList\":[{\"name\":\"fs.s3a.path.style.access\",\"value\":\"true\"},{\"name\":\"fs.s3a.endpoint\",\"value\":\"minio:9000\"},{\"name\":\"dremio.s3.compat\",\"value\":\"true\"}],\"whitelistedBuckets\":[],\"isCachingEnabled\":false,\"maxCacheSpacePct\":100},\"type\":\"S3\",\"metadataPolicy\":{\"deleteUnavailableDatasets\":true,\"autoPromoteDatasets\":false,\"namesRefreshMillis\":3600000,\"datasetDefinitionRefreshAfterMillis\":3600000,\"datasetDefinitionExpireAfterMillis\":10800000,\"authTTLMillis\":86400000,\"updateMode\":\"PREFETCH_QUERIED\"}}"
+  --data "{\"name\":\"NessieSource\",\"config\":{\"nessieEndpoint\":\"http://catalog:19120/api/v2\",\"nessieAuthType\":\"NONE\",\"credentialType\":\"ACCESS_KEY\",\"awsAccessKey\":\"admin\",\"awsAccessSecret\":\"password\",\"awsRootPath\":\"datalake\",\"secure\":false,\"propertyList\":[{\"name\":\"fs.s3a.path.style.access\",\"value\":\"true\"},{\"name\":\"fs.s3a.endpoint\",\"value\":\"dremio-storage:9000\"},{\"name\":\"dremio.s3.compat\",\"value\":\"true\"}]},\"type\":\"NESSIE\",\"metadataPolicy\":{\"deleteUnavailableDatasets\":true,\"autoPromoteDatasets\":false,\"namesRefreshMillis\":3600000,\"datasetDefinitionRefreshAfterMillis\":3600000,\"datasetDefinitionExpireAfterMillis\":10800000,\"authTTLMillis\":86400000,\"updateMode\":\"PREFETCH_QUERIED\"}}"
 
-echo "S3 Source created in Dremio"
+echo "Nessie Source created in Dremio"
