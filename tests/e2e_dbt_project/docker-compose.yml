@@ -19,7 +19,7 @@ services:
       - "8123:8123"
       - "9000:9000"
     volumes:
-      - ./clickhouse-data:/var/lib/clickhouse
+      - clickhouse-data:/var/lib/clickhouse
     environment:
       CLICKHOUSE_DB: default
       CLICKHOUSE_USER: default
@@ -224,6 +224,7 @@ networks:
 
 volumes:
   postgres:
+  clickhouse-data:
   dremio-data:
   dremio-minio-data:
   spark-warehouse:
