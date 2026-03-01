@@ -224,8 +224,6 @@ class Config:
         )
 
     def _load_configuration(self) -> dict:
-        if not os.path.exists(self.config_dir):
-            os.makedirs(self.config_dir)
         config_file_path = os.path.join(self.config_dir, self._CONFIG_FILE_NAME)
         if not os.path.exists(config_file_path):
             return {}
