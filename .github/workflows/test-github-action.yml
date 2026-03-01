@@ -137,6 +137,10 @@ jobs:
       - name: Read generated profiles
         id: profiles
         run: |
+          # Mask credentials so they don't appear in logs
+          while IFS= read -r line; do
+            echo "::add-mask::$line"
+          done < ~/.dbt/profiles.yml
           {
             echo "profiles_yml<<EOFPROFILES"
             cat ~/.dbt/profiles.yml
