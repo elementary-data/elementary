@@ -5,13 +5,13 @@
     {% endif %}
 
     {% if node.resource_type == "seed" %}
-      {#- Dremio (Nessie/Iceberg): seeds are datalake nodes whose path is
-          root_path + custom_schema.  Views that ref() seeds resolve database
-          to target.datalake but schema via this macro.  We must return the
-          full root_path-qualified schema so the relation renders correctly
-          as  <datalake>.<root_path>.<custom_schema>.<identifier>. -#}
+      {#- Dremio (Nessie/Iceberg): seeds live under the datalake root at
+          <database>.<schema>.<custom_schema>.<identifier>.  The database
+          is already set to the datalake name (NessieSource), so the schema
+          returned here must be <default_schema>.<custom_schema> to avoid
+          duplicating the datalake prefix. -#}
       {% if target.type == 'dremio' %}
-        {% do return("{}.{}".format(target.root_path, custom_schema_name)) %}
+        {% do return("{}.{}".format(default_schema, custom_schema_name)) %}
       {% endif %}
       {% do return(custom_schema_name) %}
     {% endif %}
