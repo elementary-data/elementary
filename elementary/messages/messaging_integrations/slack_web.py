@@ -1,4 +1,5 @@
 import json
+import ssl
 import time
 from typing import Any, Dict, Iterator, Optional
 
@@ -54,9 +55,13 @@ class SlackWebMessagingIntegration(
 
     @classmethod
     def from_token(
-        cls, token: str, tracking: Optional[Tracking] = None, **kwargs: Any
+        cls,
+        token: str,
+        tracking: Optional[Tracking] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        **kwargs: Any,
     ) -> "SlackWebMessagingIntegration":
-        client = WebClient(token=token)
+        client = WebClient(token=token, ssl=ssl_context)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
         return cls(client, tracking, **kwargs)
 

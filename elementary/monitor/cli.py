@@ -76,9 +76,13 @@ def common_options(cmd: str):
                 help="The Slack token for your workspace.",
             )(func)
             func = click.option(
-                "--use-system-ca-files/--no-use-system-ca-files",
-                default=True,
-                help="Whether to use the system CA files for SSL connections or the ones provided by certify (see https://pypi.org/project/certifi).",
+                "--ssl-ca-bundle",
+                type=str,
+                default=None,
+                help="Override the CA bundle used for SSL connections. "
+                "Accepted values: 'certifi' (use the certifi package bundle), "
+                "'system' (use the OS CA store), or a file path to a custom CA bundle. "
+                "When omitted each underlying library uses its own default.",
             )(func)
         if cmd in (Command.REPORT, Command.SEND_REPORT):
             func = click.option(
@@ -336,7 +340,7 @@ def monitor(
     teams_webhook,
     maximum_columns_in_alert_samples,
     quiet_logs,
-    use_system_ca_files,
+    ssl_ca_bundle,
 ):
     """
     Get alerts on failures in dbt jobs.
@@ -371,7 +375,7 @@ def monitor(
         teams_webhook=teams_webhook,
         maximum_columns_in_alert_samples=maximum_columns_in_alert_samples,
         quiet_logs=quiet_logs,
-        use_system_ca_files=use_system_ca_files,
+        ssl_ca_bundle=ssl_ca_bundle,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))
@@ -699,7 +703,7 @@ def send_report(
     include,
     target_path,
     quiet_logs,
-    use_system_ca_files,
+    ssl_ca_bundle,
 ):
     """
     Generate and send the report to an external platform.
@@ -743,7 +747,7 @@ def send_report(
         env=env,
         project_name=project_name,
         quiet_logs=quiet_logs,
-        use_system_ca_files=use_system_ca_files,
+        ssl_ca_bundle=ssl_ca_bundle,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))

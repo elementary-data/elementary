@@ -3,7 +3,6 @@ import ssl
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union
 
-import certifi
 import requests
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient, WebhookClient
@@ -15,6 +14,7 @@ from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
+from elementary.utils.ssl import create_ssl_context
 
 logger = get_logger(__name__)
 
@@ -40,29 +40,12 @@ class SlackClient(ABC):
     ) -> Optional["SlackClient"]:
         if not config.has_slack:
             return None
+        ssl_context = create_ssl_context(config.ssl_ca_bundle)
         if config.slack_token:
-            logger.debug(
-                "Creating Slack client with token (system CA? = %s).",
-                config.use_system_ca_files,
-            )
-            ssl_context = (
-                None
-                if config.use_system_ca_files
-                else ssl.create_default_context(cafile=certifi.where())
-            )
             return SlackWebClient(
                 token=config.slack_token, tracking=tracking, ssl_context=ssl_context
             )
         elif config.slack_webhook:
-            logger.debug(
-                "Creating Slack client with webhook (system CA? = %s).",
-                config.use_system_ca_files,
-            )
-            ssl_context = (
-                ssl.create_default_context(cafile=certifi.where())
-                if not config.use_system_ca_files
-                else None
-            )
             return SlackWebhookClient(
                 webhook=config.slack_webhook,
                 is_workflow=config.is_slack_workflow,
