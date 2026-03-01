@@ -96,10 +96,13 @@ jobs:
           # Cache key is a hash of seed-related files so that cache busts when
           # the data generation script, dbt project config, or seed schemas change.
           SEED_HASH=$(
-            cat generate_data.py \
-                dbt_project.yml \
-                ${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2 \
-            | sha256sum | head -c 16
+            {
+              cat generate_data.py \
+                  dbt_project.yml \
+                  docker-compose.yml \
+                  ${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2
+              echo "dbt_version=${{ inputs.dbt-version || '' }}"
+            } | sha256sum | head -c 16
           )
           echo "seed-hash=$SEED_HASH" >> "$GITHUB_OUTPUT"
 
@@ -157,11 +160,19 @@ jobs:
           sleep 10
           docker compose up -d trino
           # Wait for Trino to be ready
+          ready=0
           for i in $(seq 1 60); do
-            curl -sf http://localhost:8086/v1/info && break
+            if curl -sf http://localhost:8086/v1/info > /dev/null; then
+              ready=1
+              break
+            fi
             echo "Waiting for Trino... ($i/60)"
             sleep 5
           done
+          if [ "$ready" -ne 1 ]; then
+            echo "Timed out waiting for Trino"
+            exit 1
+          fi
 
       - name: Start Dremio
         if: inputs.warehouse-type == 'dremio'
@@ -172,11 +183,19 @@ jobs:
           docker compose up -d dremio-minio-setup
           docker compose up -d dremio
           # Wait for Dremio healthcheck
+          ready=0
           for i in $(seq 1 60); do
-            curl -sf http://localhost:9047 && break
+            if curl -sf http://localhost:9047 > /dev/null; then
+              ready=1
+              break
+            fi
             echo "Waiting for Dremio... ($i/60)"
             sleep 5
           done
+          if [ "$ready" -ne 1 ]; then
+            echo "Timed out waiting for Dremio"
+            exit 1
+          fi
           docker compose up -d dremio-setup
           # Wait for setup to complete
           sleep 15
@@ -189,11 +208,19 @@ jobs:
           sleep 5
           docker compose up -d --build spark-thrift
           # Wait for Spark Thrift Server to be ready
+          ready=0
           for i in $(seq 1 60); do
-            nc -z 127.0.0.1 10000 && break
+            if nc -z 127.0.0.1 10000; then
+              ready=1
+              break
+            fi
             echo "Waiting for Spark Thrift Server... ($i/60)"
             sleep 5
           done
+          if [ "$ready" -ne 1 ]; then
+            echo "Timed out waiting for Spark Thrift Server"
+            exit 1
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v5
