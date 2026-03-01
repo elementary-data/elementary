@@ -67,7 +67,7 @@ jobs:
           if grep -q 'git: https://github.com/elementary-data/dbt-data-reliability.git' "$PACKAGES_FILE"; then
             echo "Found git hash reference in packages.yml, converting to package version format..."
             # Replace the git+revision block with a package+version block using a placeholder version
-            sed -i '/- git: https:\/\/github.com\/elementary-data\/dbt-data-reliability.git/{N;s/- git: https:\/\/github.com\/elementary-data\/dbt-data-reliability.git\n    revision: [a-f0-9]*/- package: elementary-data\/elementary\n    version: 0.0.0/}' "$PACKAGES_FILE"
+            sed -i '/- git: https:\/\/github.com\/elementary-data\/dbt-data-reliability.git/{N;s/- git: https:\/\/github.com\/elementary-data\/dbt-data-reliability.git\n    revision: [a-fA-F0-9]\{7,40\}/- package: elementary-data\/elementary\n    version: 0.0.0/}' "$PACKAGES_FILE"
             echo "Converted to package format with placeholder version."
           else
             echo "packages.yml already uses package version format."
