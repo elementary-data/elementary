@@ -335,6 +335,40 @@ jobs:
 
           # Restart containers for the rest of the pipeline
           docker compose start || true
+
+          # Wait for services to be ready after restart
+          case "${{ inputs.warehouse-type }}" in
+            trino)
+              for i in $(seq 1 60); do
+                curl -sf http://localhost:8086/v1/info > /dev/null && break
+                echo "Waiting for Trino after restart... ($i/60)"; sleep 5
+              done
+              ;;
+            clickhouse)
+              for i in $(seq 1 30); do
+                curl -sf http://localhost:8123/ping > /dev/null && break
+                echo "Waiting for ClickHouse after restart... ($i/30)"; sleep 2
+              done
+              ;;
+            spark)
+              for i in $(seq 1 60); do
+                nc -z 127.0.0.1 10000 && break
+                echo "Waiting for Spark after restart... ($i/60)"; sleep 5
+              done
+              ;;
+            dremio)
+              for i in $(seq 1 60); do
+                curl -sf http://localhost:9047 > /dev/null && break
+                echo "Waiting for Dremio after restart... ($i/60)"; sleep 5
+              done
+              ;;
+            postgres)
+              for i in $(seq 1 30); do
+                pg_isready -h localhost -p 5432 > /dev/null 2>&1 && break
+                echo "Waiting for Postgres after restart... ($i/30)"; sleep 2
+              done
+              ;;
+          esac
           echo "Seed cache saved."
 
       - name: Save DuckDB seed cache
