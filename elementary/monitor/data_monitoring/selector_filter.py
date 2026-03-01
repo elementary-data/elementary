@@ -99,12 +99,25 @@ class SelectorFilter:
                         selector=selector,
                     )
                 elif model_match:
-                    if self.tracking:
-                        self.tracking.set_env("select_method", "model")
-                    data_monitoring_filter = FiltersSchema(
-                        models=[FilterSchema(values=[model_match.group(1)])],
-                        selector=selector,
-                    )
+                    model_value = model_match.group(1)
+                    if self.selector_fetcher and self._has_graph_operators(model_value):
+                        if self.tracking:
+                            self.tracking.set_env(
+                                "select_method", "model with graph operators"
+                            )
+                        node_names = self.selector_fetcher.get_selector_results(
+                            selector=model_value
+                        )
+                        data_monitoring_filter = FiltersSchema(
+                            node_names=node_names, selector=selector
+                        )
+                    else:
+                        if self.tracking:
+                            self.tracking.set_env("select_method", "model")
+                        data_monitoring_filter = FiltersSchema(
+                            models=[FilterSchema(values=[model_value])],
+                            selector=selector,
+                        )
                 elif statuses_match:
                     if self.tracking:
                         self.tracking.set_env("select_method", "statuses")
@@ -147,6 +160,10 @@ class SelectorFilter:
 
     def get_filter(self) -> FiltersSchema:
         return self.filter
+
+    @staticmethod
+    def _has_graph_operators(selector: str) -> bool:
+        return "+" in selector
 
     @staticmethod
     def _can_use_fetcher(selector):

@@ -190,8 +190,13 @@ class FiltersSchema(BaseModel):
 
     @staticmethod
     def from_cli_params(
-        cli_filters: Tuple[str], cli_excludes: Tuple[str]
+        cli_filters: Tuple[str],
+        cli_excludes: Tuple[str],
+        config: Optional[Any] = None,
+        tracking: Optional[Any] = None,
     ) -> "FiltersSchema":
+        from elementary.monitor.data_monitoring.selector_filter import SelectorFilter
+
         all_filters: list[tuple[str, FilterType]] = []
         for cli_filter in cli_filters:
             all_filters.append((cli_filter, FilterType.IS))
@@ -206,6 +211,7 @@ class FiltersSchema(BaseModel):
         models = []
         statuses = []
         resource_types = []
+        node_names = []
 
         for cli_filter, filter_type in all_filters:
             tags_match = FiltersSchema._match_filter_regex(
@@ -226,7 +232,22 @@ class FiltersSchema(BaseModel):
                 filter_string=cli_filter, regex=re.compile(r"models:(.*)")
             )
             if models_match:
-                models.append(FilterSchema(values=models_match, type=filter_type))
+                model_value = (
+                    models_match[0]
+                    if len(models_match) == 1
+                    else ",".join(models_match)
+                )
+                if (
+                    config
+                    and filter_type == FilterType.IS
+                    and SelectorFilter._has_graph_operators(model_value)
+                ):
+                    selector_filter = SelectorFilter(config, tracking, model_value)
+                    filter_result = selector_filter.get_filter()
+                    if filter_result.node_names:
+                        node_names.extend(filter_result.node_names)
+                else:
+                    models.append(FilterSchema(values=models_match, type=filter_type))
                 continue
 
             statuses_match = FiltersSchema._match_filter_regex(
@@ -269,6 +290,7 @@ class FiltersSchema(BaseModel):
             models=models,
             statuses=statuses,
             resource_types=resource_types,
+            node_names=node_names,
         )
 
     @staticmethod
