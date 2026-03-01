@@ -321,6 +321,9 @@ jobs:
           COMPOSE_VOLUMES=$(docker compose config --volumes 2>/dev/null || true)
           PROJECT=$(docker compose config 2>/dev/null | grep '^name:' | awk '{print $2}' || echo "e2e_dbt_project")
 
+          # Stop running containers so no files change while archiving
+          docker compose stop || true
+
           for vol in $COMPOSE_VOLUMES; do
             FULL_VOL="${PROJECT}_${vol}"
             if docker volume inspect "$FULL_VOL" >/dev/null 2>&1; then
@@ -329,6 +332,9 @@ jobs:
                 alpine sh -c "cd /data && tar czf /cache/${FULL_VOL}.tar.gz ."
             fi
           done
+
+          # Restart containers for the rest of the pipeline
+          docker compose start || true
           echo "Seed cache saved."
 
       - name: Save DuckDB seed cache
