@@ -156,6 +156,7 @@ jobs:
             --slack-channel-name data-ops
             &&
             edr monitor report
+            -t snowflake
             --file-path "report.html"
 
       - name: Upload report
