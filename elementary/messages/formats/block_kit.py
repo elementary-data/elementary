@@ -1,7 +1,6 @@
 import json
 from typing import Any, Callable, List, Optional, Tuple
 
-from pydantic import BaseModel
 from slack_sdk.models import blocks as slack_blocks
 from tabulate import tabulate
 
@@ -31,6 +30,7 @@ from elementary.messages.blocks import (
 )
 from elementary.messages.formats.unicode import ICON_TO_UNICODE
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
+from elementary.utils.pydantic_shim import BaseModel
 
 COLOR_MAP = {
     Color.RED: "#ff0000",
