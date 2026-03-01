@@ -11,8 +11,12 @@ FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 EPOCH = datetime.utcfromtimestamp(0)
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
+# Fixed seed so that generated CSVs are deterministic and cacheable across CI runs.
+RANDOM_SEED = 42
+
 
 def generate_fake_data():
+    random.seed(RANDOM_SEED)
     generate_string_anomalies_training_and_validation_files()
     generate_numeric_anomalies_training_and_validation_files()
     generate_any_type_anomalies_training_and_validation_files()

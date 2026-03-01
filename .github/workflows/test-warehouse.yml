@@ -168,21 +168,33 @@ jobs:
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
         run: |
-          # Schema name = py_<YYMMDD_HHMMSS>_<branch≤19>_<8-char hash>
-          # The hash prevents collisions across concurrent jobs; the branch
-          # keeps it human-readable; the timestamp helps with stale schema
-          # cleanup and ensures each CI run gets a unique schema.
-          #
-          # Budget (PostgreSQL 63-char limit):
-          #   py_(3) + timestamp(13) + _(1) + branch(≤19) + _(1) + hash(8) = 45
-          #   + _elementary(11) + _gw7(4) = 60
-          CONCURRENCY_GROUP="tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
-          SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
-          SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 19)
-          DATE_STAMP=$(date -u +%y%m%d_%H%M%S)
-          SCHEMA_NAME="py_${DATE_STAMP}_${SAFE_BRANCH}_${SHORT_HASH}"
+          # Docker-based adapters use ephemeral containers, so a fixed schema
+          # name is safe (the concurrency group prevents parallel collisions).
+          # This enables caching the seeded database state between runs.
+          DOCKER_ADAPTERS="postgres clickhouse trino dremio duckdb spark"
+          IS_DOCKER=false
+          for adapter in $DOCKER_ADAPTERS; do
+            if [ "$adapter" = "${{ inputs.warehouse-type }}" ]; then
+              IS_DOCKER=true
+              break
+            fi
+          done
 
-          echo "Schema name: $SCHEMA_NAME (branch='${BRANCH_NAME}', timestamp=${DATE_STAMP}, hash of concurrency group)"
+          if [ "$IS_DOCKER" = "true" ]; then
+            SCHEMA_NAME="elementary_tests"
+            echo "Schema name: $SCHEMA_NAME (fixed for Docker adapter '${{ inputs.warehouse-type }}')"
+          else
+            # Cloud adapters: unique schema per run to avoid collisions.
+            # Schema name = py_<YYMMDD_HHMMSS>_<branch≤19>_<8-char hash>
+            CONCURRENCY_GROUP="tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
+            SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
+            SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 19)
+            DATE_STAMP=$(date -u +%y%m%d_%H%M%S)
+            SCHEMA_NAME="py_${DATE_STAMP}_${SAFE_BRANCH}_${SHORT_HASH}"
+            echo "Schema name: $SCHEMA_NAME (branch='${BRANCH_NAME}', timestamp=${DATE_STAMP}, hash of concurrency group)"
+          fi
+
+          echo "SCHEMA_NAME=$SCHEMA_NAME" >> "$GITHUB_ENV"
 
           python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
             --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
@@ -211,12 +223,89 @@ jobs:
         run: |
           dbt deps
 
+      - name: Compute seed cache key
+        id: seed-cache-key
+        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          # Cache key is a hash of seed-related files so that cache busts when
+          # the data generation script, dbt project config, or seed schemas change.
+          SEED_HASH=$(
+            cat generate_data.py \
+                dbt_project.yml \
+                ${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2 \
+            | sha256sum | head -c 16
+          )
+          echo "seed-hash=$SEED_HASH" >> "$GITHUB_OUTPUT"
+
+      - name: Restore seed cache
+        id: seed-cache
+        if: steps.seed-cache-key.outputs.seed-hash
+        uses: actions/cache@v4
+        with:
+          path: /tmp/seed-cache-${{ inputs.warehouse-type }}
+          key: seed-${{ inputs.warehouse-type }}-${{ steps.seed-cache-key.outputs.seed-hash }}
+
+      - name: Restore cached seed data into Docker volumes
+        if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type != 'duckdb'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          echo "Restoring seed cache for ${{ inputs.warehouse-type }}..."
+          CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
+
+          # Restore each Docker volume from the cached tarballs
+          for archive in "$CACHE_DIR"/*.tar.gz; do
+            [ -f "$archive" ] || continue
+            VOLUME_NAME=$(basename "$archive" .tar.gz)
+            echo "Restoring volume $VOLUME_NAME from $archive..."
+            docker volume create "$VOLUME_NAME" 2>/dev/null || true
+            docker run --rm -v "$VOLUME_NAME:/data" -v "$CACHE_DIR:/cache:ro" \
+              alpine sh -c "cd /data && tar xzf /cache/${VOLUME_NAME}.tar.gz"
+          done
+          echo "Seed cache restored."
+
+      - name: Restore cached DuckDB seed
+        if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type == 'duckdb'
+        run: |
+          cp /tmp/seed-cache-duckdb/elementary_test.duckdb /tmp/elementary_test.duckdb
+          echo "DuckDB seed cache restored."
+
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb' || inputs.generate-data
+        if: |
+          steps.seed-cache.outputs.cache-hit != 'true' &&
+          (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb' || inputs.generate-data)
         run: |
           python generate_data.py
           dbt seed -f --target "${{ inputs.warehouse-type }}"
+
+      - name: Save seed cache from Docker volumes
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
+          mkdir -p "$CACHE_DIR"
+
+          # Get the Docker Compose project name and list volumes
+          COMPOSE_VOLUMES=$(docker compose config --volumes 2>/dev/null || true)
+          PROJECT=$(docker compose config 2>/dev/null | grep '^name:' | awk '{print $2}' || echo "e2e_dbt_project")
+
+          for vol in $COMPOSE_VOLUMES; do
+            FULL_VOL="${PROJECT}_${vol}"
+            if docker volume inspect "$FULL_VOL" >/dev/null 2>&1; then
+              echo "Saving volume $FULL_VOL..."
+              docker run --rm -v "$FULL_VOL:/data:ro" -v "$CACHE_DIR:/cache" \
+                alpine sh -c "cd /data && tar czf /cache/${FULL_VOL}.tar.gz ."
+            fi
+          done
+          echo "Seed cache saved."
+
+      - name: Save DuckDB seed cache
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type == 'duckdb'
+        run: |
+          mkdir -p /tmp/seed-cache-duckdb
+          cp /tmp/elementary_test.duckdb /tmp/seed-cache-duckdb/elementary_test.duckdb
+          echo "DuckDB seed cache saved."
 
       - name: Run e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
