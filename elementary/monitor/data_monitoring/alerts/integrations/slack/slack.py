@@ -222,8 +222,9 @@ class SlackIntegration(BaseIntegration):
             TEST_RESULTS_SAMPLE_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS)
             and alert.test_rows_sample
         ):
+            table_max_length = SectionBlock.text_max_length - 6
             test_rows_sample_table = list_of_dicts_to_markdown_table(
-                alert.test_rows_sample
+                alert.test_rows_sample, max_length=table_max_length
             )
             result.extend(
                 [
