@@ -23,6 +23,45 @@ elementary_tests:
       schema: {{ schema_name }}
       threads: 4
 
+    trino: &trino
+      type: trino
+      method: none
+      host: localhost
+      port: 8086
+      user: admin
+      database: iceberg
+      schema: {{ schema_name }}
+      threads: 4
+
+    dremio: &dremio
+      type: dremio
+      software_host: localhost
+      port: 9047
+      user: dremio
+      password: dremio123
+      use_ssl: false
+      datalake: S3Source
+      root_path: datalake.elementary_ci.{{ schema_name }}
+      database: elementary_ci
+      schema: {{ schema_name }}
+      threads: 4
+
+    duckdb: &duckdb
+      type: duckdb
+      path: ":memory:"
+      schema: {{ schema_name }}
+      threads: 8
+
+    spark: &spark
+      type: spark
+      method: thrift
+      host: 127.0.0.1
+      port: 10000
+      user: dbt
+      schema: {{ schema_name }}
+      file_format: delta
+      threads: 4
+
     # ── Cloud targets (secrets substituted at CI time) ─────────────────
 
     snowflake: &snowflake
@@ -83,7 +122,7 @@ elementary_tests:
 elementary:
   target: postgres
   outputs:
-{%- set targets = ['postgres', 'clickhouse', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
+{%- set targets = ['postgres', 'clickhouse', 'trino', 'dremio', 'duckdb', 'spark', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
 {%- for t in targets %}
     {{ t }}:
       <<: *{{ t }}
