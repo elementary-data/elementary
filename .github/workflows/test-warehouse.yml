@@ -159,10 +159,10 @@ jobs:
           docker compose up -d hive-metastore trino-mc-job
           sleep 10
           docker compose up -d trino
-          # Wait for Trino to be ready
+          # Wait for Trino to be fully ready (not just HTTP responding, but initialized)
           ready=0
           for i in $(seq 1 60); do
-            if curl -sf http://localhost:8086/v1/info > /dev/null; then
+            if curl -sf http://localhost:8086/v1/info 2>/dev/null | grep -q '"starting":false'; then
               ready=1
               break
             fi
@@ -339,8 +339,12 @@ jobs:
           # Wait for services to be ready after restart
           case "${{ inputs.warehouse-type }}" in
             trino)
+              echo "Waiting for Trino to be fully ready after restart..."
               for i in $(seq 1 60); do
-                curl -sf http://localhost:8086/v1/info > /dev/null && break
+                if curl -sf http://localhost:8086/v1/info 2>/dev/null | grep -q '"starting":false'; then
+                  echo "Trino is ready."
+                  break
+                fi
                 echo "Waiting for Trino after restart... ($i/60)"; sleep 5
               done
               ;;
