@@ -113,20 +113,16 @@ jobs:
           dbt run --target snowflake || true
 
           # Validate run_results.json: only error_model should be non-success
-          jq -e '
+          if jq -e '
             [.results[] | select(.status != "success") | .unique_id]
             | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
-          ' target/run_results.json > /dev/null
-          jq_exit=$?
-
-          if [ $jq_exit -eq 0 ]; then
+          ' target/run_results.json > /dev/null; then
             echo "Validation passed: only error_model failed."
           else
             echo "Validation failed. Unexpected failures:"
             jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
+            exit 1
           fi
-
-          exit $jq_exit
 
       - name: Test e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
