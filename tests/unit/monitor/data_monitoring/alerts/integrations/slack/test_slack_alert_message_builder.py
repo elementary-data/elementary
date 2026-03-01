@@ -177,11 +177,12 @@ def test_add_details_to_slack_alert():
 
 
 def test_full_width_preview_goes_to_blocks_not_attachments():
-    """With full_width=True, preview blocks are added to main blocks."""
+    """With full_width=True, preview blocks are validated and added to main blocks."""
     message_builder = SlackAlertMessageBuilder(full_width=True)
     block = message_builder.create_header_block("Preview header")
     message_builder.add_preview_to_slack_alert([block])
-    assert len(message_builder.slack_message["blocks"]) == 1
+    # Preview blocks are validated (padded to _MAX_ALERT_PREVIEW_BLOCKS)
+    assert len(message_builder.slack_message["blocks"]) == 5
     assert message_builder.slack_message["blocks"][0] == block
     assert message_builder.slack_message["attachments"][0]["blocks"] == []
 
@@ -210,11 +211,23 @@ def test_full_width_get_slack_message_structure():
     result = message_builder.get_slack_message(alert_schema=schema)
 
     blocks = result.blocks
-    assert len(blocks) >= 5
-    assert blocks[0] == {"type": "rich_text", "elements": []}
+    valid_rich_text_block = {
+        "type": "rich_text",
+        "elements": [
+            {
+                "type": "rich_text_section",
+                "elements": [{"type": "text", "text": " "}],
+            }
+        ],
+    }
+    assert blocks[0] == valid_rich_text_block
     assert blocks[1] == title
     assert blocks[2]["type"] == "divider"
+    # Preview blocks are validated and padded to _MAX_ALERT_PREVIEW_BLOCKS (5)
     assert blocks[3] == preview_block
-    assert blocks[4] == detail_block
+    # Blocks 4-7 are padding from preview validation
+    # Then detail_block follows
+    assert blocks[8] == detail_block
+    assert len(blocks) == 9
 
     assert result.attachments == []
