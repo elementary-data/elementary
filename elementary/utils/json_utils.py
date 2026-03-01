@@ -138,7 +138,11 @@ def list_of_dicts_to_markdown_table(
     if max_length is None or len(full_table) <= max_length:
         return full_table
 
+    if max_length <= 0:
+        return ""
     truncation_note = "\n(truncated)"
+    if max_length <= len(truncation_note):
+        return "(truncated)"[:max_length]
     effective_max = max_length - len(truncation_note)
     for row_count in range(len(processed_data) - 1, 0, -1):
         table = tabulate(
@@ -156,6 +160,6 @@ def list_of_dicts_to_markdown_table(
         tablefmt="github",
         disable_numparse=True,
     )
-    if effective_max <= 0 or len(single_row_table) <= effective_max:
+    if len(single_row_table) <= effective_max:
         return single_row_table + truncation_note
     return single_row_table[:effective_max].rstrip() + truncation_note
