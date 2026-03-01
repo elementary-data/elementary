@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import DefaultDict, Dict, List, Optional, Union
 
 from alive_progress import alive_bar
@@ -201,7 +201,7 @@ class DataMonitoringAlerts(DataMonitoring):
         alerts_last_sent_times: Dict[str, datetime],
     ) -> List[str]:
         suppressed_alerts = []
-        current_time_utc = convert_time_to_timezone(datetime.utcnow())
+        current_time_utc = convert_time_to_timezone(datetime.now(tz=timezone.utc))
         for alert in alerts:
             alert_class_id = alert.alert_class_id
             suppression_interval = alert.data.get_suppression_interval(

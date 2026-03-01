@@ -1,8 +1,10 @@
 from datetime import datetime
 
+import pytest
 from dateutil import tz
 
 from elementary.utils.time import (
+    convert_partial_iso_format_to_full_iso_format,
     convert_time_to_timezone,
     datetime_strftime,
     get_formatted_timedelta,
@@ -67,3 +69,49 @@ def test_convert_time_to_timezone():
     assert date.hour == 1
     assert date_with_timezone.hour == 2
     assert (date - date_with_timezone).total_seconds() == 0
+
+
+@pytest.mark.parametrize(
+    "input_time, expected_output",
+    [
+        pytest.param(
+            "2024-01-01T12:00:00+00",
+            "2024-01-01T12:00:00+00:00",
+            id="abbreviated_utc_offset",
+        ),
+        pytest.param(
+            "2024-01-01T12:00:00-05",
+            "2024-01-01T12:00:00-05:00",
+            id="abbreviated_negative_offset",
+        ),
+        pytest.param(
+            "2024-01-01 12:00:00.123456+00",
+            "2024-01-01T12:00:00+00:00",
+            id="abbreviated_offset_with_fractional_seconds",
+        ),
+        pytest.param(
+            "2024-01-01T12:00:00+00:00",
+            "2024-01-01T12:00:00+00:00",
+            id="full_utc_offset",
+        ),
+        pytest.param(
+            "2024-01-01T12:00:00+05:30",
+            "2024-01-01T12:00:00+05:30",
+            id="full_non_utc_offset",
+        ),
+        pytest.param(
+            "2024-01-01T12:00:00",
+            "2024-01-01T12:00:00+00:00",
+            id="no_offset_defaults_to_utc",
+        ),
+        pytest.param(
+            "2024-01-15",
+            "2024-01-15T00:00:00+00:00",
+            id="date_only_not_corrupted",
+        ),
+    ],
+)
+def test_convert_partial_iso_format_to_full_iso_format(
+    input_time: str, expected_output: str
+) -> None:
+    assert convert_partial_iso_format_to_full_iso_format(input_time) == expected_output

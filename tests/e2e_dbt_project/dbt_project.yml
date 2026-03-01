@@ -20,6 +20,8 @@ vars:
   days_back: 30
   debug_logs: "{{ env_var('DBT_EDR_DEBUG', False) }}"
   custom_run_started_at: "{{ modules.datetime.datetime.utcfromtimestamp(0) }}"
+  clean_elementary_temp_tables: false
+  disable_dbt_artifacts_autoupload: true
 
 seeds:
   +schema: test_seeds
