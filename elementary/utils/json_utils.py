@@ -151,11 +151,13 @@ def list_of_dicts_to_markdown_table(
         if len(table) <= effective_max:
             return table + truncation_note
 
-    # Even a single row doesn't fit — return what we can with a note
+    # Even a single row doesn't fit — hard-truncate and append note
     single_row_table = tabulate(
         processed_data[:1],
         headers="keys",
         tablefmt="github",
         disable_numparse=True,
     )
-    return single_row_table + truncation_note
+    if effective_max <= 0 or len(single_row_table) <= effective_max:
+        return single_row_table + truncation_note
+    return single_row_table[:effective_max].rstrip() + truncation_note
