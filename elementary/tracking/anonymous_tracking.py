@@ -24,7 +24,7 @@ class AnonymousTracking(Tracking):
         self._run_id = str(uuid.uuid4())
 
         # Exceptions that occurred during the run of the CLI, but don't fail the entire run.
-        # We want to avoid sending an event for each one of these (as there might be many of them), so we will send
+        # We want to avoid sending an event for each one of these (as there might be many), so we will send
         # them as a part of the cli-end event.
         self.internal_exceptions: List[dict] = []
         self.internal_exceptions_count = 0
@@ -49,6 +49,7 @@ class AnonymousTracking(Tracking):
             pass
         user_id = str(uuid.uuid4())
         try:
+            user_id_path.parent.mkdir(parents=True, exist_ok=True)
             user_id_path.write_text(user_id)
         except OSError:
             pass
@@ -74,7 +75,7 @@ class AnonymousTracking(Tracking):
                 },
             )
         except Exception:
-            logger.debug("Unable to send tracking event.", exc_info=True)
+            logger.debug("Unable to send anonymous event.", exc_info=True)
 
     def record_internal_exception(self, exc: Exception):
         self.internal_exceptions_count += 1
