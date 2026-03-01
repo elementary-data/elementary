@@ -171,29 +171,35 @@ def _dremio_create_s3_source(token: str):
 
 def _upload_csvs_to_minio(data_dir: str):
     """Upload seed CSVs to the Dremio MinIO bucket using ``docker exec``
-    on the running ``dremio-minio-setup`` (mc) container or a temp one."""
+    on the running ``dremio-storage`` (MinIO) container."""
     abs_data = os.path.abspath(data_dir)
 
-    # Copy CSVs into the running MinIO container and use mc from there.
-    # First, copy the data directory into the MinIO container.
+    # Copy CSVs into the running MinIO container.
     _run(f'docker cp "{abs_data}/training" dremio-storage:/tmp/seed-training')
     _run(f'docker cp "{abs_data}/validation" dremio-storage:/tmp/seed-validation')
 
-    # Now use a temporary mc container on the same network to upload
+    # Use a temporary minio/mc container on the same network.  The image's
+    # default entrypoint is ``mc``, so we override with ``/bin/sh`` to chain
+    # multiple mc commands together.
     network = os.environ.get("DREMIO_NETWORK", "e2e_dbt_project_dremio-lakehouse")
-    cmd = (
+    mc_cmds = " && ".join(
+        [
+            "mc alias set myminio http://dremio-storage:9000 admin password",
+            "mc mb --ignore-existing myminio/datalake/seeds/training",
+            "mc mb --ignore-existing myminio/datalake/seeds/validation",
+            "mc cp --recursive /tmp/seed-training/ myminio/datalake/seeds/training/",
+            "mc cp --recursive /tmp/seed-validation/ myminio/datalake/seeds/validation/",
+            "echo Upload complete",
+        ]
+    )
+    _run(
         f"docker run --rm "
         f"--network {network} "
         f"--volumes-from dremio-storage "
+        f"--entrypoint /bin/sh "
         f"minio/mc "
-        f'sh -c "'
-        f"mc alias set myminio http://dremio-storage:9000 admin password && "
-        f"mc cp --recursive /tmp/seed-training/ myminio/datalake/seeds/training/ && "
-        f"mc cp --recursive /tmp/seed-validation/ myminio/datalake/seeds/validation/ && "
-        f"echo Upload complete"
-        f'"'
+        f'-c "{mc_cmds}"'
     )
-    _run(cmd)
 
 
 def _dremio_refresh_source(token: str):
