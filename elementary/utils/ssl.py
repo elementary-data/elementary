@@ -22,6 +22,10 @@ def create_ssl_context(ssl_ca_bundle: Optional[str] = None) -> Optional[ssl.SSLC
         return None
 
     value = ssl_ca_bundle.strip()
+    if not value:
+        raise ValueError(
+            "ssl_ca_bundle cannot be empty. Use 'certifi', 'system', or a CA bundle file path."
+        )
 
     if value.lower() == CERTIFI:
         logger.debug("Using certifi CA bundle for SSL context.")
