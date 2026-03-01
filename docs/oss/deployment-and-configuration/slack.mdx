@@ -53,15 +53,3 @@ The alert format is:
 ```
 
 ---
-
-## Full-width alerts
-
-By default, Slack alerts use a narrower layout with some content in attachments. To use the full message width and show test results as a Markdown table in the main message body, pass the flag when running the monitor:
-
-```shell
-edr monitor --slack-token <your_slack_token> --slack-channel-name <channel> --slack-full-width
-```
-
-With `--slack-full-width`, alerts are sent using Slack Block Kit in the main message body instead of attachments, so the full channel width is used and test result samples appear as formatted Markdown tables.
-
----
