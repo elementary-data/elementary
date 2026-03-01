@@ -48,9 +48,9 @@ elementary_tests:
 
     duckdb: &duckdb
       type: duckdb
-      path: ":memory:"
+      path: /tmp/elementary_test.duckdb
       schema: {{ schema_name }}
-      threads: 8
+      threads: 1
 
     spark: &spark
       type: spark
