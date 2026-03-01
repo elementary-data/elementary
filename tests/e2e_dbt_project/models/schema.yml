@@ -7,7 +7,7 @@ models:
     meta:
       owner: "{{ var('one_owner', none) }}"
     columns:
-      - name: one
+      - name: col1
         tests:
           - accepted_values:
               meta:
@@ -255,7 +255,7 @@ models:
             - average_length
             - null_count
     columns:
-      - name: min
+      - name: min_val
         tests:
           - elementary.column_anomalies:
               tags: ["numeric_column_anomalies", "column_anomalies"]
@@ -269,7 +269,7 @@ models:
               tags: ["numeric_column_anomalies", "column_anomalies"]
               column_anomalies:
                 - average
-      - name: max
+      - name: max_val
         tests:
           - elementary.column_anomalies:
               tags: ["numeric_column_anomalies", "column_anomalies"]
@@ -327,7 +327,7 @@ models:
         tests:
           - elementary.column_anomalies:
               tags: ["numeric_column_anomalies", "column_anomalies"]
-      - name: sum
+      - name: sum_val
         tests:
           - elementary.column_anomalies:
               column_anomalies:

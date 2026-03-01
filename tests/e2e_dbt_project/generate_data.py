@@ -132,8 +132,8 @@ def generate_numeric_anomalies_training_and_validation_files(rows_count_per_day=
         return {
             "updated_at": date.strftime(DATE_FORMAT),
             "occurred_at": (date - timedelta(hours=1)).strftime(DATE_FORMAT),
-            "min": random.randint(100, 200),
-            "max": random.randint(100, 200),
+            "min_val": random.randint(100, 200),
+            "max_val": random.randint(100, 200),
             "zero_count": 0
             if row_index < (3 / 100 * rows_count)
             else random.randint(100, 200),
@@ -143,7 +143,7 @@ def generate_numeric_anomalies_training_and_validation_files(rows_count_per_day=
             "average": random.randint(99, 101),
             "standard_deviation": random.randint(99, 101),
             "variance": random.randint(99, 101),
-            "sum": random.randint(100, 200),
+            "sum_val": random.randint(100, 200),
         }
 
     def get_validation_row(date, row_index, rows_count):
@@ -151,8 +151,8 @@ def generate_numeric_anomalies_training_and_validation_files(rows_count_per_day=
         return {
             "updated_at": date.strftime(DATE_FORMAT),
             "occurred_at": (date - timedelta(hours=7)).strftime(DATE_FORMAT),
-            "min": random.randint(10, 200),
-            "max": random.randint(100, 300),
+            "min_val": random.randint(10, 200),
+            "max_val": random.randint(100, 300),
             "zero_count": 0
             if row_index < (80 / 100 * rows_count)
             else random.randint(100, 200),
@@ -162,20 +162,20 @@ def generate_numeric_anomalies_training_and_validation_files(rows_count_per_day=
             "average": random.randint(101, 110),
             "standard_deviation": random.randint(80, 120),
             "variance": random.randint(80, 120),
-            "sum": random.randint(300, 400),
+            "sum_val": random.randint(300, 400),
         }
 
     numeric_columns = [
         "updated_at",
         "occurred_at",
-        "min",
-        "max",
+        "min_val",
+        "max_val",
         "zero_count",
         "zero_percent",
         "average",
         "standard_deviation",
         "variance",
-        "sum",
+        "sum_val",
     ]
     dates = generate_rows_timestamps(base_date=EPOCH - timedelta(days=2))
     training_rows = generate_rows(rows_count_per_day, dates, get_training_row)

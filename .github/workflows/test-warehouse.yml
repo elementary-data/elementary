@@ -387,23 +387,15 @@ jobs:
           fi
           dbt run --target "${{ inputs.warehouse-type }}" $EXTRA_ARGS || true
 
-          # Validate run_results.json: only expected models should be non-success.
-          # error_model is always expected to fail (intentionally broken SQL).
-          # Dremio also fails on models using SQL reserved words as column names
-          # (min, max, sum, one) which cannot be fixed without breaking other adapters.
-          EXPECTED_FAILURES='["model.elementary_integration_tests.error_model"]'
-          if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
-            EXPECTED_FAILURES='["model.elementary_integration_tests.error_model","model.elementary_integration_tests.numeric_column_anomalies","model.elementary_integration_tests.one","model.elementary_integration_tests.nested"]'
-          fi
-
-          jq -e --argjson expected "$EXPECTED_FAILURES" '
+          # Validate run_results.json: only error_model should be non-success
+          jq -e '
             [.results[] | select(.status != "success") | .unique_id]
-            | sort == ($expected | sort)
+            | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
           ' target/run_results.json > /dev/null
           jq_exit=$?
 
           if [ $jq_exit -eq 0 ]; then
-            echo "✅ Validation passed: only expected models failed."
+            echo "✅ Validation passed: only error_model failed."
           else
             echo "❌ Validation failed. Unexpected failures:"
             jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
