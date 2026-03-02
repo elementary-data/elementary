@@ -30,7 +30,7 @@ clean-targets: # directories to be removed by `dbt clean`
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 dispatch:
   - macro_namespace: elementary
-    search_order: ['elementary_cli', 'elementary']
+    search_order: ["elementary_cli", "elementary"]
 
 vars:
   edr_cli_run: true
