@@ -266,9 +266,10 @@ class DremioExternalSeeder(ExternalSeeder):
         2. Create an S3 source so Dremio can read those files.
         3. For each CSV, CREATE TABLE in Nessie + COPY INTO from S3.
 
-        With enterprise_catalog_namespace, dbt resolves seeds to
-        ``NessieSource."test_seeds".<table>`` (database=NessieSource,
-        schema=test_seeds from generate_schema_name).
+        With enterprise_catalog_namespace, dbt-dremio's generate_schema_name
+        prefixes root_path for seeds, producing ``elementary_tests.test_seeds``.
+        DremioRelation.quoted_by_component splits dots into separate levels, so
+        seeds resolve to ``NessieSource."elementary_tests"."test_seeds".<table>``.
         """
         # dbt_project.yml: seeds: +schema: test_seeds
         seed_schema = "test_seeds"
@@ -285,7 +286,7 @@ class DremioExternalSeeder(ExternalSeeder):
         # Nessie uses CREATE FOLDER (not CREATE SCHEMA).
         # CREATE TABLE implicitly creates the namespace, so we create a
         # dummy table to ensure the namespace exists, then drop it.
-        nessie_ns = f'NessieSource."{seed_schema}"'
+        nessie_ns = f'NessieSource."{self.schema_name}"."{seed_schema}"'
         print(f"\nStep 3: Ensuring Nessie namespace '{nessie_ns}' exists...")
         try:
             self._sql(
