@@ -210,112 +210,6 @@ class DremioExternalSeeder(ExternalSeeder):
             f"  Warning: could not create Nessie namespace '{namespace}' via REST API"
         )
 
-    def _force_metadata_refresh(self, token: str, seed_schema: str) -> None:
-        """Force Dremio to re-scan NessieSource metadata.
-
-        The NessieSource is created with ``namesRefreshMillis=3600000``
-        (1 hour).  Dremio's VDS (view) validator uses cached metadata to
-        resolve object paths, so new Nessie namespaces are invisible until
-        the next periodic refresh.  To work around this we:
-
-        1. Update the source's metadata policy to a 1-second refresh.
-        2. Wait for the re-scan to happen.
-        3. Verify the namespace is visible via the Catalog API.
-        4. Restore the original metadata policy.
-        """
-        import requests
-
-        headers = self._headers(token)
-        base = f"http://{self.dremio_host}:{self.dremio_port}"
-
-        # ---- 1. Fetch the current NessieSource definition ----
-        resp = requests.get(
-            f"{base}/api/v3/catalog/by-path/NessieSource", headers=headers
-        )
-        if resp.status_code != 200:
-            print(f"  Warning: could not fetch NessieSource: {resp.status_code}")
-            # Fall back to SQL refresh
-            try:
-                self._sql(token, "ALTER SOURCE NessieSource REFRESH STATUS", timeout=30)
-            except Exception:
-                pass
-            return
-
-        source_def = resp.json()
-        source_id = source_def["id"]
-        original_policy = source_def.get("metadataPolicy", {})
-        print(f"  NessieSource id={source_id}")
-
-        # ---- 2. Update to 1-second names refresh ----
-        fast_policy = dict(original_policy)
-        fast_policy["namesRefreshMillis"] = 1000
-        source_def["metadataPolicy"] = fast_policy
-        put_resp = requests.put(
-            f"{base}/api/v3/catalog/{source_id}",
-            headers=headers,
-            json=source_def,
-        )
-        if put_resp.status_code == 200:
-            print("  Updated NessieSource to 1s names refresh")
-            source_def = put_resp.json()  # refresh tag for next PUT
-        else:
-            print(
-                f"  Warning: policy update returned {put_resp.status_code}:"
-                f" {put_resp.text[:200]}"
-            )
-
-        # Also trigger an explicit refresh via SQL
-        try:
-            self._sql(token, "ALTER SOURCE NessieSource REFRESH STATUS", timeout=30)
-            print("  NessieSource status refreshed")
-        except Exception as e:
-            print(f"  Warning: SQL refresh failed: {e}")
-
-        # ---- 3. Wait for re-scan + verify via Catalog API ----
-        print("  Waiting 10s for Dremio metadata re-scan...")
-        time.sleep(10)
-
-        ns_path = f"NessieSource/{seed_schema}"
-        for attempt in range(3):
-            cat_resp = requests.get(
-                f"{base}/api/v3/catalog/by-path/{ns_path}", headers=headers
-            )
-            if cat_resp.status_code == 200:
-                print(f"  Namespace '{seed_schema}' is now visible in Dremio catalog")
-                break
-            print(
-                f"  Attempt {attempt + 1}/3: namespace not yet visible"
-                f" ({cat_resp.status_code})"
-            )
-            time.sleep(5)
-        else:
-            # Last resort: try accessing each table via Catalog API
-            print("  Trying table-level catalog access...")
-            for tbl in ["any_type_column_anomalies_training"]:
-                tbl_resp = requests.get(
-                    f"{base}/api/v3/catalog/by-path/{ns_path}/{tbl}",
-                    headers=headers,
-                )
-                print(
-                    f"    {tbl}: {tbl_resp.status_code}"
-                    f" {tbl_resp.text[:100] if tbl_resp.status_code != 200 else 'OK'}"
-                )
-
-        # ---- 4. Restore original metadata policy ----
-        source_def["metadataPolicy"] = original_policy
-        restore_resp = requests.put(
-            f"{base}/api/v3/catalog/{source_id}",
-            headers=headers,
-            json=source_def,
-        )
-        if restore_resp.status_code == 200:
-            print("  Restored NessieSource original metadata policy")
-        else:
-            print(
-                f"  Warning: policy restore returned"
-                f" {restore_resp.status_code}: {restore_resp.text[:200]}"
-            )
-
     # ------------------------------------------------------------------
     # MinIO upload
     # ------------------------------------------------------------------
@@ -478,7 +372,13 @@ class DremioExternalSeeder(ExternalSeeder):
         self._create_nessie_namespace(seed_schema)
 
         nessie_ns = f'NessieSource."{seed_schema}"'
-        print(f"\nStep 4: Creating Iceberg tables at '{nessie_ns}'...")
+        # Set the Nessie branch context for this SQL session so that
+        # all CREATE TABLE / COPY INTO statements resolve correctly.
+        print("\nStep 4: Setting Nessie branch context...")
+        self._sql(token, "USE BRANCH main IN NessieSource", timeout=30)
+        print("  Branch context set to 'main'")
+
+        print(f"\nStep 5: Creating Iceberg tables at '{nessie_ns}'...")
         created_tables: list[str] = []
         for subdir, csv_path, table_name in self.iter_seed_csvs():
             cols = self.csv_columns(csv_path)
@@ -516,10 +416,5 @@ class DremioExternalSeeder(ExternalSeeder):
                 self._sql(token, copy_sql, timeout=120)
             except Exception as e:
                 print(f"    Error: {e}")
-
-        # Force Dremio to re-scan NessieSource metadata so the VDS
-        # validator can resolve the new namespace.
-        print("\nStep 5: Forcing NessieSource metadata re-scan...")
-        self._force_metadata_refresh(token, seed_schema)
 
         print("\nDremio seed loading complete.")

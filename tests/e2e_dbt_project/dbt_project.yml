@@ -16,6 +16,9 @@ clean-targets: # directories to be removed by `dbt clean`
   - "dbt_packages"
   - "dbt_modules"
 
+on-run-start:
+  - "{{ 'USE BRANCH main IN ' ~ target.datalake if target.type == 'dremio' else '' }}"
+
 vars:
   days_back: 30
   debug_logs: "{{ env_var('DBT_EDR_DEBUG', False) }}"

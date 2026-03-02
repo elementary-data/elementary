@@ -26,6 +26,9 @@ clean-targets: # directories to be removed by `dbt clean`
   - "dbt_packages"
   - "dbt_modules"
 
+on-run-start:
+  - "{{ 'USE BRANCH main IN ' ~ target.datalake if target.type == 'dremio' else '' }}"
+
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 vars:
