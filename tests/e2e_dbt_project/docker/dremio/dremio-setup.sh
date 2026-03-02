@@ -15,7 +15,7 @@ echo "Dremio is up. Proceeding with configuration..."
 # Log in to Dremio to get the auth token
 # Credentials are passed via environment variables from docker-compose.yml
 DREMIO_USER="${DREMIO_USER:-dremio}"
-DREMIO_PASS="${DREMIO_PASS:-dremio}"
+DREMIO_PASS="${DREMIO_PASS:-dremio123}"
 AUTH_TOKEN=$(curl -s -X POST "http://dremio:9047/apiv2/login" \
   -H "Content-Type: application/json" \
   --data "{\"userName\":\"$DREMIO_USER\", \"password\":\"$DREMIO_PASS\"}" | jq -r '.token // empty')
