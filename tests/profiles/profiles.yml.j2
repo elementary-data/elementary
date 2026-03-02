@@ -124,5 +124,5 @@ elementary:
 {%- for t in targets %}
     {{ t }}:
       <<: *{{ t }}
-      {{ 'dataset' if t == 'bigquery' else ('enterprise_catalog_folder' if t == 'dremio' else 'schema') }}: {{ schema_name }}_elementary
+      {{ 'dataset' if t == 'bigquery' else ('enterprise_catalog_folder' if t == 'dremio' else 'schema') }}: {% if t == 'dremio' %}{{ schema_name }}.elementary{% else %}{{ schema_name }}_elementary{% endif %}
 {%- endfor %}
