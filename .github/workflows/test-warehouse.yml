@@ -317,7 +317,7 @@ jobs:
         run: dbt seed -f --target "${{ inputs.warehouse-type }}"
 
       - name: Save seed cache from Docker volumes
-        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && inputs.warehouse-type != 'spark' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'dremio')
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && inputs.warehouse-type != 'spark' && inputs.warehouse-type != 'dremio' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
@@ -354,12 +354,6 @@ jobs:
               for i in $(seq 1 60); do
                 nc -z 127.0.0.1 10000 && break
                 echo "Waiting for Spark after restart... ($i/60)"; sleep 5
-              done
-              ;;
-            dremio)
-              for i in $(seq 1 60); do
-                curl -sf http://localhost:9047 > /dev/null && break
-                echo "Waiting for Dremio after restart... ($i/60)"; sleep 5
               done
               ;;
             postgres)
