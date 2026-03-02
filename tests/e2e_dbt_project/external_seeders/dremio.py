@@ -266,10 +266,10 @@ class DremioExternalSeeder(ExternalSeeder):
         2. Create an S3 source so Dremio can read those files.
         3. For each CSV, CREATE TABLE in Nessie + COPY INTO from S3.
 
-        With enterprise_catalog_namespace, dbt-dremio's generate_schema_name
-        prefixes root_path for seeds, producing ``elementary_tests.test_seeds``.
-        DremioRelation.quoted_by_component splits dots into separate levels, so
-        seeds resolve to ``NessieSource."elementary_tests"."test_seeds".<table>``.
+        With enterprise_catalog_namespace, seeds use a flat single-level
+        namespace under NessieSource (e.g. ``NessieSource."test_seeds"``).
+        We avoid nested namespaces because dbt-dremio skips folder creation
+        for Nessie sources and Dremio can't create folders inside SOURCEs.
         """
         # dbt_project.yml: seeds: +schema: test_seeds
         seed_schema = "test_seeds"
@@ -283,26 +283,10 @@ class DremioExternalSeeder(ExternalSeeder):
         token = self._get_token()
         self._create_s3_source(token)
 
-        # Nessie uses CREATE FOLDER (not CREATE SCHEMA).
-        # CREATE TABLE implicitly creates the namespace, so we create a
-        # dummy table to ensure the namespace exists, then drop it.
-        nessie_ns = f'NessieSource."{self.schema_name}"."{seed_schema}"'
-        print(f"\nStep 3: Ensuring Nessie namespace '{nessie_ns}' exists...")
-        try:
-            self._sql(
-                token,
-                f'CREATE TABLE IF NOT EXISTS {nessie_ns}."__ns_init" (x VARCHAR)',
-                timeout=30,
-            )
-            self._sql(
-                token,
-                f'DROP TABLE IF EXISTS {nessie_ns}."__ns_init"',
-                timeout=30,
-            )
-        except Exception as e:
-            print(f"  Warning creating namespace: {e}")
-
-        print("\nStep 4: Creating Iceberg tables and loading CSV data...")
+        # Use flat single-level namespace: NessieSource."test_seeds"
+        # CREATE TABLE implicitly creates the Nessie namespace.
+        nessie_ns = f'NessieSource."{seed_schema}"'
+        print(f"\nStep 3: Creating Iceberg tables at '{nessie_ns}'...")
         for subdir, csv_path, table_name in self.iter_seed_csvs():
             cols = self.csv_columns(csv_path)
             if not cols:

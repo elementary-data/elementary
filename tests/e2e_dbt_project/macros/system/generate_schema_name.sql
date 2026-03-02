@@ -1,11 +1,4 @@
 {% macro generate_schema_name(custom_schema_name, node) -%}
-    {#- For Dremio, delegate to the adapter's dremio__generate_schema_name which
-        prefixes root_path for datalake nodes (seeds/tables) so that dot-separated
-        folder paths render correctly via DremioRelation.quoted_by_component. -#}
-    {% if target.type == 'dremio' %}
-      {{ return(dremio__generate_schema_name(custom_schema_name, node)) }}
-    {% endif %}
-
     {%- set default_schema = target.schema -%}
     {% if not custom_schema_name %}
       {% do return(default_schema) %}
@@ -15,5 +8,13 @@
       {% do return(custom_schema_name) %}
     {% endif %}
 
-    {% do return("{}_{}" .format(default_schema, custom_schema_name)) %}
+    {#- For Dremio with enterprise_catalog_namespace, delegate to the adapter's
+        generate_schema_name for non-seed nodes (views/tables) so that
+        root_path is correctly applied. Seeds use flat schema (e.g. test_seeds)
+        to avoid nested Nessie namespaces that Dremio can't create folders for. -#}
+    {% if target.type == 'dremio' %}
+      {{ return(dremio__generate_schema_name(custom_schema_name, node)) }}
+    {% endif %}
+
+    {% do return("{}_{}".format(default_schema, custom_schema_name)) %}
 {%- endmacro %}
