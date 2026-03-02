@@ -149,7 +149,7 @@ services:
 
   # ── Dremio (with Nessie + MinIO) ───────────────────────────────────
   nessie:
-    image: projectnessie/nessie:0.80.0
+    image: ghcr.io/projectnessie/nessie:0.80.0
     container_name: catalog
     networks:
       - dremio-lakehouse
