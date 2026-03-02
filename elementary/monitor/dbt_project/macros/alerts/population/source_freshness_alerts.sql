@@ -97,7 +97,7 @@
       {% if error_after_column_exists %}
         results.error_after,
         results.warn_after,
-        results.filter,
+        results."filter",
       {% endif %}
       results.error,
       sources.database_name,
