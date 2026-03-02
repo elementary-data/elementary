@@ -167,20 +167,26 @@ class DremioExternalSeeder(ExternalSeeder):
         import requests
 
         headers = self._headers(token)
+        # Dremio OSS uses the Catalog API (v3) for source management.
+        # For MinIO compatibility we must set compatibilityMode, path-style
+        # access, and point the endpoint at the Docker-internal hostname.
         payload = {
+            "entityType": "source",
             "name": "SeedFiles",
             "config": {
                 "credentialType": "ACCESS_KEY",
                 "accessKey": self.minio_access_key,
                 "accessSecret": self.minio_secret_key,
                 "secure": False,
-                "externalBucketList": [],
-                "rootPath": "/datalake",
+                "externalBucketList": ["datalake"],
+                "rootPath": "/",
+                "compatibilityMode": True,
+                "enableAsync": True,
                 "propertyList": [
                     {"name": "fs.s3a.path.style.access", "value": "true"},
                     {"name": "fs.s3a.endpoint", "value": "dremio-storage:9000"},
                 ],
-                "whitelistedBuckets": [],
+                "whitelistedBuckets": ["datalake"],
                 "isCachingEnabled": False,
                 "defaultCtasFormat": "ICEBERG",
             },
@@ -195,18 +201,61 @@ class DremioExternalSeeder(ExternalSeeder):
                 "updateMode": "PREFETCH_QUERIED",
             },
         }
-        resp = requests.put(
-            f"http://{self.dremio_host}:{self.dremio_port}/apiv2/source/SeedFiles",
-            headers=headers,
-            json=payload,
-        )
-        if resp.status_code not in (200, 409):
-            print(
-                f"  Warning: SeedFiles source creation returned "
-                f"{resp.status_code}: {resp.text}"
+
+        # Try the v3 Catalog API first (Dremio OSS ≥ 24), fall back to v2.
+        for attempt in range(3):
+            # v3 catalog API – POST to create
+            resp = requests.post(
+                f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog",
+                headers=headers,
+                json=payload,
             )
-        else:
-            print("  SeedFiles S3 source created/updated in Dremio")
+            if resp.status_code in (200, 201):
+                print("  SeedFiles S3 source created via v3 Catalog API")
+                return
+            if resp.status_code == 409:
+                # Source already exists – update it with PUT
+                print("  SeedFiles source exists, updating...")
+                # Get the existing source id + tag for the update
+                get_resp = requests.get(
+                    f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog/by-path/SeedFiles",
+                    headers=headers,
+                )
+                if get_resp.status_code == 200:
+                    existing = get_resp.json()
+                    payload["id"] = existing["id"]
+                    payload["tag"] = existing.get("tag", "")
+                    put_resp = requests.put(
+                        f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog/{existing['id']}",
+                        headers=headers,
+                        json=payload,
+                    )
+                    if put_resp.status_code == 200:
+                        print("  SeedFiles S3 source updated")
+                        return
+                    print(
+                        f"  Warning: update returned {put_resp.status_code}: {put_resp.text}"
+                    )
+                return
+
+            # v2 fallback
+            resp2 = requests.put(
+                f"http://{self.dremio_host}:{self.dremio_port}/apiv2/source/SeedFiles",
+                headers=headers,
+                json=payload,
+            )
+            if resp2.status_code in (200, 409):
+                print("  SeedFiles S3 source created/updated via v2 API")
+                return
+
+            print(
+                f"  Attempt {attempt + 1}/3: source creation failed "
+                f"(v3={resp.status_code}: {resp.text[:200]}, "
+                f"v2={resp2.status_code}: {resp2.text[:200]})"
+            )
+            time.sleep(5)
+
+        print("  ERROR: Failed to create SeedFiles source after 3 attempts")
 
     # ------------------------------------------------------------------
     # Public API
@@ -261,7 +310,7 @@ class DremioExternalSeeder(ExternalSeeder):
 
             # Load CSV data using COPY INTO from the S3 source
             fname = os.path.basename(csv_path)
-            s3_path = f"@SeedFiles/seeds/{subdir}/{fname}"
+            s3_path = f"@SeedFiles/datalake/seeds/{subdir}/{fname}"
             copy_sql = (
                 f"COPY INTO {fqn} "
                 f"FROM '{s3_path}' "
