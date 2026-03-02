@@ -113,10 +113,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9083"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 30
-      start_period: 10s
+      retries: 60
+      start_period: 30s
 
   trino-minio:
     hostname: minio
@@ -183,7 +183,7 @@ services:
       test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 30
 
   dremio-minio-setup:
     image: minio/mc:RELEASE.2024-01-18T07-03-39Z
@@ -265,6 +265,7 @@ services:
       timeout: 5s
       retries: 20
       start_period: 30s
+    user: "0"
     volumes:
       - spark-warehouse:/spark-warehouse/
       - ./docker/spark/hive-site.xml:/usr/spark/conf/hive-site.xml
