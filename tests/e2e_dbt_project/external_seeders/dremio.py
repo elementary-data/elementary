@@ -27,6 +27,10 @@ def _docker_defaults() -> dict[str, str]:
         for item in services.get("dremio-minio", {}).get("environment", []):
             if isinstance(item, str) and "=" in item:
                 k, v = item.split("=", 1)
+                # Resolve ${VAR:-default} patterns to just the default value
+                m = re.match(r"\$\{[^:}]+:-([^}]+)\}", v)
+                if m:
+                    v = m.group(1)
                 if k == "MINIO_ROOT_USER":
                     defaults["MINIO_ACCESS_KEY"] = v
                 elif k == "MINIO_ROOT_PASSWORD":
@@ -35,14 +39,16 @@ def _docker_defaults() -> dict[str, str]:
         pass
 
     # --- dremio-setup.sh: Dremio login credentials ---
+    # Extract default values from bash variable assignments like:
+    #   DREMIO_PASS="${DREMIO_PASS:-dremio123}"
     setup_path = os.path.join(project_dir, "docker", "dremio", "dremio-setup.sh")
     try:
         with open(setup_path) as fh:
             content = fh.read()
-        m = re.search(r'\\?"password\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
+        m = re.search(r'DREMIO_PASS="\$\{DREMIO_PASS:-([^}]+)\}"', content)
         if m:
             defaults["DREMIO_PASS"] = m.group(1)
-        m = re.search(r'\\?"userName\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
+        m = re.search(r'DREMIO_USER="\$\{DREMIO_USER:-([^}]+)\}"', content)
         if m:
             defaults["DREMIO_USER"] = m.group(1)
     except Exception:
