@@ -183,7 +183,8 @@ services:
       test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 5s
-      retries: 30
+      retries: 60
+      start_period: 10s
 
   dremio-minio-setup:
     image: minio/mc:RELEASE.2024-01-18T07-03-39Z
@@ -222,7 +223,7 @@ services:
       test: ["CMD-SHELL", "curl -sf http://localhost:9047 || exit 1"]
       interval: 5s
       timeout: 5s
-      retries: 30
+      retries: 60
       start_period: 15s
 
   dremio-setup:
