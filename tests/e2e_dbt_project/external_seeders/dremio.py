@@ -132,11 +132,11 @@ class DremioExternalSeeder(ExternalSeeder):
     # ------------------------------------------------------------------
 
     def _create_nessie_namespace(self, namespace: str) -> None:
-        """Create a Nessie namespace via the Nessie REST API (v2).
+        """Create a Nessie namespace via REST API.
 
-        Nessie ≥ 0.52.3 requires explicit namespace creation before tables
-        can be committed.  We call the Nessie API directly (not through
-        Dremio) so the namespace is registered *before* any SQL runs.
+        Nessie requires explicit namespace creation before tables can be
+        committed.  We try multiple API variants because the available
+        endpoints depend on the Nessie version and configuration.
         """
         import requests
 
@@ -144,9 +144,9 @@ class DremioExternalSeeder(ExternalSeeder):
         nessie_port = int(os.environ.get("NESSIE_PORT", "19120"))
         base = f"http://{nessie_host}:{nessie_port}"
 
-        # Try the Iceberg REST Catalog endpoint first (newer Nessie versions)
-        # POST /iceberg/v1/namespaces
-        iceberg_url = f"{base}/iceberg/main/v1/namespaces"
+        # 1) Iceberg REST Catalog: POST /iceberg/v1/{prefix}/namespaces
+        #    where {prefix} is the branch name ("main")
+        iceberg_url = f"{base}/iceberg/v1/main/namespaces"
         payload = {"namespace": [namespace], "properties": {}}
         try:
             resp = requests.post(iceberg_url, json=payload, timeout=10)
@@ -154,57 +154,99 @@ class DremioExternalSeeder(ExternalSeeder):
                 print(f"  Created Nessie namespace '{namespace}' via Iceberg REST")
                 return
             if resp.status_code == 409:
-                print(f"  Nessie namespace '{namespace}' already exists")
+                print(f"  Nessie namespace '{namespace}' already exists (Iceberg)")
                 return
             print(f"  Iceberg REST returned {resp.status_code}: {resp.text[:200]}")
         except Exception as e:
             print(f"  Iceberg REST endpoint not available: {e}")
 
-        # Fall back to Nessie native API v2
-        # PUT /api/v2/trees/main/contents/namespace
-        nessie_url = f"{base}/api/v2/trees/main/contents/{namespace}"
-        nessie_payload = {
-            "content": {
-                "type": "NAMESPACE",
-                "elements": [namespace],
-                "properties": {},
-            }
+        # 2) Nessie v1 namespace API: PUT /api/v1/namespaces/namespace/main
+        v1_url = f"{base}/api/v1/namespaces/namespace/main"
+        v1_payload = {
+            "namespace": {"elements": [namespace]},
+            "properties": {},
         }
         try:
-            resp = requests.put(nessie_url, json=nessie_payload, timeout=10)
+            resp = requests.put(v1_url, json=v1_payload, timeout=10)
             if resp.status_code in (200, 201, 204):
-                print(f"  Created Nessie namespace '{namespace}' via Nessie API v2")
+                print(f"  Created Nessie namespace '{namespace}' via Nessie v1 API")
+                return
+            if resp.status_code == 409:
+                print(f"  Nessie namespace '{namespace}' already exists (v1)")
+                return
+            print(f"  Nessie v1 returned {resp.status_code}: {resp.text[:200]}")
+        except Exception as e:
+            print(f"  Nessie v1 failed: {e}")
+
+        # 3) Nessie v2: POST commit to create namespace content
+        v2_url = f"{base}/api/v2/trees/main/history"
+        v2_payload = {
+            "commitMeta": {"message": f"create namespace {namespace}"},
+            "operations": [
+                {
+                    "type": "PUT",
+                    "key": {"elements": [namespace]},
+                    "content": {
+                        "type": "NAMESPACE",
+                        "elements": [namespace],
+                        "properties": {},
+                    },
+                }
+            ],
+        }
+        try:
+            resp = requests.post(v2_url, json=v2_payload, timeout=10)
+            if resp.status_code in (200, 201, 204):
+                print(f"  Created Nessie namespace '{namespace}' via Nessie v2 API")
                 return
             if resp.status_code == 409:
                 print(f"  Nessie namespace '{namespace}' already exists (v2)")
                 return
-            print(f"  Nessie API v2 returned {resp.status_code}: {resp.text[:200]}")
+            print(f"  Nessie v2 returned {resp.status_code}: {resp.text[:200]}")
         except Exception as e:
-            print(f"  Nessie API v2 failed: {e}")
+            print(f"  Nessie v2 failed: {e}")
 
         print(
             f"  Warning: could not create Nessie namespace '{namespace}' via REST API"
         )
 
-    def _refresh_nessie_source(self, token: str) -> None:
-        """Refresh NessieSource metadata so Dremio picks up new namespaces."""
-        try:
-            self._sql(token, "ALTER SOURCE NessieSource REFRESH STATUS", timeout=30)
-            print("  NessieSource metadata refreshed")
-        except Exception as e:
-            print(f"  Warning: source refresh failed: {e}")
-        # Also try full metadata refresh
+    def _force_namespace_discovery(
+        self, token: str, nessie_ns: str, table_names: list[str]
+    ) -> None:
+        """Force Dremio to discover a Nessie namespace by querying tables.
+
+        After creating tables via SQL, Dremio's view validator may not see
+        the namespace until it has been accessed via a read query.  We run
+        a lightweight SELECT on each table to populate the catalog cache.
+        """
+        print("  Querying seed tables to force Dremio catalog discovery...")
+        for tbl in table_names[:3]:  # First few tables are enough
+            fqn = f'{nessie_ns}."{tbl}"'
+            try:
+                self._sql(token, f"SELECT COUNT(*) FROM {fqn}", timeout=30)
+                print(f"    Verified: {tbl}")
+            except Exception as e:
+                print(f"    Warning querying {tbl}: {e}")
+
+        # Also try listing schemas to force namespace enumeration
         try:
             self._sql(
                 token,
-                "ALTER SOURCE NessieSource REFRESH METADATA",
-                timeout=60,
+                "SELECT * FROM INFORMATION_SCHEMA.SCHEMATA"
+                " WHERE SCHEMA_NAME LIKE '%test_seeds%'",
+                timeout=15,
             )
-            print("  NessieSource full metadata refreshed")
+            print("  Schema discovery query completed")
+        except Exception:
+            pass
+
+    def _refresh_nessie_source(self, token: str) -> None:
+        """Refresh NessieSource so Dremio picks up new namespaces/tables."""
+        try:
+            self._sql(token, "ALTER SOURCE NessieSource REFRESH STATUS", timeout=30)
+            print("  NessieSource status refreshed")
         except Exception as e:
-            print(
-                f"  Warning: full metadata refresh failed (may not be supported): {e}"
-            )
+            print(f"  Warning: source refresh failed: {e}")
 
     # ------------------------------------------------------------------
     # MinIO upload
@@ -369,6 +411,7 @@ class DremioExternalSeeder(ExternalSeeder):
 
         nessie_ns = f'NessieSource."{seed_schema}"'
         print(f"\nStep 4: Creating Iceberg tables at '{nessie_ns}'...")
+        created_tables: list[str] = []
         for subdir, csv_path, table_name in self.iter_seed_csvs():
             cols = self.csv_columns(csv_path)
             if not cols:
@@ -382,6 +425,7 @@ class DremioExternalSeeder(ExternalSeeder):
             create_sql = f"CREATE TABLE IF NOT EXISTS {fqn} ({col_defs})"
             try:
                 self._sql(token, create_sql, timeout=60)
+                created_tables.append(table_name)
             except Exception as e:
                 print(f"  Error creating table {table_name}: {e}")
                 continue
@@ -408,5 +452,16 @@ class DremioExternalSeeder(ExternalSeeder):
         # Refresh NessieSource so Dremio sees the new namespace + tables
         print("\nStep 5: Refreshing NessieSource metadata...")
         self._refresh_nessie_source(token)
+
+        # Force Dremio to discover the namespace by querying tables.
+        # This populates Dremio's catalog cache so the view validator
+        # can resolve cross-source references to Nessie namespaces.
+        print("\nStep 6: Forcing Dremio namespace discovery...")
+        if created_tables:
+            self._force_namespace_discovery(token, nessie_ns, created_tables)
+
+        # Give Dremio catalog time to sync after queries
+        print("  Waiting 15s for Dremio catalog sync...")
+        time.sleep(15)
 
         print("\nDremio seed loading complete.")
