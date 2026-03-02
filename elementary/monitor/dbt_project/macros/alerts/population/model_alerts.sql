@@ -52,7 +52,7 @@
         select * from {{ ref('dbt_models', package='elementary') }}
     ),
 
-    snapshots as (
+    snapshots_data as (
         select * from {{ ref('dbt_snapshots', package='elementary') }}
     ),
 
@@ -71,7 +71,7 @@
     artifacts_meta as (
         select unique_id, meta from models
         union all
-        select unique_id, meta from snapshots
+        select unique_id, meta from snapshots_data
         union all
         select unique_id, meta from seeds
     ),
