@@ -231,6 +231,8 @@ services:
     depends_on:
       dremio:
         condition: service_healthy
+      nessie:
+        condition: service_healthy
       dremio-minio-setup:
         condition: service_completed_successfully
     environment:
