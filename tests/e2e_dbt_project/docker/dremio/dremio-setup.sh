@@ -24,7 +24,7 @@ fi
 
 echo "Obtained Dremio auth token"
 
-# Create a Nessie catalog source in Dremio (supports CREATE TABLE for dbt seed)
+# Create a Nessie catalog source in Dremio (used as "database" for views)
 curl -s -X PUT "http://dremio:9047/apiv2/source/NessieSource" \
   -H "Content-Type: application/json" \
   -H "Authorization: _dremio$AUTH_TOKEN" \

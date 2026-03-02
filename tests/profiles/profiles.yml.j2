@@ -41,7 +41,7 @@ elementary_tests:
       password: dremio123
       use_ssl: false
       datalake: NessieSource
-      root_path: NessieSource.{{ schema_name }}
+      root_path: {{ schema_name }}
       database: NessieSource
       schema: {{ schema_name }}
       threads: 4

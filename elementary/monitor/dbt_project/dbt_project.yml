@@ -31,6 +31,10 @@ clean-targets: # directories to be removed by `dbt clean`
 vars:
   edr_cli_run: true
 
+models:
+  elementary_cli:
+    +file_format: "{{ 'delta' if target.type == 'spark' else none }}"
+
 quoting:
   database: "{{ env_var('DATABASE_QUOTING', 'None') | as_native }}"
   schema: "{{ env_var('SCHEMA_QUOTING', 'None')  | as_native }}"
