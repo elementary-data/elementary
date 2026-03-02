@@ -97,7 +97,7 @@
       {% if error_after_column_exists %}
         results.error_after,
         results.warn_after,
-        results."filter",
+        {% if target.type == 'dremio' %}results."filter"{% else %}results.filter{% endif %},
       {% endif %}
       results.error,
       sources.database_name,
