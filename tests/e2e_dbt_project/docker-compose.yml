@@ -115,8 +115,8 @@ services:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9083'"]
       interval: 10s
       timeout: 5s
-      retries: 30
-      start_period: 30s
+      retries: 60
+      start_period: 60s
 
   trino-minio:
     hostname: minio
