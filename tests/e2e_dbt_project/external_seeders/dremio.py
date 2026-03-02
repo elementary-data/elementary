@@ -3,24 +3,27 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 
 import yaml
 from external_seeders.base import ExternalSeeder
 
 
-def _compose_defaults() -> dict[str, str]:
-    """Read default credentials from docker-compose.yml service definitions."""
-    compose_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "docker-compose.yml",
-    )
+def _docker_defaults() -> dict[str, str]:
+    """Read default credentials from docker-compose.yml and dremio-setup.sh.
+
+    These are local Docker test credentials, not production secrets.
+    """
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     defaults: dict[str, str] = {}
+
+    # --- docker-compose.yml: MinIO credentials ---
+    compose_path = os.path.join(project_dir, "docker-compose.yml")
     try:
         with open(compose_path) as fh:
             cfg = yaml.safe_load(fh)
         services = cfg.get("services", {})
-        # Dremio MinIO service stores creds as list items: "KEY=VALUE"
         for item in services.get("dremio-minio", {}).get("environment", []):
             if isinstance(item, str) and "=" in item:
                 k, v = item.split("=", 1)
@@ -30,6 +33,22 @@ def _compose_defaults() -> dict[str, str]:
                     defaults["MINIO_SECRET_KEY"] = v
     except Exception:
         pass
+
+    # --- dremio-setup.sh: Dremio login credentials ---
+    setup_path = os.path.join(project_dir, "docker", "dremio", "dremio-setup.sh")
+    try:
+        with open(setup_path) as fh:
+            content = fh.read()
+        # Extract password from the curl login JSON payload
+        m = re.search(r'"password"\s*:\s*"([^"]+)"', content)
+        if m:
+            defaults["DREMIO_PASS"] = m.group(1)
+        m = re.search(r'"userName"\s*:\s*"([^"]+)"', content)
+        if m:
+            defaults["DREMIO_USER"] = m.group(1)
+    except Exception:
+        pass
+
     return defaults
 
 
@@ -43,10 +62,12 @@ class DremioExternalSeeder(ExternalSeeder):
 
     def __init__(self, data_dir: str, schema_name: str) -> None:
         super().__init__(data_dir, schema_name)
-        _defaults = _compose_defaults()
+        _defaults = _docker_defaults()
         self.dremio_host = os.environ.get("DREMIO_HOST", "localhost")
         self.dremio_port = int(os.environ.get("DREMIO_PORT", "9047"))
-        self.dremio_user = os.environ.get("DREMIO_USER", "dremio")
+        self.dremio_user = os.environ.get(
+            "DREMIO_USER", _defaults.get("DREMIO_USER", "dremio")
+        )
         self.dremio_pass = os.environ.get(
             "DREMIO_PASS", _defaults.get("DREMIO_PASS", "")
         )
