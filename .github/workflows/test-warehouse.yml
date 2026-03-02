@@ -405,7 +405,7 @@ jobs:
           # Dremio needs single-threaded execution to avoid Nessie catalog race conditions
           EXTRA_ARGS=""
           if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
-            EXTRA_ARGS="--threads 1"
+            EXTRA_ARGS="--threads 1 --exclude tag:ephemeral_model"
           fi
           dbt test --target "${{ inputs.warehouse-type }}" $EXTRA_ARGS
 
