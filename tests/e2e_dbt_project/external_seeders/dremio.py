@@ -269,7 +269,7 @@ class DremioExternalSeeder(ExternalSeeder):
         With enterprise_catalog_namespace, seeds use a flat single-level
         namespace under NessieSource (e.g. ``NessieSource."test_seeds"``).
         We avoid nested namespaces because dbt-dremio skips folder creation
-        for Nessie sources and Dremio can't create folders inside SOURCEs.
+        for Nessie sources and Dremio cannot create folders inside a SOURCE.
         """
         # dbt_project.yml: seeds: +schema: test_seeds
         seed_schema = "test_seeds"
