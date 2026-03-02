@@ -6,7 +6,6 @@ import os
 import time
 
 import yaml
-
 from external_seeders.base import ExternalSeeder
 
 
@@ -48,7 +47,9 @@ class DremioExternalSeeder(ExternalSeeder):
         self.dremio_host = os.environ.get("DREMIO_HOST", "localhost")
         self.dremio_port = int(os.environ.get("DREMIO_PORT", "9047"))
         self.dremio_user = os.environ.get("DREMIO_USER", "dremio")
-        self.dremio_pass = os.environ.get("DREMIO_PASS", _defaults.get("DREMIO_PASS", ""))
+        self.dremio_pass = os.environ.get(
+            "DREMIO_PASS", _defaults.get("DREMIO_PASS", "")
+        )
         self.minio_access_key = os.environ.get(
             "MINIO_ACCESS_KEY", _defaults.get("MINIO_ACCESS_KEY", "")
         )
