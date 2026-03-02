@@ -112,10 +112,10 @@ services:
       trino-minio:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 9083"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9083'"]
       interval: 10s
       timeout: 5s
-      retries: 60
+      retries: 30
       start_period: 30s
 
   trino-minio:
@@ -180,11 +180,10 @@ services:
     volumes:
       - dremio-minio-data:/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9000'"]
       interval: 5s
       timeout: 5s
-      retries: 60
-      start_period: 10s
+      retries: 10
 
   dremio-minio-setup:
     image: minio/mc:RELEASE.2024-01-18T07-03-39Z
