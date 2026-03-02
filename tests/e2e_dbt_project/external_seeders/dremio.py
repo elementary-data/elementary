@@ -182,12 +182,14 @@ class DremioExternalSeeder(ExternalSeeder):
         except Exception as e:
             print(f"  Nessie API v2 failed: {e}")
 
-        print(f"  Warning: could not create Nessie namespace '{namespace}' via REST API")
+        print(
+            f"  Warning: could not create Nessie namespace '{namespace}' via REST API"
+        )
 
     def _refresh_nessie_source(self, token: str) -> None:
         """Refresh NessieSource metadata so Dremio picks up new namespaces."""
         try:
-            self._sql(token, 'ALTER SOURCE NessieSource REFRESH STATUS', timeout=30)
+            self._sql(token, "ALTER SOURCE NessieSource REFRESH STATUS", timeout=30)
             print("  NessieSource metadata refreshed")
         except Exception as e:
             print(f"  Warning: source refresh failed: {e}")
@@ -200,7 +202,9 @@ class DremioExternalSeeder(ExternalSeeder):
             )
             print("  NessieSource full metadata refreshed")
         except Exception as e:
-            print(f"  Warning: full metadata refresh failed (may not be supported): {e}")
+            print(
+                f"  Warning: full metadata refresh failed (may not be supported): {e}"
+            )
 
     # ------------------------------------------------------------------
     # MinIO upload
