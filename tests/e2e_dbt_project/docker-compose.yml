@@ -7,13 +7,18 @@ services:
       - "127.0.0.1:5432:5432"
     command: postgres -c max_connections=500
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
     volumes:
       - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:24.3
     container_name: clickhouse
     ports:
       - "8123:8123"
@@ -23,11 +28,16 @@ services:
     environment:
       CLICKHOUSE_DB: default
       CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: "default"
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-default}
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # ── Trino (with Iceberg + Hive Metastore + MinIO) ──────────────────
   trino:
@@ -37,14 +47,30 @@ services:
     volumes:
       - ./docker/trino/etc:/usr/lib/trino/etc:ro
       - ./docker/trino/catalog:/etc/trino/catalog
+    depends_on:
+      hive-metastore:
+        condition: service_healthy
+      trino-mc-job:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/v1/info | grep -q '\"starting\":false'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 10s
 
   trino-metastore-db:
     image: postgres:11
     hostname: metastore_db
     environment:
-      POSTGRES_USER: hive
-      POSTGRES_PASSWORD: hive
+      POSTGRES_USER: ${HIVE_METASTORE_USER:-hive}
+      POSTGRES_PASSWORD: ${HIVE_METASTORE_PASSWORD:-hive}
       POSTGRES_DB: metastore
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${HIVE_METASTORE_USER:-hive}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   hive-metastore:
     hostname: hive-metastore
@@ -54,12 +80,12 @@ services:
     environment:
       HIVE_METASTORE_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_JDBC_URL: jdbc:postgresql://metastore_db:5432/metastore
-      HIVE_METASTORE_USER: hive
-      HIVE_METASTORE_PASSWORD: hive
+      HIVE_METASTORE_USER: ${HIVE_METASTORE_USER:-hive}
+      HIVE_METASTORE_PASSWORD: ${HIVE_METASTORE_PASSWORD:-hive}
       HIVE_METASTORE_WAREHOUSE_DIR: s3://datalake/
       S3_ENDPOINT: http://trino-minio:9000
-      S3_ACCESS_KEY: minio
-      S3_SECRET_KEY: minio123
+      S3_ACCESS_KEY: ${TRINO_MINIO_ACCESS_KEY:-minio}
+      S3_SECRET_KEY: ${TRINO_MINIO_SECRET_KEY:-minio123}
       S3_PATH_STYLE_ACCESS: "true"
       REGION: ""
       GOOGLE_CLOUD_KEY_FILE_PATH: ""
@@ -77,7 +103,16 @@ services:
       AZURE_WASB_ACCESS_KEY: ""
       HIVE_METASTORE_USERS_IN_ADMIN_ROLE: "admin"
     depends_on:
-      - trino-metastore-db
+      trino-metastore-db:
+        condition: service_healthy
+      trino-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9083"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
 
   trino-minio:
     hostname: minio
@@ -86,36 +121,48 @@ services:
       - "9002:9000"
       - "9003:9001"
     environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+      MINIO_ACCESS_KEY: ${TRINO_MINIO_ACCESS_KEY:-minio}
+      MINIO_SECRET_KEY: ${TRINO_MINIO_SECRET_KEY:-minio123}
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   trino-mc-job:
     image: "minio/mc:RELEASE.2022-05-09T04-08-26Z"
     entrypoint: |
       /bin/bash -c "
-      sleep 5;
-      /usr/bin/mc config --quiet host add myminio http://minio:9000 minio minio123;
-      /usr/bin/mc mb --quiet myminio/datalake
+      until /usr/bin/mc config --quiet host add myminio http://minio:9000 $${TRINO_MINIO_ACCESS_KEY:-minio} $${TRINO_MINIO_SECRET_KEY:-minio123}; do
+        sleep 2;
+      done;
+      /usr/bin/mc mb --quiet --ignore-existing myminio/datalake
       "
     depends_on:
-      - trino-minio
+      trino-minio:
+        condition: service_healthy
 
   # ── Dremio (with Nessie + MinIO) ───────────────────────────────────
   nessie:
-    image: projectnessie/nessie:latest
+    image: projectnessie/nessie:0.80.0
     container_name: catalog
     networks:
       - dremio-lakehouse
     ports:
       - "19120:19120"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:19120/api/v2/config || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   dremio-minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-01-18T22-51-28Z
     container_name: dremio-storage
     environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=password
+      - MINIO_ROOT_USER=${DREMIO_MINIO_ROOT_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${DREMIO_MINIO_ROOT_PASSWORD:-password}
       - MINIO_DOMAIN=storage
       - MINIO_REGION_NAME=us-east-1
       - MINIO_REGION=us-east-1
@@ -127,27 +174,29 @@ services:
     command: ["server", "/data", "--console-address", ":9001"]
     volumes:
       - dremio-minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   dremio-minio-setup:
-    image: minio/mc
+    image: minio/mc:RELEASE.2024-01-18T07-03-39Z
     container_name: dremio-minio-setup
     depends_on:
-      - dremio-minio
+      dremio-minio:
+        condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      until (echo > /dev/tcp/dremio-storage/9000) >/dev/null 2>&1; do
-        echo 'Waiting for MinIO...';
-        sleep 2;
-      done;
-      mc alias set myminio http://dremio-storage:9000 admin password;
-      mc mb myminio/datalake;
+      mc alias set myminio http://dremio-storage:9000 $${DREMIO_MINIO_ROOT_USER:-admin} $${DREMIO_MINIO_ROOT_PASSWORD:-password};
+      mc mb --ignore-existing myminio/datalake;
       mc ls myminio;
       "
     networks:
       - dremio-lakehouse
 
   dremio:
-    image: dremio/dremio-oss:latest
+    image: dremio/dremio-oss:25.1.0
     platform: linux/amd64
     ports:
       - "9047:9047"
@@ -172,11 +221,18 @@ services:
       start_period: 15s
 
   dremio-setup:
-    image: alpine:latest
+    image: alpine:3.19
     container_name: dremio-setup
     depends_on:
       dremio:
         condition: service_healthy
+      dremio-minio-setup:
+        condition: service_completed_successfully
+    environment:
+      DREMIO_USER: ${DREMIO_USER:-dremio}
+      DREMIO_PASS: ${DREMIO_PASS:-dremio123}
+      MINIO_ROOT_USER: ${DREMIO_MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${DREMIO_MINIO_ROOT_PASSWORD:-password}
     volumes:
       - ./docker/dremio/dremio-setup.sh:/dremio-setup.sh
     command: sh /dremio-setup.sh
@@ -193,7 +249,8 @@ services:
       - "10000:10000"
       - "4040:4040"
     depends_on:
-      - spark-hive-metastore
+      spark-hive-metastore:
+        condition: service_healthy
     command: >
       --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
       --name Thrift JDBC/ODBC Server
@@ -216,9 +273,14 @@ services:
     volumes:
       - spark-hive-metastore:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=dbt
-      - POSTGRES_PASSWORD=dbt
+      - POSTGRES_USER=${SPARK_METASTORE_USER:-dbt}
+      - POSTGRES_PASSWORD=${SPARK_METASTORE_PASSWORD:-dbt}
       - POSTGRES_DB=metastore
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SPARK_METASTORE_USER:-dbt}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   dremio-lakehouse:
