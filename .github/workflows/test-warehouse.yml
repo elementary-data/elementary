@@ -146,7 +146,10 @@ jobs:
         if: inputs.warehouse-type == 'dremio'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
-          docker compose up -d --wait dremio-setup
+          # Run dremio-setup in foreground so it blocks until the init script
+          # finishes creating the NessieSource.  The container's depends_on
+          # ensures Dremio + MinIO are healthy before the script starts.
+          docker compose up --exit-code-from dremio-setup dremio-setup
 
       - name: Start Spark
         if: inputs.warehouse-type == 'spark'
