@@ -15,18 +15,24 @@
 #}
 
 {%- macro ref(model_name_or_package, model_name=none, v=none, version=none, package=none) -%}
+  {%- set effective_version = v if v is not none else version -%}
   {%- if model_name is not none -%}
     {#- Two-arg positional: ref('package', 'model') -#}
-    {%- do return(builtins.ref(model_name_or_package, model_name)) -%}
+    {%- if effective_version is not none -%}
+      {%- do return(builtins.ref(model_name_or_package, model_name, v=effective_version)) -%}
+    {%- else -%}
+      {%- do return(builtins.ref(model_name_or_package, model_name)) -%}
+    {%- endif -%}
   {%- elif package is not none -%}
     {#- Legacy keyword: ref('model', package='pkg') -#}
-    {%- do return(builtins.ref(package, model_name_or_package)) -%}
-  {%- elif v is not none -%}
-    {#- Versioned: ref('model', v=1) -#}
-    {%- do return(builtins.ref(model_name_or_package, v=v)) -%}
-  {%- elif version is not none -%}
-    {#- Versioned: ref('model', version=1) -#}
-    {%- do return(builtins.ref(model_name_or_package, v=version)) -%}
+    {%- if effective_version is not none -%}
+      {%- do return(builtins.ref(package, model_name_or_package, v=effective_version)) -%}
+    {%- else -%}
+      {%- do return(builtins.ref(package, model_name_or_package)) -%}
+    {%- endif -%}
+  {%- elif effective_version is not none -%}
+    {#- Versioned: ref('model', v=1) or ref('model', version=1) -#}
+    {%- do return(builtins.ref(model_name_or_package, v=effective_version)) -%}
   {%- else -%}
     {#- Simple: ref('model') -#}
     {%- do return(builtins.ref(model_name_or_package)) -%}
