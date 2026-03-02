@@ -317,7 +317,7 @@ jobs:
         run: dbt seed -f --target "${{ inputs.warehouse-type }}"
 
       - name: Save seed cache from Docker volumes
-        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && inputs.warehouse-type != 'spark' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'dremio')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"

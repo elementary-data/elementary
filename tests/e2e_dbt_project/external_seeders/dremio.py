@@ -209,87 +209,17 @@ class DremioExternalSeeder(ExternalSeeder):
             print("  SeedFiles S3 source created/updated in Dremio")
 
     # ------------------------------------------------------------------
-    # Metadata refresh
-    # ------------------------------------------------------------------
-
-    def _refresh_source(self, token: str) -> None:
-        import requests
-
-        headers = self._headers(token)
-        resp = requests.get(
-            f"http://{self.dremio_host}:{self.dremio_port}/apiv2/source/SeedFiles",
-            headers=headers,
-        )
-        if resp.status_code == 200:
-            requests.post(
-                f"http://{self.dremio_host}:{self.dremio_port}/apiv2/source/SeedFiles/refresh",
-                headers=headers,
-            )
-            print("  SeedFiles metadata refresh triggered")
-            time.sleep(5)
-
-    # ------------------------------------------------------------------
-    # CSV promotion
-    # ------------------------------------------------------------------
-
-    def _promote_csv(self, token: str, path_parts: list[str]) -> bool:
-        import requests
-
-        headers = self._headers(token)
-        full_path = ["SeedFiles"] + path_parts
-        encoded = ".".join(f'"{p}"' for p in full_path)
-        path_param = "/".join(full_path)
-
-        resp = requests.get(
-            f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog/by-path/{path_param}",
-            headers=headers,
-        )
-        if resp.status_code != 200:
-            print(f"    Cannot find file at {path_param}: {resp.status_code}")
-            return False
-
-        entity = resp.json()
-        if entity.get("entityType") == "dataset":
-            print(f"    Already promoted: {encoded}")
-            return True
-
-        entity_id = entity.get("id")
-        if not entity_id:
-            return False
-
-        promote_payload = {
-            "id": entity_id,
-            "path": full_path,
-            "type": "PHYSICAL_DATASET",
-            "entityType": "dataset",
-            "format": {
-                "type": "Text",
-                "fieldDelimiter": ",",
-                "lineDelimiter": "\n",
-                "quote": '"',
-                "comment": "#",
-                "extractHeader": True,
-                "trimHeader": True,
-                "autoGenerateColumnNames": False,
-            },
-        }
-        resp2 = requests.put(
-            f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog/{entity_id}",
-            headers=headers,
-            json=promote_payload,
-        )
-        if resp2.status_code in (200, 201):
-            print(f"    Promoted: {encoded}")
-            return True
-        print(f"    Promote failed ({resp2.status_code}): {resp2.text[:200]}")
-        return False
-
-    # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
 
     def load(self) -> None:
-        print("\n=== Loading Dremio seeds via MinIO ===")
+        """Load seeds using COPY INTO (no fragile CSV promotion needed).
+
+        1. Upload CSVs to MinIO.
+        2. Create an S3 source so Dremio can read those files.
+        3. For each CSV, CREATE TABLE in Nessie + COPY INTO from S3.
+        """
+        print("\n=== Loading Dremio seeds via MinIO + COPY INTO ===")
 
         print("\nStep 1: Uploading CSVs to MinIO...")
         self._upload_csvs_to_minio()
@@ -298,11 +228,7 @@ class DremioExternalSeeder(ExternalSeeder):
         token = self._get_token()
         self._create_s3_source(token)
 
-        print("\nStep 3: Refreshing source metadata...")
-        self._refresh_source(token)
-        time.sleep(5)
-
-        print(f"\nStep 4: Creating Nessie namespace '{self.schema_name}'...")
+        print(f"\nStep 3: Creating Nessie namespace '{self.schema_name}'...")
         try:
             self._sql(
                 token,
@@ -311,42 +237,40 @@ class DremioExternalSeeder(ExternalSeeder):
         except Exception as e:
             print(f"  Warning creating schema: {e}")
 
-        print("\nStep 5: Creating Iceberg tables from promoted CSVs...")
+        print("\nStep 4: Creating Iceberg tables and loading CSV data...")
         for subdir, csv_path, table_name in self.iter_seed_csvs():
-            fname = os.path.basename(csv_path)
+            cols = self.csv_columns(csv_path)
+            if not cols:
+                print(f"  Skipping {table_name} (completely empty file)")
+                continue
+
+            fqn = f'NessieSource."{self.schema_name}"."{table_name}"'
+
+            # Create empty Iceberg table with VARCHAR columns
+            col_defs = ", ".join(f'"{c}" VARCHAR' for c in cols)
+            create_sql = f"CREATE TABLE IF NOT EXISTS {fqn} ({col_defs})"
+            try:
+                self._sql(token, create_sql, timeout=60)
+            except Exception as e:
+                print(f"  Error creating table {table_name}: {e}")
+                continue
 
             if not self.csv_has_data(csv_path):
-                cols = self.csv_columns(csv_path)
-                if not cols:
-                    print(f"  Skipping {table_name} (completely empty file)")
-                    continue
-                col_defs = ", ".join(f'"{c}" VARCHAR' for c in cols)
-                sql = (
-                    f"CREATE TABLE IF NOT EXISTS "
-                    f'NessieSource."{self.schema_name}"."{table_name}" '
-                    f"({col_defs})"
-                )
-                print(f"  Creating empty table: {table_name}")
-                try:
-                    self._sql(token, sql, timeout=60)
-                except Exception as e:
-                    print(f"    Error: {e}")
+                print(f"  Created empty table: {table_name}")
                 continue
 
-            promoted = self._promote_csv(token, ["seeds", subdir, fname])
-            if not promoted:
-                print(f"  Skipping CTAS for {table_name} (promotion failed)")
-                continue
-
-            s3_ref = f'"SeedFiles"."seeds"."{subdir}"."{fname}"'
-            sql = (
-                f"CREATE TABLE IF NOT EXISTS "
-                f'NessieSource."{self.schema_name}"."{table_name}" AS '
-                f"SELECT * FROM {s3_ref}"
+            # Load CSV data using COPY INTO from the S3 source
+            fname = os.path.basename(csv_path)
+            s3_path = f"@SeedFiles/seeds/{subdir}/{fname}"
+            copy_sql = (
+                f"COPY INTO {fqn} "
+                f"FROM '{s3_path}' "
+                f"FILE_FORMAT 'csv' "
+                f"(EXTRACT_HEADER 'true', TRIM_SPACE 'true')"
             )
-            print(f"  CTAS: {table_name}")
+            print(f"  COPY INTO: {table_name}")
             try:
-                self._sql(token, sql, timeout=120)
+                self._sql(token, copy_sql, timeout=120)
             except Exception as e:
                 print(f"    Error: {e}")
 
