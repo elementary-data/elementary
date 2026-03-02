@@ -40,10 +40,8 @@ elementary_tests:
       user: dremio
       password: dremio123
       use_ssl: false
-      datalake: NessieSource
-      root_path: {{ schema_name }}
-      database: elementary_ci
-      schema: {{ schema_name }}
+      enterprise_catalog_namespace: NessieSource
+      enterprise_catalog_folder: {{ schema_name }}
       threads: 4
 
     duckdb: &duckdb

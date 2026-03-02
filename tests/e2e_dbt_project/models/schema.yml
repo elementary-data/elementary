@@ -530,8 +530,7 @@ models:
 
 sources:
   - name: training
-    database: "{{ target.datalake if target.type == 'dremio' else none }}"
-    schema: "{{ target.root_path ~ '.test_seeds' if target.type == 'dremio' else 'test_seeds' }}"
+    schema: test_seeds
     tables:
       - name: users_per_hour_daily_seasonal_training
         columns:
@@ -634,8 +633,7 @@ sources:
 
       - name: users_per_day_weekly_seasonal_training
   - name: validation
-    database: "{{ target.datalake if target.type == 'dremio' else none }}"
-    schema: "{{ target.root_path ~ '.test_seeds' if target.type == 'dremio' else 'test_seeds' }}"
+    schema: test_seeds
     tables:
       - name: users_per_hour_daily_seasonal_validation
       - name: any_type_column_anomalies_validation
