@@ -4,8 +4,8 @@
       select
         *,
         row_number() over (partition by unique_id order by run_results.generated_at desc) as row_number
-      from {{ ref("elementary", "dbt_run_results") }} run_results
-      join {{ ref("elementary", "dbt_models") }} using (unique_id)
+      from {{ ref("dbt_run_results", package="elementary") }} run_results
+      join {{ ref("dbt_models", package="elementary") }} using (unique_id)
     ),
 
     latest_run_results as (

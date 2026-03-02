@@ -196,21 +196,21 @@
         ROW_NUMBER() OVER (PARTITION BY elementary_unique_id ORDER BY etr.detected_at DESC) AS invocations_rank_index,
         etr.failures,
         etr.result_rows
-    FROM {{ ref('elementary', 'elementary_test_results') }} etr
-    JOIN {{ ref('elementary', 'dbt_tests') }} dt ON etr.test_unique_id = dt.unique_id
+    FROM {{ ref('elementary_test_results', package='elementary') }} etr
+    JOIN {{ ref('dbt_tests', package='elementary') }} dt ON etr.test_unique_id = dt.unique_id
     LEFT JOIN (
         SELECT
             min(detected_at) AS first_time_occurred,
             test_unique_id
-        FROM {{ ref('elementary', 'elementary_test_results') }}
+        FROM {{ ref('elementary_test_results', package='elementary') }}
         GROUP BY test_unique_id
     ) first_occurred ON etr.test_unique_id = first_occurred.test_unique_id
     LEFT JOIN (
-        SELECT unique_id, meta, tags, owner FROM {{ ref('elementary', 'dbt_models') }}
+        SELECT unique_id, meta, tags, owner FROM {{ ref('dbt_models', package='elementary') }}
         UNION ALL
-        SELECT unique_id, meta, tags, owner FROM {{ ref('elementary', 'dbt_sources') }}
+        SELECT unique_id, meta, tags, owner FROM {{ ref('dbt_sources', package='elementary') }}
     ) da ON etr.model_unique_id = da.unique_id
-    LEFT JOIN {{ ref('elementary', 'dbt_run_results') }} drr ON etr.test_execution_id = drr.model_execution_id
+    LEFT JOIN {{ ref('dbt_run_results', package='elementary') }} drr ON etr.test_execution_id = drr.model_execution_id
     WHERE {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('etr.detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
     {% endset %}
     {% do elementary.run_query(insert_query) %}

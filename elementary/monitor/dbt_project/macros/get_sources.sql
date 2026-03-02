@@ -1,6 +1,6 @@
 {% macro get_sources() %}
     {% set sources_dict = {} %}
-    {% set dbt_sources_relation = ref('elementary', 'dbt_sources') %}
+    {% set dbt_sources_relation = ref('dbt_sources', package='elementary') %}
     {%- if elementary.relation_exists(dbt_sources_relation) -%}
         --{# TODO: should we group by #}
         {% set get_sources_query %}

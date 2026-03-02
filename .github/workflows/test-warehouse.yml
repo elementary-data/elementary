@@ -117,21 +117,7 @@ jobs:
       - name: Restore cached seed data into Docker volumes
         if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type != 'duckdb'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: |
-          echo "Restoring seed cache for ${{ inputs.warehouse-type }}..."
-          CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
-
-          # Restore each Docker volume from the cached tarballs.
-          # This runs BEFORE services start so containers initialise with cached data.
-          for archive in "$CACHE_DIR"/*.tar.gz; do
-            [ -f "$archive" ] || continue
-            VOLUME_NAME=$(basename "$archive" .tar.gz)
-            echo "Restoring volume $VOLUME_NAME from $archive..."
-            docker volume create "$VOLUME_NAME" 2>/dev/null || true
-            docker run --rm -v "$VOLUME_NAME:/data" -v "$CACHE_DIR:/cache:ro" \
-              alpine sh -c "cd /data && tar xzf /cache/${VOLUME_NAME}.tar.gz"
-          done
-          echo "Seed cache restored."
+        run: bash ci/restore_seed_cache.sh "${{ inputs.warehouse-type }}"
 
       - name: Restore cached DuckDB seed
         if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type == 'duckdb'
@@ -154,73 +140,19 @@ jobs:
         if: inputs.warehouse-type == 'trino'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
-          docker compose up -d trino-minio trino-metastore-db
-          sleep 5
-          docker compose up -d hive-metastore trino-mc-job
-          sleep 10
-          docker compose up -d trino
-          # Wait for Trino to be fully ready (not just HTTP responding, but initialized)
-          ready=0
-          for i in $(seq 1 60); do
-            if curl -sf http://localhost:8086/v1/info 2>/dev/null | grep -q '"starting":false'; then
-              ready=1
-              break
-            fi
-            echo "Waiting for Trino... ($i/60)"
-            sleep 5
-          done
-          if [ "$ready" -ne 1 ]; then
-            echo "Timed out waiting for Trino"
-            exit 1
-          fi
+          docker compose up -d --wait trino
 
       - name: Start Dremio
         if: inputs.warehouse-type == 'dremio'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
-          docker compose up -d nessie dremio-minio
-          sleep 5
-          docker compose up -d dremio-minio-setup
-          docker compose up -d dremio
-          # Wait for Dremio healthcheck
-          ready=0
-          for i in $(seq 1 60); do
-            if curl -sf http://localhost:9047 > /dev/null; then
-              ready=1
-              break
-            fi
-            echo "Waiting for Dremio... ($i/60)"
-            sleep 5
-          done
-          if [ "$ready" -ne 1 ]; then
-            echo "Timed out waiting for Dremio"
-            exit 1
-          fi
-          docker compose up -d dremio-setup
-          # Wait for setup to complete
-          sleep 15
+          docker compose up -d --wait dremio-setup
 
       - name: Start Spark
         if: inputs.warehouse-type == 'spark'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
-          docker compose up -d spark-hive-metastore
-          sleep 5
-          docker compose up -d --build spark-thrift
-          # Wait for Spark Thrift Server to be ready
-          ready=0
-          for i in $(seq 1 60); do
-            if nc -z 127.0.0.1 10000; then
-              ready=1
-              break
-            fi
-            echo "Waiting for Spark Thrift Server... ($i/60)"
-            sleep 5
-          done
-          if [ "$ready" -ne 1 ]; then
-            echo "Timed out waiting for Spark Thrift Server"
-            exit 1
-          fi
+          docker compose up -d --build --wait spark-thrift
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -319,51 +251,7 @@ jobs:
       - name: Save seed cache from Docker volumes
         if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && inputs.warehouse-type != 'spark' && inputs.warehouse-type != 'dremio' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: |
-          CACHE_DIR="/tmp/seed-cache-${{ inputs.warehouse-type }}"
-          mkdir -p "$CACHE_DIR"
-
-          # Get the Docker Compose project name and list volumes
-          COMPOSE_VOLUMES=$(docker compose config --volumes 2>/dev/null || true)
-          PROJECT=$(docker compose config 2>/dev/null | grep '^name:' | awk '{print $2}' || echo "e2e_dbt_project")
-
-          # Stop running containers so no files change while archiving
-          docker compose stop || true
-
-          for vol in $COMPOSE_VOLUMES; do
-            FULL_VOL="${PROJECT}_${vol}"
-            if docker volume inspect "$FULL_VOL" >/dev/null 2>&1; then
-              echo "Saving volume $FULL_VOL..."
-              docker run --rm -v "$FULL_VOL:/data:ro" -v "$CACHE_DIR:/cache" \
-                alpine sh -c "cd /data && tar czf /cache/${FULL_VOL}.tar.gz ."
-            fi
-          done
-
-          # Restart containers for the rest of the pipeline
-          docker compose start || true
-
-          # Wait for services to be ready after restart
-          case "${{ inputs.warehouse-type }}" in
-            clickhouse)
-              for i in $(seq 1 30); do
-                curl -sf http://localhost:8123/ping > /dev/null && break
-                echo "Waiting for ClickHouse after restart... ($i/30)"; sleep 2
-              done
-              ;;
-            spark)
-              for i in $(seq 1 60); do
-                nc -z 127.0.0.1 10000 && break
-                echo "Waiting for Spark after restart... ($i/60)"; sleep 5
-              done
-              ;;
-            postgres)
-              for i in $(seq 1 30); do
-                pg_isready -h localhost -p 5432 > /dev/null 2>&1 && break
-                echo "Waiting for Postgres after restart... ($i/30)"; sleep 2
-              done
-              ;;
-          esac
-          echo "Seed cache saved."
+        run: bash ci/save_seed_cache.sh "${{ inputs.warehouse-type }}"
 
       - name: Save DuckDB seed cache
         if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type == 'duckdb'
@@ -413,7 +301,6 @@ jobs:
         run: edr --help
 
       - name: Run monitor
-        continue-on-error: ${{ inputs.warehouse-type == 'dremio' }}
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
         run: >
@@ -425,14 +312,12 @@ jobs:
           --slack-webhook "$SLACK_WEBHOOK"
 
       - name: Validate alerts statuses were updated
-        continue-on-error: ${{ inputs.warehouse-type == 'dremio' }}
         working-directory: ${{ env.CLI_INTERNAL_DBT_PKG_DIR }}
         run: |
           dbt deps
           dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
 
       - name: Run report
-        continue-on-error: ${{ inputs.warehouse-type == 'dremio' }}
         run: >
           edr monitor report
           -t "${{ inputs.warehouse-type }}"
@@ -457,7 +342,6 @@ jobs:
         run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
 
       - name: Run send report
-        continue-on-error: ${{ inputs.warehouse-type == 'dremio' }}
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -495,7 +379,6 @@ jobs:
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests
-        continue-on-error: ${{ inputs.warehouse-type == 'dremio' }}
         run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
 
       - name: Drop test schemas

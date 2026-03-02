@@ -24,7 +24,10 @@ RUN apt-get update && \
     apt-get clean
 
 COPY entrypoint.sh /scripts/
-RUN chmod +x /scripts/entrypoint.sh
+RUN chmod +x /scripts/entrypoint.sh && \
+    groupadd -r spark && useradd -r -g spark -m spark && \
+    chown -R spark:spark /usr/spark /scripts
 
+USER spark
 ENTRYPOINT ["/scripts/entrypoint.sh"]
 CMD ["--help"]

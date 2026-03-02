@@ -1,28 +1,28 @@
 {% macro current_tests_run_results_query(days_back = none, invocation_id = none) %}
     with elementary_test_results as (
-        select * from {{ ref('elementary', 'elementary_test_results') }}
+        select * from {{ ref('elementary_test_results', package='elementary') }}
         {% if days_back %}
             where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}
     ),
 
     dbt_run_results as (
-        select * from {{ ref('elementary', 'dbt_run_results') }}
+        select * from {{ ref('dbt_run_results', package='elementary') }}
         {% if days_back %}
             where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('execute_completed_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
         {% endif %}
     ),
 
     dbt_tests as (
-        select * from {{ ref('elementary', 'dbt_tests') }}
+        select * from {{ ref('dbt_tests', package='elementary') }}
     ),
 
     dbt_models as (
-        select * from {{ ref('elementary', 'dbt_models') }}
+        select * from {{ ref('dbt_models', package='elementary') }}
     ),
 
     dbt_sources as (
-        select * from {{ ref('elementary', 'dbt_sources') }}
+        select * from {{ ref('dbt_sources', package='elementary') }}
     ),
 
     dbt_artifacts as (

@@ -6,7 +6,7 @@
           original_path,
           package_name,
           tags
-        from {{ ref('elementary', 'dbt_tests') }}
+        from {{ ref('dbt_tests', package='elementary') }}
         where type = 'singular'
     {% endset %}
     {% set tests_agate = elementary.run_query(get_tests_query) %}

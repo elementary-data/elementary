@@ -1,8 +1,8 @@
 {%- macro get_tests() -%}
-    {% set dbt_tests_relation = ref('elementary', 'dbt_tests') %}
-    {% set dbt_models_relation = ref('elementary', 'dbt_models') %}
-    {% set dbt_sources_relation = ref('elementary', 'dbt_sources') %}
-    {% set test_results_relation = ref('elementary', 'elementary_test_results') %}
+    {% set dbt_tests_relation = ref('dbt_tests', package='elementary') %}
+    {% set dbt_models_relation = ref('dbt_models', package='elementary') %}
+    {% set dbt_sources_relation = ref('dbt_sources', package='elementary') %}
+    {% set test_results_relation = ref('elementary_test_results', package='elementary') %}
 
     {%- if elementary.relation_exists(dbt_tests_relation) -%}
         {% set get_tests_query %}

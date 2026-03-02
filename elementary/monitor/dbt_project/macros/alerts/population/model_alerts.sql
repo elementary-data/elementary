@@ -49,23 +49,23 @@
     {% set seed_run_results_relation = elementary.get_elementary_relation('seed_run_results') -%}
 
     with models as (
-        select * from {{ ref('elementary', 'dbt_models') }}
+        select * from {{ ref('dbt_models', package='elementary') }}
     ),
 
     snapshots as (
-        select * from {{ ref('elementary', 'dbt_snapshots') }}
+        select * from {{ ref('dbt_snapshots', package='elementary') }}
     ),
 
     seeds as (
-        select * from {{ ref('elementary', 'dbt_seeds') }}
+        select * from {{ ref('dbt_seeds', package='elementary') }}
     ),
 
     dbt_invocations as (
-        select * from {{ ref('elementary', 'dbt_invocations') }}
+        select * from {{ ref('dbt_invocations', package='elementary') }}
     ),
 
     dbt_run_results as (
-        select * from {{ ref('elementary', 'dbt_run_results') }}
+        select * from {{ ref('dbt_run_results', package='elementary') }}
     ),
 
     artifacts_meta as (

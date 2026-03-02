@@ -70,23 +70,23 @@
     ),
 
     models as (
-        select * from {{ ref('elementary', 'dbt_models') }}
+        select * from {{ ref('dbt_models', package='elementary') }}
     ),
 
     sources as (
-        select * from {{ ref('elementary', 'dbt_sources') }}
+        select * from {{ ref('dbt_sources', package='elementary') }}
     ),
 
     tests as (
-        select * from {{ ref('elementary', 'dbt_tests') }}
+        select * from {{ ref('dbt_tests', package='elementary') }}
     ),
 
     dbt_invocations as (
-        select * from {{ ref('elementary', 'dbt_invocations') }}
+        select * from {{ ref('dbt_invocations', package='elementary') }}
     ),
 
     dbt_run_results as (
-        select * from {{ ref('elementary', 'dbt_run_results') }}
+        select * from {{ ref('dbt_run_results', package='elementary') }}
     ),
 
     artifacts_meta as (

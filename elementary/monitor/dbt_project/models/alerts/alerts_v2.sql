@@ -12,20 +12,20 @@
 
 -- depends_on: {{ ref('dbt_tests') }}
 -- depends_on: {{ ref('elementary_test_results') }}
--- depends_on: {{ ref('elementary', 'test_result_rows') }}
+-- depends_on: {{ ref('test_result_rows', package='elementary') }}
 
 -- depends_on: {{ ref('dbt_models') }}
--- depends_on: {{ ref('elementary', 'dbt_snapshots') }}
+-- depends_on: {{ ref('dbt_snapshots', package='elementary') }}
 -- depends_on: {{ ref('model_run_results') }}
 -- depends_on: {{ ref('snapshot_run_results') }}
 
 -- depends_on: {{ ref('dbt_sources') }}
--- depends_on: {{ ref('elementary', 'dbt_source_freshness_results') }}
+-- depends_on: {{ ref('dbt_source_freshness_results', package='elementary') }}
 
 -- depends_on: {{ ref('dbt_seeds') }}
 
--- depends_on: {{ ref('elementary', 'dbt_invocations') }}
--- depends_on: {{ ref('elementary', 'dbt_run_results') }}
+-- depends_on: {{ ref('dbt_invocations', package='elementary') }}
+-- depends_on: {{ ref('dbt_run_results', package='elementary') }}
 
 -- backwards compatibility
 -- depends_on: {{ ref('elementary_cli', 'alerts') }}

@@ -46,9 +46,11 @@
 {% endmacro %}
 
 {% macro duckdb__edr_drop_schema(schema_name) %}
-    {% do run_query("DROP SCHEMA IF EXISTS " ~ schema_name ~ " CASCADE") %}
+    {% set quoted_schema = adapter.quote(schema_name) %}
+    {% do run_query("DROP SCHEMA IF EXISTS " ~ quoted_schema ~ " CASCADE") %}
 {% endmacro %}
 
 {% macro spark__edr_drop_schema(schema_name) %}
-    {% do run_query("DROP DATABASE IF EXISTS " ~ schema_name ~ " CASCADE") %}
+    {% set quoted_schema = adapter.quote(schema_name) %}
+    {% do run_query("DROP DATABASE IF EXISTS " ~ quoted_schema ~ " CASCADE") %}
 {% endmacro %}
