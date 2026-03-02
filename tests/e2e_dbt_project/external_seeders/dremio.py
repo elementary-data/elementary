@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 
 import yaml
@@ -10,22 +11,19 @@ from external_seeders.base import ExternalSeeder
 
 
 def _docker_defaults() -> dict[str, str]:
-    """Read default credentials from docker-compose.yml.
+    """Read default credentials from docker-compose.yml and dremio-setup.sh.
 
     These are local Docker test credentials, not production secrets.
-    Credentials are read from the ``dremio-setup`` and ``dremio-minio``
-    service environment sections in ``docker-compose.yml``.
     """
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     defaults: dict[str, str] = {}
 
+    # --- docker-compose.yml: MinIO credentials ---
     compose_path = os.path.join(project_dir, "docker-compose.yml")
     try:
         with open(compose_path) as fh:
             cfg = yaml.safe_load(fh)
         services = cfg.get("services", {})
-
-        # --- dremio-minio: MinIO root credentials ---
         for item in services.get("dremio-minio", {}).get("environment", []):
             if isinstance(item, str) and "=" in item:
                 k, v = item.split("=", 1)
@@ -33,22 +31,20 @@ def _docker_defaults() -> dict[str, str]:
                     defaults["MINIO_ACCESS_KEY"] = v
                 elif k == "MINIO_ROOT_PASSWORD":
                     defaults["MINIO_SECRET_KEY"] = v
+    except Exception:
+        pass
 
-        # --- dremio-setup: Dremio + MinIO credentials (dict form) ---
-        setup_env = services.get("dremio-setup", {}).get("environment", {})
-        if isinstance(setup_env, dict):
-            if "DREMIO_USER" in setup_env:
-                defaults["DREMIO_USER"] = str(setup_env["DREMIO_USER"])
-            if "DREMIO_DEFAULT_PASS" in setup_env:
-                defaults["DREMIO_PASS"] = str(setup_env["DREMIO_DEFAULT_PASS"])
-            if "MINIO_ACCESS_KEY" in setup_env:
-                defaults.setdefault(
-                    "MINIO_ACCESS_KEY", str(setup_env["MINIO_ACCESS_KEY"])
-                )
-            if "MINIO_DEFAULT_SECRET" in setup_env:
-                defaults.setdefault(
-                    "MINIO_SECRET_KEY", str(setup_env["MINIO_DEFAULT_SECRET"])
-                )
+    # --- dremio-setup.sh: Dremio login credentials ---
+    setup_path = os.path.join(project_dir, "docker", "dremio", "dremio-setup.sh")
+    try:
+        with open(setup_path) as fh:
+            content = fh.read()
+        m = re.search(r'\\?"password\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
+        if m:
+            defaults["DREMIO_PASS"] = m.group(1)
+        m = re.search(r'\\?"userName\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
+        if m:
+            defaults["DREMIO_USER"] = m.group(1)
     except Exception:
         pass
 
