@@ -53,7 +53,11 @@ services:
       trino-mc-job:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/v1/info | grep -q '\"starting\":false'"]
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sf http://localhost:8080/v1/info | grep -q ''"starting":false''',
+        ]
       interval: 5s
       timeout: 5s
       retries: 60
@@ -152,7 +156,8 @@ services:
     ports:
       - "19120:19120"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:19120/api/v2/config || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -sf http://localhost:19120/api/v2/config || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
