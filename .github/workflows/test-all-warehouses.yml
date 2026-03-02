@@ -105,8 +105,7 @@ jobs:
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       elementary-ref: ${{ inputs.elementary-ref || ((github.event_name == 'pull_request_target' || github.event_name == 'pull_request') && github.event.pull_request.head.sha) || '' }}
-      # TODO: revert to ${{ inputs.dbt-data-reliability-ref }} after dbt-data-reliability#948 is merged
-      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref || 'devin/1772379764-trino-dremio-spark-fixes' }}
+      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
       dbt-version: ${{ matrix.dbt-version }}
       generate-data: ${{ inputs.generate-data || false }}
     secrets: inherit
