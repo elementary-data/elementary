@@ -39,11 +39,12 @@ def _docker_defaults() -> dict[str, str]:
     try:
         with open(setup_path) as fh:
             content = fh.read()
-        # Extract password from the curl login JSON payload
-        m = re.search(r'"password"\s*:\s*"([^"]+)"', content)
+        # Extract password from the curl login JSON payload.
+        # In shell scripts the JSON quotes are escaped: \"password\":\"val\"
+        m = re.search(r'\\?"password\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
         if m:
             defaults["DREMIO_PASS"] = m.group(1)
-        m = re.search(r'"userName"\s*:\s*"([^"]+)"', content)
+        m = re.search(r'\\?"userName\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
         if m:
             defaults["DREMIO_USER"] = m.group(1)
     except Exception:
