@@ -31,3 +31,11 @@ curl -s -X PUT "http://dremio:9047/apiv2/source/NessieSource" \
   --data "{\"name\":\"NessieSource\",\"config\":{\"nessieEndpoint\":\"http://catalog:19120/api/v2\",\"nessieAuthType\":\"NONE\",\"credentialType\":\"ACCESS_KEY\",\"awsAccessKey\":\"admin\",\"awsAccessSecret\":\"password\",\"awsRootPath\":\"datalake\",\"secure\":false,\"propertyList\":[{\"name\":\"fs.s3a.path.style.access\",\"value\":\"true\"},{\"name\":\"fs.s3a.endpoint\",\"value\":\"dremio-storage:9000\"},{\"name\":\"dremio.s3.compat\",\"value\":\"true\"}]},\"type\":\"NESSIE\",\"metadataPolicy\":{\"deleteUnavailableDatasets\":true,\"autoPromoteDatasets\":false,\"namesRefreshMillis\":3600000,\"datasetDefinitionRefreshAfterMillis\":3600000,\"datasetDefinitionExpireAfterMillis\":10800000,\"authTTLMillis\":86400000,\"updateMode\":\"PREFETCH_QUERIED\"}}"
 
 echo "Nessie Source created in Dremio"
+
+# Create a Space in Dremio for views (views cannot be created in data sources)
+curl -s -X POST "http://dremio:9047/api/v3/catalog" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: _dremio$AUTH_TOKEN" \
+  --data "{\"entityType\":\"space\",\"name\":\"elementary_ci\"}"
+
+echo "Space 'elementary_ci' created in Dremio"

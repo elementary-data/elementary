@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import re
 import time
 
 import yaml
@@ -11,19 +10,22 @@ from external_seeders.base import ExternalSeeder
 
 
 def _docker_defaults() -> dict[str, str]:
-    """Read default credentials from docker-compose.yml and dremio-setup.sh.
+    """Read default credentials from docker-compose.yml.
 
     These are local Docker test credentials, not production secrets.
+    Credentials are read from the ``dremio-setup`` and ``dremio-minio``
+    service environment sections in ``docker-compose.yml``.
     """
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     defaults: dict[str, str] = {}
 
-    # --- docker-compose.yml: MinIO credentials ---
     compose_path = os.path.join(project_dir, "docker-compose.yml")
     try:
         with open(compose_path) as fh:
             cfg = yaml.safe_load(fh)
         services = cfg.get("services", {})
+
+        # --- dremio-minio: MinIO root credentials ---
         for item in services.get("dremio-minio", {}).get("environment", []):
             if isinstance(item, str) and "=" in item:
                 k, v = item.split("=", 1)
@@ -31,22 +33,18 @@ def _docker_defaults() -> dict[str, str]:
                     defaults["MINIO_ACCESS_KEY"] = v
                 elif k == "MINIO_ROOT_PASSWORD":
                     defaults["MINIO_SECRET_KEY"] = v
-    except Exception:
-        pass
 
-    # --- dremio-setup.sh: Dremio login credentials ---
-    setup_path = os.path.join(project_dir, "docker", "dremio", "dremio-setup.sh")
-    try:
-        with open(setup_path) as fh:
-            content = fh.read()
-        # Extract password from the curl login JSON payload.
-        # In shell scripts the JSON quotes are escaped: \"password\":\"val\"
-        m = re.search(r'\\?"password\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
-        if m:
-            defaults["DREMIO_PASS"] = m.group(1)
-        m = re.search(r'\\?"userName\\?"\s*:\s*\\?"([^"\\]+)\\?"', content)
-        if m:
-            defaults["DREMIO_USER"] = m.group(1)
+        # --- dremio-setup: Dremio + MinIO credentials (dict form) ---
+        setup_env = services.get("dremio-setup", {}).get("environment", {})
+        if isinstance(setup_env, dict):
+            if "DREMIO_USER" in setup_env:
+                defaults["DREMIO_USER"] = str(setup_env["DREMIO_USER"])
+            if "DREMIO_DEFAULT_PASS" in setup_env:
+                defaults["DREMIO_PASS"] = str(setup_env["DREMIO_DEFAULT_PASS"])
+            if "MINIO_ACCESS_KEY" in setup_env:
+                defaults.setdefault("MINIO_ACCESS_KEY", str(setup_env["MINIO_ACCESS_KEY"]))
+            if "MINIO_DEFAULT_SECRET" in setup_env:
+                defaults.setdefault("MINIO_SECRET_KEY", str(setup_env["MINIO_DEFAULT_SECRET"]))
     except Exception:
         pass
 
@@ -267,7 +265,14 @@ class DremioExternalSeeder(ExternalSeeder):
         1. Upload CSVs to MinIO.
         2. Create an S3 source so Dremio can read those files.
         3. For each CSV, CREATE TABLE in Nessie + COPY INTO from S3.
+
+        Seeds are placed at ``NessieSource.<root_path>.<seed_schema>.<table>``
+        to match dbt-dremio's schema resolution (root_path + custom schema).
+        The dbt_project.yml sets ``+schema: test_seeds`` for all seeds.
         """
+        # dbt_project.yml: seeds: +schema: test_seeds
+        seed_schema = "test_seeds"
+
         print("\n=== Loading Dremio seeds via MinIO + COPY INTO ===")
 
         print("\nStep 1: Uploading CSVs to MinIO...")
@@ -277,14 +282,24 @@ class DremioExternalSeeder(ExternalSeeder):
         token = self._get_token()
         self._create_s3_source(token)
 
-        print(f"\nStep 3: Creating Nessie namespace '{self.schema_name}'...")
+        # Nessie uses CREATE FOLDER (not CREATE SCHEMA).
+        # CREATE TABLE implicitly creates the namespace, so we create a
+        # dummy table to ensure the namespace exists, then drop it.
+        nessie_ns = f'NessieSource."{self.schema_name}"."{seed_schema}"'
+        print(f"\nStep 3: Ensuring Nessie namespace '{nessie_ns}' exists...")
         try:
             self._sql(
                 token,
-                f'CREATE SCHEMA IF NOT EXISTS NessieSource."{self.schema_name}"',
+                f"CREATE TABLE IF NOT EXISTS {nessie_ns}.\"__ns_init\" (x VARCHAR)",
+                timeout=30,
+            )
+            self._sql(
+                token,
+                f"DROP TABLE IF EXISTS {nessie_ns}.\"__ns_init\"",
+                timeout=30,
             )
         except Exception as e:
-            print(f"  Warning creating schema: {e}")
+            print(f"  Warning creating namespace: {e}")
 
         print("\nStep 4: Creating Iceberg tables and loading CSV data...")
         for subdir, csv_path, table_name in self.iter_seed_csvs():
@@ -293,7 +308,7 @@ class DremioExternalSeeder(ExternalSeeder):
                 print(f"  Skipping {table_name} (completely empty file)")
                 continue
 
-            fqn = f'NessieSource."{self.schema_name}"."{table_name}"'
+            fqn = f'{nessie_ns}."{table_name}"'
 
             # Create empty Iceberg table with VARCHAR columns
             col_defs = ", ".join(f'"{c}" VARCHAR' for c in cols)
