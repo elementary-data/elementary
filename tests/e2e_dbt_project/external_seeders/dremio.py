@@ -42,9 +42,13 @@ def _docker_defaults() -> dict[str, str]:
             if "DREMIO_DEFAULT_PASS" in setup_env:
                 defaults["DREMIO_PASS"] = str(setup_env["DREMIO_DEFAULT_PASS"])
             if "MINIO_ACCESS_KEY" in setup_env:
-                defaults.setdefault("MINIO_ACCESS_KEY", str(setup_env["MINIO_ACCESS_KEY"]))
+                defaults.setdefault(
+                    "MINIO_ACCESS_KEY", str(setup_env["MINIO_ACCESS_KEY"])
+                )
             if "MINIO_DEFAULT_SECRET" in setup_env:
-                defaults.setdefault("MINIO_SECRET_KEY", str(setup_env["MINIO_DEFAULT_SECRET"]))
+                defaults.setdefault(
+                    "MINIO_SECRET_KEY", str(setup_env["MINIO_DEFAULT_SECRET"])
+                )
     except Exception:
         pass
 
@@ -290,12 +294,12 @@ class DremioExternalSeeder(ExternalSeeder):
         try:
             self._sql(
                 token,
-                f"CREATE TABLE IF NOT EXISTS {nessie_ns}.\"__ns_init\" (x VARCHAR)",
+                f'CREATE TABLE IF NOT EXISTS {nessie_ns}."__ns_init" (x VARCHAR)',
                 timeout=30,
             )
             self._sql(
                 token,
-                f"DROP TABLE IF EXISTS {nessie_ns}.\"__ns_init\"",
+                f'DROP TABLE IF EXISTS {nessie_ns}."__ns_init"',
                 timeout=30,
             )
         except Exception as e:
