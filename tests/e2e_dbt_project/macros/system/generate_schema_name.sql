@@ -5,6 +5,13 @@
     {% endif %}
 
     {% if node.resource_type == "seed" %}
+      {#- For Dremio with enterprise_catalog_namespace, seeds must live in the
+          same Nessie namespace as models.  The REST API is stateless so
+          session-level USE BRANCH does not persist, and the VDS view
+          validator cannot resolve cross-namespace Nessie references. -#}
+      {% if target.type == 'dremio' %}
+        {% do return(default_schema) %}
+      {% endif %}
       {% do return(custom_schema_name) %}
     {% endif %}
 

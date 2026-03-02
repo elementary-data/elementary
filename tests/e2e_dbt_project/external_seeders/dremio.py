@@ -354,8 +354,11 @@ class DremioExternalSeeder(ExternalSeeder):
         We avoid nested namespaces because dbt-dremio skips folder creation
         for Nessie sources and Dremio cannot create folders inside a SOURCE.
         """
-        # dbt_project.yml: seeds: +schema: test_seeds
-        seed_schema = "test_seeds"
+        # For Dremio, seeds must live in the same Nessie namespace as models
+        # because the REST API is stateless (no persistent USE BRANCH) and
+        # the VDS view validator cannot resolve cross-namespace references.
+        # self.schema_name is the target schema (e.g. "elementary_tests").
+        seed_schema = self.schema_name
 
         print("\n=== Loading Dremio seeds via MinIO + COPY INTO ===")
 
@@ -372,13 +375,8 @@ class DremioExternalSeeder(ExternalSeeder):
         self._create_nessie_namespace(seed_schema)
 
         nessie_ns = f'NessieSource."{seed_schema}"'
-        # Set the Nessie branch context for this SQL session so that
-        # all CREATE TABLE / COPY INTO statements resolve correctly.
-        print("\nStep 4: Setting Nessie branch context...")
-        self._sql(token, "USE BRANCH main IN NessieSource", timeout=30)
-        print("  Branch context set to 'main'")
 
-        print(f"\nStep 5: Creating Iceberg tables at '{nessie_ns}'...")
+        print(f"\nStep 4: Creating Iceberg tables at '{nessie_ns}'...")
         created_tables: list[str] = []
         for subdir, csv_path, table_name in self.iter_seed_csvs():
             cols = self.csv_columns(csv_path)
